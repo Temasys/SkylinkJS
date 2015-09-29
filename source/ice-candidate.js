@@ -40,8 +40,7 @@ Skylink.prototype._peerIceTrickleDisabled = {};
 
 /**
  * The list of PeerConnection ICE candidate generation triggered states.
- * Refer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/
- *   #idl-def-RTCIceGatheringState).
+ * Refer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState).
  * @attribute CANDIDATE_GENERATION_STATE
  * @type JSON
  * @param {String} NEW The object was just created, and no networking

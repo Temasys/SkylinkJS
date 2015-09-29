@@ -2349,7 +2349,7 @@
         {
             "file": "source/ice-candidate.js",
             "line": 41,
-            "description": "The list of PeerConnection ICE candidate generation triggered states.\nRefer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/\n  #idl-def-RTCIceGatheringState).",
+            "description": "The list of PeerConnection ICE candidate generation triggered states.\nRefer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState).",
             "itemtype": "attribute",
             "name": "CANDIDATE_GENERATION_STATE",
             "type": "JSON",
@@ -2377,7 +2377,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 65,
+            "line": 64,
             "description": "Handles the ICE candidate object received from associated PeerConnection\n  to send the ICE candidate object or wait for all gathering to complete\n  before sending the candidate to prevent trickle ICE.",
             "itemtype": "method",
             "name": "_onIceCandidate",
@@ -2402,7 +2402,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 118,
+            "line": 117,
             "description": "Buffers an ICE candidate object associated with a PeerConnection\n  to prevent disruption to ICE connection when ICE candidate\n  is received before <code>RTCPeerConnection.setRemoteDescription</code>\n  is called.",
             "itemtype": "method",
             "name": "_addIceCandidateToQueue",
@@ -2426,7 +2426,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 140,
+            "line": 139,
             "description": "Handles the event when adding an ICE candidate has been added\n  successfully. This is mainly to prevent JShint errors.",
             "itemtype": "method",
             "name": "_onAddIceCandidateSuccess",
@@ -2438,7 +2438,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 153,
+            "line": 152,
             "description": "Handles the event when adding an ICE candidate has failed.\nThis is mainly to prevent JShint errors.",
             "itemtype": "method",
             "name": "_onAddIceCandidateFailure",
@@ -2457,7 +2457,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 168,
+            "line": 167,
             "description": "Adds the list of ICE candidates bufferred before <code>RTCPeerConnection.setRemoteDescription\n  </code> is called associated with the PeerConnection.",
             "itemtype": "method",
             "name": "_addIceCandidateFromQueue",
@@ -12974,27 +12974,27 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/ice-candidate.js:65"
+            "line": " source/ice-candidate.js:64"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:65"
+            "line": " source/ice-candidate.js:64"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:118"
+            "line": " source/ice-candidate.js:117"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:140"
+            "line": " source/ice-candidate.js:139"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:153"
+            "line": " source/ice-candidate.js:152"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:168"
+            "line": " source/ice-candidate.js:167"
         },
         {
             "message": "unknown tag: component",

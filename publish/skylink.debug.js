@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Wed Sep 30 2015 03:54:36 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 30 2015 04:03:28 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3188,8 +3188,7 @@ Skylink.prototype._peerIceTrickleDisabled = {};
 
 /**
  * The list of PeerConnection ICE candidate generation triggered states.
- * Refer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/
- *   #idl-def-RTCIceGatheringState).
+ * Refer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState).
  * @attribute CANDIDATE_GENERATION_STATE
  * @type JSON
  * @param {String} NEW The object was just created, and no networking
@@ -5068,8 +5067,8 @@ Skylink.prototype.GET_PEERS_STATE = {
  * The types of peer introduction states available
  * @attribute INTRODUCE_STATE
  * @type JSON
- * @param {String} INTRODUCING Privileged peer sent the introduction signal
- * @param {String} ERROR Error happened during peer introduction
+ * @param {String} INTRODUCING The privileged PeerConnection peer sent the introduction signal
+ * @param {String} ERROR The PeerConnection peer introduction has occurred an exception.
  * @readOnly
  * @component Peer
  * @for Skylink
@@ -5152,7 +5151,7 @@ Skylink.prototype._peerList = null;
  *       console.log('Success fully retrieved list of peers', success);
  *     }
  *   });
- *   
+ *
  *   // To get a list of all peers then invoke the callback
  *   SkylinkDemo.getPeers(true, function(error, success){
  *     if (error){
@@ -5162,8 +5161,7 @@ Skylink.prototype._peerList = null;
  *       console.log('Success fully retrieved list of peers', success);
  *     }
  *   });
- *   
- * @public
+ *
  * @component Peer
  * @for Skylink
  * @since 0.6.1
@@ -5176,11 +5174,11 @@ Skylink.prototype.getPeers = function(showAll, callback){
 	}
 	if (!self._appKey){
 		log.warn('App key is not defined. Please authenticate again.');
-		return;	
+		return;
 	}
 	if (!self._parentKey){
 		log.warn('Parent key is not defined. Please authenticate again.');
-		return;	
+		return;
 	}
 
 	// Only callback is provided
@@ -5214,7 +5212,6 @@ Skylink.prototype.getPeers = function(showAll, callback){
  * @method introducePeer
  * @param {String} sendingPeerId Id of the peer who sends enter
  * @param {String} receivingPeerId Id of the peer who receives enter
- * @public
  * @component Peer
  * @for Skylink
  * @since 0.6.1

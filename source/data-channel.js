@@ -120,10 +120,15 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
   }
 
   if (!customChannelName) {
-    log.error([peerId, 'RTCDataChannel', null, 'Aborting of creating Datachannel as no ' +
-      'channel name is provided for channel. Aborting of creating Datachannel'], {
-        channelType: channelType
-      });
+    log.error([peerId, 'DataChannel', null, 'DataChannel connection has been aborted. ' +
+      '"customChannelName" parameter is missing. {params}'], {
+      params: {
+        peerId: peerId,
+        channelType: channelType,
+        dc: dc,
+        customChannelName: customChannelName
+      }
+    });
     return;
   }
 
@@ -132,16 +137,33 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
 
   if (window.webrtcDetectedDCSupport !== 'SCTP' &&
     window.webrtcDetectedDCSupport !== 'plugin') {
-    log.warn([peerId, 'RTCDataChannel', channelName, 'SCTP not supported'], {
-      channelType: channelType
+    log.warn([peerId, 'DataChannel', channelName, 'DataChannel connection does not ' +
+      'support SCTP connection. {params,support}'], {
+      params: {
+        peerId: peerId,
+        channelType: channelType,
+        dc: dc,
+        customChannelName: customChannelName
+      },
+      support: {
+        type: window.webrtcDetectedDCSupport
+      }
     });
     return;
   }
 
   var dcHasOpened = function () {
-    log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], {
-      readyState: 'open',
-      channelType: channelType
+    log.log([peerId, 'DataChannel', channelName, 'DataChannel connection state {params,state} ->'], {
+      params: {
+        peerId: peerId,
+        channelType: channelType,
+        dc: dc,
+        customChannelName: customChannelName
+      },
+      state: {
+        readyState: 'open',
+        channelType: channelType
+      }
     });
 
     self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.OPEN,
@@ -169,14 +191,27 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
         });
       }
 
-      log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel RTC object is created'], {
-        readyState: dc.readyState,
-        channelType: channelType
+      log.debug([peerId, 'DataChannel', channelName, 'DataChannel connection been initialised {params,state}'], {
+        params: {
+          peerId: peerId,
+          channelType: channelType,
+          dc: dc,
+          customChannelName: customChannelName
+        },
+        state: {
+          readyState: dc.readyState,
+          channelType: channelType
+        }
       });
 
     } catch (error) {
-      log.error([peerId, 'RTCDataChannel', channelName, 'Exception occurred in datachannel:'], {
-        channelType: channelType,
+      log.error([peerId, 'DataChannel', channelName, 'DataChannel connection has an exception {params,error}'], {
+        params: {
+          peerId: peerId,
+          channelType: channelType,
+          dc: dc,
+          customChannelName: customChannelName
+        },
         error: error
       });
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error,
@@ -193,10 +228,17 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
     }
   }
 
-  log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], {
-    binaryType: dc.binaryType,
-    readyState: dc.readyState,
-    channelType: channelType
+  log.log([peerId, 'DataChannel', channelName, 'DataChannel connection transfer data type support {param,support} ->'], {
+    params: {
+      peerId: peerId,
+      channelType: channelType,
+      dc: dc,
+      customChannelName: customChannelName
+    },
+    support: {
+      binaryType: dc.binaryType,
+      readyState: dc.readyState
+    }
   });
 
   dc.dcType = channelType;
