@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Mon Sep 28 2015 18:27:58 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Tue Sep 29 2015 12:57:43 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7001,7 +7001,7 @@ function toArray(list, index) {
 (1)
 });
 
-/*! adapterjs - v0.12.1 - 2015-09-07 */
+/*! adapterjs - v0.11.0 - 2015-06-08 */
 
 // Adapter's interface.
 var AdapterJS = AdapterJS || {};
@@ -7020,7 +7020,7 @@ AdapterJS.options = AdapterJS.options || {};
 // AdapterJS.options.hidePluginInstallPrompt = true;
 
 // AdapterJS version
-AdapterJS.VERSION = '0.12.1';
+AdapterJS.VERSION = '0.11.0';
 
 // This function will be called when the WebRTC API is ready to be used
 // Whether it is the native implementation (Chrome, Firefox, Opera) or
@@ -7074,12 +7074,6 @@ if(!!navigator.platform.match(/^Mac/i)) {
 else if(!!navigator.platform.match(/^Win/i)) {
   AdapterJS.WebRTCPlugin.pluginInfo.downloadLink = 'http://bit.ly/1kkS4FN';
 }
-
-AdapterJS.WebRTCPlugin.TAGS = {
-  NONE  : 'none',
-  AUDIO : 'audio',
-  VIDEO : 'video'
-};
 
 // Unique identifier of each opened page
 AdapterJS.WebRTCPlugin.pageId = Math.random().toString(36).slice(2);
@@ -7334,10 +7328,9 @@ AdapterJS.renderNotificationBar = function (text, buttonText, buttonLink, openNe
     'sans-serif; font-size: .9rem; padding: 4px; vertical-align: ' +
     'middle; cursor: default;">' + text + '</span>');
   if(buttonText && buttonLink) {
-    c.document.write('<button id="okay">' + buttonText + '</button><button id="cancel">Cancel</button>');
+    c.document.write('<button id="okay">' + buttonText + '</button><button>Cancel</button>');
     c.document.close();
 
-    // On click on okay
     AdapterJS.addEvent(c.document.getElementById('okay'), 'click', function(e) {
       if (!!displayRefreshBar) {
         AdapterJS.renderNotificationBar(AdapterJS.TEXT.EXTENSION ?
@@ -7350,31 +7343,14 @@ AdapterJS.renderNotificationBar = function (text, buttonText, buttonLink, openNe
       try {
         event.cancelBubble = true;
       } catch(error) { }
-
-      var pluginInstallInterval = setInterval(function(){
-        if(! isIE) {
-          navigator.plugins.refresh(false);
-        }
-        AdapterJS.WebRTCPlugin.isPluginInstalled(
-          AdapterJS.WebRTCPlugin.pluginInfo.prefix,
-          AdapterJS.WebRTCPlugin.pluginInfo.plugName,
-          function() { // plugin now installed
-            clearInterval(pluginInstallInterval);
-            AdapterJS.WebRTCPlugin.defineWebRTCInterface();
-          },
-          function() { 
-            // still no plugin detected, nothing to do
-          });
-      } , 500);
-    });   
-
-    // On click on Cancel
-    AdapterJS.addEvent(c.document.getElementById('cancel'), 'click', function(e) {
-      w.document.body.removeChild(i);
     });
-  } else {
+  }
+  else {
     c.document.close();
   }
+  AdapterJS.addEvent(c.document, 'click', function() {
+    w.document.body.removeChild(i);
+  });
   setTimeout(function() {
     if(typeof i.style.webkitTransform === 'string') {
       i.style.webkitTransform = 'translateY(40px)';
@@ -7739,28 +7715,6 @@ if (navigator.mozGetUserMedia) {
   };
 
   AdapterJS.maybeThroughWebRTCReady();
-} else if (navigator.mediaDevices && navigator.userAgent.match(
-    /Edge\/(\d+).(\d+)$/)) {
-  webrtcDetectedBrowser = 'edge';
-
-  webrtcDetectedVersion =
-    parseInt(navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)[2], 10);
-
-  // the minimum version still supported by adapter.
-  webrtcMinimumVersion = 12;
-
-  window.getUserMedia = navigator.getUserMedia.bind(navigator);
-
-  attachMediaStream = function(element, stream) {
-    element.srcObject = stream;
-    return element;
-  };
-  reattachMediaStream = function(to, from) {
-    to.srcObject = from.srcObject;
-    return to;
-  };
-
-  AdapterJS.maybeThroughWebRTCReady();
 } else { // TRY TO USE PLUGIN
   // IE 9 is not offering an implementation of console.log until you open a console
   if (typeof console !== 'object' || typeof console.log !== 'function') {
@@ -7843,8 +7797,8 @@ if (navigator.mozGetUserMedia) {
         AdapterJS.WebRTCPlugin.pluginInfo.pluginId + '" /> ' +
         '<param name="windowless" value="false" /> ' +
         '<param name="pageId" value="' + AdapterJS.WebRTCPlugin.pageId + '" /> ' +
-        '<param name="onload" value="' + AdapterJS.WebRTCPlugin.pluginInfo.onload + '" />' +
-        '<param name="tag" value="' + AdapterJS.WebRTCPlugin.TAGS.NONE + '" />' +
+        '<param name="onload" value="' + AdapterJS.WebRTCPlugin.pluginInfo.onload +
+        '" />' +
         // uncomment to be able to use virtual cams
         (AdapterJS.options.getAllCams ? '<param name="forceGetAllCams" value="True" />':'') +
 
@@ -7878,8 +7832,7 @@ if (navigator.mozGetUserMedia) {
         AdapterJS.WebRTCPlugin.pluginInfo.pluginId + '">' +
         '<param name="windowless" value="false" /> ' +
         (AdapterJS.options.getAllCams ? '<param name="forceGetAllCams" value="True" />':'') +
-        '<param name="pageId" value="' + AdapterJS.WebRTCPlugin.pageId + '">' +
-        '<param name="tag" value="' + AdapterJS.WebRTCPlugin.TAGS.NONE + '" />';
+        '<param name="pageId" value="' + AdapterJS.WebRTCPlugin.pageId + '">';
       document.body.appendChild(AdapterJS.WebRTCPlugin.plugin);
     }
 
@@ -7910,12 +7863,6 @@ if (navigator.mozGetUserMedia) {
   };
 
   AdapterJS.WebRTCPlugin.defineWebRTCInterface = function () {
-    if (AdapterJS.WebRTCPlugin.pluginState ===
-        AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY) {
-      console.error("AdapterJS - WebRTC interface has already been defined");
-      return;
-    }
-
     AdapterJS.WebRTCPlugin.pluginState = AdapterJS.WebRTCPlugin.PLUGIN_STATES.INITIALIZING;
 
     AdapterJS.isDefined = function (variable) {
@@ -8007,91 +7954,78 @@ if (navigator.mozGetUserMedia) {
         streamId = '';
       }
       else {
-        stream.enableSoundTracks(true); // TODO: remove on 0.12.0
+        stream.enableSoundTracks(true);
         streamId = stream.id;
       }
 
-      var elementId = element.id.length === 0 ? Math.random().toString(36).slice(2) : element.id;
-      var nodeName = element.nodeName.toLowerCase();
-      if (nodeName !== 'object') { // not a plugin <object> tag yet
-        var tag;
-        switch(nodeName) {
-          case 'audio':
-            tag = AdapterJS.WebRTCPlugin.TAGS.AUDIO;
-            break;
-          case 'video':
-            tag = AdapterJS.WebRTCPlugin.TAGS.VIDEO;
-            break;
-          default:
-            tag = AdapterJS.WebRTCPlugin.TAGS.NONE;
+      if (element.nodeName.toLowerCase() !== 'audio') {
+        var elementId = element.id.length === 0 ? Math.random().toString(36).slice(2) : element.id;
+        if (!element.isWebRTCPlugin || !element.isWebRTCPlugin()) {
+          var frag = document.createDocumentFragment();
+          var temp = document.createElement('div');
+          var classHTML = '';
+          if (element.className) {
+            classHTML = 'class="' + element.className + '" ';
+          } else if (element.attributes && element.attributes['class']) {
+            classHTML = 'class="' + element.attributes['class'].value + '" ';
           }
 
-        var frag = document.createDocumentFragment();
-        var temp = document.createElement('div');
-        var classHTML = '';
-        if (element.className) {
-          classHTML = 'class="' + element.className + '" ';
-        } else if (element.attributes && element.attributes['class']) {
-          classHTML = 'class="' + element.attributes['class'].value + '" ';
-        }
+          temp.innerHTML = '<object id="' + elementId + '" ' + classHTML +
+            'type="' + AdapterJS.WebRTCPlugin.pluginInfo.type + '">' +
+            '<param name="pluginId" value="' + elementId + '" /> ' +
+            '<param name="pageId" value="' + AdapterJS.WebRTCPlugin.pageId + '" /> ' +
+            '<param name="windowless" value="true" /> ' +
+            '<param name="streamId" value="' + streamId + '" /> ' +
+            '</object>';
+          while (temp.firstChild) {
+            frag.appendChild(temp.firstChild);
+          }
 
-        temp.innerHTML = '<object id="' + elementId + '" ' + classHTML +
-          'type="' + AdapterJS.WebRTCPlugin.pluginInfo.type + '">' +
-          '<param name="pluginId" value="' + elementId + '" /> ' +
-          '<param name="pageId" value="' + AdapterJS.WebRTCPlugin.pageId + '" /> ' +
-          '<param name="windowless" value="true" /> ' +
-          '<param name="streamId" value="' + streamId + '" /> ' +
-          '<param name="tag" value="' + tag + '" /> ' +
-          '</object>';
-        while (temp.firstChild) {
-          frag.appendChild(temp.firstChild);
-        }
+          var height = '';
+          var width = '';
+          if (element.getBoundingClientRect) {
+            var rectObject = element.getBoundingClientRect();
+            width = rectObject.width + 'px';
+            height = rectObject.height + 'px';
+          }
+          else if (element.width) {
+            width = element.width;
+            height = element.height;
+          } else {
+            // TODO: What scenario could bring us here?
+          }
 
-        var height = '';
-        var width = '';
-        if (element.getBoundingClientRect) {
-          var rectObject = element.getBoundingClientRect();
-          width = rectObject.width + 'px';
-          height = rectObject.height + 'px';
-        }
-        else if (element.width) {
-          width = element.width;
-          height = element.height;
+          element.parentNode.insertBefore(frag, element);
+          frag = document.getElementById(elementId);
+          frag.width = width;
+          frag.height = height;
+          element.parentNode.removeChild(element);
         } else {
-          // TODO: What scenario could bring us here?
-        }
-
-        element.parentNode.insertBefore(frag, element);
-        frag = document.getElementById(elementId);
-        frag.width = width;
-        frag.height = height;
-        element.parentNode.removeChild(element);
-      } else { // already an <object> tag, just change the stream id
-        var children = element.children;
-        for (var i = 0; i !== children.length; ++i) {
-          if (children[i].name === 'streamId') {
-            children[i].value = streamId;
-            break;
+          var children = element.children;
+          for (var i = 0; i !== children.length; ++i) {
+            if (children[i].name === 'streamId') {
+              children[i].value = streamId;
+              break;
+            }
           }
+          element.setStreamId(streamId);
         }
-        element.setStreamId(streamId);
-      }
-      var newElement = document.getElementById(elementId);
-      newElement.onplaying = (element.onplaying) ? element.onplaying : function (arg) {};
-      newElement.onplay    = (element.onplay)    ? element.onplay    : function (arg) {};
-      newElement.onclick   = (element.onclick)   ? element.onclick   : function (arg) {};
-      if (isIE) { // on IE the event needs to be plugged manually
-        newElement.attachEvent('onplaying', newElement.onplaying);
-        newElement.attachEvent('onplay', newElement.onplay);
-        newElement._TemOnClick = function (id) {
-          var arg = {
-            srcElement : document.getElementById(id)
+        var newElement = document.getElementById(elementId);
+        newElement.onplaying = (element.onplaying) ? element.onplaying : function (arg) {};
+        if (isIE) { // on IE the event needs to be plugged manually
+          newElement.attachEvent('onplaying', newElement.onplaying);
+          newElement.onclick = (element.onclick) ? element.onclick : function (arg) {};
+          newElement._TemOnClick = function (id) {
+            var arg = {
+              srcElement : document.getElementById(id)
+            };
+            newElement.onclick(arg);
           };
-          newElement.onclick(arg);
-        };
+        }
+        return newElement;
+      } else {
+        return element;
       }
-      
-      return newElement;
     };
 
     reattachMediaStream = function (to, from) {
@@ -8169,6 +8103,8 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.defineWebRTCInterface,
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
+
+
 
 (function () {
 
@@ -8313,10 +8249,6 @@ if (navigator.mozGetUserMedia) {
 
     getUserMedia = navigator.getUserMedia;
 
-  } else if (navigator.mediaDevices && navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)) {
-    // nothing here because edge does not support screensharing
-    console.warn('Edge does not support screensharing feature in getUserMedia');
-
   } else {
     baseGetUserMedia = window.navigator.getUserMedia;
 
@@ -8377,11 +8309,9 @@ if (navigator.mozGetUserMedia) {
 
       iframe.contentWindow.postMessage(object, '*');
     };
-  } else if (window.webrtcDetectedBrowser === 'opera') {
-    console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.1 - Mon Sep 28 2015 18:27:58 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Tue Sep 29 2015 12:57:43 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8959,7 +8889,9 @@ Skylink.prototype._closeDataChannel = function(peerId, channelName) {
         if (!dc.hasFiredClosed && window.webrtcDetectedBrowser === 'firefox') {
           log.log([peerId, 'RTCDataChannel', channelKey + '|' + dc.label,
             'Closed Firefox datachannel']);
-          self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
+          self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId,
+            null, channelName, channelKey === 'main' ? self.DATA_CHANNEL_TYPE.MESSAGING :
+            self.DATA_CHANNEL_TYPE.DATA);
         }
       }
       delete self._dataChannels[peerId][channelKey];
@@ -9513,15 +9445,12 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender, channelN
  * @param {Number} [dataInfo.timeout=60] The timeout set to await in seconds
  *   for response from DataChannel connection.
  * @param {Number} dataInfo.size The Blob data binary size expected to be received in the receiving end.
- * @param {String} data.target The targeted PeerConnection ID to relay data to for the case of where
- *   MCU is enabled.
+ * @param {Boolean} [dataInfo.isPrivate=false] The flag to indicate if the data transfer is a private
+ *   transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
  * @param {String|Array} [targetPeerId=null] The receiving PeerConnection ID. Array is used for
  *   MCU connection where multi-targeted PeerConnections are used. By default, the
  *   value is <code>null</code>, which indicates that the data transfer is requested with all
  *   connected PeerConnections.
- * @param {Boolean} [isPrivate=false] The flag to indicate if the data transfer is a private
- *   transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
- * @param {String} transferId The transfer ID of the data transfer.
  * @return {String} The DataChannel connection ID associated with the transfer. If returned
  *   as <code>null</code> or empty, it indicates an error.
  * @private
@@ -9529,7 +9458,7 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender, channelN
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate) {
+Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
   var self = this;
   //If there is MCU then directs all messages to MCU
   var targetChannel = targetPeerId;//(self._hasMCU) ? 'MCU' : targetPeerId;
@@ -9580,7 +9509,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
             dataType: dataInfo.dataType,
             senderPeerId: self._user.sid,
             timeout: dataInfo.timeout,
-            isPrivate: !!isPrivate
+            isPrivate: dataInfo.isPrivate
           },{
             message: message,
             transferType: self.DATA_TRANSFER_TYPE.UPLOAD
@@ -9596,7 +9525,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
           dataType: dataInfo.dataType,
           senderPeerId: self._user.sid,
           timeout: dataInfo.timeout,
-          isPrivate: !!isPrivate
+          isPrivate: dataInfo.isPrivate
         },{
           message: message,
           transferType: self.DATA_TRANSFER_TYPE.UPLOAD
@@ -9618,7 +9547,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
         chunkSize: binaryChunkSize,
         timeout: dataInfo.timeout,
         target: self._hasMCU ? 'MCU' : targetPeerId,
-        isPrivate: !!isPrivate
+        isPrivate: dataInfo.isPrivate
       };
 
       if (self._hasMCU) {
@@ -9717,7 +9646,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
     timeout: dataInfo.timeout,
     chunkSize: chunkSize,
     dataType: dataInfo.dataType,
-    isPrivate: !!isPrivate
+    isPrivate: dataInfo.isPrivate
   };
 
   if (supportMulti) {
@@ -9914,6 +9843,15 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
     });
     return;
   }
+
+  if (!this._uploadDataTransfers[channelName]) {
+    log.error([peerId, 'RTCDataChannel', channelName,
+      'Ignoring data received as upload data transfers array is missing'], {
+        data: data
+    });
+    return;
+  }
+
   //peerId = (peerId === 'MCU') ? data.sender : peerId;
   var chunksLength = self._uploadDataTransfers[channelName].length;
   var transferId = transferStatus.transferId;
@@ -9928,6 +9866,15 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
     if (ackN < chunksLength) {
       var sendDataFn = function (base64BinaryString) {
         var percentage = parseFloat((((ackN + 1) / chunksLength) * 100).toFixed(2), 10);
+
+        if (!self._uploadDataSessions[channelName]) {
+          log.error([peerId, 'RTCDataChannel', channelName,
+            'Failed uploading as data session is empty'], {
+              status: transferStatus,
+              data: data
+          });
+          return;
+        }
 
         self._uploadDataSessions[channelName].percentage = percentage;
 
@@ -10219,8 +10166,18 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
   });
 
   if (!transferStatus) {
-    log.log([peerId, 'RTCDataChannel', channelName,
+    log.error([peerId, 'RTCDataChannel', channelName,
       'Ignoring data received as download data session is empty'], {
+        dataType: dataType,
+        data: dataString,
+        type: 'DATA'
+    });
+    return;
+  }
+
+  if (!this._downloadDataTransfers[channelName]) {
+    log.error([peerId, 'RTCDataChannel', channelName,
+      'Ignoring data received as download data transfers array is missing'], {
         dataType: dataType,
         data: dataString,
         type: 'DATA'
@@ -10317,7 +10274,18 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
           isPrivate: transferStatus.isPrivate
       });
       this._setDataChannelTimeout(peerId, transferStatus.timeout, false, channelName);
-      this._downloadDataTransfers[channelName].info = transferStatus;
+
+      if (!this._downloadDataSessions[channelName]) {
+        log.error([peerId, 'RTCDataChannel', channelName,
+          'Failed downloading as data session is empty'], {
+            dataType: dataType,
+            data: dataString,
+            type: 'DATA'
+        });
+        return;
+      }
+
+      this._downloadDataSessions[channelName].info = transferStatus;
 
     } else {
       log.log([peerId, 'RTCDataChannel', channelName,
@@ -10825,7 +10793,7 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
           dataType: dataType,
           senderPeerId: self._user.sid,
           timeout: dataInfo.timeout,
-          isPrivate: dataInfo.isPrivate
+          isPrivate: isPrivate
       });
 
       self._trigger('incomingDataRequest', transferId, peerId, {
@@ -10835,12 +10803,12 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
         dataType: dataType,
         senderPeerId: self._user.sid,
         timeout: dataInfo.timeout,
-        isPrivate: dataInfo.isPrivate
+        isPrivate: isPrivate
       }, true);
 
       //if (!self._hasMCU) {
         listOfPeersChannels[peerId] =
-          self._sendBlobDataToPeer(data, dataInfo, peerId, isPrivate, transferId);
+          self._sendBlobDataToPeer(data, dataInfo, peerId);
       /*} else {
         listOfPeersChannels[peerId] = self._dataChannels[peerId].main.label;
       }*/
@@ -10874,7 +10842,7 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
           percentage: 0,
           senderPeerId: self._user.sid,
           timeout: dataInfo.timeout,
-          isPrivate: dataInfo.isPrivate
+          isPrivate: isPrivate
         }, {
           message: error,
           transferType: self.DATA_TRANSFER_TYPE.UPLOAD
@@ -11077,6 +11045,7 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
       ackN: -1
     }, channelName);
     delete this._downloadDataSessions[channelName];
+    delete this._downloadDataTransfers[channelName];
   }
 };
 
@@ -12105,7 +12074,6 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
   if (!restartConn) {
     self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS);
   }
-  console.info('the data', self._peerConnections[targetMid]);
 
   self._peerConnections[targetMid].receiveOnly = !!receiveOnly;
   self._peerConnections[targetMid].hasScreen = !!isSS;

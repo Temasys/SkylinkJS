@@ -377,7 +377,9 @@ Skylink.prototype._closeDataChannel = function(peerId, channelName) {
         if (!dc.hasFiredClosed && window.webrtcDetectedBrowser === 'firefox') {
           log.log([peerId, 'RTCDataChannel', channelKey + '|' + dc.label,
             'Closed Firefox datachannel']);
-          self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
+          self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId,
+            null, channelName, channelKey === 'main' ? self.DATA_CHANNEL_TYPE.MESSAGING :
+            self.DATA_CHANNEL_TYPE.DATA);
         }
       }
       delete self._dataChannels[peerId][channelKey];

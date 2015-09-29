@@ -70,6 +70,12 @@ test('Testing receiving file', function (t) {
     if (typeof channelName !== 'string') {
       failFn('dataChannelState has triggered a payload with invalid channelName');
 
+    } else if (typeof channelName !== 'string') {
+      failFn('dataChannelState has triggered a payload with invalid channelType');
+
+    } else if (typeof peerId !== 'string') {
+      failFn('dataChannelState has triggered a payload with invalid peerId');
+
     } else if (sw.DATA_CHANNEL_TYPE.MESSAGING !== channelType &&
       sw.DATA_CHANNEL_TYPE.DATA !== channelType) {
       failFn('dataChannelState has triggered an invalid payload of channelType');
@@ -94,7 +100,7 @@ test('Testing receiving file', function (t) {
   });
 
   sw.on('dataTransferState', function (state, transferId, peerId, transferInfo, error) {
-    //console.error('dataTransferState', state, transferId, peerId, transferInfo, error);
+    console.error('dataTransferState', state, transferId, peerId, transferInfo, error);
     var failFn = function (message) {
       if (!hasFailedTransferPayload) {
         t.fail(message + '\n' +
@@ -140,6 +146,9 @@ test('Testing receiving file', function (t) {
       } else if (typeof transferInfo.data !== 'object') {
         failFn('dataTransferState has triggered a payload with invalid transferInfo.data');
 
+      } else if (typeof transferInfo.isPrivate !== 'boolean') {
+        failFn('dataTransferState has triggered a payload with invalid transferInfo.isPrivate');
+
       } else if (transferInfo.dataType !== 'blob') {
         failFn('dataTransferState has triggered a payload with invalid transferInfo.dataType as "' +
           transferInfo.dataType + '"');
@@ -151,7 +160,8 @@ test('Testing receiving file', function (t) {
           peerId: peerId,
           isPercentageZero: transferInfo.percentage === 0,
           isPercentageFull: transferInfo.percentage === 100,
-          senderPeerId: transferInfo.senderPeerId
+          senderPeerId: transferInfo.senderPeerId,
+          isPrivate: transferInfo.isPrivate
         };
 
         if (state === sw.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {
@@ -168,7 +178,8 @@ test('Testing receiving file', function (t) {
               percentage: transferInfo.percentage,
               dataType: 'blob',
               senderPeerId: transferInfo.senderPeerId,
-              timeout: transferInfo.timeout
+              timeout: transferInfo.timeout,
+              isPrivate: transferInfo.isPrivate
             },
             isSelf: false
           };
@@ -190,7 +201,8 @@ test('Testing receiving file', function (t) {
               percentage: transferInfo.percentage,
               dataType: 'blob',
               senderPeerId: transferInfo.senderPeerId,
-              timeout: transferInfo.timeout
+              timeout: transferInfo.timeout,
+              isPrivate: transferInfo.isPrivate
             },
             isSelf: false
           };
@@ -240,7 +252,8 @@ test('Testing receiving file', function (t) {
       peerId: expectedPeerId,
       isPercentageZero: true,
       isPercentageFull: false,
-      senderPeerId: expectedPeerId
+      senderPeerId: expectedPeerId,
+      isPrivate: false
     };
     expectedTransferPayloadArray[sw.DATA_TRANSFER_STATE.DOWNLOAD_STARTED] = {
       isDataBlob: false,
@@ -248,7 +261,8 @@ test('Testing receiving file', function (t) {
       peerId: expectedPeerId,
       isPercentageZero: true,
       isPercentageFull: false,
-      senderPeerId: expectedPeerId
+      senderPeerId: expectedPeerId,
+      isPrivate: false
     };
     expectedTransferPayloadArray[sw.DATA_TRANSFER_STATE.DOWNLOADING] = {
       isDataBlob: false,
@@ -256,7 +270,8 @@ test('Testing receiving file', function (t) {
       peerId: expectedPeerId,
       isPercentageZero: false,
       isPercentageFull: false,
-      senderPeerId: expectedPeerId
+      senderPeerId: expectedPeerId,
+      isPrivate: false
     };
     expectedTransferPayloadArray[sw.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED] = {
       isDataBlob: true,
@@ -264,7 +279,8 @@ test('Testing receiving file', function (t) {
       peerId: expectedPeerId,
       isPercentageZero: false,
       isPercentageFull: true,
-      senderPeerId: expectedPeerId
+      senderPeerId: expectedPeerId,
+      isPrivate: false
     };
 
     if (!hasFailedTransferPayload) {
@@ -348,6 +364,12 @@ test('Testing sending file', function (t) {
     if (typeof channelName !== 'string') {
       failFn('dataChannelState has triggered a payload with invalid channelName');
 
+    } else if (typeof channelName !== 'string') {
+      failFn('dataChannelState has triggered a payload with invalid channelType');
+
+    } else if (typeof peerId !== 'string') {
+      failFn('dataChannelState has triggered a payload with invalid peerId');
+
     } else if (sw.DATA_CHANNEL_TYPE.MESSAGING !== channelType &&
       sw.DATA_CHANNEL_TYPE.DATA !== channelType) {
       failFn('dataChannelState has triggered an invalid payload of channelType');
@@ -412,6 +434,9 @@ test('Testing sending file', function (t) {
       } else if (typeof transferInfo.data !== 'object') {
         failFn('dataTransferState has triggered a payload with invalid transferInfo.data');
 
+      } else if (typeof transferInfo.isPrivate !== 'boolean') {
+        failFn('dataTransferState has triggered a payload with invalid transferInfo.isPrivate');
+
       } else if (transferInfo.dataType !== 'blob') {
         failFn('dataTransferState has triggered a payload with invalid transferInfo.dataType as "' +
           transferInfo.dataType + '"');
@@ -423,7 +448,8 @@ test('Testing sending file', function (t) {
           peerId: peerId,
           isPercentageZero: transferInfo.percentage === 0,
           isPercentageFull: transferInfo.percentage === 100,
-          senderPeerId: transferInfo.senderPeerId
+          senderPeerId: transferInfo.senderPeerId,
+          isPrivate: transferInfo.isPrivate
         };
 
         if (state === sw.DATA_TRANSFER_STATE.UPLOAD_STARTED) {
@@ -450,7 +476,8 @@ test('Testing sending file', function (t) {
               percentage: transferInfo.percentage,
               dataType: transferInfo.dataType,
               senderPeerId: sw._user.sid,
-              timeout: transferInfo.timeout
+              timeout: transferInfo.timeout,
+              isPrivate: transferInfo.isPrivate
             },
             isSelf: true
           };
@@ -470,7 +497,8 @@ test('Testing sending file', function (t) {
               percentage: transferInfo.percentage,
               dataType: transferInfo.dataType,
               senderPeerId: sw._user.sid,
-              timeout: transferInfo.timeout
+              timeout: transferInfo.timeout,
+              isPrivate: transferInfo.isPrivate
             },
             isSelf: true
           };
@@ -523,7 +551,8 @@ test('Testing sending file', function (t) {
       peerId: expectedPeerId,
       isPercentageZero: true,
       isPercentageFull: false,
-      senderPeerId: sw._user.sid
+      senderPeerId: sw._user.sid,
+      isPrivate: false
     };
     expectedTransferPayloadArray[sw.DATA_TRANSFER_STATE.UPLOADING] = {
       isDataBlob: false,
@@ -531,7 +560,8 @@ test('Testing sending file', function (t) {
       peerId: expectedPeerId,
       isPercentageZero: false,
       isPercentageFull: false,
-      senderPeerId: sw._user.sid
+      senderPeerId: sw._user.sid,
+      isPrivate: false
     };
     expectedTransferPayloadArray[sw.DATA_TRANSFER_STATE.UPLOAD_COMPLETED] = {
       isDataBlob: false,
@@ -539,7 +569,8 @@ test('Testing sending file', function (t) {
       peerId: expectedPeerId,
       isPercentageZero: false,
       isPercentageFull: true,
-      senderPeerId: sw._user.sid
+      senderPeerId: sw._user.sid,
+      isPrivate: false
     };
 
     if (!hasFailedTransferPayload) {
@@ -608,8 +639,8 @@ test('Testing simultaneous transfers', function (t) {
   var expectedData2 = populateExpectedData('MT2', 150000);
   var expectedData3 = populateExpectedData('MT3', 20000);
 
-  sw.on('dataChannelState', function (state, peerId, error, channelName, channelType) {
-    //console.info('dataChannelState', state, peerId, error, channelName, channelType);
+  sw.on('dataChannelState', function (state, peerId, error, channelName, channelType, stage1) {
+    console.info('dataChannelState', state, peerId, error, channelName, channelType, stage1);
     expectedPeerId = peerId;
 
     if (state === sw.DATA_CHANNEL_STATE.OPEN || state === sw.DATA_CHANNEL_STATE.CLOSED) {
@@ -640,7 +671,8 @@ test('Testing simultaneous transfers', function (t) {
         dataType: transferInfo.dataType,
         percentage: transferInfo.percentage,
         senderPeerId: transferInfo.senderPeerId,
-        timeout: transferInfo.timeout
+        timeout: transferInfo.timeout,
+        isPrivate: transferInfo.isPrivate
       }, false]);
       sw.respondBlobRequest(peerId, transferId, true);
     }
@@ -660,7 +692,8 @@ test('Testing simultaneous transfers', function (t) {
         percentage: transferInfo.percentage,
         dataType: transferInfo.dataType,
         senderPeerId: transferInfo.senderPeerId,
-        timeout: transferInfo.timeout
+        timeout: transferInfo.timeout,
+        isPrivate: transferInfo.isPrivate
       }, true]);
 
       console.log('Sending "EXPECT-BLOB"', transferInfo.data, transferInfo.data.size);
@@ -673,7 +706,8 @@ test('Testing simultaneous transfers', function (t) {
         dataType: transferInfo.dataType,
         percentage: transferInfo.percentage,
         senderPeerId: transferInfo.senderPeerId,
-        timeout: transferInfo.timeout
+        timeout: transferInfo.timeout,
+        isPrivate: transferInfo.isPrivate
       }, true]);
     }
 
@@ -692,7 +726,8 @@ test('Testing simultaneous transfers', function (t) {
         percentage: transferInfo.percentage,
         dataType: transferInfo.dataType,
         senderPeerId: transferInfo.senderPeerId,
-        timeout: transferInfo.timeout
+        timeout: transferInfo.timeout,
+        isPrivate: transferInfo.isPrivate
       }, false]);
     }
   });
@@ -752,6 +787,7 @@ test('Testing simultaneous transfers', function (t) {
 
       for (var j = 0; j < channelPayloadArray.length; j++) {
         var chPayload = channelPayloadArray[j];
+        console.info(chPayload, j);
         var chState = chPayload[0];
         var chPeerId = chPayload[1];
         var channelName = chPayload[2];
@@ -801,7 +837,7 @@ test('Testing cancel transfer', function (t) {
     if (message.content === 'CANCEL-BLOB') {
       hasCancelledPeer = true;
     }
-  })
+  });
 
   sw.on('dataTransferState', function (state, transferId, peerId, transferInfo, error) {
     if (state === sw.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {
@@ -868,7 +904,7 @@ test('Testing sendDataURL file', function (t) {
   });
 
   sw.on('dataChannelState', function (state, peerId, error, channelName, channelType) {
-    //console.info('dataChannelState', state, peerId, error, channelName, channelType);
+    console.info('dataChannelState', state, peerId, error, channelName, channelType);
     var failFn = function (message) {
       if (!hasFailedChannelPayload) {
         t.fail(message + '\n' +
@@ -885,6 +921,12 @@ test('Testing sendDataURL file', function (t) {
 
     if (typeof channelName !== 'string') {
       failFn('dataChannelState has triggered a payload with invalid channelName');
+
+    } else if (typeof channelType !== 'string') {
+      failFn('dataChannelState has triggered a payload with invalid channelType');
+
+    } else if (typeof peerId !== 'string') {
+      failFn('dataChannelState has triggered a payload with invalid peerId');
 
     } else if (sw.DATA_CHANNEL_TYPE.MESSAGING !== channelType &&
       sw.DATA_CHANNEL_TYPE.DATA !== channelType) {
@@ -940,6 +982,9 @@ test('Testing sendDataURL file', function (t) {
       } else if (typeof transferInfo.senderPeerId !== 'string') {
         failFn('dataTransferState has triggered a payload with invalid transferInfo.senderPeerId');
 
+      } else if (typeof transferInfo.isPrivate !== 'boolean') {
+        failFn('dataTransferState has triggered a payload with invalid transferInfo.isPrivate');
+
       } else if (transferInfo.senderPeerId !== sw._user.sid) {
         failFn('dataTransferState has triggered a payload with wrong transferInfo.senderPeerId\n' +
           '[Expected :' + sw._user.sid + ' | Received: ' + transferInfo.senderPeerId + ']');
@@ -961,7 +1006,8 @@ test('Testing sendDataURL file', function (t) {
           peerId: peerId,
           isPercentageZero: transferInfo.percentage === 0,
           isPercentageFull: transferInfo.percentage === 100,
-          senderPeerId: transferInfo.senderPeerId
+          senderPeerId: transferInfo.senderPeerId,
+          isPrivate: transferInfo.isPrivate
         };
 
         if (state === sw.DATA_TRANSFER_STATE.UPLOAD_STARTED) {
@@ -988,7 +1034,8 @@ test('Testing sendDataURL file', function (t) {
               percentage: transferInfo.percentage,
               dataType: transferInfo.dataType,
               senderPeerId: sw._user.sid,
-              timeout: transferInfo.timeout
+              timeout: transferInfo.timeout,
+              isPrivate: transferInfo.isPrivate
             },
             isSelf: true
           };
@@ -1008,7 +1055,8 @@ test('Testing sendDataURL file', function (t) {
               percentage: transferInfo.percentage,
               dataType: transferInfo.dataType,
               senderPeerId: sw._user.sid,
-              timeout: transferInfo.timeout
+              timeout: transferInfo.timeout,
+              isPrivate: transferInfo.isPrivate
             },
             isSelf: true
           };
@@ -1065,7 +1113,8 @@ test('Testing sendDataURL file', function (t) {
         peerId: expectedPeerId,
         isPercentageZero: true,
         isPercentageFull: false,
-        senderPeerId: sw._user.sid
+        senderPeerId: sw._user.sid,
+        isPrivate: false
       };
       expectedTransferPayloadArray[sw.DATA_TRANSFER_STATE.UPLOADING] = {
         isDataString: false,
@@ -1073,7 +1122,8 @@ test('Testing sendDataURL file', function (t) {
         peerId: expectedPeerId,
         isPercentageZero: false,
         isPercentageFull: false,
-        senderPeerId: sw._user.sid
+        senderPeerId: sw._user.sid,
+        isPrivate: false
       };
       expectedTransferPayloadArray[sw.DATA_TRANSFER_STATE.UPLOAD_COMPLETED] = {
         isDataString: false,
@@ -1081,7 +1131,8 @@ test('Testing sendDataURL file', function (t) {
         peerId: expectedPeerId,
         isPercentageZero: false,
         isPercentageFull: true,
-        senderPeerId: sw._user.sid
+        senderPeerId: sw._user.sid,
+        isPrivate: false
       };
 
       if (!hasFailedTransferPayload) {
@@ -1114,6 +1165,7 @@ test('Testing sendDataURL file', function (t) {
       init(fr.result);
     };
     fr.readAsDataURL(input.files[0]);
+    input.style.display = 'none';
   };
 
   document.body.appendChild(input);

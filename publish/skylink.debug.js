@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Mon Sep 28 2015 18:27:58 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Tue Sep 29 2015 12:57:43 GMT+0800 (SGT) */
 
 (function() {
 
@@ -576,7 +576,9 @@ Skylink.prototype._closeDataChannel = function(peerId, channelName) {
         if (!dc.hasFiredClosed && window.webrtcDetectedBrowser === 'firefox') {
           log.log([peerId, 'RTCDataChannel', channelKey + '|' + dc.label,
             'Closed Firefox datachannel']);
-          self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
+          self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId,
+            null, channelName, channelKey === 'main' ? self.DATA_CHANNEL_TYPE.MESSAGING :
+            self.DATA_CHANNEL_TYPE.DATA);
         }
       }
       delete self._dataChannels[peerId][channelKey];
@@ -1130,15 +1132,12 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender, channelN
  * @param {Number} [dataInfo.timeout=60] The timeout set to await in seconds
  *   for response from DataChannel connection.
  * @param {Number} dataInfo.size The Blob data binary size expected to be received in the receiving end.
- * @param {String} data.target The targeted PeerConnection ID to relay data to for the case of where
- *   MCU is enabled.
+ * @param {Boolean} [dataInfo.isPrivate=false] The flag to indicate if the data transfer is a private
+ *   transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
  * @param {String|Array} [targetPeerId=null] The receiving PeerConnection ID. Array is used for
  *   MCU connection where multi-targeted PeerConnections are used. By default, the
  *   value is <code>null</code>, which indicates that the data transfer is requested with all
  *   connected PeerConnections.
- * @param {Boolean} [isPrivate=false] The flag to indicate if the data transfer is a private
- *   transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
- * @param {String} transferId The transfer ID of the data transfer.
  * @return {String} The DataChannel connection ID associated with the transfer. If returned
  *   as <code>null</code> or empty, it indicates an error.
  * @private
@@ -1146,7 +1145,7 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender, channelN
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate) {
+Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
   var self = this;
   //If there is MCU then directs all messages to MCU
   var targetChannel = targetPeerId;//(self._hasMCU) ? 'MCU' : targetPeerId;
@@ -1197,7 +1196,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
             dataType: dataInfo.dataType,
             senderPeerId: self._user.sid,
             timeout: dataInfo.timeout,
-            isPrivate: !!isPrivate
+            isPrivate: dataInfo.isPrivate
           },{
             message: message,
             transferType: self.DATA_TRANSFER_TYPE.UPLOAD
@@ -1213,7 +1212,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
           dataType: dataInfo.dataType,
           senderPeerId: self._user.sid,
           timeout: dataInfo.timeout,
-          isPrivate: !!isPrivate
+          isPrivate: dataInfo.isPrivate
         },{
           message: message,
           transferType: self.DATA_TRANSFER_TYPE.UPLOAD
@@ -1235,7 +1234,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
         chunkSize: binaryChunkSize,
         timeout: dataInfo.timeout,
         target: self._hasMCU ? 'MCU' : targetPeerId,
-        isPrivate: !!isPrivate
+        isPrivate: dataInfo.isPrivate
       };
 
       if (self._hasMCU) {
@@ -1334,7 +1333,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
     timeout: dataInfo.timeout,
     chunkSize: chunkSize,
     dataType: dataInfo.dataType,
-    isPrivate: !!isPrivate
+    isPrivate: dataInfo.isPrivate
   };
 
   if (supportMulti) {
@@ -1531,6 +1530,15 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
     });
     return;
   }
+
+  if (!this._uploadDataTransfers[channelName]) {
+    log.error([peerId, 'RTCDataChannel', channelName,
+      'Ignoring data received as upload data transfers array is missing'], {
+        data: data
+    });
+    return;
+  }
+
   //peerId = (peerId === 'MCU') ? data.sender : peerId;
   var chunksLength = self._uploadDataTransfers[channelName].length;
   var transferId = transferStatus.transferId;
@@ -1545,6 +1553,15 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
     if (ackN < chunksLength) {
       var sendDataFn = function (base64BinaryString) {
         var percentage = parseFloat((((ackN + 1) / chunksLength) * 100).toFixed(2), 10);
+
+        if (!self._uploadDataSessions[channelName]) {
+          log.error([peerId, 'RTCDataChannel', channelName,
+            'Failed uploading as data session is empty'], {
+              status: transferStatus,
+              data: data
+          });
+          return;
+        }
 
         self._uploadDataSessions[channelName].percentage = percentage;
 
@@ -1836,8 +1853,18 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
   });
 
   if (!transferStatus) {
-    log.log([peerId, 'RTCDataChannel', channelName,
+    log.error([peerId, 'RTCDataChannel', channelName,
       'Ignoring data received as download data session is empty'], {
+        dataType: dataType,
+        data: dataString,
+        type: 'DATA'
+    });
+    return;
+  }
+
+  if (!this._downloadDataTransfers[channelName]) {
+    log.error([peerId, 'RTCDataChannel', channelName,
+      'Ignoring data received as download data transfers array is missing'], {
         dataType: dataType,
         data: dataString,
         type: 'DATA'
@@ -1934,7 +1961,18 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
           isPrivate: transferStatus.isPrivate
       });
       this._setDataChannelTimeout(peerId, transferStatus.timeout, false, channelName);
-      this._downloadDataTransfers[channelName].info = transferStatus;
+
+      if (!this._downloadDataSessions[channelName]) {
+        log.error([peerId, 'RTCDataChannel', channelName,
+          'Failed downloading as data session is empty'], {
+            dataType: dataType,
+            data: dataString,
+            type: 'DATA'
+        });
+        return;
+      }
+
+      this._downloadDataSessions[channelName].info = transferStatus;
 
     } else {
       log.log([peerId, 'RTCDataChannel', channelName,
@@ -2442,7 +2480,7 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
           dataType: dataType,
           senderPeerId: self._user.sid,
           timeout: dataInfo.timeout,
-          isPrivate: dataInfo.isPrivate
+          isPrivate: isPrivate
       });
 
       self._trigger('incomingDataRequest', transferId, peerId, {
@@ -2452,12 +2490,12 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
         dataType: dataType,
         senderPeerId: self._user.sid,
         timeout: dataInfo.timeout,
-        isPrivate: dataInfo.isPrivate
+        isPrivate: isPrivate
       }, true);
 
       //if (!self._hasMCU) {
         listOfPeersChannels[peerId] =
-          self._sendBlobDataToPeer(data, dataInfo, peerId, isPrivate, transferId);
+          self._sendBlobDataToPeer(data, dataInfo, peerId);
       /*} else {
         listOfPeersChannels[peerId] = self._dataChannels[peerId].main.label;
       }*/
@@ -2491,7 +2529,7 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
           percentage: 0,
           senderPeerId: self._user.sid,
           timeout: dataInfo.timeout,
-          isPrivate: dataInfo.isPrivate
+          isPrivate: isPrivate
         }, {
           message: error,
           transferType: self.DATA_TRANSFER_TYPE.UPLOAD
@@ -2694,6 +2732,7 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
       ackN: -1
     }, channelName);
     delete this._downloadDataSessions[channelName];
+    delete this._downloadDataTransfers[channelName];
   }
 };
 
@@ -3722,7 +3761,6 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
   if (!restartConn) {
     self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS);
   }
-  console.info('the data', self._peerConnections[targetMid]);
 
   self._peerConnections[targetMid].receiveOnly = !!receiveOnly;
   self._peerConnections[targetMid].hasScreen = !!isSS;
