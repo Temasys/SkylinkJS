@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Wed Sep 30 2015 16:01:03 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 30 2015 17:50:52 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8381,7 +8381,7 @@ if (navigator.mozGetUserMedia) {
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.1 - Wed Sep 30 2015 16:01:03 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 30 2015 17:50:52 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8488,8 +8488,8 @@ if (!Object.keys) {
  * Getting_started_with_WebRTC_and_SkylinkJS/), or alternatively fork a ready made demo application
  * that uses Skylink Web SDK at [getaroom.io](http://getaroom.io/).
  *
- * For tips on writing better application with Skylink or troubleshooting issues, please
- *   [click here](http://support.temasys.com.sg/support/solutions/folders/5000267498).
+ * For tips on using skylink and troubleshooting you can visit
+ *   [our support portal](http://support.temasys.com.sg/support/solutions/folders/5000267498).
  * @class Skylink
  * @constructor
  * @example
@@ -11713,19 +11713,22 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
 };
 
 /**
- * The list of TURN server transports flags to set
- *  for TURN server connections.
+ * The list of TURN server transports flags to set for TURN server connections.
  * @attribute TURN_TRANSPORT
  * @type JSON
  * @param {String} TCP Use only TCP transport option.
  *   <i>E.g. <code>turn:turnurl:5523?transport=tcp</code></i>.
  * @param {String} UDP Use only UDP transport option.
  *   <i>E.g. <code>turn:turnurl:5523?transport=udp</code></i>.
- * @param {String} ANY Use both TCP and UDP transport option.
- *   <i>E.g. <code>turn:turnurl:5523?transport=udp</code> and
+ * @param {String} ANY Use any transports option given
+ *   by the platform signaling.
+ *   <i>E.g. <code>turn:turnurl:5523?transport=udp</code> or
  *   <code>turn:turnurl:5523?transport=tcp</code></i>.
  * @param {String} NONE Set no transport option in TURN servers.
  *   <i>E.g. <code>turn:turnurl:5523</code></i>
+ * @param {String} ALL Use both UCP and TCP transports options.
+ *   <i>E.g. <code>turn:turnurl:5523?transport=udp</code> and
+ *   <code>turn:turnurl:5523?transport=tcp</code></i>.
  * @readOnly
  * @since 0.5.4
  * @component ICE
@@ -11735,7 +11738,8 @@ Skylink.prototype.TURN_TRANSPORT = {
   UDP: 'udp',
   TCP: 'tcp',
   ANY: 'any',
-  NONE: 'none'
+  NONE: 'none',
+  ALL: 'all'
 };
 
 /**
@@ -11792,12 +11796,6 @@ Skylink.prototype._enableTURN = true;
  * @since 0.6.1
  */
 Skylink.prototype._usePublicSTUN = true;
-
-// TODO: To implement support of stuns protocol?
-//Skylink.prototype._STUNSSL = false;
-
-// TODO: To implement support of turns protocol?
-//Skylink.prototype._TURNSSL = false;
 
 /**
  * Stores the TURN server transport to enable for TURN server connections.
@@ -11940,9 +11938,45 @@ Skylink.prototype._setIceServers = function(givenConfig) {
     iceServers: []
   };
 
+  // to prevent repeat
+  var iceServerUrls = [];
+
+  var useTURNSSLProtocol = false;
+  var useTURNSSLPort = false;
+
+  var clone = function (obj) {
+    if (obj === null || typeof obj !== 'object') {
+      return obj;
+    }
+
+    var copy = obj.constructor();
+    for (var attr in obj) {
+      if (obj.hasOwnProperty(attr)) {
+        copy[attr] = obj[attr];
+      }
+    }
+    return copy;
+  };
+
+  if (window.location.protocol === 'https:' || this._forceTURNSSL) {
+    if (window.webrtcDetectedBrowser === 'chrome' ||
+      window.webrtcDetectedBrowser === 'safari' ||
+      window.webrtcDetectedBrowser === 'IE') {
+      useTURNSSLProtocol = true;
+    }
+    useTURNSSLPort = true;
+  }
+
+  log.log('TURN server connections SSL configuration', {
+    useTURNSSLProtocol: useTURNSSLProtocol,
+    useTURNSSLPort: useTURNSSLPort
+  });
+
   for (var i = 0; i < config.iceServers.length; i++) {
     var iceServer = config.iceServers[i];
     var iceServerParts = iceServer.url.split(':');
+    var copyIceServers = [];
+
     // check for stun servers
     if (iceServerParts[0] === 'stun' || iceServerParts[0] === 'stuns') {
       if (!this._enableSTUN) {
@@ -11954,7 +11988,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
           continue;
         }
         // STUNS is unsupported
-        iceServerParts[0] = (this._STUNSSL) ? 'stuns' : 'stun';
+        //iceServerParts[0] = (this._STUNSSL) ? 'stuns' : 'stun';
       }
       iceServer.url = iceServerParts.join(':');
     }
@@ -11963,12 +11997,12 @@ Skylink.prototype._setIceServers = function(givenConfig) {
       if (!this._enableTURN) {
         log.log('Removing TURN Server support', iceServer);
         continue;
-      } else if (iceServer.url.indexOf(':443') === -1 && this._forceTURNSSL) {
-        log.log('Ignoring non-SSL configured TURN', iceServer);
+      } else if (iceServer.url.indexOf(':443') === -1 && useTURNSSLPort) {
+        log.log('Ignoring TURN Server with non-SSL port', iceServer);
         continue;
       } else {
         // this is terrible. No turns please
-        iceServerParts[0] = (this._TURNSSL) ? 'turns' : 'turn';
+        iceServerParts[0] = (useTURNSSLProtocol) ? 'turns' : 'turn';
         iceServer.url = iceServerParts.join(':');
         // check if requires SSL
         log.log('Transport option:', this._TURNTransport);
@@ -11979,11 +12013,33 @@ Skylink.prototype._setIceServers = function(givenConfig) {
             if (this._TURNTransport === this.TURN_TRANSPORT.NONE) {
               log.log('Removing transport option');
               iceServer.url = iceServer.url.split('?')[0];
+            } else if (this._TURNTransport === this.TURN_TRANSPORT.ALL) {
+              log.log('Setting for all transport option');
+
+
+
+              var originalUrl = iceServer.url.split('?')[0];
+
+              // turn:turn.test.com
+              var iceServerTransportNone = clone(iceServer);
+              iceServerTransportNone.url = originalUrl;
+              copyIceServers.push(iceServerTransportNone);
+
+              // turn:turn.test.com?transport=tcp
+              var iceServerTransportTcp = clone(iceServer);
+              iceServerTransportTcp.url = originalUrl + '?transport=' + this.TURN_TRANSPORT.TCP;
+              copyIceServers.push(iceServerTransportTcp);
+
+              // turn:turn.test.com?transport=udp
+              var iceServerTransportUdp = clone(iceServer);
+              iceServerTransportUdp.url = originalUrl + '?transport=' + this.TURN_TRANSPORT.UDP;
+              copyIceServers.push(iceServerTransportUdp);
+
             } else {
               // UDP or TCP
               log.log('Setting transport option');
-              var urlProtocolParts = iceServer.url.split('=')[1];
-              urlProtocolParts = this._TURNTransport;
+              var urlProtocolParts = iceServer.url.split('=');
+              urlProtocolParts[1] = this._TURNTransport;
               iceServer.url = urlProtocolParts.join('=');
             }
           } else {
@@ -11996,7 +12052,18 @@ Skylink.prototype._setIceServers = function(givenConfig) {
         }
       }
     }
-    newConfig.iceServers.push(iceServer);
+
+    if (copyIceServers.length > 0) {
+      for (var j = 0; j < copyIceServers.length; j++) {
+        if (iceServerUrls.indexOf(copyIceServers[j].url) === -1) {
+          newConfig.iceServers.push(copyIceServers[j]);
+          iceServerUrls.push(copyIceServers[j].url);
+        }
+      }
+    } else if (iceServerUrls.indexOf(iceServer.url) === -1) {
+      newConfig.iceServers.push(iceServer);
+      iceServerUrls.push(iceServer.url);
+    }
   }
 
   log.log('Output iceServers configuration:', newConfig.iceServers);
@@ -12024,7 +12091,7 @@ Skylink.prototype.SERVER_PEER_TYPE = {
 };
 
 /**
- * Stores the timestamp of the moment when the last PeerConnections
+ * Stores the timestamp of the moment when the last Peers connection
  *   restarts has happened. Used for the restart Peers connection functionality.
  * @attribute _lastRestart
  * @type Object
@@ -12038,7 +12105,7 @@ Skylink.prototype._lastRestart = null;
 
 /**
  * Stores the counter of the number of consecutive
- *   PeerConnections restarts retries.
+ *   Peers connection restarts retries.
  * @attribute _retryCount
  * @type Number
  * @required
@@ -12050,7 +12117,7 @@ Skylink.prototype._lastRestart = null;
 Skylink.prototype._retryCount = 0;
 
 /**
- * Stores the list of PeerConnections.
+ * Stores the list of Peers connection.
  * @attribute _peerConnections
  * @param {Object} (#peerId) The Peer ID associated to the RTCPeerConnection object.
  * @type JSON
@@ -12507,9 +12574,9 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
  *   or refresh is less than 3 seconds since the last refresh
  *   initiated by the other peer, it will be aborted.
  * @method refreshConnection
- * @param {String|Array} [targetPeerId] The array of targeted PeerConnections to refresh
+ * @param {String|Array} [targetPeerId] The array of targeted Peers connection to refresh
  *   the connection with.
- * @param {Function} [callback] The callback fired after all targeted PeerConnections has
+ * @param {Function} [callback] The callback fired after all targeted Peers connection has
  *   been initiated with refresh or have met with an exception.
  *   The callback signature is <code>function (error, success)</code>.
  * @param {JSON} callback.error The error object received in the callback.
@@ -12661,7 +12728,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
  * This would require the current user to leave the room and restart all
  *   current existing Peers connection.
  * @method _restartMCUConnection
- * @param {Function} [callback] The callback fired after all targeted PeerConnections has
+ * @param {Function} [callback] The callback fired after all targeted Peers connection has
  *   been initiated with refresh or have met with an exception.
  *   The callback signature is <code>function (error, success)</code>.
  * @param {JSON} callback.error The error object received in the callback.
@@ -14465,6 +14532,8 @@ Skylink.prototype._forceSSL = false;
  *   would be automatically used. This flag is mostly used for self domain accessing protocol
  *   that is <code>http:</code> and enforcing the SSL connections for
  *   TURN server connection.
+ * This will configure TURN server connection using port <code>443</code> only and
+ *   if <code>turns:</code> protocol is supported, it will use <code>turns:</code> protocol.
  * @attribute _forceTURNSSL
  * @type Boolean
  * @default false
@@ -15264,6 +15333,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   would be automatically used. This flag is mostly used for self domain accessing protocol
  *   that is <code>http:</code> and enforcing the SSL connections for
  *   TURN server connection.
+ * This will configure TURN server connection using port <code>443</code> only and
+ *   if <code>turns:</code> protocol is supported, it will use <code>turns:</code> protocol.
  * @param {Function} [callback] The callback fired after Skylink has been
  *   initialised successfully or have met with an exception.
  *   The callback signature is <code>function (error, success)</code>.
@@ -15315,6 +15386,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @param {Boolean} callback.success.forceTURNSSL The flag to enforce an SSL TURN server connection.
  *   If self domain accessing protocol is <code>https:</code>, SSL connections
  *   would be automatically used.
+ * This will configure TURN server connection using port <code>443</code> only and
+ *   if <code>turns:</code> protocol is supported, it will use <code>turns:</code> protocol.
  * @param {Boolean} callback.success.forceTURN The flag that indicates if PeerConnections connection
  *   should only use TURN server connection which enables a quicker connectivity.
  *   This configuration will override the settings for <code>enableTURNServer</code>
@@ -15396,7 +15469,7 @@ Skylink.prototype.init = function(options, callback) {
   var audioFallback = false;
   var forceSSL = false;
   var socketTimeout = 0;
-  var forceTURNSSL = window.location.protocol === 'https:';
+  var forceTURNSSL = false;
   var audioCodec = self.AUDIO_CODEC.AUTO;
   var videoCodec = self.VIDEO_CODEC.AUTO;
   var forceTURN = false;
@@ -17976,9 +18049,8 @@ Skylink.prototype._createSocket = function (type) {
     self._signalingServerPort = ports[ ports.indexOf(self._signalingServerPort) + 1 ];
   }
 
-  var url = //self._signalingServerProtocol + '//' +
-    //self._signalingServer + ':' + self._signalingServerPort;
-    'http://ec2-52-8-93-170.us-west-1.compute.amazonaws.com:6001';
+  var url = self._signalingServerProtocol + '//' + self._signalingServer + ':' + self._signalingServerPort;
+    //'http://ec2-52-8-93-170.us-west-1.compute.amazonaws.com:6001';
 
   if (type === 'WebSocket') {
     options.transports = ['websocket'];

@@ -133,6 +133,8 @@ Skylink.prototype._forceSSL = false;
  *   would be automatically used. This flag is mostly used for self domain accessing protocol
  *   that is <code>http:</code> and enforcing the SSL connections for
  *   TURN server connection.
+ * This will configure TURN server connection using port <code>443</code> only and
+ *   if <code>turns:</code> protocol is supported, it will use <code>turns:</code> protocol.
  * @attribute _forceTURNSSL
  * @type Boolean
  * @default false
@@ -932,6 +934,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   would be automatically used. This flag is mostly used for self domain accessing protocol
  *   that is <code>http:</code> and enforcing the SSL connections for
  *   TURN server connection.
+ * This will configure TURN server connection using port <code>443</code> only and
+ *   if <code>turns:</code> protocol is supported, it will use <code>turns:</code> protocol.
  * @param {Function} [callback] The callback fired after Skylink has been
  *   initialised successfully or have met with an exception.
  *   The callback signature is <code>function (error, success)</code>.
@@ -983,6 +987,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @param {Boolean} callback.success.forceTURNSSL The flag to enforce an SSL TURN server connection.
  *   If self domain accessing protocol is <code>https:</code>, SSL connections
  *   would be automatically used.
+ * This will configure TURN server connection using port <code>443</code> only and
+ *   if <code>turns:</code> protocol is supported, it will use <code>turns:</code> protocol.
  * @param {Boolean} callback.success.forceTURN The flag that indicates if PeerConnections connection
  *   should only use TURN server connection which enables a quicker connectivity.
  *   This configuration will override the settings for <code>enableTURNServer</code>
@@ -1064,7 +1070,7 @@ Skylink.prototype.init = function(options, callback) {
   var audioFallback = false;
   var forceSSL = false;
   var socketTimeout = 0;
-  var forceTURNSSL = window.location.protocol === 'https:';
+  var forceTURNSSL = false;
   var audioCodec = self.AUDIO_CODEC.AUTO;
   var videoCodec = self.VIDEO_CODEC.AUTO;
   var forceTURN = false;

@@ -2517,7 +2517,7 @@
         {
             "file": "source/ice-connection.js",
             "line": 42,
-            "description": "The list of TURN server transports flags to set\n for TURN server connections.",
+            "description": "The list of TURN server transports flags to set for TURN server connections.",
             "itemtype": "attribute",
             "name": "TURN_TRANSPORT",
             "type": "JSON",
@@ -2534,12 +2534,17 @@
                 },
                 {
                     "name": "ANY",
-                    "description": "Use both TCP and UDP transport option.\n  <i>E.g. <code>turn:turnurl:5523?transport=udp</code> and\n  <code>turn:turnurl:5523?transport=tcp</code></i>.",
+                    "description": "Use any transports option given\n  by the platform signaling.\n  <i>E.g. <code>turn:turnurl:5523?transport=udp</code> or\n  <code>turn:turnurl:5523?transport=tcp</code></i>.",
                     "type": "String"
                 },
                 {
                     "name": "NONE",
                     "description": "Set no transport option in TURN servers.\n  <i>E.g. <code>turn:turnurl:5523</code></i>",
+                    "type": "String"
+                },
+                {
+                    "name": "ALL",
+                    "description": "Use both UCP and TCP transports options.\n  <i>E.g. <code>turn:turnurl:5523?transport=udp</code> and\n  <code>turn:turnurl:5523?transport=tcp</code></i>.",
                     "type": "String"
                 }
             ],
@@ -2550,7 +2555,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 68,
+            "line": 72,
             "description": "The flag that indicates if PeerConnections should enable\n   trickling of ICE to connect the ICE connection.",
             "itemtype": "attribute",
             "name": "_enableIceTrickle",
@@ -2565,7 +2570,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 82,
+            "line": 86,
             "description": "The flag that indicates if PeerConnections ICE gathering\n  should use STUN server connection.",
             "itemtype": "attribute",
             "name": "_enableSTUN",
@@ -2580,7 +2585,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 95,
+            "line": 99,
             "description": "The flag that indicates if PeerConnections ICE gathering\n  should use TURN server connection.\nTampering this flag may disable any successful Peer connection\n  that is behind any firewalls.",
             "itemtype": "attribute",
             "name": "_enableTURN",
@@ -2595,7 +2600,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 110,
+            "line": 114,
             "description": "The flag to enable using of public STUN server connections.",
             "itemtype": "attribute",
             "name": "_usePublicSTUN",
@@ -2610,7 +2615,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 129,
+            "line": 127,
             "description": "Stores the TURN server transport to enable for TURN server connections.\n[Rel: Skylink.TURN_TRANSPORT]",
             "itemtype": "attribute",
             "name": "_TURNTransport",
@@ -2625,7 +2630,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 143,
+            "line": 141,
             "description": "Stores the list of Peer connection ICE connection failures.\nAfter an third attempt of ICE connection failure, the\n  trickling of ICE would be disabled.",
             "itemtype": "attribute",
             "name": "_ICEConnectionFailures",
@@ -2646,7 +2651,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 159,
+            "line": 157,
             "description": "Reconfigures the <code>RTCConfiguration.iceServers</code> that is\n  to be passed in constructing the new <code>RTCPeerConnection</code>\n  object for different browsers support.\nPreviously known as <code>_setFirefoxIceServers</code>.\nThis method will reconfigure <code>urls</code> configuration to\n  an array of <code>url</code> configuration.",
             "itemtype": "method",
             "name": "_parseIceServers",
@@ -2669,7 +2674,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 243,
+            "line": 241,
             "description": "Reconfigures the <code>RTCConfiguration.iceServers</code> that is\n  to be passed in constructing the new <code>RTCPeerConnection</code>\n  object to remove (disable) STUN or remove TURN (disable) server\n  connections based on the\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  configuration passed in.",
             "itemtype": "method",
             "name": "_setIceServers",
@@ -4574,7 +4579,7 @@
         {
             "file": "source/room-init.js",
             "line": 130,
-            "description": "The flag to enforce an SSL TURN server connection.\nIf self domain accessing protocol is <code>https:</code>, SSL connections\n  would be automatically used. This flag is mostly used for self domain accessing protocol\n  that is <code>http:</code> and enforcing the SSL connections for\n  TURN server connection.",
+            "description": "The flag to enforce an SSL TURN server connection.\nIf self domain accessing protocol is <code>https:</code>, SSL connections\n  would be automatically used. This flag is mostly used for self domain accessing protocol\n  that is <code>http:</code> and enforcing the SSL connections for\n  TURN server connection.\nThis will configure TURN server connection using port <code>443</code> only and\n  if <code>turns:</code> protocol is supported, it will use <code>turns:</code> protocol.",
             "itemtype": "attribute",
             "name": "_forceTURNSSL",
             "type": "Boolean",
@@ -4588,7 +4593,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 147,
+            "line": 149,
             "description": "The flag to enforce TURN server connection for quicker connectivity.",
             "itemtype": "attribute",
             "name": "_forceTURN",
@@ -4603,7 +4608,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 160,
+            "line": 162,
             "description": "The constructed REST path that Skylink makes a <code>HTTP /GET</code> from\n  to retrieve the connection information required.",
             "itemtype": "attribute",
             "name": "_path",
@@ -4617,7 +4622,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 173,
+            "line": 175,
             "description": "The regional server that Skylink connects to.",
             "itemtype": "attribute",
             "name": "_serverRegion",
@@ -4630,7 +4635,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 184,
+            "line": 186,
             "description": "The platform server URL that Skylink can construct the REST path with to make\n  a <code>HTTP /GET</code> to retrieve the connection information required.\nIf the value is not the default value, it's mostly for debugging purposes.\nIt's not advisable to allow developers to set the custom server URL unless\n  they are aware of what they are doing, as this is a debugging feature.",
             "itemtype": "attribute",
             "name": "_roomServer",
@@ -4644,7 +4649,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 200,
+            "line": 202,
             "description": "Stores the Application Key that is configured in the\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_appKey",
@@ -4657,7 +4662,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 212,
+            "line": 214,
             "description": "Stores the default room that is configured in the\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.\nIf no room is provided in {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}},\n  this is the room that self would join to by default.\nIf the value is not provided in {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}},\n  by default, the value is the Application Key that is configured\n  in {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_defaultRoom",
@@ -4671,7 +4676,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 230,
+            "line": 232,
             "description": "Stores the new persistent room meeting start datetime stamp in\n  [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601).\nThis will start a new meeting based on the starting datetime stamp\n  in the room that was selected to join.\nThe start date time of the room will not affect non persistent room connection.\nThe persistent room feature is configurable in the Application Key\n  in the developer console.",
             "itemtype": "attribute",
             "name": "_roomStart",
@@ -4685,7 +4690,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 248,
+            "line": 250,
             "description": "Stores the new persistent room meeting duration (in hours)\n  that the current new meeting duration should be in the room\n  that was selected to join.\nThe duration will not affect non persistent room connection.\nThe persistent room feature is configurable in the Application Key\n  in the developer console.",
             "itemtype": "attribute",
             "name": "_roomDuration",
@@ -4699,7 +4704,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 265,
+            "line": 267,
             "description": "Stores the room credentials for Application Key.\nThis is required for rooms connecting without CORS verification\n  or starting a new persistent room meeting.\nTo generate the credentials:\n- Concatenate a string that consists of the room name\n  the room meeting duration (in hours) and the start date timestamp (in ISO 8601 format).\n  Format <code>room + duration + startDateTimeStamp</code>.\n- Hash the concatenated string with the Application Key token using\n  [SHA-1](https://en.wikipedia.org/wiki/SHA-1).\n  You may use the [CryptoJS.HmacSHA1](https://code.google.com/p/crypto-js/#HMAC) function to do so.\n  Example <code>var hash = CryptoJS.HmacSHA1(concatenatedString, token);</code>.\n- Convert the hash to a [Base64](https://en.wikipedia.org/wiki/Base64) encoded string. You may use the\n  [CryptoJS.enc.Base64](https://code.google.com/p/crypto-js/#The_Cipher_Output) function\n  to do so. Example <code>var base64String = hash.toString(CryptoJS.enc.Base64); </code>.\n- Encode the Base64 encoded string to a URI component using UTF-8 encoding with\n  [encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent).\n  Example <code>var credentials = encodeURIComponent(base64String);</code>\nand the duration.",
             "itemtype": "attribute",
             "name": "_roomCredentials",
@@ -4713,7 +4718,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 294,
+            "line": 296,
             "description": "Stores the current Skylink room connection retrieval ready state.\n[Rel: Skylink.READY_STATE_CHANGE]",
             "itemtype": "attribute",
             "name": "_readyState",
@@ -4727,7 +4732,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 307,
+            "line": 309,
             "description": "Stores the Skylink server connection key for the selected room.",
             "itemtype": "attribute",
             "name": "_key",
@@ -4740,7 +4745,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 318,
+            "line": 320,
             "description": "Stores the Skylink server Application Key owner string for the selected room.",
             "itemtype": "attribute",
             "name": "_appKeyOwner",
@@ -4753,7 +4758,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 329,
+            "line": 331,
             "description": "Stores the room connection information that is passed for starting\n  the selected room connection. Some of these information are also\n  used and required to send for every messages sent to the platform\n  signaling connection for targeting the correct room and\n  self identification in the room.",
             "itemtype": "attribute",
             "name": "_room",
@@ -4821,7 +4826,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 370,
+            "line": 372,
             "description": "Starts a <code>HTTP /GET</code> REST call to the platform server to\n  retrieve the required connection information.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -4984,7 +4989,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 535,
+            "line": 537,
             "description": "Parses the connection information retrieved from the platform server and\n  stores them into the relevant attributes in\n  {{#crossLink \"Skylink/_room:attribute\"}}_room{{/crossLink}} and\n  {{#crossLink \"Skylink/_user:attribute\"}}_user{{/crossLink}}.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -5113,7 +5118,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 664,
+            "line": 666,
             "description": "Starts loading the required dependencies and then retrieve the required\n  connection information from the platform server.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -5127,7 +5132,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 759,
+            "line": 761,
             "description": "Starts loading the required connection information to start connection\n  based on the selected room in {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -5160,7 +5165,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 810,
+            "line": 812,
             "description": "Initialises and configures Skylink to begin any connection.\n<b>NOTE</b> that this is the first method that has to be called before\n  using any other functionalities other than debugging features like\n  {{#crossLink \"Skylink/setLogLevel:method\"}}setLogLevel(){{/crossLink}} and\n  {{#crossLink \"Skylink/setDebugMode:method\"}}setDebugMode(){{/crossLink}} and\n  after all event subscriptions like {{#crossLink \"Skylink/on:method\"}}on(){{/crossLink}}\n  or {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}} has been made.\nThis is where the Application Key is configured and attached to Skylink for usage.",
             "itemtype": "method",
             "name": "init",
@@ -5297,7 +5302,7 @@
                         },
                         {
                             "name": "forceTURNSSL",
-                            "description": "The flag to enforce an SSL TURN server connection.\n  If self domain accessing protocol is <code>https:</code>, SSL connections\n  would be automatically used. This flag is mostly used for self domain accessing protocol\n  that is <code>http:</code> and enforcing the SSL connections for\n  TURN server connection.",
+                            "description": "The flag to enforce an SSL TURN server connection.\n  If self domain accessing protocol is <code>https:</code>, SSL connections\n  would be automatically used. This flag is mostly used for self domain accessing protocol\n  that is <code>http:</code> and enforcing the SSL connections for\n  TURN server connection.\nThis will configure TURN server connection using port <code>443</code> only and\n  if <code>turns:</code> protocol is supported, it will use <code>turns:</code> protocol.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
@@ -5404,7 +5409,7 @@
                                 },
                                 {
                                     "name": "forceTURNSSL",
-                                    "description": "The flag to enforce an SSL TURN server connection.\n  If self domain accessing protocol is <code>https:</code>, SSL connections\n  would be automatically used.",
+                                    "description": "The flag to enforce an SSL TURN server connection.\n  If self domain accessing protocol is <code>https:</code>, SSL connections\n  would be automatically used.\nThis will configure TURN server connection using port <code>443</code> only and\n  if <code>turns:</code> protocol is supported, it will use <code>turns:</code> protocol.",
                                     "type": "Boolean"
                                 },
                                 {
@@ -8952,7 +8957,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 480,
+            "line": 479,
             "description": "Connects to the socket connection endpoint URI to platform signaling that is constructed with\n {{#crossLink \"Skylink/_signalingServerProtocol:attribute\"}}_signalingServerProtocol{{/crossLink}},\n {{#crossLink \"Skylink/_signalingServer:attribute\"}}_signalingServer{{/crossLink}} and\n {{#crossLink \"Skylink/_signalingServerPort:attribute\"}}_signalingServerPort{{/crossLink}}.\n <small>Example format: <code>protocol//serverUrl:port</code></small>.<br>\nOnce URI is formed, it will start a new socket.io connection with\n {{#crossLink \"Skylink/_createSocket:method\"}}_createSocket(){{/crossLink}}.",
             "itemtype": "method",
             "name": "_openChannel",
@@ -8965,7 +8970,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 527,
+            "line": 526,
             "description": "Disconnects the current socket connection with the platform signaling.",
             "itemtype": "method",
             "name": "_closeChannel",
@@ -13015,35 +13020,35 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:68"
+            "line": " source/ice-connection.js:72"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:82"
+            "line": " source/ice-connection.js:86"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:95"
+            "line": " source/ice-connection.js:99"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:110"
+            "line": " source/ice-connection.js:114"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:129"
+            "line": " source/ice-connection.js:127"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:143"
+            "line": " source/ice-connection.js:141"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:159"
+            "line": " source/ice-connection.js:157"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:243"
+            "line": " source/ice-connection.js:241"
         },
         {
             "message": "unknown tag: component",
@@ -13291,91 +13296,91 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:147"
+            "line": " source/room-init.js:149"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:160"
+            "line": " source/room-init.js:162"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:173"
+            "line": " source/room-init.js:175"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:184"
+            "line": " source/room-init.js:186"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:200"
+            "line": " source/room-init.js:202"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:212"
+            "line": " source/room-init.js:214"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:230"
+            "line": " source/room-init.js:232"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:248"
+            "line": " source/room-init.js:250"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:265"
+            "line": " source/room-init.js:267"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:294"
+            "line": " source/room-init.js:296"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:307"
+            "line": " source/room-init.js:309"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:318"
+            "line": " source/room-init.js:320"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:329"
+            "line": " source/room-init.js:331"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:370"
+            "line": " source/room-init.js:372"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:535"
+            "line": " source/room-init.js:537"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:535"
+            "line": " source/room-init.js:537"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:664"
+            "line": " source/room-init.js:666"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:664"
+            "line": " source/room-init.js:666"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:759"
+            "line": " source/room-init.js:761"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:759"
+            "line": " source/room-init.js:761"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:810"
+            "line": " source/room-init.js:812"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:810"
+            "line": " source/room-init.js:812"
         },
         {
             "message": "unknown tag: component",
@@ -13771,15 +13776,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-channel.js:480"
+            "line": " source/socket-channel.js:479"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:480"
+            "line": " source/socket-channel.js:479"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:527"
+            "line": " source/socket-channel.js:526"
         },
         {
             "message": "unknown tag: component",

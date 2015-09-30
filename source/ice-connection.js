@@ -40,19 +40,22 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
 };
 
 /**
- * The list of TURN server transports flags to set
- *  for TURN server connections.
+ * The list of TURN server transports flags to set for TURN server connections.
  * @attribute TURN_TRANSPORT
  * @type JSON
  * @param {String} TCP Use only TCP transport option.
  *   <i>E.g. <code>turn:turnurl:5523?transport=tcp</code></i>.
  * @param {String} UDP Use only UDP transport option.
  *   <i>E.g. <code>turn:turnurl:5523?transport=udp</code></i>.
- * @param {String} ANY Use both TCP and UDP transport option.
- *   <i>E.g. <code>turn:turnurl:5523?transport=udp</code> and
+ * @param {String} ANY Use any transports option given
+ *   by the platform signaling.
+ *   <i>E.g. <code>turn:turnurl:5523?transport=udp</code> or
  *   <code>turn:turnurl:5523?transport=tcp</code></i>.
  * @param {String} NONE Set no transport option in TURN servers.
  *   <i>E.g. <code>turn:turnurl:5523</code></i>
+ * @param {String} ALL Use both UCP and TCP transports options.
+ *   <i>E.g. <code>turn:turnurl:5523?transport=udp</code> and
+ *   <code>turn:turnurl:5523?transport=tcp</code></i>.
  * @readOnly
  * @since 0.5.4
  * @component ICE
@@ -62,7 +65,8 @@ Skylink.prototype.TURN_TRANSPORT = {
   UDP: 'udp',
   TCP: 'tcp',
   ANY: 'any',
-  NONE: 'none'
+  NONE: 'none',
+  ALL: 'all'
 };
 
 /**
@@ -119,12 +123,6 @@ Skylink.prototype._enableTURN = true;
  * @since 0.6.1
  */
 Skylink.prototype._usePublicSTUN = true;
-
-// TODO: To implement support of stuns protocol?
-//Skylink.prototype._STUNSSL = false;
-
-// TODO: To implement support of turns protocol?
-//Skylink.prototype._TURNSSL = false;
 
 /**
  * Stores the TURN server transport to enable for TURN server connections.
@@ -267,9 +265,45 @@ Skylink.prototype._setIceServers = function(givenConfig) {
     iceServers: []
   };
 
+  // to prevent repeat
+  var iceServerUrls = [];
+
+  var useTURNSSLProtocol = false;
+  var useTURNSSLPort = false;
+
+  var clone = function (obj) {
+    if (obj === null || typeof obj !== 'object') {
+      return obj;
+    }
+
+    var copy = obj.constructor();
+    for (var attr in obj) {
+      if (obj.hasOwnProperty(attr)) {
+        copy[attr] = obj[attr];
+      }
+    }
+    return copy;
+  };
+
+  if (window.location.protocol === 'https:' || this._forceTURNSSL) {
+    if (window.webrtcDetectedBrowser === 'chrome' ||
+      window.webrtcDetectedBrowser === 'safari' ||
+      window.webrtcDetectedBrowser === 'IE') {
+      useTURNSSLProtocol = true;
+    }
+    useTURNSSLPort = true;
+  }
+
+  log.log('TURN server connections SSL configuration', {
+    useTURNSSLProtocol: useTURNSSLProtocol,
+    useTURNSSLPort: useTURNSSLPort
+  });
+
   for (var i = 0; i < config.iceServers.length; i++) {
     var iceServer = config.iceServers[i];
     var iceServerParts = iceServer.url.split(':');
+    var copyIceServers = [];
+
     // check for stun servers
     if (iceServerParts[0] === 'stun' || iceServerParts[0] === 'stuns') {
       if (!this._enableSTUN) {
@@ -281,7 +315,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
           continue;
         }
         // STUNS is unsupported
-        iceServerParts[0] = (this._STUNSSL) ? 'stuns' : 'stun';
+        //iceServerParts[0] = (this._STUNSSL) ? 'stuns' : 'stun';
       }
       iceServer.url = iceServerParts.join(':');
     }
@@ -290,12 +324,12 @@ Skylink.prototype._setIceServers = function(givenConfig) {
       if (!this._enableTURN) {
         log.log('Removing TURN Server support', iceServer);
         continue;
-      } else if (iceServer.url.indexOf(':443') === -1 && this._forceTURNSSL) {
-        log.log('Ignoring non-SSL configured TURN', iceServer);
+      } else if (iceServer.url.indexOf(':443') === -1 && useTURNSSLPort) {
+        log.log('Ignoring TURN Server with non-SSL port', iceServer);
         continue;
       } else {
         // this is terrible. No turns please
-        iceServerParts[0] = (this._TURNSSL) ? 'turns' : 'turn';
+        iceServerParts[0] = (useTURNSSLProtocol) ? 'turns' : 'turn';
         iceServer.url = iceServerParts.join(':');
         // check if requires SSL
         log.log('Transport option:', this._TURNTransport);
@@ -306,11 +340,33 @@ Skylink.prototype._setIceServers = function(givenConfig) {
             if (this._TURNTransport === this.TURN_TRANSPORT.NONE) {
               log.log('Removing transport option');
               iceServer.url = iceServer.url.split('?')[0];
+            } else if (this._TURNTransport === this.TURN_TRANSPORT.ALL) {
+              log.log('Setting for all transport option');
+
+
+
+              var originalUrl = iceServer.url.split('?')[0];
+
+              // turn:turn.test.com
+              var iceServerTransportNone = clone(iceServer);
+              iceServerTransportNone.url = originalUrl;
+              copyIceServers.push(iceServerTransportNone);
+
+              // turn:turn.test.com?transport=tcp
+              var iceServerTransportTcp = clone(iceServer);
+              iceServerTransportTcp.url = originalUrl + '?transport=' + this.TURN_TRANSPORT.TCP;
+              copyIceServers.push(iceServerTransportTcp);
+
+              // turn:turn.test.com?transport=udp
+              var iceServerTransportUdp = clone(iceServer);
+              iceServerTransportUdp.url = originalUrl + '?transport=' + this.TURN_TRANSPORT.UDP;
+              copyIceServers.push(iceServerTransportUdp);
+
             } else {
               // UDP or TCP
               log.log('Setting transport option');
-              var urlProtocolParts = iceServer.url.split('=')[1];
-              urlProtocolParts = this._TURNTransport;
+              var urlProtocolParts = iceServer.url.split('=');
+              urlProtocolParts[1] = this._TURNTransport;
               iceServer.url = urlProtocolParts.join('=');
             }
           } else {
@@ -323,7 +379,18 @@ Skylink.prototype._setIceServers = function(givenConfig) {
         }
       }
     }
-    newConfig.iceServers.push(iceServer);
+
+    if (copyIceServers.length > 0) {
+      for (var j = 0; j < copyIceServers.length; j++) {
+        if (iceServerUrls.indexOf(copyIceServers[j].url) === -1) {
+          newConfig.iceServers.push(copyIceServers[j]);
+          iceServerUrls.push(copyIceServers[j].url);
+        }
+      }
+    } else if (iceServerUrls.indexOf(iceServer.url) === -1) {
+      newConfig.iceServers.push(iceServer);
+      iceServerUrls.push(iceServer.url);
+    }
   }
 
   log.log('Output iceServers configuration:', newConfig.iceServers);
