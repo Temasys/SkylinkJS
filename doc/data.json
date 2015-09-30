@@ -3929,6 +3929,12 @@
                                     "type": "Boolean",
                                     "optional": true,
                                     "optdefault": "false"
+                                },
+                                {
+                                    "name": "optional",
+                                    "description": "The optional constraints for audio streaming\n  in self user media Stream object. This follows the <code>optional</code>\n  setting in the <code>MediaStreamConstraints</code> when <code>getUserMedia()</code> is invoked.\n  Tampering this may cause errors in retrieval of self user media Stream object.\n  Refer to this [site for more reference](http://www.sitepoint.com/introduction-getusermedia-api/).",
+                                    "type": "Array",
+                                    "optional": true
                                 }
                             ]
                         },
@@ -3945,6 +3951,12 @@
                                     "type": "Boolean",
                                     "optional": true,
                                     "optdefault": "false"
+                                },
+                                {
+                                    "name": "optional",
+                                    "description": "The optional constraints for video streaming\n  in self user media Stream object. This follows the <code>optional</code>\n  setting in the <code>MediaStreamConstraints</code> when <code>getUserMedia()</code> is invoked.\n  Tampering this may cause errors in retrieval of self user media Stream object.\n  Refer to this [site for more reference](http://www.sitepoint.com/introduction-getusermedia-api/).",
+                                    "type": "Array",
+                                    "optional": true
                                 },
                                 {
                                     "name": "resolution",
@@ -4201,7 +4213,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 515,
+            "line": 525,
             "description": "Waits for the signaling socket channel connection to be ready before\n  starting the room connection with the Skylink signaling platform.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -4340,7 +4352,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 620,
+            "line": 630,
             "description": "Disconnects self from current connected room.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -4393,7 +4405,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 721,
+            "line": 731,
             "description": "Locks the currently connected room to prevent other peers\n  from joining the room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -4407,7 +4419,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 744,
+            "line": 754,
             "description": "Unlocks the currently connected room to allow other peers\n  to join the room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -12300,7 +12312,7 @@
                                 },
                                 {
                                     "name": "optional",
-                                    "description": "The optional constraints for audio streaming\n  in self user media Stream object. This follows the <code>optional</code>\n  setting in the <code>MediaStreamConstraints</code> when <code>getUserMedia()</code> is invoked.\n  Tampering this may cause errors in retrieval of self user media Stream object.\n  Refer to this [site for more reference](http://www.sitepoint.com/introduction-getusermedia-api/).",
+                                    "description": "The optional constraints for video streaming\n  in self user media Stream object. This follows the <code>optional</code>\n  setting in the <code>MediaStreamConstraints</code> when <code>getUserMedia()</code> is invoked.\n  Tampering this may cause errors in retrieval of self user media Stream object.\n  Refer to this [site for more reference](http://www.sitepoint.com/introduction-getusermedia-api/).",
                                     "type": "Array",
                                     "optional": true
                                 }
@@ -12367,6 +12379,12 @@
                                     "type": "Boolean",
                                     "optional": true,
                                     "optdefault": "false"
+                                },
+                                {
+                                    "name": "optional",
+                                    "description": "The optional constraints for audio streaming\n  in self user media Stream object. This follows the <code>optional</code>\n  setting in the <code>MediaStreamConstraints</code> when <code>getUserMedia()</code> is invoked.\n  Tampering this may cause errors in retrieval of self user media Stream object.\n  Refer to this [site for more reference](http://www.sitepoint.com/introduction-getusermedia-api/).",
+                                    "type": "Array",
+                                    "optional": true
                                 }
                             ]
                         },
@@ -12408,6 +12426,12 @@
                                     "type": "Number",
                                     "optional": true,
                                     "optdefault": "50"
+                                },
+                                {
+                                    "name": "optional",
+                                    "description": "The optional constraints for video streaming\n  in self user media Stream object. This follows the <code>optional</code>\n  setting in the <code>MediaStreamConstraints</code> when <code>getUserMedia()</code> is invoked.\n  Tampering this may cause errors in retrieval of self user media Stream object.\n  Refer to this [site for more reference](http://www.sitepoint.com/introduction-getusermedia-api/).",
+                                    "type": "Array",
+                                    "optional": true
                                 }
                             ]
                         }
@@ -12442,7 +12466,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1803,
+            "line": 1813,
             "description": "Mutes the currently attached Stream object in Skylink.",
             "itemtype": "method",
             "name": "muteStream",
@@ -12479,7 +12503,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1905,
+            "line": 1915,
             "description": "Unmutes the currently attached Stream object audio stream.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -12495,7 +12519,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1923,
+            "line": 1933,
             "description": "Mutes the currently attached Stream object audio stream.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -12511,7 +12535,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1941,
+            "line": 1951,
             "description": "Unmutes the currently attached Stream object video stream.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -12527,7 +12551,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1959,
+            "line": 1969,
             "description": "Mutes the currently attached Stream object video stream.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -12542,7 +12566,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1976,
+            "line": 1986,
             "description": "Shares the current screen with Peer connections and will refresh all\n   Peer connections to send the screensharing Stream object with\n   <code>HTTPS</code> protocol accessing application.\nThis will require our own Temasys Skylink extension to do screensharing.\nFor screensharing feature in IE / Safari with our Temasys Plugin, please\n  [contact us](https://www.temasys.com.sg/contact-us).\nCurrently, Opera does not support screensharing feature.\nThis does not replace the currently attached user media Stream object in Skylink.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -12583,7 +12607,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2112,
+            "line": 2122,
             "description": "Stops self screensharing Stream object attached to Skylink.\nIf user media Stream object is available, Skylink will refresh all\n   Peer connections to send the user media Stream object.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -13244,35 +13268,35 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:515"
+            "line": " source/room-connection.js:525"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:515"
+            "line": " source/room-connection.js:525"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:620"
+            "line": " source/room-connection.js:630"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:620"
+            "line": " source/room-connection.js:630"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:721"
+            "line": " source/room-connection.js:731"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:721"
+            "line": " source/room-connection.js:731"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:744"
+            "line": " source/room-connection.js:754"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:744"
+            "line": " source/room-connection.js:754"
         },
         {
             "message": "unknown tag: component",
@@ -14116,71 +14140,71 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1803"
+            "line": " source/stream-media.js:1813"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1803"
+            "line": " source/stream-media.js:1813"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1905"
+            "line": " source/stream-media.js:1915"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1905"
+            "line": " source/stream-media.js:1915"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1905"
+            "line": " source/stream-media.js:1915"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1923"
+            "line": " source/stream-media.js:1933"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1923"
+            "line": " source/stream-media.js:1933"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1923"
+            "line": " source/stream-media.js:1933"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1941"
+            "line": " source/stream-media.js:1951"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1941"
+            "line": " source/stream-media.js:1951"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1941"
+            "line": " source/stream-media.js:1951"
         },
         {
             "message": "unknown tag: depcreated",
-            "line": " source/stream-media.js:1959"
+            "line": " source/stream-media.js:1969"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1959"
+            "line": " source/stream-media.js:1969"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1959"
+            "line": " source/stream-media.js:1969"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1976"
+            "line": " source/stream-media.js:1986"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1976"
+            "line": " source/stream-media.js:1986"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2112"
+            "line": " source/stream-media.js:2122"
         },
         {
             "message": "unknown tag: component",

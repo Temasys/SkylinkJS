@@ -1553,7 +1553,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  *   Stream streaming video maximum frameRate.
  *   &lt;i&gt;This sets the &lt;code&gt;maxFramerate&lt;/code&gt; of the &lt;code&gt;video&lt;/code&gt;
  *   constraints passed in &lt;code&gt;getUserMedia()&lt;/code&gt;&lt;/i&gt;.
- * @param {Array} [options.video.optional] The optional constraints for audio streaming
+ * @param {Array} [options.video.optional] The optional constraints for video streaming
  *   in self user media Stream object. This follows the &lt;code&gt;optional&lt;/code&gt;
  *   setting in the &lt;code&gt;MediaStreamConstraints&lt;/code&gt; when &lt;code&gt;getUserMedia()&lt;/code&gt; is invoked.
  *   Tampering this may cause errors in retrieval of self user media Stream object.
@@ -1705,6 +1705,11 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *   settings, {{#crossLink &quot;Skylink/getUserMedia:method&quot;}}getUserMedia(){{/crossLink}}
  *   will be invoked. Self will not connect to the room unless the Stream video
  *   user media access is given.
+ * @param {Array} [options.audio.optional] The optional constraints for audio streaming
+ *   in self user media Stream object. This follows the &lt;code&gt;optional&lt;/code&gt;
+ *   setting in the &lt;code&gt;MediaStreamConstraints&lt;/code&gt; when &lt;code&gt;getUserMedia()&lt;/code&gt; is invoked.
+ *   Tampering this may cause errors in retrieval of self user media Stream object.
+ *   Refer to this [site for more reference](http://www.sitepoint.com/introduction-getusermedia-api/).
  * @param {Boolean} [options.video.mute=false] The flag that
  *   indicates if the self Stream object video streaming is muted.
  * @param {JSON} [options.video.resolution] The self Stream streaming video
@@ -1717,6 +1722,11 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *   Stream streaming video resolution height.
  * @param {Number} [options.video.frameRate=50] The self
  *   Stream streaming video maximum frameRate.
+ * @param {Array} [options.video.optional] The optional constraints for video streaming
+ *   in self user media Stream object. This follows the &lt;code&gt;optional&lt;/code&gt;
+ *   setting in the &lt;code&gt;MediaStreamConstraints&lt;/code&gt; when &lt;code&gt;getUserMedia()&lt;/code&gt; is invoked.
+ *   Tampering this may cause errors in retrieval of self user media Stream object.
+ *   Refer to this [site for more reference](http://www.sitepoint.com/introduction-getusermedia-api/).
  * @param {Function} [callback] The callback fired after Skylink has replaced
  *   the current Stream object successfully with the provided
  *   media settings / MediaStream object or have met with an exception.

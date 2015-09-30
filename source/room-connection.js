@@ -126,6 +126,11 @@ Skylink.prototype._roomLocked = false;
  *   audio streaming.
  * @param {Boolean} [options.audio.mute=false] The flag that
  *   indicates if the self Stream object audio streaming is muted.
+ * @param {Array} [options.audio.optional] The optional constraints for audio streaming
+ *   in self user media Stream object. This follows the <code>optional</code>
+ *   setting in the <code>MediaStreamConstraints</code> when <code>getUserMedia()</code> is invoked.
+ *   Tampering this may cause errors in retrieval of self user media Stream object.
+ *   Refer to this [site for more reference](http://www.sitepoint.com/introduction-getusermedia-api/).
  * @param {Boolean|JSON} [options.video=false] The self Stream streaming video settings.
  *   If <code>false</code>, it means that video streaming is disabled in
  *   the self Stream. If this option is set to <code>true</code> or is defined with
@@ -134,6 +139,11 @@ Skylink.prototype._roomLocked = false;
  *   user media access is given.
  * @param {Boolean} [options.video.mute=false] The flag that
  *   indicates if the self Stream object video streaming is muted.
+ * @param {Array} [options.video.optional] The optional constraints for video streaming
+ *   in self user media Stream object. This follows the <code>optional</code>
+ *   setting in the <code>MediaStreamConstraints</code> when <code>getUserMedia()</code> is invoked.
+ *   Tampering this may cause errors in retrieval of self user media Stream object.
+ *   Refer to this [site for more reference](http://www.sitepoint.com/introduction-getusermedia-api/).
  * @param {JSON} [options.video.resolution] The self Stream streaming video
  *   resolution settings. Setting the resolution may
  *   not force set the resolution provided as it depends on the how the

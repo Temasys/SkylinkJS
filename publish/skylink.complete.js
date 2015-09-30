@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Wed Sep 30 2015 17:50:52 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 30 2015 18:30:30 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8381,7 +8381,7 @@ if (navigator.mozGetUserMedia) {
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.1 - Wed Sep 30 2015 17:50:52 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 30 2015 18:30:30 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13782,6 +13782,11 @@ Skylink.prototype._roomLocked = false;
  *   audio streaming.
  * @param {Boolean} [options.audio.mute=false] The flag that
  *   indicates if the self Stream object audio streaming is muted.
+ * @param {Array} [options.audio.optional] The optional constraints for audio streaming
+ *   in self user media Stream object. This follows the <code>optional</code>
+ *   setting in the <code>MediaStreamConstraints</code> when <code>getUserMedia()</code> is invoked.
+ *   Tampering this may cause errors in retrieval of self user media Stream object.
+ *   Refer to this [site for more reference](http://www.sitepoint.com/introduction-getusermedia-api/).
  * @param {Boolean|JSON} [options.video=false] The self Stream streaming video settings.
  *   If <code>false</code>, it means that video streaming is disabled in
  *   the self Stream. If this option is set to <code>true</code> or is defined with
@@ -13790,6 +13795,11 @@ Skylink.prototype._roomLocked = false;
  *   user media access is given.
  * @param {Boolean} [options.video.mute=false] The flag that
  *   indicates if the self Stream object video streaming is muted.
+ * @param {Array} [options.video.optional] The optional constraints for video streaming
+ *   in self user media Stream object. This follows the <code>optional</code>
+ *   setting in the <code>MediaStreamConstraints</code> when <code>getUserMedia()</code> is invoked.
+ *   Tampering this may cause errors in retrieval of self user media Stream object.
+ *   Refer to this [site for more reference](http://www.sitepoint.com/introduction-getusermedia-api/).
  * @param {JSON} [options.video.resolution] The self Stream streaming video
  *   resolution settings. Setting the resolution may
  *   not force set the resolution provided as it depends on the how the
@@ -21112,7 +21122,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  *   Stream streaming video maximum frameRate.
  *   <i>This sets the <code>maxFramerate</code> of the <code>video</code>
  *   constraints passed in <code>getUserMedia()</code></i>.
- * @param {Array} [options.video.optional] The optional constraints for audio streaming
+ * @param {Array} [options.video.optional] The optional constraints for video streaming
  *   in self user media Stream object. This follows the <code>optional</code>
  *   setting in the <code>MediaStreamConstraints</code> when <code>getUserMedia()</code> is invoked.
  *   Tampering this may cause errors in retrieval of self user media Stream object.
@@ -21264,6 +21274,11 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *   settings, {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
  *   will be invoked. Self will not connect to the room unless the Stream video
  *   user media access is given.
+ * @param {Array} [options.audio.optional] The optional constraints for audio streaming
+ *   in self user media Stream object. This follows the <code>optional</code>
+ *   setting in the <code>MediaStreamConstraints</code> when <code>getUserMedia()</code> is invoked.
+ *   Tampering this may cause errors in retrieval of self user media Stream object.
+ *   Refer to this [site for more reference](http://www.sitepoint.com/introduction-getusermedia-api/).
  * @param {Boolean} [options.video.mute=false] The flag that
  *   indicates if the self Stream object video streaming is muted.
  * @param {JSON} [options.video.resolution] The self Stream streaming video
@@ -21276,6 +21291,11 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *   Stream streaming video resolution height.
  * @param {Number} [options.video.frameRate=50] The self
  *   Stream streaming video maximum frameRate.
+ * @param {Array} [options.video.optional] The optional constraints for video streaming
+ *   in self user media Stream object. This follows the <code>optional</code>
+ *   setting in the <code>MediaStreamConstraints</code> when <code>getUserMedia()</code> is invoked.
+ *   Tampering this may cause errors in retrieval of self user media Stream object.
+ *   Refer to this [site for more reference](http://www.sitepoint.com/introduction-getusermedia-api/).
  * @param {Function} [callback] The callback fired after Skylink has replaced
  *   the current Stream object successfully with the provided
  *   media settings / MediaStream object or have met with an exception.
