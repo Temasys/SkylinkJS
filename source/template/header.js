@@ -109,10 +109,10 @@ if (!Object.keys) {
  * @constructor
  * @example
  *   // Here's a simple example on how you can start using Skylink
- *   var sw = new Skylink();
+ *   var SkylinkDemo = new Skylink();
  *
  *   // Subscribe all events first before init()
- *   sw.on("incomingStream", function (peerId, stream, peerInfo, isSelf) {
+ *   SkylinkDemo.on("incomingStream", function (peerId, stream, peerInfo, isSelf) {
  *     if (isSelf) {
  *       attachMediaStream(document.getElementById("selfVideo"), stream);
  *     } else {
@@ -124,7 +124,7 @@ if (!Object.keys) {
  *     }
  *   });
  *
- *   sw.on("peerLeft", function (peerId, peerInfo, isSelf) {
+ *   SkylinkDemo.on("peerLeft", function (peerId, peerInfo, isSelf) {
  *     if (!isSelf) {
  *       var peerVideo = document.getElementById(peerId);
  *       // do a check if peerVideo exists first
@@ -138,12 +138,12 @@ if (!Object.keys) {
  *
  *  // never call joinRoom in readyStateChange event subscription.
  *  // call joinRoom after init() callback if you want to joinRoom instantly.
- *  sw.on("readyStateChange", function (state, room) {
+ *  SkylinkDemo.on("readyStateChange", function (state, room) {
  *    console.log("Room (" + room + ") state: ", room);
  *  })
  *
  *  // always remember to call init()
- *  sw.init("YOUR_APP_KEY_HERE", function (error, success) {
+ *  SkylinkDemo.init("YOUR_APP_KEY_HERE", function (error, success) {
  *    // do a check for error or success
  *    if (error) {
  *      console.error("Init failed: ", error);

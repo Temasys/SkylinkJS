@@ -1526,7 +1526,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  *        console.log(success);
  *     }
  *   });
- * @trigger mediaAccessSuccess, mediaAccessError, streamEnded
+ * @trigger mediaAccessSuccess, mediaAccessError
  * @component Stream
  * @for Skylink
  * @since 0.5.6
