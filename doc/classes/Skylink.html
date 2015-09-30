@@ -2114,10 +2114,12 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
                     </span>
                   </a>
                 
-                  <a href="#attr_REGIONAL_SERVER" class="list-group-item code-menu-item attr-item ">
+                  <a href="#attr_REGIONAL_SERVER" class="list-group-item code-menu-item attr-item  deprecated">
                     &nbsp;&nbsp;REGIONAL_SERVER
                     <span class="settings">
                       
+                      
+                        <small class="label label-warning">deprecated</small>
                       
                     </span>
                   </a>
@@ -7866,7 +7868,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l761"><code>source&#x2F;room-init.js:761</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l758"><code>source&#x2F;room-init.js:758</code></a>
       </small>
     
 
@@ -8382,7 +8384,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l666"><code>source&#x2F;room-init.js:666</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l663"><code>source&#x2F;room-init.js:663</code></a>
       </small>
     
 
@@ -10970,7 +10972,7 @@ This method will reconfigure <code>urls</code> configuration to
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l537"><code>source&#x2F;room-init.js:537</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l534"><code>source&#x2F;room-init.js:534</code></a>
       </small>
     
 
@@ -13704,7 +13706,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l372"><code>source&#x2F;room-init.js:372</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l369"><code>source&#x2F;room-init.js:369</code></a>
       </small>
     
 
@@ -22164,7 +22166,7 @@ Do not invoke this function when user has already joined a room as
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l812"><code>source&#x2F;room-init.js:812</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l809"><code>source&#x2F;room-init.js:809</code></a>
       </small>
     
 
@@ -22266,6 +22268,23 @@ This is where the Application Key is configured and attached to Skylink for usag
   <code>HTTP /GET</code> to retrieve the connection information required.
   This is a debugging feature, and it&#39;s not advisable to manipulate
     this value unless you are using a beta platform server.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">region</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      
+                      <p><i>Deprecated feature</i>. The regional server that Skylink
+   should connect to for fastest connectivity. [Rel: Skylink.REGIONAL_SERVER]</p>
 
                     </div>
 
@@ -22841,6 +22860,20 @@ This will configure TURN server connection using port <code>443</code> only and
                               The TURN server transport
   to enable for TURN server connections.
   [Rel: Skylink.TURN_TRANSPORT]
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">serverRegion</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              
+                              The regional server that Skylink
+   should connect to for fastest connectivity. [Rel: Skylink.REGIONAL_SERVER]
                             </div>
                           </li>
                         
@@ -29293,7 +29326,7 @@ Skylink <a href="../classes/Skylink.html#method_setDebugMode" class="crosslink">
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l202"><code>source&#x2F;room-init.js:202</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l199"><code>source&#x2F;room-init.js:199</code></a>
       </small>
     
 
@@ -29368,7 +29401,7 @@ Skylink <a href="../classes/Skylink.html#method_setDebugMode" class="crosslink">
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l320"><code>source&#x2F;room-init.js:320</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l317"><code>source&#x2F;room-init.js:317</code></a>
       </small>
     
 
@@ -30266,7 +30299,7 @@ Skylink <a href="../classes/Skylink.html#method_setDebugMode" class="crosslink">
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l214"><code>source&#x2F;room-init.js:214</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l211"><code>source&#x2F;room-init.js:211</code></a>
       </small>
     
 
@@ -31706,7 +31739,7 @@ Tampering this flag may disable any successful Peer connection
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l113"><code>source&#x2F;room-init.js:113</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l110"><code>source&#x2F;room-init.js:110</code></a>
       </small>
     
 
@@ -31791,7 +31824,7 @@ If self domain accessing protocol is <code>https:</code>, SSL connections
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l149"><code>source&#x2F;room-init.js:149</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l146"><code>source&#x2F;room-init.js:146</code></a>
       </small>
     
 
@@ -31872,7 +31905,7 @@ If self domain accessing protocol is <code>https:</code>, SSL connections
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l130"><code>source&#x2F;room-init.js:130</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l127"><code>source&#x2F;room-init.js:127</code></a>
       </small>
     
 
@@ -32582,7 +32615,7 @@ After an third attempt of ICE connection failure, the
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l309"><code>source&#x2F;room-init.js:309</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l306"><code>source&#x2F;room-init.js:306</code></a>
       </small>
     
 
@@ -33608,7 +33641,7 @@ If the current key is not alias, this is the same as _appKey</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l162"><code>source&#x2F;room-init.js:162</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l159"><code>source&#x2F;room-init.js:159</code></a>
       </small>
     
 
@@ -34933,7 +34966,7 @@ The one that sends restart later is the one who initiates the restart.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l296"><code>source&#x2F;room-init.js:296</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l293"><code>source&#x2F;room-init.js:293</code></a>
       </small>
     
 
@@ -35170,7 +35203,7 @@ The one that sends restart later is the one who initiates the restart.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l331"><code>source&#x2F;room-init.js:331</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l328"><code>source&#x2F;room-init.js:328</code></a>
       </small>
     
 
@@ -35286,7 +35319,7 @@ The one that sends restart later is the one who initiates the restart.</p>
                     
 
                     <div class="param-description">
-                      <p><i>Deprecated</i>. The RTCPeerConnection
+                      <p><i>Deprecated feature</i>. The RTCPeerConnection
    constraints that is passed in this format <code>new RTCPeerConnection(config, constraints);</code>.
    This feature is not documented in W3C Specification draft and not advisable to use.</p>
 
@@ -35319,7 +35352,7 @@ The one that sends restart later is the one who initiates the restart.</p>
                     
 
                     <div class="param-description">
-                      <p><i>Deprecated</i>. The RTCPeerConnection
+                      <p><i>Deprecated feature</i>. The RTCPeerConnection
    <a href="http://w3c.github.io/webrtc-pc/#idl-def-RTCOfferOptions">RTCOfferOptions</a> used in
    <code>RTCPeerConnection.createOffer(successCb, failureCb, options);</code>.</p>
 
@@ -35354,7 +35387,7 @@ The one that sends restart later is the one who initiates the restart.</p>
                     
 
                     <div class="param-description">
-                      <p><i>Deprecated</i>. The getUserMedia()
+                      <p><i>Deprecated feature</i>. The getUserMedia()
    <a href="https://w3c.github.io/mediacapture-main/getusermedia.html#idl-def-MediaStreamConstraints">MediaStreamConstraints</a>
    in <code>getUserMedia(constraints, successCb, failureCb);</code>.</p>
 
@@ -35427,7 +35460,7 @@ The one that sends restart later is the one who initiates the restart.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l267"><code>source&#x2F;room-init.js:267</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l264"><code>source&#x2F;room-init.js:264</code></a>
       </small>
     
 
@@ -35522,7 +35555,7 @@ and the duration.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l250"><code>source&#x2F;room-init.js:250</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l247"><code>source&#x2F;room-init.js:247</code></a>
       </small>
     
 
@@ -35675,7 +35708,7 @@ The persistent room feature is configurable in the Application Key
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l186"><code>source&#x2F;room-init.js:186</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l183"><code>source&#x2F;room-init.js:183</code></a>
       </small>
     
 
@@ -35760,7 +35793,7 @@ It&#39;s not advisable to allow developers to set the custom server URL unless
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l232"><code>source&#x2F;room-init.js:232</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l229"><code>source&#x2F;room-init.js:229</code></a>
       </small>
     
 
@@ -36549,7 +36582,7 @@ The selected room will be usually defaulted to
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l175"><code>source&#x2F;room-init.js:175</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l172"><code>source&#x2F;room-init.js:172</code></a>
       </small>
     
 
@@ -36559,7 +36592,7 @@ The selected room will be usually defaulted to
   </div>
 
   <div class="code-item-description">
-    <p>The regional server that Skylink connects to.</p>
+    <p>The regional server that Skylink should connect to for fastest connectivity.</p>
 
   </div>
 
@@ -41837,7 +41870,7 @@ Skylink/:attr</li>
   <hr>
 </div>
             
-              <div id="attr_REGIONAL_SERVER" class="code-item attr item attr-item ">
+              <div id="attr_REGIONAL_SERVER" class="code-item attr item attr-item  deprecated">
   <a name="config_REGIONAL_SERVER"></a> 
   <h3 class="code-item-name"><code>REGIONAL_SERVER</code></h3>
   <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>JSON<b>}</b></span>
@@ -41845,7 +41878,7 @@ Skylink/:attr</li>
   <div class="code-item-properties">
     <div class="properties-wrapper">
       
-
+        <span class="label label-warning" title="This property is deprecated. Might be removed in future releases.">deprecated</span>
       
 
       
@@ -41859,7 +41892,7 @@ Skylink/:attr</li>
       
 
       
-
+        <span class="label label-danger" title="This attribute is final and cannot be changed.">final</span>
       
 
       
@@ -41867,7 +41900,9 @@ Skylink/:attr</li>
       
 
       
-        <span class="label label-info" title="This attribute is reference only.">readonly</span>
+
+      
+
       
 
       
@@ -41880,12 +41915,15 @@ Skylink/:attr</li>
         
       
       
+        <span>Deprecated: Signaling server selection is handled on
+   the server side based on load and latency.</span>
+      
       
     </div>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l94"><code>source&#x2F;room-init.js:94</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l91"><code>source&#x2F;room-init.js:91</code></a>
       </small>
     
 
@@ -41895,12 +41933,8 @@ Skylink/:attr</li>
   </div>
 
   <div class="code-item-description">
-    <p>The list of available regional servers.</p>
-<ul>
-<li>This is for developers to set the nearest region server
-for Skylink to connect to for faster connectivity.</li>
-<li>The available regional servers are:</li>
-</ul>
+    <p>The list of available platform signaling servers Skylink
+  should connect to for faster connectivity.</p>
 
   </div>
 

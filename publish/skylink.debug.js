@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Wed Sep 30 2015 18:30:30 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 30 2015 19:33:12 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6102,9 +6102,6 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
   API_CREDENTIALS_INVALID: 4004,
   API_CREDENTIALS_NOT_MATCH: 4005,
   API_INVALID_PARENT_KEY: 4006,
-  API_NOT_ENOUGH_CREDIT: 4007,
-  API_NOT_ENOUGH_PREPAID_CREDIT: 4008,
-  API_FAILED_FINDING_PREPAID_CREDIT: 4009,
   API_NO_MEETING_RECORD_FOUND: 4010,
   ROOM_LOCKED: 5001,
   XML_HTTP_REQUEST_ERROR: -1,
@@ -6118,15 +6115,15 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
 };
 
 /**
- * The list of available regional servers.
- * - This is for developers to set the nearest region server
- *   for Skylink to connect to for faster connectivity.
- * - The available regional servers are:
+ * The list of available platform signaling servers Skylink
+ *   should connect to for faster connectivity.
  * @attribute REGIONAL_SERVER
  * @type JSON
  * @param {String} APAC1 Asia pacific server 1.
  * @param {String} US1 server 1.
- * @readOnly
+ * @deprecated Signaling server selection is handled on
+ *    the server side based on load and latency.
+ * @final
  * @component Room
  * @for Skylink
  * @since 0.5.0
@@ -6199,7 +6196,7 @@ Skylink.prototype._forceTURN = false;
 Skylink.prototype._path = null;
 
 /**
- * The regional server that Skylink connects to.
+ * The regional server that Skylink should connect to for fastest connectivity.
  * @attribute _serverRegion
  * @type String
  * @private
@@ -6859,12 +6856,14 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   <code>HTTP /GET</code> to retrieve the connection information required.
  *   This is a debugging feature, and it's not advisable to manipulate
  *     this value unless you are using a beta platform server.
+ * @param {String} [options.region] <i>Deprecated feature</i> The regional server that Skylink
+ *    should connect to for fastest connectivity. [Rel: Skylink.REGIONAL_SERVER]
  * @param {Boolean} [options.enableIceTrickle=true] <i>Debugging Feature</i>.
  *    The flag that indicates if PeerConnections
  *    should enable trickling of ICE to connect the ICE connection. Configuring
  *    this value to <code>false</code> may result in a slower connection but
  *    a more stable connection.
- * @param {Boolean} [options.enableDataChannel=true]  <i>Debugging feature</i>.
+ * @param {Boolean} [options.enableDataChannel=true] <i>Debugging feature</i>.
  *   The flag that indicates if PeerConnections
  *   should have any DataChannel connections. Configuring this value to <code>false</code>
  *   may result in failure to use features like

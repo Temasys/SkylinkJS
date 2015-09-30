@@ -76,9 +76,6 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
   API_CREDENTIALS_INVALID: 4004,
   API_CREDENTIALS_NOT_MATCH: 4005,
   API_INVALID_PARENT_KEY: 4006,
-  API_NOT_ENOUGH_CREDIT: 4007,
-  API_NOT_ENOUGH_PREPAID_CREDIT: 4008,
-  API_FAILED_FINDING_PREPAID_CREDIT: 4009,
   API_NO_MEETING_RECORD_FOUND: 4010,
   ROOM_LOCKED: 5001,
   XML_HTTP_REQUEST_ERROR: -1,
@@ -92,15 +89,15 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
 };
 
 /**
- * The list of available regional servers.
- * - This is for developers to set the nearest region server
- *   for Skylink to connect to for faster connectivity.
- * - The available regional servers are:
+ * The list of available platform signaling servers Skylink
+ *   should connect to for faster connectivity.
  * @attribute REGIONAL_SERVER
  * @type JSON
  * @param {String} APAC1 Asia pacific server 1.
  * @param {String} US1 server 1.
- * @readOnly
+ * @deprecated Signaling server selection is handled on
+ *    the server side based on load and latency.
+ * @final
  * @component Room
  * @for Skylink
  * @since 0.5.0
@@ -173,7 +170,7 @@ Skylink.prototype._forceTURN = false;
 Skylink.prototype._path = null;
 
 /**
- * The regional server that Skylink connects to.
+ * The regional server that Skylink should connect to for fastest connectivity.
  * @attribute _serverRegion
  * @type String
  * @private
@@ -346,19 +343,19 @@ Skylink.prototype._appKeyOwner = null;
  * @param {String} duration The duration of the room meeting (in hours). This duration will
  *    not affect non persistent room.
  * @param {JSON} connection Connection The RTCPeerConnection constraints and configuration.
- * @param {JSON} connection.peerConstraints <i>Deprecated</i>. The RTCPeerConnection
+ * @param {JSON} connection.peerConstraints <i>Deprecated feature</i>. The RTCPeerConnection
  *    constraints that is passed in this format <code>new RTCPeerConnection(config, constraints);</code>.
  *    This feature is not documented in W3C Specification draft and not advisable to use.
  * @param {JSON} connection.peerConfig The RTCPeerConnection
  *    [RTCConfiguration](http://w3c.github.io/webrtc-pc/#idl-def-RTCConfiguration).
- * @param {JSON} connection.offerConstraints <i>Deprecated</i>. The RTCPeerConnection
+ * @param {JSON} connection.offerConstraints <i>Deprecated feature</i>. The RTCPeerConnection
  *    [RTCOfferOptions](http://w3c.github.io/webrtc-pc/#idl-def-RTCOfferOptions) used in
  *    <code>RTCPeerConnection.createOffer(successCb, failureCb, options);</code>.
  * @param {JSON} connection.sdpConstraints <i>Not in use</i>. The RTCPeerConnection
  *    [RTCAnswerOptions](http://w3c.github.io/webrtc-pc/#idl-def-RTCAnswerOptions) to be used
  *    in <code>RTCPeerConnection.createAnswer(successCb, failureCb, options);</code>.
  *    This is currently not in use due to not all browsers supporting this feature yet.
- * @param {JSON} connection.mediaConstraints <i>Deprecated</i>. The getUserMedia()
+ * @param {JSON} connection.mediaConstraints <i>Deprecated feature</i>. The getUserMedia()
  *    [MediaStreamConstraints](https://w3c.github.io/mediacapture-main/getusermedia.html#idl-def-MediaStreamConstraints)
  *    in <code>getUserMedia(constraints, successCb, failureCb);</code>.
  * @required
@@ -833,12 +830,14 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   <code>HTTP /GET</code> to retrieve the connection information required.
  *   This is a debugging feature, and it's not advisable to manipulate
  *     this value unless you are using a beta platform server.
+ * @param {String} [options.region] <i>Deprecated feature</i>. The regional server that Skylink
+ *    should connect to for fastest connectivity. [Rel: Skylink.REGIONAL_SERVER]
  * @param {Boolean} [options.enableIceTrickle=true] <i>Debugging Feature</i>.
  *    The flag that indicates if PeerConnections
  *    should enable trickling of ICE to connect the ICE connection. Configuring
  *    this value to <code>false</code> may result in a slower connection but
  *    a more stable connection.
- * @param {Boolean} [options.enableDataChannel=true]  <i>Debugging feature</i>.
+ * @param {Boolean} [options.enableDataChannel=true] <i>Debugging feature</i>.
  *   The flag that indicates if PeerConnections
  *   should have any DataChannel connections. Configuring this value to <code>false</code>
  *   may result in failure to use features like
@@ -970,6 +969,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @param {Boolean} callback.success.TURNServerTransport The TURN server transport
  *   to enable for TURN server connections.
  *   [Rel: Skylink.TURN_TRANSPORT]
+ * @param {String} [callback.success.serverRegion] The regional server that Skylink
+ *    should connect to for fastest connectivity. [Rel: Skylink.REGIONAL_SERVER]
  * @param {Boolean} callback.success.audioFallback The flag that indicates if there is a failure in
  *   <a href="#method_getUserMedia">getUserMedia()</a> in retrieving user media
  *   video stream, it should fallback to retrieve audio stream only.

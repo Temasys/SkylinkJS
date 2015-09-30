@@ -4551,8 +4551,8 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 94,
-            "description": "The list of available regional servers.\n- This is for developers to set the nearest region server\n  for Skylink to connect to for faster connectivity.\n- The available regional servers are:",
+            "line": 91,
+            "description": "The list of available platform signaling servers Skylink\n  should connect to for faster connectivity.",
             "itemtype": "attribute",
             "name": "REGIONAL_SERVER",
             "type": "JSON",
@@ -4568,14 +4568,16 @@
                     "type": "String"
                 }
             ],
-            "readonly": "",
+            "deprecated": true,
+            "deprecationMessage": "Signaling server selection is handled on\n   the server side based on load and latency.",
+            "final": 1,
             "component": "Room",
             "since": "0.5.0",
             "class": "Skylink"
         },
         {
             "file": "source/room-init.js",
-            "line": 113,
+            "line": 110,
             "description": "The flag to enforce an SSL platform signaling and platform server connection.\nIf self domain accessing protocol is <code>https:</code>, SSL connections\n  would be automatically used. This flag is mostly used for self domain accessing protocol\n  that is <code>http:</code> and enforcing the SSL connections for\n  platform signaling and platform server connection.",
             "itemtype": "attribute",
             "name": "_forceSSL",
@@ -4590,7 +4592,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 130,
+            "line": 127,
             "description": "The flag to enforce an SSL TURN server connection.\nIf self domain accessing protocol is <code>https:</code>, SSL connections\n  would be automatically used. This flag is mostly used for self domain accessing protocol\n  that is <code>http:</code> and enforcing the SSL connections for\n  TURN server connection.\nThis will configure TURN server connection using port <code>443</code> only and\n  if <code>turns:</code> protocol is supported, it will use <code>turns:</code> protocol.",
             "itemtype": "attribute",
             "name": "_forceTURNSSL",
@@ -4605,7 +4607,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 149,
+            "line": 146,
             "description": "The flag to enforce TURN server connection for quicker connectivity.",
             "itemtype": "attribute",
             "name": "_forceTURN",
@@ -4620,7 +4622,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 162,
+            "line": 159,
             "description": "The constructed REST path that Skylink makes a <code>HTTP /GET</code> from\n  to retrieve the connection information required.",
             "itemtype": "attribute",
             "name": "_path",
@@ -4634,8 +4636,8 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 175,
-            "description": "The regional server that Skylink connects to.",
+            "line": 172,
+            "description": "The regional server that Skylink should connect to for fastest connectivity.",
             "itemtype": "attribute",
             "name": "_serverRegion",
             "type": "String",
@@ -4647,7 +4649,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 186,
+            "line": 183,
             "description": "The platform server URL that Skylink can construct the REST path with to make\n  a <code>HTTP /GET</code> to retrieve the connection information required.\nIf the value is not the default value, it's mostly for debugging purposes.\nIt's not advisable to allow developers to set the custom server URL unless\n  they are aware of what they are doing, as this is a debugging feature.",
             "itemtype": "attribute",
             "name": "_roomServer",
@@ -4661,7 +4663,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 202,
+            "line": 199,
             "description": "Stores the Application Key that is configured in the\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_appKey",
@@ -4674,7 +4676,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 214,
+            "line": 211,
             "description": "Stores the default room that is configured in the\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.\nIf no room is provided in {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}},\n  this is the room that self would join to by default.\nIf the value is not provided in {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}},\n  by default, the value is the Application Key that is configured\n  in {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_defaultRoom",
@@ -4688,7 +4690,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 232,
+            "line": 229,
             "description": "Stores the new persistent room meeting start datetime stamp in\n  [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601).\nThis will start a new meeting based on the starting datetime stamp\n  in the room that was selected to join.\nThe start date time of the room will not affect non persistent room connection.\nThe persistent room feature is configurable in the Application Key\n  in the developer console.",
             "itemtype": "attribute",
             "name": "_roomStart",
@@ -4702,7 +4704,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 250,
+            "line": 247,
             "description": "Stores the new persistent room meeting duration (in hours)\n  that the current new meeting duration should be in the room\n  that was selected to join.\nThe duration will not affect non persistent room connection.\nThe persistent room feature is configurable in the Application Key\n  in the developer console.",
             "itemtype": "attribute",
             "name": "_roomDuration",
@@ -4716,7 +4718,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 267,
+            "line": 264,
             "description": "Stores the room credentials for Application Key.\nThis is required for rooms connecting without CORS verification\n  or starting a new persistent room meeting.\nTo generate the credentials:\n- Concatenate a string that consists of the room name\n  the room meeting duration (in hours) and the start date timestamp (in ISO 8601 format).\n  Format <code>room + duration + startDateTimeStamp</code>.\n- Hash the concatenated string with the Application Key token using\n  [SHA-1](https://en.wikipedia.org/wiki/SHA-1).\n  You may use the [CryptoJS.HmacSHA1](https://code.google.com/p/crypto-js/#HMAC) function to do so.\n  Example <code>var hash = CryptoJS.HmacSHA1(concatenatedString, token);</code>.\n- Convert the hash to a [Base64](https://en.wikipedia.org/wiki/Base64) encoded string. You may use the\n  [CryptoJS.enc.Base64](https://code.google.com/p/crypto-js/#The_Cipher_Output) function\n  to do so. Example <code>var base64String = hash.toString(CryptoJS.enc.Base64); </code>.\n- Encode the Base64 encoded string to a URI component using UTF-8 encoding with\n  [encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent).\n  Example <code>var credentials = encodeURIComponent(base64String);</code>\nand the duration.",
             "itemtype": "attribute",
             "name": "_roomCredentials",
@@ -4730,7 +4732,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 296,
+            "line": 293,
             "description": "Stores the current Skylink room connection retrieval ready state.\n[Rel: Skylink.READY_STATE_CHANGE]",
             "itemtype": "attribute",
             "name": "_readyState",
@@ -4744,7 +4746,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 309,
+            "line": 306,
             "description": "Stores the Skylink server connection key for the selected room.",
             "itemtype": "attribute",
             "name": "_key",
@@ -4757,7 +4759,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 320,
+            "line": 317,
             "description": "Stores the Skylink server Application Key owner string for the selected room.",
             "itemtype": "attribute",
             "name": "_appKeyOwner",
@@ -4770,7 +4772,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 331,
+            "line": 328,
             "description": "Stores the room connection information that is passed for starting\n  the selected room connection. Some of these information are also\n  used and required to send for every messages sent to the platform\n  signaling connection for targeting the correct room and\n  self identification in the room.",
             "itemtype": "attribute",
             "name": "_room",
@@ -4803,7 +4805,7 @@
                     "props": [
                         {
                             "name": "peerConstraints",
-                            "description": "<i>Deprecated</i>. The RTCPeerConnection\n   constraints that is passed in this format <code>new RTCPeerConnection(config, constraints);</code>.\n   This feature is not documented in W3C Specification draft and not advisable to use.",
+                            "description": "<i>Deprecated feature</i>. The RTCPeerConnection\n   constraints that is passed in this format <code>new RTCPeerConnection(config, constraints);</code>.\n   This feature is not documented in W3C Specification draft and not advisable to use.",
                             "type": "JSON"
                         },
                         {
@@ -4813,7 +4815,7 @@
                         },
                         {
                             "name": "offerConstraints",
-                            "description": "<i>Deprecated</i>. The RTCPeerConnection\n   [RTCOfferOptions](http://w3c.github.io/webrtc-pc/#idl-def-RTCOfferOptions) used in\n   <code>RTCPeerConnection.createOffer(successCb, failureCb, options);</code>.",
+                            "description": "<i>Deprecated feature</i>. The RTCPeerConnection\n   [RTCOfferOptions](http://w3c.github.io/webrtc-pc/#idl-def-RTCOfferOptions) used in\n   <code>RTCPeerConnection.createOffer(successCb, failureCb, options);</code>.",
                             "type": "JSON"
                         },
                         {
@@ -4823,7 +4825,7 @@
                         },
                         {
                             "name": "mediaConstraints",
-                            "description": "<i>Deprecated</i>. The getUserMedia()\n   [MediaStreamConstraints](https://w3c.github.io/mediacapture-main/getusermedia.html#idl-def-MediaStreamConstraints)\n   in <code>getUserMedia(constraints, successCb, failureCb);</code>.",
+                            "description": "<i>Deprecated feature</i>. The getUserMedia()\n   [MediaStreamConstraints](https://w3c.github.io/mediacapture-main/getusermedia.html#idl-def-MediaStreamConstraints)\n   in <code>getUserMedia(constraints, successCb, failureCb);</code>.",
                             "type": "JSON"
                         }
                     ]
@@ -4838,7 +4840,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 372,
+            "line": 369,
             "description": "Starts a <code>HTTP /GET</code> REST call to the platform server to\n  retrieve the required connection information.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -5001,7 +5003,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 537,
+            "line": 534,
             "description": "Parses the connection information retrieved from the platform server and\n  stores them into the relevant attributes in\n  {{#crossLink \"Skylink/_room:attribute\"}}_room{{/crossLink}} and\n  {{#crossLink \"Skylink/_user:attribute\"}}_user{{/crossLink}}.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -5130,7 +5132,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 666,
+            "line": 663,
             "description": "Starts loading the required dependencies and then retrieve the required\n  connection information from the platform server.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -5144,7 +5146,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 761,
+            "line": 758,
             "description": "Starts loading the required connection information to start connection\n  based on the selected room in {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -5177,7 +5179,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 812,
+            "line": 809,
             "description": "Initialises and configures Skylink to begin any connection.\n<b>NOTE</b> that this is the first method that has to be called before\n  using any other functionalities other than debugging features like\n  {{#crossLink \"Skylink/setLogLevel:method\"}}setLogLevel(){{/crossLink}} and\n  {{#crossLink \"Skylink/setDebugMode:method\"}}setDebugMode(){{/crossLink}} and\n  after all event subscriptions like {{#crossLink \"Skylink/on:method\"}}on(){{/crossLink}}\n  or {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}} has been made.\nThis is where the Application Key is configured and attached to Skylink for usage.",
             "itemtype": "method",
             "name": "init",
@@ -5202,6 +5204,12 @@
                         {
                             "name": "roomServer",
                             "description": "The platform server URL that Skylink makes a\n  <code>HTTP /GET</code> to retrieve the connection information required.\n  This is a debugging feature, and it's not advisable to manipulate\n    this value unless you are using a beta platform server.",
+                            "type": "String",
+                            "optional": true
+                        },
+                        {
+                            "name": "region",
+                            "description": "<i>Deprecated feature</i>. The regional server that Skylink\n   should connect to for fastest connectivity. [Rel: Skylink.REGIONAL_SERVER]",
                             "type": "String",
                             "optional": true
                         },
@@ -5393,6 +5401,12 @@
                                     "name": "TURNServerTransport",
                                     "description": "The TURN server transport\n  to enable for TURN server connections.\n  [Rel: Skylink.TURN_TRANSPORT]",
                                     "type": "Boolean"
+                                },
+                                {
+                                    "name": "serverRegion",
+                                    "description": "The regional server that Skylink\n   should connect to for fastest connectivity. [Rel: Skylink.REGIONAL_SERVER]",
+                                    "type": "String",
+                                    "optional": true
                                 },
                                 {
                                     "name": "audioFallback",
@@ -13308,103 +13322,103 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:94"
+            "line": " source/room-init.js:91"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:113"
+            "line": " source/room-init.js:110"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:130"
+            "line": " source/room-init.js:127"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:149"
+            "line": " source/room-init.js:146"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:162"
+            "line": " source/room-init.js:159"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:175"
+            "line": " source/room-init.js:172"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:186"
+            "line": " source/room-init.js:183"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:202"
+            "line": " source/room-init.js:199"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:214"
+            "line": " source/room-init.js:211"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:232"
+            "line": " source/room-init.js:229"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:250"
+            "line": " source/room-init.js:247"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:267"
+            "line": " source/room-init.js:264"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:296"
+            "line": " source/room-init.js:293"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:309"
+            "line": " source/room-init.js:306"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:320"
+            "line": " source/room-init.js:317"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:331"
+            "line": " source/room-init.js:328"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:372"
+            "line": " source/room-init.js:369"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:537"
+            "line": " source/room-init.js:534"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:537"
+            "line": " source/room-init.js:534"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:666"
+            "line": " source/room-init.js:663"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:666"
+            "line": " source/room-init.js:663"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:761"
+            "line": " source/room-init.js:758"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:761"
+            "line": " source/room-init.js:758"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:812"
+            "line": " source/room-init.js:809"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:812"
+            "line": " source/room-init.js:809"
         },
         {
             "message": "unknown tag: component",
