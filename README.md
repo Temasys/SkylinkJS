@@ -4,31 +4,33 @@
 
 We've gone to great length to make this library work in as many browsers as possible. SkylinkJS is build on top of [AdapterJS](http://github.com/Temasys/AdapterJS) and works with our [Temasys WebRTC Plugin](http://skylink.io/plugin/) even in Internet Explorer and Safari on Mac and PC.
 
-
+To install SkylinkJS with [npm](https://www.npmjs.com/):
 ```
 npm install skylinkjs
 ```
-or
+To install SkylinkJS with [bower](http://bower.io/):
 ```
 bower install skylinkjs
 ```
 
 You'll need a Temasys Developer Account and an App key to use this. [Register here to get your App key](https://developer.temasys.com.sg).
 
+
 - [Getting started](http://temasys.github.io/how-to/2014/08/08/Getting_started_with_WebRTC_and_SkylinkJS/)
 - [API Docs](http://cdn.temasys.com.sg/skylink/skylinkjs/latest/doc/classes/Skylink.html)
 - [Versions](http://github.com/Temasys/SkylinkJS/releases)
 - [Developer Console  - Get your App key](https://developer.temasys.com.sg)
-
+- [View Code Examples](https://github.com/Temasys/SkylinkJS/tree/master/demo)
+- [Run tests](https://github.com/Temasys/SkylinkJS/tree/master/tests)
 
 
 ##### Need help or want something changed?
-Please read how you can find help, contribute and support us advancing SkylinkJS on [our Github Page](https://developer.temasys.com.sg/support).
+You can raise tickets on [http://support.temasys.com.sg) our support portal or on [our Github Page](https://developer.temasys.com.sg/support).
 
 ##### Current versions and stability
 Always use the latest versions of the SkylinkJS library as WebRTC is still evolving and we adapt to changes very frequently.
 
-[Latest version: 0.6.0](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.0).
+[Latest version: 0.6.1](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.1).
 
 ##### Upgrading from 0.5.7 and below:
 It's now recommended to use the `init()` callback instead of using `readyStateChange` event state to go completed as this may result in an infinite loop.
@@ -90,15 +92,10 @@ After making edits, here are some commands to run and build Skylink:
 __What's included in the repository?__
 
 - `demo` : Contains the sample demos.
-
 - `doc` : Contains the generated YUI documentation for the SkylinkJS.
-
 - `doc-style` : Contains the template for our YUI documentation.
-
 - `publish` : Contains the production version of the library and a minified copy of it
-
 - `source` : Contains the skylink.js library development files
-
 - `tests` : Contains the list of test scripts.
 
 

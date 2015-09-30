@@ -1,6 +1,6 @@
 ## Running the demos
 ### 1. Hosting the project repo files in a `localhost` server
-In order to run these demos locally, firstly, you will require to host the demos in your localhost. You may use the `server.js` that uses [NodeJS](https://nodejs.org) to start the localhost server. Simple invoke `node server` when you are in the SkylinkJS project repository folder.
+In order to run these demos locally, firstly, you will require to host the demos in your localhost. You may use the `server.js` that uses [NodeJS](https://nodejs.org) to start the localhost server. Simply invoke `node server` when you are in the SkylinkJS project repository folder.
 
 For windows, you will require to use the Node shell to run the NodeJS server.
 For mac / linux, simple invoke the command from the terminal.
@@ -18,7 +18,7 @@ In the `/demo` folder, this contains all the examples of how you can use Skylink
 You may also choose to access the `/demo/index.html` page for the list of all demos available.
 
 ### demo/app
-In this demo, it contains the overview of all functionalities of Skylink which you can choose to integrate in your Web Application.
+In this demo, you can find an example of the overview of all functionalities of Skylink which you can choose to integrate in your Web Application.
 
 ##### Functionalities covered
 `disableAudio()`, `disableVideo()`, `enableAudio()`, `enableVideo()`, `getPeerInfo()`, `getUserData()`, `init()`, `getUserMedia()`, `joinRoom()`, `leaveRoom()`, `lockRoom()`, `muteStream()`, `on()`, `refreshConnection()`, `respondBlobRequest()`, `sendBlobData()`, `sendMessage()`, `sendP2PMessage()`, `sendStream()`, `setUserData()`, `shareScreen()`, `stopScreen()`, `stopStream()`, `unlockRoom()`
@@ -27,7 +27,7 @@ In this demo, it contains the overview of all functionalities of Skylink which y
 `candidateGenerationState`, `channelClose`, `channelError`, `channelMessage`, `channelOpen`, `dataChannelState`, `dataTransferState`, `handshakeProgress`, `incomingMessage`, `incomingStream`, `mediaAccessError`, `mediaAccessSuccess`, `peerConnectionState`, `peerJoined`, `peerLeft`, `peerRestart`, `peerUpdated`, `readyStateChange`, `roomLock`
 
 ### demo/audio-only-call
-In this demo, it contains a simple example how you can use Skylink to make an audio only call.
+In this demo, you can find an example of how you can use Skylink to make an audio only call.
 
 ##### Functionalities covered
 `init()`, `joinRoom()`
@@ -36,7 +36,7 @@ In this demo, it contains a simple example how you can use Skylink to make an au
 `incomingStream`, `peerLeft`
 
 ### demo/chat-room
-In this demo, it contains an example of how you can stimulate a chat room like environment with leaving and joining rooms.
+In this demo, you can find an example of how you can stimulate a chat room like environment with leaving and joining rooms.
 
 ##### Functionalities covered
 `init()`, `joinRoom()`, `sendP2PMessage()`, `on()`, `setUserData()`
@@ -45,7 +45,7 @@ In this demo, it contains an example of how you can stimulate a chat room like e
 `peerJoined`, `peerUpdated`, `peerLeft`, `incomingMessage`
 
 ### demo/connection-status
-In this demo, it shows a more advanced connection statuses and information - ICE connection, Peer Connection, DataChannel connections, signalling connection and Peer Recognition (handshake) progress.
+In this demo, you can find an example of a more advanced connection statuses and information - ICE connection, Peer Connection, DataChannel connections, signalling connection and Peer Recognition (handshake) progress.
 
 ##### Functionalities covered
 `init()`, `joinRoom()`
@@ -54,7 +54,7 @@ In this demo, it shows a more advanced connection statuses and information - ICE
 `peerJoined`, `serverPeerJoined`, `peerUpdated`, `peerLeft`, `serverPeerLeft`, `on()`, `readyStateChange`, `channelOpen`, `channelMessage`, `channelClose`, `channelError`, `peerConnectionState`, `candidateGenerateState`, `dataChannelState`, `handshakeProgress`
 
 ### demo/file-transfer
-In this demo, it contains an example of how you can do a simple file transfer to all peers or a targeted peer.
+In this demo, you can find an example of how you can do a simple file transfer to all peers or a targeted peer.
 
 ##### Functionalities covered
 `init()`, `joinRoom()`, `getPeerInfo()`, `respondBlobRequest()`, `on()`, `sendBlobData()`
@@ -63,7 +63,7 @@ In this demo, it contains an example of how you can do a simple file transfer to
 `peerJoined`, `peerLeft`, `dataTransferState`
 
 ### demo/gridster-integration
-In this demo, it's an integration of [gridster](http://gridster.net/), a drag-and-drop grid like UI with Skylink functionalities that enables users to send files, send text messages and make video calls.
+In this demo, you can find an example of an integration of [gridster](http://gridster.net/), a drag-and-drop grid like UI with Skylink functionalities that enables users to send files, send text messages and make video calls.
 
 ##### Functionalities covered
 `getPeerInfo()`, `getUserData()`, `init()`, `getUserMedia()`, `joinRoom()`,  `on()`, `respondBlobRequest()`, `sendBlobData()`, `sendMessage()`, `sendP2PMessage()`
@@ -72,7 +72,7 @@ In this demo, it's an integration of [gridster](http://gridster.net/), a drag-an
 `dataTransferState`, `incomingMessage`, `peerJoined`, `incomingStream`, `mediaAccessSuccess`, `mediaAccessError`, `peerLeft`, `channelError`, `mediaAccessError`
 
 ### demo/messaging
-In this demo, it displays all the ways to do messaging with Skylink - P2P (secure) or socket. Private (targeted) or public (broadcasted) messages.
+In this demo, you can find an example of all the ways to do messaging with Skylink - P2P (secure) or socket. Private (targeted) or public (broadcasted) messages.
 
 ##### Functionalities covered
 `sendP2PMessage()`, `sendMessage()`, `setUserData()`, `init()`, `joinRoom()`,  `on()`
@@ -81,7 +81,7 @@ In this demo, it displays all the ways to do messaging with Skylink - P2P (secur
 `incomingMessage`, `peerJoined`, `peerLeft`
 
 ### demo/request-call
-In this demo, it contains a use-call to request call to other peers and start a video call.
+In this demo, you can find an example of an use-call to request call to other peers and start a video call.
 
 ##### Functionalities covered
 `enableVideo()`, `joinRoom()`, `leaveRoom()`, `sendMessage()`, `setUserData()`, `init()`, `on()`
@@ -90,7 +90,7 @@ In this demo, it contains a use-call to request call to other peers and start a 
 `peerJoined`, `peerLeft`, `incomingStream`, `mediaAccessSuccess`, `incomingMessage`
 
 ### demo/stream-settings
-In this demo, it shows the overview of all types of stream settings you could use to join a room.
+In this demo, you can find an example of the overview of all types of stream settings you could use to join a room.
 
 ##### Functionalities covered
 `enableAudio()`, `disableAudio()`, `enableVideo()`, `disableVideo()`, `init()`, `on()`
@@ -100,7 +100,7 @@ In this demo, it shows the overview of all types of stream settings you could us
 
 
 ### demo/video-call
-In this demo, it contains an example of how you can create a simple video call with Skylink.
+In this demo, you can find an example of how you can create a simple video call with Skylink.
 
 ##### Functionalities covered
 `init()`, `joinRoom()`, `on()`, `getPeerInfo()`
