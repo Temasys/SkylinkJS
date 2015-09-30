@@ -1,5 +1,5 @@
 /**
- * The list of PeerConnection ICE connection triggered states.
+ * The list of Peer connection ICE connection triggered states.
  * Refer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState).
  * @attribute ICE_CONNECTION_STATE
  * @type JSON
@@ -95,7 +95,7 @@ Skylink.prototype._enableSTUN = true;
 /**
  * The flag that indicates if PeerConnections ICE gathering
  *   should use TURN server connection.
- * Tampering this flag may disable any successful PeerConnection
+ * Tampering this flag may disable any successful Peer connection
  *   that is behind any firewalls.
  * @attribute _enableTURN
  * @type Boolean
@@ -141,12 +141,12 @@ Skylink.prototype._usePublicSTUN = true;
 Skylink.prototype._TURNTransport = 'any';
 
 /**
- * Stores the list of PeerConnection ICE connection failures.
+ * Stores the list of Peer connection ICE connection failures.
  * After an third attempt of ICE connection failure, the
  *   trickling of ICE would be disabled.
  * @attribute _ICEConnectionFailures
- * @param {Number} (#peerId) The number of PeerConnection ICE connection
- *   attempt failures.
+ * @param {Number} (#peerId) The Peer ID associated with the
+ *   number of Peer connection ICE connection attempt failures.
  * @type JSON
  * @private
  * @required
@@ -183,6 +183,11 @@ Skylink.prototype._parseIceServers = function(config) {
       var urlParts = protocolParts[1].split('@');
       iceServer.username = urlParts[0];
       iceServer.url = protocolParts[0] + ':' + urlParts[1];
+
+      // add the ICE server port
+      if (protocolParts[2]) {
+        iceServer.url += ':' + protocolParts[2];
+      }
     }
 
     if (iceServer.url.indexOf('stun:') === 0 &&
@@ -319,13 +324,6 @@ Skylink.prototype._setIceServers = function(givenConfig) {
       }
     }
     newConfig.iceServers.push(iceServer);
-  }
-
-  // NOTE: manual eventually to remove
-  if (this._enableSTUN) {
-    newConfig.iceServers.splice(0, 0, {
-      url: 'stun:turn.temasys.com.sg'
-    });
   }
 
   log.log('Output iceServers configuration:', newConfig.iceServers);

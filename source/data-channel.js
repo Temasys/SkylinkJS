@@ -10,7 +10,7 @@
  * @param {String} CLOSING Connection is closing.
  * @param {String} CLOSED Connection is closed.
  * @param {String} ERROR Connection have met with an exception.
- * @readOnly
+ * @final
  * @component DataChannel
  * @for Skylink
  * @since 0.1.0
@@ -30,14 +30,14 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
  * @param {String} MESSAGING DataChannel that is used for messaging only.
  *   This is the sole channel for sending P2P messages in
  *   {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.
- *   This connection will always be kept alive until the PeerConnection has
+ *   This connection will always be kept alive until the Peer connection has
  *   ended.
  * @param {String} DATA DataChannel that is used temporarily for a data transfer.
  *   This is using caused by methods
  *   {{#crossLink "Skylink/sendBlobData:method"}}sendBlobData(){{/crossLink}}
  *   and {{#crossLink "Skylink/sendURLData:method"}}sendURLData(){{/crossLink}}.
  *   This connection will be closed once the transfer has completed or terminated.
- * @readOnly
+ * @final
  * @component DataChannel
  * @for Skylink
  * @since 0.6.1
@@ -48,13 +48,12 @@ Skylink.prototype.DATA_CHANNEL_TYPE = {
 };
 
 /**
- * The flag that indicates if PeerConnections should have any
+ * The flag that indicates if Peers connection should have any
  *   DataChannel connections.
  * @attribute _enableDataChannel
  * @type Boolean
  * @default true
  * @private
- * @required
  * @component DataChannel
  * @for Skylink
  * @since 0.3.0
@@ -64,25 +63,23 @@ Skylink.prototype._enableDataChannel = true;
 /**
  * Stores the list of DataChannel connections.
  * @attribute _dataChannels
- * @param {Array} (#peerId) The list of DataChannel connections with the
- *   associated PeerConnection.
- * @param {Object} (#peerId).main RTCDataChannel connection object
- *   that is used for messaging only associated with the PeerConnection.
+ * @param {Array} (#peerId) The Peer ID associated with the list of
+ *   DataChannel connections.
+ * @param {Object} (#peerId).main The DataChannel connection object
+ *   that is used for messaging only associated with the Peer connection.
  *   This is the sole channel for sending P2P messages in
  *   {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.
- *   This connection will always be kept alive until the PeerConnection has
- *   ended. The channel ID for this reserved key is <code>"main"</code>.
- * @param {Object} (#peerId).(#channelName) RTCDataChannel connection
+ *   This connection will always be kept alive until the Peer connection has
+ *   ended. The <code>channelName</code> for this reserved key is <code>"main"</code>.
+ * @param {Object} (#peerId).(#channelName) The DataChannel connection
  *   object that is used temporarily for a data transfer associated with the
- *   PeerConnection. This is using caused by methods
+ *   Peer connection. This is using caused by methods
  *   {{#crossLink "Skylink/sendBlobData:method"}}sendBlobData(){{/crossLink}}
  *   and {{#crossLink "Skylink/sendURLData:method"}}sendURLData(){{/crossLink}}.
  *   This connection will be closed once the transfer has completed or terminated.
- *   The channel ID is usually the data transfer ID.
- * @param {}
+ *   The <code>channelName</code> is usually the data transfer ID.
  * @type JSON
  * @private
- * @required
  * @component DataChannel
  * @for Skylink
  * @since 0.2.0
@@ -90,22 +87,22 @@ Skylink.prototype._enableDataChannel = true;
 Skylink.prototype._dataChannels = {};
 
 /**
- * Starts a DataChannel connection with a PeerConnection. If the
+ * Starts a DataChannel connection with a Peer connection. If the
  *   DataChannel is provided in the parameter, it simply appends
  *   event handlers to check the current state of the DataChannel.
  * @method _createDataChannel
- * @param {String} peerId The PeerConnection ID to start the
+ * @param {String} peerId The Peer ID to start the
  *   DataChannel with or associate the provided DataChannel object
  *   connection with.
  * @param {String} channelType The DataChannel functionality type.
  *   [Rel: Skylink.DATA_CHANNEL_TYPE]
  * @param {Object} [dataChannel] The RTCDataChannel object received
- *   in the PeerConnection <code>.ondatachannel</code> event.
+ *   in the Peer connection <code>.ondatachannel</code> event.
  * @param {String} customChannelName The custom RTCDataChannel label
  *   name to identify the different opened channels.
  * @trigger dataChannelState
  * @return {Object} The DataChannel connection object associated with
- *   the provided PeerConnection ID.
+ *   the provided Peer ID.
  * @private
  * @component DataChannel
  * @for Skylink
@@ -267,21 +264,22 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
 };
 
 /**
- * Sends data over the DataChannel associated with the PeerConnection.
+ * Sends data over the DataChannel connection associated
+ *    with the Peer connection.
  * The current supported data type is <code>string</code>. <code>Blob</code>,
  *   <code>ArrayBuffer</code> types support is not yet currently handled or
  *   implemented.
  * @method _sendDataChannelMessage
- * @param {String} peerId The PeerConnection ID to send the data to the
+ * @param {String} peerId The Peer ID to send the data to the
  *   associated DataChannel connection.
  * @param {JSON|String} data The data to send over. <code>string</code> is only
  *   used to send binary data string over. <code>JSON</code> is primarily used
  *   for the {{#crossLink "Skylink/DT_PROTOCOL_VERSION:attribute"}}DT Protocol{{/crossLink}}
  *   that Skylink follows for P2P messaging and transfers.
- * @param {String} [channelKey="main"] The DataChannel ID of the connection
+ * @param {String} [channelName="main"] The DataChannel channelName of the connection
  *   to send the data over to. The datachannel to send messages to. By default,
- *   if the DataChannel ID is not provided, the DataChannel connection associated
- *   with the ID <code>"main"</code> would be used.
+ *   if the DataChannel <code>channelName</code> is not provided,
+ *   the DataChannel connection associated with the channelName <code>"main"</code> would be used.
  * @trigger dataChannelState
  * @private
  * @component DataChannel
@@ -340,14 +338,14 @@ Skylink.prototype._sendDataChannelMessage = function(peerId, data, channelKey) {
 };
 
 /**
- * Stops DataChannel connection(s) associated with a PeerConnection
+ * Stops DataChannel connections associated with a Peer connection
  *   and remove any object references to the DataChannel connection(s).
  * @method _closeDataChannel
- * @param {String} peerId The PeerConnection ID associated with the DataChannel
+ * @param {String} peerId The Peer ID associated with the DataChannel
  *   connection(s) to close.
- * @param {String} [channelName] The targeted DataChannel ID to close the
- *   connection with. If channelName is not provided, all associated DataChannel
- *   connections with the PeerConnection would be closed.
+ * @param {String} [channelName] The targeted DataChannel <code>channelName</code>
+ *   to close the connection with. If <code>channelName</code> is not provided,
+ *   all associated DataChannel connections with the Peer connection would be closed.
  * @trigger dataChannelState
  * @private
  * @component DataChannel

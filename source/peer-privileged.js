@@ -2,8 +2,8 @@
  * The types of get peers states available
  * @attribute GET_PEERS_STATE
  * @type JSON
- * @param {String} ENQUIRED The privileged PeerConnection peer already enquired signaling for list of peers
- * @param {String} RECEIVED The privileged PeerConnection peer received list of peers from signaling
+ * @param {String} ENQUIRED The privileged Peer already enquired signaling for list of peers
+ * @param {String} RECEIVED The privileged Peer received list of peers from signaling
  * @readOnly
  * @component Peer
  * @for Skylink
@@ -18,8 +18,8 @@ Skylink.prototype.GET_PEERS_STATE = {
  * The types of peer introduction states available
  * @attribute INTRODUCE_STATE
  * @type JSON
- * @param {String} INTRODUCING The privileged PeerConnection peer sent the introduction signal
- * @param {String} ERROR The PeerConnection peer introduction has occurred an exception.
+ * @param {String} INTRODUCING The privileged Peer sent the introduction signal
+ * @param {String} ERROR The Peer introduction has occurred an exception.
  * @readOnly
  * @component Peer
  * @for Skylink
@@ -83,12 +83,12 @@ Skylink.prototype._peerList = null;
  * Retrieves the list of rooms and peers under the same realm based
  *   on the Application Key configured in {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
  *   from the platform signaling.
- * This will only work if self is a privileged PeerConnection peer.
+ * This will only work if self is a privileged Peer.
  * @method getPeers
  * @param {Boolean} [showAll=false] The flag that indicates if returned list should
  *   also include privileged peers in the list. By default, the value is <code>false</code>.
  * @param {Function} [callback] The callback fired after the receiving the current
- *   list of PeerConnection peers from platform signaling or have met with an exception.
+ *   list of Peers from platform signaling or have met with an exception.
  *   The callback signature is <code>function (error, success)</code>.
  * @param {Object} callback.error The error object received in the callback.
  *   This is the exception thrown that caused the failure for getting self user media.
@@ -170,14 +170,13 @@ Skylink.prototype.getPeers = function(showAll, callback){
 };
 
 /**
- * Introduces two PeerConnection peers to each other to
- *   start a PeerConnection connection with each other.
- * This will only work if self is a privileged PeerConnection peer.
+ * Introduces two Peers to each other to start a connection with each other.
+ * This will only work if self is a privileged Peer.
  * @method introducePeer
- * @param {String} sendingPeerId The PeerConnection ID of the peer
- *   that initiates the connection with the introduced PeerConnection peer.
- * @param {String} receivingPeerId The PeerConnection ID of the
- *   introduced peer who would be introduced to the initiator PeerConnection peer.
+ * @param {String} sendingPeerId The Peer ID of the peer
+ *   that initiates the connection with the introduced Peer.
+ * @param {String} receivingPeerId The Peer ID of the
+ *   introduced peer who would be introduced to the initiator Peer.
  * @trigger introduceStateChange
  * @component Peer
  * @for Skylink

@@ -1,5 +1,5 @@
 /**
- * The list of PeerConnection connection streaming video codecs available.
+ * The list of Peer connection streaming video codecs available.
  * The video codec will only be use if the browser supports the selected codec,
  *   or it will usually default to the browser default codec <code>VP8</code>.
  * @attribute VIDEO_CODEC
@@ -22,7 +22,7 @@ Skylink.prototype.VIDEO_CODEC = {
 };
 
 /**
- * The list of PeerConnection connection streaming audio codecs available.
+ * The list of Peer connection streaming audio codecs available.
  * The audio codec will only be use if the browser supports the selected codec,
  *   or it will usually default to the browser default codec <code>OPUS</code>.
  * @attribute AUDIO_CODEC
@@ -45,7 +45,7 @@ Skylink.prototype.AUDIO_CODEC = {
 };
 
 /**
- * Stores the preferred PeerConnection connection streaming audio codec.
+ * Stores the preferred Peer connection streaming audio codec.
  * @attribute _selectedAudioCodec
  * @type String
  * @default Skylink.AUDIO_CODEC.AUTO
@@ -57,7 +57,7 @@ Skylink.prototype.AUDIO_CODEC = {
 Skylink.prototype._selectedAudioCodec = 'auto';
 
 /**
- * Stores the preferred PeerConnection connection streaming video codec.
+ * Stores the preferred Peer connection streaming video codec.
  * @attribute _selectedVideoCodec
  * @type String
  * @default Skylink.VIDEO_CODEC.AUTO
@@ -235,7 +235,7 @@ Skylink.prototype._mediaScreenClone = null;
  *    audio streaming.
  * @param {Boolean|JSON} [video=false] The default
  *   streaming video settings. If <code>false</code>, it means that
- *   video streaming is disabled in the remote Stream of the PeerConnection.
+ *   video streaming is disabled in the remote Stream of the Peer.
  * @param {JSON} [video.resolution] The default
  *   streaming video resolution settings. Setting the resolution may
  *   not force set the resolution provided as it depends on the how the
@@ -613,12 +613,12 @@ Skylink.prototype._onUserMediaError = function(error, isScreenSharing) {
 };
 
 /**
- * Handles the event when remote MediaStream is received from PeerConnection connection.
+ * Handles the event when remote MediaStream is received from Peer connection.
  * @method _onRemoteStreamAdded
- * @param {String} targetMid The PeerConnection ID associated with the remote Stream object received.
+ * @param {String} targetMid The Peer ID associated with the remote Stream object received.
  * @param {Event}  event The event object received in the <code>RTCPeerConnection.
  *   onaddstream</code>.
- * @param {Boolean} [isScreenSharing=false] The flag that indicates if PeerConnection connection
+ * @param {Boolean} [isScreenSharing=false] The flag that indicates if Peer connection
  *    Stream object is a screensharing stream or not.
  * @trigger incomingStream
  * @private
@@ -1045,15 +1045,15 @@ Skylink.prototype._parseMediaStreamSettings = function(options) {
 };
 
 /**
- * Sends self selected Stream object to current PeerConnection connections.
+ * Sends self selected Stream object to current Peer connections.
  * If {{#crossLink "Skylink/_mediaScreen:attribute"}}_mediaScreen{{/crossLink}}
  *   is not empty, it will send the screensharing stream, else it will
  *   send the {{#crossLink "Skylink/_mediaStream:attribute"}}_mediaStream{{/crossLink}}
  *   if is not empty.
  * If self does not have any Stream object to send, it will a connection without
- *   any remote Stream sent to the PeerConnection connection.
+ *   any remote Stream sent to the Peer connection.
  * @method _addLocalMediaStreams
- * @param {String} peerId The PeerConnection ID of the connection to send
+ * @param {String} peerId The Peer ID of the connection to send
  *   Stream object to.
  * @private
  * @component Stream
@@ -1601,7 +1601,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
 
 /**
  * Replaces the currently attached Stream object in Skylink and refreshes all
- *   connection with PeerConnection connections to send the updated Stream object.
+ *   connection with Peer connections to send the updated Stream object.
  * The application may provide their own MediaStream object to send to
  *   all PeerConnections connection.
  * @method sendStream
@@ -1974,8 +1974,8 @@ Skylink.prototype.disableVideo = function() {
 };
 
 /**
- * Shares the current screen with PeerConnection connections and will refresh all
- *    PeerConnection connections to send the screensharing Stream object with
+ * Shares the current screen with Peer connections and will refresh all
+ *    Peer connections to send the screensharing Stream object with
  *    <code>HTTPS</code> protocol accessing application.
  * This will require our own Temasys Skylink extension to do screensharing.
  * For screensharing feature in IE / Safari with our Temasys Plugin, please
@@ -2112,7 +2112,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 /**
  * Stops self screensharing Stream object attached to Skylink.
  * If user media Stream object is available, Skylink will refresh all
- *    PeerConnection connections to send the user media Stream object.
+ *    Peer connections to send the user media Stream object.
  * @method stopScreen
  * @example
  *   SkylinkDemo.stopScreen();

@@ -1,5 +1,5 @@
 /**
- * The list of Skylink PeerConnection signaling triggered states.
+ * The list of Skylink Peer connection signaling triggered states.
  * Refer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCSignalingState).
  * @attribute PEER_CONNECTION_STATE
  * @type JSON
@@ -23,12 +23,10 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 };
 
 /**
- * The types of Skylink server PeerConnections that serves different functionalities.
+ * The types of Skylink server Peers that serves different functionalities.
  * @type JSON
  * @attribute SERVER_PEER_TYPE
- * @param {String} MCU The MCU server PeerConnection.
- *   This server PeerConnection is only available after MCU PeerConnection
- *   is connected.
+ * @param {String} MCU The server Peer is a MCU server.
  * @readOnly
  * @component Peer
  * @for Skylink
@@ -39,8 +37,8 @@ Skylink.prototype.SERVER_PEER_TYPE = {
 };
 
 /**
- * Stores the timestamp of the moment when the last PeerConnections
- *   restarts has happened. Used for the restart PeerConnection functionality.
+ * Stores the timestamp of the moment when the last Peers connection
+ *   restarts has happened. Used for the restart Peers connection functionality.
  * @attribute _lastRestart
  * @type Object
  * @required
@@ -53,7 +51,7 @@ Skylink.prototype._lastRestart = null;
 
 /**
  * Stores the counter of the number of consecutive
- *   PeerConnections restarts retries.
+ *   Peers connection restarts retries.
  * @attribute _retryCount
  * @type Number
  * @required
@@ -65,10 +63,9 @@ Skylink.prototype._lastRestart = null;
 Skylink.prototype._retryCount = 0;
 
 /**
- * Stores the list of PeerConnections.
+ * Stores the list of Peers connection.
  * @attribute _peerConnections
- * @param {Object} (#peerId) The RTCPeerConnection object associated to
- *   PeerConnection connection.
+ * @param {Object} (#peerId) The Peer ID associated to the RTCPeerConnection object.
  * @type JSON
  * @required
  * @private
@@ -79,14 +76,13 @@ Skylink.prototype._retryCount = 0;
 Skylink.prototype._peerConnections = {};
 
 /**
- * Stores the list of PeerConnection restart weights received
- *   that would be compared against to indicate if PeerConnection
+ * Stores the list of Peer connection restart weights received
+ *   that would be compared against to indicate if Peer connection
  *   should initiates a restart from the other connection end should.
  * The one that sends restart later is the one who initiates the restart.
  * @attribute _peerRestartPriorities
- * @param {Number} (#peerId) The PeerConnection connection restart
- *   handshake reconnection weights. The weight is generated with
- *   <code>Date.valueOf()</code>.
+ * @param {Number} (#peerId) The Peer ID associated with the connection restart
+ *   handshake reconnection weights. The weight is generated with <code>Date.valueOf()</code>.
  * @type JSON
  * @private
  * @required
@@ -96,21 +92,21 @@ Skylink.prototype._peerConnections = {};
 Skylink.prototype._peerRestartPriorities = {};
 
 /**
- * Connects to the PeerConnection associated to the ID provided.
+ * Connects to the Peer.
  * @method _addPeer
- * @param {String} targetMid The PeerConnection ID to connect to.
- * @param {JSON} peerBrowser The PeerConnection platform agent information.
- * @param {String} peerBrowser.agent The PeerConnection platform browser or agent name.
- * @param {Number} peerBrowser.version The PeerConnection platform browser or agent version.
- * @param {Number} peerBrowser.os The PeerConnection platform name.
- * @param {Boolean} [toOffer=false] The flag that indicates if the PeerConnection connection
+ * @param {String} targetMid The Peer ID to connect to.
+ * @param {JSON} peerBrowser The Peer platform agent information.
+ * @param {String} peerBrowser.agent The Peer platform browser or agent name.
+ * @param {Number} peerBrowser.version The Peer platform browser or agent version.
+ * @param {Number} peerBrowser.os The Peer platform name.
+ * @param {Boolean} [toOffer=false] The flag that indicates if the Peer connection
  *   should be start connection as an offerer or as an answerer.
- * @param {Boolean} [restartConn=false] The flag that indicates if the PeerConnection
+ * @param {Boolean} [restartConn=false] The flag that indicates if the Peer
  *   connection is part of restart functionality use-case.
- * @param {Boolean} [receiveOnly=false] The flag that indicates if the PeerConnection
+ * @param {Boolean} [receiveOnly=false] The flag that indicates if the Peer
  *   connection would send Stream or not (receive only).
- * @param {Boolean} [isSS=false] The flag that indicates if the PeerConnection
- *   connection Stream object sent is a screensharing stream or not.
+ * @param {Boolean} [isSS=false] The flag that indicates if the Peer
+ *   connection Stream sent is a screensharing stream or not.
  * @private
  * @component Peer
  * @for Skylink
@@ -161,19 +157,19 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
 };
 
 /**
- * Restarts a PeerConnection connection in a P2P environment.
- * This is usually done for replacing the previous Stream object and restarting
+ * Restarts a Peer connection in a P2P environment.
+ * This is usually done for replacing the previous Stream attached and restarting
  *   the connection with a new one, or when the ICE connection has issues
- *   streaming video/audio stream in the remote Stream object which requires
+ *   streaming video/audio stream in the remote Stream which requires
  *   a refresh in the ICE connection.
  * @method _restartPeerConnection
- * @param {String} peerId The PeerConnection ID to restart the connection with.
+ * @param {String} peerId The Peer ID to restart the connection with.
  * @param {Boolean} isSelfInitiatedRestart The flag that indicates if the restart action
  *    was caused by self.
  * @param {Boolean} isConnectionRestart The flag that indicates whether the restarting action
  *   is caused by ICE connection or handshake connection failure. Currently, this feature works the same as
  *   <code>explict</code> parameter.
- * @param {Function} callback The callback fired after the PeerConnection connection has
+ * @param {Function} callback The callback fired after the Peer connection has
  *   been succesfully initiated with a restart. Set this value to <code>null</code> if you
  *   do not want to pass in any callbacks.
  * @param {Boolean} [explict=false] The flag that indicates whether the restart functionality
@@ -297,11 +293,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 };
 
 /**
- * Disconnects the PeerConnection and remove object references
- *   associated to the ID provided
+ * Disconnects the Peer connection and remove object references associated.
  * @method _removePeer
- * @param {String} peerId The PeerConnection ID to disconnect
- *   the connection with.
+ * @param {String} peerId The Peer ID to disconnect the connection with.
  * @trigger peerLeft
  * @private
  * @component Peer
@@ -357,14 +351,14 @@ Skylink.prototype._removePeer = function(peerId) {
 };
 
 /**
- * Creates a PeerConnection connection. This does not start the handshake connection
- *   but creates the PeerConnection connection object ready for connection.
+ * Creates a Peer connection. This does not start the handshake connection
+ *   but creates the Peer connection object ready for connection.
  * @method _createPeerConnection
- * @param {String} targetMid The PeerConnection ID to create the PeerConnection object
+ * @param {String} targetMid The Peer ID to create the connection object
  *   with.
- * @param {Boolean} [isScreenSharing=false] The flag that indicates if the PeerConnection
- *   connection Stream object sent is a screensharing stream or not.
- * @return {Object} The PeerConnection connection object associated with
+ * @param {Boolean} [isScreenSharing=false] The flag that indicates if the Peer
+ *   connection Stream sent is a screensharing stream or not.
+ * @return {Object} The Peer connection object associated with
  *   the provided ID.
  * @private
  * @component Peer
@@ -519,29 +513,29 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 };
 
 /**
- * Refreshes a PeerConnection connection.
- * This feature can be used to refresh a PeerConnection when the
- *   remote Stream object received does not stream any audio/video stream.
+ * Refreshes a Peer connection.
+ * This feature can be used to refresh a Peer connection when the
+ *   remote Stream received does not stream any audio/video stream.
  * If there are more than 1 refresh during 5 seconds
  *   or refresh is less than 3 seconds since the last refresh
  *   initiated by the other peer, it will be aborted.
  * @method refreshConnection
- * @param {String|Array} [targetPeerId] The array of targeted PeerConnections to refresh
+ * @param {String|Array} [targetPeerId] The array of targeted Peers connection to refresh
  *   the connection with.
- * @param {Function} [callback] The callback fired after all targeted PeerConnections has
+ * @param {Function} [callback] The callback fired after all targeted Peers connection has
  *   been initiated with refresh or have met with an exception.
  *   The callback signature is <code>function (error, success)</code>.
  * @param {JSON} callback.error The error object received in the callback.
  *   If received as <code>null</code>, it means that there is no errors.
- * @param {Array} callback.error.listOfPeers The list of PeerConnection that the
+ * @param {Array} callback.error.listOfPeers The list of Peers that the
  *   refresh connection had been initiated with.
  * @param {JSON} callback.error.refreshErrors The list of errors occurred
- *   based on per PeerConnection basis.
- * @param {Object|String} callback.error.refreshErrors.(#peerId) The error that occurred when
- *   refreshing the connection with associated PeerConnection.
+ *   based on per Peer basis.
+ * @param {Object|String} callback.error.refreshErrors.(#peerId) The Peer ID that
+ *   is associated with the error that occurred when refreshing the connection.
  * @param {JSON} callback.success The success object received in the callback.
  *   If received as <code>null</code>, it means that there are errors.
- * @param {Array} callback.success.listOfPeers The list of PeerConnection that the
+ * @param {Array} callback.success.listOfPeers The list of Peers that the
  *   refresh connection had been initiated with.
  * @example
  *   SkylinkDemo.on("iceConnectionState", function (state, peerId)) {
@@ -676,24 +670,24 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
 };
 
 /**
- * Restarts all PeerConnection connection in a MCU connection environment.
+ * Restarts all Peers connection in a MCU connection environment.
  * This would require the current user to leave the room and restart all
- *   current existing PeerConnection connections.
+ *   current existing Peers connection.
  * @method _restartMCUConnection
- * @param {Function} [callback] The callback fired after all targeted PeerConnections has
+ * @param {Function} [callback] The callback fired after all targeted Peers connection has
  *   been initiated with refresh or have met with an exception.
  *   The callback signature is <code>function (error, success)</code>.
  * @param {JSON} callback.error The error object received in the callback.
  *   If received as <code>null</code>, it means that there is no errors.
- * @param {Array} callback.error.listOfPeers The list of PeerConnection that the
+ * @param {Array} callback.error.listOfPeers The list of Peers that the
  *   refresh connection had been initiated with.
  * @param {JSON} callback.error.refreshErrors The list of errors occurred
- *   based on per PeerConnection basis.
- * @param {Object|String} callback.error.refreshErrors.(#peerId) The error that occurred when
- *   refreshing the connection with associated PeerConnection.
+ *   based on per Peer basis.
+ * @param {Object|String} callback.error.refreshErrors.(#peerId) The Peer ID associated
+ *   with the error that occurred when refreshing the connection.
  * @param {JSON} callback.success The success object received in the callback.
  *   If received as <code>null</code>, it means that there are errors.
- * @param {Array} callback.success.listOfPeers The list of PeerConnection that the
+ * @param {Array} callback.success.listOfPeers The list of Peers that the
  *   refresh connection had been initiated with.
  * @private
  * @trigger peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined

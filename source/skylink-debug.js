@@ -267,7 +267,7 @@ window.SkylinkLogs = {
  * @method _logFn
  * @param {String} logLevel The console log message log level. [Rel: Skylink.LOG_LEVEL]
  * @param {Array|String} message The console log message contents.
- * @param {String} message.[0] The PeerConnection ID the message is associated with.
+ * @param {String} message.[0] The Peer ID the message is associated with.
  * @param {String} message.1 The interface the message is associated with.
  * @param {String|Array} message.2 Any additional message information that the message is
  *    associated with.
@@ -363,7 +363,7 @@ var log = {
    * @property log.debug
    * @type Function
    * @param {Array|String} message The console log message contents.
-   * @param {String} message.[0] The PeerConnection ID the message is associated with.
+   * @param {String} message.[0] The Peer ID the message is associated with.
    * @param {String} message.1 The interface the message is associated with.
    * @param {String|Array} message.2 Any additional message information that the message is
    *    associated with.
@@ -389,7 +389,7 @@ var log = {
    * @property log.log
    * @type Function
    * @param {Array|String} message The console log message contents.
-   * @param {String} message.[0] The PeerConnection ID the message is associated with.
+   * @param {String} message.[0] The Peer ID the message is associated with.
    * @param {String} message.1 The interface the message is associated with.
    * @param {String|Array} message.2 Any additional message information that the message is
    *    associated with.
@@ -415,7 +415,7 @@ var log = {
    * @property log.info
    * @type Function
    * @param {Array|String} message The console log message contents.
-   * @param {String} message.[0] The PeerConnection ID the message is associated with.
+   * @param {String} message.[0] The Peer ID the message is associated with.
    * @param {String} message.1 The interface the message is associated with.
    * @param {String|Array} message.2 Any additional message information that the message is
    *    associated with.
@@ -441,7 +441,7 @@ var log = {
    * @property log.warn
    * @type Function
    * @param {Array|String} message The console log message contents.
-   * @param {String} message.[0] The PeerConnection ID the message is associated with.
+   * @param {String} message.[0] The Peer ID the message is associated with.
    * @param {String} message.1 The interface the message is associated with.
    * @param {String|Array} message.2 Any additional message information that the message is
    *    associated with.
@@ -466,7 +466,7 @@ var log = {
    * @property log.error
    * @type Function
    * @param {Array|String} message The console log message contents.
-   * @param {String} message.[0] The PeerConnection ID the message is associated with.
+   * @param {String} message.[0] The Peer ID the message is associated with.
    * @param {String} message.1 The interface the message is associated with.
    * @param {String|Array} message.2 Any additional message information that the message is
    *    associated with.

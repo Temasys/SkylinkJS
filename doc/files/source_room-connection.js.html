@@ -263,7 +263,7 @@ Skylink.prototype._roomLocked = false;
  *   If received as &lt;code&gt;null&lt;/code&gt;, it means that there are errors.
  * @param {Array} callback.success.room The selected room that self has
  *   succesfully joined to.
- * @param {String} callback.success.peerId The self PeerConnection ID that
+ * @param {String} callback.success.peerId The self Peer ID that
  *   would be reflected remotely to peers in the room.
  * @param {JSON} callback.success.peerInfo The connection settings for self connection in the
  *   room. If both audio and video option is &lt;code&gt;false&lt;/code&gt;,
@@ -323,7 +323,7 @@ Skylink.prototype._roomLocked = false;
  *   it is set to &lt;code&gt;true&lt;/code&gt;.
  * @param {Boolean} [callback.success.peerInfo.mediaStatus.videoMuted=true] The flag that
  *   indicates if the self Stream object video streaming is muted. If
- *   there is no video streaming enabled for the PeerConnection, by default,
+ *   there is no video streaming enabled for the Peer connection, by default,
  *   it is set to &lt;code&gt;true&lt;/code&gt;.
  * @param {JSON} callback.success.peerInfo.agent The self platform agent information.
  * @param {String} callback.success.peerInfo.agent.name The self platform browser or agent name.
@@ -707,7 +707,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
  *   If received as &lt;code&gt;null&lt;/code&gt;, it means that there is no errors.
  * @param {JSON} callback.success The success object received in the callback.
  *   If received as &lt;code&gt;null&lt;/code&gt;, it means that there are errors.
- * @param {String} callback.success.peerId The assigned previous PeerConnection ID
+ * @param {String} callback.success.peerId The assigned previous Peer ID
  *   to self given when self was still connected to the room.
  * @param {String} callback.success.previousRoom The room self was disconnected
  *   from.

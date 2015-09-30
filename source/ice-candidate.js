@@ -5,10 +5,10 @@
  *   session description causes an ICE connection failures in a
  *   number of instances.
  * @attribute _peerCandidatesQueue
- * @param {Array} (#peerId) The list of buffered ICE candidates
- *   associated with the PeerConnection.
+ * @param {Array} (#peerId) The Peer ID associated with the
+ *   list of buffered ICE candidates.
  * @param {Object} (#peerId).(#index) The buffered RTCIceCandidate
- *   object associated with the PeerConnection.
+ *   object associated with the Peer.
  * @type JSON
  * @private
  * @required
@@ -23,10 +23,10 @@ Skylink.prototype._peerCandidatesQueue = {};
  *   to disable trickle ICE as attempting to establish an
  *   ICE connection failed after many trickle ICE connection
  *   attempts. To ensure the stability and increase the chances
- *   of a successful ICE connection, track the PeerConnection and store
+ *   of a successful ICE connection, track the Peer connection and store
  *   it as a flag in this list to disable trickling of ICE connections.
  * @attribute _peerIceTrickleDisabled
- * @param {Boolean} (#peerId) The PeerConnection trickle ICE disabled flag.
+ * @param {Boolean} (#peerId) The Peer trickle ICE disabled flag.
  *   If value is <code>true</code>, it means that trickling of ICE is
  *   disabled for subsequent connection attempt.
  * @type JSON
@@ -39,7 +39,7 @@ Skylink.prototype._peerCandidatesQueue = {};
 Skylink.prototype._peerIceTrickleDisabled = {};
 
 /**
- * The list of PeerConnection ICE candidate generation triggered states.
+ * The list of Peer connection ICE candidate generation triggered states.
  * Refer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState).
  * @attribute CANDIDATE_GENERATION_STATE
  * @type JSON
@@ -62,11 +62,11 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
 };
 
 /**
- * Handles the ICE candidate object received from associated PeerConnection
+ * Handles the ICE candidate object received from associated Peer connection
  *   to send the ICE candidate object or wait for all gathering to complete
  *   before sending the candidate to prevent trickle ICE.
  * @method _onIceCandidate
- * @param {String} targetMid The PeerConnection ID associated with the ICE
+ * @param {String} targetMid The Peer ID associated with the ICE
  *   candidate object received.
  * @param {Event} event The event object received in the <code>RTCPeerConnection.
  *   onicecandidate</code> to parse the ICE candidate and determine
@@ -115,12 +115,12 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
 };
 
 /**
- * Buffers an ICE candidate object associated with a PeerConnection
+ * Buffers an ICE candidate object associated with a Peer connection
  *   to prevent disruption to ICE connection when ICE candidate
  *   is received before <code>RTCPeerConnection.setRemoteDescription</code>
  *   is called.
  * @method _addIceCandidateToQueue
- * @param {String} targetMid The PeerConnection associated with the ICE
+ * @param {String} targetMid The Peer ID associated with the ICE
  *   candidate object.
  * @param {Object} candidate The constructed ICE candidate object.
  * @private
@@ -166,9 +166,9 @@ Skylink.prototype._onAddIceCandidateFailure = function (error) {
 
 /**
  * Adds the list of ICE candidates bufferred before <code>RTCPeerConnection.setRemoteDescription
- *   </code> is called associated with the PeerConnection.
+ *   </code> is called associated with the Peer connection.
  * @method _addIceCandidateFromQueue
- * @param {String} targetMid The PeerConnection ID to add the associated bufferred
+ * @param {String} targetMid The Peer ID to add the associated bufferred
  *   ICE candidates.
  * @private
  * @since 0.5.2

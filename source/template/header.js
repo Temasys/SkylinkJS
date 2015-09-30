@@ -96,15 +96,15 @@ if (!Object.keys) {
  * Please invoke {{#crossLink "Skylink/init:method"}}init(){{/crossLink}} method
  * first to initialise the Application Key before using any functionalities in Skylink.
  *
- * If you do not have an Application Key, you may
- * [register for a Skylink platform developer account](http://developer.temasys.com.sg).<br>
+ * If you do not have an Application Key, you may register for a Skylink platform developer account
+ *   [to create one](http://developer.temasys.com.sg/register).
  *
  * To get started you may [visit the getting started page](https://temasys.github.io/how-to/2014/08/08/
  * Getting_started_with_WebRTC_and_SkylinkJS/), or alternatively fork a ready made demo application
  * that uses Skylink Web SDK at [getaroom.io](http://getaroom.io/).
  *
- * For tips on writing better application with Skylink or troubleshooting issues, please
- *   [click here](http://support.temasys.com.sg/support/solutions/folders/5000267498).
+ * For tips on using skylink and troubleshooting you can visit
+ *   [our support portal](http://support.temasys.com.sg/support/solutions/folders/5000267498).
  * @class Skylink
  * @constructor
  * @example

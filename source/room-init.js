@@ -846,7 +846,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   DataChannel connection related services.
  * @param {Boolean} [options.enableTURNServer=true] <i>Debugging feature</i>.
  *   The flag that indicates if PeerConnections connection should use any TURN server connection.
- *   Tampering this flag may disable any successful PeerConnection
+ *   Tampering this flag may disable any successful Peer connection
  *   that is behind any firewalls, so set this value at your own risk.
  * @param {Boolean} [options.enableSTUNServer=true] <i>Debugging feature</i>.
  *   The flag that indicates if PeerConnections connection should use any STUN server connection.
@@ -915,11 +915,11 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   that is <code>http:</code> and enforcing the SSL connections for
  *   platform signaling and platform server connection.
  * @param {String} [options.audioCodec=Skylink.AUDIO_CODEC.AUTO] <i>Debugging Feature</i>.
- *   The preferred audio codec that PeerConnection
+ *   The preferred audio codec that Peer connection
  *   streaming audio codec should use in the connection when available. If not available, the default
  *   codec would be the browser generated session description selected codec. [Rel: Skylink.AUDIO_CODEC]
  * @param {String} [options.videoCodec=Skylink.VIDEO_CODEC.AUTO] <i>Debugging Feature</i>.
- *   The preferred video codec that PeerConnection
+ *   The preferred video codec that Peer connection
  *   streaming video codec should use in the connection when available. If not available, the default
  *   codec would be the browser generated session description selected codec. [Rel: Skylink.VIDEO_CODEC]
  * @param {Number} [options.socketTimeout=20000] The timeout that the socket connection should throw a
@@ -972,9 +972,9 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @param {Boolean} callback.success.forceSSL The flag to enforce an SSL platform signaling and platform server connection.
  *   If self domain accessing protocol is <code>https:</code>, SSL connections
  *   would be automatically used.
- * @param {String} callback.success.audioCodec The preferred audio codec that PeerConnection
+ * @param {String} callback.success.audioCodec The preferred audio codec that Peer connection
  *   streaming audio codec should use in the connection when available. [Rel: Skylink.AUDIO_CODEC]
- * @param {String} callback.success.videoCodec The preferred video codec that PeerConnection
+ * @param {String} callback.success.videoCodec The preferred video codec that Peer connection
  *   streaming video codec should use in the connection when available. [Rel: Skylink.VIDEO_CODEC]
  * @param {Number} callback.success.socketTimeout The timeout that the socket connection should throw a
  *   timeout exception when socket fails to receive a response from connection. Depending on

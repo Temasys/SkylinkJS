@@ -1,39 +1,38 @@
 /**
- * Stores the PeerConnection peer information.
+ * Stores the list of all Peers information.
  * @attribute _peerInformations
- * @param {JSON} (#peerId) The peer information associated
- *   with the Peer Connection.
+ * @param {JSON} (#peerId) The Peer ID associated with the information.
  * @param {String|JSON} (#peerId).userData The custom user data
  *   information set by developer. This custom user data can also
  *   be set in <a href="#method_setUserData">setUserData()</a>.
- * @param {JSON} (#peerId).settings The PeerConnection Stream
+ * @param {JSON} (#peerId).settings The Peer Stream
  *   streaming settings information. If both audio and video
  *   option is <code>false</code>, there should be no
- *   receiving remote Stream object from this associated PeerConnection.
+ *   receiving remote Stream object from this associated Peer.
  * @param {Boolean|JSON} [(#peerId).settings.audio=false] The
- *   PeerConnection Stream streaming audio settings. If
+ *   Peer Stream streaming audio settings. If
  *   <code>false</code>, it means that audio streaming is disabled in
- *   the remote Stream of the PeerConnection.
+ *   the remote Stream of the Peer.
  * @param {Boolean} [(#peerId).settings.audio.stereo] The flag that indicates if
- *   stereo should be enabled in the PeerConnection connection Stream
+ *   stereo should be enabled in the Peer connection Stream
  *    audio streaming.
- * @param {Boolean|JSON} [(#peerId).settings.video=false] The PeerConnection
+ * @param {Boolean|JSON} [(#peerId).settings.video=false] The Peer
  *   Stream streaming video settings. If <code>false</code>, it means that
- *   video streaming is disabled in the remote Stream of the PeerConnection.
- * @param {JSON} [(#peerId).settings.video.resolution] The PeerConnection
+ *   video streaming is disabled in the remote Stream of the Peer.
+ * @param {JSON} [(#peerId).settings.video.resolution] The Peer
  *   Stream streaming video resolution settings. Setting the resolution may
  *   not force set the resolution provided as it depends on the how the
  *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Number} [(#peerId).settings.video.resolution.width] The PeerConnection
+ * @param {Number} [(#peerId).settings.video.resolution.width] The Peer
  *   Stream streaming video resolution width.
- * @param {Number} [(#peerId).settings.video.resolution.height] The PeerConnection
+ * @param {Number} [(#peerId).settings.video.resolution.height] The Peer
  *   Stream streaming video resolution height.
- * @param {Number} [(#peerId).settings.video.frameRate] The PeerConnection
+ * @param {Number} [(#peerId).settings.video.frameRate] The Peer
  *   Stream streaming video maximum frameRate.
  * @param {Boolean} [(#peerId).settings.video.screenshare=false] The flag
- *   that indicates if the PeerConnection connection Stream object sent
+ *   that indicates if the Peer connection Stream object sent
  *   is a screensharing stream or not.
- * @param {String} [(#peerId).settings.bandwidth] The PeerConnection
+ * @param {String} [(#peerId).settings.bandwidth] The Peer
  *   streaming bandwidth settings. Setting the bandwidth flags may not
  *   force set the bandwidth for each connection stream channels as it depends
  *   on how the browser handles the bandwidth bitrate. Values are configured
@@ -47,20 +46,20 @@
  * @param {String} [(#peerId).settings.bandwidth.data] The configured
  *   datachannel channel for the DataChannel connection bandwidth
  *   that datachannel connection per packet should be able use in <var>kb/s</var>.
- * @param {JSON} (#peerId).mediaStatus The PeerConnection Stream mute
+ * @param {JSON} (#peerId).mediaStatus The Peer Stream mute
  *   settings for both audio and video streamings.
  * @param {Boolean} [(#peerId).mediaStatus.audioMuted=true] The flag that
  *   indicates if the remote Stream object audio streaming is muted. If
- *   there is no audio streaming enabled for the PeerConnection, by default,
+ *   there is no audio streaming enabled for the Peer, by default,
  *   it is set to <code>true</code>.
  * @param {Boolean} [(#peerId).mediaStatus.videoMuted=true] The flag that
  *   indicates if the remote Stream object video streaming is muted. If
- *   there is no video streaming enabled for the PeerConnection, by default,
+ *   there is no video streaming enabled for the Peer, by default,
  *   it is set to <code>true</code>.
- * @param {JSON} (#peerId).agent The PeerConnection platform agent information.
- * @param {String} (#peerId).agent.name The PeerConnection platform browser or agent name.
- * @param {Number} (#peerId).agent.version The PeerConnection platform browser or agent version.
- * @param {Number} (#peerId).agent.os The PeerConnection platform name.
+ * @param {JSON} (#peerId).agent The Peer platform agent information.
+ * @param {String} (#peerId).agent.name The Peer platform browser or agent name.
+ * @param {Number} (#peerId).agent.version The Peer platform browser or agent version.
+ * @param {Number} (#peerId).agent.os The Peer platform name.
  * @type JSON
  * @private
  * @required
@@ -79,7 +78,7 @@ Skylink.prototype._peerInformations = {};
  * @param {String} uid The self session ID.
  * @param {String} sid The self session socket connection ID. This
  *   is used by the signalling socket connection as ID to target
- *   self and the peers PeerConnection ID.
+ *   self and the peers Peer ID.
  * @param {String} timeStamp The self session timestamp.
  * @param {String} token The self session access token.
  * @required
@@ -198,14 +197,14 @@ Skylink.prototype._parseUserData = function(userData) {
 };
 
 /**
- * Gets the PeerConnection peer information associated to the ID provided.
- * If an invalid PeerConnection ID is provided, or no PeerConnection ID is provided,
+ * Gets the Peer information.
+ * If an invalid Peer ID is provided, or no Peer ID is provided,
  *   the method will return the self peer information.
  * @method getPeerInfo
- * @param {String} [peerId] The PeerConnection peer information to retrieve the
- *   data from. If the DataChannel ID is not provided, it will return
- *   the self peer information.
- * @return {JSON} The PeerConnection peer information. The parameters relates to the
+ * @param {String} [peerId] The Peer information to retrieve the
+ *   data from. If the Peer ID is not provided, it will return
+ *   the self Peer information.
+ * @return {JSON} The Peer information. The parameters relates to the
  *   <code>peerInfo</code> payload given in the
  *   {{#crossLink "Skylink/peerJoined:event"}}peerJoined{{/crossLink}} event.
  * @example
