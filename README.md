@@ -4,31 +4,33 @@
 
 We've gone to great length to make this library work in as many browsers as possible. SkylinkJS is build on top of [AdapterJS](http://github.com/Temasys/AdapterJS) and works with our [Temasys WebRTC Plugin](http://skylink.io/plugin/) even in Internet Explorer and Safari on Mac and PC.
 
-
+To install SkylinkJS with [npm](https://www.npmjs.com/):
 ```
 npm install skylinkjs
 ```
-or
+To install SkylinkJS with [bower](http://bower.io/):
 ```
 bower install skylinkjs
 ```
 
 You'll need a Temasys Developer Account and an App key to use this. [Register here to get your App key](https://developer.temasys.com.sg).
 
+
 - [Getting started](http://temasys.github.io/how-to/2014/08/08/Getting_started_with_WebRTC_and_SkylinkJS/)
 - [API Docs](http://cdn.temasys.com.sg/skylink/skylinkjs/latest/doc/classes/Skylink.html)
 - [Versions](http://github.com/Temasys/SkylinkJS/releases)
 - [Developer Console  - Get your App key](https://developer.temasys.com.sg)
-
+- [View Code Examples](https://github.com/Temasys/SkylinkJS/tree/master/demo)
+- [Run tests](https://github.com/Temasys/SkylinkJS/tree/master/tests)
 
 
 ##### Need help or want something changed?
-Please read how you can find help, contribute and support us advancing SkylinkJS on [our Github Page](https://developer.temasys.com.sg/support).
+You can raise tickets on [http://support.temasys.com.sg) our support portal or on [our Github Page](https://developer.temasys.com.sg/support).
 
 ##### Current versions and stability
 Always use the latest versions of the SkylinkJS library as WebRTC is still evolving and we adapt to changes very frequently.
 
-[Latest version: 0.6.0](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.0).
+[Latest version: 0.6.1](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.1).
 
 ##### Upgrading from 0.5.7 and below:
 It's now recommended to use the `init()` callback instead of using `readyStateChange` event state to go completed as this may result in an infinite loop.
@@ -90,98 +92,12 @@ After making edits, here are some commands to run and build Skylink:
 __What's included in the repository?__
 
 - `demo` : Contains the sample demos.
-
 - `doc` : Contains the generated YUI documentation for the SkylinkJS.
-
 - `doc-style` : Contains the template for our YUI documentation.
-
 - `publish` : Contains the production version of the library and a minified copy of it
-
 - `source` : Contains the skylink.js library development files
-
 - `tests` : Contains the list of test scripts.
 
-
-## Running tests
-
-Run `sh test.sh <type> <param>` to test SkylinkJS, where `<type>` is either `bot` for running a bot required for test and `test` for running the test.
-
-Our tests are built on [`tape` testing framework](https://ci.testling.com/guide/tape), and you may modify the `test.sh` file to run on different browsers.
-
-Here's the list of available tests:
-
-- `event`: Tests the events triggering, subscription and unsubscription.
-```
-sh test.sh test event
-```
-
-- `socket` : Tests the socket connection reliability and fallback.
-```
-sh test.sh test socket
-```
-
-- `api` : Tests api server parsing and connection.
-```
-sh test.sh test api
-```
-
-- `helper` : Tests helper functions.
-```
-sh test.sh test helper
-```
-
-- `peer` : Tests the peer connection signaling state and ice connection state.
-```
-# run first
-sh test.sh bot peer
-# then in another terminal
-sh test.sh test peer
-```
-
-- `message` : Tests the messaging system like sendMessage or sendP2PMessage.
-```
-#run first
-sh test.sh bot message
-#then in another terminal
-sh test.sh test message
-```
-
-- `transfer` : Tests the data transfer with blob data like sendBlobData.
-```
-#run first
-sh test.sh bot transfer
-#then in another terminal
-sh test.sh test transfer
-```
-
-- `stream` : Tests the stream sending and parsing like getUserMedia, sendStream and joinRoom mediaConstraints.
-```
-#run first
-sh test.sh bot stream
-#then in another terminal
-sh test.sh test stream
-```
-
-- `debug` : Tests the debug mode. Currently, it is able to test if the SkylinkLogs are enabled or not.
-```
-sh test.sh test debug
-```
-
-- `async` : Tests the async callbacks.
-```
-#run first
-sh test.sh bot async
-#then in another terminal
-sh test.sh test async
-```
-
-- `sdp` : Tests the SDP modifications.
-```
-#run first
-sh test.sh bot sdp
-#then in another terminal
-sh test.sh test sdp
-```
 
 ## License
 [APACHE 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)

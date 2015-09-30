@@ -7,9 +7,14 @@ Demo.Peers = 0;
 Demo.Files = [];
 Demo.Streams = [];
 Demo.Methods = {};
-Demo.Skylink = SkylinkDemo;
+Demo.Skylink = new Skylink();
 
 var _peerId = null;
+
+var selectedPeers = [];
+
+//Demo.Skylink.setLogLevel(4);
+
 
 Demo.Methods.displayFileItemHTML = function (content) {
   return '<p>' + content.name + '<small style="float:right;color:#aaa;">' + content.size + ' B</small></p>' +
@@ -53,6 +58,7 @@ Demo.Methods.displayChatItemHTML = function (peerId, timestamp, content, isPriva
 Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
   var timestamp = new Date();
   var isFile = typeof content === 'object';
+
   //console.info(isFile);
   var element = (isFile) ? '#file_log' : '#chat_log';
   var element_body = (isFile) ? '#file_body' : '#chat_body';
@@ -70,13 +76,30 @@ Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
   Skylink Events
 *********************************************************/
 //---------------------------------------------------
+Demo.Skylink.on('incomingData', function (data, transferId, peerId, transferInfo, isSelf) {
+  if (transferInfo.dataType !== 'blob') {
+    console.info('incomingData', data, transferId, peerId, transferInfo, isSelf);
+    //displayChatItemHTML = function (peerId, timestamp, content, isPrivate)
+    Demo.Methods.displayChatMessage(peerId, '<img src="' + data + '">', false);
+  }
+});
+Demo.Skylink.on('incomingDataRequest', function (transferId, peerId, transferInfo, isSelf) {
+  if (!isSelf && transferInfo.dataType !== 'blob') {
+    Demo.Skylink.respondBlobRequest(peerId, transferId, true);
+  }
+})
 Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transferInfo, error){
   transferInfo = transferInfo || {};
+
+  if (transferInfo.dataType !== 'blob') {
+    return;
+  }
+
   switch (state) {
   case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_REQUEST :
     var result = confirm('Accept file "' + transferInfo.name +
       '" from ' + peerId + '?\n\n[size: ' + transferInfo.size + ']');
-    Demo.Skylink.respondBlobRequest(peerId, result);
+    Demo.Skylink.respondBlobRequest(peerId, transferId, result);
     break;
   case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_STARTED :
     var displayName = Demo.Skylink.getUserData();
@@ -140,7 +163,8 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
 //---------------------------------------------------
 Demo.Skylink.on('incomingMessage', function (message, peerId, peerInfo, isSelf) {
   Demo.Methods.displayChatMessage((isSelf) ? 'You' : peerInfo.userData,
-    ((message.isDataChannel) ? 'P2P: ' : '') + message.content, message.isPrivate);
+    ((message.isDataChannel) ? 'P2P' : 'Socket') + ' -> ' + message.targetPeerId + ': ' +
+    message.content, message.isPrivate);
 });
 //---------------------------------------------------
 Demo.Skylink.on('peerRestart', function (peerId, peerInfo, isSelf){
@@ -172,7 +196,8 @@ Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf){
     _peerId = peerId;
     Demo.Methods.displayChatMessage('System', 'Peer ' + peerId + ' joined the room');
     var newListEntry = '<tr id="user' + peerId + '" class="badQuality">' +
-      '<td class="name">' + peerInfo.userData + '</td><td>';
+      '<td><span class="name">' + peerInfo.userData + '</span><br>' +
+      '<input class="select-user" target="' + peerId + '" type="checkbox" onclick="selectTargetPeer(this);"></td><td>';
     var titleList = [
       'Joined Room', 'Handshake: Welcome', 'Handshake: Offer',
       'Handshake: Answer', 'Candidate Generation state', 'ICE Connection state',
@@ -211,6 +236,7 @@ Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo){
     peerVideo.className = 'col-md-6';
     if (window.webrtcDetectedBrowser !== 'IE') {
       peerVideo.autoplay = 'autoplay';
+      peerVideo.muted = 'muted';
     }
 
     // mutes user's video
@@ -237,29 +263,7 @@ Demo.Skylink.on('mediaAccessError', function (error){
 });
 //---------------------------------------------------
 Demo.Skylink.on('readyStateChange', function (state, error){
-  if(state === Demo.Skylink.READY_STATE_CHANGE.COMPLETED) {
-    var displayName = 'name_' + 'user_' + Math.floor((Math.random() * 1000) + 1);
-    Demo.Skylink.joinRoom({
-      userData: displayName,
-      audio: { stereo: true },
-      video: {
-        resolution: {
-          width: 1280,
-          height: 720
-        }
-      }
-    });
-    /*Demo.Skylink.joinRoom({
-      audio: true
-    }, function () {
-      console.log('Muting audio');
-      Demo.Skylink.muteStream({
-        audioMuted: true
-      });
-    });*/
-    $('#display_user_info').val(displayName);
-    return;
-  } else if (state === Demo.Skylink.READY_STATE_CHANGE.ERROR) {
+  if (state === Demo.Skylink.READY_STATE_CHANGE.ERROR) {
     for (var errorCode in Demo.Skylink.READY_STATE_CHANGE_ERROR) {
       if (Demo.Skylink.READY_STATE_CHANGE_ERROR[errorCode] ===
         error.errorCode) {
@@ -272,12 +276,18 @@ Demo.Skylink.on('readyStateChange', function (state, error){
   $('#channel_status').show();
 });
 //---------------------------------------------------
-Demo.Skylink.on('peerLeft', function (peerId){
+Demo.Skylink.on('peerLeft', function (peerId, peerInfo, isSelf){
+  //console.info('peerLeft', peerId, peerInfo, isSelf);
   Demo.Methods.displayChatMessage('System', 'Peer ' + peerId + ' has left the room');
   Demo.Peers -= 1;
   $('#video' + peerId).remove();
   $('#user' + peerId).remove();
   delete Demo.Streams[peerId];
+  var index = selectedPeers.indexOf(peerId);
+
+  if (index > -1) {
+    selectedPeers.splice(index, 1);
+  }
 });
 //---------------------------------------------------
 Demo.Skylink.on('handshakeProgress', function (state, peerId) {
@@ -426,20 +436,71 @@ Demo.Skylink.on('channelError', function (error) {
 Demo.Skylink.on('mediaAccessError', function (error) {
   alert((error.message || error));
 });
+
+Demo.Skylink.on('serverPeerJoined', function (serverPeerId, serverPeerType) {
+  console.info('serverPeerJoined', serverPeerId, serverPeerType);
+});
+
+Demo.Skylink.on('serverPeerLeft', function (serverPeerId, serverPeerType) {
+  console.info('serverPeerLeft', serverPeerId, serverPeerType);
+});
+
+Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf) {
+  console.info('peerJoined', peerId, peerInfo, isSelf);
+});
+
+Demo.Skylink.on('peerLeft', function (peerId, peerInfo, isSelf) {
+  console.info('peerLeft', peerId, peerInfo, isSelf);
+});
+
+Demo.Skylink.on('peerRestart', function (peerId, peerInfo, isSelf) {
+  console.info('peerRestart', peerId, peerInfo, isSelf);
+});
+
+Demo.Skylink.on('serverPeerRestart', function (serverPeerId, serverPeerType) {
+  console.info('serverPeerRestart', serverPeerId, serverPeerType);
+});
+
+//------------- join room ---------------------------
+var displayName = 'name_' + 'user_' + Math.floor((Math.random() * 1000) + 1);
+
+Demo.Skylink.init(config, function (error, success) {
+  if (success) {
+    Demo.Skylink.joinRoom({
+      userData: displayName,
+      audio: { stereo: true },
+      video: {
+        resolution: {
+          width: 1280,
+          height: 720
+        }
+      }
+    });
+  }
+});
+
 /********************************************************
   DOM Events
 *********************************************************/
 $(document).ready(function () {
   //---------------------------------------------------
-  $('#display_app_id').html(Config.apiKey);
+  $('#display_app_id').html(config.apiKey);
   //---------------------------------------------------
   $('#chat_input').keyup(function(e) {
     e.preventDefault();
     if (e.keyCode === 13) {
       if ($('#send_data_channel').prop('checked')) {
-        Demo.Skylink.sendP2PMessage($('#chat_input').val());
+        if (selectedPeers.length > 0) {
+          Demo.Skylink.sendP2PMessage($('#chat_input').val(), selectedPeers);
+        } else {
+          Demo.Skylink.sendP2PMessage($('#chat_input').val());
+        }
       } else {
-        Demo.Skylink.sendMessage($('#chat_input').val());
+        if (selectedPeers.length > 0) {
+          Demo.Skylink.sendMessage($('#chat_input').val(), selectedPeers);
+        } else {
+          Demo.Skylink.sendMessage($('#chat_input').val());
+        }
       }
       $('#chat_input').val('');
     }
@@ -447,6 +508,10 @@ $(document).ready(function () {
   //---------------------------------------------------
   $('#file_input').change(function() {
     Demo.Files = $(this)[0].files;
+  });
+  //---------------------------------------------------
+  $('#dataURL_input').change(function() {
+    Demo.DataURL = $(this)[0].files;
   });
   //---------------------------------------------------
   $('#send_file_btn').click(function() {
@@ -462,10 +527,11 @@ $(document).ready(function () {
     for(var i=0; i < Demo.Files.length; i++) {
       var file = Demo.Files[i];
       if(file.size <= Demo.FILE_SIZE_LIMIT) {
-        Demo.Skylink.sendBlobData(file, {
-          name : file.name,
-          size : file.size
-        });
+        if (selectedPeers.length > 0) {
+          Demo.Skylink.sendBlobData(file, selectedPeers);
+        } else {
+          Demo.Skylink.sendBlobData(file);
+        }
         $('#file_input').val('');
       } else {
         alert('File "' + file.name + '"" exceeded the limit of 200MB.\n' +
@@ -473,6 +539,41 @@ $(document).ready(function () {
       }
     }
     $('#send_file_btn')[0].disabled = false;
+  });
+  //---------------------------------------------------
+  $('#send_dataURL_btn').click(function() {
+    if(!Demo.DataURL) {
+      alert('No files selected');
+      return;
+    } else {
+      if(Demo.Files.length > 0) {
+        $(Demo.Files)[0].disabled = true;
+        console.log('Button temporarily disabled to prevent crash');
+      }
+    }
+
+    for(var i=0; i < Demo.DataURL.length; i++) {
+      var file = Demo.DataURL[i];
+
+      var fr = new FileReader();
+
+      fr.onload = function () {
+        if(file.size <=  1024 * 1024 * 2) {
+          if (selectedPeers.length > 0) {
+            Demo.Skylink.sendURLData(fr.result, selectedPeers);
+          } else {
+            Demo.Skylink.sendURLData(fr.result);
+          }
+          $('#dataURL_input').val('');
+        } else {
+          alert('File "' + file.name + '"" exceeded the limit of 2MB.\n' +
+            'We only currently support files up to 2MB for this demo.');
+        }
+      };
+
+      fr.readAsDataURL(file);
+    }
+    $('#send_dataURL_btn')[0].disabled = false;
   });
   //---------------------------------------------------
   $('#update_user_info_btn').click(function () {
@@ -526,4 +627,37 @@ $(document).ready(function () {
   $('#stop_screen_btn').click(function () {
     Demo.Skylink.stopScreen();
   });
+
+  window.selectTargetPeer = function(dom) {
+    var peerId = $(dom).attr('target');
+    var panelDom = $('#selected_users_panel');
+
+    if (!dom.checked) {
+      $('#' + peerId + '-selected-user').remove();
+
+      var index = selectedPeers.indexOf(peerId);
+
+      if (index > -1) {
+        selectedPeers.splice(index, 1);
+      }
+
+      if ($(panelDom).find('.selected-users em').length === 0) {
+        $(panelDom).find('.all').show();
+      }
+    } else {
+      $(panelDom).find('.selected-users').append('<em id="' +
+        peerId + '-selected-user">Peer ' + peerId + '</em>');
+      $(panelDom).find('.all').show();
+      selectedPeers.push(peerId);
+    }
+  }
+
+  $('#clear-selected-users').click(function () {
+    $('#selected_users_panel .selected-users').html('');
+    $('.select-user').each(function () {
+      $(this)[0].checked = false
+    });
+    $('#selected_users_panel .all').show();
+    selectedPeers = [];
+  })
 });

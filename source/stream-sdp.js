@@ -1,9 +1,10 @@
 /**
- * Enables the stereo feature by modifying the SDP. This requires the OPUS
- * to be enabled in the connection first.
+ * Modifies the array of session description received to enable
+ *   stereo in the audio streaming connection.
  * @method _addSDPStereo
- * @param {Array} sdpLines Sdp received.
- * @return {Array} Updated version with Stereo feature
+ * @param {Array} sdpLines The array of lines in the session description.
+ * @return {Array} The updated array of lines in the session description
+ *    with the stereo feature.
  * @private
  * @component SDP
  * @for Skylink
@@ -59,11 +60,12 @@ Skylink.prototype._addSDPStereo = function(sdpLines) {
 
 
 /**
- * Sets the video resolution by modifying the SDP.
- * - This is broken.
+ * <b>BROKEN (not in use)</b>. Modifies the array of session description received to set
+ *   a custom video resolution in the video streaming connection.
  * @method _setSDPVideoResolution
- * @param {Array} sdpLines Sdp received.
- * @return {Array} Updated version with custom Resolution settings
+ * @param {Array} sdpLines The array of lines in the session description.
+ * @return {Array} The updated array of lines in the session description
+ *    with the custom video resolution.
  * @private
  * @component SDP
  * @for Skylink
@@ -147,12 +149,15 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
 };
 
 /**
- * Set the audio, video and data streamming bandwidth by modifying the SDP.
- * It sets the bandwidth when the connection is good. In low bandwidth environment,
- * the bandwidth is managed by the browser.
+ * Modifies the array of session description received to set
+ *   a custom bandwidth bitrate (in kbps) in the streaming connection.
+ * Setting the bandwidth flags may not
+ *   force set the bandwidth for each connection stream channels as it depends
+ *   on how the browser handles the bandwidth bitrate.
  * @method _setSDPBitrate
- * @param {Array} sdpLines The session description received.
- * @return {Array} Updated session description.
+ * @param {Array} sdpLines The array of lines in the session description.
+ * @return {Array} The updated array of lines in the session description
+ *    with custom bandwidth bitrate (in kbps) settings.
  * @private
  * @component SDP
  * @for Skylink
@@ -211,10 +216,12 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
 };
 
 /**
- * Sets the audio codec for the connection,
+ * Modifies the array of session description received to configure
+ *   the selected video codec to use in the video streaming connection.
  * @method _setSDPVideoCodec
- * @param {Array} sdpLines The session description received.
- * @return {Array} Updated session description.
+ * @param {Array} sdpLines The array of lines in the session description.
+ * @return {Array} The updated array of lines in the session description
+ *    with the selected video codec.
  * @private
  * @component SDP
  * @for Skylink
@@ -267,10 +274,12 @@ Skylink.prototype._setSDPVideoCodec = function(sdpLines) {
 };
 
 /**
- * Sets the audio codec for the connection,
+ * Modifies the array of session description received to configure
+ *   the selected audio codec to use in the audio streaming connection.
  * @method _setSDPAudioCodec
- * @param {Array} sdpLines The session description received.
- * @return {Array} Updated session description.
+ * @param {Array} sdpLines The array of lines in the session description.
+ * @return {Array} The updated array of lines in the session description
+ *    with the selected audio codec.
  * @private
  * @component SDP
  * @for Skylink
@@ -322,11 +331,12 @@ Skylink.prototype._setSDPAudioCodec = function(sdpLines) {
 };
 
 /**
- * Removes Firefox 32 H262 preference in the SDP to prevent breaking connection in
- * unsupported browsers.
+ * Modifies the array of session description received to remove the
+ *   Firefox 32 H262 preference to prevent breaking connection with nsupported browsers.
  * @method _removeSDPFirefoxH264Pref
- * @param {Array} sdpLines The session description received.
- * @return {Array} Updated session description.
+ * @param {Array} sdpLines The array of lines in the session description.
+ * @return {Array} The updated array of lines in the session description
+ *    removed of the Firefox 32 H262 preference.
  * @private
  * @component SDP
  * @for Skylink

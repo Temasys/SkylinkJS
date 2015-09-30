@@ -168,7 +168,7 @@ function setSelectedTab (currentSelectedTab, privateMode) {
 function scrollToHeader (itemToShow) {
   // animate to header bar
   $('html, body').animate({
-    scrollTop: $('#doc-type-select').offset().top - $('#hd').height() - 15
+    scrollTop: 0 // $('#doc-type-select').offset().top - $('#hd').height() - 15
   }, 350);
   // select the first element
   $('.list-group-item' + itemToShow).removeClass('active');
