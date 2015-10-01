@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Wed Sep 30 2015 19:33:12 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Fri Oct 02 2015 00:36:35 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6369,19 +6369,19 @@ Skylink.prototype._appKeyOwner = null;
  * @param {String} duration The duration of the room meeting (in hours). This duration will
  *    not affect non persistent room.
  * @param {JSON} connection Connection The RTCPeerConnection constraints and configuration.
- * @param {JSON} connection.peerConstraints <i>Deprecated</i>. The RTCPeerConnection
+ * @param {JSON} connection.peerConstraints <i>Deprecated feature</i>. The RTCPeerConnection
  *    constraints that is passed in this format <code>new RTCPeerConnection(config, constraints);</code>.
  *    This feature is not documented in W3C Specification draft and not advisable to use.
  * @param {JSON} connection.peerConfig The RTCPeerConnection
  *    [RTCConfiguration](http://w3c.github.io/webrtc-pc/#idl-def-RTCConfiguration).
- * @param {JSON} connection.offerConstraints <i>Deprecated</i>. The RTCPeerConnection
+ * @param {JSON} connection.offerConstraints <i>Deprecated feature</i>. The RTCPeerConnection
  *    [RTCOfferOptions](http://w3c.github.io/webrtc-pc/#idl-def-RTCOfferOptions) used in
  *    <code>RTCPeerConnection.createOffer(successCb, failureCb, options);</code>.
  * @param {JSON} connection.sdpConstraints <i>Not in use</i>. The RTCPeerConnection
  *    [RTCAnswerOptions](http://w3c.github.io/webrtc-pc/#idl-def-RTCAnswerOptions) to be used
  *    in <code>RTCPeerConnection.createAnswer(successCb, failureCb, options);</code>.
  *    This is currently not in use due to not all browsers supporting this feature yet.
- * @param {JSON} connection.mediaConstraints <i>Deprecated</i>. The getUserMedia()
+ * @param {JSON} connection.mediaConstraints <i>Deprecated feature</i>. The getUserMedia()
  *    [MediaStreamConstraints](https://w3c.github.io/mediacapture-main/getusermedia.html#idl-def-MediaStreamConstraints)
  *    in <code>getUserMedia(constraints, successCb, failureCb);</code>.
  * @required
@@ -6856,7 +6856,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   <code>HTTP /GET</code> to retrieve the connection information required.
  *   This is a debugging feature, and it's not advisable to manipulate
  *     this value unless you are using a beta platform server.
- * @param {String} [options.region] <i>Deprecated feature</i> The regional server that Skylink
+ * @param {String} [options.region] <i>Deprecated feature</i>. The regional server that Skylink
  *    should connect to for fastest connectivity. [Rel: Skylink.REGIONAL_SERVER]
  * @param {Boolean} [options.enableIceTrickle=true] <i>Debugging Feature</i>.
  *    The flag that indicates if PeerConnections
@@ -6995,6 +6995,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @param {Boolean} callback.success.TURNServerTransport The TURN server transport
  *   to enable for TURN server connections.
  *   [Rel: Skylink.TURN_TRANSPORT]
+ * @param {String} [callback.success.serverRegion] The regional server that Skylink
+ *    should connect to for fastest connectivity. [Rel: Skylink.REGIONAL_SERVER]
  * @param {Boolean} callback.success.audioFallback The flag that indicates if there is a failure in
  *   <a href="#method_getUserMedia">getUserMedia()</a> in retrieving user media
  *   video stream, it should fallback to retrieve audio stream only.
@@ -11685,43 +11687,6 @@ Skylink.prototype._screenSharingAvailable = false;
 Skylink.prototype._getUserMediaSettings = {};
 
 /**
- * Stores the
- *   [getUserMedia MediaStreamConstraints](https://w3c.github.io/mediacapture-main/getusermedia.html#idl-def-MediaStreamConstraints)
- *   parsed from {{#crossLink "Skylink/_streamSettings:attribute"}}_streamSettings{{/crossLink}}
- *   for screensharing stream object.
- * @attribute _screenSharingGetUserMediaSettings
- * @type JSON
- * @param {Boolean|JSON} [audio=false] The flag that indicates if self user media
- *   MediaStream would have audio streaming.
- * @param {Array} [audio.optional] The optional constraints for audio streaming
- *   in self user media MediaStream object. Some of the values are
- *   set by the <code>audio.optional</code> setting in
- *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}.
- * @param {Boolean|JSON} [video=false] The flag that indicates if self user media
- *   MediaStream would have video streaming.
- * @param {Number} [video.mandatory.maxHeight] The self user media
- *   MediaStream video streaming resolution maximum height.
- * @param {Number} [video.mandatory.maxWidth] The self user media
- *   MediaStream video streaming resolution maximum width.
- * @param {Number} [video.mandatory.maxFrameRate] The self user media
- *   MediaStream video streaming maxinmum framerate.
- * @param {Array} [video.optional] The optional constraints for video streaming
- *   in self user media MediaStream object. Some of the values are
- *   set by the <code>video.optional</code> setting in
- *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}.
- * @private
- * @component Stream
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._screenSharingGetUserMediaSettings = {
-  video: {
-    mediaSource: 'window'
-  },
-  audio: false
-};
-
-/**
  * Stores self Stream mute settings for both audio and video streamings.
  * @attribute _mediaStreamsStatus
  * @type JSON
@@ -13293,6 +13258,12 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
   var self = this;
   var hasAudio = false;
 
+  var settings = {
+    video: {
+      mediaSource: 'window'
+    }
+  };
+
   if (typeof enableAudio === 'function') {
     callback = enableAudio;
     enableAudio = true;
@@ -13319,11 +13290,11 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
   };
 
   if (window.webrtcDetectedBrowser === 'firefox') {
-    self._screenSharingGetUserMediaSettings.audio = !!enableAudio;
+    settings.audio = !!enableAudio;
   }
 
   try {
-    window.getUserMedia(self._screenSharingGetUserMediaSettings, function (stream) {
+    window.getUserMedia(settings, function (stream) {
 
       if (window.webrtcDetectedBrowser !== 'firefox' && enableAudio) {
         window.getUserMedia({

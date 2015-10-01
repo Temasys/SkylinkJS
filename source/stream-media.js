@@ -422,43 +422,6 @@ Skylink.prototype._screenSharingAvailable = false;
 Skylink.prototype._getUserMediaSettings = {};
 
 /**
- * Stores the
- *   [getUserMedia MediaStreamConstraints](https://w3c.github.io/mediacapture-main/getusermedia.html#idl-def-MediaStreamConstraints)
- *   parsed from {{#crossLink "Skylink/_streamSettings:attribute"}}_streamSettings{{/crossLink}}
- *   for screensharing stream object.
- * @attribute _screenSharingGetUserMediaSettings
- * @type JSON
- * @param {Boolean|JSON} [audio=false] The flag that indicates if self user media
- *   MediaStream would have audio streaming.
- * @param {Array} [audio.optional] The optional constraints for audio streaming
- *   in self user media MediaStream object. Some of the values are
- *   set by the <code>audio.optional</code> setting in
- *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}.
- * @param {Boolean|JSON} [video=false] The flag that indicates if self user media
- *   MediaStream would have video streaming.
- * @param {Number} [video.mandatory.maxHeight] The self user media
- *   MediaStream video streaming resolution maximum height.
- * @param {Number} [video.mandatory.maxWidth] The self user media
- *   MediaStream video streaming resolution maximum width.
- * @param {Number} [video.mandatory.maxFrameRate] The self user media
- *   MediaStream video streaming maxinmum framerate.
- * @param {Array} [video.optional] The optional constraints for video streaming
- *   in self user media MediaStream object. Some of the values are
- *   set by the <code>video.optional</code> setting in
- *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}.
- * @private
- * @component Stream
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._screenSharingGetUserMediaSettings = {
-  video: {
-    mediaSource: 'window'
-  },
-  audio: false
-};
-
-/**
  * Stores self Stream mute settings for both audio and video streamings.
  * @attribute _mediaStreamsStatus
  * @type JSON
@@ -2030,6 +1993,12 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
   var self = this;
   var hasAudio = false;
 
+  var settings = {
+    video: {
+      mediaSource: 'window'
+    }
+  };
+
   if (typeof enableAudio === 'function') {
     callback = enableAudio;
     enableAudio = true;
@@ -2056,11 +2025,11 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
   };
 
   if (window.webrtcDetectedBrowser === 'firefox') {
-    self._screenSharingGetUserMediaSettings.audio = !!enableAudio;
+    settings.audio = !!enableAudio;
   }
 
   try {
-    window.getUserMedia(self._screenSharingGetUserMediaSettings, function (stream) {
+    window.getUserMedia(settings, function (stream) {
 
       if (window.webrtcDetectedBrowser !== 'firefox' && enableAudio) {
         window.getUserMedia({
