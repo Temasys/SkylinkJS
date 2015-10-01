@@ -236,7 +236,6 @@ Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo){
     peerVideo.className = 'col-md-6';
     if (window.webrtcDetectedBrowser !== 'IE') {
       peerVideo.autoplay = 'autoplay';
-      peerVideo.muted = 'muted';
     }
 
     // mutes user's video
