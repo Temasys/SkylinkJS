@@ -422,43 +422,6 @@ Skylink.prototype._screenSharingAvailable = false;
 Skylink.prototype._getUserMediaSettings = {};
 
 /**
- * Stores the
- *   [getUserMedia MediaStreamConstraints](https://w3c.github.io/mediacapture-main/getusermedia.html#idl-def-MediaStreamConstraints)
- *   parsed from {{#crossLink "Skylink/_streamSettings:attribute"}}_streamSettings{{/crossLink}}
- *   for screensharing stream object.
- * @attribute _screenSharingGetUserMediaSettings
- * @type JSON
- * @param {Boolean|JSON} [audio=false] The flag that indicates if self user media
- *   MediaStream would have audio streaming.
- * @param {Array} [audio.optional] The optional constraints for audio streaming
- *   in self user media MediaStream object. Some of the values are
- *   set by the <code>audio.optional</code> setting in
- *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}.
- * @param {Boolean|JSON} [video=false] The flag that indicates if self user media
- *   MediaStream would have video streaming.
- * @param {Number} [video.mandatory.maxHeight] The self user media
- *   MediaStream video streaming resolution maximum height.
- * @param {Number} [video.mandatory.maxWidth] The self user media
- *   MediaStream video streaming resolution maximum width.
- * @param {Number} [video.mandatory.maxFrameRate] The self user media
- *   MediaStream video streaming maxinmum framerate.
- * @param {Array} [video.optional] The optional constraints for video streaming
- *   in self user media MediaStream object. Some of the values are
- *   set by the <code>video.optional</code> setting in
- *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}.
- * @private
- * @component Stream
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._screenSharingGetUserMediaSettings = {
-  video: {
-    mediaSource: 'window'
-  },
-  audio: false
-};
-
-/**
  * Stores self Stream mute settings for both audio and video streamings.
  * @attribute _mediaStreamsStatus
  * @type JSON
@@ -514,7 +477,7 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
     log.log([null, 'MediaStream', stream.id, 'Local mediastream has ended'], {
       inRoom: self._inRoom,
       currentTime: stream.currentTime,
-      ended: stream.ended
+      ended: stream.active || stream.ended
     });
 
     if (self._inRoom) {
@@ -1111,8 +1074,35 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
  * @since 0.5.6
  */
 Skylink.prototype.stopStream = function () {
+  var stopTracksFn = function (stream) {
+    var audioTracks = stream.getAudioTracks();
+    var videoTracks = stream.getVideoTracks();
+
+    for (var i = 0; i < audioTracks.length; i++) {
+      audioTracks[i].stop();
+    }
+
+    for (var j = 0; j < videoTracks.length; j++) {
+      videoTracks[j].stop();
+    }
+  };
+
+  var stopFn = function (stream, name) {
+    if (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 44) {
+      stopTracksFn(stream);
+    } else {
+      try {
+        stream.stop();
+      } catch (error) {
+        log.warn('Failed stopping MediaStreamTracks for "' + name + '".' +
+          ' Stopping MediaStream instead', error);
+        stopTracksFn();
+      }
+    }
+  };
+
   if (this._mediaStream && this._mediaStream !== null) {
-    this._mediaStream.stop();
+    stopFn(this._mediaStream, '_mediaStream');
   }
 
   // if previous line break, recheck again to trigger event
@@ -2030,6 +2020,12 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
   var self = this;
   var hasAudio = false;
 
+  var settings = {
+    video: {
+      mediaSource: 'window'
+    }
+  };
+
   if (typeof enableAudio === 'function') {
     callback = enableAudio;
     enableAudio = true;
@@ -2056,11 +2052,11 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
   };
 
   if (window.webrtcDetectedBrowser === 'firefox') {
-    self._screenSharingGetUserMediaSettings.audio = !!enableAudio;
+    settings.audio = !!enableAudio;
   }
 
   try {
-    window.getUserMedia(self._screenSharingGetUserMediaSettings, function (stream) {
+    window.getUserMedia(settings, function (stream) {
 
       if (window.webrtcDetectedBrowser !== 'firefox' && enableAudio) {
         window.getUserMedia({
@@ -2133,13 +2129,40 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 Skylink.prototype.stopScreen = function () {
   var endSession = false;
 
+  var stopTracksFn = function (stream) {
+    var audioTracks = stream.getAudioTracks();
+    var videoTracks = stream.getVideoTracks();
+
+    for (var i = 0; i < audioTracks.length; i++) {
+      audioTracks[i].stop();
+    }
+
+    for (var j = 0; j < videoTracks.length; j++) {
+      videoTracks[j].stop();
+    }
+  };
+
+  var stopFn = function (stream, name) {
+    if (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 44) {
+      stopTracksFn(stream);
+    } else {
+      try {
+        stream.stop();
+      } catch (error) {
+        log.warn('Failed stopping MediaStreamTracks for "' + name + '".' +
+          ' Stopping MediaStream instead', error);
+        stopTracksFn();
+      }
+    }
+  };
+
   if (this._mediaScreen && this._mediaScreen !== null) {
     endSession = !!this._mediaScreen.endSession;
-    this._mediaScreen.stop();
+    stopFn(this._mediaScreen, '_mediaScreen');
   }
 
   if (this._mediaScreenClone && this._mediaScreenClone !== null) {
-    this._mediaScreenClone.stop();
+    stopFn(this._mediaScreenClone, '_mediaScreenClone');
   }
 
   if (this._mediaScreen && this._mediaScreen !== null) {
