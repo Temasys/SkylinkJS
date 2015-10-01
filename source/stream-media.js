@@ -477,7 +477,7 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
     log.log([null, 'MediaStream', stream.id, 'Local mediastream has ended'], {
       inRoom: self._inRoom,
       currentTime: stream.currentTime,
-      ended: stream.ended
+      ended: stream.active || stream.ended
     });
 
     if (self._inRoom) {
@@ -1074,8 +1074,35 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
  * @since 0.5.6
  */
 Skylink.prototype.stopStream = function () {
+  var stopTracksFn = function (stream) {
+    var audioTracks = stream.getAudioTracks();
+    var videoTracks = stream.getVideoTracks();
+
+    for (var i = 0; i < audioTracks.length; i++) {
+      audioTracks[i].stop();
+    }
+
+    for (var j = 0; j < videoTracks.length; j++) {
+      videoTracks[j].stop();
+    }
+  };
+
+  var stopFn = function (stream, name) {
+    if (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 44) {
+      stopTracksFn(stream);
+    } else {
+      try {
+        stream.stop();
+      } catch (error) {
+        log.warn('Failed stopping MediaStreamTracks for "' + name + '".' +
+          ' Stopping MediaStream instead', error);
+        stopTracksFn();
+      }
+    }
+  };
+
   if (this._mediaStream && this._mediaStream !== null) {
-    this._mediaStream.stop();
+    stopFn(this._mediaStream, '_mediaStream');
   }
 
   // if previous line break, recheck again to trigger event
@@ -2102,13 +2129,40 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 Skylink.prototype.stopScreen = function () {
   var endSession = false;
 
+  var stopTracksFn = function (stream) {
+    var audioTracks = stream.getAudioTracks();
+    var videoTracks = stream.getVideoTracks();
+
+    for (var i = 0; i < audioTracks.length; i++) {
+      audioTracks[i].stop();
+    }
+
+    for (var j = 0; j < videoTracks.length; j++) {
+      videoTracks[j].stop();
+    }
+  };
+
+  var stopFn = function (stream, name) {
+    if (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 44) {
+      stopTracksFn(stream);
+    } else {
+      try {
+        stream.stop();
+      } catch (error) {
+        log.warn('Failed stopping MediaStreamTracks for "' + name + '".' +
+          ' Stopping MediaStream instead', error);
+        stopTracksFn();
+      }
+    }
+  };
+
   if (this._mediaScreen && this._mediaScreen !== null) {
     endSession = !!this._mediaScreen.endSession;
-    this._mediaScreen.stop();
+    stopFn(this._mediaScreen, '_mediaScreen');
   }
 
   if (this._mediaScreenClone && this._mediaScreenClone !== null) {
-    this._mediaScreenClone.stop();
+    stopFn(this._mediaScreenClone, '_mediaScreenClone');
   }
 
   if (this._mediaScreen && this._mediaScreen !== null) {
