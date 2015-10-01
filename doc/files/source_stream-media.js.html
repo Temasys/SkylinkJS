@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.1</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.2</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -500,43 +500,6 @@ Skylink.prototype._screenSharingAvailable = false;
 Skylink.prototype._getUserMediaSettings = {};
 
 /**
- * Stores the
- *   [getUserMedia MediaStreamConstraints](https://w3c.github.io/mediacapture-main/getusermedia.html#idl-def-MediaStreamConstraints)
- *   parsed from {{#crossLink &quot;Skylink/_streamSettings:attribute&quot;}}_streamSettings{{/crossLink}}
- *   for screensharing stream object.
- * @attribute _screenSharingGetUserMediaSettings
- * @type JSON
- * @param {Boolean|JSON} [audio=false] The flag that indicates if self user media
- *   MediaStream would have audio streaming.
- * @param {Array} [audio.optional] The optional constraints for audio streaming
- *   in self user media MediaStream object. Some of the values are
- *   set by the &lt;code&gt;audio.optional&lt;/code&gt; setting in
- *   {{#crossLink &quot;Skylink/getUserMedia:method&quot;}}getUserMedia(){{/crossLink}}.
- * @param {Boolean|JSON} [video=false] The flag that indicates if self user media
- *   MediaStream would have video streaming.
- * @param {Number} [video.mandatory.maxHeight] The self user media
- *   MediaStream video streaming resolution maximum height.
- * @param {Number} [video.mandatory.maxWidth] The self user media
- *   MediaStream video streaming resolution maximum width.
- * @param {Number} [video.mandatory.maxFrameRate] The self user media
- *   MediaStream video streaming maxinmum framerate.
- * @param {Array} [video.optional] The optional constraints for video streaming
- *   in self user media MediaStream object. Some of the values are
- *   set by the &lt;code&gt;video.optional&lt;/code&gt; setting in
- *   {{#crossLink &quot;Skylink/getUserMedia:method&quot;}}getUserMedia(){{/crossLink}}.
- * @private
- * @component Stream
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._screenSharingGetUserMediaSettings = {
-  video: {
-    mediaSource: &#x27;window&#x27;
-  },
-  audio: false
-};
-
-/**
  * Stores self Stream mute settings for both audio and video streamings.
  * @attribute _mediaStreamsStatus
  * @type JSON
@@ -592,7 +555,7 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
     log.log([null, &#x27;MediaStream&#x27;, stream.id, &#x27;Local mediastream has ended&#x27;], {
       inRoom: self._inRoom,
       currentTime: stream.currentTime,
-      ended: stream.ended
+      ended: stream.active || stream.ended
     });
 
     if (self._inRoom) {
@@ -1189,8 +1152,35 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
  * @since 0.5.6
  */
 Skylink.prototype.stopStream = function () {
+  var stopTracksFn = function (stream) {
+    var audioTracks = stream.getAudioTracks();
+    var videoTracks = stream.getVideoTracks();
+
+    for (var i = 0; i &lt; audioTracks.length; i++) {
+      audioTracks[i].stop();
+    }
+
+    for (var j = 0; j &lt; videoTracks.length; j++) {
+      videoTracks[j].stop();
+    }
+  };
+
+  var stopFn = function (stream, name) {
+    if (window.webrtcDetectedBrowser === &#x27;chrome&#x27; &amp;&amp; window.webrtcDetectedVersion &gt; 44) {
+      stopTracksFn(stream);
+    } else {
+      try {
+        stream.stop();
+      } catch (error) {
+        log.warn(&#x27;Failed stopping MediaStreamTracks for &quot;&#x27; + name + &#x27;&quot;.&#x27; +
+          &#x27; Stopping MediaStream instead&#x27;, error);
+        stopTracksFn();
+      }
+    }
+  };
+
   if (this._mediaStream &amp;&amp; this._mediaStream !== null) {
-    this._mediaStream.stop();
+    stopFn(this._mediaStream, &#x27;_mediaStream&#x27;);
   }
 
   // if previous line break, recheck again to trigger event
@@ -2108,6 +2098,12 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
   var self = this;
   var hasAudio = false;
 
+  var settings = {
+    video: {
+      mediaSource: &#x27;window&#x27;
+    }
+  };
+
   if (typeof enableAudio === &#x27;function&#x27;) {
     callback = enableAudio;
     enableAudio = true;
@@ -2134,11 +2130,11 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
   };
 
   if (window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
-    self._screenSharingGetUserMediaSettings.audio = !!enableAudio;
+    settings.audio = !!enableAudio;
   }
 
   try {
-    window.getUserMedia(self._screenSharingGetUserMediaSettings, function (stream) {
+    window.getUserMedia(settings, function (stream) {
 
       if (window.webrtcDetectedBrowser !== &#x27;firefox&#x27; &amp;&amp; enableAudio) {
         window.getUserMedia({
@@ -2211,13 +2207,40 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 Skylink.prototype.stopScreen = function () {
   var endSession = false;
 
+  var stopTracksFn = function (stream) {
+    var audioTracks = stream.getAudioTracks();
+    var videoTracks = stream.getVideoTracks();
+
+    for (var i = 0; i &lt; audioTracks.length; i++) {
+      audioTracks[i].stop();
+    }
+
+    for (var j = 0; j &lt; videoTracks.length; j++) {
+      videoTracks[j].stop();
+    }
+  };
+
+  var stopFn = function (stream, name) {
+    if (window.webrtcDetectedBrowser === &#x27;chrome&#x27; &amp;&amp; window.webrtcDetectedVersion &gt; 44) {
+      stopTracksFn(stream);
+    } else {
+      try {
+        stream.stop();
+      } catch (error) {
+        log.warn(&#x27;Failed stopping MediaStreamTracks for &quot;&#x27; + name + &#x27;&quot;.&#x27; +
+          &#x27; Stopping MediaStream instead&#x27;, error);
+        stopTracksFn();
+      }
+    }
+  };
+
   if (this._mediaScreen &amp;&amp; this._mediaScreen !== null) {
     endSession = !!this._mediaScreen.endSession;
-    this._mediaScreen.stop();
+    stopFn(this._mediaScreen, &#x27;_mediaScreen&#x27;);
   }
 
   if (this._mediaScreenClone &amp;&amp; this._mediaScreenClone !== null) {
-    this._mediaScreenClone.stop();
+    stopFn(this._mediaScreenClone, &#x27;_mediaScreenClone&#x27;);
   }
 
   if (this._mediaScreen &amp;&amp; this._mediaScreen !== null) {
