@@ -1,6 +1,6 @@
 //-------------------CONSTRUCTOR-------------------
 var successCase = function () {
-  describe('new StreamTrack(' + printJSON(options) + ')', function () {
+  describe('new StreamTrack(' + util.printJSON(options) + ')', function () {
 
     var track = null;
     var objectRefTrack = null;
@@ -38,7 +38,7 @@ var successCase = function () {
 };
 
 var failureCase = function (options) {
-  describe('new StreamTrack(' + printJSON(options) + ')', function () {
+  describe('new StreamTrack(' + util.printJSON(options) + ')', function () {
 
     var track = null;
 

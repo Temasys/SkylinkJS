@@ -59,12 +59,6 @@ module.exports = function(grunt) {
 
     var components = fs.readdirSync(__dirname+'/tests/spec/');
 
-    var exclude = ['script.js'];
-
-    exclude.forEach(function(item){
-      components.splice(components.indexOf(item),1);
-    });
-
     var classList = ['streamtrack'];
     var moduleList = []; //['event'];
 
@@ -76,7 +70,7 @@ module.exports = function(grunt) {
         var url = 'tests/spec/' + item + '.js';
         // copy layout first and into the gen folder
         concatTask[item] = {
-          src: ['tests/spec/script.js'],
+          src: ['tests/util/script.js'],
           dest: 'tests/gen/units/' + item + '.js'
         };
 
