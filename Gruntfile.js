@@ -1,3 +1,5 @@
+var fs = require('fs');
+
 module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-clean');
@@ -55,92 +57,86 @@ module.exports = function(grunt) {
 
     var testBrowsers = ['chrome','firefox']; //,'safari','opera'];
 
+    var components = fs.readdirSync(__dirname+'/tests/spec/');
+
+    var exclude = ['script.js'];
+
+    exclude.forEach(function(item){
+      components.splice(components.indexOf(item),1);
+    });
+
     var classList = ['streamtrack'];
     var moduleList = []; //['event'];
 
     var testUnits = [];
 
-    // Generate all the test scripts
-    var generateTestUnits = function (array, testItems) {
-      var a, b;
-
-      // generate test scripts for classes into testUnits
-      for (a = 0; a < array.length; a += 1) {
-        var unit = array[a];
-
-        for (b = 0; b < testItems.length; b += 1) {
-          var item = testItems[b];
-          var url = 'tests/spec/' + unit + '/' + item + '.js';
-          var fileName = unit + '-' + item;
-
-          // copy layout first and into the gen folder
-          concatTask[fileName] = {
-            src: ['tests/spec/script.js'],
-            dest: 'tests/gen/units/' + fileName + '.js'
-          };
-
-          // replace the copied first
-          replaceTask[fileName] = {
-            options: {
-              variables: {
-                'test': unit + ' | ' + item,
-                'script': grunt.file.read(url, { encoding: 'UTF-8' })
-              },
-              prefix: '@@'
-            },
-            files: [{
-              expand: true,
-              flatten: true,
-              src: ['tests/gen/units/' + fileName + '.js'],
-              dest: 'tests/gen/units/'
-            }]
-          };
-
-          testUnits.push(fileName);
-        }
-      }
-    };
-
-    generateTestUnits(classList, ['attributes', 'events', 'methods']);
-    generateTestUnits(moduleList, ['attributes', 'methods']);
-
-
-    // generate configs for each test scripts and each browsers
-    var i, j;
-
-    for (i = 0; i < testBrowsers.length; i += 1) {
-      var browser = testBrowsers[i];
-
-      for (j = 0; j < testUnits.length; j += 1) {
-        var unit = testUnits[j];
-        var key = browser + '.' + unit;
-
-        concatTask[key] = {
-          src: ['tests/config/spec.conf.js'],
-          dest: 'tests/gen/conf/' + key + '.conf.js'
+    var generateTestUnits = function(components){
+      for (var i=0; i<components.length; i++){
+        var item = components[i].substring(0,components[i].length-3);
+        var url = 'tests/spec/' + item + '.js';
+        // copy layout first and into the gen folder
+        concatTask[item] = {
+          src: ['tests/spec/script.js'],
+          dest: 'tests/gen/units/' + item + '.js'
         };
 
-        replaceTask[key] = {
+        // replace the copied first
+        replaceTask[item] = {
           options: {
             variables: {
-              'browser': '../../config/browsers/' + browser + '.conf.js',
-              'spec': '../units/' + unit +'.js',
-              'port': parseInt('50' + i + j, 10),
-              'source': '../../../publish/skylink.complete.js'
+              'test': item,
+              'script': grunt.file.read(url, { encoding: 'UTF-8' })
             },
             prefix: '@@'
           },
           files: [{
             expand: true,
             flatten: true,
-            src: ['tests/gen/conf/' + key + '.conf.js'],
-            dest: 'tests/gen/conf'
+            src: ['tests/gen/units/' + item + '.js'],
+            dest: 'tests/gen/units/'
           }]
         };
-
-        console.log(unit);
+        testUnits.push(item);
       }
     }
+
+    var generateTestConfigs = function(browsers){
+      // generate configs for each test scripts and each browsers
+      for (var i = 0; i < browsers.length; i += 1) {
+        var browser = browsers[i];
+
+        for (var j = 0; j < testUnits.length; j += 1) {
+          var unit = testUnits[j];
+          var key = browser + '.' + unit;
+
+          concatTask[key] = {
+            src: ['tests/config/spec.conf.js'],
+            dest: 'tests/gen/conf/' + key + '.conf.js'
+          };
+
+          replaceTask[key] = {
+            options: {
+              variables: {
+                'browser': '../../config/browsers/' + browser + '.conf.js',
+                'spec': '../units/' + unit +'.js',
+                'port': parseInt('50' + i + j, 10),
+                'source': '../../../publish/skylink.complete.js'
+              },
+              prefix: '@@'
+            },
+            files: [{
+              expand: true,
+              flatten: true,
+              src: ['tests/gen/conf/' + key + '.conf.js'],
+              dest: 'tests/gen/conf'
+            }]
+          };
+        }
+      }
+    }
+
+    generateTestUnits(components);
+    generateTestConfigs(testBrowsers);
 
     grunt.initConfig({
 
