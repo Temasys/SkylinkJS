@@ -1,4 +1,4 @@
-/*! skylinkjs - v1.0.0 - Mon Jul 06 2015 11:09:33 GMT+0800 (SGT) */
+/*! skylinkjs - v1.0.0 - Fri Oct 09 2015 11:53:58 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,8 +8311,40 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v1.0.0 - Mon Jul 06 2015 11:09:33 GMT+0800 (SGT) */
+/*! skylinkjs - v1.0.0 - Fri Oct 09 2015 11:53:58 GMT+0800 (SGT) */
 
+var DataChannel = function(channel){
+	'use strict';
+	var self = this;
+	var id = channel.label;
+	var reliable = false;
+	var readyState = 'connecting';
+	var channelType = 'generic';
+	var objectRef = channel;
+
+	Event.mixin(this);
+
+	objectRef.onopen = function(event){
+		this._trigger('connected', event);
+	};
+
+	objectRef.onmessage = function(event){
+		this._trigger('message', event);
+	};
+
+	objectRef.onclose = function(event){
+		this._trigger('disconnected', event);
+	};
+
+	objectRef.onerror = function(event){
+		this._trigger('error', event);
+	};
+};
+
+DataChannel.prototype.disconnect = function(){
+	var self = this;
+	objectRef.close();
+}
 var Event = {
 
 	on: function(event, callback){
@@ -8339,12 +8371,12 @@ var Event = {
 
 			//Remove single on callback
 			if (this.listeners.on[event]){				
-				this.removeListener(this.listeners.on[event], callback);
+				this._removeListener(this.listeners.on[event], callback);
 			}
 		
 			//Remove single once callback
 			if (this.listeners.once[event]){
-				this.removeListener(this.listeners.once[event], callback);
+				this._removeListener(this.listeners.once[event], callback);
 			}
 		}
 		return this;
@@ -8356,7 +8388,7 @@ var Event = {
 		return this;
 	},
 
-	trigger: function(event){
+	_trigger: function(event){
 		var args = Array.prototype.slice.call(arguments,1);
 
 		if (this.listeners.on[event]){
@@ -8376,7 +8408,7 @@ var Event = {
 		return this;
 	},
 
-	removeListener: function(listeners, listener){
+	_removeListener: function(listeners, listener){
 		for (var i=0; i<listeners.length; i++){
 			if (listeners[i]===listener){
 				listeners.splice(i,1);
@@ -8385,8 +8417,8 @@ var Event = {
 		}
 	},
 
-	mixin: function(object){
-		var methods = ['on','off','once','trigger','removeListener'];
+	_mixin: function(object){
+		var methods = ['on','off','once','_trigger','_removeListener'];
 		for (var i=0; i<methods.length; i++){
 			if (Event.hasOwnProperty(methods[i]) ){
 				if (typeof object === 'function'){

@@ -1,4 +1,4 @@
-/*! skylinkjs - v1.0.0 - Mon Jul 06 2015 11:09:33 GMT+0800 (SGT) */
+/*! skylinkjs - v1.0.0 - Fri Oct 09 2015 11:53:58 GMT+0800 (SGT) */
 
 //mocha.bail();
 //mocha.run();
@@ -66,6 +66,88 @@ var drawCanvas = function (v, callback) {
 
    callback( checkCanvas(context, cw, ch) );
  }, 50);
+};
+
+// Parse the constraints of getUserMedia
+var printJSON = function (obj, spaces) {
+  spaces = typeof spaces !== 'number' ? 2 : spaces;
+
+  if (typeof obj === 'undefined') {
+    return '';
+  }
+
+  // make indentation
+  var makeIndentation = function (spaces) {
+    var str = '';
+    var i;
+
+    for (i = 0; i < spaces; i += 1) {
+      str += ' ';
+    }
+
+    return str;
+  };
+
+  var opening = '{';
+  var closing = '}';
+
+  if (obj instanceof Array) {
+    opening = '[';
+    closing = ']';
+  }
+
+  // parse object
+  var outputStr = makeIndentation(spaces - 2) + opening;
+  var val;
+
+
+  if (!(obj instanceof Array)) {
+    var key;
+
+    for (key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        outputStr += '\n\t' + makeIndentation(spaces) + '"' + key + '": ';
+
+        val = obj[key];
+
+        if (typeof val === 'object') {
+          outputStr += printJSON(val, spaces + 2);
+
+        } else if (typeof val === 'string') {
+          outputStr += '"' + val + '"';
+
+        } else {
+          outputStr += val;
+        }
+
+        outputStr += ',';
+      }
+    }
+  } else {
+    var i;
+
+    for (i = 0; i < obj.length; i += 1) {
+      val = obj[i];
+
+      if (typeof val === 'object') {
+        outputStr += printJSON(val, spaces + 2);
+
+      } else if (typeof val === 'string') {
+        outputStr += '"' + val + '"';
+
+      } else {
+        outputStr += val;
+      }
+
+      if (i < (obj.length - 1)) {
+        outputStr += ',';
+      }
+    }
+  }
+
+  outputStr += '\n\t' + makeIndentation(spaces - 2) + closing;
+
+  return outputStr;
 };
 
 /* Template */
@@ -264,4 +346,5 @@ describe('#stop()', function () {
   });
 
 });
+/* End of #stop() */
 });
