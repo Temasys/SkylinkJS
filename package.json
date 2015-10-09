@@ -47,7 +47,6 @@
     "karma-opera-launcher": "^0.1.0",
     "karma-safari-launcher": "^0.1.1",
     "mocha": "^2.2.5",
-    "mocha-funnynyan-reporter": "*",
     "tape": "^3.5.0",
     "yuidocjs": "^0.3.50"
   },
