@@ -37,6 +37,7 @@
     "grunt-replace": "^0.7.9",
     "grunt-tape": "^0.0.2",
     "karma": "^0.12.31",
+    "karma-browserify": "^4.4.0",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^0.2.0",
     "karma-coverage": "^0.4.2",

@@ -136,6 +136,6 @@ var printJSON = function (obj, spaces) {
   return outputStr;
 };
 
-module.exports.checkCanvas = checkCanvas;
-module.exports.drawCanvas = drawCanvas;
-module.exports.printJSON = printJSON;
+window.checkCanvas = checkCanvas;
+window.drawCanvas = drawCanvas;
+window.printJSON = printJSON;

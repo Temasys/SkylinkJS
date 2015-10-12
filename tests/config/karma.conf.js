@@ -10,7 +10,7 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha', 'chai'],
+    frameworks: ['mocha', 'chai', 'browserify'],
 
 
     // list of files / patterns to load in the browser
@@ -98,7 +98,8 @@ module.exports = function(config) {
       'karma-opera-launcher',
       'karma-safari-launcher',
       'karma-ie-launcher',
-      'karma-coverage'
+      'karma-coverage',
+      'karma-browserify'
     ]
 
   });
