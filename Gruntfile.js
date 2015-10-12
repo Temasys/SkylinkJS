@@ -111,7 +111,8 @@ module.exports = function(grunt) {
                 'browser': '../../config/browsers/' + browser + '.conf.js',
                 'spec': '../units/' + unit +'.js',
                 'port': parseInt('50' + i + j, 10),
-                'source': '../../../publish/skylink.complete.js'
+                'source': '../../../publish/skylink.complete.js',
+                'util': '../../util/util.js'
               },
               prefix: '@@'
             },
