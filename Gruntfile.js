@@ -59,9 +59,6 @@ module.exports = function(grunt) {
 
     var components = fs.readdirSync(__dirname+'/tests/spec/');
 
-    var classList = ['streamtrack'];
-    var moduleList = []; //['event'];
-
     var testUnits = [];
 
     var generateTestUnits = function(components){
