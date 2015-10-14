@@ -921,7 +921,7 @@ Skylink.prototype._restartHandler = function(message){
   var targetMid = message.mid;
 
   if (self._hasMCU) {
-    self._restartMCUConnection();
+    self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false);
     return;
   }
 
@@ -979,7 +979,7 @@ Skylink.prototype._restartHandler = function(message){
 
     self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false);
 
-	// do a peer connection health check
+	  // do a peer connection health check
   	self._startPeerConnectionHealthCheck(targetMid);
   }, message.explicit);
 };

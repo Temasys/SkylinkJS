@@ -1594,6 +1594,8 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *   connection with Peer connections to send the updated Stream object.
  * The application may provide their own MediaStream object to send to
  *   all PeerConnections connection.
+ * Reference {{#crossLink "Skylink/refreshConnection:method"}}refreshConnection(){{/crossLink}}
+ *    on the events triggered and restart mechanism.
  * @method sendStream
  * @param {Object|JSON} options The self Stream streaming settings for the new Stream
  *   object to replace the current Stream object attached to Skylink.
@@ -1683,7 +1685,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *    }
  *   });
  *
- * @trigger peerRestart, incomingStream
+ * @trigger peerRestart, serverPeerRestart, incomingStream
  * @component Stream
  * @for Skylink
  * @since 0.5.6
@@ -1744,9 +1746,13 @@ Skylink.prototype.sendStream = function(stream, callback) {
       },false);
     }
 
-    for (var peer in self._peerConnections) {
-      if (self._peerConnections.hasOwnProperty(peer)) {
-        self._restartPeerConnection(peer, true, false, null, true);
+    if (self._hasMCU) {
+      self._restartMCUConnection();
+    } else {
+      for (var peer in self._peerConnections) {
+        if (self._peerConnections.hasOwnProperty(peer)) {
+          self._restartPeerConnection(peer, true, false, null, true);
+        }
       }
     }
 
@@ -1780,9 +1786,13 @@ Skylink.prototype.sendStream = function(stream, callback) {
     // get the mediastream and then wait for it to be retrieved before sending
     self._waitForLocalMediaStream(function (error) {
       // mute unwanted streams
-      for (var peer in self._peerConnections) {
-        if (self._peerConnections.hasOwnProperty(peer)) {
-          self._restartPeerConnection(peer, true, false, null, true);
+      if (self._hasMCU) {
+        self._restartMCUConnection();
+      } else {
+        for (var peer in self._peerConnections) {
+          if (self._peerConnections.hasOwnProperty(peer)) {
+            self._restartPeerConnection(peer, true, false, null, true);
+          }
         }
       }
 
@@ -1977,6 +1987,8 @@ Skylink.prototype.disableVideo = function() {
  * Shares the current screen with Peer connections and will refresh all
  *    Peer connections to send the screensharing Stream object with
  *    <code>HTTPS</code> protocol accessing application.
+ * Reference {{#crossLink "Skylink/refreshConnection:method"}}refreshConnection(){{/crossLink}}
+ *    on the events triggered and restart mechanism.
  * This will require our own Temasys Skylink extension to do screensharing.
  * For screensharing feature in IE / Safari with our Temasys Plugin, please
  *   [contact us](https://www.temasys.com.sg/contact-us).
@@ -2011,7 +2023,7 @@ Skylink.prototype.disableVideo = function() {
  *        console.log(success);
  *     }
  *   });
- * @trigger mediaAccessSuccess, mediaAccessError, incomingStream
+ * @trigger mediaAccessSuccess, mediaAccessError, incomingStream, peerRestart, serverPeerRestart
  * @component Stream
  * @for Skylink
  * @since 0.6.0
@@ -2084,9 +2096,13 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 
       self._wait(function () {
         if (self._inRoom) {
-          for (var peer in self._peerConnections) {
-            if (self._peerConnections.hasOwnProperty(peer)) {
-              self._restartPeerConnection(peer, true, false, null, true);
+          if (self._hasMCU) {
+            self._restartMCUConnection();
+          } else {
+            for (var peer in self._peerConnections) {
+              if (self._peerConnections.hasOwnProperty(peer)) {
+                self._restartPeerConnection(peer, true, false, null, true);
+              }
             }
           }
         } else {
@@ -2119,10 +2135,12 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
  * Stops self screensharing Stream object attached to Skylink.
  * If user media Stream object is available, Skylink will refresh all
  *    Peer connections to send the user media Stream object.
+ * Reference {{#crossLink "Skylink/refreshConnection:method"}}refreshConnection(){{/crossLink}}
+ *    on the events triggered and restart mechanism.
  * @method stopScreen
  * @example
  *   SkylinkDemo.stopScreen();
- * @trigger mediaAccessStopped, streamEnded, incomingStream
+ * @trigger mediaAccessStopped, streamEnded, incomingStream, peerRestart, serverPeerRestart
  * @for Skylink
  * @since 0.6.0
  */
@@ -2176,7 +2194,7 @@ Skylink.prototype.stopScreen = function () {
           this.getPeerInfo(), false);
       }
 
-      if (self._hasMCU) {
+      if (this._hasMCU) {
         this._restartMCUConnection();
       } else {
         for (var peer in this._peerConnections) {

@@ -860,7 +860,8 @@ Skylink.prototype._enterHandler = function(message) {
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
     name: message.agent,
-    version: message.version
+    version: message.version,
+    os: message.os || &#x27;&#x27;
   };
   if (targetMid !== &#x27;MCU&#x27;) {
     self._trigger(&#x27;peerJoined&#x27;, targetMid, message.userInfo, false);
@@ -998,7 +999,7 @@ Skylink.prototype._restartHandler = function(message){
   var targetMid = message.mid;
 
   if (self._hasMCU) {
-    self._restartMCUConnection();
+    self._trigger(&#x27;peerRestart&#x27;, targetMid, self.getPeerInfo(targetMid), false);
     return;
   }
 
@@ -1026,7 +1027,8 @@ Skylink.prototype._restartHandler = function(message){
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
     name: message.agent,
-    version: message.version
+    version: message.version,
+    os: message.os || &#x27;&#x27;
   };
 
   // mcu has joined
@@ -1050,12 +1052,12 @@ Skylink.prototype._restartHandler = function(message){
   	self._addPeer(targetMid, {
 	    agent: message.agent,
 	    version: message.version,
-	    os: message.os || window.navigator.platform
+	    os: message.os
 	  }, true, true, message.receiveOnly, message.sessionType === &#x27;screensharing&#x27;);
 
     self._trigger(&#x27;peerRestart&#x27;, targetMid, self.getPeerInfo(targetMid), false);
 
-	// do a peer connection health check
+	  // do a peer connection health check
   	self._startPeerConnectionHealthCheck(targetMid);
   }, message.explicit);
 };
@@ -1202,7 +1204,8 @@ Skylink.prototype._welcomeHandler = function(message) {
     this._peerInformations[targetMid] = message.userInfo || {};
     this._peerInformations[targetMid].agent = {
       name: message.agent,
-      version: message.version
+      version: message.version,
+      os: message.os || &#x27;&#x27;
     };
     // disable mcu for incoming peer sent by MCU
     /*if (message.agent === &#x27;MCU&#x27;) {

@@ -231,7 +231,13 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
   }
 
   // do a peer connection health check
-  this._startPeerConnectionHealthCheck(targetMid, toOffer);
+  // let MCU handle this case
+  if (!self._hasMCU) {
+    this._startPeerConnectionHealthCheck(targetMid, toOffer);
+  } else {
+    log.warn([targetMid, &#x27;PeerConnectionHealth&#x27;, null, &#x27;Not setting health timer for MCU connection&#x27;]);
+    return;
+  }
 };
 
 /**
@@ -534,10 +540,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
           self._trigger(&#x27;iceConnectionState&#x27;,
             self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
         }
-        // refresh when failed
-        if (self._hasMCU) {
-          self._restartMCUConnection();
-        } else {
+        // refresh when failed. ignore for MCU case since restart is handled by MCU in this case
+        if (!self._hasMCU) {
           self._restartPeerConnection(targetMid, true, true, null, false);
         }
       }
@@ -597,6 +601,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
  * If there are more than 1 refresh during 5 seconds
  *   or refresh is less than 3 seconds since the last refresh
  *   initiated by the other peer, it will be aborted.
+ * As for MCU connection, the restart mechanism makes the self user
+ *    leave and join the currently connected room again.
  * @method refreshConnection
  * @param {String|Array} [targetPeerId] The array of targeted Peers connection to refresh
  *   the connection with.
@@ -622,7 +628,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
  *       SkylinkDemo.refreshConnection(peerId);
  *     }
  *   });
- * @trigger peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined
+ * @trigger peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined, serverPeerLeft
  * @component Peer
  * @for Skylink
  * @since 0.5.5
@@ -783,12 +789,9 @@ Skylink.prototype._restartMCUConnection = function(callback) {
   var listOfPeerRestartErrors = {};
   var peerId; // j shint is whinning
   var receiveOnly = false;
-
-  // Save username if it&#x27;s been modified (should be used to keep same name after rejoin)
-  /*if (((self._userData).length &lt;= 10) || ( ((self._userData).length &gt; 10) &amp;&amp;
-    ((self._userData).substring(0, 10) !== &#x27;name_user_&#x27;))) {
-    var name = self._userData;
-  }*/
+  // for MCU case, these dont matter at all
+  var lastRestart = Date.now() || function() { return +new Date(); };
+  var weight = (new Date()).valueOf();
 
   self._trigger(&#x27;serverPeerRestart&#x27;, &#x27;MCU&#x27;, self.SERVER_PEER_TYPE.MCU);
 
@@ -806,37 +809,12 @@ Skylink.prototype._restartMCUConnection = function(callback) {
       receiveOnly = !!self._peerConnections[peerId].receiveOnly;
     }
 
-    self._peerConnections[peerId].dataChannelClosed = true;
-    self._stopPeerConnectionHealthCheck(peerId);
-
-    if (self._peerConnections[peerId].signalingState !== &#x27;closed&#x27;) {
-      self._peerConnections[peerId].close();
-    }
-
-    if (self._peerConnections[peerId].hasStream) {
-      self._trigger(&#x27;streamEnded&#x27;, peerId, self.getPeerInfo(peerId), false);
-    }
-
     if (peerId !== &#x27;MCU&#x27;) {
       self._trigger(&#x27;peerRestart&#x27;, peerId, self.getPeerInfo(peerId), true);
-    }
-
-    delete self._peerConnections[peerId];
-  }
-
-  //self._trigger(&#x27;streamEnded&#x27;, self._user.sid, self.getPeerInfo(), true);
-
-  // Restart with MCU = peer leaves then rejoins room
-  var peerJoinedFn = function (peerId, peerInfo, isSelf) {
-    if (isSelf) {
-      self.off(&#x27;peerJoined&#x27;, peerJoinedFn);
 
       log.log([peerId, null, null, &#x27;Sending restart message to signaling server&#x27;]);
 
-      var lastRestart = Date.now() || function() { return +new Date(); };
-
-      var weight = (new Date()).valueOf();
-      self._peerRestartPriorities.MCU = weight;
+      self._peerRestartPriorities[peerId] = weight;
 
       self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.RESTART,
@@ -846,7 +824,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         version: window.webrtcDetectedVersion,
         os: window.navigator.platform,
         userInfo: self.getPeerInfo(),
-        target: &#x27;MCU&#x27;,
+        target: peerId, //&#x27;MCU&#x27;,
         isConnectionRestart: false,
         lastRestart: lastRestart,
         weight: weight,
@@ -856,23 +834,30 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
         explicit: true
       });
+    }
+  }
 
-      if (typeof callback === &#x27;function&#x27;) {
-        if (Object.keys(listOfPeerRestartErrors).length &gt; 0) {
-          callback({
-            refreshErrors: listOfPeerRestartErrors,
-            listOfPeers: listOfPeers
-          }, null);
-        } else {
-          callback(null, {
-            listOfPeers: listOfPeers
-          });
-        }
+  // Restart with MCU = peer leaves then rejoins room
+  var peerJoinedFn = function (peerId, peerInfo, isSelf) {
+    log.log([null, &#x27;PeerConnection&#x27;, null, &#x27;Invoked all peers to restart with MCU. Firing callback&#x27;]);
+
+    if (typeof callback === &#x27;function&#x27;) {
+      if (Object.keys(listOfPeerRestartErrors).length &gt; 0) {
+        callback({
+          refreshErrors: listOfPeerRestartErrors,
+          listOfPeers: listOfPeers
+        }, null);
+      } else {
+        callback(null, {
+          listOfPeers: listOfPeers
+        });
       }
     }
   };
 
-  self.on(&#x27;peerJoined&#x27;, peerJoinedFn);
+  self.once(&#x27;peerJoined&#x27;, peerJoinedFn, function (peerId, peerInfo, isSelf) {
+    return isSelf;
+  });
 
   self.leaveRoom(false, function (error, success) {
     if (error) {
@@ -886,8 +871,8 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         }, null);
       }
     } else {
-      self._trigger(&#x27;serverPeerLeft&#x27;, &#x27;MCU&#x27;, self.SERVER_PEER_TYPE.MCU);
-      self.joinRoom();
+      //self._trigger(&#x27;serverPeerLeft&#x27;, &#x27;MCU&#x27;, self.SERVER_PEER_TYPE.MCU);
+      self.joinRoom(self._selectedRoom);
     }
   });
 };
