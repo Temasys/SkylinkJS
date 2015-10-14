@@ -782,7 +782,8 @@ Skylink.prototype._enterHandler = function(message) {
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
     name: message.agent,
-    version: message.version
+    version: message.version,
+    os: message.os || ''
   };
   if (targetMid !== 'MCU') {
     self._trigger('peerJoined', targetMid, message.userInfo, false);
@@ -948,7 +949,8 @@ Skylink.prototype._restartHandler = function(message){
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
     name: message.agent,
-    version: message.version
+    version: message.version,
+    os: message.os || ''
   };
 
   // mcu has joined
@@ -972,7 +974,7 @@ Skylink.prototype._restartHandler = function(message){
   	self._addPeer(targetMid, {
 	    agent: message.agent,
 	    version: message.version,
-	    os: message.os || window.navigator.platform
+	    os: message.os
 	  }, true, true, message.receiveOnly, message.sessionType === 'screensharing');
 
     self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false);
@@ -1124,7 +1126,8 @@ Skylink.prototype._welcomeHandler = function(message) {
     this._peerInformations[targetMid] = message.userInfo || {};
     this._peerInformations[targetMid].agent = {
       name: message.agent,
-      version: message.version
+      version: message.version,
+      os: message.os || ''
     };
     // disable mcu for incoming peer sent by MCU
     /*if (message.agent === 'MCU') {
