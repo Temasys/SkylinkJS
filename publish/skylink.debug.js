@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-/*! skylinkjs - v0.6.2 - Wed Oct 14 2015 16:05:15 GMT+0800 (SGT) */
-=======
-/*! skylinkjs - v0.6.2 - Thu Oct 15 2015 01:47:08 GMT+0800 (SGT) */
->>>>>>> de3b88f... ESS-386 #comment Improvemnts to refreshConnection() functionality with connecting MCU.
+/*! skylinkjs - v0.6.2 - Thu Oct 15 2015 01:53:15 GMT+0800 (SGT) */
 
 (function() {
 
@@ -201,62 +197,6 @@ function Skylink() {
 }
 this.Skylink = Skylink;
 
-var Globals = {
-  /**
-   * The default Application Key.
-   * @attribute defaultAppKey
-   * @type String
-   * @for Globals
-   * @since 1.0.0
-   */
-  defaultAppKey: null,
-
-  /**
-   * The default room.
-   * @attribute defaultRoom
-   * @type String
-   * @for Globals
-   * @since 1.0.0
-   */
-  defaultRoom: null,
-
-  /**
-   * The default room credentials used for non-CORS connection or
-   *   starting a meeting for persistent Application Keys.
-   * @attribute defaultRoomCredentials
-   * @param {String} start The start datetime stamp (in ISO 8601 format) based off
-   *   the <a href="http://www.w3schools.com/jsref/jsref_toisostring.asp">Date.toISOString() method</a>.
-   *    For non-persistent Application Key, you may provide the current time.
-   * @param {Number} duration The duration (in hours) that the meeting would take
-   *   in this room. For non-persistent Application Key, you may provide any value as it has no affect on it.
-   * @param {Number} credentials The duration (in hours) that the meeting would take
-   *   in this room. This credentials is based off the provided <code>.start</code> and <code>.duration</code>.
-   *   <br><br>
-   *   <u>To generate the credentials:</u><br>
-   *   <ol>
-   *   <li>Concatenate a string that consists of the room name
-   *     the room meeting duration (in hours) and the start datetime stamp (in ISO 8601 format).<br>
-   *     <small>Format <code>room + "_" + duration + "_" + start</code></small></li>
-   *   <li>Hash the concatenated string with the Application Key token using
-   *     <a href="https://en.wikipedia.org/wiki/SHA-1">SHA-1</a>.
-   *     You may use the <a href="https://code.google.com/p/crypto-js/#HMAC">CryptoJS.HmacSHA1</a> function to do so.<br>
-   *     <small>Example <code>var hash = CryptoJS.HmacSHA1(concatenatedString, token);</code></small></li>
-   *   <li>Convert the hash to a <a href="https://en.wikipedia.org/wiki/Base64">Base64</a> encoded string. You may use the
-   *     <a href="https://code.google.com/p/crypto-js/#The_Cipher_Output">CryptoJS.enc.Base64</a> function
-   *     to do so.<br><small>Example <code>var base64String = hash.toString(CryptoJS.enc.Base64); </code></small></li>
-   *   <li>Encode the Base64 encoded string to a URI component using UTF-8 encoding with
-   *     <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent">encodeURIComponent()</a>.<br>
-   *     <small>Example <code>var credentials = encodeURIComponent(base64String);</code></small></li>
-   *   </ol><br>
-   * @for Globals
-   * @since 1.0.0
-   */
-  defaultRoomCredentials: {
-    start: null,
-    duration: 0,
-    credentials: null
-  }
-};
 Skylink.prototype.DATA_CHANNEL_STATE = {
   CONNECTING: 'connecting',
   OPEN: 'open',
