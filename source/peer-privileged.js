@@ -86,7 +86,8 @@ Skylink.prototype._peerList = null;
  * This will only work if self is a privileged Peer.
  * @method getPeers
  * @param {Boolean} [showAll=false] The flag that indicates if returned list should
- *   also include privileged peers in the list. By default, the value is <code>false</code>.
+ *   also include privileged and standard in the list. By default, the value is <code>false</code>.
+ *   Which means only unprivileged peers' ID (isPrivileged = autoIntroduce = false) is included.
  * @param {Function} [callback] The callback fired after the receiving the current
  *   list of Peers from platform signaling or have met with an exception.
  *   The callback signature is <code>function (error, success)</code>.
