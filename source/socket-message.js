@@ -661,6 +661,12 @@ Skylink.prototype._inRoomHandler = function(message) {
 
   self._trigger('peerJoined', self._user.sid, self.getPeerInfo(), true);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
+
+  if (self._mediaScreen && self._mediaScreen !== null) {
+    self._trigger('incomingStream', self._user.sid, self._mediaScreen, true, self.getPeerInfo());
+  } else if (self._mediaStream && self._mediaStream !== null) {
+    self._trigger('incomingStream', self._user.sid, self._mediaStream, true, self.getPeerInfo());
+  }
   // NOTE ALEX: should we wait for local streams?
   // or just go with what we have (if no stream, then one way?)
   // do we hardcode the logic here, or give the flexibility?

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.2 - Fri Oct 16 2015 15:34:14 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Fri Oct 16 2015 16:19:34 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8381,7 +8381,7 @@ if (navigator.mozGetUserMedia) {
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.2 - Fri Oct 16 2015 15:34:14 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Fri Oct 16 2015 16:19:34 GMT+0800 (SGT) */
 
 (function() {
 
@@ -18895,6 +18895,12 @@ Skylink.prototype._inRoomHandler = function(message) {
 
   self._trigger('peerJoined', self._user.sid, self.getPeerInfo(), true);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
+
+  if (self._mediaScreen && self._mediaScreen !== null) {
+    self._trigger('incomingStream', self._user.sid, self._mediaScreen, true, self.getPeerInfo());
+  } else if (self._mediaStream && self._mediaStream !== null) {
+    self._trigger('incomingStream', self._user.sid, self._mediaStream, true, self.getPeerInfo());
+  }
   // NOTE ALEX: should we wait for local streams?
   // or just go with what we have (if no stream, then one way?)
   // do we hardcode the logic here, or give the flexibility?
@@ -20120,7 +20126,6 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
   var self = this;
   log.log([null, 'MediaStream', stream.id,
     'User has granted access to local media'], stream);
-  self._trigger('mediaAccessSuccess', stream, !!isScreenSharing);
 
   var streamEnded = function () {
     log.log([null, 'MediaStream', stream.id, 'Local mediastream has ended'], {
@@ -20164,29 +20169,31 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
   }
 
   // check if readyStateChange is done
-  self._condition('readyStateChange', function () {
-    if (!isScreenSharing) {
-      self._mediaStream = stream;
-    } else {
-      self._mediaScreen = stream;
-    }
+  if (!isScreenSharing) {
+    self._mediaStream = stream;
+  } else {
+    self._mediaScreen = stream;
+  }
 
-    self._muteLocalMediaStreams();
+  self._muteLocalMediaStreams();
 
+  self._trigger('mediaAccessSuccess', stream, !!isScreenSharing);
+
+  /*self._condition('readyStateChange', function () {
     // check if users is in the room already
-    /*self._condition('peerJoined', function () {
+    self._condition('peerJoined', function () {
       self._trigger('incomingStream', self._user.sid, stream, true,
         self.getPeerInfo(), !!isScreenSharing);
     }, function () {
       return self._inRoom;
     }, function (peerId, peerInfo, isSelf) {
       return isSelf;
-    });*/
+    });
   }, function () {
     return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
   }, function (state) {
     return state === self.READY_STATE_CHANGE.COMPLETED;
-  });
+  });*/
 };
 
 /**
@@ -20953,25 +20960,6 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
   var requireAudio = !!options.audio;
   var requireVideo = !!options.video;
 
-  var triggerIncomingStreamFn = function () {
-    var hasMediaStream = !!self._mediaStream && self._mediaStream !== null;
-    var hasMediaScreen = !!self._mediaScreen && self._mediaScreen !== null;
-
-    if (hasMediaScreen || hasMediaStream) {
-      self.once('peerJoined', function () {
-        if (hasMediaScreen) {
-          self._trigger('incomingStream', self._user.sid, self._mediaScreen,
-            true, self.getPeerInfo(), true);
-        } else if (hasMediaStream) {
-          self._trigger('incomingStream', self._user.sid, self._mediaStream,
-            true, self.getPeerInfo(), false);
-        }
-      }, function (peerId, peerInfo, isSelf) {
-        return isSelf;
-      });
-    }
-  };
-
   log.log('Requested audio:', requireAudio);
   log.log('Requested video:', requireVideo);
 
@@ -20981,8 +20969,6 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
     if (options.audio === false && options.video === false) {
       self._parseMediaStreamSettings(options);
     }
-
-    triggerIncomingStreamFn();
 
     callback(null);
     return;
@@ -21010,8 +20996,6 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
       if (hasAudio && hasVideo) {
         isSuccess = true;
       }
-
-      triggerIncomingStreamFn();
 
       if (isSuccess) {
         callback();
@@ -21401,17 +21385,19 @@ Skylink.prototype.sendStream = function(stream, callback) {
       },false);
     }
 
-    if (self._hasMCU) {
-      self._restartMCUConnection();
-    } else {
-      for (var peer in self._peerConnections) {
-        if (self._peerConnections.hasOwnProperty(peer)) {
-          self._restartPeerConnection(peer, true, false, null, true);
+    if (self._inRoom) {
+      if (self._hasMCU) {
+        self._restartMCUConnection();
+      } else {
+        self._trigger('incomingStream', self._user.sid, self._mediaStream,
+          true, self.getPeerInfo(), false);
+        for (var peer in self._peerConnections) {
+          if (self._peerConnections.hasOwnProperty(peer)) {
+            self._restartPeerConnection(peer, true, false, null, true);
+          }
         }
       }
-    }
 
-    if (self._inRoom) {
       self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
     }
 
