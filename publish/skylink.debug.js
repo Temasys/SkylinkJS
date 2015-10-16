@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.2 - Fri Oct 16 2015 15:26:32 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Fri Oct 16 2015 15:34:14 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5350,6 +5350,17 @@ Skylink.prototype._selectedRoom = null;
  * @since 0.5.2
  */
 Skylink.prototype._roomLocked = false;
+
+/**
+ * The flag that indicates if self is currently joined in a room.
+ * @attribute _inRoom
+ * @type Boolean
+ * @private
+ * @component Room
+ * @for Skylink
+ * @since 0.4.0
+ */
+Skylink.prototype._inRoom = false;
 
 /**
  * Connects self to the selected room.

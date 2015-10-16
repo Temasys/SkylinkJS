@@ -92,6 +92,17 @@ Skylink.prototype._selectedRoom = null;
 Skylink.prototype._roomLocked = false;
 
 /**
+ * The flag that indicates if self is currently joined in a room.
+ * @attribute _inRoom
+ * @type Boolean
+ * @private
+ * @component Room
+ * @for Skylink
+ * @since 0.4.0
+ */
+Skylink.prototype._inRoom = false;
+
+/**
  * Connects self to the selected room.
  * By default, if room parameter is not provided, it will
  *   connect to the default room provided in
