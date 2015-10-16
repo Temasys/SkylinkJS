@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.2 - Fri Oct 16 2015 16:19:34 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Fri Oct 16 2015 16:40:50 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8381,7 +8381,7 @@ if (navigator.mozGetUserMedia) {
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.2 - Fri Oct 16 2015 16:19:34 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Fri Oct 16 2015 16:40:50 GMT+0800 (SGT) */
 
 (function() {
 
@@ -21356,16 +21356,17 @@ Skylink.prototype.sendStream = function(stream, callback) {
     typeof stream.getVideoTracks === 'function') {
     // stop playback
     self.stopStream();
+
+    self._streamSettings.audio = stream.getAudioTracks().length > 0;
+    self._streamSettings.video = stream.getVideoTracks().length > 0;
+
+    self._mediaStreamsStatus.audioMuted = self._streamSettings.audio === false;
+    self._mediaStreamsStatus.videoMuted = self._streamSettings.video === false;
+
     // send the stream
     if (self._mediaStream !== stream) {
       self._onUserMediaSuccess(stream);
     }
-
-    self._mediaStreamsStatus.audioMuted = false;
-    self._mediaStreamsStatus.videoMuted = false;
-
-    self._streamSettings.audio = stream.getAudioTracks().length > 0;
-    self._streamSettings.video = stream.getVideoTracks().length > 0;
 
     // The callback is provided and has peers, so require to wait for restart
     if (typeof callback === 'function' && !hasNoPeers) {

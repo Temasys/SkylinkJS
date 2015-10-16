@@ -1701,16 +1701,17 @@ Skylink.prototype.sendStream = function(stream, callback) {
     typeof stream.getVideoTracks === 'function') {
     // stop playback
     self.stopStream();
+
+    self._streamSettings.audio = stream.getAudioTracks().length > 0;
+    self._streamSettings.video = stream.getVideoTracks().length > 0;
+
+    self._mediaStreamsStatus.audioMuted = self._streamSettings.audio === false;
+    self._mediaStreamsStatus.videoMuted = self._streamSettings.video === false;
+
     // send the stream
     if (self._mediaStream !== stream) {
       self._onUserMediaSuccess(stream);
     }
-
-    self._mediaStreamsStatus.audioMuted = false;
-    self._mediaStreamsStatus.videoMuted = false;
-
-    self._streamSettings.audio = stream.getAudioTracks().length > 0;
-    self._streamSettings.video = stream.getVideoTracks().length > 0;
 
     // The callback is provided and has peers, so require to wait for restart
     if (typeof callback === 'function' && !hasNoPeers) {
