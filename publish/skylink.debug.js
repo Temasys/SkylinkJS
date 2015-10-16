@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.2 - Fri Oct 16 2015 13:27:58 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Fri Oct 16 2015 15:26:32 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13017,7 +13017,9 @@ Skylink.prototype.sendStream = function(stream, callback) {
       }
     }
 
-    self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+    if (self._inRoom) {
+      self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+    }
 
     // The callback is provided but there is no peers, so automatically invoke the callback
     if (typeof callback === 'function' && hasNoPeers) {
@@ -13058,7 +13060,9 @@ Skylink.prototype.sendStream = function(stream, callback) {
       }
 
       if (!error) {
-        self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+        if (self._inRoom) {
+          self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+        }
 
         // The callback is provided but there is not peers, so automatically invoke the callback
         if (typeof callback === 'function' && hasNoPeers) {
