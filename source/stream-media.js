@@ -525,14 +525,14 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
     self._muteLocalMediaStreams();
 
     // check if users is in the room already
-    self._condition('peerJoined', function () {
+    /*self._condition('peerJoined', function () {
       self._trigger('incomingStream', self._user.sid, stream, true,
         self.getPeerInfo(), !!isScreenSharing);
     }, function () {
       return self._inRoom;
     }, function (peerId, peerInfo, isSelf) {
       return isSelf;
-    });
+    });*/
   }, function () {
     return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
   }, function (state) {
@@ -1304,16 +1304,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
   var requireAudio = !!options.audio;
   var requireVideo = !!options.video;
 
-  log.log('Requested audio:', requireAudio);
-  log.log('Requested video:', requireVideo);
-
-  // check if it requires audio or video
-  if (!requireAudio && !requireVideo && !options.manualGetUserMedia) {
-    // set to default
-    if (options.audio === false && options.video === false) {
-      self._parseMediaStreamSettings(options);
-    }
-
+  var triggerIncomingStreamFn = function () {
     var hasMediaStream = !!self._mediaStream && self._mediaStream !== null;
     var hasMediaScreen = !!self._mediaScreen && self._mediaScreen !== null;
 
@@ -1330,6 +1321,19 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
         return isSelf;
       });
     }
+  };
+
+  log.log('Requested audio:', requireAudio);
+  log.log('Requested video:', requireVideo);
+
+  // check if it requires audio or video
+  if (!requireAudio && !requireVideo && !options.manualGetUserMedia) {
+    // set to default
+    if (options.audio === false && options.video === false) {
+      self._parseMediaStreamSettings(options);
+    }
+
+    triggerIncomingStreamFn();
 
     callback(null);
     return;
@@ -1357,6 +1361,8 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
       if (hasAudio && hasVideo) {
         isSuccess = true;
       }
+
+      triggerIncomingStreamFn();
 
       if (isSuccess) {
         callback();
