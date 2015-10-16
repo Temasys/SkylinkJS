@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.2 - Fri Oct 16 2015 16:40:50 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Fri Oct 16 2015 18:02:30 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8381,7 +8381,7 @@ if (navigator.mozGetUserMedia) {
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.2 - Fri Oct 16 2015 16:40:50 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Fri Oct 16 2015 18:02:30 GMT+0800 (SGT) */
 
 (function() {
 
@@ -21363,6 +21363,24 @@ Skylink.prototype.sendStream = function(stream, callback) {
     self._mediaStreamsStatus.audioMuted = self._streamSettings.audio === false;
     self._mediaStreamsStatus.videoMuted = self._streamSettings.video === false;
 
+    if (self._inRoom) {
+      self.once('mediaAccessSuccess', function (stream) {
+        if (self._hasMCU) {
+          self._restartMCUConnection();
+        } else {
+          self._trigger('incomingStream', self._user.sid, self._mediaStream,
+            true, self.getPeerInfo(), false);
+          for (var peer in self._peerConnections) {
+            if (self._peerConnections.hasOwnProperty(peer)) {
+              self._restartPeerConnection(peer, true, false, null, true);
+            }
+          }
+        }
+
+        self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+      });
+    }
+
     // send the stream
     if (self._mediaStream !== stream) {
       self._onUserMediaSuccess(stream);
@@ -21384,22 +21402,6 @@ Skylink.prototype.sendStream = function(stream, callback) {
         }
         return false;
       },false);
-    }
-
-    if (self._inRoom) {
-      if (self._hasMCU) {
-        self._restartMCUConnection();
-      } else {
-        self._trigger('incomingStream', self._user.sid, self._mediaStream,
-          true, self.getPeerInfo(), false);
-        for (var peer in self._peerConnections) {
-          if (self._peerConnections.hasOwnProperty(peer)) {
-            self._restartPeerConnection(peer, true, false, null, true);
-          }
-        }
-      }
-
-      self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
     }
 
     // The callback is provided but there is no peers, so automatically invoke the callback
@@ -21427,24 +21429,27 @@ Skylink.prototype.sendStream = function(stream, callback) {
       },false);
     }
 
-    // get the mediastream and then wait for it to be retrieved before sending
-    self._waitForLocalMediaStream(function (error) {
-      // mute unwanted streams
-      if (self._hasMCU) {
-        self._restartMCUConnection();
-      } else {
-        for (var peer in self._peerConnections) {
-          if (self._peerConnections.hasOwnProperty(peer)) {
-            self._restartPeerConnection(peer, true, false, null, true);
+    if (self._inRoom) {
+      self.once('mediaAccessSuccess', function (stream) {
+        if (self._hasMCU) {
+          self._restartMCUConnection();
+        } else {
+          self._trigger('incomingStream', self._user.sid, self._mediaStream,
+            true, self.getPeerInfo(), false);
+          for (var peer in self._peerConnections) {
+            if (self._peerConnections.hasOwnProperty(peer)) {
+              self._restartPeerConnection(peer, true, false, null, true);
+            }
           }
         }
-      }
 
+        self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+      });
+    }
+
+    // get the mediastream and then wait for it to be retrieved before sending
+    self._waitForLocalMediaStream(function (error) {
       if (!error) {
-        if (self._inRoom) {
-          self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
-        }
-
         // The callback is provided but there is not peers, so automatically invoke the callback
         if (typeof callback === 'function' && hasNoPeers) {
           callback(null, self._mediaStream);
