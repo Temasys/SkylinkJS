@@ -653,6 +653,9 @@ $(document).ready(function () {
       });
     }
   });
+  $('#introduce_btn').click(function () {
+    Demo.Skylink.introducePeer($('#peer1').val(), $('#peer2').val());
+  });
   $('#share_screen_btn').click(function () {
     Demo.Skylink.shareScreen(function (data, error) {
       console.info(data, error);
