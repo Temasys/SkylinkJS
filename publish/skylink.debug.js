@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.2 - Mon Oct 19 2015 00:45:25 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Mon Oct 19 2015 02:13:15 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5901,8 +5901,16 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 /**
  * Disconnects self from current connected room.
  * @method leaveRoom
- * @param {Boolean} [stopUserMedia=true] The flag that indicates if leaving the room
+ * @param {Boolean|JSON} [stopMediaOptions=true] The stop attached Stream options for
+ *   Skylink when leaving the room. If provided options is a
+ *   <var>typeof</var> <code>boolean</code>, it will be interpreted as both
+ *   <code>userMedia</code> and <code>screenshare</code> Streams would be stopped.
+ * @param {Boolean} [stopMediaOptions.userMedia=true]  The flag that indicates if leaving the room
  *   should automatically stop and clear the existing user media stream attached to skylink.
+ *   This would trigger <code>mediaAccessStopped</code> for this Stream if available.
+ * @param {Boolean} [stopMediaOptions.screenshare=true] The flag that indicates if leaving the room
+ *   should automatically stop and clear the existing screensharing stream attached to skylink.
+ *   This would trigger <code>mediaAccessStopped</code> for this Stream if available.
  * @param {Function} [callback] The callback fired after self has
  *   left the room successfully or have met with an exception.
  *   The callback signature is <code>function (error, success)</code>.
@@ -5932,22 +5940,28 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype.leaveRoom = function(stopUserMedia, callback) {
+Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
   var self = this;
   var error; // j-shint !!!
+  var stopUserMedia = true;
+  var stopScreenshare = true;
 
   // shift parameters
-  if (typeof stopUserMedia === 'function') {
-    callback = stopUserMedia;
-    stopUserMedia = true;
-  } else if (typeof stopUserMedia === 'undefined') {
-    stopUserMedia = true;
+  if (typeof stopMediaOptions === 'function') {
+    callback = stopMediaOptions;
+    stopMediaOptions = true;
+  } else if (typeof stopMediaOptions === 'undefined') {
+    stopMediaOptions = true;
   }
 
-  // stopUserMedia === null or {} ?
-  if (typeof stopUserMedia !== 'boolean') {
-    error = 'stopUserMedia parameter provided is not a boolean';
-    log.error(error, stopUserMedia);
+  // stopMediaOptions === null or {} ?
+  if (typeof stopMediaOptions === 'object' && stopMediaOptions !== null) {
+    stopUserMedia = stopMediaOptions.userMedia !== false;
+    stopScreenshare = stopMediaOptions.screenshare !== false;
+
+  } else if (typeof stopMediaOptions !== 'boolean') {
+    error = 'stopMediaOptions parameter provided is not a boolean or valid object';
+    log.error(error, stopMediaOptions);
     if (typeof callback === 'function') {
       log.log([null, 'Socket', self._selectedRoom, 'Error occurred. ' +
         'Firing callback with error -> '
@@ -5955,6 +5969,10 @@ Skylink.prototype.leaveRoom = function(stopUserMedia, callback) {
       callback(new Error(error), null);
     }
     return;
+
+  } else if (stopMediaOptions === false) {
+    stopUserMedia = false;
+    stopScreenshare = false;
   }
 
   if (!self._inRoom) {
@@ -5975,11 +5993,19 @@ Skylink.prototype.leaveRoom = function(stopUserMedia, callback) {
   }
   self._inRoom = false;
   self._closeChannel();
+
   if (stopUserMedia) {
     log.log([null, 'MediaStream', self._selectedRoom, 'Stopping user\'s MediaStream']);
     self.stopStream();
   } else {
     log.log([null, 'MediaStream', self._selectedRoom, 'User\'s MediaStream will not be stopped']);
+  }
+
+  if (stopScreenshare) {
+    log.log([null, 'MediaStream', self._selectedRoom, 'Stopping screensharing MediaStream']);
+    self.stopScreen();
+  } else {
+    log.log([null, 'MediaStream', self._selectedRoom, 'Screensharing MediaStream will not be stopped']);
   }
 
   self._wait(function() {
@@ -5994,8 +6020,8 @@ Skylink.prototype.leaveRoom = function(stopUserMedia, callback) {
     }
   }, function() {
     return (Object.keys(self._peerConnections).length === 0 &&
-      self._channelOpen === false &&
-      self._readyState === self.READY_STATE_CHANGE.COMPLETED);
+      self._channelOpen === false); // &&
+      //self._readyState === self.READY_STATE_CHANGE.COMPLETED);
   }, false);
 };
 
@@ -12382,12 +12408,9 @@ Skylink.prototype.stopStream = function () {
     }
   };
 
-  if (this._mediaStream && this._mediaStream !== null) {
-    stopFn(this._mediaStream, '_mediaStream');
-  }
-
   // if previous line break, recheck again to trigger event
   if (this._mediaStream && this._mediaStream !== null) {
+    stopFn(this._mediaStream, '_mediaStream');
     this._trigger('mediaAccessStopped', false);
   }
 
@@ -13458,8 +13481,6 @@ Skylink.prototype.stopScreen = function () {
 
   if (this._mediaScreen && this._mediaScreen !== null) {
     this._trigger('mediaAccessStopped', true);
-    this._mediaScreen = null;
-    this._mediaScreenClone = null;
 
     if (!endSession) {
       if (this._hasMCU) {
@@ -13477,6 +13498,9 @@ Skylink.prototype.stopScreen = function () {
       }
     }
   }
+
+  this._mediaScreen = null;
+  this._mediaScreenClone = null;
 };
 Skylink.prototype._addSDPStereo = function(sdpLines) {
   var opusRtmpLineIndex = 0;

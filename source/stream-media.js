@@ -1110,12 +1110,9 @@ Skylink.prototype.stopStream = function () {
     }
   };
 
-  if (this._mediaStream && this._mediaStream !== null) {
-    stopFn(this._mediaStream, '_mediaStream');
-  }
-
   // if previous line break, recheck again to trigger event
   if (this._mediaStream && this._mediaStream !== null) {
+    stopFn(this._mediaStream, '_mediaStream');
     this._trigger('mediaAccessStopped', false);
   }
 
@@ -2186,8 +2183,6 @@ Skylink.prototype.stopScreen = function () {
 
   if (this._mediaScreen && this._mediaScreen !== null) {
     this._trigger('mediaAccessStopped', true);
-    this._mediaScreen = null;
-    this._mediaScreenClone = null;
 
     if (!endSession) {
       if (this._hasMCU) {
@@ -2205,4 +2200,7 @@ Skylink.prototype.stopScreen = function () {
       }
     }
   }
+
+  this._mediaScreen = null;
+  this._mediaScreenClone = null;
 };
