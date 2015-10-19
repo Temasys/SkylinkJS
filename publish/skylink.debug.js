@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.2 - Mon Oct 19 2015 18:11:23 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Mon Oct 19 2015 18:14:23 GMT+0800 (SGT) */
 
 (function() {
 
@@ -210,7 +210,7 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
  * - Different channels serves different functionalities.
  * @attribute DATA_CHANNEL_TYPE
  * @type JSON
- * @param {String} MESSAGING <small><b>MAIN connection</b> | Value <code>"messaging"</code></small>
+ * @param {String} MESSAGING <small><b>PRIMARY connection</b> | Value <code>"messaging"</code></small>
  *   This DataChannel connection is used for P2P messaging only, as used in
  *   {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.<br>
  * Unless if self connects with Peers connecting from the mobile SDK platform applications,

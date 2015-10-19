@@ -6,15 +6,22 @@
  * @attribute DATA_CHANNEL_STATE
  * @type JSON
  * @param {String} CONNECTING <small>Value <code>"connecting"</code></small>
- *   The state when DataChannel is attempting to establish a connection.
+ *   The state when DataChannel is attempting to establish a connection.<br>
+ *   This is the initial state when a DataChannel connection is created.
  * @param {String} OPEN <small>Value <code>"open"</code></small>
- *   The state when DataChannel connection is established.
+ *   The state when DataChannel connection is established.<br>
+ *   This happens usually after <code>CONNECTING</code> state, or not when DataChannel connection
+ *   is from initializing Peer (the one who begins the DataChannel connection).
  * @param {String} CLOSING <small>Value <code>"closing"</code></small>
- *   The state when DataChannel connection is closing.
+ *   The state when DataChannel connection is closing.<br>
+ *   This happens when DataChannel connection is closing and happens after <code>OPEN</code>.
  * @param {String} CLOSED <small>Value <code>"closed"</code></small>
- *   The state when DataChannel connection is closed.
+ *   The state when DataChannel connection is closed.<br>
+ *   This happens when DataChannel connection has closed and happens after <code>CLOSING</code>
+ *   (or sometimes <code>OPEN</code> depending on the browser implementation).
  * @param {String} ERROR <small>Value <code>"error"</code></small>
- *   The state when DataChannel connection have met with an exception.
+ *   The state when DataChannel connection have met with an exception.<br>
+ *   This may happen during any state not after <code>CLOSED</code>.
  * @readOnly
  * @component DataChannel
  * @for Skylink

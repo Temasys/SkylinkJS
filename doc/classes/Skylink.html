@@ -5573,7 +5573,7 @@ If provided dataURL binary string (base64)
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l352"><code>source&#x2F;data-channel.js:352</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l359"><code>source&#x2F;data-channel.js:359</code></a>
       </small>
     
 
@@ -5925,7 +5925,7 @@ This method will do a event subscription with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l101"><code>source&#x2F;data-channel.js:101</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l108"><code>source&#x2F;data-channel.js:108</code></a>
       </small>
     
 
@@ -15918,7 +15918,7 @@ This is usually done for replacing the previous Stream attached and restarting
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l278"><code>source&#x2F;data-channel.js:278</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l285"><code>source&#x2F;data-channel.js:285</code></a>
       </small>
     
 
@@ -30096,7 +30096,7 @@ Skylink <a href="../classes/Skylink.html#method_setDebugMode" class="crosslink">
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l75"><code>source&#x2F;data-channel.js:75</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l82"><code>source&#x2F;data-channel.js:82</code></a>
       </small>
     
 
@@ -31254,7 +31254,7 @@ If the value is not provided in <a href="../classes/Skylink.html#method_init" cl
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l62"><code>source&#x2F;data-channel.js:62</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l69"><code>source&#x2F;data-channel.js:69</code></a>
       </small>
     
 
@@ -39596,7 +39596,8 @@ to inform exception during the DataChannel connection with Peers.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;connecting&quot;</code></small>
-  The state when DataChannel is attempting to establish a connection.</p>
+  The state when DataChannel is attempting to establish a connection.<br>
+  This is the initial state when a DataChannel connection is created.</p>
 
             </div>
 
@@ -39612,7 +39613,9 @@ to inform exception during the DataChannel connection with Peers.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;open&quot;</code></small>
-  The state when DataChannel connection is established.</p>
+  The state when DataChannel connection is established.<br>
+  This happens usually after <code>CONNECTING</code> state, or not when DataChannel connection
+  is from initializing Peer (the one who begins the DataChannel connection).</p>
 
             </div>
 
@@ -39628,7 +39631,8 @@ to inform exception during the DataChannel connection with Peers.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;closing&quot;</code></small>
-  The state when DataChannel connection is closing.</p>
+  The state when DataChannel connection is closing.<br>
+  This happens when DataChannel connection is closing and happens after <code>OPEN</code>.</p>
 
             </div>
 
@@ -39644,7 +39648,9 @@ to inform exception during the DataChannel connection with Peers.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;closed&quot;</code></small>
-  The state when DataChannel connection is closed.</p>
+  The state when DataChannel connection is closed.<br>
+  This happens when DataChannel connection has closed and happens after <code>CLOSING</code>
+  (or sometimes <code>OPEN</code> depending on the browser implementation).</p>
 
             </div>
 
@@ -39660,7 +39666,8 @@ to inform exception during the DataChannel connection with Peers.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;error&quot;</code></small>
-  The state when DataChannel connection have met with an exception.</p>
+  The state when DataChannel connection have met with an exception.<br>
+  This may happen during any state not after <code>CLOSED</code>.</p>
 
             </div>
 
@@ -39725,7 +39732,7 @@ to inform exception during the DataChannel connection with Peers.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l31"><code>source&#x2F;data-channel.js:31</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l38"><code>source&#x2F;data-channel.js:38</code></a>
       </small>
     
 

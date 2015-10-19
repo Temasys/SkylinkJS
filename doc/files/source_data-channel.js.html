@@ -84,15 +84,22 @@
  * @attribute DATA_CHANNEL_STATE
  * @type JSON
  * @param {String} CONNECTING &lt;small&gt;Value &lt;code&gt;&quot;connecting&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when DataChannel is attempting to establish a connection.
+ *   The state when DataChannel is attempting to establish a connection.&lt;br&gt;
+ *   This is the initial state when a DataChannel connection is created.
  * @param {String} OPEN &lt;small&gt;Value &lt;code&gt;&quot;open&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when DataChannel connection is established.
+ *   The state when DataChannel connection is established.&lt;br&gt;
+ *   This happens usually after &lt;code&gt;CONNECTING&lt;/code&gt; state, or not when DataChannel connection
+ *   is from initializing Peer (the one who begins the DataChannel connection).
  * @param {String} CLOSING &lt;small&gt;Value &lt;code&gt;&quot;closing&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when DataChannel connection is closing.
+ *   The state when DataChannel connection is closing.&lt;br&gt;
+ *   This happens when DataChannel connection is closing and happens after &lt;code&gt;OPEN&lt;/code&gt;.
  * @param {String} CLOSED &lt;small&gt;Value &lt;code&gt;&quot;closed&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when DataChannel connection is closed.
+ *   The state when DataChannel connection is closed.&lt;br&gt;
+ *   This happens when DataChannel connection has closed and happens after &lt;code&gt;CLOSING&lt;/code&gt;
+ *   (or sometimes &lt;code&gt;OPEN&lt;/code&gt; depending on the browser implementation).
  * @param {String} ERROR &lt;small&gt;Value &lt;code&gt;&quot;error&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when DataChannel connection have met with an exception.
+ *   The state when DataChannel connection have met with an exception.&lt;br&gt;
+ *   This may happen during any state not after &lt;code&gt;CLOSED&lt;/code&gt;.
  * @readOnly
  * @component DataChannel
  * @for Skylink

@@ -229,27 +229,27 @@
             "params": [
                 {
                     "name": "CONNECTING",
-                    "description": "<small>Value <code>\"connecting\"</code></small>\n  The state when DataChannel is attempting to establish a connection.",
+                    "description": "<small>Value <code>\"connecting\"</code></small>\n  The state when DataChannel is attempting to establish a connection.<br>\n  This is the initial state when a DataChannel connection is created.",
                     "type": "String"
                 },
                 {
                     "name": "OPEN",
-                    "description": "<small>Value <code>\"open\"</code></small>\n  The state when DataChannel connection is established.",
+                    "description": "<small>Value <code>\"open\"</code></small>\n  The state when DataChannel connection is established.<br>\n  This happens usually after <code>CONNECTING</code> state, or not when DataChannel connection\n  is from initializing Peer (the one who begins the DataChannel connection).",
                     "type": "String"
                 },
                 {
                     "name": "CLOSING",
-                    "description": "<small>Value <code>\"closing\"</code></small>\n  The state when DataChannel connection is closing.",
+                    "description": "<small>Value <code>\"closing\"</code></small>\n  The state when DataChannel connection is closing.<br>\n  This happens when DataChannel connection is closing and happens after <code>OPEN</code>.",
                     "type": "String"
                 },
                 {
                     "name": "CLOSED",
-                    "description": "<small>Value <code>\"closed\"</code></small>\n  The state when DataChannel connection is closed.",
+                    "description": "<small>Value <code>\"closed\"</code></small>\n  The state when DataChannel connection is closed.<br>\n  This happens when DataChannel connection has closed and happens after <code>CLOSING</code>\n  (or sometimes <code>OPEN</code> depending on the browser implementation).",
                     "type": "String"
                 },
                 {
                     "name": "ERROR",
-                    "description": "<small>Value <code>\"error\"</code></small>\n  The state when DataChannel connection have met with an exception.",
+                    "description": "<small>Value <code>\"error\"</code></small>\n  The state when DataChannel connection have met with an exception.<br>\n  This may happen during any state not after <code>CLOSED</code>.",
                     "type": "String"
                 }
             ],
@@ -260,7 +260,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 31,
+            "line": 38,
             "description": "These are the types of DataChannel connection that Skylink provides.\n- Different channels serves different functionalities.",
             "itemtype": "attribute",
             "name": "DATA_CHANNEL_TYPE",
@@ -284,7 +284,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 62,
+            "line": 69,
             "description": "The flag that indicates if Peers connection should have any\n  DataChannel connections.",
             "itemtype": "attribute",
             "name": "_enableDataChannel",
@@ -298,7 +298,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 75,
+            "line": 82,
             "description": "Stores the list of DataChannel connections.",
             "itemtype": "attribute",
             "name": "_dataChannels",
@@ -330,7 +330,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 101,
+            "line": 108,
             "description": "Starts a DataChannel connection with a Peer connection. If the\n  DataChannel is provided in the parameter, it simply appends\n  event handlers to check the current state of the DataChannel.",
             "itemtype": "method",
             "name": "_createDataChannel",
@@ -370,7 +370,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 278,
+            "line": 285,
             "description": "Sends data over the DataChannel connection associated\n   with the Peer connection.\nThe current supported data type is <code>string</code>. <code>Blob</code>,\n  <code>ArrayBuffer</code> types support is not yet currently handled or\n  implemented.",
             "itemtype": "method",
             "name": "_sendDataChannelMessage",
@@ -402,7 +402,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 352,
+            "line": 359,
             "description": "Stops DataChannel connections associated with a Peer connection\n  and remove any object references to the DataChannel connection(s).",
             "itemtype": "method",
             "name": "_closeDataChannel",
@@ -12445,39 +12445,39 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:31"
+            "line": " source/data-channel.js:38"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:62"
+            "line": " source/data-channel.js:69"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:75"
+            "line": " source/data-channel.js:82"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-channel.js:101"
+            "line": " source/data-channel.js:108"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:101"
+            "line": " source/data-channel.js:108"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-channel.js:278"
+            "line": " source/data-channel.js:285"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:278"
+            "line": " source/data-channel.js:285"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-channel.js:352"
+            "line": " source/data-channel.js:359"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:352"
+            "line": " source/data-channel.js:359"
         },
         {
             "message": "unknown tag: component",
