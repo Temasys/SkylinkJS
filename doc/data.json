@@ -471,35 +471,35 @@
         {
             "file": "source/data-process.js",
             "line": 48,
-            "description": "The list of native data types that is transferred through the DataChannel connection.\nThe current supported data types is <code>string</code>. <code>Blob</code>,\n  <code>ArrayBuffer</code> types support is not yet currently handled or\n  implemented.",
+            "description": "These are the list of available transfer encodings that would be used by Skylink during a data transfer.\n- The currently supported data type is <code>BINARY_STRING</code>.\n- Support for data types <code>BLOB</code> and <code>ARRAY_BUFFER</code> is still in implementation.",
             "itemtype": "attribute",
             "name": "DATA_TRANSFER_DATA_TYPE",
             "type": "JSON",
             "params": [
                 {
                     "name": "BINARY_STRING",
-                    "description": "Data is transferred using\n  [binary converted strings](https://developer.mozilla.org/en-US/\n  docs/Web/HTTP/data_URIs) through the DataChannel connection.",
+                    "description": "<small><b>DEFAULT</b> | Value <code>\"binaryString\"</code></small>\n  The option to let Skylink encode data packets using\n  [binary converted strings](https://developer.mozilla.org/en-US/docs/Web/HTTP/data_URIs)\n  when sending the data packets through the DataChannel connection during data transfers.",
                     "type": "String"
                 },
                 {
                     "name": "ARRAY_BUFFER",
-                    "description": "Data is transferred using\n  [ArrayBuffers](https://developer.mozilla.org/en-US/docs/Web/JavaScript\n /Reference/Global_Objects/ArrayBuffer) through the DataChannel connection.",
+                    "description": "<small><em>IN IMPLEMENTATION</em> | Value <code>\"arrayBuffer\"</code></small>\n  The option to let Skylink encode data packets using\n  [ArrayBuffers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)\n  when sending the data packets through the DataChannel connection during data transfers.",
                     "type": "String"
                 },
                 {
                     "name": "BLOB",
-                    "description": "Data is transferred using\n  [Blobs](https://developer.mozilla.org/en/docs/Web/API/Blob)\n  through the DataChannel connection.",
+                    "description": "<small><em>IN IMPLEMENTATION</em> | Value <code>\"blob\"</code></small>\n  The option to let Skylink encode data packets using\n  [Blobs](https://developer.mozilla.org/en/docs/Web/API/Blob)\n  when sending the data packets through the DataChannel connection during data transfers.",
                     "type": "String"
                 }
             ],
-            "final": 1,
+            "readonly": "",
             "component": "DataProcess",
             "since": "0.1.0",
             "class": "Skylink"
         },
         {
             "file": "source/data-process.js",
-            "line": 75,
+            "line": 77,
             "description": "Converts a binary string (base64) derived from\n [dataURL conversion](https://developer.mozilla.org/en-US\n  /docs/Web/API/FileReader/readAsDataURL)\n  to a Blob data object.<br>\n<small>Author: devnull69@stackoverflow.com #6850276</small>",
             "itemtype": "method",
             "name": "_base64ToBlob",
@@ -522,7 +522,7 @@
         },
         {
             "file": "source/data-process.js",
-            "line": 101,
+            "line": 103,
             "description": "Converts a Blob data object into a binary string (base64) using\n  [dataURL conversion](https://developer.mozilla.org/en-US\n  /docs/Web/API/FileReader/readAsDataURL)",
             "itemtype": "method",
             "name": "_blobToBase64",
@@ -553,7 +553,7 @@
         },
         {
             "file": "source/data-process.js",
-            "line": 125,
+            "line": 127,
             "description": "Chunks a huge Blob data object into smaller Blob data object chunks\n  based on the chunk sizes provided.\nIf provided Blob data object is smaller than chunk sizes, it will return an array\n  length of <code>1</code> with the Blob data object.",
             "itemtype": "method",
             "name": "_chunkBlobData",
@@ -581,7 +581,7 @@
         },
         {
             "file": "source/data-process.js",
-            "line": 164,
+            "line": 166,
             "description": "Chunks a huge dataURL binary string (base64)\n  into smaller strings based on the chunk length provided.\nIf provided dataURL binary string (base64)\n  is smaller than chunk length, it will return an array\n  length of <code>1</code> with the dataURL string.",
             "itemtype": "method",
             "name": "_chunkDataURL",
@@ -609,7 +609,7 @@
         },
         {
             "file": "source/data-process.js",
-            "line": 206,
+            "line": 208,
             "description": "Assembles the data string chunks of a chunked dataURL\n  binary string (base64) into the original dataURL binary string (base64).",
             "itemtype": "method",
             "name": "_assembleDataURL",
@@ -726,12 +726,12 @@
             "params": [
                 {
                     "name": "UPLOAD",
-                    "description": "<small>Value <code>\"upload\"</code></small>\n  This data transfer is an outgoing (uploading) transfer.<br>\n  Data is sent to the receiving Peer using the associated DataChannel connection.",
+                    "description": "<small>Value <code>\"upload\"</code></small>\n  This data transfer is an outgoing <em>(uploading)</em> transfer.<br>\n  Data is sent to the receiving Peer using the associated DataChannel connection.",
                     "type": "String"
                 },
                 {
                     "name": "DOWNLOAD",
-                    "description": "<small>Value <code>\"download\"</code></small>\n  The data transfer is an incoming (downloading) transfer.<br>\n  Data is received from the sending Peer using the associated DataChannel connection.",
+                    "description": "<small>Value <code>\"download\"</code></small>\n  The data transfer is an incoming <em>(downloading)</em> transfer.<br>\n  Data is received from the sending Peer using the associated DataChannel connection.",
                     "type": "String"
                 }
             ],
@@ -6489,6 +6489,11 @@
                     "name": "isScreensharing",
                     "description": "The flag that indicates if self\n   Stream object is a screensharing stream or not.",
                     "type": "Boolean"
+                },
+                {
+                    "name": "isAudioFallbackError",
+                    "description": "The flag that indicates if Skylink throws\n   the error after an audio fallback has been attempted.",
+                    "type": "Boolean"
                 }
             ],
             "component": "Events",
@@ -6497,7 +6502,24 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 181,
+            "line": 183,
+            "description": "Event triggered when Skylink does an audio fallback when retrieving video and audio\n  user media stream fails.",
+            "itemtype": "event",
+            "name": "mediaAccessFallback",
+            "params": [
+                {
+                    "name": "error",
+                    "description": "The error object thrown that caused the failure\n  from retrieve video and audio user media stream.",
+                    "type": "Object|String"
+                }
+            ],
+            "component": "Events",
+            "since": "0.6.3",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 195,
             "description": "Event triggered when Skylink have been successfully granted access to self user media stream and\n  attached to Skylink.",
             "itemtype": "event",
             "name": "mediaAccessSuccess",
@@ -6519,7 +6541,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 196,
+            "line": 210,
             "description": "Event triggered when thhe application requires to retrieve self user media stream with\n  {{#crossLink \"Skylink/getUserMedia:method\"}}getUserMedia(){{/crossLink}}.\nOnce the self user media stream is attached to Skylink, the socket connection to\n  the signaling will start and then join self to the selected room.\nThis event will be triggered if <code>manualGetUserMedia</code> is set to <code>true</code> in\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom() options{{/crossLink}}.",
             "itemtype": "event",
             "name": "mediaAccessRequired",
@@ -6529,7 +6551,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 210,
+            "line": 224,
             "description": "Event triggered when self user media stream attached to Skylink has been stopped.",
             "itemtype": "event",
             "name": "mediaAccessStopped",
@@ -6546,7 +6568,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 221,
+            "line": 235,
             "description": "Event triggered when a Peer joins the room.",
             "itemtype": "event",
             "name": "peerJoined",
@@ -6710,7 +6732,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 298,
+            "line": 312,
             "description": "Event triggered when a Peer connection has been restarted for\n  a reconnection.",
             "itemtype": "event",
             "name": "peerRestart",
@@ -6874,7 +6896,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 377,
+            "line": 391,
             "description": "Event triggered when a Peer information have been updated.\nThis event would only be triggered if self is in the room.",
             "itemtype": "event",
             "name": "peerUpdated",
@@ -7038,7 +7060,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 454,
+            "line": 468,
             "description": "Event triggered when a Peer leaves the room.",
             "itemtype": "event",
             "name": "peerLeft",
@@ -7202,7 +7224,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 531,
+            "line": 545,
             "description": "Event triggered when a Stream is available from a Peer\n  in the room.",
             "itemtype": "event",
             "name": "incomingStream",
@@ -7371,7 +7393,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 613,
+            "line": 627,
             "description": "Event triggered when a message is received from a Peer.",
             "itemtype": "event",
             "name": "incomingMessage",
@@ -7569,7 +7591,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 704,
+            "line": 718,
             "description": "Event triggered when a data transfer is completed in a DataChannel connection.",
             "itemtype": "event",
             "name": "incomingData",
@@ -7635,7 +7657,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 732,
+            "line": 746,
             "description": "Event triggered when a data transfer request is made to Peer in a\n  DataChannel connection.",
             "itemtype": "event",
             "name": "incomingDataRequest",
@@ -7696,7 +7718,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 756,
+            "line": 770,
             "description": "Event triggered when the currently connected room lock status have been updated.",
             "itemtype": "event",
             "name": "roomLock",
@@ -7865,7 +7887,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 834,
+            "line": 848,
             "description": "Event triggered when a Peer connection DataChannel connection state has changed.",
             "itemtype": "event",
             "name": "dataChannelState",
@@ -7904,7 +7926,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 852,
+            "line": 866,
             "description": "Event triggered when a data transfer made to Peer in a\n  DataChannel connection state has changed.",
             "itemtype": "event",
             "name": "dataTransferState",
@@ -7988,7 +8010,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 890,
+            "line": 904,
             "description": "Event triggered when Skylink receives an system action from the platform signaling.",
             "itemtype": "event",
             "name": "systemAction",
@@ -8015,7 +8037,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 906,
+            "line": 920,
             "description": "Event triggered when a server Peer joins the room.",
             "itemtype": "event",
             "name": "serverPeerJoined",
@@ -8037,7 +8059,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 919,
+            "line": 933,
             "description": "Event triggered when a server Peer leaves the room.",
             "itemtype": "event",
             "name": "serverPeerLeft",
@@ -8059,7 +8081,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 932,
+            "line": 946,
             "description": "Event triggered when a sever Peer connection has been restarted for\n  a reconnection.",
             "itemtype": "event",
             "name": "serverPeerRestart",
@@ -8081,7 +8103,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 946,
+            "line": 960,
             "description": "Event triggered when a Peer connection Stream streaming has stopped.",
             "itemtype": "event",
             "name": "streamEnded",
@@ -8252,7 +8274,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1025,
+            "line": 1039,
             "description": "Event triggered when a Peer connection Stream streaming audio or video\n  stream muted status have been updated.",
             "itemtype": "event",
             "name": "streamMuted",
@@ -8421,7 +8443,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1105,
+            "line": 1119,
             "description": "Event triggered when the retrieval of the list of rooms and peers under the same realm based\n  on the Application Key configured in {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  from the platform signaling state has changed.",
             "itemtype": "event",
             "name": "getPeersStateChange",
@@ -8448,7 +8470,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1120,
+            "line": 1134,
             "description": "Event triggered when introductory state of two Peer peers to each other\n  selected by the privileged Peer state has changed.",
             "itemtype": "event",
             "name": "introduceStateChange",
@@ -8485,7 +8507,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1140,
+            "line": 1154,
             "description": "Stores the list of {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}}\n  event subscription handlers.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -8513,7 +8535,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1161,
+            "line": 1175,
             "description": "The throttling function datetime stamp in\n  [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601).",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -8527,7 +8549,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1176,
+            "line": 1190,
             "description": "Triggers event subscription handlers that is associated with the event name.\n{{#crossLink \"Skylink/on:method\"}}on() event subscription handlers{{/crossLink}}\n  will be triggered always, but\n  {{#crossLink \"Skylink/once:method\"}}once() event subscription hadlers{{/crossLink}}\n  will only be triggered once the condition is met.",
             "itemtype": "method",
             "name": "_trigger",
@@ -8546,7 +8568,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1235,
+            "line": 1249,
             "description": "Subscribes an event handler associated to the event name.\nThis event handler will always be triggered when the event name is triggered. If you\n  are looking for subscription event handler to be triggered once, check out\n  {{#crossLink \"Skylink/once:method\"}}once() event subscription{{/crossLink}}.",
             "itemtype": "method",
             "name": "on",
@@ -8571,7 +8593,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1262,
+            "line": 1276,
             "description": "Subscribes an event handler associated to the event name that\n   would only be triggered once the provided condition function has been met.",
             "itemtype": "method",
             "name": "once",
@@ -8609,7 +8631,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1311,
+            "line": 1325,
             "description": "Unsubscribes an event handler associated to the event name.",
             "itemtype": "method",
             "name": "off",
@@ -8635,7 +8657,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1358,
+            "line": 1372,
             "description": "Checks if the first condition is already met before doing an event\n  handler subscription to wait for the second condition to be met.\nThis method will do a event subscription with\n  {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}} as this\n  <code>_condition()</code> would only trigger once, unless <code>fireAlways</code>\n  is set to <code>true</code>.",
             "itemtype": "method",
             "name": "_condition",
@@ -8678,7 +8700,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1409,
+            "line": 1423,
             "description": "Starts the interval check for the condition provided to meet before clearing\n  the interval and triggering the callback provided.\nThis utilises <code>setInterval()</code> function.",
             "itemtype": "method",
             "name": "_wait",
@@ -8709,7 +8731,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1459,
+            "line": 1473,
             "description": "Returns a wrapper of the original function, which fires only once during\n a specified amount of time.",
             "itemtype": "method",
             "name": "_throttle",
@@ -12496,23 +12518,23 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-process.js:75"
+            "line": " source/data-process.js:77"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-process.js:101"
+            "line": " source/data-process.js:103"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-process.js:125"
+            "line": " source/data-process.js:127"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-process.js:164"
+            "line": " source/data-process.js:166"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-process.js:206"
+            "line": " source/data-process.js:208"
         },
         {
             "message": "unknown tag: component",
@@ -13304,11 +13326,11 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:181"
+            "line": " source/skylink-events.js:183"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:196"
+            "line": " source/skylink-events.js:195"
         },
         {
             "message": "unknown tag: component",
@@ -13316,63 +13338,63 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:221"
+            "line": " source/skylink-events.js:224"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:298"
+            "line": " source/skylink-events.js:235"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:377"
+            "line": " source/skylink-events.js:312"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:454"
+            "line": " source/skylink-events.js:391"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:531"
+            "line": " source/skylink-events.js:468"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:613"
+            "line": " source/skylink-events.js:545"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:704"
+            "line": " source/skylink-events.js:627"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:732"
+            "line": " source/skylink-events.js:718"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:756"
+            "line": " source/skylink-events.js:746"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:834"
+            "line": " source/skylink-events.js:770"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:852"
+            "line": " source/skylink-events.js:848"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:890"
+            "line": " source/skylink-events.js:866"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:906"
+            "line": " source/skylink-events.js:904"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:919"
+            "line": " source/skylink-events.js:920"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:932"
+            "line": " source/skylink-events.js:933"
         },
         {
             "message": "unknown tag: component",
@@ -13380,51 +13402,55 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1025"
+            "line": " source/skylink-events.js:960"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1105"
+            "line": " source/skylink-events.js:1039"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1120"
+            "line": " source/skylink-events.js:1119"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1140"
+            "line": " source/skylink-events.js:1134"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1161"
+            "line": " source/skylink-events.js:1154"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1176"
+            "line": " source/skylink-events.js:1175"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1235"
+            "line": " source/skylink-events.js:1190"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1262"
+            "line": " source/skylink-events.js:1249"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1311"
+            "line": " source/skylink-events.js:1276"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1358"
+            "line": " source/skylink-events.js:1325"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1409"
+            "line": " source/skylink-events.js:1372"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1459"
+            "line": " source/skylink-events.js:1423"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/skylink-events.js:1473"
         },
         {
             "message": "unknown tag: component",

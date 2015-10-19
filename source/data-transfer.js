@@ -84,10 +84,10 @@ Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['Android', 'iOS'];
  * @attribute DATA_TRANSFER_TYPE
  * @type JSON
  * @param {String} UPLOAD <small>Value <code>"upload"</code></small>
- *   This data transfer is an outgoing (uploading) transfer.<br>
+ *   This data transfer is an outgoing <em>(uploading)</em> transfer.<br>
  *   Data is sent to the receiving Peer using the associated DataChannel connection.
  * @param {String} DOWNLOAD <small>Value <code>"download"</code></small>
- *   The data transfer is an incoming (downloading) transfer.<br>
+ *   The data transfer is an incoming <em>(downloading)</em> transfer.<br>
  *   Data is received from the sending Peer using the associated DataChannel connection.
  * @readOnly
  * @component DataTransfer

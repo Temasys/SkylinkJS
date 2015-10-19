@@ -172,11 +172,25 @@ Skylink.prototype._EVENTS = {
    * @param {Object|String} error The error object thrown that caused the failure.
    * @param {Boolean} isScreensharing The flag that indicates if self
    *    Stream object is a screensharing stream or not.
+   * @param {Boolean} isAudioFallbackError The flag that indicates if Skylink throws
+   *    the error after an audio fallback has been attempted.
    * @component Events
    * @for Skylink
    * @since 0.1.0
    */
   mediaAccessError: [],
+
+  /**
+   * Event triggered when Skylink does an audio fallback when retrieving video and audio
+   *   user media stream fails.
+   * @event mediaAccessFallback
+   * @param {Object|String} error The error object thrown that caused the failure
+   *   from retrieve video and audio user media stream.
+   * @component Events
+   * @for Skylink
+   * @since 0.6.3
+   */
+  mediaAccessFallback: [],
 
   /**
    * Event triggered when Skylink have been successfully granted access to self user media stream and

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.2 - Mon Oct 19 2015 18:14:23 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Mon Oct 19 2015 19:09:38 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.2 - Mon Oct 19 2015 18:14:23 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Mon Oct 19 2015 19:09:38 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8523,7 +8523,7 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
  * - Different channels serves different functionalities.
  * @attribute DATA_CHANNEL_TYPE
  * @type JSON
- * @param {String} MESSAGING <small><b>PRIMARY connection</b> | Value <code>"messaging"</code></small>
+ * @param {String} MESSAGING <small><b>MAIN connection</b> | Value <code>"messaging"</code></small>
  *   This DataChannel connection is used for P2P messaging only, as used in
  *   {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.<br>
  * Unless if self connects with Peers connecting from the mobile SDK platform applications,
@@ -8931,22 +8931,24 @@ Skylink.prototype._CHUNK_DATAURL_SIZE = 1212;
 Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 12288;
 
 /**
- * The list of native data types that is transferred through the DataChannel connection.
- * The current supported data types is <code>string</code>. <code>Blob</code>,
- *   <code>ArrayBuffer</code> types support is not yet currently handled or
- *   implemented.
+ * These are the list of available transfer encodings that would be used by Skylink during a data transfer.
+ * - The currently supported data type is <code>BINARY_STRING</code>.
+ * - Support for data types <code>BLOB</code> and <code>ARRAY_BUFFER</code> is still in implementation.
  * @attribute DATA_TRANSFER_DATA_TYPE
  * @type JSON
- * @param {String} BINARY_STRING Data is transferred using
- *   [binary converted strings](https://developer.mozilla.org/en-US/
- *   docs/Web/HTTP/data_URIs) through the DataChannel connection.
- * @param {String} ARRAY_BUFFER Data is transferred using
- *   [ArrayBuffers](https://developer.mozilla.org/en-US/docs/Web/JavaScript
-  *  /Reference/Global_Objects/ArrayBuffer) through the DataChannel connection.
- * @param {String} BLOB Data is transferred using
+ * @param {String} BINARY_STRING <small><b>DEFAULT</b> | Value <code>"binaryString"</code></small>
+ *   The option to let Skylink encode data packets using
+ *   [binary converted strings](https://developer.mozilla.org/en-US/docs/Web/HTTP/data_URIs)
+ *   when sending the data packets through the DataChannel connection during data transfers.
+ * @param {String} ARRAY_BUFFER <small><em>IN IMPLEMENTATION</em> | Value <code>"arrayBuffer"</code></small>
+ *   The option to let Skylink encode data packets using
+ *   [ArrayBuffers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
+ *   when sending the data packets through the DataChannel connection during data transfers.
+ * @param {String} BLOB <small><em>IN IMPLEMENTATION</em> | Value <code>"blob"</code></small>
+ *   The option to let Skylink encode data packets using
  *   [Blobs](https://developer.mozilla.org/en/docs/Web/API/Blob)
- *   through the DataChannel connection.
- * @final
+ *   when sending the data packets through the DataChannel connection during data transfers.
+ * @readOnly
  * @component DataProcess
  * @for Skylink
  * @since 0.1.0
@@ -9181,15 +9183,17 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
 Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['Android', 'iOS'];
 
 /**
- * The types of data transfers to indicate if the DataChannel is
- *   uploading or downloading the data transfer.
+ * These are the types of data transfers that indicates if transfer is an
+ *   outgoing <small><em>(uploading)</em></small> or incoming <small><em>(downloding)</em></small> transfers.
  * @attribute DATA_TRANSFER_TYPE
  * @type JSON
- * @param {String} UPLOAD The DataChannel connection is uploading data packets to
- *   receiving end.
- * @param {String} DOWNLOAD The DataChannel connection is downloading data packets
- *   from sending point.
- * @final
+ * @param {String} UPLOAD <small>Value <code>"upload"</code></small>
+ *   This data transfer is an outgoing <em>(uploading)</em> transfer.<br>
+ *   Data is sent to the receiving Peer using the associated DataChannel connection.
+ * @param {String} DOWNLOAD <small>Value <code>"download"</code></small>
+ *   The data transfer is an incoming <em>(downloading)</em> transfer.<br>
+ *   Data is received from the sending Peer using the associated DataChannel connection.
+ * @readOnly
  * @component DataTransfer
  * @for Skylink
  * @since 0.1.0
@@ -9200,25 +9204,50 @@ Skylink.prototype.DATA_TRANSFER_TYPE = {
 };
 
 /**
- * The states of a data transfer in a DataChannel connection.
+ * These are the list of data transfer states that Skylink would trigger.
  * @attribute DATA_TRANSFER_STATE
  * @type JSON
- * @param {String} UPLOAD_REQUEST Request to start a data transfer.
- * @param {String} UPLOAD_STARTED Request to start the data transfer has been accepted
- *   and data transfer is starting to upload data packets to receiving end.
- * @param {String} DOWNLOAD_STARTED Request to start the data transfer has been accepted
- *   and data transfer is starting to receive data packets from sending point.
- * @param {String} REJECTED Request to start a data transfer is rejected.
- * @param {String} UPLOADING The data transfer upload is ongoing with receiving end.
- * @param {String} DOWNLOADING The data transfer download is ongoing with sending point.
- * @param {String} UPLOAD_COMPLETED The data transfer uploaded to receiving end has
- *   been completed successfully.
- * @param {String} DOWNLOAD_COMPLETED The data transfer downloaded from sending point
- *   has been completed successfully.
- * @param {String} CANCEL The ongoing data transfer has cancelled from receiving end
- *   or sending point and has been terminated.
- * @param {String} ERROR The ongoing data transfer has occurred an exception and
- *   has been terminated.
+ * @param {String} UPLOAD_REQUEST <small>Value <code>"request"</code></small>
+ *   The state when a data transfer request has been received from Peer.
+ * This happens after Peer starts a data transfer using
+ *   {{#crossLink "Skylink/sendBlobData:method"}}sendBlobData(){{/crossLink}} or
+ *   {{#crossLink "Skylink/sendURLData:method"}}sendURLData(){{/crossLink}}.
+ * @param {String} UPLOAD_STARTED <small>Value <code>"uploadStarted"</code></small>
+ *   The state when the data transfer will begin and start to upload the first data
+ *   packets to receiving Peer.<br>
+ * This happens after receiving Peer accepts a data transfer using
+ *   {{#crossLink "Skylink/acceptDataTransfer:method"}}acceptDataTransfer(){{/crossLink}}.
+ * @param {String} DOWNLOAD_STARTED <small>Value <code>"downloadStarted"</code></small>
+ *   The state when the data transfer has begin and associated DataChannel connection is
+ *   expected to receive the first data packet from sending Peer.<br>
+ * This happens after self accepts a data transfer using
+ *   {{#crossLink "Skylink/acceptDataTransfer:method"}}acceptDataTransfer(){{/crossLink}} upon
+ *   the triggered state of <code>UPLOAD_REQUEST</code>.
+ * @param {String} REJECTED <small>Value <code>"rejected"</code></small>
+ *   The state when the data transfer has been rejected by receiving Peer and data transfer is
+ *   terminated.<br>
+ * This happens after Peer rejects a data transfer using
+ *   {{#crossLink "Skylink/acceptDataTransfer:method"}}acceptDataTransfer(){{/crossLink}}.
+ * @param {String} UPLOADING <small>Value <code>"uploading"</code></small>
+ *   The state when the data transfer is still being transferred to receiving Peer.<br>
+ * This happens after state <code>UPLOAD_STARTED</code>.
+ * @param {String} DOWNLOADING <small>Value <code>"downloading"</code></small>
+ *   The state when the data transfer is still being transferred from sending Peer.<br>
+ * This happens after state <code>DOWNLOAD_STARTED</code>.
+ * @param {String} UPLOAD_COMPLETED <small>Value <code>"uploadCompleted"</code></small>
+ *   The state when the data transfer has been transferred to receiving Peer successfully.<br>
+ * This happens after state <code>UPLOADING</code> or <code>UPLOAD_STARTED</code>, depending
+ *   on how huge the data being transferred is.
+ * @param {String} DOWNLOAD_COMPLETED <small>Value <code>"downloadCompleted"</code></small>
+ *   The state when the data transfer has been transferred from sending Peer successfully.<br>
+ * This happens after state <code>DOWNLOADING</code> or <code>DOWNLOAD_STARTED</code>, depending
+ *   on how huge the data being transferred is.
+ * @param {String} CANCEL <small>Value <code>"cancel"</code></small>
+ *   The state when the data transfer has been terminated by Peer.<br>
+ * This happens after state <code>DOWNLOAD_STARTED</code> or <code>UPLOAD_STARTED</code>.
+ * @param {String} ERROR <small>Value <code>"error"</code></small>
+ *   The state when the data transfer has occurred an exception.<br>
+ * At this stage, the data transfer would usually be terminated and may lead to state <code>CANCEL</code>.
  * @readOnly
  * @component DataTransfer
  * @for Skylink
@@ -16355,11 +16384,25 @@ Skylink.prototype._EVENTS = {
    * @param {Object|String} error The error object thrown that caused the failure.
    * @param {Boolean} isScreensharing The flag that indicates if self
    *    Stream object is a screensharing stream or not.
+   * @param {Boolean} isAudioFallbackError The flag that indicates if Skylink throws
+   *    the error after an audio fallback has been attempted.
    * @component Events
    * @for Skylink
    * @since 0.1.0
    */
   mediaAccessError: [],
+
+  /**
+   * Event triggered when Skylink does an audio fallback when retrieving video and audio
+   *   user media stream fails.
+   * @event mediaAccessFallback
+   * @param {Object|String} error The error object thrown that caused the failure
+   *   from retrieve video and audio user media stream.
+   * @component Events
+   * @for Skylink
+   * @since 0.6.3
+   */
+  mediaAccessFallback: [],
 
   /**
    * Event triggered when Skylink have been successfully granted access to self user media stream and
