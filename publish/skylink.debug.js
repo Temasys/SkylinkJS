@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.2 - Mon Oct 19 2015 16:07:53 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Mon Oct 19 2015 16:20:47 GMT+0800 (SGT) */
 
 (function() {
 
@@ -12877,6 +12877,21 @@ Skylink.prototype.getUserMedia = function(options,callback) {
 
     setTimeout(function () {
       try {
+        if (typeof callback === 'function'){
+          var mediaAccessErrorFn = function (error) {
+            callback(error, null);
+            self.off('mediaAccessSuccess', mediaAccessSuccessFn);
+          };
+
+          var mediaAccessSuccessFn = function (stream) {
+            callback(null, stream);
+            self.off('mediaAccessError', mediaAccessErrorFn);
+          };
+
+          self.once('mediaAccessError', mediaAccessErrorFn);
+          self.once('mediaAccessSuccess', mediaAccessSuccessFn);
+        }
+
         window.getUserMedia(self._getUserMediaSettings, function (stream) {
           var isSuccess = false;
           var requireAudio = !!options.audio;
@@ -12902,7 +12917,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
               hasVideo =  stream.getVideoTracks().length > 0;
 
               if (self._audioFallback && !hasVideo) {
-                hasVideo = true;
+                hasVideo = true; // to trick isSuccess to be true
                 self._trigger('mediaAccessFallback', notSameTracksError);
               }
             }
@@ -12912,25 +12927,15 @@ Skylink.prototype.getUserMedia = function(options,callback) {
 
             if (isSuccess) {
               self._onUserMediaSuccess(stream);
-              if (typeof callback === 'function'){
-                callback(null,stream);
-              }
             } else {
               self._onUserMediaError(notSameTracksError, false, false);
-              callback(notSameTracksError);
             }
           }
         }, function (error) {
           self._onUserMediaError(error, false, true);
-          if (typeof callback === 'function'){
-            callback(error,null);
-          }
         });
       } catch (error) {
         self._onUserMediaError(error, false, true);
-        if (typeof callback === 'function'){
-          callback(error,null);
-        }
       }
     }, window.webrtcDetectedBrowser === 'firefox' ? 500 : 1);
   } else {
