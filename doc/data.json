@@ -5708,7 +5708,7 @@
         {
             "file": "source/skylink-debug.js",
             "line": 208,
-            "description": "The object that handles the stored Skylink console logs.\nSkylink {{#crossLink \"Skylink/setDebugMode:method\"}}setDebugMode(){{/crossLink}} <code>storeLogs</code>\n  must be set as <code>true</code> to enable the storage of logs.",
+            "description": "The object that handles the stored Skylink console logs.\n- {{#crossLink \"Skylink/setDebugMode:method\"}}setDebugMode(){{/crossLink}} <code>storeLogs</code> flag\n  must be set as <code>true</code> to enable the storage of logs.",
             "itemtype": "property",
             "name": "SkylinkLogs",
             "type": "JSON",
@@ -5728,6 +5728,9 @@
                 "description": "The array of stored console logs based on the log level provided.",
                 "type": "Array"
             },
+            "example": [
+                "\n // Example 1: Get logs of specific level\n var debugLogs = SkylinkLogs.getLogs(SkylinkDemo.LOG_LEVEL.DEBUG);\n\n // Example 2: Get all logs\n var allLogs = SkylinkLogs.getLogs();"
+            ],
             "type": "Function",
             "required": 1,
             "global": "true",
@@ -5737,7 +5740,7 @@
             "subprops": [
                 {
                     "name": "logLevel",
-                    "description": "The specific log level of Skylink console logs\n  that should be returned. If value is not provided, it will return all stored console logs.\n [Rel: Skylink.LOG_LEVEL]",
+                    "description": "The specific log level of Skylink console logs\n  that should be returned.<br>If value is not provided, it will return all stored console logs.\n [Rel: Skylink.LOG_LEVEL]",
                     "type": "Number",
                     "optional": true
                 }
@@ -5745,11 +5748,14 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 237,
+            "line": 243,
             "description": "Clears the stored Skylink console logs.",
             "itemtype": "property",
             "name": "SkylinkLogs.clearAllLogs",
             "type": "Function",
+            "example": [
+                "\n  SkylinkLogs.clearAllLogs(); // empties all logs"
+            ],
             "required": 1,
             "global": "true",
             "component": "Log",
@@ -5766,11 +5772,14 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 252,
+            "line": 260,
             "description": "Prints all the stored Skylink console logs into the [Web console](https://developer.mozilla.org/en/docs/Web/API/console).",
             "itemtype": "property",
             "name": "SkylinkLogs.printAllLogs",
             "type": "Function",
+            "example": [
+                "\n  SkylinkLogs.printAllLogs(); // check the console"
+            ],
             "required": 1,
             "global": "true",
             "component": "Log",
@@ -5779,7 +5788,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 265,
+            "line": 275,
             "description": "Handles the Skylink logs and stores the console log message in\n  {{#crossLink \"Skylink/_storedLogs:attribute\"}}_storedLogs{{/crossLink}}\n  if {{#crossLink \"Skylink/_enableDebugStack:attribute\"}}_enableDebugStack{{/crossLink}} is\n  set to <code>true</code> and prints out the log to the Web console.",
             "itemtype": "method",
             "name": "_logFn",
@@ -5834,7 +5843,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 347,
+            "line": 357,
             "description": "The object that handles the logging functionality in Skylink.",
             "itemtype": "attribute",
             "name": "log",
@@ -5876,7 +5885,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 364,
+            "line": 374,
             "description": "Handles the <code>console.debug</code> console log message.",
             "itemtype": "property",
             "name": "log.debug",
@@ -5930,7 +5939,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 390,
+            "line": 400,
             "description": "Handles the <code>console.log</code> console log message.",
             "itemtype": "property",
             "name": "log.log",
@@ -5984,7 +5993,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 416,
+            "line": 426,
             "description": "Handles the <code>console.info</code> console log message.",
             "itemtype": "property",
             "name": "log.info",
@@ -6038,7 +6047,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 442,
+            "line": 452,
             "description": "Handles the <code>console.warn</code> console log message.",
             "itemtype": "property",
             "name": "log.warn",
@@ -6091,7 +6100,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 467,
+            "line": 477,
             "description": "Handles the <code>console.error</code> console log message.",
             "itemtype": "property",
             "name": "log.error",
@@ -6145,7 +6154,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 494,
+            "line": 504,
             "description": "Configures the Skylink console log level that would determine the\n  type of console logs that would be printed in the [Web console](https://developer.mozilla.org/en/docs/Web/API/console).",
             "itemtype": "method",
             "name": "setLogLevel",
@@ -6166,7 +6175,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 521,
+            "line": 531,
             "description": "Configures the Skylink debugging tools.",
             "itemtype": "method",
             "name": "setDebugMode",
@@ -13211,71 +13220,71 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:237"
+            "line": " source/skylink-debug.js:243"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:252"
+            "line": " source/skylink-debug.js:260"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:265"
+            "line": " source/skylink-debug.js:275"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:265"
+            "line": " source/skylink-debug.js:275"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:347"
+            "line": " source/skylink-debug.js:357"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:347"
+            "line": " source/skylink-debug.js:357"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:364"
+            "line": " source/skylink-debug.js:374"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:364"
+            "line": " source/skylink-debug.js:374"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:390"
+            "line": " source/skylink-debug.js:400"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:390"
+            "line": " source/skylink-debug.js:400"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:416"
+            "line": " source/skylink-debug.js:426"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:416"
+            "line": " source/skylink-debug.js:426"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:442"
+            "line": " source/skylink-debug.js:452"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:467"
+            "line": " source/skylink-debug.js:477"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:467"
+            "line": " source/skylink-debug.js:477"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:494"
+            "line": " source/skylink-debug.js:504"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:521"
+            "line": " source/skylink-debug.js:531"
         },
         {
             "message": "unknown tag: component",

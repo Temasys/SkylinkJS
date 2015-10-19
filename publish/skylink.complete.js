@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.2 - Tue Oct 20 2015 03:15:25 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Tue Oct 20 2015 03:57:06 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.2 - Tue Oct 20 2015 03:15:25 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Tue Oct 20 2015 03:57:06 GMT+0800 (SGT) */
 
 (function() {
 
@@ -15937,7 +15937,7 @@ var _printAllStoredLogsFn = function () {
 
 /**
  * The object that handles the stored Skylink console logs.
- * Skylink {{#crossLink "Skylink/setDebugMode:method"}}setDebugMode(){{/crossLink}} <code>storeLogs</code>
+ * - {{#crossLink "Skylink/setDebugMode:method"}}setDebugMode(){{/crossLink}} <code>storeLogs</code> flag
  *   must be set as <code>true</code> to enable the storage of logs.
  * @property SkylinkLogs
  * @type JSON
@@ -15952,9 +15952,15 @@ window.SkylinkLogs = {
    * Gets the stored Skylink console logs.
    * @property SkylinkLogs.getLogs
    * @param {Number} [logLevel] The specific log level of Skylink console logs
-   *   that should be returned. If value is not provided, it will return all stored console logs.
+   *   that should be returned.<br>If value is not provided, it will return all stored console logs.
    *  [Rel: Skylink.LOG_LEVEL]
    * @return {Array} The array of stored console logs based on the log level provided.
+   * @example
+   *  // Example 1: Get logs of specific level
+   *  var debugLogs = SkylinkLogs.getLogs(SkylinkDemo.LOG_LEVEL.DEBUG);
+   *
+   *  // Example 2: Get all logs
+   *  var allLogs = SkylinkLogs.getLogs();
    * @type Function
    * @required
    * @global true
@@ -15971,6 +15977,8 @@ window.SkylinkLogs = {
    *   that should be cleared. If value is not provided, it will clear all stored console logs.
    *  [Rel: Skylink.LOG_LEVEL]
    * @type Function
+   * @example
+   *   SkylinkLogs.clearAllLogs(); // empties all logs
    * @required
    * @global true
    * @component Log
@@ -15983,6 +15991,8 @@ window.SkylinkLogs = {
    * Prints all the stored Skylink console logs into the [Web console](https://developer.mozilla.org/en/docs/Web/API/console).
    * @property SkylinkLogs.printAllLogs
    * @type Function
+   * @example
+   *   SkylinkLogs.printAllLogs(); // check the console
    * @required
    * @global true
    * @component Log
