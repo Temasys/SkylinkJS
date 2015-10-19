@@ -1,28 +1,49 @@
 /**
- * The list of Peer connection ICE connection triggered states.
- * Refer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState).
+ * These are the list of Peer connection ICE connection states that Skylink would trigger.
+ * - Some of the state references the [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState),
+ *   except the <code>TRICKLE_FAILED</code> state, which is an addition provided state by Skylink
+ *   to inform that trickle ICE has failed.
  * @attribute ICE_CONNECTION_STATE
  * @type JSON
- * @param {String} STARTING The ICE agent is gathering addresses
- *   and/or waiting for remote candidates to be supplied.
- * @param {String} CHECKING The ICE agent has received remote candidates
+ * @param {String} STARTING <small>Value <code>"starting"</code></small>
+ *   The state when the ICE agent is gathering addresses and/or waiting
+ *   for remote candidates to be supplied.<br>
+ * This state occurs when Peer connection has just been initialised.
+ * @param {String} CHECKING <small>Value <code>"checking"</code></small>
+ *   The state when the ICE agent has received remote candidates
  *   on at least one component, and is checking candidate pairs but has
  *   not yet found a connection. In addition to checking, it may also
- *   still be gathering.
- * @param {String} CONNECTED The ICE agent has found a usable connection
+ *   still be gathering.<br>
+ * This state occurs after <code>STARTING</code> state.
+ * @param {String} CONNECTED <small>Value <code>"connected"</code></small>
+ *  The state when the ICE agent has found a usable connection
  *   for all components but is still checking other candidate pairs to see
- *   if there is a better connection. It may also still be gathering.
- * @param {String} COMPLETED The ICE agent has finished gathering and
- *   checking and found a connection for all components.
- * @param {String} FAILED The ICE agent is finished checking all
+ *   if there is a better connection. It may also still be gathering.<br>
+ * This state occurs after <code>CHECKING</code>.
+ * @param {String} COMPLETED <small>Value <code>"completed"</code></small>
+ *   The state when the ICE agent has finished gathering and
+ *   checking and found a connection for all components.<br>
+ * This state occurs after <code>CONNECTED</code> (or sometimes after <code>CHECKING</code>).
+ * @param {String} FAILED <small>Value <code>"failed"</code></small>
+ *   The state when the ICE agent is finished checking all
  *   candidate pairs and failed to find a connection for at least one
- *   component.
- * @param {String} DISCONNECTED Liveness checks have failed for one or
+ *   component.<br>
+ * This state occurs during the ICE connection attempt after <code>STARTING</code> state.
+ * @param {String} DISCONNECTED <small>Value <code>"disconnected"</code></small>
+ *   The state when liveness checks have failed for one or
  *   more components. This is more aggressive than "failed", and may
  *   trigger intermittently (and resolve itself without action) on
- *   a flaky network.
- * @param {String} CLOSED The ICE agent has shut down and is no
- *   longer responding to STUN requests.
+ *   a flaky network.<br>
+ * This state occurs after <code>CONNECTED</code> or <code>COMPLETED</code> state.
+ * @param {String} CLOSED <small>Value <code>"closed"</code></small>
+ *   The state when the ICE agent has shut down and is no
+ *   longer responding to STUN requests.<br>
+ * This state occurs after Peer connection has been disconnected <em>(closed)</em>.
+ * @param {String} TRICKLE_FAILED <small>Value <code>"trickeFailed"</code></small>
+ *   The state when attempting to connect successfully with ICE connection fails
+ *    with trickle ICE connections.<br>
+ * Trickle ICE would be disabled after <code>3</code> attempts to have a better
+ *   successful ICE connection.
  * @readOnly
  * @since 0.1.0
  * @component ICE
@@ -40,22 +61,49 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
 };
 
 /**
- * The list of TURN server transports flags to set for TURN server connections.
+ * These are the list of available transports that
+ *   Skylink would use to connect to the TURN servers with.
+ * - If example, these are list of TURN servers given by the platform signaling:<br>
+ *   <small><code>turn:turnurl:123?transport=tcp</code><br>
+ *   <code>turn:turnurl?transport=udp</code><br>
+ *   <code>turn:turnurl:1234</code><br>
+ *   <code>turn:turnurl</code></small>
  * @attribute TURN_TRANSPORT
  * @type JSON
- * @param {String} TCP Use only TCP transport option.
- *   <i>E.g. <code>turn:turnurl:5523?transport=tcp</code></i>.
- * @param {String} UDP Use only UDP transport option.
- *   <i>E.g. <code>turn:turnurl:5523?transport=udp</code></i>.
- * @param {String} ANY Use any transports option given
- *   by the platform signaling.
- *   <i>E.g. <code>turn:turnurl:5523?transport=udp</code> or
- *   <code>turn:turnurl:5523?transport=tcp</code></i>.
- * @param {String} NONE Set no transport option in TURN servers.
- *   <i>E.g. <code>turn:turnurl:5523</code></i>
- * @param {String} ALL Use both UCP and TCP transports options.
- *   <i>E.g. <code>turn:turnurl:5523?transport=udp</code> and
- *   <code>turn:turnurl:5523?transport=tcp</code></i>.
+ * @param {String} TCP <small>Value <code>"tcp"</code></small>
+ *   The option to connect using only TCP transports.
+ *   <small>EXAMPLE OUTPUT<br>
+ *   <code>turn:turnurl:123?transport=tcp</code><br>
+ *   <code>turn:turnurl?transport=tcp</code><br>
+ *   <code>turn:turnurl:1234?transport=tcp</code></small>
+ * @param {String} UDP <small>Value <code>"udp"</code></small>
+ *   The option to connect using only UDP transports.
+ *   <small>EXAMPLE OUTPUT<br>
+ *   <code>turn:turnurl:123?transport=udp</code><br>
+ *   <code>turn:turnurl?transport=udp</code><br>
+ *   <code>turn:turnurl:1234?transport=udp</code></small>
+ * @param {String} ANY <small><b>DEFAULT</b> | Value <code>"any"</code></small>
+ *   This option to use any transports that is preconfigured by provided by the platform signaling.
+ *   <small>EXAMPLE OUTPUT<br>
+ *   <code>turn:turnurl:123?transport=tcp</code><br>
+ *   <code>turn:turnurl?transport=udp</code><br>
+ *   <code>turn:turnurl:1234</code><br>
+ *   <code>turn:turnurl</code></small>
+ * @param {String} NONE <small>Value <code>"none"</code></small>
+ *   This option to set no transports.
+ *   <small>EXAMPLE OUTPUT<br>
+ *   <code>turn:turnurl:123</code><br>
+ *   <code>turn:turnurl</code><br>
+ *   <code>turn:turnurl:1234</code></small>
+ * @param {String} ALL <small>Value <code>"all"</code></small>
+ *   This option to use both TCP and UDP transports.
+ *   <small>EXAMPLE OUTPUT<br>
+ *   <code>turn:turnurl:123?transport=tcp</code><br>
+ *   <code>turn:turnurl:123?transport=udp</code><br>
+ *   <code>turn:turnurl?transport=tcp</code><br>
+ *   <code>turn:turnurl?transport=udp</code><br>
+ *   <code>turn:turnurl:1234?transport=tcp</code><br>
+ *   <code>turn:turnurl:1234?transport=udp</code></small>
  * @readOnly
  * @since 0.5.4
  * @component ICE

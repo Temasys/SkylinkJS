@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.2 - Mon Oct 19 2015 19:09:38 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Mon Oct 19 2015 21:47:03 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.2 - Mon Oct 19 2015 19:09:38 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Mon Oct 19 2015 21:47:03 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11516,17 +11516,20 @@ Skylink.prototype._peerCandidatesQueue = {};
 Skylink.prototype._peerIceTrickleDisabled = {};
 
 /**
- * The list of Peer connection ICE candidate generation triggered states.
- * Refer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState).
+ * The list of Peer connection ICE candidate generation states that Skylink would trigger.
+ * - These states references the [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState).
  * @attribute CANDIDATE_GENERATION_STATE
  * @type JSON
- * @param {String} NEW The object was just created, and no networking
- *   has occurred yet.
- * @param {String} GATHERING The ICE engine is in the process of gathering
- *   candidates for connection.
- * @param {String} COMPLETED The ICE engine has completed gathering. Events
- *   such as adding a new interface or a new TURN server will cause the
- *   state to go back to gathering.
+ * @param {String} NEW <small>Value <code>"new"</code></small>
+ *   The state when the object was just created, and no networking has occurred yet.<br>
+ * This state occurs when Peer connection has just been initialised.
+ * @param {String} GATHERING <small>Value <code>"gathering"</code></small>
+ *   The state when the ICE engine is in the process of gathering candidates for connection.<br>
+ * This state occurs after <code>NEW</code> state.
+ * @param {String} COMPLETED <small>Value <code>"completed"</code></small>
+ *   The ICE engine has completed gathering. Events such as adding a
+ *   new interface or a new TURN server will cause the state to go back to gathering.<br>
+ * This state occurs after <code>GATHERING</code> state and means ICE gathering has been done.
  * @readOnly
  * @since 0.4.1
  * @component ICE
@@ -11679,22 +11682,49 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
 };
 
 /**
- * The list of TURN server transports flags to set for TURN server connections.
+ * These are the list of available transports that
+ *   Skylink would use to connect to the TURN servers with.
+ * - If example, these are list of TURN servers given by the platform signaling:<br>
+ *   <small><code>turn:turnurl:123?transport=tcp</code><br>
+ *   <code>turn:turnurl?transport=udp</code><br>
+ *   <code>turn:turnurl:1234</code><br>
+ *   <code>turn:turnurl</code></small>
  * @attribute TURN_TRANSPORT
  * @type JSON
- * @param {String} TCP Use only TCP transport option.
- *   <i>E.g. <code>turn:turnurl:5523?transport=tcp</code></i>.
- * @param {String} UDP Use only UDP transport option.
- *   <i>E.g. <code>turn:turnurl:5523?transport=udp</code></i>.
- * @param {String} ANY Use any transports option given
- *   by the platform signaling.
- *   <i>E.g. <code>turn:turnurl:5523?transport=udp</code> or
- *   <code>turn:turnurl:5523?transport=tcp</code></i>.
- * @param {String} NONE Set no transport option in TURN servers.
- *   <i>E.g. <code>turn:turnurl:5523</code></i>
- * @param {String} ALL Use both UCP and TCP transports options.
- *   <i>E.g. <code>turn:turnurl:5523?transport=udp</code> and
- *   <code>turn:turnurl:5523?transport=tcp</code></i>.
+ * @param {String} TCP <small>Value <code>"tcp"</code></small>
+ *   The option to connect using only TCP transports.
+ *   <small>EXAMPLE OUTPUT<br>
+ *   <code>turn:turnurl:123?transport=tcp</code><br>
+ *   <code>turn:turnurl?transport=tcp</code><br>
+ *   <code>turn:turnurl:1234?transport=tcp</code></small>
+ * @param {String} UDP <small>Value <code>"udp"</code></small>
+ *   The option to connect using only UDP transports.
+ *   <small>EXAMPLE OUTPUT<br>
+ *   <code>turn:turnurl:123?transport=udp</code><br>
+ *   <code>turn:turnurl?transport=udp</code><br>
+ *   <code>turn:turnurl:1234?transport=udp</code></small>
+ * @param {String} ANY <small><b>DEFAULT</b> | Value <code>"any"</code></small>
+ *   This option to use any transports that is preconfigured by provided by the platform signaling.
+ *   <small>EXAMPLE OUTPUT<br>
+ *   <code>turn:turnurl:123?transport=tcp</code><br>
+ *   <code>turn:turnurl?transport=udp</code><br>
+ *   <code>turn:turnurl:1234</code><br>
+ *   <code>turn:turnurl</code></small>
+ * @param {String} NONE <small>Value <code>"none"</code></small>
+ *   This option to set no transports.
+ *   <small>EXAMPLE OUTPUT<br>
+ *   <code>turn:turnurl:123</code><br>
+ *   <code>turn:turnurl</code><br>
+ *   <code>turn:turnurl:1234</code></small>
+ * @param {String} ALL <small>Value <code>"all"</code></small>
+ *   This option to use both TCP and UDP transports.
+ *   <small>EXAMPLE OUTPUT<br>
+ *   <code>turn:turnurl:123?transport=tcp</code><br>
+ *   <code>turn:turnurl:123?transport=udp</code><br>
+ *   <code>turn:turnurl?transport=tcp</code><br>
+ *   <code>turn:turnurl?transport=udp</code><br>
+ *   <code>turn:turnurl:1234?transport=tcp</code><br>
+ *   <code>turn:turnurl:1234?transport=udp</code></small>
  * @readOnly
  * @since 0.5.4
  * @component ICE

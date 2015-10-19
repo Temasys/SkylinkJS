@@ -117,17 +117,20 @@ Skylink.prototype._peerCandidatesQueue = {};
 Skylink.prototype._peerIceTrickleDisabled = {};
 
 /**
- * The list of Peer connection ICE candidate generation triggered states.
- * Refer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState).
+ * The list of Peer connection ICE candidate generation states that Skylink would trigger.
+ * - These states references the [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState).
  * @attribute CANDIDATE_GENERATION_STATE
  * @type JSON
- * @param {String} NEW The object was just created, and no networking
- *   has occurred yet.
- * @param {String} GATHERING The ICE engine is in the process of gathering
- *   candidates for connection.
- * @param {String} COMPLETED The ICE engine has completed gathering. Events
- *   such as adding a new interface or a new TURN server will cause the
- *   state to go back to gathering.
+ * @param {String} NEW &lt;small&gt;Value &lt;code&gt;&quot;new&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The state when the object was just created, and no networking has occurred yet.&lt;br&gt;
+ * This state occurs when Peer connection has just been initialised.
+ * @param {String} GATHERING &lt;small&gt;Value &lt;code&gt;&quot;gathering&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The state when the ICE engine is in the process of gathering candidates for connection.&lt;br&gt;
+ * This state occurs after &lt;code&gt;NEW&lt;/code&gt; state.
+ * @param {String} COMPLETED &lt;small&gt;Value &lt;code&gt;&quot;completed&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The ICE engine has completed gathering. Events such as adding a
+ *   new interface or a new TURN server will cause the state to go back to gathering.&lt;br&gt;
+ * This state occurs after &lt;code&gt;GATHERING&lt;/code&gt; state and means ICE gathering has been done.
  * @readOnly
  * @since 0.4.1
  * @component ICE

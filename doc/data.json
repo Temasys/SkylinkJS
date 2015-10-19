@@ -2339,24 +2339,24 @@
         {
             "file": "source/ice-candidate.js",
             "line": 41,
-            "description": "The list of Peer connection ICE candidate generation triggered states.\nRefer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState).",
+            "description": "The list of Peer connection ICE candidate generation states that Skylink would trigger.\n- These states references the [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState).",
             "itemtype": "attribute",
             "name": "CANDIDATE_GENERATION_STATE",
             "type": "JSON",
             "params": [
                 {
                     "name": "NEW",
-                    "description": "The object was just created, and no networking\n  has occurred yet.",
+                    "description": "<small>Value <code>\"new\"</code></small>\n  The state when the object was just created, and no networking has occurred yet.<br>\nThis state occurs when Peer connection has just been initialised.",
                     "type": "String"
                 },
                 {
                     "name": "GATHERING",
-                    "description": "The ICE engine is in the process of gathering\n  candidates for connection.",
+                    "description": "<small>Value <code>\"gathering\"</code></small>\n  The state when the ICE engine is in the process of gathering candidates for connection.<br>\nThis state occurs after <code>NEW</code> state.",
                     "type": "String"
                 },
                 {
                     "name": "COMPLETED",
-                    "description": "The ICE engine has completed gathering. Events\n  such as adding a new interface or a new TURN server will cause the\n  state to go back to gathering.",
+                    "description": "<small>Value <code>\"completed\"</code></small>\n  The ICE engine has completed gathering. Events such as adding a\n  new interface or a new TURN server will cause the state to go back to gathering.<br>\nThis state occurs after <code>GATHERING</code> state and means ICE gathering has been done.",
                     "type": "String"
                 }
             ],
@@ -2367,7 +2367,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 64,
+            "line": 67,
             "description": "Handles the ICE candidate object received from associated Peer connection\n  to send the ICE candidate object or wait for all gathering to complete\n  before sending the candidate to prevent trickle ICE.",
             "itemtype": "method",
             "name": "_onIceCandidate",
@@ -2392,7 +2392,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 117,
+            "line": 120,
             "description": "Buffers an ICE candidate object associated with a Peer connection\n  to prevent disruption to ICE connection when ICE candidate\n  is received before <code>RTCPeerConnection.setRemoteDescription</code>\n  is called.",
             "itemtype": "method",
             "name": "_addIceCandidateToQueue",
@@ -2416,7 +2416,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 139,
+            "line": 142,
             "description": "Handles the event when adding an ICE candidate has been added\n  successfully. This is mainly to prevent JShint errors.",
             "itemtype": "method",
             "name": "_onAddIceCandidateSuccess",
@@ -2428,7 +2428,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 152,
+            "line": 155,
             "description": "Handles the event when adding an ICE candidate has failed.\nThis is mainly to prevent JShint errors.",
             "itemtype": "method",
             "name": "_onAddIceCandidateFailure",
@@ -2447,7 +2447,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 167,
+            "line": 170,
             "description": "Adds the list of ICE candidates bufferred before <code>RTCPeerConnection.setRemoteDescription\n  </code> is called associated with the Peer connection.",
             "itemtype": "method",
             "name": "_addIceCandidateFromQueue",
@@ -2467,44 +2467,49 @@
         {
             "file": "source/ice-connection.js",
             "line": 1,
-            "description": "The list of Peer connection ICE connection triggered states.\nRefer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState).",
+            "description": "These are the list of Peer connection ICE connection states that Skylink would trigger.\n- Some of the state references the [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState),\n  except the <code>TRICKLE_FAILED</code> state, which is an addition provided state by Skylink\n  to inform that trickle ICE has failed.",
             "itemtype": "attribute",
             "name": "ICE_CONNECTION_STATE",
             "type": "JSON",
             "params": [
                 {
                     "name": "STARTING",
-                    "description": "The ICE agent is gathering addresses\n  and/or waiting for remote candidates to be supplied.",
+                    "description": "<small>Value <code>\"starting\"</code></small>\n  The state when the ICE agent is gathering addresses and/or waiting\n  for remote candidates to be supplied.<br>\nThis state occurs when Peer connection has just been initialised.",
                     "type": "String"
                 },
                 {
                     "name": "CHECKING",
-                    "description": "The ICE agent has received remote candidates\n  on at least one component, and is checking candidate pairs but has\n  not yet found a connection. In addition to checking, it may also\n  still be gathering.",
+                    "description": "<small>Value <code>\"checking\"</code></small>\n  The state when the ICE agent has received remote candidates\n  on at least one component, and is checking candidate pairs but has\n  not yet found a connection. In addition to checking, it may also\n  still be gathering.<br>\nThis state occurs after <code>STARTING</code> state.",
                     "type": "String"
                 },
                 {
                     "name": "CONNECTED",
-                    "description": "The ICE agent has found a usable connection\n  for all components but is still checking other candidate pairs to see\n  if there is a better connection. It may also still be gathering.",
+                    "description": "<small>Value <code>\"connected\"</code></small>\n The state when the ICE agent has found a usable connection\n  for all components but is still checking other candidate pairs to see\n  if there is a better connection. It may also still be gathering.<br>\nThis state occurs after <code>CHECKING</code>.",
                     "type": "String"
                 },
                 {
                     "name": "COMPLETED",
-                    "description": "The ICE agent has finished gathering and\n  checking and found a connection for all components.",
+                    "description": "<small>Value <code>\"completed\"</code></small>\n  The state when the ICE agent has finished gathering and\n  checking and found a connection for all components.<br>\nThis state occurs after <code>CONNECTED</code> (or sometimes after <code>CHECKING</code>).",
                     "type": "String"
                 },
                 {
                     "name": "FAILED",
-                    "description": "The ICE agent is finished checking all\n  candidate pairs and failed to find a connection for at least one\n  component.",
+                    "description": "<small>Value <code>\"failed\"</code></small>\n  The state when the ICE agent is finished checking all\n  candidate pairs and failed to find a connection for at least one\n  component.<br>\nThis state occurs during the ICE connection attempt after <code>STARTING</code> state.",
                     "type": "String"
                 },
                 {
                     "name": "DISCONNECTED",
-                    "description": "Liveness checks have failed for one or\n  more components. This is more aggressive than \"failed\", and may\n  trigger intermittently (and resolve itself without action) on\n  a flaky network.",
+                    "description": "<small>Value <code>\"disconnected\"</code></small>\n  The state when liveness checks have failed for one or\n  more components. This is more aggressive than \"failed\", and may\n  trigger intermittently (and resolve itself without action) on\n  a flaky network.<br>\nThis state occurs after <code>CONNECTED</code> or <code>COMPLETED</code> state.",
                     "type": "String"
                 },
                 {
                     "name": "CLOSED",
-                    "description": "The ICE agent has shut down and is no\n  longer responding to STUN requests.",
+                    "description": "<small>Value <code>\"closed\"</code></small>\n  The state when the ICE agent has shut down and is no\n  longer responding to STUN requests.<br>\nThis state occurs after Peer connection has been disconnected <em>(closed)</em>.",
+                    "type": "String"
+                },
+                {
+                    "name": "TRICKLE_FAILED",
+                    "description": "<small>Value <code>\"trickeFailed\"</code></small>\n  The state when attempting to connect successfully with ICE connection fails\n   with trickle ICE connections.<br>\nTrickle ICE would be disabled after <code>3</code> attempts to have a better\n  successful ICE connection.",
                     "type": "String"
                 }
             ],
@@ -2515,35 +2520,35 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 42,
-            "description": "The list of TURN server transports flags to set for TURN server connections.",
+            "line": 63,
+            "description": "These are the list of available transports that\n  Skylink would use to connect to the TURN servers with.\n- If example, these are list of TURN servers given by the platform signaling:<br>\n  <small><code>turn:turnurl:123?transport=tcp</code><br>\n  <code>turn:turnurl?transport=udp</code><br>\n  <code>turn:turnurl:1234</code><br>\n  <code>turn:turnurl</code></small>",
             "itemtype": "attribute",
             "name": "TURN_TRANSPORT",
             "type": "JSON",
             "params": [
                 {
                     "name": "TCP",
-                    "description": "Use only TCP transport option.\n  <i>E.g. <code>turn:turnurl:5523?transport=tcp</code></i>.",
+                    "description": "<small>Value <code>\"tcp\"</code></small>\n  The option to connect using only TCP transports.\n  <small>EXAMPLE OUTPUT<br>\n  <code>turn:turnurl:123?transport=tcp</code><br>\n  <code>turn:turnurl?transport=tcp</code><br>\n  <code>turn:turnurl:1234?transport=tcp</code></small>",
                     "type": "String"
                 },
                 {
                     "name": "UDP",
-                    "description": "Use only UDP transport option.\n  <i>E.g. <code>turn:turnurl:5523?transport=udp</code></i>.",
+                    "description": "<small>Value <code>\"udp\"</code></small>\n  The option to connect using only UDP transports.\n  <small>EXAMPLE OUTPUT<br>\n  <code>turn:turnurl:123?transport=udp</code><br>\n  <code>turn:turnurl?transport=udp</code><br>\n  <code>turn:turnurl:1234?transport=udp</code></small>",
                     "type": "String"
                 },
                 {
                     "name": "ANY",
-                    "description": "Use any transports option given\n  by the platform signaling.\n  <i>E.g. <code>turn:turnurl:5523?transport=udp</code> or\n  <code>turn:turnurl:5523?transport=tcp</code></i>.",
+                    "description": "<small><b>DEFAULT</b> | Value <code>\"any\"</code></small>\n  This option to use any transports that is preconfigured by provided by the platform signaling.\n  <small>EXAMPLE OUTPUT<br>\n  <code>turn:turnurl:123?transport=tcp</code><br>\n  <code>turn:turnurl?transport=udp</code><br>\n  <code>turn:turnurl:1234</code><br>\n  <code>turn:turnurl</code></small>",
                     "type": "String"
                 },
                 {
                     "name": "NONE",
-                    "description": "Set no transport option in TURN servers.\n  <i>E.g. <code>turn:turnurl:5523</code></i>",
+                    "description": "<small>Value <code>\"none\"</code></small>\n  This option to set no transports.\n  <small>EXAMPLE OUTPUT<br>\n  <code>turn:turnurl:123</code><br>\n  <code>turn:turnurl</code><br>\n  <code>turn:turnurl:1234</code></small>",
                     "type": "String"
                 },
                 {
                     "name": "ALL",
-                    "description": "Use both UCP and TCP transports options.\n  <i>E.g. <code>turn:turnurl:5523?transport=udp</code> and\n  <code>turn:turnurl:5523?transport=tcp</code></i>.",
+                    "description": "<small>Value <code>\"all\"</code></small>\n  This option to use both TCP and UDP transports.\n  <small>EXAMPLE OUTPUT<br>\n  <code>turn:turnurl:123?transport=tcp</code><br>\n  <code>turn:turnurl:123?transport=udp</code><br>\n  <code>turn:turnurl?transport=tcp</code><br>\n  <code>turn:turnurl?transport=udp</code><br>\n  <code>turn:turnurl:1234?transport=tcp</code><br>\n  <code>turn:turnurl:1234?transport=udp</code></small>",
                     "type": "String"
                 }
             ],
@@ -2554,7 +2559,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 72,
+            "line": 120,
             "description": "The flag that indicates if PeerConnections should enable\n   trickling of ICE to connect the ICE connection.",
             "itemtype": "attribute",
             "name": "_enableIceTrickle",
@@ -2569,7 +2574,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 86,
+            "line": 134,
             "description": "The flag that indicates if PeerConnections ICE gathering\n  should use STUN server connection.",
             "itemtype": "attribute",
             "name": "_enableSTUN",
@@ -2584,7 +2589,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 99,
+            "line": 147,
             "description": "The flag that indicates if PeerConnections ICE gathering\n  should use TURN server connection.\nTampering this flag may disable any successful Peer connection\n  that is behind any firewalls.",
             "itemtype": "attribute",
             "name": "_enableTURN",
@@ -2599,7 +2604,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 114,
+            "line": 162,
             "description": "The flag to enable using of public STUN server connections.",
             "itemtype": "attribute",
             "name": "_usePublicSTUN",
@@ -2614,7 +2619,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 127,
+            "line": 175,
             "description": "Stores the TURN server transport to enable for TURN server connections.\n[Rel: Skylink.TURN_TRANSPORT]",
             "itemtype": "attribute",
             "name": "_TURNTransport",
@@ -2629,7 +2634,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 141,
+            "line": 189,
             "description": "Stores the list of Peer connection ICE connection failures.\nAfter an third attempt of ICE connection failure, the\n  trickling of ICE would be disabled.",
             "itemtype": "attribute",
             "name": "_ICEConnectionFailures",
@@ -2650,7 +2655,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 157,
+            "line": 205,
             "description": "Reconfigures the <code>RTCConfiguration.iceServers</code> that is\n  to be passed in constructing the new <code>RTCPeerConnection</code>\n  object for different browsers support.\nPreviously known as <code>_setFirefoxIceServers</code>.\nThis method will reconfigure <code>urls</code> configuration to\n  an array of <code>url</code> configuration.",
             "itemtype": "method",
             "name": "_parseIceServers",
@@ -2673,7 +2678,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 241,
+            "line": 289,
             "description": "Reconfigures the <code>RTCConfiguration.iceServers</code> that is\n  to be passed in constructing the new <code>RTCPeerConnection</code>\n  object to remove (disable) STUN or remove TURN (disable) server\n  connections based on the\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  configuration passed in.",
             "itemtype": "method",
             "name": "_setIceServers",
@@ -12714,27 +12719,27 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/ice-candidate.js:64"
+            "line": " source/ice-candidate.js:67"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:64"
+            "line": " source/ice-candidate.js:67"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:117"
+            "line": " source/ice-candidate.js:120"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:139"
+            "line": " source/ice-candidate.js:142"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:152"
+            "line": " source/ice-candidate.js:155"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:167"
+            "line": " source/ice-candidate.js:170"
         },
         {
             "message": "unknown tag: component",
@@ -12742,39 +12747,39 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:42"
+            "line": " source/ice-connection.js:63"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:72"
+            "line": " source/ice-connection.js:120"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:86"
+            "line": " source/ice-connection.js:134"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:99"
+            "line": " source/ice-connection.js:147"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:114"
+            "line": " source/ice-connection.js:162"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:127"
+            "line": " source/ice-connection.js:175"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:141"
+            "line": " source/ice-connection.js:189"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:157"
+            "line": " source/ice-connection.js:205"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:241"
+            "line": " source/ice-connection.js:289"
         },
         {
             "message": "unknown tag: component",
