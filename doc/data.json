@@ -633,19 +633,18 @@
         {
             "file": "source/data-transfer.js",
             "line": 1,
-            "description": "The current version of DT (Data Transfer) Protocol\n  that the Skylink SDK is using.",
+            "description": "The current version of the internal <u>Data Transfer (DT)</u> Protocol that Skylink is using.<br>\n- This is not a feature for developers to use but rather for SDK developers to\n  see the Protocol version used in this Skylink version.\n- In some cases, this information may be used for reporting issues with Skylink.\n- DT_PROTOCOL VERSION: <code>0.1.0</code>.",
             "itemtype": "attribute",
             "name": "DT_PROTOCOL_VERSION",
             "type": "String",
-            "final": 1,
-            "required": 1,
+            "readonly": "",
             "component": "DataTransfer",
             "since": "0.5.10",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 14,
+            "line": 16,
             "description": "The fixed delimiter that is used in Skylink to\n  concat the DataChannel channelName and the actual\n  transfer ID together based on the transfer ID provided in\n  {{#crossLink \"Skylink/dataTransferState:event\"}}dataTransferState{{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_TRANSFER_DELIMITER",
@@ -659,7 +658,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 29,
+            "line": 31,
             "description": "The list of Protocol types that is used for transfers and messaging using\n  the DataChannel connection.",
             "itemtype": "attribute",
             "name": "_DC_PROTOCOL_TYPE",
@@ -705,7 +704,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 63,
+            "line": 65,
             "description": "The list of platforms that Skylink should fallback to use the\n  {{#crossLink \"Skylink/DATA_CHANNEL_TYPE:attr\"}}<code>\n  DATA_CHANNEL_TYPE.MESSAGING</code>{{/crossLink}}\n  channel for transfers instead of using multi-transfers\n  due to the lack of support in the platform implementations.",
             "itemtype": "attribute",
             "name": "_INTEROP_MULTI_TRANSFERS",
@@ -719,84 +718,84 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 79,
-            "description": "The types of data transfers to indicate if the DataChannel is\n  uploading or downloading the data transfer.",
+            "line": 81,
+            "description": "These are the types of data transfers that indicates if transfer is an\n  outgoing <small><em>(uploading)</em></small> or incoming <small><em>(downloding)</em></small> transfers.",
             "itemtype": "attribute",
             "name": "DATA_TRANSFER_TYPE",
             "type": "JSON",
             "params": [
                 {
                     "name": "UPLOAD",
-                    "description": "The DataChannel connection is uploading data packets to\n  receiving end.",
+                    "description": "<small>Value <code>\"upload\"</code></small>\n  This data transfer is an outgoing (uploading) transfer.<br>\n  Data is sent to the receiving Peer using the associated DataChannel connection.",
                     "type": "String"
                 },
                 {
                     "name": "DOWNLOAD",
-                    "description": "The DataChannel connection is downloading data packets\n  from sending point.",
+                    "description": "<small>Value <code>\"download\"</code></small>\n  The data transfer is an incoming (downloading) transfer.<br>\n  Data is received from the sending Peer using the associated DataChannel connection.",
                     "type": "String"
                 }
             ],
-            "final": 1,
+            "readonly": "",
             "component": "DataTransfer",
             "since": "0.1.0",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 98,
-            "description": "The states of a data transfer in a DataChannel connection.",
+            "line": 102,
+            "description": "These are the list of data transfer states that Skylink would trigger.",
             "itemtype": "attribute",
             "name": "DATA_TRANSFER_STATE",
             "type": "JSON",
             "params": [
                 {
                     "name": "UPLOAD_REQUEST",
-                    "description": "Request to start a data transfer.",
+                    "description": "<small>Value <code>\"request\"</code></small>\n  The state when a data transfer request has been received from Peer.\nThis happens after Peer starts a data transfer using\n  {{#crossLink \"Skylink/sendBlobData:method\"}}sendBlobData(){{/crossLink}} or\n  {{#crossLink \"Skylink/sendURLData:method\"}}sendURLData(){{/crossLink}}.",
                     "type": "String"
                 },
                 {
                     "name": "UPLOAD_STARTED",
-                    "description": "Request to start the data transfer has been accepted\n  and data transfer is starting to upload data packets to receiving end.",
+                    "description": "<small>Value <code>\"uploadStarted\"</code></small>\n  The state when the data transfer will begin and start to upload the first data\n  packets to receiving Peer.<br>\nThis happens after receiving Peer accepts a data transfer using\n  {{#crossLink \"Skylink/acceptDataTransfer:method\"}}acceptDataTransfer(){{/crossLink}}.",
                     "type": "String"
                 },
                 {
                     "name": "DOWNLOAD_STARTED",
-                    "description": "Request to start the data transfer has been accepted\n  and data transfer is starting to receive data packets from sending point.",
+                    "description": "<small>Value <code>\"downloadStarted\"</code></small>\n  The state when the data transfer has begin and associated DataChannel connection is\n  expected to receive the first data packet from sending Peer.<br>\nThis happens after self accepts a data transfer using\n  {{#crossLink \"Skylink/acceptDataTransfer:method\"}}acceptDataTransfer(){{/crossLink}} upon\n  the triggered state of <code>UPLOAD_REQUEST</code>.",
                     "type": "String"
                 },
                 {
                     "name": "REJECTED",
-                    "description": "Request to start a data transfer is rejected.",
+                    "description": "<small>Value <code>\"rejected\"</code></small>\n  The state when the data transfer has been rejected by receiving Peer and data transfer is\n  terminated.<br>\nThis happens after Peer rejects a data transfer using\n  {{#crossLink \"Skylink/acceptDataTransfer:method\"}}acceptDataTransfer(){{/crossLink}}.",
                     "type": "String"
                 },
                 {
                     "name": "UPLOADING",
-                    "description": "The data transfer upload is ongoing with receiving end.",
+                    "description": "<small>Value <code>\"uploading\"</code></small>\n  The state when the data transfer is still being transferred to receiving Peer.<br>\nThis happens after state <code>UPLOAD_STARTED</code>.",
                     "type": "String"
                 },
                 {
                     "name": "DOWNLOADING",
-                    "description": "The data transfer download is ongoing with sending point.",
+                    "description": "<small>Value <code>\"downloading\"</code></small>\n  The state when the data transfer is still being transferred from sending Peer.<br>\nThis happens after state <code>DOWNLOAD_STARTED</code>.",
                     "type": "String"
                 },
                 {
                     "name": "UPLOAD_COMPLETED",
-                    "description": "The data transfer uploaded to receiving end has\n  been completed successfully.",
+                    "description": "<small>Value <code>\"uploadCompleted\"</code></small>\n  The state when the data transfer has been transferred to receiving Peer successfully.<br>\nThis happens after state <code>UPLOADING</code> or <code>UPLOAD_STARTED</code>, depending\n  on how huge the data being transferred is.",
                     "type": "String"
                 },
                 {
                     "name": "DOWNLOAD_COMPLETED",
-                    "description": "The data transfer downloaded from sending point\n  has been completed successfully.",
+                    "description": "<small>Value <code>\"downloadCompleted\"</code></small>\n  The state when the data transfer has been transferred from sending Peer successfully.<br>\nThis happens after state <code>DOWNLOADING</code> or <code>DOWNLOAD_STARTED</code>, depending\n  on how huge the data being transferred is.",
                     "type": "String"
                 },
                 {
                     "name": "CANCEL",
-                    "description": "The ongoing data transfer has cancelled from receiving end\n  or sending point and has been terminated.",
+                    "description": "<small>Value <code>\"cancel\"</code></small>\n  The state when the data transfer has been terminated by Peer.<br>\nThis happens after state <code>DOWNLOAD_STARTED</code> or <code>UPLOAD_STARTED</code>.",
                     "type": "String"
                 },
                 {
                     "name": "ERROR",
-                    "description": "The ongoing data transfer has occurred an exception and\n  has been terminated.",
+                    "description": "<small>Value <code>\"error\"</code></small>\n  The state when the data transfer has occurred an exception.<br>\nAt this stage, the data transfer would usually be terminated and may lead to state <code>CANCEL</code>.",
                     "type": "String"
                 }
             ],
@@ -807,7 +806,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 136,
+            "line": 165,
             "description": "Stores the list of ongoing data transfers data packets (chunks) to be sent to receiving end\n  in a DataChannel connection based on the associated DataChannel ID.",
             "itemtype": "attribute",
             "name": "_uploadDataTransfers",
@@ -835,7 +834,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 153,
+            "line": 182,
             "description": "Stores the list of ongoing data transfer state informations that is sent to receiving end\n  in a DataChannel connection based on the associated DataChannel ID.",
             "itemtype": "attribute",
             "name": "_uploadDataSessions",
@@ -903,7 +902,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 180,
+            "line": 209,
             "description": "Stores the list of ongoing data transfers data packets (chunks) to be received from\n  sending point in a DataChannel connection based on the associated DataChannel ID.",
             "itemtype": "attribute",
             "name": "_downloadDataTransfers",
@@ -931,7 +930,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 197,
+            "line": 226,
             "description": "Stores the list of ongoing data transfer state informations that is received from\n  the sender point in a DataChannel connection based on the associated DataChannel ID.",
             "itemtype": "attribute",
             "name": "_downloadDataSessions",
@@ -999,7 +998,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 225,
+            "line": 254,
             "description": "Stores the list of ongoing data transfer timeouts using the\n  <code>setTimeout</code> objects for each DataChannel connection transfer.",
             "itemtype": "attribute",
             "name": "_dataTransfersTimeout",
@@ -1020,7 +1019,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 240,
+            "line": 269,
             "description": "Sets a waiting timeout for every response sent to DataChannel connection receiving\n  end. Once the timeout has ended, a timeout error will be thrown and\n  data transfer will be terminated.",
             "itemtype": "method",
             "name": "_setDataChannelTimeout",
@@ -1056,7 +1055,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 293,
+            "line": 322,
             "description": "Stops and clears the waitig timeout for the associated DataChannel connection.",
             "itemtype": "method",
             "name": "_clearDataChannelTimeout",
@@ -1087,7 +1086,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 316,
+            "line": 345,
             "description": "Starts a data transfer with a Peer. If multi-transfer is supported,\n  Skylink would open a new DataChannel connection with Peer to start\n  data transfer. If mutli-transfer is not supported in\n  {{#crossLink \"Skylink/_INTEROP_MULTI_TRANSFERS:attr\"}}_INTEROP_MULTI_TRANSFERS{{/crossLink}},\n  the data transfer would start in the {{#crossLink \"Skylink/DATA_CHANNEL_TYPE:attr\"}}<code>\n  DATA_CHANNEL_TYPE.MESSAGING</code>{{/crossLink}} channel instead.",
             "itemtype": "method",
             "name": "_sendBlobDataToPeer",
@@ -1153,7 +1152,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 551,
+            "line": 580,
             "description": "Routes the data received to the relevant Protocol handler based on the data received.",
             "itemtype": "method",
             "name": "_dataChannelProtocolHandler",
@@ -1187,7 +1186,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 623,
+            "line": 652,
             "description": "Handles the WRQ Protocol request received from the DataChannel connection.",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
@@ -1264,7 +1263,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 694,
+            "line": 723,
             "description": "Handles the ACK Protocol request received from the DataChannel connection.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
@@ -1311,7 +1310,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 856,
+            "line": 885,
             "description": "Handles the MESSAGE Protocol request received from the DataChannel connection.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -1363,7 +1362,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 886,
+            "line": 915,
             "description": "Handles the ERROR Protocol request received from the DataChannel connection.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -1421,7 +1420,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 937,
+            "line": 966,
             "description": "Handles the CANCEL Protocol request received from the DataChannel connection.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -1473,7 +1472,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1026,
+            "line": 1055,
             "description": "Handles the DATA Protocol request received from the DataChannel connection.\nIn this handler, it actually handles and manipulates the received data transfer packet.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
@@ -1508,7 +1507,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1259,
+            "line": 1288,
             "description": "Starts a [Blob](https://developer.mozilla.org/en/docs/Web/API/Blob) data transfer\n  with Peers using the DataChannel connection.\nYou can transfer files using the <code>input</code> [fileupload object](\n  http://www.w3schools.com/jsref/dom_obj_fileupload.asp) and accessing the receiving\n  files using [FileUpload files property](http://www.w3schools.com/jsref/prop_fileupload_files.asp).\nThe [File](https://developer.mozilla.org/en/docs/Web/API/File) object inherits from\n  the Blob interface which is passable in this method as a Blob object.\nThe receiving Peer have the option to accept or reject the data transfer.",
             "itemtype": "method",
             "name": "sendBlobData",
@@ -1713,7 +1712,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1502,
+            "line": 1531,
             "description": "Starts the actual data transfers with the array of Peers provided\n  and based on the data transfer type to start the DataChannel connection data transfer.",
             "itemtype": "method",
             "name": "_startDataTransfer",
@@ -1948,7 +1947,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1830,
+            "line": 1859,
             "description": "Responds to a data transfer request by rejecting or accepting\n  the data transfer request initiated by a Peer.",
             "itemtype": "method",
             "name": "respondBlobRequest",
@@ -1980,7 +1979,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1847,
+            "line": 1876,
             "description": "Responds to a data transfer request by rejecting or accepting\n  the data transfer request initiated by a Peer.",
             "itemtype": "method",
             "name": "acceptDataTransfer",
@@ -2010,7 +2009,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1935,
+            "line": 1964,
             "description": "Terminates an ongoing DataChannel connection data transfer.",
             "itemtype": "method",
             "name": "cancelBlobTransfer",
@@ -2035,7 +2034,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1948,
+            "line": 1977,
             "description": "Terminates an ongoing DataChannel connection data transfer.",
             "itemtype": "method",
             "name": "cancelDataTransfer",
@@ -2058,7 +2057,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2035,
+            "line": 2064,
             "description": "Send a message object or string using the DataChannel connection\n  associated with the list of targeted Peers.\nThe maximum size for the message object would be<code>16Kb</code>.<br>\nTo send a string length longer than <code>16kb</code>, please considered\n  to use {{#crossLink \"Skylink/sendURLData:method\"}}sendURLData(){{/crossLink}}\n  to send longer strings (for that instance base64 binary strings are long).\nTo send message objects with platform signaling socket connection, see\n  {{#crossLink \"Skylink/sendMessage:method\"}}sendMessage(){{/crossLink}}.",
             "itemtype": "method",
             "name": "sendP2PMessage",
@@ -2085,7 +2084,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2130,
+            "line": 2159,
             "description": "Starts a [dataURL](https://developer.mozilla.org/en-US/docs/Web/API/FileReader\n  /readAsDataURL) data transfer with Peers using the DataChannel connection.\nThe receiving Peers have the option to accept or reject the data transfer.",
             "itemtype": "method",
             "name": "sendURLData",
@@ -12521,163 +12520,163 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:14"
+            "line": " source/data-transfer.js:16"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:29"
+            "line": " source/data-transfer.js:31"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:63"
+            "line": " source/data-transfer.js:65"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:79"
+            "line": " source/data-transfer.js:81"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:98"
+            "line": " source/data-transfer.js:102"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:136"
+            "line": " source/data-transfer.js:165"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:153"
+            "line": " source/data-transfer.js:182"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:180"
+            "line": " source/data-transfer.js:209"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:197"
+            "line": " source/data-transfer.js:226"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:225"
+            "line": " source/data-transfer.js:254"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:240"
+            "line": " source/data-transfer.js:269"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:293"
+            "line": " source/data-transfer.js:322"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:316"
+            "line": " source/data-transfer.js:345"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:551"
+            "line": " source/data-transfer.js:580"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:623"
+            "line": " source/data-transfer.js:652"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:623"
+            "line": " source/data-transfer.js:652"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:694"
+            "line": " source/data-transfer.js:723"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:694"
+            "line": " source/data-transfer.js:723"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:856"
+            "line": " source/data-transfer.js:885"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:856"
+            "line": " source/data-transfer.js:885"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:886"
+            "line": " source/data-transfer.js:915"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:937"
+            "line": " source/data-transfer.js:966"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:937"
+            "line": " source/data-transfer.js:966"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1026"
+            "line": " source/data-transfer.js:1055"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1026"
+            "line": " source/data-transfer.js:1055"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1259"
+            "line": " source/data-transfer.js:1288"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1259"
+            "line": " source/data-transfer.js:1288"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1502"
+            "line": " source/data-transfer.js:1531"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1830"
+            "line": " source/data-transfer.js:1859"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1830"
+            "line": " source/data-transfer.js:1859"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1847"
+            "line": " source/data-transfer.js:1876"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1847"
+            "line": " source/data-transfer.js:1876"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1935"
+            "line": " source/data-transfer.js:1964"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1935"
+            "line": " source/data-transfer.js:1964"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1948"
+            "line": " source/data-transfer.js:1977"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1948"
+            "line": " source/data-transfer.js:1977"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:2035"
+            "line": " source/data-transfer.js:2064"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:2035"
+            "line": " source/data-transfer.js:2064"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:2130"
+            "line": " source/data-transfer.js:2159"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:2130"
+            "line": " source/data-transfer.js:2159"
         },
         {
             "message": "unknown tag: component",
