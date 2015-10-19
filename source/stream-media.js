@@ -555,19 +555,27 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
  * @param {Object} error The error object thrown that caused the failure.
  * @param {Boolean} [isScreenSharing=false] The flag that indicates if self
  *    Stream object is a screensharing stream or not.
+ * @param {Boolean} [audioFallback=false] The flag that indicates if stage
+ *    of stream media error should do an audio fallback.
  * @trigger mediaAccessError
  * @private
  * @component Stream
  * @for Skylink
  * @since 0.5.4
  */
-Skylink.prototype._onUserMediaError = function(error, isScreenSharing) {
+Skylink.prototype._onUserMediaError = function(error, isScreenSharing, audioFallback) {
   var self = this;
-  if (self._audioFallback && self._streamSettings.video && !isScreenSharing) {
+  var hasAudioVideoRequest = !!self._streamSettings.video && !!self._streamSettings.audio;
+
+  if (self._audioFallback && hasAudioVideoRequest && audioFallback) {
     // redefined the settings for video as false
     self._streamSettings.video = false;
+    self._getUserMediaSettings.video = false;
 
     log.debug([null, 'MediaStream', null, 'Falling back to audio stream call']);
+
+    self._trigger('mediaAccessFallback', error);
+
     window.getUserMedia({
       audio: true
     }, function(stream) {
@@ -575,12 +583,11 @@ Skylink.prototype._onUserMediaError = function(error, isScreenSharing) {
     }, function(error) {
       log.error([null, 'MediaStream', null,
         'Failed retrieving audio in audio fallback:'], error);
-      self._trigger('mediaAccessError', error, !!isScreenSharing);
+      self._trigger('mediaAccessError', error, !!isScreenSharing, true);
     });
-    this.getUserMedia({ audio: true });
   } else {
     log.error([null, 'MediaStream', null, 'Failed retrieving stream:'], error);
-   self._trigger('mediaAccessError', error, !!isScreenSharing);
+   self._trigger('mediaAccessError', error, !!isScreenSharing, false);
   }
 };
 
@@ -1408,7 +1415,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
     // wait for available audio or video stream
     self._wait(function () {
       if (mediaAccessRequiredFailure === true) {
-        self._onUserMediaError(new Error('Waiting for stream timeout'));
+        self._onUserMediaError(new Error('Waiting for stream timeout'), false, false);
       } else {
         callback(null, self._mediaStream);
       }
@@ -1591,6 +1598,13 @@ Skylink.prototype.getUserMedia = function(options,callback) {
           // for now we require one MediaStream with both audio and video
           // due to firefox non-supported audio or video
           if (stream && stream !== null) {
+            var notSameTracksError = new Error(
+              'Expected audio tracks length with ' +
+              (requireAudio ? '1' : '0') + ' and video tracks length with ' +
+              (requireVideo ? '1' : '0') + ' but received audio tracks length ' +
+              'with ' + stream.getAudioTracks().length + ' and video ' +
+              'tracks length with ' + stream.getVideoTracks().length);
+
             // do the check
             if (requireAudio) {
               hasAudio = stream.getAudioTracks().length > 0;
@@ -1600,6 +1614,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
 
               if (self._audioFallback && !hasVideo) {
                 hasVideo = true;
+                self._trigger('mediaAccessFallback', notSameTracksError);
               }
             }
             if (hasAudio && hasVideo) {
@@ -1612,24 +1627,18 @@ Skylink.prototype.getUserMedia = function(options,callback) {
                 callback(null,stream);
               }
             } else {
-              var notSameTracksError =new Error(
-                'Expected audio tracks length with ' +
-                (requireAudio ? '1' : '0') + ' and video tracks length with ' +
-                (requireVideo ? '1' : '0') + ' but received audio tracks length ' +
-                'with ' + stream.getAudioTracks().length + ' and video ' +
-                'tracks length with ' + stream.getVideoTracks().length);
-              self._onUserMediaError(notSameTracksError);
+              self._onUserMediaError(notSameTracksError, false, false);
               callback(notSameTracksError);
             }
           }
         }, function (error) {
-          self._onUserMediaError(error);
+          self._onUserMediaError(error, false, true);
           if (typeof callback === 'function'){
             callback(error,null);
           }
         });
       } catch (error) {
-        self._onUserMediaError(error);
+        self._onUserMediaError(error, false, true);
         if (typeof callback === 'function'){
           callback(error,null);
         }
@@ -2175,7 +2184,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
       }
 
     }, function (error) {
-      self._onUserMediaError(error, true);
+      self._onUserMediaError(error, true, false);
 
       if (typeof callback === 'function') {
         callback(error, null);
@@ -2183,7 +2192,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     });
 
   } catch (error) {
-    self._onUserMediaError(error, true);
+    self._onUserMediaError(error, true, false);
 
     if (typeof callback === 'function') {
       callback(error, null);
