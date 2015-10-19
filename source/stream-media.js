@@ -1083,40 +1083,10 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
  * @since 0.5.6
  */
 Skylink.prototype.stopStream = function () {
-  var stopTracksFn = function (stream) {
-    var audioTracks = stream.getAudioTracks();
-    var videoTracks = stream.getVideoTracks();
-
-    for (var i = 0; i < audioTracks.length; i++) {
-      audioTracks[i].stop();
-    }
-
-    for (var j = 0; j < videoTracks.length; j++) {
-      videoTracks[j].stop();
-    }
-  };
-
-  var stopFn = function (stream, name) {
-    if (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 44) {
-      stopTracksFn(stream);
-    } else {
-      try {
-        stream.stop();
-      } catch (error) {
-        log.warn('Failed stopping MediaStreamTracks for "' + name + '".' +
-          ' Stopping MediaStream instead', error);
-        stopTracksFn();
-      }
-    }
-  };
-
   // if previous line break, recheck again to trigger event
-  if (this._mediaStream && this._mediaStream !== null) {
-    stopFn(this._mediaStream, '_mediaStream');
-    this._trigger('mediaAccessStopped', false);
-  }
-
-  this._mediaStream = null;
+  this._stopLocalMediaStreams({
+    userMedia: true
+  });
 };
 
 /**
@@ -1232,6 +1202,96 @@ Skylink.prototype._muteLocalMediaStreams = function () {
 };
 
 /**
+ * Handles the stopping of audio and video streams.
+ * @method _stopLocalMediaStreams
+ * @param {Boolean|JSON} options The stop attached Stream options for
+ *   Skylink when leaving the room.
+ * @param {Boolean} [options.userMedia=false]  The flag that indicates if leaving the room
+ *   should automatically stop and clear the existing user media stream attached to skylink.
+ *   This would trigger <code>mediaAccessStopped</code> for this Stream if available.
+ * @param {Boolean} [options.screenshare=false] The flag that indicates if leaving the room
+ *   should automatically stop and clear the existing screensharing stream attached to skylink.
+ *   This would trigger <code>mediaAccessStopped</code> for this Stream if available.
+ * @private
+ * @for Skylink
+ * @since 0.6.3
+ */
+Skylink.prototype._stopLocalMediaStreams = function (options) {
+  var stopUserMedia = false;
+  var stopScreenshare = false;
+  var triggerStopped = false;
+
+  if (typeof options === 'object') {
+    stopUserMedia = options.userMedia === true;
+    stopScreenshare = options.screenshare === true;
+  }
+
+  var stopTracksFn = function (stream) {
+    var audioTracks = stream.getAudioTracks();
+    var videoTracks = stream.getVideoTracks();
+
+    for (var i = 0; i < audioTracks.length; i++) {
+      audioTracks[i].stop();
+    }
+
+    for (var j = 0; j < videoTracks.length; j++) {
+      videoTracks[j].stop();
+    }
+  };
+
+  var stopFn = function (stream, name) {
+    if (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 44) {
+      stopTracksFn(stream);
+    } else {
+      try {
+        stream.stop();
+      } catch (error) {
+        log.warn('Failed stopping MediaStreamTracks for ' + name + '.' +
+          ' Stopping MediaStream instead', error);
+        stopTracksFn(stream);
+      }
+    }
+  };
+
+  if (stopScreenshare) {
+    log.log([null, 'MediaStream', self._selectedRoom, 'Stopping screensharing MediaStream']);
+
+    if (this._mediaScreen && this._mediaScreen !== null) {
+      stopFn(this._mediaScreen, '_mediaScreen');
+      this._mediaScreen = null;
+      triggerStopped = true;
+    }
+
+    if (this._mediaScreenClone && this._mediaScreenClone !== null) {
+      stopFn(this._mediaScreenClone, '_mediaScreenClone');
+      this._mediaScreenClone = null;
+    }
+
+    if (triggerStopped) {
+      this._trigger('mediaAccessStopped', true);
+    }
+  } else {
+    log.log([null, 'MediaStream', self._selectedRoom, 'Screensharing MediaStream will not be stopped']);
+  }
+
+  if (stopUserMedia) {
+    log.log([null, 'MediaStream', self._selectedRoom, 'Stopping user\'s MediaStream']);
+
+    if (this._mediaStream && this._mediaStream !== null) {
+      stopFn(this._mediaStream, '_mediaStream');
+      this._mediaStream = null;
+      triggerStopped = true;
+    }
+
+    if (triggerStopped) {
+      this._trigger('mediaAccessStopped', false);
+    }
+  } else {
+    log.log([null, 'MediaStream', self._selectedRoom, 'User\'s MediaStream will not be stopped']);
+  }
+};
+
+/**
  * Waits for self MediaStream object to be attached to Skylink based
  *   on the options provided before firing the callback to indicate
  *   that self Stream object is received.
@@ -1324,43 +1384,6 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
     return;
   }
 
-  var checkStream = function (stream) {
-    var isSuccess = false;
-    var hasAudio = !requireAudio;
-    var hasVideo = !requireVideo;
-
-    // for now we require one MediaStream with both audio and video
-    // due to firefox non-supported audio or video
-    if (stream && stream !== null) {
-      // do the check
-      if (requireAudio) {
-        hasAudio = stream.getAudioTracks().length > 0;
-      }
-      if (requireVideo) {
-        hasVideo =  stream.getVideoTracks().length > 0;
-
-        if (self._audioFallback && !hasVideo) {
-          hasVideo = true;
-        }
-      }
-      if (hasAudio && hasVideo) {
-        isSuccess = true;
-      }
-
-      if (isSuccess) {
-        callback();
-      } else {
-        callback(new Error(
-          'Expected audio tracks length with ' +
-          (requireAudio ? '1' : '0') + ' and video tracks length with ' +
-          (requireVideo ? '1' : '0') + ' but received audio tracks length ' +
-          'with ' + stream.getAudioTracks().length + ' and video ' +
-          'tracks length with ' + stream.getVideoTracks().length
-        ));
-      }
-    }
-  };
-
   // get the user media
   if (!options.manualGetUserMedia && (options.audio || options.video)) {
     self.getUserMedia({
@@ -1371,7 +1394,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
       if (error) {
         callback(error);
       } else {
-        checkStream(success);
+        callback(null, success);
       }
     });
   }
@@ -1387,7 +1410,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
       if (mediaAccessRequiredFailure === true) {
         self._onUserMediaError(new Error('Waiting for stream timeout'));
       } else {
-        checkStream(self._mediaStream);
+        callback(null, self._mediaStream);
       }
     }, function () {
       current50Block += 1;
@@ -1402,6 +1425,8 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
     }, 50);
   }
 };
+
+
 
 /**
  * Gets self user media Stream object to attach to Skylink.
@@ -1553,12 +1578,49 @@ Skylink.prototype.getUserMedia = function(options,callback) {
   if (!(options.audio === false && options.video === false)) {
     // clear previous mediastreams
     self.stopStream();
+
     setTimeout(function () {
       try {
         window.getUserMedia(self._getUserMediaSettings, function (stream) {
-          self._onUserMediaSuccess(stream);
-          if (typeof callback === 'function'){
-            callback(null,stream);
+          var isSuccess = false;
+          var requireAudio = !!options.audio;
+          var requireVideo = !!options.video;
+          var hasAudio = !requireAudio;
+          var hasVideo = !requireVideo;
+
+          // for now we require one MediaStream with both audio and video
+          // due to firefox non-supported audio or video
+          if (stream && stream !== null) {
+            // do the check
+            if (requireAudio) {
+              hasAudio = stream.getAudioTracks().length > 0;
+            }
+            if (requireVideo) {
+              hasVideo =  stream.getVideoTracks().length > 0;
+
+              if (self._audioFallback && !hasVideo) {
+                hasVideo = true;
+              }
+            }
+            if (hasAudio && hasVideo) {
+              isSuccess = true;
+            }
+
+            if (isSuccess) {
+              self._onUserMediaSuccess(stream);
+              if (typeof callback === 'function'){
+                callback(null,stream);
+              }
+            } else {
+              var notSameTracksError =new Error(
+                'Expected audio tracks length with ' +
+                (requireAudio ? '1' : '0') + ' and video tracks length with ' +
+                (requireVideo ? '1' : '0') + ' but received audio tracks length ' +
+                'with ' + stream.getAudioTracks().length + ' and video ' +
+                'tracks length with ' + stream.getVideoTracks().length);
+              self._onUserMediaError(notSameTracksError);
+              callback(notSameTracksError);
+            }
           }
         }, function (error) {
           self._onUserMediaError(error);
@@ -2145,44 +2207,12 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 Skylink.prototype.stopScreen = function () {
   var endSession = false;
 
-  var stopTracksFn = function (stream) {
-    var audioTracks = stream.getAudioTracks();
-    var videoTracks = stream.getVideoTracks();
-
-    for (var i = 0; i < audioTracks.length; i++) {
-      audioTracks[i].stop();
-    }
-
-    for (var j = 0; j < videoTracks.length; j++) {
-      videoTracks[j].stop();
-    }
-  };
-
-  var stopFn = function (stream, name) {
-    if (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 44) {
-      stopTracksFn(stream);
-    } else {
-      try {
-        stream.stop();
-      } catch (error) {
-        log.warn('Failed stopping MediaStreamTracks for "' + name + '".' +
-          ' Stopping MediaStream instead', error);
-        stopTracksFn();
-      }
-    }
-  };
-
   if (this._mediaScreen && this._mediaScreen !== null) {
     endSession = !!this._mediaScreen.endSession;
-    stopFn(this._mediaScreen, '_mediaScreen');
-  }
 
-  if (this._mediaScreenClone && this._mediaScreenClone !== null) {
-    stopFn(this._mediaScreenClone, '_mediaScreenClone');
-  }
-
-  if (this._mediaScreen && this._mediaScreen !== null) {
-    this._trigger('mediaAccessStopped', true);
+    this._stopLocalMediaStreams({
+      screenshare: true
+    });
 
     if (!endSession) {
       if (this._hasMCU) {
@@ -2200,7 +2230,4 @@ Skylink.prototype.stopScreen = function () {
       }
     }
   }
-
-  this._mediaScreen = null;
-  this._mediaScreenClone = null;
 };
