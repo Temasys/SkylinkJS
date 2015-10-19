@@ -77,18 +77,21 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * The list of Skylink &lt;code&gt;console&lt;/code&gt; logging levels available.
- * Refer to [Javascript Web Console](https://developer.mozilla.org/en/docs/Web/API/console).
+ * These are the logging levels that Skylink provides.
+ * - This manipulates the debugging messages sent to &lt;code&gt;console&lt;/code&gt; object.
+ * - Refer to [Javascript Web Console](https://developer.mozilla.org/en/docs/Web/API/console).
  * @attribute LOG_LEVEL
  * @type JSON
- * @param {Number} DEBUG Displays &lt;code&gt;debug&lt;/code&gt;, &lt;code&gt;log&lt;/code&gt;,
- *   &lt;code&gt;info&lt;/code&gt;, &lt;code&gt;warn&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt; console logs.
- * @param {Number} LOG Displays &lt;code&gt;log&lt;/code&gt;,
- *   &lt;code&gt;info&lt;/code&gt;, &lt;code&gt;warn&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt; console logs.
- * @param {Number} INFO Displays &lt;code&gt;info&lt;/code&gt;, &lt;code&gt;warn&lt;/code&gt; and
- *   &lt;code&gt;error&lt;/code&gt; console logs.
- * @param {Number} WARN Displays &lt;code&gt;warn&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt; console logs.
- * @param {Number} ERROR &lt;i&gt;This is the default log level.&lt;/i&gt; Displays &lt;code&gt;error&lt;/code&gt; console logs only.
+ * @param {Number} DEBUG &lt;small&gt;Value &lt;code&gt;4&lt;/code&gt; | Level higher than &lt;code&gt;LOG&lt;/code&gt;&lt;/small&gt;
+ *   Displays debugging logs from &lt;code&gt;LOG&lt;/code&gt; level onwards with &lt;code&gt;DEBUG&lt;/code&gt; logs.
+ * @param {Number} LOG &lt;small&gt;Value &lt;code&gt;3&lt;/code&gt; | Level higher than &lt;code&gt;INFO&lt;/code&gt;&lt;/small&gt;
+ *   Displays debugging logs from &lt;code&gt;INFO&lt;/code&gt; level onwards with &lt;code&gt;LOG&lt;/code&gt; logs.
+ * @param {Number} INFO &lt;small&gt;Value &lt;code&gt;2&lt;/code&gt; | Level higher than &lt;code&gt;WARN&lt;/code&gt;&lt;/small&gt;
+ *   Displays debugging logs from &lt;code&gt;WARN&lt;/code&gt; level onwards with &lt;code&gt;INFO&lt;/code&gt; logs.
+ * @param {Number} WARN &lt;small&gt;Value &lt;code&gt;1&lt;/code&gt; | Level higher than &lt;code&gt;ERROR&lt;/code&gt;&lt;/small&gt;
+ *   Displays debugging logs of &lt;code&gt;ERROR&lt;/code&gt; level with &lt;code&gt;WARN&lt;/code&gt; logs.
+ * @param {Number} ERROR &lt;small&gt;&lt;b&gt;DEFAULT&lt;/b&gt; | Value &lt;code&gt;0&lt;/code&gt; | Lowest level&lt;/small&gt;
+ *   Displays only &lt;code&gt;ERROR&lt;/code&gt; logs.
  * @readOnly
  * @component Log
  * @for Skylink

@@ -77,21 +77,27 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * The list of Skylink estalishing socket connection error triggered states.
+ * These are the list of socket connection error states that Skylink would trigger.
+ * - These error states references the [socket.io-client events](http://socket.io/docs/client-api/).
  * @attribute SOCKET_ERROR
  * @type JSON
- * @param {Number} CONNECTION_FAILED Skylink have failed to
- *   establish a socket connection with platform signaling in the first attempt.
- * @param {String} RECONNECTION_FAILED Skylink have failed to
+ * @param {Number} CONNECTION_FAILED &lt;small&gt;Value &lt;code&gt;0&lt;/code&gt;&lt;/small&gt;
+ *   The error state when Skylink have failed to establish a socket connection with
+ *   platform signaling in the first attempt.
+ * @param {String} RECONNECTION_FAILED &lt;small&gt;Value &lt;code&gt;-1&lt;/code&gt;&lt;/small&gt;
+ *   The error state when Skylink have failed to
  *   reestablish a socket connection with platform signaling after the first attempt
  *   &lt;code&gt;CONNECTION_FAILED&lt;/code&gt;.
- * @param {String} CONNECTION_ABORTED Attempt to reestablish socket connection
+ * @param {String} CONNECTION_ABORTED &lt;small&gt;Value &lt;code&gt;-2&lt;/code&gt;&lt;/small&gt;
+ *   The error state when attempt to reestablish socket connection
  *   with platform signaling has been aborted after the failed first attempt
  *   &lt;code&gt;CONNECTION_FAILED&lt;/code&gt;.
- * @param {String} RECONNECTION_ABORTED Attempt to reestablish socket connection
+ * @param {String} RECONNECTION_ABORTED &lt;small&gt;Value &lt;code&gt;-3&lt;/code&gt;&lt;/small&gt;
+ *   The error state when attempt to reestablish socket connection
  *   with platform signaling has been aborted after several failed reattempts
  *   &lt;code&gt;RECONNECTION_FAILED&lt;/code&gt;.
- * @param {String} RECONNECTION_ATTEMPT Skylink is attempting to reestablish
+ * @param {String} RECONNECTION_ATTEMPT &lt;small&gt;Value &lt;code&gt;-4&lt;/code&gt;&lt;/small&gt;
+ *   The error state when Skylink is attempting to reestablish
  *   a socket connection with platform signaling after a failed attempt
  *   &lt;code&gt;CONNECTION_FAILED&lt;/code&gt; or &lt;code&gt;RECONNECTION_FAILED&lt;/code&gt;.
  * @readOnly
@@ -159,27 +165,37 @@ Skylink.prototype._socketPorts = {
 };
 
 /**
- * The list of Skylink fallback socket transport types.
+ * These are the list of fallback attempt types that Skylink would attempt with.
  * @attribute SOCKET_FALLBACK
  * @type JSON
- * @param {String} NON_FALLBACK The current socket connection attempt
+ * @param {String} NON_FALLBACK &lt;small&gt;Value &lt;code&gt;&quot;nonfallback&quot;&lt;/code&gt; | Protocol &lt;code&gt;&quot;http:&quot;&lt;/code&gt;,
+ * &lt;code&gt;&quot;https:&quot;&lt;/code&gt; | Transports &lt;code&gt;&quot;WebSocket&quot;&lt;/code&gt;, &lt;code&gt;&quot;Polling&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The current socket connection attempt
  *   is using the first selected socket connection port for
  *   the current selected transport &lt;code&gt;&quot;Polling&quot;&lt;/code&gt; or &lt;code&gt;&quot;WebSocket&quot;&lt;/code&gt;.
- * @param {String} FALLBACK_PORT The current socket connection reattempt
+ * @param {String} FALLBACK_PORT &lt;small&gt;Value &lt;code&gt;&quot;fallbackPortNonSSL&quot;&lt;/code&gt; | Protocol &lt;code&gt;&quot;http:&quot;&lt;/code&gt;
+ *  | Transports &lt;code&gt;&quot;WebSocket&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The current socket connection reattempt
  *   is using the next selected socket connection port for
  *   &lt;code&gt;HTTP&lt;/code&gt; protocol connection with the current selected transport
  *   &lt;code&gt;&quot;Polling&quot;&lt;/code&gt; or &lt;code&gt;&quot;WebSocket&quot;&lt;/code&gt;.
- * @param {String} FALLBACK_PORT_SSL The current socket connection reattempt
+ * @param {String} FALLBACK_PORT_SSL &lt;small&gt;Value &lt;code&gt;&quot;fallbackPortSSL&quot;&lt;/code&gt; | Protocol &lt;code&gt;&quot;https:&quot;&lt;/code&gt;
+ *  | Transports &lt;code&gt;&quot;WebSocket&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The current socket connection reattempt
  *   is using the next selected socket connection port for
  *   &lt;code&gt;HTTPS&lt;/code&gt; protocol connection with the current selected transport
  *   &lt;code&gt;&quot;Polling&quot;&lt;/code&gt; or &lt;code&gt;&quot;WebSocket&quot;&lt;/code&gt;.
- * @param {String} LONG_POLLING The current socket connection reattempt
+ * @param {String} LONG_POLLING &lt;small&gt;Value &lt;code&gt;&quot;fallbackLongPollingNonSSL&quot;&lt;/code&gt; | Protocol &lt;code&gt;&quot;http:&quot;&lt;/code&gt;
+ *  | Transports &lt;code&gt;&quot;Polling&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The current socket connection reattempt
  *   is using the next selected socket connection port for
  *   &lt;code&gt;HTTP&lt;/code&gt; protocol connection with &lt;code&gt;&quot;Polling&quot;&lt;/code&gt; after
  *   many attempts of &lt;code&gt;&quot;WebSocket&quot;&lt;/code&gt; has failed.
  *   This occurs only for socket connection that is originally using
  *   &lt;code&gt;&quot;WebSocket&quot;&lt;/code&gt; transports.
- * @param {String} LONG_POLLING_SSL The current socket connection reattempt
+ * @param {String} LONG_POLLING_SSL &lt;small&gt;Value &lt;code&gt;&quot;fallbackLongPollingSSL&quot;&lt;/code&gt; | Protocol &lt;code&gt;&quot;https:&quot;&lt;/code&gt;
+ *  | Transports &lt;code&gt;&quot;Polling&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The current socket connection reattempt
  *   is using the next selected socket connection port for
  *   &lt;code&gt;HTTPS&lt;/code&gt; protocol connection with &lt;code&gt;&quot;Polling&quot;&lt;/code&gt; after
  *   many attempts of &lt;code&gt;&quot;WebSocket&quot;&lt;/code&gt; has failed.

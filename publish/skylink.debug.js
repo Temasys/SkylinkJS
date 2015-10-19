@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.2 - Tue Oct 20 2015 02:16:14 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Tue Oct 20 2015 03:15:25 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5373,12 +5373,10 @@ Skylink.prototype.SYSTEM_ACTION = {
  * @param {String} DUPLICATED_LOGIN <small>Value <code>"duplicatedLogin"</code> | Action ties with <code>REJECT</code></small>
  *   The reason code when the credentials given is already in use, which the platform signaling
  *   throws an exception for this error.<br>
- * This rarely occurs as Skylink handles this issue, and it's recommended to
- *   report this issue if this occurs.
+ * This rarely occurs as Skylink handles this issue, and it's recommended to report this issue if this occurs.
  * @param {String} SERVER_ERROR <small>Value <code>"serverError"</code> | Action ties with <code>REJECT</code></small>
  *   The reason code when the connection with the platform signaling has an exception with self.<br>
- * This rarely (and should not) occurs and it's recommended to
- *   report this issue if this occurs.
+ * This rarely (and should not) occur and it's recommended to  report this issue if this occurs.
  * @param {String} EXPIRED <small>Value <code>"expired"</code> | Action ties with <code>REJECT</code></small>
  *   The reason code when the persistent room meeting has expired so self is unable to join the room as
  *   the end time of the meeting has ended.<br>
@@ -6154,42 +6152,63 @@ Skylink.prototype.READY_STATE_CHANGE = {
 };
 
 /**
- * The list of Skylink platform room initialization ready state errors when
- *   the error state is triggered by
- *   {{#crossLink "Skylink/readyStateChange:event"}}readyStateChange{{/crossLink}}
-     The list of ready state change errors.
- * - These are the error states from the error object error code.
- * - <b>ROOM_LOCKED</b> is deprecated in 0.5.2. Please use
- *   {{#crossLink "Skylink/:attr"}}leaveRoom(){{/crossLink}}
- * - The states that would occur are:
+ * These are the list of room initialization ready state errors that Skylink has.
+ * - Ready state errors like <code>ROOM_LOCKED</code>, <code>API_NOT_ENOUGH_CREDIT</code>,
+ *   <code>API_NOT_ENOUGH_PREPAID_CREDIT</code>, <code>API_FAILED_FINDING_PREPAID_CREDIT</code> and
+ *   <code>SCRIPT_ERROR</code> has been removed as they are no longer supported.
  * @attribute READY_STATE_CHANGE_ERROR
  * @type JSON
- * @param {Number} API_INVALID Provided Application Key does not exists (invalid).
- * @param {Number} API_DOMAIN_NOT_MATCH Application accessing from backend IP address
- *   is not valid for provided Application Key.
- * @param {Number} API_CORS_DOMAIN_NOT_MATCH Application accessing from the CORS domain
- *   is not valid for provided Application Key.
- * @param {Number} API_CREDENTIALS_INVALID Credentials provided is not valid for
- *   provided Application Key.
- * @param {Number} API_CREDENTIALS_NOT_MATCH Credentials does not match as expected
- *   generated credentials for provided Application Key.
- * @param {Number} API_INVALID_PARENT_KEY Provided alias Application Key has an
- *   error because parent Application Key does not exists.
- * @param {Number} API_NO_MEETING_RECORD_FOUND For persistent room feature configured
- *   Application Key. There is no meeting currently that is open or available to join
- *   for self at the current time in the selected room.
- * @param {Number} NO_SOCKET_IO Socket.io dependency is not loaded.
- * @param {Number} NO_XMLHTTPREQUEST_SUPPORT XMLHttpRequest is not supported
- *   in current browser.
- * @param {Number} NO_WEBRTC_SUPPORT WebRTC is not supported in
- *   current browser.
- * @param {Number} NO_PATH Error thrown when {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
- *   is invoked before {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}.
- * @param {Number} INVALID_XMLHTTPREQUEST_STATUS XMLHttpRequest does not return a
- *   HTTP status code of <code>200</code>, which is a HTTP failure.
- * @param {Number} ADAPTER_NO_LOADED AdapterJS dependency is not loaded.
- * @param {Number} XML_HTTP_REQUEST_ERROR XMLHttpRequest failure on the network level when attempting to
- *   connect to the platform server to retrieve selected room connection information.
+ * @param {Number} API_INVALID <small>Value <code>4001</code></small>
+ *   The error when provided Application Key does not exists <em>(invalid)</em>.<br>
+ * For this error, it's recommended that you check if the Application Key exists in your account
+ *   in the developer console.
+ * @param {Number} API_DOMAIN_NOT_MATCH <small>Value <code>4002</code></small>
+ *   The error when application accessing from backend IP address is not valid for provided Application Key.<br>
+ * This rarely (and should not) occur and it's recommended to report this issue if this occurs.
+ * @param {Number} API_CORS_DOMAIN_NOT_MATCH <small>Value <code>4003</code></small>
+ *   The error when application accessing from the CORS domain is not valid for provided Application Key.<br>
+ * For this error, it's recommended that you check the CORS configuration for the provided Application Key
+ *   in the developer console.
+ * @param {Number} API_CREDENTIALS_INVALID <small>Value <code>4004</code></small>
+ *   The error when credentials provided is not valid for provided Application Key.<br>
+ * For this error, it's recommended to check the <code>credentials</code> provided in
+ *   {{#crossLink "Skylink/init:method"}}init() configuration{{/crossLink}}.
+ * @param {Number} API_CREDENTIALS_NOT_MATCH <small>Value <code>4005</code></small>
+ *   The error when credentials does not match as expected generated credentials for provided Application Key.<br>
+ * For this error, it's recommended to check the <code>credentials</code> provided in
+ *   {{#crossLink "Skylink/init:method"}}init() configuration{{/crossLink}}.
+ * @param {Number} API_INVALID_PARENT_KEY <small>Value <code>4006</code></small>
+ *   The error when provided alias Application Key has an error because parent Application Key does not exists.<br>
+ * For this error, it's recommended to provide another alias Application Key.
+ * @param {Number} API_NO_MEETING_RECORD_FOUND <small>Value <code>4010</code></small>
+ *   The error when there is no meeting currently that is open or available to join
+ *   for self at the current time in the selected room.<br>
+ * For this error, it's recommended to retrieve the list of meetings and check if it exists using
+ *   the [Meeting Resource REST API](https://temasys.atlassian.net/wiki/display/TPD/SkylinkAPI+-+Meeting+%28Persistent+Room%29+Resources).
+ * @param {Number} NO_SOCKET_IO <small>Value <code>1</code></small>
+ *   The error when socket.io dependency is not loaded.<br>
+ * For this error, it's recommended to load the
+ *   [correct socket.io-client dependency](http://socket.io/download/) from the CDN.
+ * @param {Number} NO_XMLHTTPREQUEST_SUPPORT <small>Value <code>2</code></small>
+ *   The error when XMLHttpRequest is not supported in current browser.<br>
+ * For this error, it's recommended to ask user to switch to another browser that supports <code>XMLHttpRequest</code>.
+ * @param {Number} NO_WEBRTC_SUPPORT <small>Value <code>3</code></small>
+ *   The error when WebRTC is not supported in current browser.<br>
+ * For this error, it's recommended to ask user to switch to another browser that supports WebRTC.
+ * @param {Number} NO_PATH <small>Value <code>4</code></small>
+ *   The error when constructed path is invalid.<br>
+ * This rarely (and should not) occur and it's recommended to report this issue if this occurs.
+ * @param {Number} INVALID_XMLHTTPREQUEST_STATUS <small>Value <code>5</code></small>
+ *   The error when XMLHttpRequest does not return a HTTP status code of <code>200</code> but a HTTP failure.<br>
+ * This rarely (and should not) occur and it's recommended to report this issue if this occurs.
+ * @param {Number} ADAPTER_NO_LOADED <small>Value <code>7</code></small>
+ *   The error when AdapterJS dependency is not loaded.<br>
+ * For this error, it's recommended to load the
+ *   [correct AdapterJS dependency](https://github.com/Temasys/AdapterJS/releases) from the CDN.
+ * @param {Number} XML_HTTP_REQUEST_ERROR <small>Value <code>-1</code></small>
+ *   The error when XMLHttpRequest failure on the network level when attempting to
+ *   connect to the platform server to retrieve selected room connection information.<br>
+ * This might happen when connection timeouts. If this is a persistent issue, it's recommended to report this issue.
  * @readOnly
  * @component Room
  * @for Skylink
@@ -6215,15 +6234,17 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
 };
 
 /**
- * The list of available platform signaling servers Skylink
+ * These are the list of available platform signaling servers Skylink
  *   should connect to for faster connectivity.
  * @attribute REGIONAL_SERVER
  * @type JSON
- * @param {String} APAC1 Asia pacific server 1.
- * @param {String} US1 server 1.
+ * @param {String} APAC1 <small>Value <code>"sg"</code></small>
+ *   The option to select the Asia pacific server 1 regional server.
+ * @param {String} US1 <small>Value <code>"us2"</code></small>
+ *   The option to select the US server 1 regional server.
  * @deprecated Signaling server selection is handled on
  *    the server side based on load and latency.
- * @final
+ * @readOnly
  * @component Room
  * @for Skylink
  * @since 0.5.0
@@ -9505,27 +9526,37 @@ Skylink.prototype._socketPorts = {
 };
 
 /**
- * The list of Skylink fallback socket transport types.
+ * These are the list of fallback attempt types that Skylink would attempt with.
  * @attribute SOCKET_FALLBACK
  * @type JSON
- * @param {String} NON_FALLBACK The current socket connection attempt
+ * @param {String} NON_FALLBACK <small>Value <code>"nonfallback"</code> | Protocol <code>"http:"</code>,
+ * <code>"https:"</code> | Transports <code>"WebSocket"</code>, <code>"Polling"</code></small>
+ *   The current socket connection attempt
  *   is using the first selected socket connection port for
  *   the current selected transport <code>"Polling"</code> or <code>"WebSocket"</code>.
- * @param {String} FALLBACK_PORT The current socket connection reattempt
+ * @param {String} FALLBACK_PORT <small>Value <code>"fallbackPortNonSSL"</code> | Protocol <code>"http:"</code>
+ *  | Transports <code>"WebSocket"</code></small>
+ *   The current socket connection reattempt
  *   is using the next selected socket connection port for
  *   <code>HTTP</code> protocol connection with the current selected transport
  *   <code>"Polling"</code> or <code>"WebSocket"</code>.
- * @param {String} FALLBACK_PORT_SSL The current socket connection reattempt
+ * @param {String} FALLBACK_PORT_SSL <small>Value <code>"fallbackPortSSL"</code> | Protocol <code>"https:"</code>
+ *  | Transports <code>"WebSocket"</code></small>
+ *   The current socket connection reattempt
  *   is using the next selected socket connection port for
  *   <code>HTTPS</code> protocol connection with the current selected transport
  *   <code>"Polling"</code> or <code>"WebSocket"</code>.
- * @param {String} LONG_POLLING The current socket connection reattempt
+ * @param {String} LONG_POLLING <small>Value <code>"fallbackLongPollingNonSSL"</code> | Protocol <code>"http:"</code>
+ *  | Transports <code>"Polling"</code></small>
+ *   The current socket connection reattempt
  *   is using the next selected socket connection port for
  *   <code>HTTP</code> protocol connection with <code>"Polling"</code> after
  *   many attempts of <code>"WebSocket"</code> has failed.
  *   This occurs only for socket connection that is originally using
  *   <code>"WebSocket"</code> transports.
- * @param {String} LONG_POLLING_SSL The current socket connection reattempt
+ * @param {String} LONG_POLLING_SSL <small>Value <code>"fallbackLongPollingSSL"</code> | Protocol <code>"https:"</code>
+ *  | Transports <code>"Polling"</code></small>
+ *   The current socket connection reattempt
  *   is using the next selected socket connection port for
  *   <code>HTTPS</code> protocol connection with <code>"Polling"</code> after
  *   many attempts of <code>"WebSocket"</code> has failed.

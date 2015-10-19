@@ -3833,12 +3833,12 @@
                 },
                 {
                     "name": "DUPLICATED_LOGIN",
-                    "description": "<small>Value <code>\"duplicatedLogin\"</code> | Action ties with <code>REJECT</code></small>\n  The reason code when the credentials given is already in use, which the platform signaling\n  throws an exception for this error.<br>\nThis rarely occurs as Skylink handles this issue, and it's recommended to\n  report this issue if this occurs.",
+                    "description": "<small>Value <code>\"duplicatedLogin\"</code> | Action ties with <code>REJECT</code></small>\n  The reason code when the credentials given is already in use, which the platform signaling\n  throws an exception for this error.<br>\nThis rarely occurs as Skylink handles this issue, and it's recommended to report this issue if this occurs.",
                     "type": "String"
                 },
                 {
                     "name": "SERVER_ERROR",
-                    "description": "<small>Value <code>\"serverError\"</code> | Action ties with <code>REJECT</code></small>\n  The reason code when the connection with the platform signaling has an exception with self.<br>\nThis rarely (and should not) occurs and it's recommended to\n  report this issue if this occurs.",
+                    "description": "<small>Value <code>\"serverError\"</code> | Action ties with <code>REJECT</code></small>\n  The reason code when the connection with the platform signaling has an exception with self.<br>\nThis rarely (and should not) occur and it's recommended to  report this issue if this occurs.",
                     "type": "String"
                 },
                 {
@@ -3864,7 +3864,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 76,
+            "line": 74,
             "description": "Stores the current room self is joined to.\nThe selected room will be usually defaulted to\n  {{#crossLink \"Skylink/_defaultRoom:attribute\"}}_defaultRoom{{/crossLink}}\n  if there is no selected room in\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_selectedRoom",
@@ -3878,7 +3878,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 92,
+            "line": 90,
             "description": "The flag that indicates if the currently joined room is locked.",
             "itemtype": "attribute",
             "name": "_roomLocked",
@@ -3891,7 +3891,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 103,
+            "line": 101,
             "description": "The flag that indicates if self is currently joined in a room.",
             "itemtype": "attribute",
             "name": "_inRoom",
@@ -3904,7 +3904,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 114,
+            "line": 112,
             "description": "Connects self to the selected room.\nBy default, if room parameter is not provided, it will\n  connect to the default room provided in\n  {{#crossLink \"Skylink/init:method\"}}init() <code>defaultRoom</code> settings{{/crossLink}}.\nIf any existing user media streams attached in Skylink, like for an example, calling\n  {{#crossLink \"Skylink/getUserMedia:method\"}}getUserMedia(){{/crossLink}} or\n  {{#crossLink \"Skylink/sendStream:method\"}}sendStream(){{/crossLink}} before\n  <code>joinRoom()</code>, self would actually send the current attached user media stream\n  attached. To stop the current attached Stream, please invoke\n  {{#crossLink \"Skylink/stopStream:method\"}}stopStream(){{/crossLink}} before\n  <code>joinRoom()</code> is invoked.",
             "itemtype": "method",
             "name": "joinRoom",
@@ -4230,7 +4230,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 545,
+            "line": 543,
             "description": "Waits for the signaling socket channel connection to be ready before\n  starting the room connection with the Skylink signaling platform.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -4369,7 +4369,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 650,
+            "line": 648,
             "description": "Disconnects self from current connected room.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -4438,7 +4438,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 768,
+            "line": 766,
             "description": "Locks the currently connected room to prevent other peers\n  from joining the room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -4452,7 +4452,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 791,
+            "line": 789,
             "description": "Unlocks the currently connected room to allow other peers\n  to join the room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -4467,29 +4467,29 @@
         {
             "file": "source/room-init.js",
             "line": 1,
-            "description": "The list of Skylink platform room initialization ready state that indicates\n  if the required connection information has been retrieved successfully from\n  the platform server to start a connection.",
+            "description": "These are the list of room initialization ready states that Skylink would trigger.\n- The states indicates if the required connection information has been retrieved successfully from\n  the platform server to start a connection.\n- These states are triggered when {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}} or\n  {{#crossLink \"Skylink/joinRoom:attr\"}}joinRoom(){{/crossLink}} is invoked.",
             "itemtype": "attribute",
             "name": "READY_STATE_CHANGE",
             "type": "JSON",
             "params": [
                 {
                     "name": "INIT",
-                    "description": "Retrieval Step 1. The ready state is at it's beginning.\n  When {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}} is invoked, or\n  when {{#crossLink \"Skylink/joinRoom:attr\"}}joinRoom(){{/crossLink}} is invoked\n  with a provided room, it will start proceeding to Step 2.",
+                    "description": "<small>Value <code>0</code></small>\n  The state when Skylink is at the initial state before retrieval.<br>\nIf all dependencies has been loaded, this would proceed to <code>LOADING</code> state.",
                     "type": "Number"
                 },
                 {
                     "name": "LOADING",
-                    "description": "Retrieval Step 2. Skylink starts retrieving the\n  connection information from the platform server.",
+                    "description": "<small>Value <code>1</code></small>\n  The state when Skylink starts retrieving the connection information from the platform server.<br>\nThis state occurs after <code>INIT</code> state and if retrieval is successful, this would\n  proceed to <code>COMPLETED</code> state.",
                     "type": "Number"
                 },
                 {
                     "name": "COMPLETED",
-                    "description": "Retrieval Step 3. The connection information\n  has been retrieved successfully.",
+                    "description": "<small>Value <code>2</code></small>\n  The state when the connection information has been retrieved successfully.<br>\nThis state occurs after <code>LOADING</code>, and if it's\n  {{#crossLink \"Skylink/joinRoom:attr\"}}joinRoom(){{/crossLink}} that is invoked, room connection\n  would commerce.",
                     "type": "Number"
                 },
                 {
                     "name": "ERROR",
-                    "description": "Retrieval failure Step. An exception occured while retrieving\n  the connection information. This could also be due to missing dependencies or the\n  lack of WebRTC support.",
+                    "description": "<small>Value <code>-1</code></small>\n  The state when an exception occured while retrieving the connection information.<br>\nThis state might be triggered when dependencies failed to load or HTTP retrieval fails.<br>\nReference {{#crossLink \"Skylink/READY_STATE_CHANGE_ERROR:attr\"}}READY_STATE_CHANGE_ERROR{{/crossLink}}\n  to see the list of errors that might have triggered the <code>ERROR</code> state.",
                     "type": "Number"
                 }
             ],
@@ -4500,80 +4500,80 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 30,
-            "description": "The list of Skylink platform room initialization ready state errors when\n  the error state is triggered by\n  {{#crossLink \"Skylink/readyStateChange:event\"}}readyStateChange{{/crossLink}}\n    The list of ready state change errors.\n- These are the error states from the error object error code.\n- <b>ROOM_LOCKED</b> is deprecated in 0.5.2. Please use\n  {{#crossLink \"Skylink/:attr\"}}leaveRoom(){{/crossLink}}\n- The states that would occur are:",
+            "line": 38,
+            "description": "These are the list of room initialization ready state errors that Skylink has.\n- Ready state errors like <code>ROOM_LOCKED</code>, <code>API_NOT_ENOUGH_CREDIT</code>,\n  <code>API_NOT_ENOUGH_PREPAID_CREDIT</code>, <code>API_FAILED_FINDING_PREPAID_CREDIT</code> and\n  <code>SCRIPT_ERROR</code> has been removed as they are no longer supported.",
             "itemtype": "attribute",
             "name": "READY_STATE_CHANGE_ERROR",
             "type": "JSON",
             "params": [
                 {
                     "name": "API_INVALID",
-                    "description": "Provided Application Key does not exists (invalid).",
+                    "description": "<small>Value <code>4001</code></small>\n  The error when provided Application Key does not exists <em>(invalid)</em>.<br>\nFor this error, it's recommended that you check if the Application Key exists in your account\n  in the developer console.",
                     "type": "Number"
                 },
                 {
                     "name": "API_DOMAIN_NOT_MATCH",
-                    "description": "Application accessing from backend IP address\n  is not valid for provided Application Key.",
+                    "description": "<small>Value <code>4002</code></small>\n  The error when application accessing from backend IP address is not valid for provided Application Key.<br>\nThis rarely (and should not) occur and it's recommended to report this issue if this occurs.",
                     "type": "Number"
                 },
                 {
                     "name": "API_CORS_DOMAIN_NOT_MATCH",
-                    "description": "Application accessing from the CORS domain\n  is not valid for provided Application Key.",
+                    "description": "<small>Value <code>4003</code></small>\n  The error when application accessing from the CORS domain is not valid for provided Application Key.<br>\nFor this error, it's recommended that you check the CORS configuration for the provided Application Key\n  in the developer console.",
                     "type": "Number"
                 },
                 {
                     "name": "API_CREDENTIALS_INVALID",
-                    "description": "Credentials provided is not valid for\n  provided Application Key.",
+                    "description": "<small>Value <code>4004</code></small>\n  The error when credentials provided is not valid for provided Application Key.<br>\nFor this error, it's recommended to check the <code>credentials</code> provided in\n  {{#crossLink \"Skylink/init:method\"}}init() configuration{{/crossLink}}.",
                     "type": "Number"
                 },
                 {
                     "name": "API_CREDENTIALS_NOT_MATCH",
-                    "description": "Credentials does not match as expected\n  generated credentials for provided Application Key.",
+                    "description": "<small>Value <code>4005</code></small>\n  The error when credentials does not match as expected generated credentials for provided Application Key.<br>\nFor this error, it's recommended to check the <code>credentials</code> provided in\n  {{#crossLink \"Skylink/init:method\"}}init() configuration{{/crossLink}}.",
                     "type": "Number"
                 },
                 {
                     "name": "API_INVALID_PARENT_KEY",
-                    "description": "Provided alias Application Key has an\n  error because parent Application Key does not exists.",
+                    "description": "<small>Value <code>4006</code></small>\n  The error when provided alias Application Key has an error because parent Application Key does not exists.<br>\nFor this error, it's recommended to provide another alias Application Key.",
                     "type": "Number"
                 },
                 {
                     "name": "API_NO_MEETING_RECORD_FOUND",
-                    "description": "For persistent room feature configured\n  Application Key. There is no meeting currently that is open or available to join\n  for self at the current time in the selected room.",
+                    "description": "<small>Value <code>4010</code></small>\n  The error when there is no meeting currently that is open or available to join\n  for self at the current time in the selected room.<br>\nFor this error, it's recommended to retrieve the list of meetings and check if it exists using\n  the [Meeting Resource REST API](https://temasys.atlassian.net/wiki/display/TPD/SkylinkAPI+-+Meeting+%28Persistent+Room%29+Resources).",
                     "type": "Number"
                 },
                 {
                     "name": "NO_SOCKET_IO",
-                    "description": "Socket.io dependency is not loaded.",
+                    "description": "<small>Value <code>1</code></small>\n  The error when socket.io dependency is not loaded.<br>\nFor this error, it's recommended to load the\n  [correct socket.io-client dependency](http://socket.io/download/) from the CDN.",
                     "type": "Number"
                 },
                 {
                     "name": "NO_XMLHTTPREQUEST_SUPPORT",
-                    "description": "XMLHttpRequest is not supported\n  in current browser.",
+                    "description": "<small>Value <code>2</code></small>\n  The error when XMLHttpRequest is not supported in current browser.<br>\nFor this error, it's recommended to ask user to switch to another browser that supports <code>XMLHttpRequest</code>.",
                     "type": "Number"
                 },
                 {
                     "name": "NO_WEBRTC_SUPPORT",
-                    "description": "WebRTC is not supported in\n  current browser.",
+                    "description": "<small>Value <code>3</code></small>\n  The error when WebRTC is not supported in current browser.<br>\nFor this error, it's recommended to ask user to switch to another browser that supports WebRTC.",
                     "type": "Number"
                 },
                 {
                     "name": "NO_PATH",
-                    "description": "Error thrown when {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  is invoked before {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.",
+                    "description": "<small>Value <code>4</code></small>\n  The error when constructed path is invalid.<br>\nThis rarely (and should not) occur and it's recommended to report this issue if this occurs.",
                     "type": "Number"
                 },
                 {
                     "name": "INVALID_XMLHTTPREQUEST_STATUS",
-                    "description": "XMLHttpRequest does not return a\n  HTTP status code of <code>200</code>, which is a HTTP failure.",
+                    "description": "<small>Value <code>5</code></small>\n  The error when XMLHttpRequest does not return a HTTP status code of <code>200</code> but a HTTP failure.<br>\nThis rarely (and should not) occur and it's recommended to report this issue if this occurs.",
                     "type": "Number"
                 },
                 {
                     "name": "ADAPTER_NO_LOADED",
-                    "description": "AdapterJS dependency is not loaded.",
+                    "description": "<small>Value <code>7</code></small>\n  The error when AdapterJS dependency is not loaded.<br>\nFor this error, it's recommended to load the\n  [correct AdapterJS dependency](https://github.com/Temasys/AdapterJS/releases) from the CDN.",
                     "type": "Number"
                 },
                 {
                     "name": "XML_HTTP_REQUEST_ERROR",
-                    "description": "XMLHttpRequest failure on the network level when attempting to\n  connect to the platform server to retrieve selected room connection information.",
+                    "description": "<small>Value <code>-1</code></small>\n  The error when XMLHttpRequest failure on the network level when attempting to\n  connect to the platform server to retrieve selected room connection information.<br>\nThis might happen when connection timeouts. If this is a persistent issue, it's recommended to report this issue.",
                     "type": "Number"
                 }
             ],
@@ -4584,33 +4584,33 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 91,
-            "description": "The list of available platform signaling servers Skylink\n  should connect to for faster connectivity.",
+            "line": 120,
+            "description": "These are the list of available platform signaling servers Skylink\n  should connect to for faster connectivity.",
             "itemtype": "attribute",
             "name": "REGIONAL_SERVER",
             "type": "JSON",
             "params": [
                 {
                     "name": "APAC1",
-                    "description": "Asia pacific server 1.",
+                    "description": "<small>Value <code>\"sg\"</code></small>\n  The option to select the Asia pacific server 1 regional server.",
                     "type": "String"
                 },
                 {
                     "name": "US1",
-                    "description": "server 1.",
+                    "description": "<small>Value <code>\"us2\"</code></small>\n  The option to select the US server 1 regional server.",
                     "type": "String"
                 }
             ],
             "deprecated": true,
             "deprecationMessage": "Signaling server selection is handled on\n   the server side based on load and latency.",
-            "final": 1,
+            "readonly": "",
             "component": "Room",
             "since": "0.5.0",
             "class": "Skylink"
         },
         {
             "file": "source/room-init.js",
-            "line": 110,
+            "line": 141,
             "description": "The flag to enforce an SSL platform signaling and platform server connection.\nIf self domain accessing protocol is <code>https:</code>, SSL connections\n  would be automatically used. This flag is mostly used for self domain accessing protocol\n  that is <code>http:</code> and enforcing the SSL connections for\n  platform signaling and platform server connection.",
             "itemtype": "attribute",
             "name": "_forceSSL",
@@ -4625,7 +4625,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 127,
+            "line": 158,
             "description": "The flag to enforce an SSL TURN server connection.\nIf self domain accessing protocol is <code>https:</code>, SSL connections\n  would be automatically used. This flag is mostly used for self domain accessing protocol\n  that is <code>http:</code> and enforcing the SSL connections for\n  TURN server connection.\nThis will configure TURN server connection using port <code>443</code> only and\n  if <code>turns:</code> protocol is supported, it will use <code>turns:</code> protocol.",
             "itemtype": "attribute",
             "name": "_forceTURNSSL",
@@ -4640,7 +4640,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 146,
+            "line": 177,
             "description": "The flag to enforce TURN server connection for quicker connectivity.",
             "itemtype": "attribute",
             "name": "_forceTURN",
@@ -4655,7 +4655,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 159,
+            "line": 190,
             "description": "The constructed REST path that Skylink makes a <code>HTTP /GET</code> from\n  to retrieve the connection information required.",
             "itemtype": "attribute",
             "name": "_path",
@@ -4669,7 +4669,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 172,
+            "line": 203,
             "description": "The regional server that Skylink should connect to for fastest connectivity.",
             "itemtype": "attribute",
             "name": "_serverRegion",
@@ -4682,7 +4682,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 183,
+            "line": 214,
             "description": "The platform server URL that Skylink can construct the REST path with to make\n  a <code>HTTP /GET</code> to retrieve the connection information required.\nIf the value is not the default value, it's mostly for debugging purposes.\nIt's not advisable to allow developers to set the custom server URL unless\n  they are aware of what they are doing, as this is a debugging feature.",
             "itemtype": "attribute",
             "name": "_roomServer",
@@ -4696,7 +4696,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 199,
+            "line": 230,
             "description": "Stores the Application Key that is configured in the\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_appKey",
@@ -4709,7 +4709,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 211,
+            "line": 242,
             "description": "Stores the default room that is configured in the\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.\nIf no room is provided in {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}},\n  this is the room that self would join to by default.\nIf the value is not provided in {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}},\n  by default, the value is the Application Key that is configured\n  in {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_defaultRoom",
@@ -4723,7 +4723,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 229,
+            "line": 260,
             "description": "Stores the new persistent room meeting start datetime stamp in\n  [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601).\nThis will start a new meeting based on the starting datetime stamp\n  in the room that was selected to join.\nThe start date time of the room will not affect non persistent room connection.\nThe persistent room feature is configurable in the Application Key\n  in the developer console.",
             "itemtype": "attribute",
             "name": "_roomStart",
@@ -4737,7 +4737,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 247,
+            "line": 278,
             "description": "Stores the new persistent room meeting duration (in hours)\n  that the current new meeting duration should be in the room\n  that was selected to join.\nThe duration will not affect non persistent room connection.\nThe persistent room feature is configurable in the Application Key\n  in the developer console.",
             "itemtype": "attribute",
             "name": "_roomDuration",
@@ -4751,7 +4751,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 264,
+            "line": 295,
             "description": "Stores the room credentials for Application Key.\nThis is required for rooms connecting without CORS verification\n  or starting a new persistent room meeting.\nTo generate the credentials:\n- Concatenate a string that consists of the room name\n  the room meeting duration (in hours) and the start date timestamp (in ISO 8601 format).\n  Format <code>room + duration + startDateTimeStamp</code>.\n- Hash the concatenated string with the Application Key token using\n  [SHA-1](https://en.wikipedia.org/wiki/SHA-1).\n  You may use the [CryptoJS.HmacSHA1](https://code.google.com/p/crypto-js/#HMAC) function to do so.\n  Example <code>var hash = CryptoJS.HmacSHA1(concatenatedString, token);</code>.\n- Convert the hash to a [Base64](https://en.wikipedia.org/wiki/Base64) encoded string. You may use the\n  [CryptoJS.enc.Base64](https://code.google.com/p/crypto-js/#The_Cipher_Output) function\n  to do so. Example <code>var base64String = hash.toString(CryptoJS.enc.Base64); </code>.\n- Encode the Base64 encoded string to a URI component using UTF-8 encoding with\n  [encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent).\n  Example <code>var credentials = encodeURIComponent(base64String);</code>\nand the duration.",
             "itemtype": "attribute",
             "name": "_roomCredentials",
@@ -4765,7 +4765,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 293,
+            "line": 324,
             "description": "Stores the current Skylink room connection retrieval ready state.\n[Rel: Skylink.READY_STATE_CHANGE]",
             "itemtype": "attribute",
             "name": "_readyState",
@@ -4779,7 +4779,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 306,
+            "line": 337,
             "description": "Stores the Skylink server connection key for the selected room.",
             "itemtype": "attribute",
             "name": "_key",
@@ -4792,7 +4792,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 317,
+            "line": 348,
             "description": "Stores the Skylink server Application Key owner string for the selected room.",
             "itemtype": "attribute",
             "name": "_appKeyOwner",
@@ -4805,7 +4805,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 328,
+            "line": 359,
             "description": "Stores the room connection information that is passed for starting\n  the selected room connection. Some of these information are also\n  used and required to send for every messages sent to the platform\n  signaling connection for targeting the correct room and\n  self identification in the room.",
             "itemtype": "attribute",
             "name": "_room",
@@ -4873,7 +4873,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 369,
+            "line": 400,
             "description": "Starts a <code>HTTP /GET</code> REST call to the platform server to\n  retrieve the required connection information.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -5036,7 +5036,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 534,
+            "line": 565,
             "description": "Parses the connection information retrieved from the platform server and\n  stores them into the relevant attributes in\n  {{#crossLink \"Skylink/_room:attribute\"}}_room{{/crossLink}} and\n  {{#crossLink \"Skylink/_user:attribute\"}}_user{{/crossLink}}.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -5165,7 +5165,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 663,
+            "line": 694,
             "description": "Starts loading the required dependencies and then retrieve the required\n  connection information from the platform server.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -5179,7 +5179,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 758,
+            "line": 789,
             "description": "Starts loading the required connection information to start connection\n  based on the selected room in {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -5212,7 +5212,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 809,
+            "line": 840,
             "description": "Initialises and configures Skylink to begin any connection.\n<b>NOTE</b> that this is the first method that has to be called before\n  using any other functionalities other than debugging features like\n  {{#crossLink \"Skylink/setLogLevel:method\"}}setLogLevel(){{/crossLink}} and\n  {{#crossLink \"Skylink/setDebugMode:method\"}}setDebugMode(){{/crossLink}} and\n  after all event subscriptions like {{#crossLink \"Skylink/on:method\"}}on(){{/crossLink}}\n  or {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}} has been made.\nThis is where the Application Key is configured and attached to Skylink for usage.",
             "itemtype": "method",
             "name": "init",
@@ -5498,34 +5498,34 @@
         {
             "file": "source/skylink-debug.js",
             "line": 1,
-            "description": "The list of Skylink <code>console</code> logging levels available.\nRefer to [Javascript Web Console](https://developer.mozilla.org/en/docs/Web/API/console).",
+            "description": "These are the logging levels that Skylink provides.\n- This manipulates the debugging messages sent to <code>console</code> object.\n- Refer to [Javascript Web Console](https://developer.mozilla.org/en/docs/Web/API/console).",
             "itemtype": "attribute",
             "name": "LOG_LEVEL",
             "type": "JSON",
             "params": [
                 {
                     "name": "DEBUG",
-                    "description": "Displays <code>debug</code>, <code>log</code>,\n  <code>info</code>, <code>warn</code> and <code>error</code> console logs.",
+                    "description": "<small>Value <code>4</code> | Level higher than <code>LOG</code></small>\n  Displays debugging logs from <code>LOG</code> level onwards with <code>DEBUG</code> logs.",
                     "type": "Number"
                 },
                 {
                     "name": "LOG",
-                    "description": "Displays <code>log</code>,\n  <code>info</code>, <code>warn</code> and <code>error</code> console logs.",
+                    "description": "<small>Value <code>3</code> | Level higher than <code>INFO</code></small>\n  Displays debugging logs from <code>INFO</code> level onwards with <code>LOG</code> logs.",
                     "type": "Number"
                 },
                 {
                     "name": "INFO",
-                    "description": "Displays <code>info</code>, <code>warn</code> and\n  <code>error</code> console logs.",
+                    "description": "<small>Value <code>2</code> | Level higher than <code>WARN</code></small>\n  Displays debugging logs from <code>WARN</code> level onwards with <code>INFO</code> logs.",
                     "type": "Number"
                 },
                 {
                     "name": "WARN",
-                    "description": "Displays <code>warn</code> and <code>error</code> console logs.",
+                    "description": "<small>Value <code>1</code> | Level higher than <code>ERROR</code></small>\n  Displays debugging logs of <code>ERROR</code> level with <code>WARN</code> logs.",
                     "type": "Number"
                 },
                 {
                     "name": "ERROR",
-                    "description": "<i>This is the default log level.</i> Displays <code>error</code> console logs only.",
+                    "description": "<small><b>DEFAULT</b> | Value <code>0</code> | Lowest level</small>\n  Displays only <code>ERROR</code> logs.",
                     "type": "Number"
                 }
             ],
@@ -5536,7 +5536,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 27,
+            "line": 30,
             "description": "The format string that is printed in every Skylink console logs for Skylink logs identification.<br>\n<small>Example: <code>\"SkylinkJS - <<logs here>>\"</code></small>",
             "itemtype": "attribute",
             "name": "_LOG_KEY",
@@ -5551,7 +5551,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 42,
+            "line": 45,
             "description": "Stores the list of Skylink console logging levels in an array.",
             "itemtype": "attribute",
             "name": "_LOG_LEVELS",
@@ -5566,7 +5566,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 55,
+            "line": 58,
             "description": "Stores the current Skylink log level.\nBy default, the value is <code>ERROR</code>.",
             "itemtype": "attribute",
             "name": "_logLevel",
@@ -5582,7 +5582,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 70,
+            "line": 73,
             "description": "The flag that indicates if Skylink debugging mode is enabled.\nThis is not to be confused with {{#crossLink \"Skylink/setLogLevel:method\"}}setLogLevel(){{/crossLink}}\n  functionality, as that touches the output Web console log levels, and this\n  enables the debugging trace of the logs <code>console.trace()</code> or storage of the console logs.",
             "itemtype": "attribute",
             "name": "_enableDebugMode",
@@ -5598,7 +5598,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 87,
+            "line": 90,
             "description": "The flag that indicates if Skylink should store the logs in\n  {{#crossLink \"Skylink/_storedLogs:attribute\"}}_storedLogs{{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_enableDebugStack",
@@ -5614,7 +5614,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 102,
+            "line": 105,
             "description": "The flag that indicates if Skylink console logs should all output as\n  <code>console.trace()</code>.\nIf <code>console.trace()</code> is not supported, it will fallback and\n  output as <code>console.log()</code>.",
             "itemtype": "attribute",
             "name": "_enableDebugTrace",
@@ -5630,7 +5630,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 119,
+            "line": 122,
             "description": "Stores all Skylink console logs.",
             "itemtype": "attribute",
             "name": "_storedLogs",
@@ -5645,7 +5645,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 132,
+            "line": 135,
             "description": "Gets the stored Skylink console logs from\n  {{#crossLink \"Skylink/_storedLogs:attribute\"}}_storedLogs{{/crossLink}}.",
             "itemtype": "method",
             "name": "_getStoredLogsFn",
@@ -5671,7 +5671,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 160,
+            "line": 163,
             "description": "Clears the stored Skylink console logs in\n  {{#crossLink \"Skylink/_storedLogs:attribute\"}}_storedLogs{{/crossLink}}.",
             "itemtype": "method",
             "name": "_clearAllStoredLogsFn",
@@ -5693,7 +5693,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 178,
+            "line": 181,
             "description": "Prints all the stored Skylink console logs into the Web console from\n  {{#crossLink \"Skylink/_storedLogs:attribute\"}}_storedLogs{{/crossLink}}.",
             "itemtype": "method",
             "name": "_printAllStoredLogsFn",
@@ -5707,7 +5707,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 205,
+            "line": 208,
             "description": "The object that handles the stored Skylink console logs.\nSkylink {{#crossLink \"Skylink/setDebugMode:method\"}}setDebugMode(){{/crossLink}} <code>storeLogs</code>\n  must be set as <code>true</code> to enable the storage of logs.",
             "itemtype": "property",
             "name": "SkylinkLogs",
@@ -5720,7 +5720,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 218,
+            "line": 221,
             "description": "Gets the stored Skylink console logs.",
             "itemtype": "property",
             "name": "SkylinkLogs.getLogs",
@@ -5745,7 +5745,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 234,
+            "line": 237,
             "description": "Clears the stored Skylink console logs.",
             "itemtype": "property",
             "name": "SkylinkLogs.clearAllLogs",
@@ -5766,7 +5766,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 249,
+            "line": 252,
             "description": "Prints all the stored Skylink console logs into the [Web console](https://developer.mozilla.org/en/docs/Web/API/console).",
             "itemtype": "property",
             "name": "SkylinkLogs.printAllLogs",
@@ -5779,7 +5779,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 262,
+            "line": 265,
             "description": "Handles the Skylink logs and stores the console log message in\n  {{#crossLink \"Skylink/_storedLogs:attribute\"}}_storedLogs{{/crossLink}}\n  if {{#crossLink \"Skylink/_enableDebugStack:attribute\"}}_enableDebugStack{{/crossLink}} is\n  set to <code>true</code> and prints out the log to the Web console.",
             "itemtype": "method",
             "name": "_logFn",
@@ -5834,7 +5834,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 344,
+            "line": 347,
             "description": "The object that handles the logging functionality in Skylink.",
             "itemtype": "attribute",
             "name": "log",
@@ -5876,7 +5876,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 361,
+            "line": 364,
             "description": "Handles the <code>console.debug</code> console log message.",
             "itemtype": "property",
             "name": "log.debug",
@@ -5930,7 +5930,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 387,
+            "line": 390,
             "description": "Handles the <code>console.log</code> console log message.",
             "itemtype": "property",
             "name": "log.log",
@@ -5984,7 +5984,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 413,
+            "line": 416,
             "description": "Handles the <code>console.info</code> console log message.",
             "itemtype": "property",
             "name": "log.info",
@@ -6038,7 +6038,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 439,
+            "line": 442,
             "description": "Handles the <code>console.warn</code> console log message.",
             "itemtype": "property",
             "name": "log.warn",
@@ -6091,7 +6091,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 464,
+            "line": 467,
             "description": "Handles the <code>console.error</code> console log message.",
             "itemtype": "property",
             "name": "log.error",
@@ -6145,7 +6145,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 491,
+            "line": 494,
             "description": "Configures the Skylink console log level that would determine the\n  type of console logs that would be printed in the [Web console](https://developer.mozilla.org/en/docs/Web/API/console).",
             "itemtype": "method",
             "name": "setLogLevel",
@@ -6166,7 +6166,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 518,
+            "line": 521,
             "description": "Configures the Skylink debugging tools.",
             "itemtype": "method",
             "name": "setDebugMode",
@@ -8765,34 +8765,34 @@
         {
             "file": "source/socket-channel.js",
             "line": 1,
-            "description": "The list of Skylink estalishing socket connection error triggered states.",
+            "description": "These are the list of socket connection error states that Skylink would trigger.\n- These error states references the [socket.io-client events](http://socket.io/docs/client-api/).",
             "itemtype": "attribute",
             "name": "SOCKET_ERROR",
             "type": "JSON",
             "params": [
                 {
                     "name": "CONNECTION_FAILED",
-                    "description": "Skylink have failed to\n  establish a socket connection with platform signaling in the first attempt.",
+                    "description": "<small>Value <code>0</code></small>\n  The error state when Skylink have failed to establish a socket connection with\n  platform signaling in the first attempt.",
                     "type": "Number"
                 },
                 {
                     "name": "RECONNECTION_FAILED",
-                    "description": "Skylink have failed to\n  reestablish a socket connection with platform signaling after the first attempt\n  <code>CONNECTION_FAILED</code>.",
+                    "description": "<small>Value <code>-1</code></small>\n  The error state when Skylink have failed to\n  reestablish a socket connection with platform signaling after the first attempt\n  <code>CONNECTION_FAILED</code>.",
                     "type": "String"
                 },
                 {
                     "name": "CONNECTION_ABORTED",
-                    "description": "Attempt to reestablish socket connection\n  with platform signaling has been aborted after the failed first attempt\n  <code>CONNECTION_FAILED</code>.",
+                    "description": "<small>Value <code>-2</code></small>\n  The error state when attempt to reestablish socket connection\n  with platform signaling has been aborted after the failed first attempt\n  <code>CONNECTION_FAILED</code>.",
                     "type": "String"
                 },
                 {
                     "name": "RECONNECTION_ABORTED",
-                    "description": "Attempt to reestablish socket connection\n  with platform signaling has been aborted after several failed reattempts\n  <code>RECONNECTION_FAILED</code>.",
+                    "description": "<small>Value <code>-3</code></small>\n  The error state when attempt to reestablish socket connection\n  with platform signaling has been aborted after several failed reattempts\n  <code>RECONNECTION_FAILED</code>.",
                     "type": "String"
                 },
                 {
                     "name": "RECONNECTION_ATTEMPT",
-                    "description": "Skylink is attempting to reestablish\n  a socket connection with platform signaling after a failed attempt\n  <code>CONNECTION_FAILED</code> or <code>RECONNECTION_FAILED</code>.",
+                    "description": "<small>Value <code>-4</code></small>\n  The error state when Skylink is attempting to reestablish\n  a socket connection with platform signaling after a failed attempt\n  <code>CONNECTION_FAILED</code> or <code>RECONNECTION_FAILED</code>.",
                     "type": "String"
                 }
             ],
@@ -8803,7 +8803,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 32,
+            "line": 38,
             "description": "Stores the queued socket messages to sent to the platform signaling to\n  prevent messages from being dropped due to messages being sent in\n  less than a second interval.",
             "itemtype": "attribute",
             "name": "_socketMessageQueue",
@@ -8817,7 +8817,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 46,
+            "line": 52,
             "description": "Limits the socket messages being sent in less than a second interval\n  using the <code>setTimeout</code> object to prevent messages being sent\n  in less than a second interval.\nThe messaegs are stored in\n  {{#crossLink \"Skylink/_socketMessageQueue:attribute\"}}_socketMessageQueue{{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_socketMessageTimeout",
@@ -8831,7 +8831,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 63,
+            "line": 69,
             "description": "Stores the list of fallback ports that Skylink can attempt\n  to establish a socket connection with platform signaling.",
             "itemtype": "attribute",
             "name": "_socketPorts",
@@ -8857,35 +8857,35 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 83,
-            "description": "The list of Skylink fallback socket transport types.",
+            "line": 89,
+            "description": "These are the list of fallback attempt types that Skylink would attempt with.",
             "itemtype": "attribute",
             "name": "SOCKET_FALLBACK",
             "type": "JSON",
             "params": [
                 {
                     "name": "NON_FALLBACK",
-                    "description": "The current socket connection attempt\n  is using the first selected socket connection port for\n  the current selected transport <code>\"Polling\"</code> or <code>\"WebSocket\"</code>.",
+                    "description": "<small>Value <code>\"nonfallback\"</code> | Protocol <code>\"http:\"</code>,\n<code>\"https:\"</code> | Transports <code>\"WebSocket\"</code>, <code>\"Polling\"</code></small>\n  The current socket connection attempt\n  is using the first selected socket connection port for\n  the current selected transport <code>\"Polling\"</code> or <code>\"WebSocket\"</code>.",
                     "type": "String"
                 },
                 {
                     "name": "FALLBACK_PORT",
-                    "description": "The current socket connection reattempt\n  is using the next selected socket connection port for\n  <code>HTTP</code> protocol connection with the current selected transport\n  <code>\"Polling\"</code> or <code>\"WebSocket\"</code>.",
+                    "description": "<small>Value <code>\"fallbackPortNonSSL\"</code> | Protocol <code>\"http:\"</code>\n | Transports <code>\"WebSocket\"</code></small>\n  The current socket connection reattempt\n  is using the next selected socket connection port for\n  <code>HTTP</code> protocol connection with the current selected transport\n  <code>\"Polling\"</code> or <code>\"WebSocket\"</code>.",
                     "type": "String"
                 },
                 {
                     "name": "FALLBACK_PORT_SSL",
-                    "description": "The current socket connection reattempt\n  is using the next selected socket connection port for\n  <code>HTTPS</code> protocol connection with the current selected transport\n  <code>\"Polling\"</code> or <code>\"WebSocket\"</code>.",
+                    "description": "<small>Value <code>\"fallbackPortSSL\"</code> | Protocol <code>\"https:\"</code>\n | Transports <code>\"WebSocket\"</code></small>\n  The current socket connection reattempt\n  is using the next selected socket connection port for\n  <code>HTTPS</code> protocol connection with the current selected transport\n  <code>\"Polling\"</code> or <code>\"WebSocket\"</code>.",
                     "type": "String"
                 },
                 {
                     "name": "LONG_POLLING",
-                    "description": "The current socket connection reattempt\n  is using the next selected socket connection port for\n  <code>HTTP</code> protocol connection with <code>\"Polling\"</code> after\n  many attempts of <code>\"WebSocket\"</code> has failed.\n  This occurs only for socket connection that is originally using\n  <code>\"WebSocket\"</code> transports.",
+                    "description": "<small>Value <code>\"fallbackLongPollingNonSSL\"</code> | Protocol <code>\"http:\"</code>\n | Transports <code>\"Polling\"</code></small>\n  The current socket connection reattempt\n  is using the next selected socket connection port for\n  <code>HTTP</code> protocol connection with <code>\"Polling\"</code> after\n  many attempts of <code>\"WebSocket\"</code> has failed.\n  This occurs only for socket connection that is originally using\n  <code>\"WebSocket\"</code> transports.",
                     "type": "String"
                 },
                 {
                     "name": "LONG_POLLING_SSL",
-                    "description": "The current socket connection reattempt\n  is using the next selected socket connection port for\n  <code>HTTPS</code> protocol connection with <code>\"Polling\"</code> after\n  many attempts of <code>\"WebSocket\"</code> has failed.\n  This occurs only for socket connection that is originally using\n  <code>\"WebSocket\"</code> transports.",
+                    "description": "<small>Value <code>\"fallbackLongPollingSSL\"</code> | Protocol <code>\"https:\"</code>\n | Transports <code>\"Polling\"</code></small>\n  The current socket connection reattempt\n  is using the next selected socket connection port for\n  <code>HTTPS</code> protocol connection with <code>\"Polling\"</code> after\n  many attempts of <code>\"WebSocket\"</code> has failed.\n  This occurs only for socket connection that is originally using\n  <code>\"WebSocket\"</code> transports.",
                     "type": "String"
                 }
             ],
@@ -8896,7 +8896,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 123,
+            "line": 139,
             "description": "The flag that indicates if the current socket connection with\n  platform signaling is opened.",
             "itemtype": "attribute",
             "name": "_channelOpen",
@@ -8910,7 +8910,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 136,
+            "line": 152,
             "description": "Stores the platform signaling endpoint URI to open socket connection with.",
             "itemtype": "attribute",
             "name": "_signalingServer",
@@ -8923,7 +8923,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 147,
+            "line": 163,
             "description": "Stores the current platform signaling protocol to open socket connection with.",
             "itemtype": "attribute",
             "name": "_signalingServerProtocol",
@@ -8936,7 +8936,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 158,
+            "line": 174,
             "description": "Stores the current platform signaling port to open socket connection with.",
             "itemtype": "attribute",
             "name": "_signalingServerPort",
@@ -8949,7 +8949,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 169,
+            "line": 185,
             "description": "Stores the [socket.io-client <code>io</code> object](http://socket.io/docs/client-api/) that\n  handles the middleware socket connection with platform signaling.",
             "itemtype": "attribute",
             "name": "_socket",
@@ -8963,7 +8963,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 182,
+            "line": 198,
             "description": "Stores the timeout (in ms) set to await in seconds for response from platform signaling\n  before throwing a connection timeout exception when Skylink is attemtping\n  to establish a connection with platform signaling.\nIf the value is <code>0</code>, it will use the default timeout from\n  socket.io-client that is in <code>20000</code>.",
             "itemtype": "attribute",
             "name": "_socketTimeout",
@@ -8978,7 +8978,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 199,
+            "line": 215,
             "description": "The flag that indicates if the current socket connection for\n  transports types with <code>\"Polling\"</code> uses\n  [XDomainRequest](https://msdn.microsoft.com/en-us/library/cc288060(v=vs.85).aspx)\n  instead of [XMLHttpRequest](http://www.w3schools.com/Xml/dom_httprequest.asp)\n  due to the IE 8 / 9 <code>XMLHttpRequest</code> not supporting CORS access.",
             "itemtype": "attribute",
             "name": "_socketUseXDR",
@@ -8993,7 +8993,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 216,
+            "line": 232,
             "description": "Sends socket message over the platform signaling socket connection.",
             "itemtype": "method",
             "name": "_sendChannelMessage",
@@ -9019,7 +9019,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 316,
+            "line": 332,
             "description": "Starts a socket.io connection with the platform signaling.",
             "itemtype": "method",
             "name": "_createSocket",
@@ -9038,7 +9038,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 479,
+            "line": 495,
             "description": "Connects to the socket connection endpoint URI to platform signaling that is constructed with\n {{#crossLink \"Skylink/_signalingServerProtocol:attribute\"}}_signalingServerProtocol{{/crossLink}},\n {{#crossLink \"Skylink/_signalingServer:attribute\"}}_signalingServer{{/crossLink}} and\n {{#crossLink \"Skylink/_signalingServerPort:attribute\"}}_signalingServerPort{{/crossLink}}.\n <small>Example format: <code>protocol//serverUrl:port</code></small>.<br>\nOnce URI is formed, it will start a new socket.io connection with\n {{#crossLink \"Skylink/_createSocket:method\"}}_createSocket(){{/crossLink}}.",
             "itemtype": "method",
             "name": "_openChannel",
@@ -9051,7 +9051,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 526,
+            "line": 542,
             "description": "Disconnects the current socket connection with the platform signaling.",
             "itemtype": "method",
             "name": "_closeChannel",
@@ -9064,7 +9064,7 @@
         {
             "file": "source/socket-message.js",
             "line": 1,
-            "description": "The current version of SM (Signaling Message) Protocol\n  that the SDK is using.",
+            "description": "The current version of the internal <u>Signaling Message (SM)</u> Protocol that Skylink is using.<br>\n- This is not a feature for developers to use but rather for SDK developers to\n  see the Protocol version used in this Skylink version.\n- In some cases, this information may be used for reporting issues with Skylink.\n- SM_PROTOCOL VERSION: <code>0.1.</code>.",
             "itemtype": "attribute",
             "name": "SM_PROTOCOL_VERSION",
             "type": "String",
@@ -9075,7 +9075,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 13,
+            "line": 16,
             "description": "The list of Protocol types that is used for messaging using\n  the platform signaling socket connection.",
             "itemtype": "attribute",
             "name": "_SIG_MESSAGE_TYPE",
@@ -9206,7 +9206,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 114,
+            "line": 117,
             "description": "The flag that indicates if MCU is enabled.",
             "itemtype": "attribute",
             "name": "_hasMCU",
@@ -9220,7 +9220,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 126,
+            "line": 129,
             "description": "Stores the list of types of socket messages that requires to be queued or bundled\n   before sending to the server to prevent platform signaling from dropping of socket messages.",
             "itemtype": "attribute",
             "name": "_groupMessageList",
@@ -9234,7 +9234,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 146,
+            "line": 149,
             "description": "The flag that indicates if MCU is in the room and is enabled.",
             "itemtype": "attribute",
             "name": "_hasMCU",
@@ -9249,7 +9249,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 160,
+            "line": 163,
             "description": "The flag that indicates that the current self connection\n  should only receive streaming Stream objects from other Peer connection\n  and not send streaming Stream objects to other Peer connection.",
             "itemtype": "attribute",
             "name": "_receiveOnly",
@@ -9264,7 +9264,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 176,
+            "line": 179,
             "description": "Parses any <code>GROUP</code> type of message received and split them up to\n  send them to {{#crossLink \"Skylink/_processSingleMessage:method\"}}_processSingleMessage(){{/crossLink}}\n  to handle the individual message object received.\nIf the message is not <code>GROUP</code> type of message received, it will send\n  it directly to {{#crossLink \"Skylink/_processSingleMessage:method\"}}_processSingleMessage(){{/crossLink}}",
             "itemtype": "method",
             "name": "_processSigMessage",
@@ -9283,7 +9283,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 201,
+            "line": 204,
             "description": "Routes the data received to the relevant Protocol handler based on the socket message received.",
             "itemtype": "method",
             "name": "_processingSingleMessage",
@@ -9302,7 +9302,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 289,
+            "line": 292,
             "description": "Handles the PEER_LIST message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_peerListEventHandler",
@@ -9338,7 +9338,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 309,
+            "line": 312,
             "description": "Handles the INTRODUCE_ERROR message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_introduceErrorEventHandler",
@@ -9379,7 +9379,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 329,
+            "line": 332,
             "description": "Handles the APPROACH message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_approachEventHandler",
@@ -9410,7 +9410,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 360,
+            "line": 363,
             "description": "Handles the REDIRECT message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_redirectHandler",
@@ -9457,7 +9457,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 396,
+            "line": 399,
             "description": "Handles the UPDATE_USER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
@@ -9499,7 +9499,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 424,
+            "line": 427,
             "description": "Handles the ROOM_LOCK Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
@@ -9541,7 +9541,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 446,
+            "line": 449,
             "description": "Handles the MUTE_AUDIO Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -9583,7 +9583,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 474,
+            "line": 477,
             "description": "Handles the MUTE_VIDEO Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -9625,7 +9625,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 502,
+            "line": 505,
             "description": "Handles the STREAM Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_streamEventHandler",
@@ -9677,7 +9677,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 550,
+            "line": 553,
             "description": "Handles the BYE Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -9714,7 +9714,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 576,
+            "line": 579,
             "description": "Handles the PRIVATE_MESSAGE Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -9766,7 +9766,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 606,
+            "line": 609,
             "description": "Handles the PUBLIC_MESSAGE Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -9813,7 +9813,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 636,
+            "line": 639,
             "description": "Handles the IN_ROOM Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -9861,7 +9861,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 688,
+            "line": 691,
             "description": "Handles the ENTER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -10036,7 +10036,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 828,
+            "line": 831,
             "description": "Handles the RESTART Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -10250,7 +10250,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 993,
+            "line": 996,
             "description": "Handles the WELCOME Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -10447,7 +10447,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1158,
+            "line": 1161,
             "description": "Handles the OFFER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -10494,7 +10494,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1209,
+            "line": 1212,
             "description": "Handles the CANDIDATE Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -10550,7 +10550,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1289,
+            "line": 1292,
             "description": "Handles the ANSWER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -10597,7 +10597,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1353,
+            "line": 1356,
             "description": "Send a message object or string using the platform signaling socket connection\n  to the list of targeted PeerConnections.\nTo send message objects with DataChannel connections, see\n  {{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.",
             "itemtype": "method",
             "name": "sendMessage",
@@ -12959,55 +12959,55 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:76"
+            "line": " source/room-connection.js:74"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:92"
+            "line": " source/room-connection.js:90"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:103"
+            "line": " source/room-connection.js:101"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:114"
+            "line": " source/room-connection.js:112"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:114"
+            "line": " source/room-connection.js:112"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:545"
+            "line": " source/room-connection.js:543"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:545"
+            "line": " source/room-connection.js:543"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:650"
+            "line": " source/room-connection.js:648"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:650"
+            "line": " source/room-connection.js:648"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:768"
+            "line": " source/room-connection.js:766"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:768"
+            "line": " source/room-connection.js:766"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:791"
+            "line": " source/room-connection.js:789"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:791"
+            "line": " source/room-connection.js:789"
         },
         {
             "message": "unknown tag: component",
@@ -13015,107 +13015,107 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:30"
+            "line": " source/room-init.js:38"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:91"
+            "line": " source/room-init.js:120"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:110"
+            "line": " source/room-init.js:141"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:127"
+            "line": " source/room-init.js:158"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:146"
+            "line": " source/room-init.js:177"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:159"
+            "line": " source/room-init.js:190"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:172"
+            "line": " source/room-init.js:203"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:183"
+            "line": " source/room-init.js:214"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:199"
+            "line": " source/room-init.js:230"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:211"
+            "line": " source/room-init.js:242"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:229"
+            "line": " source/room-init.js:260"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:247"
+            "line": " source/room-init.js:278"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:264"
+            "line": " source/room-init.js:295"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:293"
+            "line": " source/room-init.js:324"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:306"
+            "line": " source/room-init.js:337"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:317"
+            "line": " source/room-init.js:348"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:328"
+            "line": " source/room-init.js:359"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:369"
+            "line": " source/room-init.js:400"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:534"
+            "line": " source/room-init.js:565"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:534"
+            "line": " source/room-init.js:565"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:663"
+            "line": " source/room-init.js:694"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:663"
+            "line": " source/room-init.js:694"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:758"
+            "line": " source/room-init.js:789"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:758"
+            "line": " source/room-init.js:789"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:809"
+            "line": " source/room-init.js:840"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:809"
+            "line": " source/room-init.js:840"
         },
         {
             "message": "unknown tag: component",
@@ -13123,159 +13123,159 @@
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:27"
+            "line": " source/skylink-debug.js:30"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:27"
+            "line": " source/skylink-debug.js:30"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:42"
+            "line": " source/skylink-debug.js:45"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:42"
+            "line": " source/skylink-debug.js:45"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:55"
+            "line": " source/skylink-debug.js:58"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:55"
+            "line": " source/skylink-debug.js:58"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:70"
+            "line": " source/skylink-debug.js:73"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:70"
+            "line": " source/skylink-debug.js:73"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:87"
+            "line": " source/skylink-debug.js:90"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:87"
+            "line": " source/skylink-debug.js:90"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:102"
+            "line": " source/skylink-debug.js:105"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:102"
+            "line": " source/skylink-debug.js:105"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:119"
+            "line": " source/skylink-debug.js:122"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:119"
+            "line": " source/skylink-debug.js:122"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:132"
+            "line": " source/skylink-debug.js:135"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:132"
+            "line": " source/skylink-debug.js:135"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:160"
+            "line": " source/skylink-debug.js:163"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:160"
+            "line": " source/skylink-debug.js:163"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:178"
+            "line": " source/skylink-debug.js:181"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:178"
+            "line": " source/skylink-debug.js:181"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:205"
+            "line": " source/skylink-debug.js:208"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:218"
+            "line": " source/skylink-debug.js:221"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:234"
+            "line": " source/skylink-debug.js:237"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:249"
+            "line": " source/skylink-debug.js:252"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:262"
+            "line": " source/skylink-debug.js:265"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:262"
+            "line": " source/skylink-debug.js:265"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:344"
+            "line": " source/skylink-debug.js:347"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:344"
+            "line": " source/skylink-debug.js:347"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:361"
+            "line": " source/skylink-debug.js:364"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:361"
+            "line": " source/skylink-debug.js:364"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:387"
+            "line": " source/skylink-debug.js:390"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:387"
+            "line": " source/skylink-debug.js:390"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:413"
+            "line": " source/skylink-debug.js:416"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:413"
+            "line": " source/skylink-debug.js:416"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:439"
+            "line": " source/skylink-debug.js:442"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:464"
+            "line": " source/skylink-debug.js:467"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:464"
+            "line": " source/skylink-debug.js:467"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:491"
+            "line": " source/skylink-debug.js:494"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-debug.js:518"
+            "line": " source/skylink-debug.js:521"
         },
         {
             "message": "unknown tag: component",
@@ -13463,67 +13463,67 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:32"
+            "line": " source/socket-channel.js:38"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:46"
+            "line": " source/socket-channel.js:52"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:63"
+            "line": " source/socket-channel.js:69"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:83"
+            "line": " source/socket-channel.js:89"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:123"
+            "line": " source/socket-channel.js:139"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:136"
+            "line": " source/socket-channel.js:152"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:147"
+            "line": " source/socket-channel.js:163"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:158"
+            "line": " source/socket-channel.js:174"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:169"
+            "line": " source/socket-channel.js:185"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:182"
+            "line": " source/socket-channel.js:198"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:199"
+            "line": " source/socket-channel.js:215"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:216"
+            "line": " source/socket-channel.js:232"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:316"
+            "line": " source/socket-channel.js:332"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-channel.js:479"
+            "line": " source/socket-channel.js:495"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:479"
+            "line": " source/socket-channel.js:495"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:526"
+            "line": " source/socket-channel.js:542"
         },
         {
             "message": "unknown tag: component",
@@ -13531,183 +13531,183 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:13"
+            "line": " source/socket-message.js:16"
         },
         {
             "message": "unknown tag: development",
-            "line": " source/socket-message.js:114"
+            "line": " source/socket-message.js:117"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:114"
+            "line": " source/socket-message.js:117"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:126"
+            "line": " source/socket-message.js:129"
         },
         {
             "message": "unknown tag: development",
-            "line": " source/socket-message.js:146"
+            "line": " source/socket-message.js:149"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:146"
+            "line": " source/socket-message.js:149"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:160"
+            "line": " source/socket-message.js:163"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:176"
+            "line": " source/socket-message.js:179"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:201"
+            "line": " source/socket-message.js:204"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:289"
+            "line": " source/socket-message.js:292"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:309"
+            "line": " source/socket-message.js:312"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:329"
+            "line": " source/socket-message.js:332"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:360"
+            "line": " source/socket-message.js:363"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:360"
+            "line": " source/socket-message.js:363"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:396"
+            "line": " source/socket-message.js:399"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:396"
+            "line": " source/socket-message.js:399"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:424"
+            "line": " source/socket-message.js:427"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:424"
+            "line": " source/socket-message.js:427"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:446"
+            "line": " source/socket-message.js:449"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:446"
+            "line": " source/socket-message.js:449"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:474"
+            "line": " source/socket-message.js:477"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:474"
+            "line": " source/socket-message.js:477"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:502"
+            "line": " source/socket-message.js:505"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:502"
+            "line": " source/socket-message.js:505"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:550"
+            "line": " source/socket-message.js:553"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:550"
+            "line": " source/socket-message.js:553"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:576"
+            "line": " source/socket-message.js:579"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:576"
+            "line": " source/socket-message.js:579"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:606"
+            "line": " source/socket-message.js:609"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:606"
+            "line": " source/socket-message.js:609"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:636"
+            "line": " source/socket-message.js:639"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:636"
+            "line": " source/socket-message.js:639"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:688"
+            "line": " source/socket-message.js:691"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:688"
+            "line": " source/socket-message.js:691"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:828"
+            "line": " source/socket-message.js:831"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:828"
+            "line": " source/socket-message.js:831"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:993"
+            "line": " source/socket-message.js:996"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:993"
+            "line": " source/socket-message.js:996"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1158"
+            "line": " source/socket-message.js:1161"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1158"
+            "line": " source/socket-message.js:1161"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1209"
+            "line": " source/socket-message.js:1212"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1289"
+            "line": " source/socket-message.js:1292"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1289"
+            "line": " source/socket-message.js:1292"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1353"
+            "line": " source/socket-message.js:1356"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1353"
+            "line": " source/socket-message.js:1356"
         },
         {
             "message": "unknown tag: component",

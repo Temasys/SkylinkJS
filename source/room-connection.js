@@ -37,12 +37,10 @@ Skylink.prototype.SYSTEM_ACTION = {
  * @param {String} DUPLICATED_LOGIN <small>Value <code>"duplicatedLogin"</code> | Action ties with <code>REJECT</code></small>
  *   The reason code when the credentials given is already in use, which the platform signaling
  *   throws an exception for this error.<br>
- * This rarely occurs as Skylink handles this issue, and it's recommended to
- *   report this issue if this occurs.
+ * This rarely occurs as Skylink handles this issue, and it's recommended to report this issue if this occurs.
  * @param {String} SERVER_ERROR <small>Value <code>"serverError"</code> | Action ties with <code>REJECT</code></small>
  *   The reason code when the connection with the platform signaling has an exception with self.<br>
- * This rarely (and should not) occurs and it's recommended to
- *   report this issue if this occurs.
+ * This rarely (and should not) occur and it's recommended to  report this issue if this occurs.
  * @param {String} EXPIRED <small>Value <code>"expired"</code> | Action ties with <code>REJECT</code></small>
  *   The reason code when the persistent room meeting has expired so self is unable to join the room as
  *   the end time of the meeting has ended.<br>

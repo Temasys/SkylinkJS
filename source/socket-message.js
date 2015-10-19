@@ -1,6 +1,9 @@
 /**
- * The current version of SM (Signaling Message) Protocol
- *   that the SDK is using.
+ * The current version of the internal <u>Signaling Message (SM)</u> Protocol that Skylink is using.<br>
+ * - This is not a feature for developers to use but rather for SDK developers to
+ *   see the Protocol version used in this Skylink version.
+ * - In some cases, this information may be used for reporting issues with Skylink.
+ * - SM_PROTOCOL VERSION: <code>0.1.</code>.
  * @attribute SM_PROTOCOL_VERSION
  * @type String
  * @required
