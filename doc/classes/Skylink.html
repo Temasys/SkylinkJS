@@ -810,6 +810,14 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
                     </span>
                   </a>
                 
+                  <a href="#method__stopLocalMediaStreams" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_stopLocalMediaStreams
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#method__stopPeerConnectionHealthCheck" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_stopPeerConnectionHealthCheck
                     <span class="settings">
@@ -1492,6 +1500,14 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
                 
                   <a href="#attr__ICEConnectionFailures" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_ICEConnectionFailures
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#attr__inRoom" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_inRoom
                     <span class="settings">
                       
                       
@@ -3108,7 +3124,7 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1010"><code>source&#x2F;stream-media.js:1010</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1001"><code>source&#x2F;stream-media.js:1001</code></a>
       </small>
     
 
@@ -3604,7 +3620,7 @@ If self does not have any Stream object to send, it will a connection without
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1283"><code>source&#x2F;socket-message.js:1283</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1289"><code>source&#x2F;socket-message.js:1289</code></a>
       </small>
     
 
@@ -4710,7 +4726,7 @@ If self does not have any Stream object to send, it will a connection without
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1203"><code>source&#x2F;socket-message.js:1203</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1209"><code>source&#x2F;socket-message.js:1209</code></a>
       </small>
     
 
@@ -6970,7 +6986,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l682"><code>source&#x2F;socket-message.js:682</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l688"><code>source&#x2F;socket-message.js:688</code></a>
       </small>
     
 
@@ -9078,7 +9094,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1116"><code>source&#x2F;stream-media.js:1116</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1074"><code>source&#x2F;stream-media.js:1074</code></a>
       </small>
     
 
@@ -9361,7 +9377,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1152"><code>source&#x2F;socket-message.js:1152</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1158"><code>source&#x2F;socket-message.js:1158</code></a>
       </small>
     
 
@@ -9878,7 +9894,7 @@ This is mainly to prevent JShint errors.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l578"><code>source&#x2F;stream-media.js:578</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l569"><code>source&#x2F;stream-media.js:569</code></a>
       </small>
     
 
@@ -9981,6 +9997,11 @@ This is mainly to prevent JShint errors.</p>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
+        
+          <code class="optional">[audioFallback=false]</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
       <span class="paren">)</span>
     </div>
   
@@ -10026,7 +10047,7 @@ This is mainly to prevent JShint errors.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l543"><code>source&#x2F;stream-media.js:543</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l527"><code>source&#x2F;stream-media.js:527</code></a>
       </small>
     
 
@@ -10080,6 +10101,23 @@ This is mainly to prevent JShint errors.</p>
               <small class="default"><span>DEFAULT: </span>false</small>
               <p>The flag that indicates if self
    Stream object is a screensharing stream or not.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">audioFallback</code>
+            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+              <small class="default"><span>DEFAULT: </span>false</small>
+              <p>The flag that indicates if stage
+   of stream media error should do an audio fallback.</p>
 
             </div>
 
@@ -10157,7 +10195,7 @@ This is mainly to prevent JShint errors.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l458"><code>source&#x2F;stream-media.js:458</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l433"><code>source&#x2F;stream-media.js:433</code></a>
       </small>
     
 
@@ -10365,7 +10403,7 @@ Once URI is formed, it will start a new socket.io connection with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l625"><code>source&#x2F;stream-media.js:625</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l616"><code>source&#x2F;stream-media.js:616</code></a>
       </small>
     
 
@@ -10530,7 +10568,7 @@ Once URI is formed, it will start a new socket.io connection with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l785"><code>source&#x2F;stream-media.js:785</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l776"><code>source&#x2F;stream-media.js:776</code></a>
       </small>
     
 
@@ -10696,7 +10734,7 @@ Once URI is formed, it will start a new socket.io connection with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l893"><code>source&#x2F;stream-media.js:893</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l884"><code>source&#x2F;stream-media.js:884</code></a>
       </small>
     
 
@@ -11426,7 +11464,7 @@ This method will reconfigure <code>urls</code> configuration to
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l927"><code>source&#x2F;stream-media.js:927</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l918"><code>source&#x2F;stream-media.js:918</code></a>
       </small>
     
 
@@ -11761,7 +11799,7 @@ This method will reconfigure <code>urls</code> configuration to
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l825"><code>source&#x2F;stream-media.js:825</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l816"><code>source&#x2F;stream-media.js:816</code></a>
       </small>
     
 
@@ -12170,7 +12208,7 @@ This method will reconfigure <code>urls</code> configuration to
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l684"><code>source&#x2F;stream-media.js:684</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l675"><code>source&#x2F;stream-media.js:675</code></a>
       </small>
     
 
@@ -14250,7 +14288,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l822"><code>source&#x2F;socket-message.js:822</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l828"><code>source&#x2F;socket-message.js:828</code></a>
       </small>
     
 
@@ -17719,6 +17757,151 @@ This sets the timeout object associated with the Peer into
   <hr>
 </div>
             
+              <div id="method__stopLocalMediaStreams" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_stopLocalMediaStreams</code></h3>
+  
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code>options</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+      <span class="paren">)</span>
+    </div>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1186"><code>source&#x2F;stream-media.js:1186</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.3</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Handles the stopping of audio and video streams.</p>
+
+  </div>
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">options</code>
+            <span class="type"><b>{</b>Boolean | JSON<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The stop attached Stream options for
+  Skylink when leaving the room.</p>
+
+            </div>
+
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">userMedia</code>
+                    <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <p>The flag that indicates if leaving the room
+  should automatically stop and clear the existing user media stream attached to skylink.
+  This would trigger <code>mediaAccessStopped</code> for this Stream if available.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">screenshare</code>
+                    <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <p>The flag that indicates if leaving the room
+  should automatically stop and clear the existing screensharing stream attached to skylink.
+  This would trigger <code>mediaAccessStopped</code> for this Stream if available.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
               <div id="method__stopPeerConnectionHealthCheck" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_stopPeerConnectionHealthCheck</code></h3>
   
@@ -18687,7 +18870,7 @@ This utilises <code>setInterval()</code> function.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1228"><code>source&#x2F;stream-media.js:1228</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1276"><code>source&#x2F;stream-media.js:1276</code></a>
       </small>
     
 
@@ -19107,7 +19290,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l525"><code>source&#x2F;room-connection.js:525</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l536"><code>source&#x2F;room-connection.js:536</code></a>
       </small>
     
 
@@ -19524,7 +19707,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l987"><code>source&#x2F;socket-message.js:987</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l993"><code>source&#x2F;socket-message.js:993</code></a>
       </small>
     
 
@@ -20872,7 +21055,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1933"><code>source&#x2F;stream-media.js:1933</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1985"><code>source&#x2F;stream-media.js:1985</code></a>
       </small>
     
 
@@ -20954,7 +21137,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1969"><code>source&#x2F;stream-media.js:1969</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2021"><code>source&#x2F;stream-media.js:2021</code></a>
       </small>
     
 
@@ -21040,7 +21223,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1915"><code>source&#x2F;stream-media.js:1915</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1967"><code>source&#x2F;stream-media.js:1967</code></a>
       </small>
     
 
@@ -21126,7 +21309,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1951"><code>source&#x2F;stream-media.js:1951</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2003"><code>source&#x2F;stream-media.js:2003</code></a>
       </small>
     
 
@@ -21746,7 +21929,7 @@ You may set the current customer user data information for self in
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1417"><code>source&#x2F;stream-media.js:1417</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1413"><code>source&#x2F;stream-media.js:1413</code></a>
       </small>
     
 
@@ -23244,7 +23427,7 @@ This will only work if self is a privileged Peer.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l94"><code>source&#x2F;room-connection.js:94</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l105"><code>source&#x2F;room-connection.js:105</code></a>
       </small>
     
 
@@ -24172,7 +24355,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
       <span class="paren">(</span>
       
         
-          <code class="optional">[stopUserMedia=true]</code>
+          <code class="optional">[stopMediaOptions=true]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -24224,7 +24407,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l630"><code>source&#x2F;room-connection.js:630</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l641"><code>source&#x2F;room-connection.js:641</code></a>
       </small>
     
 
@@ -24252,19 +24435,61 @@ If any existing user media streams attached in Skylink, like for an example, cal
       <ul class="params-list">
       
           <li class="param">
-            <code class="param-name">stopUserMedia</code>
-            <span class="type"><b>{</b>Boolean<b>}</b></span>
+            <code class="param-name">stopMediaOptions</code>
+            <span class="type"><b>{</b>Boolean | JSON<b>}</b></span>
 
             <span class="label">Optional</span>
             
 
             <div class="param-description">
               <small class="default"><span>DEFAULT: </span>true</small>
-              <p>The flag that indicates if leaving the room
-  should automatically stop and clear the existing user media stream attached to skylink.</p>
+              <p>The stop attached Stream options for
+  Skylink when leaving the room. If provided options is a
+  <var>typeof</var> <code>boolean</code>, it will be interpreted as both
+  <code>userMedia</code> and <code>screenshare</code> Streams would be stopped.</p>
 
             </div>
 
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">userMedia</code>
+                    <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      <small class="default"><span>DEFAULT: </span>true</small>
+                      <p>The flag that indicates if leaving the room
+  should automatically stop and clear the existing user media stream attached to skylink.
+  This would trigger <code>mediaAccessStopped</code> for this Stream if available.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">screenshare</code>
+                    <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      <small class="default"><span>DEFAULT: </span>true</small>
+                      <p>The flag that indicates if leaving the room
+  should automatically stop and clear the existing screensharing stream attached to skylink.
+  This would trigger <code>mediaAccessStopped</code> for this Stream if available.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+              </ul>
             
           </li>
       
@@ -24429,7 +24654,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l731"><code>source&#x2F;room-connection.js:731</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l759"><code>source&#x2F;room-connection.js:759</code></a>
       </small>
     
 
@@ -24521,7 +24746,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1813"><code>source&#x2F;stream-media.js:1813</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1865"><code>source&#x2F;stream-media.js:1865</code></a>
       </small>
     
 
@@ -26178,7 +26403,7 @@ The receiving Peer have the option to accept or reject the data transfer.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1347"><code>source&#x2F;socket-message.js:1347</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1353"><code>source&#x2F;socket-message.js:1353</code></a>
       </small>
     
 
@@ -26470,7 +26695,7 @@ To send message objects with platform signaling socket connection, see
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1592"><code>source&#x2F;stream-media.js:1592</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1632"><code>source&#x2F;stream-media.js:1632</code></a>
       </small>
     
 
@@ -27891,7 +28116,7 @@ You may get the current customer user data information for self in
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1986"><code>source&#x2F;stream-media.js:1986</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2038"><code>source&#x2F;stream-media.js:2038</code></a>
       </small>
     
 
@@ -27917,7 +28142,7 @@ This does not replace the currently attached user media Stream object in Skylink
   
   <div class="code-item-section">
     <h4>Triggers:</h4>
-    <span class="code-item-trigger">mediaAccessSuccess, mediaAccessError, incomingStream, peerRestart, serverPeerRestart</span>
+    <span class="code-item-trigger">mediaAccessSuccess, mediaAccessError, incomingStream, peerRestart, serverPeerRestart, peerUpdated</span>
   </div>
   
 
@@ -28079,7 +28304,7 @@ This does not replace the currently attached user media Stream object in Skylink
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2134"><code>source&#x2F;stream-media.js:2134</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2183"><code>source&#x2F;stream-media.js:2183</code></a>
       </small>
     
 
@@ -28165,7 +28390,7 @@ Reference <a href="../classes/Skylink.html#method_refreshConnection" class="cros
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1067"><code>source&#x2F;stream-media.js:1067</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1058"><code>source&#x2F;stream-media.js:1058</code></a>
       </small>
     
 
@@ -28247,7 +28472,7 @@ Reference <a href="../classes/Skylink.html#method_refreshConnection" class="cros
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l754"><code>source&#x2F;room-connection.js:754</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l782"><code>source&#x2F;room-connection.js:782</code></a>
       </small>
     
 
@@ -29477,7 +29702,7 @@ Skylink <a href="../classes/Skylink.html#method_setDebugMode" class="crosslink">
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l443"><code>source&#x2F;stream-media.js:443</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l418"><code>source&#x2F;stream-media.js:418</code></a>
       </small>
     
 
@@ -30384,7 +30609,7 @@ If the value is not provided in <a href="../classes/Skylink.html#method_init" cl
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l225"><code>source&#x2F;stream-media.js:225</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l200"><code>source&#x2F;stream-media.js:200</code></a>
       </small>
     
 
@@ -31990,7 +32215,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l392"><code>source&#x2F;stream-media.js:392</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l367"><code>source&#x2F;stream-media.js:367</code></a>
       </small>
     
 
@@ -32479,6 +32704,80 @@ After an third attempt of ICE connection failure, the
       
       </ul>
     </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="attr__inRoom" class="code-item attr item private-attr-item ">
+  <a name="config__inRoom"></a> 
+  <h3 class="code-item-name"><code>_inRoom</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>Boolean<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This attribute is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l94"><code>source&#x2F;room-connection.js:94</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.4.0</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>The flag that indicates if self is currently joined in a room.</p>
+
+  </div>
+
+  
+
+  
+
   
 
   
@@ -33007,7 +33306,7 @@ By default, the value is <code>ERROR</code>.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l198"><code>source&#x2F;stream-media.js:198</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l173"><code>source&#x2F;stream-media.js:173</code></a>
       </small>
     
 
@@ -33081,7 +33380,7 @@ By default, the value is <code>ERROR</code>.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l209"><code>source&#x2F;stream-media.js:209</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l184"><code>source&#x2F;stream-media.js:184</code></a>
       </small>
     
 
@@ -33160,7 +33459,7 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l187"><code>source&#x2F;stream-media.js:187</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l162"><code>source&#x2F;stream-media.js:162</code></a>
       </small>
     
 
@@ -33234,7 +33533,7 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l424"><code>source&#x2F;stream-media.js:424</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l399"><code>source&#x2F;stream-media.js:399</code></a>
       </small>
     
 
@@ -35873,7 +36172,7 @@ The persistent room feature is configurable in the Application Key
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l378"><code>source&#x2F;stream-media.js:378</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l353"><code>source&#x2F;stream-media.js:353</code></a>
       </small>
     
 
@@ -35954,7 +36253,7 @@ Currently, Opera does not support screensharing and only premium
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l345"><code>source&#x2F;stream-media.js:345</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l320"><code>source&#x2F;stream-media.js:320</code></a>
       </small>
     
 
@@ -36132,7 +36431,7 @@ Currently, Opera does not support screensharing and only premium
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l47"><code>source&#x2F;stream-media.js:47</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l55"><code>source&#x2F;stream-media.js:55</code></a>
       </small>
     
 
@@ -36294,7 +36593,7 @@ The selected room will be usually defaulted to
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l59"><code>source&#x2F;stream-media.js:59</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l67"><code>source&#x2F;stream-media.js:67</code></a>
       </small>
     
 
@@ -37740,7 +38039,7 @@ If the value is <code>0</code>, it will use the default timeout from
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l286"><code>source&#x2F;stream-media.js:286</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l261"><code>source&#x2F;stream-media.js:261</code></a>
       </small>
     
 
@@ -38989,7 +39288,7 @@ By default, if no custom user data is set, it is an empty string <code>&quot;&qu
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l24"><code>source&#x2F;stream-media.js:24</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l28"><code>source&#x2F;stream-media.js:28</code></a>
       </small>
     
 
@@ -38999,9 +39298,13 @@ By default, if no custom user data is set, it is an empty string <code>&quot;&qu
   </div>
 
   <div class="code-item-description">
-    <p>The list of Peer connection streaming audio codecs available.
-The audio codec will only be use if the browser supports the selected codec,
-  or it will usually default to the browser default codec <code>OPUS</code>.</p>
+    <p>These are the list of available audio codecs settings that Skylink would use
+  when streaming audio stream with Peers.</p>
+<ul>
+<li>The audio codec would be used if the self and Peer&#39;s browser supports the selected codec.</li>
+<li>This would default to the browser selected codec. In most cases, option <code>OPUS</code> is
+used by default.</li>
+</ul>
 
   </div>
 
@@ -39023,8 +39326,8 @@ The audio codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>The default option to let Skylink use any audio codec selected by
-  the browser generated session description.</p>
+                <p><small><b>DEFAULT</b> | Value <code>&quot;auto&quot;</code></small>
+  The option to let Skylink use any audio codec selected by the browser generated session description.</p>
 
             </div>
 
@@ -39039,8 +39342,9 @@ The audio codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>The option to let Skylink use the <a href="https://en.wikipedia.org/wiki/Opus_(audio_format">OPUS</a>)
-  codec. This is the common and mandantory audio codec used.</p>
+                <p><small>Value <code>&quot;opus&quot;</code></small>
+  The option to let Skylink use the <a href="https://en.wikipedia.org/wiki/Opus_(audio_format">OPUS</a>) codec.<br>
+  This is the common and mandantory audio codec used.</p>
 
             </div>
 
@@ -39055,7 +39359,8 @@ The audio codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>The option to let Skylink use the <a href="https://en.wikipedia.org/wiki/Internet_Speech_Audio_Codec">iSAC</a>.
+                <p><small>Value <code>&quot;ISAC&quot;</code></small>
+  The option to let Skylink use the <a href="https://en.wikipedia.org/wiki/Internet_Speech_Audio_Codec">iSAC</a>.<br>
   This only works if the browser supports the iSAC video codec.</p>
 
             </div>
@@ -42896,9 +43201,13 @@ You may refer to <a href="../classes/Skylink.html#attr_SYSTEM_ACTION" class="cro
   </div>
 
   <div class="code-item-description">
-    <p>The list of Peer connection streaming video codecs available.
-The video codec will only be use if the browser supports the selected codec,
-  or it will usually default to the browser default codec <code>VP8</code>.</p>
+    <p>These are the list of available video codecs settings that Skylink would use
+  when streaming video stream with Peers.</p>
+<ul>
+<li>The video codec would be used if the self and Peer&#39;s browser supports the selected codec.</li>
+<li>This would default to the browser selected codec. In most cases, option <code>VP8</code> is
+used by default.</li>
+</ul>
 
   </div>
 
@@ -42920,8 +43229,8 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>The default option to let Skylink use any video codec selected by
-  the browser generated session description.</p>
+                <p><small><b>DEFAULT</b> | Value <code>&quot;auto&quot;</code></small>
+  The option to let Skylink use any video codec selected by the browser generated session description.</p>
 
             </div>
 
@@ -42936,8 +43245,9 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>The option to let Skylink use the <a href="https://en.wikipedia.org/wiki/VP8">VP8</a> codec.
-   This is the common and mandantory video codec used by most browsers.</p>
+                <p><small>Value <code>&quot;VP8&quot;</code></small>
+  The option to let Skylink use the <a href="https://en.wikipedia.org/wiki/VP8">VP8</a> codec.<br>
+  This is the common and mandantory video codec used by most browsers.</p>
 
             </div>
 
@@ -42952,8 +43262,9 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>The option to let Skylink use the <a href="https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC">H264</a>
-   codec. This only works if the browser supports the H264 video codec.</p>
+                <p><small>Value <code>&quot;H264&quot;</code></small>
+  The option to let Skylink use the <a href="https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC">H264</a> codec.<br>
+  This only works if the browser supports the H264 video codec.</p>
 
             </div>
 
@@ -43018,7 +43329,7 @@ The video codec will only be use if the browser supports the selected codec,
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l72"><code>source&#x2F;stream-media.js:72</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l80"><code>source&#x2F;stream-media.js:80</code></a>
       </small>
     
 
@@ -43028,10 +43339,19 @@ The video codec will only be use if the browser supports the selected codec,
   </div>
 
   <div class="code-item-description">
-    <p>The list of recommended Stream video resolutions to use for self
-  user media stream. Setting the resolution may
-  not force set the resolution provided as it depends on the how the
-  browser handles the resolution.</p>
+    <p>These are the list of suggested video resolutions that Skylink should configure
+  when retrieving self user media video stream.</p>
+<ul>
+<li>Setting the resolution may not force set the resolution provided as it
+depends on the how the browser handles the resolution.</li>
+<li>It&#39;s recommended to use video resolution option to maximum <code>FHD</code>, as the other
+resolution options may be unrealistic and create performance issues. However, we provide them
+to allow developers to test with the browser capability, but do use it at your own risk.</li>
+<li>The higher the resolution, the more CPU usage might be used, hence it&#39;s recommended to
+use the default option <code>VGA</code>.</li>
+<li>This follows the
+<a href="https://en.wikipedia.org/wiki/Graphics_display_resolution#Video_Graphics_Array">Wikipedia Graphics display resolution page</a></li>
+</ul>
 
   </div>
 
@@ -43053,59 +43373,11 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>QQVGA resolution.</p>
+                <p><small>Value <code>{ width: 160, height: 120 }</code> | Aspect Ratio <code>4:3</code></small>
+  The option to use QQVGA resolution.</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">width</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>160</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">height</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>120</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">aspectRatio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>4:3</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -43117,59 +43389,11 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>HQVGA resolution.</p>
+                <p><small>Value <code>{ width: 240, height: 160 }</code> | Aspect Ratio <code>3:2</code></small>
+  The option to use HQVGA resolution.</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">width</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>240</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">height</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>160</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">aspectRatio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>3:2</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -43181,59 +43405,11 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>QVGA resolution.</p>
+                <p><small>Value <code>{ width: 320, height: 240 }</code> | Aspect Ratio <code>4:3</code></small>
+  The option to use QVGA resolution.</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">width</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>320</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">height</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>240</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">aspectRatio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>4:3</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -43245,59 +43421,11 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>WQVGA resolution.</p>
+                <p><small>Value <code>{ width: 384, height: 240 }</code> | Aspect Ratio <code>16:10</code></small>
+  The option to use WQVGA resolution.</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">width</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>384</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">height</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>240</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">aspectRatio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>16:10</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -43309,59 +43437,11 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>HVGA resolution.</p>
+                <p><small>Value <code>{ width: 480, height: 320 }</code> | Aspect Ratio <code>3:2</code></small>
+  The option to use HVGA resolution.</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">width</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>480</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">height</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>320</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">aspectRatio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>3:2</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -43373,59 +43453,11 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>VGA resolution.</p>
+                <p><small><b>DEFAULT</b> | Value <code>{ width: 640, height: 480 }</code> | Aspect Ratio <code>4:3</code></small>
+  The option to use VGA resolution.</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">width</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>640</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">height</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>480</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">aspectRatio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>4:3</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -43437,59 +43469,11 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>WVGA resolution.</p>
+                <p><small>Value <code>{ width: 768, height: 480 }</code> | Aspect Ratio <code>16:10</code></small>
+  The option to use WVGA resolution.</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">width</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>768</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">height</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>480</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">aspectRatio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>16:10</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -43501,59 +43485,11 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>FWVGA resolution.</p>
+                <p><small>Value <code>{ width: 854, height: 480 }</code> | Aspect Ratio <code>16:9</code></small>
+  The option to use FWVGA resolution.</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">width</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>854</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">height</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>480</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">aspectRatio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>16:9</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -43565,59 +43501,11 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>SVGA resolution.</p>
+                <p><small>Value <code>{ width: 800, height: 600 }</code> | Aspect Ratio <code>4:3</code></small>
+  The option to use SVGA resolution.</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">width</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>800</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">height</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>600</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">aspectRatio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>4:3</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -43629,59 +43517,11 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>DVGA resolution.</p>
+                <p><small>Value <code>{ width: 960, height: 640 }</code> | Aspect Ratio <code>3:2</code></small>
+  The option to use DVGA resolution.</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">width</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>960</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">height</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>640</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">aspectRatio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>3:2</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -43693,59 +43533,11 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>WSVGA resolution.</p>
+                <p><small>Value <code>{ width: 1024, height: 576 }</code> | Aspect Ratio <code>16:9</code></small>
+  The option to use WSVGA resolution.</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">width</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>1024</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">height</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>576</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">aspectRatio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>16:9</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -43757,59 +43549,11 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>HD resolution.</p>
+                <p><small>Value <code>{ width: 1280, height: 720 }</code> | Aspect Ratio <code>16:9</code></small>
+  The option to use HD resolution.</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">width</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>1280</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">height</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>720</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">aspectRatio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>16:9</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -43821,59 +43565,11 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>HDPLUS resolution.</p>
+                <p><small>Value <code>{ width: 1600, height: 900 }</code> | Aspect Ratio <code>16:9</code></small>
+  The option to use HDPLUS resolution.</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">width</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>1600</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">height</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>900</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">aspectRatio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>16:9</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -43885,59 +43581,11 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>FHD resolution.</p>
+                <p><small>Value <code>{ width: 1920, height: 1080 }</code> | Aspect Ratio <code>16:9</code></small>
+  The option to use FHD resolution.</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">width</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>1920</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">height</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>1080</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">aspectRatio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>16:9</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -43949,59 +43597,11 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>QHD resolution.</p>
+                <p><small>Value <code>{ width: 2560, height: 1440 }</code> | Aspect Ratio <code>16:9</code></small>
+  The option to use QHD resolution.</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">width</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>2560</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">height</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>1440</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">aspectRatio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>16:9</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -44013,59 +43613,11 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>WQXGAPLUS resolution.</p>
+                <p><small>Value <code>{ width: 3200, height: 1800 }</code> | Aspect Ratio <code>16:9</code></small>
+  The option to use WQXGAPLUS resolution.</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">width</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>3200</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">height</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>1800</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">aspectRatio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>16:9</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -44077,59 +43629,11 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>UHD resolution.</p>
+                <p><small>Value <code>{ width: 3840, height: 2160 }</code> | Aspect Ratio <code>16:9</code></small>
+  The option to use UHD resolution.</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">width</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>3840</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">height</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>2160</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">aspectRatio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>16:9</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -44141,59 +43645,11 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>UHDPLUS resolution.</p>
+                <p><small>Value <code>{ width: 5120, height: 2880 }</code> | Aspect Ratio <code>16:9</code></small>
+  The option to use UHDPLUS resolution.</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">width</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>5120</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">height</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>2880</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">aspectRatio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>16:9</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -44205,59 +43661,11 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>FUHD resolution.</p>
+                <p><small>Value <code>{ width: 7680, height: 4320 }</code> | Aspect Ratio <code>16:9</code></small>
+  The option to use FUHD resolution.</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">width</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>7680</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">height</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>4320</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">aspectRatio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>16:9</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -44269,59 +43677,11 @@ The video codec will only be use if the browser supports the selected codec,
             
 
             <div class="param-description">
-                <p>resolution.</p>
+                <p><small>Value <code>{ width: 15360, height: 8640 }</code> | Aspect Ratio <code>16:9</code></small>
+  The option to use QUHD resolution.</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">width</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>15360</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">height</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>8640</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">aspectRatio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>16:9</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       

@@ -170,6 +170,17 @@ Skylink.prototype._selectedRoom = null;
 Skylink.prototype._roomLocked = false;
 
 /**
+ * The flag that indicates if self is currently joined in a room.
+ * @attribute _inRoom
+ * @type Boolean
+ * @private
+ * @component Room
+ * @for Skylink
+ * @since 0.4.0
+ */
+Skylink.prototype._inRoom = false;
+
+/**
  * Connects self to the selected room.
  * By default, if room parameter is not provided, it will
  *   connect to the default room provided in
@@ -708,8 +719,16 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 /**
  * Disconnects self from current connected room.
  * @method leaveRoom
- * @param {Boolean} [stopUserMedia=true] The flag that indicates if leaving the room
+ * @param {Boolean|JSON} [stopMediaOptions=true] The stop attached Stream options for
+ *   Skylink when leaving the room. If provided options is a
+ *   &lt;var&gt;typeof&lt;/var&gt; &lt;code&gt;boolean&lt;/code&gt;, it will be interpreted as both
+ *   &lt;code&gt;userMedia&lt;/code&gt; and &lt;code&gt;screenshare&lt;/code&gt; Streams would be stopped.
+ * @param {Boolean} [stopMediaOptions.userMedia=true]  The flag that indicates if leaving the room
  *   should automatically stop and clear the existing user media stream attached to skylink.
+ *   This would trigger &lt;code&gt;mediaAccessStopped&lt;/code&gt; for this Stream if available.
+ * @param {Boolean} [stopMediaOptions.screenshare=true] The flag that indicates if leaving the room
+ *   should automatically stop and clear the existing screensharing stream attached to skylink.
+ *   This would trigger &lt;code&gt;mediaAccessStopped&lt;/code&gt; for this Stream if available.
  * @param {Function} [callback] The callback fired after self has
  *   left the room successfully or have met with an exception.
  *   The callback signature is &lt;code&gt;function (error, success)&lt;/code&gt;.
@@ -739,22 +758,28 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype.leaveRoom = function(stopUserMedia, callback) {
+Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
   var self = this;
   var error; // j-shint !!!
+  var stopUserMedia = true;
+  var stopScreenshare = true;
 
   // shift parameters
-  if (typeof stopUserMedia === &#x27;function&#x27;) {
-    callback = stopUserMedia;
-    stopUserMedia = true;
-  } else if (typeof stopUserMedia === &#x27;undefined&#x27;) {
-    stopUserMedia = true;
+  if (typeof stopMediaOptions === &#x27;function&#x27;) {
+    callback = stopMediaOptions;
+    stopMediaOptions = true;
+  } else if (typeof stopMediaOptions === &#x27;undefined&#x27;) {
+    stopMediaOptions = true;
   }
 
-  // stopUserMedia === null or {} ?
-  if (typeof stopUserMedia !== &#x27;boolean&#x27;) {
-    error = &#x27;stopUserMedia parameter provided is not a boolean&#x27;;
-    log.error(error, stopUserMedia);
+  // stopMediaOptions === null or {} ?
+  if (typeof stopMediaOptions === &#x27;object&#x27; &amp;&amp; stopMediaOptions !== null) {
+    stopUserMedia = stopMediaOptions.userMedia !== false;
+    stopScreenshare = stopMediaOptions.screenshare !== false;
+
+  } else if (typeof stopMediaOptions !== &#x27;boolean&#x27;) {
+    error = &#x27;stopMediaOptions parameter provided is not a boolean or valid object&#x27;;
+    log.error(error, stopMediaOptions);
     if (typeof callback === &#x27;function&#x27;) {
       log.log([null, &#x27;Socket&#x27;, self._selectedRoom, &#x27;Error occurred. &#x27; +
         &#x27;Firing callback with error -&gt; &#x27;
@@ -762,6 +787,10 @@ Skylink.prototype.leaveRoom = function(stopUserMedia, callback) {
       callback(new Error(error), null);
     }
     return;
+
+  } else if (stopMediaOptions === false) {
+    stopUserMedia = false;
+    stopScreenshare = false;
   }
 
   if (!self._inRoom) {
@@ -782,12 +811,11 @@ Skylink.prototype.leaveRoom = function(stopUserMedia, callback) {
   }
   self._inRoom = false;
   self._closeChannel();
-  if (stopUserMedia) {
-    log.log([null, &#x27;MediaStream&#x27;, self._selectedRoom, &#x27;Stopping user\&#x27;s MediaStream&#x27;]);
-    self.stopStream();
-  } else {
-    log.log([null, &#x27;MediaStream&#x27;, self._selectedRoom, &#x27;User\&#x27;s MediaStream will not be stopped&#x27;]);
-  }
+
+  self._stopLocalMediaStreams({
+    userMedia: stopUserMedia,
+    screenshare: stopScreenshare
+  });
 
   self._wait(function() {
     log.log([null, &#x27;Socket&#x27;, self._selectedRoom, &#x27;User left the room. Callback fired.&#x27;]);
@@ -801,8 +829,8 @@ Skylink.prototype.leaveRoom = function(stopUserMedia, callback) {
     }
   }, function() {
     return (Object.keys(self._peerConnections).length === 0 &amp;&amp;
-      self._channelOpen === false &amp;&amp;
-      self._readyState === self.READY_STATE_CHANGE.COMPLETED);
+      self._channelOpen === false); // &amp;&amp;
+      //self._readyState === self.READY_STATE_CHANGE.COMPLETED);
   }, false);
 };
 
