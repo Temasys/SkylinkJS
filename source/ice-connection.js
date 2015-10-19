@@ -63,7 +63,8 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
 /**
  * These are the list of available transports that
  *   Skylink would use to connect to the TURN servers with.
- * - If example, these are list of TURN servers given by the platform signaling:<br>
+ * - For example as explanation how these options works below, let's take that
+ *   these are list of TURN servers given by the platform signaling:<br>
  *   <small><code>turn:turnurl:123?transport=tcp</code><br>
  *   <code>turn:turnurl?transport=udp</code><br>
  *   <code>turn:turnurl:1234</code><br>

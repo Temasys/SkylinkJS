@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.2 - Mon Oct 19 2015 23:12:50 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Tue Oct 20 2015 02:16:14 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3371,7 +3371,8 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
 /**
  * These are the list of available transports that
  *   Skylink would use to connect to the TURN servers with.
- * - If example, these are list of TURN servers given by the platform signaling:<br>
+ * - For example as explanation how these options works below, let's take that
+ *   these are list of TURN servers given by the platform signaling:<br>
  *   <small><code>turn:turnurl:123?transport=tcp</code><br>
  *   <code>turn:turnurl?transport=udp</code><br>
  *   <code>turn:turnurl:1234</code><br>
@@ -5165,11 +5166,15 @@ Skylink.prototype.GET_PEERS_STATE = {
 };
 
 /**
- * The types of peer introduction states available
+ * These are the list of Peer introduction states that Skylink would trigger.
+ * - This relates to and requires the Privileged Key feature where Peers using
+ *   that Privileged alias Key becomes a privileged Peer with privileged functionalities.
  * @attribute INTRODUCE_STATE
  * @type JSON
- * @param {String} INTRODUCING The privileged Peer sent the introduction signal
- * @param {String} ERROR The Peer introduction has occurred an exception.
+ * @param {String} INTRODUCING <small>Value <code>"enquired"</code></small>
+ *   The state when the privileged Peer have sent the introduction signal.
+ * @param {String} ERROR <small>Value <code>"error"</code></small>
+ *   The state when the Peer introduction has occurred an exception.
  * @readOnly
  * @component Peer
  * @for Skylink
@@ -5355,31 +5360,38 @@ Skylink.prototype.SYSTEM_ACTION = {
 };
 
 /**
- * The list of Skylink platform signaling code as the reason
- *   for the system action given by the current signaling connection.
- * You may refer to {{#crossLink "Skylink/SYSTEM_ACTION:attribute"}}SYSTEM_ACTION{{/crossLink}}
+ * These are the list of Skylink platform signaling codes as the reason
+ *   for the system action given by the platform signaling that Skylink would receive.
+ * - You may refer to {{#crossLink "Skylink/SYSTEM_ACTION:attribute"}}SYSTEM_ACTION{{/crossLink}}
  *   for the types of system actions that would be given.
+ * - Reason codes like <code>FAST_MESSAGE</code>, <code>ROOM_FULL</code>, <code>VERIFICATION</code> and
+ *   <code>OVER_SEAT_LIMIT</code> has been removed as they are no longer supported.
  * @attribute SYSTEM_ACTION_REASON
  * @type JSON
- * @param {String} ROOM_LOCKED Given as <code>REJECT</code>. The room is
- *   locked and self is rejected from joining the room connection.
- * @param {String} DUPLICATED_LOGIN Given as <code>REJECT</code>.
- *   The credentials given is already in use, which the signaling server
- *   throws an exception for this error.
- *   This should rarely happen as Skylink handles this issue.
- * @param {String} SERVER_ERROR Given as <code>REJECT</code>. The connection
- *   with the server has an exception that is caught during the server connection.
- * @param {String} EXPIRED Given as <code>REJECT</code>. The persistent
- *   room meeting has expired so self is unable to join the room as
- *   the end time of the meeting has ended. Depending on other
- *   meeting timings available for this room, the persistent room will appear
- *   expired.
- * @param {String} ROOM_CLOSED Given as <code>REJECT</code>. The persistent
- *   room meeting has ended and has been rendered expired so self is rejected
- *   from the room as the meeting is over.
- * @param {String} ROOM_CLOSING Given as <code>WARNING</code>. The persistent
- *   room meeting is going to end soon, so this warning is given to inform
- *   users before self is rejected from the room.
+ * @param {String} ROOM_LOCKED <small>Value <code>"locked"</code> | Action ties with <code>REJECT</code></small>
+ *   The reason code when room is locked and self is rejected from joining the room.
+ * @param {String} DUPLICATED_LOGIN <small>Value <code>"duplicatedLogin"</code> | Action ties with <code>REJECT</code></small>
+ *   The reason code when the credentials given is already in use, which the platform signaling
+ *   throws an exception for this error.<br>
+ * This rarely occurs as Skylink handles this issue, and it's recommended to
+ *   report this issue if this occurs.
+ * @param {String} SERVER_ERROR <small>Value <code>"serverError"</code> | Action ties with <code>REJECT</code></small>
+ *   The reason code when the connection with the platform signaling has an exception with self.<br>
+ * This rarely (and should not) occurs and it's recommended to
+ *   report this issue if this occurs.
+ * @param {String} EXPIRED <small>Value <code>"expired"</code> | Action ties with <code>REJECT</code></small>
+ *   The reason code when the persistent room meeting has expired so self is unable to join the room as
+ *   the end time of the meeting has ended.<br>
+ * Depending on other meeting timings available for this room, the persistent room will appear expired.<br>
+ * This relates to the persistent room feature configured in the Application Key.
+ * @param {String} ROOM_CLOSED <small>Value <code>"roomclose"</code> | Action ties with <code>REJECT</code></small>
+ *   The reason code when the persistent room meeting has ended and has been rendered expired so self is rejected
+ *   from the room as the meeting is over.<br>
+ * This relates to the persistent room feature configured in the Application Key.
+ * @param {String} ROOM_CLOSING <small>Value <code>"toclose"</code> | Action ties with <code>WARNING</code></small>
+ *   The reason code when the persistent room meeting is going to end soon, so this warning is given to inform
+ *   users before self is rejected from the room.<br>
+ * This relates to the persistent room feature configured in the Application Key.
  * @readOnly
  * @component Room
  * @for Skylink

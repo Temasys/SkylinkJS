@@ -4,8 +4,8 @@
  * @attribute PEER_CONNECTION_STATE
  * @type JSON
  * @param {String} STABLE <small>Value <code>"stable"</code></small>
- *   The state when there is no handshaking in progress. This state occurs
- *   when handshaking has just started or close.<br>
+ *   The state when there is no handshaking in progress and when
+ *   handshaking has just started or close.<br>
  * This state occurs when Peer connection has just been initialised and after
  *   <code>HAVE_LOCAL_OFFER</code> or <code>HAVE_REMOTE_OFFER</code>.
  * @param {String} HAVE_LOCAL_OFFER <small>Value <code>"have-local-offer"</code></small>
@@ -15,7 +15,9 @@
  *   The state when the remote session description <code>"offer"</code> is received.<br>
  * At this stage, this indicates that the Peer connection signaling handshaking has been completed, and
  *   likely would go back to <code>STABLE</code> after local <code>"answer"</code> is received by Peer.
- * @param {String} CLOSED The connection is closed.
+ * @param {String} CLOSED <small>Value <code>"closed"</code></small>
+ *   The state when the Peer connection is closed.<br>
+ * This state occurs when connection with Peer has been closed, usually when Peer leaves the room.
  * @readOnly
  * @component Peer
  * @for Skylink

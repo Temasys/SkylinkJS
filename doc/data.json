@@ -2521,7 +2521,7 @@
         {
             "file": "source/ice-connection.js",
             "line": 63,
-            "description": "These are the list of available transports that\n  Skylink would use to connect to the TURN servers with.\n- If example, these are list of TURN servers given by the platform signaling:<br>\n  <small><code>turn:turnurl:123?transport=tcp</code><br>\n  <code>turn:turnurl?transport=udp</code><br>\n  <code>turn:turnurl:1234</code><br>\n  <code>turn:turnurl</code></small>",
+            "description": "These are the list of available transports that\n  Skylink would use to connect to the TURN servers with.\n- For example as explanation how these options works below, let's take that\n  these are list of TURN servers given by the platform signaling:<br>\n  <small><code>turn:turnurl:123?transport=tcp</code><br>\n  <code>turn:turnurl?transport=udp</code><br>\n  <code>turn:turnurl:1234</code><br>\n  <code>turn:turnurl</code></small>",
             "itemtype": "attribute",
             "name": "TURN_TRANSPORT",
             "type": "JSON",
@@ -2559,7 +2559,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 120,
+            "line": 121,
             "description": "The flag that indicates if PeerConnections should enable\n   trickling of ICE to connect the ICE connection.",
             "itemtype": "attribute",
             "name": "_enableIceTrickle",
@@ -2574,7 +2574,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 134,
+            "line": 135,
             "description": "The flag that indicates if PeerConnections ICE gathering\n  should use STUN server connection.",
             "itemtype": "attribute",
             "name": "_enableSTUN",
@@ -2589,7 +2589,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 147,
+            "line": 148,
             "description": "The flag that indicates if PeerConnections ICE gathering\n  should use TURN server connection.\nTampering this flag may disable any successful Peer connection\n  that is behind any firewalls.",
             "itemtype": "attribute",
             "name": "_enableTURN",
@@ -2604,7 +2604,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 162,
+            "line": 163,
             "description": "The flag to enable using of public STUN server connections.",
             "itemtype": "attribute",
             "name": "_usePublicSTUN",
@@ -2619,7 +2619,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 175,
+            "line": 176,
             "description": "Stores the TURN server transport to enable for TURN server connections.\n[Rel: Skylink.TURN_TRANSPORT]",
             "itemtype": "attribute",
             "name": "_TURNTransport",
@@ -2634,7 +2634,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 189,
+            "line": 190,
             "description": "Stores the list of Peer connection ICE connection failures.\nAfter an third attempt of ICE connection failure, the\n  trickling of ICE would be disabled.",
             "itemtype": "attribute",
             "name": "_ICEConnectionFailures",
@@ -2655,7 +2655,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 205,
+            "line": 206,
             "description": "Reconfigures the <code>RTCConfiguration.iceServers</code> that is\n  to be passed in constructing the new <code>RTCPeerConnection</code>\n  object for different browsers support.\nPreviously known as <code>_setFirefoxIceServers</code>.\nThis method will reconfigure <code>urls</code> configuration to\n  an array of <code>url</code> configuration.",
             "itemtype": "method",
             "name": "_parseIceServers",
@@ -2678,7 +2678,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 289,
+            "line": 290,
             "description": "Reconfigures the <code>RTCConfiguration.iceServers</code> that is\n  to be passed in constructing the new <code>RTCPeerConnection</code>\n  object to remove (disable) STUN or remove TURN (disable) server\n  connections based on the\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  configuration passed in.",
             "itemtype": "method",
             "name": "_setIceServers",
@@ -2709,7 +2709,7 @@
             "params": [
                 {
                     "name": "STABLE",
-                    "description": "<small>Value <code>\"stable\"</code></small>\n  The state when there is no handshaking in progress. This state occurs\n  when handshaking has just started or close.<br>\nThis state occurs when Peer connection has just been initialised and after\n  <code>HAVE_LOCAL_OFFER</code> or <code>HAVE_REMOTE_OFFER</code>.",
+                    "description": "<small>Value <code>\"stable\"</code></small>\n  The state when there is no handshaking in progress and when\n  handshaking has just started or close.<br>\nThis state occurs when Peer connection has just been initialised and after\n  <code>HAVE_LOCAL_OFFER</code> or <code>HAVE_REMOTE_OFFER</code>.",
                     "type": "String"
                 },
                 {
@@ -2724,7 +2724,7 @@
                 },
                 {
                     "name": "CLOSED",
-                    "description": "The connection is closed.",
+                    "description": "<small>Value <code>\"closed\"</code></small>\n  The state when the Peer connection is closed.<br>\nThis state occurs when connection with Peer has been closed, usually when Peer leaves the room.",
                     "type": "String"
                 }
             ],
@@ -2735,7 +2735,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 31,
+            "line": 33,
             "description": "These are the types of server Peers that Skylink would connect with.\n- Different server Peers that serves different functionalities.\n- The server Peers functionalities are only available depending on the\n  Application Key configuration.\n- Eventually, this list will be populated as there are more server Peer\n  functionalities provided by the Skylink platform.",
             "itemtype": "attribute",
             "name": "SERVER_PEER_TYPE",
@@ -2754,7 +2754,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 52,
+            "line": 54,
             "description": "Stores the timestamp of the moment when the last Peers connection\n  restarts has happened. Used for the restart Peers connection functionality.",
             "itemtype": "attribute",
             "name": "_lastRestart",
@@ -2768,7 +2768,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 65,
+            "line": 67,
             "description": "Stores the counter of the number of consecutive\n  Peers connection restarts retries.",
             "itemtype": "attribute",
             "name": "_retryCount",
@@ -2782,7 +2782,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 78,
+            "line": 80,
             "description": "Stores the list of Peers connection.",
             "itemtype": "attribute",
             "name": "_peerConnections",
@@ -2803,7 +2803,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 91,
+            "line": 93,
             "description": "Stores the list of Peer connection restart weights received\n  that would be compared against to indicate if Peer connection\n  should initiates a restart from the other connection end should.\nThe one that sends restart later is the one who initiates the restart.",
             "itemtype": "attribute",
             "name": "_peerRestartPriorities",
@@ -2823,7 +2823,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 107,
+            "line": 109,
             "description": "Connects to the Peer.",
             "itemtype": "method",
             "name": "_addPeer",
@@ -2892,7 +2892,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 178,
+            "line": 180,
             "description": "Restarts a Peer connection in a P2P environment.\nThis is usually done for replacing the previous Stream attached and restarting\n  the connection with a new one, or when the ICE connection has issues\n  streaming video/audio stream in the remote Stream which requires\n  a refresh in the ICE connection.",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -2933,7 +2933,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 314,
+            "line": 316,
             "description": "Disconnects the Peer connection and remove object references associated.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -2953,7 +2953,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 372,
+            "line": 374,
             "description": "Creates a Peer connection. This does not start the handshake connection\n  but creates the Peer connection object ready for connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -2983,13 +2983,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 484,
+            "line": 486,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 532,
+            "line": 534,
             "description": "Refreshes a Peer connection.\nThis feature can be used to refresh a Peer connection when the\n  remote Stream received does not stream any audio/video stream.\nIf there are more than 1 refresh during 5 seconds\n  or refresh is less than 3 seconds since the last refresh\n  initiated by the other peer, it will be aborted.\nAs for MCU connection, the restart mechanism makes the self user\n   leave and join the currently connected room again.",
             "itemtype": "method",
             "name": "refreshConnection",
@@ -3053,7 +3053,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 691,
+            "line": 693,
             "description": "Restarts all Peers connection in a MCU connection environment.\nThis would require the current user to leave the room and restart all\n  current existing Peers connection.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -3398,34 +3398,34 @@
         {
             "file": "source/peer-handshake.js",
             "line": 1,
-            "description": "The list of Skylink Peer connection handshake triggered states.",
-            "type": "JSON",
+            "description": "These are the list of Peer connection handshake states that Skylink would trigger.\n- Do not be confused with {{#crossLink \"Skylink/PEER_CONNECTION_STATE:attr\"}}PEER_CONNECTION_STATE{{/crossLink}}.\n  This is the Peer recognition connection that is established with the platform signaling protocol, and not\n  the Peer connection signaling state itself.\n- In this case, this happens before the {{#crossLink \"Skylink/PEER_CONNECTION_STATE:attr\"}}PEER_CONNECTION_STATE\n  handshaking states. {{/crossLink}} The <code>OFFER</code> and <code>ANSWER</code> relates to the\n  {{#crossLink \"Skylink/PEER_CONNECTION_STATE:attr\"}}PEER_CONNECTION_STATE states{{/crossLink}}.\n- For example as explanation how these state works below, let's make self as the offerer and\n  the connecting Peer as the answerer.",
             "itemtype": "attribute",
             "name": "HANDSHAKE_PROGRESS",
+            "type": "JSON",
             "params": [
                 {
                     "name": "ENTER",
-                    "description": "Connection handshake Step 1a.\n  Received <code>ENTER</code> from peer, and Peer connection is\n  initialised to start connection. In this Step, self would\n  sent <code>WELCOME</code> to the peer to start the WebRTC\n  session description connection handshake.",
+                    "description": "<small>Value <code>\"enter\"</code></small>\n  The state when Peer have received <code>ENTER</code> from self,\n  and Peer connection with self is initialised with self.<br>\nThis state will occur for both self and Peer as <code>ENTER</code>\n  message is sent to ping for Peers in the room.<br>\nAt this state, Peer would sent <code>WELCOME</code> to the peer to\n  start the session description connection handshake.<br>\n<table class=\"table table-condensed\">\n  <thead><tr><th class=\"col-md-1\"></th><th class=\"col-md-5\">Self</th><th>Peer</th></thead>\n  <tbody>\n    <tr><td class=\"col-md-1\">1.</td>\n      <td class=\"col-md-5\">Sends <code>ENTER</code></td><td>Sends <code>ENTER</code></td></tr>\n    <tr><td class=\"col-md-1\">2.</td>\n      <td class=\"col-md-5\">-</td><td>Receives self <code>ENTER</code></td></tr>\n    <tr><td class=\"col-md-1\">3.</td>\n      <td class=\"col-md-5\">-</td><td>Sends self <code>WELCOME</code></td></tr>\n  </tbody>\n</table>",
                     "type": "String"
                 },
                 {
                     "name": "WELCOME",
-                    "description": "Connection handshake Step 1b.\n  Received <code>WELCOME</code> from peer, and Peer connection is\n  initialised to start connection. In this Step, the WebRTC layer\n  to begin the session description connection handshake starts here\n  and send the local <code>OFFER</code> session description to peer.",
+                    "description": "<small>Value <code>\"welcome\"</code></small>\n  The state when self have received <code>WELCOME</code> from Peer,\n  and Peer connection is initialised with Peer.<br>\nAt this state, self would start the session description connection handshake and\n  send the local <code>OFFER</code> session description to Peer.\n<table class=\"table table-condensed\">\n  <thead><tr><th class=\"col-md-1\"></th><th class=\"col-md-5\">Self</th><th>Peer</th></thead>\n  <tbody>\n    <tr><td class=\"col-md-1\">4.</td>\n      <td class=\"col-md-5\">Receives <code>WELCOME</code></td><td>-</td></tr>\n    <tr><td class=\"col-md-1\">5.</td>\n      <td class=\"col-md-5\">Generates <code>OFFER</code></td><td>-</td></tr>\n    <tr><td class=\"col-md-1\">6.</td>\n      <td class=\"col-md-5\">Sets local <code>OFFER</code><sup>REF</sup></td><td>-</td></tr>\n    <tr><td class=\"col-md-1\">7.</td>\n      <td class=\"col-md-5\">Sends <code>OFFER</code></td><td>-</td></tr>\n  </tbody>\n</table>\n<sup>REF</sup>: The will cause {{#crossLink \"Skylink/PEER_CONNECTION_STATE:attr\"}}PEER_CONNECTION_STATE{{/crossLink}}\n  state go to <code>HAVE_LOCAL_OFFER</code>.",
                     "type": "String"
                 },
                 {
                     "name": "OFFER",
-                    "description": "Connection handshake Step 2a. Received\n  <code>OFFER</code> from peer, and Peer connection has received the\n  remote <code>OFFER</code> session description. In this Step, self\n  would start to send local <code>ANSWER</code> session description\n  to peer.",
+                    "description": "<small>Value <code>\"offer\"</code></small>\n  The state when Peer received <code>OFFER</code> from self.\nAt this state, Peer would set the remote <code>OFFER</code> session description and\n  start to send local <code>ANSWER</code> session description to self.<br>\n<table class=\"table table-condensed\">\n  <thead><tr><th class=\"col-md-1\"></th><th class=\"col-md-5\">Self</th><th>Peer</th></thead>\n  <tbody>\n    <tr><td class=\"col-md-1\">8.</td>\n       <td class=\"col-md-5\">-</td><td>Receives <code>OFFER</code></td></tr>\n    <tr><td class=\"col-md-1\">9.</td>\n       <td class=\"col-md-5\">-</td><td>Sets remote <code>OFFER</code><sup>REF</sup></td></tr>\n    <tr><td class=\"col-md-1\">10.</td>\n       <td class=\"col-md-5\">-</td><td>Generates <code>ANSWER</code></td></tr>\n    <tr><td class=\"col-md-1\">11.</td>\n       <td class=\"col-md-5\">-</td><td>Sets local <code>ANSWER</code></td></tr>\n    <tr><td class=\"col-md-1\">12.</td>\n       <td class=\"col-md-5\">-</td><td>Sends <code>ANSWER</code></td></tr>\n  </tbody>\n</table>\n<sup>REF</sup>: The will cause {{#crossLink \"Skylink/PEER_CONNECTION_STATE:attr\"}}PEER_CONNECTION_STATE{{/crossLink}}\n  state go to <code>HAVE_REMOTE_OFFER</code>.",
                     "type": "String"
                 },
                 {
                     "name": "ANSWER",
-                    "description": "Connection handshake Step 2b. Received\n  <code>ANSWER</code> from peer, and Peer connection has received the\n  remote <code>ANSWER</code> session description. In this Step, the\n  connection handshaking progress has been completed.",
+                    "description": "<small>Value <code>\"answer\"</code></small>\n  The state when self received <code>ANSWER</code> from Peer.<br>\nAt this state, self would set the remote <code>ANSWER</code> session description and\n  the connection handshaking progress has been completed.<br>\n<table class=\"table table-condensed\">\n  <thead><tr><th class=\"col-md-1\"></th><th class=\"col-md-5\">Self</th><th>Peer</th></thead>\n  <tbody>\n    <tr><td class=\"col-md-1\">13.</td>\n       <td class=\"col-md-5\">Receives <code>ANSWER</code></td><td>-</td></tr>\n    <tr><td class=\"col-md-1\">14.</td>\n       <td class=\"col-md-5\">Sets remote <code>ANSWER</code></td><td>-</td></tr>\n  </tbody>\n</table>",
                     "type": "String"
                 },
                 {
                     "name": "ERROR",
-                    "description": "Connection handshake has occurred and exception,\n  in this which the connection handshake could have been aborted abruptly\n  and no Peer connection is established.",
+                    "description": "<small>Value <code>\"error\"</code></small>\n  The state when connection handshake has occurred and exception,\n  in this which the connection handshake could have been aborted abruptly\n  and no Peer connection is established.",
                     "type": "String"
                 }
             ],
@@ -3436,7 +3436,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 40,
+            "line": 102,
             "description": "Stores the list of Peer connection health timeout objects that\n  waits for any existing Peer \"healthy\" state in successful\n  {{#crossLink \"Skylink/_peerConnectionHealth:attr\"}}_peerConnectionHealth{{/crossLink}}.\n  If timeout has reached it's limit and does not have any \"healthy\" connection state\n  with Peer connection, it will restart the connection again with\n  {{#crossLink \"Skylink/_restartPeerConnection:method\"}}_restartPeerConnection(){{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_peerConnectionHealthTimers",
@@ -3457,7 +3457,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 61,
+            "line": 123,
             "description": "Stores the list of Peer connections that has connection\n  established successfully. When the Peer connection has a\n  successful ICE connection state of <code>\"completed\"</code>,\n  it stores the Peer connection as \"healthy\".",
             "itemtype": "attribute",
             "name": "_peerConnectionHealth",
@@ -3478,7 +3478,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 78,
+            "line": 140,
             "description": "Stores the list of Peer handshake connection weights.\nThis is implemented to prevent the conflict of sending <code>WELCOME</code>\n  to peer and receiving <code>WELCOME</code> from peer at the same time.\nTo handle this event, both self and the peer has to generate a weight initially.\nThen in the {{#crossLink \"Skylink/_welcomeHandler:attr\"}}_welcomeHandler(){{/crossLink}}\n  when conflict <code>WELCOME</code> message is received, the handler woudl check\n  if there is already an existing Peer connection object with the peer (due\n  to the initialisation in the received <code>ENTER</code>). If so the handler would\n  then compare the received weight if it is higher than the weight generated for this peer.\nThe one with the highest weight would have the \"priority\" to initiate the WebRTC layer of\n  handshake and start sending the <code>OFFER</code> session description.",
             "itemtype": "attribute",
             "name": "_peerHSPriorities",
@@ -3498,7 +3498,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 102,
+            "line": 164,
             "description": "Starts to initiate the WebRTC layer of handshake connection by\n  creating the <code>OFFER</code> session description and then\n  sending it to the associated Peer.\nThe offerer status may be shifted to the other peer depending on\n  when version of browser that is initiating the connection\n  to what version of browser to.",
             "itemtype": "method",
             "name": "_doOffer",
@@ -3539,7 +3539,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 195,
+            "line": 257,
             "description": "Responses to the <code>OFFER</code> session description received and\n   creates an <code>ANSWER</code> session description to sent\n  to the associated Peer to complete the WebRTC handshake layer.",
             "itemtype": "method",
             "name": "_doAnswer",
@@ -3558,7 +3558,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 227,
+            "line": 289,
             "description": "Starts the waiting timeout for a \"healthy\" connection\n  with associated Peer connection.\nIt waits for any existing Peer \"healthy\" state in successful\n  {{#crossLink \"Skylink/_peerConnectionHealth:attr\"}}_peerConnectionHealth{{/crossLink}}.\nIf timeout has reached it's limit and does not have any \"healthy\" connection state\n  with Peer connection, it will restart the connection again with\n  {{#crossLink \"Skylink/_restartPeerConnection:method\"}}_restartPeerConnection(){{/crossLink}}.\nThis sets the timeout object associated with the Peer into\n  {{#crossLink \"Skylink/_peerConnectionHealthTimers\"}}_peerConnectionHealthTimers(){{/crossLink}}.",
             "itemtype": "method",
             "name": "_startPeerConnectionHealthCheck",
@@ -3584,7 +3584,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 290,
+            "line": 352,
             "description": "Stops the waiting timeout for a \"healthy\" connection associated\n  with the Peer.",
             "itemtype": "method",
             "name": "_stopPeerConnectionHealthCheck",
@@ -3603,7 +3603,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 317,
+            "line": 379,
             "description": "Sets the WebRTC handshake layer session description into the\n  Peer <code>RTCPeerConnection</code> object <i><code>\n  RTCPeerConnection.setLocalDescription()</code></i> associated\n  with the Peer connection.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -3629,19 +3629,19 @@
         {
             "file": "source/peer-privileged.js",
             "line": 1,
-            "description": "The types of get peers states available",
+            "description": "These are the list of Peer list retrieval states that Skylink would trigger.\n- This relates to and requires the Privileged Key feature where Peers using\n  that Privileged alias Key becomes a privileged Peer with privileged functionalities.",
             "itemtype": "attribute",
             "name": "GET_PEERS_STATE",
             "type": "JSON",
             "params": [
                 {
                     "name": "ENQUIRED",
-                    "description": "The privileged Peer already enquired signaling for list of peers",
+                    "description": "<small>Value <code>\"enquired\"</code></small>\n  The state when the privileged Peer already enquired signaling for list of peers.",
                     "type": "String"
                 },
                 {
                     "name": "RECEIVED",
-                    "description": "The privileged Peer received list of peers from signaling",
+                    "description": "<small>Value <code>\"received\"</code></small>\n  The state when the privileged Peer received list of peers from signaling.",
                     "type": "String"
                 }
             ],
@@ -3652,20 +3652,20 @@
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 17,
-            "description": "The types of peer introduction states available",
+            "line": 21,
+            "description": "These are the list of Peer introduction states that Skylink would trigger.\n- This relates to and requires the Privileged Key feature where Peers using\n  that Privileged alias Key becomes a privileged Peer with privileged functionalities.",
             "itemtype": "attribute",
             "name": "INTRODUCE_STATE",
             "type": "JSON",
             "params": [
                 {
                     "name": "INTRODUCING",
-                    "description": "The privileged Peer sent the introduction signal",
+                    "description": "<small>Value <code>\"enquired\"</code></small>\n  The state when the privileged Peer have sent the introduction signal.",
                     "type": "String"
                 },
                 {
                     "name": "ERROR",
-                    "description": "The Peer introduction has occurred an exception.",
+                    "description": "<small>Value <code>\"error\"</code></small>\n  The state when the Peer introduction has occurred an exception.",
                     "type": "String"
                 }
             ],
@@ -3676,7 +3676,7 @@
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 33,
+            "line": 41,
             "description": "Whether this user automatically introduce to other peers.",
             "itemtype": "attribute",
             "name": "_autoIntroduce",
@@ -3690,7 +3690,7 @@
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 45,
+            "line": 53,
             "description": "Whether this user is a privileged user.",
             "itemtype": "attribute",
             "name": "isPrivileged",
@@ -3704,7 +3704,7 @@
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 57,
+            "line": 65,
             "description": "Parent key in case the current key is alias.\nIf the current key is not alias, this is the same as _appKey",
             "itemtype": "attribute",
             "name": "_parentKey",
@@ -3718,7 +3718,7 @@
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 70,
+            "line": 78,
             "description": "List of peers retrieved from signaling",
             "itemtype": "attribute",
             "name": "_peerList",
@@ -3732,7 +3732,7 @@
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 82,
+            "line": 90,
             "description": "Retrieves the list of rooms and peers under the same realm based\n  on the Application Key configured in {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  from the platform signaling.\nThis will only work if self is a privileged Peer.",
             "itemtype": "method",
             "name": "getPeers",
@@ -3773,7 +3773,7 @@
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 172,
+            "line": 180,
             "description": "Introduces two Peers to each other to start a connection with each other.\nThis will only work if self is a privileged Peer.",
             "itemtype": "method",
             "name": "introducePeer",
@@ -3797,19 +3797,19 @@
         {
             "file": "source/room-connection.js",
             "line": 1,
-            "description": "The list of Skylink platform signaling system action that might be given.\nUpon receiving from the signaling, the application has to reflect the\n  relevant actions given.\nYou may refer to {{#crossLink \"Skylink/SYSTEM_ACTION_REASON:attribute\"}}SYSTEM_ACTION_REASON{{/crossLink}}\n  for the types of system action reasons that would be given.",
+            "description": "These are the list of platform signaling system actions that Skylink would be given with.\n- Upon receiving from the signaling, the application has to reflect the\n  relevant actions given.\n- You may refer to {{#crossLink \"Skylink/SYSTEM_ACTION_REASON:attribute\"}}SYSTEM_ACTION_REASON{{/crossLink}}\n  for the types of system action reasons that would be given.",
             "itemtype": "attribute",
             "name": "SYSTEM_ACTION",
             "type": "JSON",
             "params": [
                 {
                     "name": "WARNING",
-                    "description": "This action serves a warning to self. Usually if\n  warning is not heeded, it may result in an <code>REJECT</code> action.",
+                    "description": "<small>Value <code>\"warning\"</code></small>\n  This action serves a warning to self. Usually if\n  warning is not heeded, it may result in an <code>REJECT</code> action.",
                     "type": "String"
                 },
                 {
                     "name": "REJECT",
-                    "description": "This action means that self has been kicked out\n  of the current signaling room connection, and subsequent PeerConnections\n  would be disconnected.",
+                    "description": "<small>Value <code>\"reject\"</code></small>\n  This action means that self has been kicked out\n  of the current signaling room connection, and subsequent Peer connections\n  would be disconnected.",
                     "type": "String"
                 }
             ],
@@ -3820,40 +3820,40 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 24,
-            "description": "The list of Skylink platform signaling code as the reason\n  for the system action given by the current signaling connection.\nYou may refer to {{#crossLink \"Skylink/SYSTEM_ACTION:attribute\"}}SYSTEM_ACTION{{/crossLink}}\n  for the types of system actions that would be given.",
+            "line": 26,
+            "description": "These are the list of Skylink platform signaling codes as the reason\n  for the system action given by the platform signaling that Skylink would receive.\n- You may refer to {{#crossLink \"Skylink/SYSTEM_ACTION:attribute\"}}SYSTEM_ACTION{{/crossLink}}\n  for the types of system actions that would be given.\n- Reason codes like <code>FAST_MESSAGE</code>, <code>ROOM_FULL</code>, <code>VERIFICATION</code> and\n  <code>OVER_SEAT_LIMIT</code> has been removed as they are no longer supported.",
             "itemtype": "attribute",
             "name": "SYSTEM_ACTION_REASON",
             "type": "JSON",
             "params": [
                 {
                     "name": "ROOM_LOCKED",
-                    "description": "Given as <code>REJECT</code>. The room is\n  locked and self is rejected from joining the room connection.",
+                    "description": "<small>Value <code>\"locked\"</code> | Action ties with <code>REJECT</code></small>\n  The reason code when room is locked and self is rejected from joining the room.",
                     "type": "String"
                 },
                 {
                     "name": "DUPLICATED_LOGIN",
-                    "description": "Given as <code>REJECT</code>.\n  The credentials given is already in use, which the signaling server\n  throws an exception for this error.\n  This should rarely happen as Skylink handles this issue.",
+                    "description": "<small>Value <code>\"duplicatedLogin\"</code> | Action ties with <code>REJECT</code></small>\n  The reason code when the credentials given is already in use, which the platform signaling\n  throws an exception for this error.<br>\nThis rarely occurs as Skylink handles this issue, and it's recommended to\n  report this issue if this occurs.",
                     "type": "String"
                 },
                 {
                     "name": "SERVER_ERROR",
-                    "description": "Given as <code>REJECT</code>. The connection\n  with the server has an exception that is caught during the server connection.",
+                    "description": "<small>Value <code>\"serverError\"</code> | Action ties with <code>REJECT</code></small>\n  The reason code when the connection with the platform signaling has an exception with self.<br>\nThis rarely (and should not) occurs and it's recommended to\n  report this issue if this occurs.",
                     "type": "String"
                 },
                 {
                     "name": "EXPIRED",
-                    "description": "Given as <code>REJECT</code>. The persistent\n  room meeting has expired so self is unable to join the room as\n  the end time of the meeting has ended. Depending on other\n  meeting timings available for this room, the persistent room will appear\n  expired.",
+                    "description": "<small>Value <code>\"expired\"</code> | Action ties with <code>REJECT</code></small>\n  The reason code when the persistent room meeting has expired so self is unable to join the room as\n  the end time of the meeting has ended.<br>\nDepending on other meeting timings available for this room, the persistent room will appear expired.<br>\nThis relates to the persistent room feature configured in the Application Key.",
                     "type": "String"
                 },
                 {
                     "name": "ROOM_CLOSED",
-                    "description": "Given as <code>REJECT</code>. The persistent\n  room meeting has ended and has been rendered expired so self is rejected\n  from the room as the meeting is over.",
+                    "description": "<small>Value <code>\"roomclose\"</code> | Action ties with <code>REJECT</code></small>\n  The reason code when the persistent room meeting has ended and has been rendered expired so self is rejected\n  from the room as the meeting is over.<br>\nThis relates to the persistent room feature configured in the Application Key.",
                     "type": "String"
                 },
                 {
                     "name": "ROOM_CLOSING",
-                    "description": "Given as <code>WARNING</code>. The persistent\n  room meeting is going to end soon, so this warning is given to inform\n  users before self is rejected from the room.",
+                    "description": "<small>Value <code>\"toclose\"</code> | Action ties with <code>WARNING</code></small>\n  The reason code when the persistent room meeting is going to end soon, so this warning is given to inform\n  users before self is rejected from the room.<br>\nThis relates to the persistent room feature configured in the Application Key.",
                     "type": "String"
                 }
             ],
@@ -3864,7 +3864,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 67,
+            "line": 76,
             "description": "Stores the current room self is joined to.\nThe selected room will be usually defaulted to\n  {{#crossLink \"Skylink/_defaultRoom:attribute\"}}_defaultRoom{{/crossLink}}\n  if there is no selected room in\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_selectedRoom",
@@ -3878,7 +3878,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 83,
+            "line": 92,
             "description": "The flag that indicates if the currently joined room is locked.",
             "itemtype": "attribute",
             "name": "_roomLocked",
@@ -3891,7 +3891,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 94,
+            "line": 103,
             "description": "The flag that indicates if self is currently joined in a room.",
             "itemtype": "attribute",
             "name": "_inRoom",
@@ -3904,7 +3904,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 105,
+            "line": 114,
             "description": "Connects self to the selected room.\nBy default, if room parameter is not provided, it will\n  connect to the default room provided in\n  {{#crossLink \"Skylink/init:method\"}}init() <code>defaultRoom</code> settings{{/crossLink}}.\nIf any existing user media streams attached in Skylink, like for an example, calling\n  {{#crossLink \"Skylink/getUserMedia:method\"}}getUserMedia(){{/crossLink}} or\n  {{#crossLink \"Skylink/sendStream:method\"}}sendStream(){{/crossLink}} before\n  <code>joinRoom()</code>, self would actually send the current attached user media stream\n  attached. To stop the current attached Stream, please invoke\n  {{#crossLink \"Skylink/stopStream:method\"}}stopStream(){{/crossLink}} before\n  <code>joinRoom()</code> is invoked.",
             "itemtype": "method",
             "name": "joinRoom",
@@ -4230,7 +4230,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 536,
+            "line": 545,
             "description": "Waits for the signaling socket channel connection to be ready before\n  starting the room connection with the Skylink signaling platform.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -4369,7 +4369,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 641,
+            "line": 650,
             "description": "Disconnects self from current connected room.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -4438,7 +4438,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 759,
+            "line": 768,
             "description": "Locks the currently connected room to prevent other peers\n  from joining the room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -4452,7 +4452,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 782,
+            "line": 791,
             "description": "Unlocks the currently connected room to allow other peers\n  to join the room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -12751,35 +12751,35 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:120"
+            "line": " source/ice-connection.js:121"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:134"
+            "line": " source/ice-connection.js:135"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:147"
+            "line": " source/ice-connection.js:148"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:162"
+            "line": " source/ice-connection.js:163"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:175"
+            "line": " source/ice-connection.js:176"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:189"
+            "line": " source/ice-connection.js:190"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:205"
+            "line": " source/ice-connection.js:206"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:289"
+            "line": " source/ice-connection.js:290"
         },
         {
             "message": "unknown tag: component",
@@ -12787,55 +12787,55 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:31"
+            "line": " source/peer-connection.js:33"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:52"
+            "line": " source/peer-connection.js:54"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:65"
+            "line": " source/peer-connection.js:67"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:78"
+            "line": " source/peer-connection.js:80"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:107"
+            "line": " source/peer-connection.js:109"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:178"
+            "line": " source/peer-connection.js:180"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:314"
+            "line": " source/peer-connection.js:316"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:314"
+            "line": " source/peer-connection.js:316"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:372"
+            "line": " source/peer-connection.js:374"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:532"
+            "line": " source/peer-connection.js:534"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:532"
+            "line": " source/peer-connection.js:534"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:691"
+            "line": " source/peer-connection.js:693"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:691"
+            "line": " source/peer-connection.js:693"
         },
         {
             "message": "unknown tag: component",
@@ -12875,39 +12875,39 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:40"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:61"
-        },
-        {
-            "message": "param name/type/descript missing",
-            "line": " source/peer-handshake.js:78"
-        },
-        {
-            "message": "unknown tag: component",
             "line": " source/peer-handshake.js:102"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:195"
+            "line": " source/peer-handshake.js:123"
+        },
+        {
+            "message": "param name/type/descript missing",
+            "line": " source/peer-handshake.js:140"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:227"
+            "line": " source/peer-handshake.js:164"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:290"
+            "line": " source/peer-handshake.js:257"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/peer-handshake.js:289"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/peer-handshake.js:352"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-handshake.js:317"
+            "line": " source/peer-handshake.js:379"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:317"
+            "line": " source/peer-handshake.js:379"
         },
         {
             "message": "unknown tag: component",
@@ -12915,39 +12915,39 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:17"
+            "line": " source/peer-privileged.js:21"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:33"
+            "line": " source/peer-privileged.js:41"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:45"
+            "line": " source/peer-privileged.js:53"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:57"
+            "line": " source/peer-privileged.js:65"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:70"
+            "line": " source/peer-privileged.js:78"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-privileged.js:82"
+            "line": " source/peer-privileged.js:90"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:82"
+            "line": " source/peer-privileged.js:90"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-privileged.js:172"
+            "line": " source/peer-privileged.js:180"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:172"
+            "line": " source/peer-privileged.js:180"
         },
         {
             "message": "unknown tag: component",
@@ -12955,59 +12955,59 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:24"
+            "line": " source/room-connection.js:26"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:67"
+            "line": " source/room-connection.js:76"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:83"
+            "line": " source/room-connection.js:92"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:94"
+            "line": " source/room-connection.js:103"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:105"
+            "line": " source/room-connection.js:114"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:105"
+            "line": " source/room-connection.js:114"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:536"
+            "line": " source/room-connection.js:545"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:536"
+            "line": " source/room-connection.js:545"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:641"
+            "line": " source/room-connection.js:650"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:641"
+            "line": " source/room-connection.js:650"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:759"
+            "line": " source/room-connection.js:768"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:759"
+            "line": " source/room-connection.js:768"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:782"
+            "line": " source/room-connection.js:791"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:782"
+            "line": " source/room-connection.js:791"
         },
         {
             "message": "unknown tag: component",
@@ -13943,7 +13943,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:484"
+            "line": " source/peer-connection.js:486"
         }
     ]
 }

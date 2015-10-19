@@ -77,29 +77,91 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * The list of Skylink Peer connection handshake triggered states.
- * @type JSON
+ * These are the list of Peer connection handshake states that Skylink would trigger.
+ * - Do not be confused with {{#crossLink &quot;Skylink/PEER_CONNECTION_STATE:attr&quot;}}PEER_CONNECTION_STATE{{/crossLink}}.
+ *   This is the Peer recognition connection that is established with the platform signaling protocol, and not
+ *   the Peer connection signaling state itself.
+ * - In this case, this happens before the {{#crossLink &quot;Skylink/PEER_CONNECTION_STATE:attr&quot;}}PEER_CONNECTION_STATE
+ *   handshaking states. {{/crossLink}} The &lt;code&gt;OFFER&lt;/code&gt; and &lt;code&gt;ANSWER&lt;/code&gt; relates to the
+ *   {{#crossLink &quot;Skylink/PEER_CONNECTION_STATE:attr&quot;}}PEER_CONNECTION_STATE states{{/crossLink}}.
+ * - For example as explanation how these state works below, let&#x27;s make self as the offerer and
+ *   the connecting Peer as the answerer.
  * @attribute HANDSHAKE_PROGRESS
- * @param {String} ENTER Connection handshake Step 1a.
- *   Received &lt;code&gt;ENTER&lt;/code&gt; from peer, and Peer connection is
- *   initialised to start connection. In this Step, self would
- *   sent &lt;code&gt;WELCOME&lt;/code&gt; to the peer to start the WebRTC
- *   session description connection handshake.
- * @param {String} WELCOME Connection handshake Step 1b.
- *   Received &lt;code&gt;WELCOME&lt;/code&gt; from peer, and Peer connection is
- *   initialised to start connection. In this Step, the WebRTC layer
- *   to begin the session description connection handshake starts here
- *   and send the local &lt;code&gt;OFFER&lt;/code&gt; session description to peer.
- * @param {String} OFFER Connection handshake Step 2a. Received
- *   &lt;code&gt;OFFER&lt;/code&gt; from peer, and Peer connection has received the
- *   remote &lt;code&gt;OFFER&lt;/code&gt; session description. In this Step, self
- *   would start to send local &lt;code&gt;ANSWER&lt;/code&gt; session description
- *   to peer.
- * @param {String} ANSWER Connection handshake Step 2b. Received
- *   &lt;code&gt;ANSWER&lt;/code&gt; from peer, and Peer connection has received the
- *   remote &lt;code&gt;ANSWER&lt;/code&gt; session description. In this Step, the
- *   connection handshaking progress has been completed.
- * @param {String} ERROR Connection handshake has occurred and exception,
+ * @type JSON
+ * @param {String} ENTER &lt;small&gt;Value &lt;code&gt;&quot;enter&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The state when Peer have received &lt;code&gt;ENTER&lt;/code&gt; from self,
+ *   and Peer connection with self is initialised with self.&lt;br&gt;
+ * This state will occur for both self and Peer as &lt;code&gt;ENTER&lt;/code&gt;
+ *   message is sent to ping for Peers in the room.&lt;br&gt;
+ * At this state, Peer would sent &lt;code&gt;WELCOME&lt;/code&gt; to the peer to
+ *   start the session description connection handshake.&lt;br&gt;
+ * &lt;table class=&quot;table table-condensed&quot;&gt;
+ *   &lt;thead&gt;&lt;tr&gt;&lt;th class=&quot;col-md-1&quot;&gt;&lt;/th&gt;&lt;th class=&quot;col-md-5&quot;&gt;Self&lt;/th&gt;&lt;th&gt;Peer&lt;/th&gt;&lt;/thead&gt;
+ *   &lt;tbody&gt;
+ *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;1.&lt;/td&gt;
+ *       &lt;td class=&quot;col-md-5&quot;&gt;Sends &lt;code&gt;ENTER&lt;/code&gt;&lt;/td&gt;&lt;td&gt;Sends &lt;code&gt;ENTER&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;
+ *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;2.&lt;/td&gt;
+ *       &lt;td class=&quot;col-md-5&quot;&gt;-&lt;/td&gt;&lt;td&gt;Receives self &lt;code&gt;ENTER&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;
+ *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;3.&lt;/td&gt;
+ *       &lt;td class=&quot;col-md-5&quot;&gt;-&lt;/td&gt;&lt;td&gt;Sends self &lt;code&gt;WELCOME&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;
+ *   &lt;/tbody&gt;
+ * &lt;/table&gt;
+ * @param {String} WELCOME &lt;small&gt;Value &lt;code&gt;&quot;welcome&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The state when self have received &lt;code&gt;WELCOME&lt;/code&gt; from Peer,
+ *   and Peer connection is initialised with Peer.&lt;br&gt;
+ * At this state, self would start the session description connection handshake and
+ *   send the local &lt;code&gt;OFFER&lt;/code&gt; session description to Peer.
+ * &lt;table class=&quot;table table-condensed&quot;&gt;
+ *   &lt;thead&gt;&lt;tr&gt;&lt;th class=&quot;col-md-1&quot;&gt;&lt;/th&gt;&lt;th class=&quot;col-md-5&quot;&gt;Self&lt;/th&gt;&lt;th&gt;Peer&lt;/th&gt;&lt;/thead&gt;
+ *   &lt;tbody&gt;
+ *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;4.&lt;/td&gt;
+ *       &lt;td class=&quot;col-md-5&quot;&gt;Receives &lt;code&gt;WELCOME&lt;/code&gt;&lt;/td&gt;&lt;td&gt;-&lt;/td&gt;&lt;/tr&gt;
+ *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;5.&lt;/td&gt;
+ *       &lt;td class=&quot;col-md-5&quot;&gt;Generates &lt;code&gt;OFFER&lt;/code&gt;&lt;/td&gt;&lt;td&gt;-&lt;/td&gt;&lt;/tr&gt;
+ *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;6.&lt;/td&gt;
+ *       &lt;td class=&quot;col-md-5&quot;&gt;Sets local &lt;code&gt;OFFER&lt;/code&gt;&lt;sup&gt;REF&lt;/sup&gt;&lt;/td&gt;&lt;td&gt;-&lt;/td&gt;&lt;/tr&gt;
+ *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;7.&lt;/td&gt;
+ *       &lt;td class=&quot;col-md-5&quot;&gt;Sends &lt;code&gt;OFFER&lt;/code&gt;&lt;/td&gt;&lt;td&gt;-&lt;/td&gt;&lt;/tr&gt;
+ *   &lt;/tbody&gt;
+ * &lt;/table&gt;
+ * &lt;sup&gt;REF&lt;/sup&gt;: The will cause {{#crossLink &quot;Skylink/PEER_CONNECTION_STATE:attr&quot;}}PEER_CONNECTION_STATE{{/crossLink}}
+ *   state go to &lt;code&gt;HAVE_LOCAL_OFFER&lt;/code&gt;.
+ * @param {String} OFFER &lt;small&gt;Value &lt;code&gt;&quot;offer&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The state when Peer received &lt;code&gt;OFFER&lt;/code&gt; from self.
+ * At this state, Peer would set the remote &lt;code&gt;OFFER&lt;/code&gt; session description and
+ *   start to send local &lt;code&gt;ANSWER&lt;/code&gt; session description to self.&lt;br&gt;
+ * &lt;table class=&quot;table table-condensed&quot;&gt;
+ *   &lt;thead&gt;&lt;tr&gt;&lt;th class=&quot;col-md-1&quot;&gt;&lt;/th&gt;&lt;th class=&quot;col-md-5&quot;&gt;Self&lt;/th&gt;&lt;th&gt;Peer&lt;/th&gt;&lt;/thead&gt;
+ *   &lt;tbody&gt;
+ *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;8.&lt;/td&gt;
+ *        &lt;td class=&quot;col-md-5&quot;&gt;-&lt;/td&gt;&lt;td&gt;Receives &lt;code&gt;OFFER&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;
+ *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;9.&lt;/td&gt;
+ *        &lt;td class=&quot;col-md-5&quot;&gt;-&lt;/td&gt;&lt;td&gt;Sets remote &lt;code&gt;OFFER&lt;/code&gt;&lt;sup&gt;REF&lt;/sup&gt;&lt;/td&gt;&lt;/tr&gt;
+ *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;10.&lt;/td&gt;
+ *        &lt;td class=&quot;col-md-5&quot;&gt;-&lt;/td&gt;&lt;td&gt;Generates &lt;code&gt;ANSWER&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;
+ *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;11.&lt;/td&gt;
+ *        &lt;td class=&quot;col-md-5&quot;&gt;-&lt;/td&gt;&lt;td&gt;Sets local &lt;code&gt;ANSWER&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;
+ *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;12.&lt;/td&gt;
+ *        &lt;td class=&quot;col-md-5&quot;&gt;-&lt;/td&gt;&lt;td&gt;Sends &lt;code&gt;ANSWER&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;
+ *   &lt;/tbody&gt;
+ * &lt;/table&gt;
+ * &lt;sup&gt;REF&lt;/sup&gt;: The will cause {{#crossLink &quot;Skylink/PEER_CONNECTION_STATE:attr&quot;}}PEER_CONNECTION_STATE{{/crossLink}}
+ *   state go to &lt;code&gt;HAVE_REMOTE_OFFER&lt;/code&gt;.
+ * @param {String} ANSWER &lt;small&gt;Value &lt;code&gt;&quot;answer&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The state when self received &lt;code&gt;ANSWER&lt;/code&gt; from Peer.&lt;br&gt;
+ * At this state, self would set the remote &lt;code&gt;ANSWER&lt;/code&gt; session description and
+ *   the connection handshaking progress has been completed.&lt;br&gt;
+ * &lt;table class=&quot;table table-condensed&quot;&gt;
+ *   &lt;thead&gt;&lt;tr&gt;&lt;th class=&quot;col-md-1&quot;&gt;&lt;/th&gt;&lt;th class=&quot;col-md-5&quot;&gt;Self&lt;/th&gt;&lt;th&gt;Peer&lt;/th&gt;&lt;/thead&gt;
+ *   &lt;tbody&gt;
+ *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;13.&lt;/td&gt;
+ *        &lt;td class=&quot;col-md-5&quot;&gt;Receives &lt;code&gt;ANSWER&lt;/code&gt;&lt;/td&gt;&lt;td&gt;-&lt;/td&gt;&lt;/tr&gt;
+ *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;14.&lt;/td&gt;
+ *        &lt;td class=&quot;col-md-5&quot;&gt;Sets remote &lt;code&gt;ANSWER&lt;/code&gt;&lt;/td&gt;&lt;td&gt;-&lt;/td&gt;&lt;/tr&gt;
+ *   &lt;/tbody&gt;
+ * &lt;/table&gt;
+ * @param {String} ERROR &lt;small&gt;Value &lt;code&gt;&quot;error&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The state when connection handshake has occurred and exception,
  *   in this which the connection handshake could have been aborted abruptly
  *   and no Peer connection is established.
  * @readOnly
