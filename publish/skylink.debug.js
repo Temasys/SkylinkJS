@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.2 - Mon Oct 19 2015 21:47:03 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Mon Oct 19 2015 23:12:50 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3760,17 +3760,24 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 };
 
 /**
- * The types of Skylink server Peers that serves different functionalities.
- * @type JSON
+ * These are the types of server Peers that Skylink would connect with.
+ * - Different server Peers that serves different functionalities.
+ * - The server Peers functionalities are only available depending on the
+ *   Application Key configuration.
+ * - Eventually, this list will be populated as there are more server Peer
+ *   functionalities provided by the Skylink platform.
  * @attribute SERVER_PEER_TYPE
- * @param {String} MCU The server Peer is a MCU server.
+ * @param {String} MCU <small>Value <code>"mcu"</code></small>
+ *   This server Peer is a MCU server connection.
+ * @type JSON
  * @readOnly
  * @component Peer
  * @for Skylink
  * @since 0.6.1
  */
 Skylink.prototype.SERVER_PEER_TYPE = {
-  MCU: 'mcu'
+  MCU: 'mcu',
+  //SIP: 'sip'
 };
 
 /**

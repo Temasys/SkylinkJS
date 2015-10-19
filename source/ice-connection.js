@@ -1,6 +1,6 @@
 /**
  * These are the list of Peer connection ICE connection states that Skylink would trigger.
- * - Some of the state references the [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState),
+ * - These states references the [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState),
  *   except the <code>TRICKLE_FAILED</code> state, which is an addition provided state by Skylink
  *   to inform that trickle ICE has failed.
  * @attribute ICE_CONNECTION_STATE
