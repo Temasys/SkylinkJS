@@ -1,16 +1,21 @@
 /**
- * The list of Skylink DataChannel connection triggered states.
- * Refer to [w3c WebRTC Specification Draft](http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState).<br>
- * <code>ERROR</code> state is a provided state by Skylink to
- *   inform exception in RTCDataChannel error handler.
+ * These are the list of DataChannel connection states that Skylink would trigger.
+ * - Some of the state references the [w3c WebRTC Specification Draft](http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState),
+ *   except the <code>ERROR</code> state, which is an addition provided state by Skylink
+ *   to inform exception during the DataChannel connection with Peers.
  * @attribute DATA_CHANNEL_STATE
  * @type JSON
- * @param {String} CONNECTING Attempting to establish a connection.
- * @param {String} OPEN Connection is established.
- * @param {String} CLOSING Connection is closing.
- * @param {String} CLOSED Connection is closed.
- * @param {String} ERROR Connection have met with an exception.
- * @final
+ * @param {String} CONNECTING <small>Value <code>"connecting"</code></small>
+ *   The state when DataChannel is attempting to establish a connection.
+ * @param {String} OPEN <small>Value <code>"open"</code></small>
+ *   The state when DataChannel connection is established.
+ * @param {String} CLOSING <small>Value <code>"closing"</code></small>
+ *   The state when DataChannel connection is closing.
+ * @param {String} CLOSED <small>Value <code>"closed"</code></small>
+ *   The state when DataChannel connection is closed.
+ * @param {String} ERROR <small>Value <code>"error"</code></small>
+ *   The state when DataChannel connection have met with an exception.
+ * @readOnly
  * @component DataChannel
  * @for Skylink
  * @since 0.1.0
@@ -24,20 +29,27 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
 };
 
 /**
- * The types of Skylink DataChannel that serves different functionalities.
+ * These are the types of DataChannel connection that Skylink provides.
+ * - Different channels serves different functionalities.
  * @attribute DATA_CHANNEL_TYPE
  * @type JSON
- * @param {String} MESSAGING DataChannel that is used for messaging only.
- *   This is the sole channel for sending P2P messages in
- *   {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.
- *   This connection will always be kept alive until the Peer connection has
- *   ended.
- * @param {String} DATA DataChannel that is used temporarily for a data transfer.
- *   This is using caused by methods
+ * @param {String} MESSAGING <small><b>MAIN connection</b> | Value <code>"messaging"</code></small>
+ *   This DataChannel connection is used for P2P messaging only, as used in
+ *   {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.<br>
+ * Unless if self connects with Peers connecting from the mobile SDK platform applications,
+ *   this connection would be used for data transfers as used in
+ *   {{#crossLink "Skylink/sendBlobData:method"}}sendBlobData(){{/crossLink}} and
+ *   and {{#crossLink "Skylink/sendURLData:method"}}sendURLData(){{/crossLink}}, which allows
+ *   only one outgoing and incoming data transfer one at a time (no multi-transfer support).<br>
+ *   This connection will always be kept alive until the Peer connection has ended.
+ * @param {String} DATA <small>Value <code>"data"</code></small>
+ *   This DataChannel connection is used for a data transfer, as used in
  *   {{#crossLink "Skylink/sendBlobData:method"}}sendBlobData(){{/crossLink}}
- *   and {{#crossLink "Skylink/sendURLData:method"}}sendURLData(){{/crossLink}}.
- *   This connection will be closed once the transfer has completed or terminated.
- * @final
+ *   and {{#crossLink "Skylink/sendURLData:method"}}sendURLData(){{/crossLink}}.<br>
+ * If self connects with Peers with DataChannel connections of this type,
+ *   it indicates that multi-transfer is supported.<br>
+ *   This connection will be closed once the data transfer has completed or terminated.
+ * @readOnly
  * @component DataChannel
  * @for Skylink
  * @since 0.6.1

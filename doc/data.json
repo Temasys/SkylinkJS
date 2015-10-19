@@ -222,69 +222,69 @@
         {
             "file": "source/data-channel.js",
             "line": 1,
-            "description": "The list of Skylink DataChannel connection triggered states.\nRefer to [w3c WebRTC Specification Draft](http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState).<br>\n<code>ERROR</code> state is a provided state by Skylink to\n  inform exception in RTCDataChannel error handler.",
+            "description": "These are the list of DataChannel connection states that Skylink would trigger.\n- Some of the state references the [w3c WebRTC Specification Draft](http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState),\n  except the <code>ERROR</code> state, which is an addition provided state by Skylink\n  to inform exception during the DataChannel connection with Peers.",
             "itemtype": "attribute",
             "name": "DATA_CHANNEL_STATE",
             "type": "JSON",
             "params": [
                 {
                     "name": "CONNECTING",
-                    "description": "Attempting to establish a connection.",
+                    "description": "<small>Value <code>\"connecting\"</code></small>\n  The state when DataChannel is attempting to establish a connection.",
                     "type": "String"
                 },
                 {
                     "name": "OPEN",
-                    "description": "Connection is established.",
+                    "description": "<small>Value <code>\"open\"</code></small>\n  The state when DataChannel connection is established.",
                     "type": "String"
                 },
                 {
                     "name": "CLOSING",
-                    "description": "Connection is closing.",
+                    "description": "<small>Value <code>\"closing\"</code></small>\n  The state when DataChannel connection is closing.",
                     "type": "String"
                 },
                 {
                     "name": "CLOSED",
-                    "description": "Connection is closed.",
+                    "description": "<small>Value <code>\"closed\"</code></small>\n  The state when DataChannel connection is closed.",
                     "type": "String"
                 },
                 {
                     "name": "ERROR",
-                    "description": "Connection have met with an exception.",
+                    "description": "<small>Value <code>\"error\"</code></small>\n  The state when DataChannel connection have met with an exception.",
                     "type": "String"
                 }
             ],
-            "final": 1,
+            "readonly": "",
             "component": "DataChannel",
             "since": "0.1.0",
             "class": "Skylink"
         },
         {
             "file": "source/data-channel.js",
-            "line": 26,
-            "description": "The types of Skylink DataChannel that serves different functionalities.",
+            "line": 31,
+            "description": "These are the types of DataChannel connection that Skylink provides.\n- Different channels serves different functionalities.",
             "itemtype": "attribute",
             "name": "DATA_CHANNEL_TYPE",
             "type": "JSON",
             "params": [
                 {
                     "name": "MESSAGING",
-                    "description": "DataChannel that is used for messaging only.\n  This is the sole channel for sending P2P messages in\n  {{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.\n  This connection will always be kept alive until the Peer connection has\n  ended.",
+                    "description": "<small><b>MAIN connection</b> | Value <code>\"messaging\"</code></small>\n  This DataChannel connection is used for P2P messaging only, as used in\n  {{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.<br>\nUnless if self connects with Peers connecting from the mobile SDK platform applications,\n  this connection would be used for data transfers as used in\n  {{#crossLink \"Skylink/sendBlobData:method\"}}sendBlobData(){{/crossLink}} and\n  and {{#crossLink \"Skylink/sendURLData:method\"}}sendURLData(){{/crossLink}}, which allows\n  only one outgoing and incoming data transfer one at a time (no multi-transfer support).<br>\n  This connection will always be kept alive until the Peer connection has ended.",
                     "type": "String"
                 },
                 {
                     "name": "DATA",
-                    "description": "DataChannel that is used temporarily for a data transfer.\n  This is using caused by methods\n  {{#crossLink \"Skylink/sendBlobData:method\"}}sendBlobData(){{/crossLink}}\n  and {{#crossLink \"Skylink/sendURLData:method\"}}sendURLData(){{/crossLink}}.\n  This connection will be closed once the transfer has completed or terminated.",
+                    "description": "<small>Value <code>\"data\"</code></small>\n  This DataChannel connection is used for a data transfer, as used in\n  {{#crossLink \"Skylink/sendBlobData:method\"}}sendBlobData(){{/crossLink}}\n  and {{#crossLink \"Skylink/sendURLData:method\"}}sendURLData(){{/crossLink}}.<br>\nIf self connects with Peers with DataChannel connections of this type,\n  it indicates that multi-transfer is supported.<br>\n  This connection will be closed once the data transfer has completed or terminated.",
                     "type": "String"
                 }
             ],
-            "final": 1,
+            "readonly": "",
             "component": "DataChannel",
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/data-channel.js",
-            "line": 50,
+            "line": 62,
             "description": "The flag that indicates if Peers connection should have any\n  DataChannel connections.",
             "itemtype": "attribute",
             "name": "_enableDataChannel",
@@ -298,7 +298,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 63,
+            "line": 75,
             "description": "Stores the list of DataChannel connections.",
             "itemtype": "attribute",
             "name": "_dataChannels",
@@ -330,7 +330,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 89,
+            "line": 101,
             "description": "Starts a DataChannel connection with a Peer connection. If the\n  DataChannel is provided in the parameter, it simply appends\n  event handlers to check the current state of the DataChannel.",
             "itemtype": "method",
             "name": "_createDataChannel",
@@ -370,7 +370,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 266,
+            "line": 278,
             "description": "Sends data over the DataChannel connection associated\n   with the Peer connection.\nThe current supported data type is <code>string</code>. <code>Blob</code>,\n  <code>ArrayBuffer</code> types support is not yet currently handled or\n  implemented.",
             "itemtype": "method",
             "name": "_sendDataChannelMessage",
@@ -402,7 +402,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 340,
+            "line": 352,
             "description": "Stops DataChannel connections associated with a Peer connection\n  and remove any object references to the DataChannel connection(s).",
             "itemtype": "method",
             "name": "_closeDataChannel",
@@ -12445,39 +12445,39 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:26"
+            "line": " source/data-channel.js:31"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:50"
+            "line": " source/data-channel.js:62"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:63"
+            "line": " source/data-channel.js:75"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-channel.js:89"
+            "line": " source/data-channel.js:101"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:89"
+            "line": " source/data-channel.js:101"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-channel.js:266"
+            "line": " source/data-channel.js:278"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:266"
+            "line": " source/data-channel.js:278"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-channel.js:340"
+            "line": " source/data-channel.js:352"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:340"
+            "line": " source/data-channel.js:352"
         },
         {
             "message": "unknown tag: component",

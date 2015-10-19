@@ -5573,7 +5573,7 @@ If provided dataURL binary string (base64)
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l340"><code>source&#x2F;data-channel.js:340</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l352"><code>source&#x2F;data-channel.js:352</code></a>
       </small>
     
 
@@ -5925,7 +5925,7 @@ This method will do a event subscription with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l89"><code>source&#x2F;data-channel.js:89</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l101"><code>source&#x2F;data-channel.js:101</code></a>
       </small>
     
 
@@ -15918,7 +15918,7 @@ This is usually done for replacing the previous Stream attached and restarting
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l266"><code>source&#x2F;data-channel.js:266</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l278"><code>source&#x2F;data-channel.js:278</code></a>
       </small>
     
 
@@ -30096,7 +30096,7 @@ Skylink <a href="../classes/Skylink.html#method_setDebugMode" class="crosslink">
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l63"><code>source&#x2F;data-channel.js:63</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l75"><code>source&#x2F;data-channel.js:75</code></a>
       </small>
     
 
@@ -31254,7 +31254,7 @@ If the value is not provided in <a href="../classes/Skylink.html#method_init" cl
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l50"><code>source&#x2F;data-channel.js:50</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l62"><code>source&#x2F;data-channel.js:62</code></a>
       </small>
     
 
@@ -39530,8 +39530,6 @@ Refer to <a href="http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState">w3c
       
 
       
-        <span class="label label-danger" title="This attribute is final and cannot be changed.">final</span>
-      
 
       
 
@@ -39541,6 +39539,8 @@ Refer to <a href="http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState">w3c
 
       
 
+      
+        <span class="label label-info" title="This attribute is reference only.">readonly</span>
       
 
       
@@ -39568,10 +39568,12 @@ Refer to <a href="http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState">w3c
   </div>
 
   <div class="code-item-description">
-    <p>The list of Skylink DataChannel connection triggered states.
-Refer to <a href="http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState">w3c WebRTC Specification Draft</a>.<br>
-<code>ERROR</code> state is a provided state by Skylink to
-  inform exception in RTCDataChannel error handler.</p>
+    <p>These are the list of DataChannel connection states that Skylink would trigger.</p>
+<ul>
+<li>Some of the state references the <a href="http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState">w3c WebRTC Specification Draft</a>,
+except the <code>ERROR</code> state, which is an addition provided state by Skylink
+to inform exception during the DataChannel connection with Peers.</li>
+</ul>
 
   </div>
 
@@ -39593,7 +39595,8 @@ Refer to <a href="http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState">w
             
 
             <div class="param-description">
-                <p>Attempting to establish a connection.</p>
+                <p><small>Value <code>&quot;connecting&quot;</code></small>
+  The state when DataChannel is attempting to establish a connection.</p>
 
             </div>
 
@@ -39608,7 +39611,8 @@ Refer to <a href="http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState">w
             
 
             <div class="param-description">
-                <p>Connection is established.</p>
+                <p><small>Value <code>&quot;open&quot;</code></small>
+  The state when DataChannel connection is established.</p>
 
             </div>
 
@@ -39623,7 +39627,8 @@ Refer to <a href="http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState">w
             
 
             <div class="param-description">
-                <p>Connection is closing.</p>
+                <p><small>Value <code>&quot;closing&quot;</code></small>
+  The state when DataChannel connection is closing.</p>
 
             </div>
 
@@ -39638,7 +39643,8 @@ Refer to <a href="http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState">w
             
 
             <div class="param-description">
-                <p>Connection is closed.</p>
+                <p><small>Value <code>&quot;closed&quot;</code></small>
+  The state when DataChannel connection is closed.</p>
 
             </div>
 
@@ -39653,7 +39659,8 @@ Refer to <a href="http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState">w
             
 
             <div class="param-description">
-                <p>Connection have met with an exception.</p>
+                <p><small>Value <code>&quot;error&quot;</code></small>
+  The state when DataChannel connection have met with an exception.</p>
 
             </div>
 
@@ -39690,8 +39697,6 @@ Refer to <a href="http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState">w
       
 
       
-        <span class="label label-danger" title="This attribute is final and cannot be changed.">final</span>
-      
 
       
 
@@ -39701,6 +39706,8 @@ Refer to <a href="http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState">w
 
       
 
+      
+        <span class="label label-info" title="This attribute is reference only.">readonly</span>
       
 
       
@@ -39718,7 +39725,7 @@ Refer to <a href="http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState">w
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l26"><code>source&#x2F;data-channel.js:26</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l31"><code>source&#x2F;data-channel.js:31</code></a>
       </small>
     
 
@@ -39728,7 +39735,10 @@ Refer to <a href="http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState">w
   </div>
 
   <div class="code-item-description">
-    <p>The types of Skylink DataChannel that serves different functionalities.</p>
+    <p>These are the types of DataChannel connection that Skylink provides.</p>
+<ul>
+<li>Different channels serves different functionalities.</li>
+</ul>
 
   </div>
 
@@ -39750,11 +39760,15 @@ Refer to <a href="http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState">w
             
 
             <div class="param-description">
-                <p>DataChannel that is used for messaging only.
-  This is the sole channel for sending P2P messages in
-  <a href="../classes/Skylink.html#method_sendP2PMessage" class="crosslink">sendP2PMessage()</a>.
-  This connection will always be kept alive until the Peer connection has
-  ended.</p>
+                <p><small><b>MAIN connection</b> | Value <code>"messaging"</code></small>
+  This DataChannel connection is used for P2P messaging only, as used in
+  <a href="../classes/Skylink.html#method_sendP2PMessage" class="crosslink">sendP2PMessage()</a>.<br>
+Unless if self connects with Peers connecting from the mobile SDK platform applications,
+  this connection would be used for data transfers as used in
+  <a href="../classes/Skylink.html#method_sendBlobData" class="crosslink">sendBlobData()</a> and
+  and <a href="../classes/Skylink.html#method_sendURLData" class="crosslink">sendURLData()</a>, which allows
+  only one outgoing and incoming data transfer one at a time (no multi-transfer support).<br>
+  This connection will always be kept alive until the Peer connection has ended.</p>
 
             </div>
 
@@ -39769,11 +39783,13 @@ Refer to <a href="http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState">w
             
 
             <div class="param-description">
-                <p>DataChannel that is used temporarily for a data transfer.
-  This is using caused by methods
+                <p><small>Value <code>"data"</code></small>
+  This DataChannel connection is used for a data transfer, as used in
   <a href="../classes/Skylink.html#method_sendBlobData" class="crosslink">sendBlobData()</a>
-  and <a href="../classes/Skylink.html#method_sendURLData" class="crosslink">sendURLData()</a>.
-  This connection will be closed once the transfer has completed or terminated.</p>
+  and <a href="../classes/Skylink.html#method_sendURLData" class="crosslink">sendURLData()</a>.<br>
+If self connects with Peers with DataChannel connections of this type,
+  it indicates that multi-transfer is supported.<br>
+  This connection will be closed once the data transfer has completed or terminated.</p>
 
             </div>
 
