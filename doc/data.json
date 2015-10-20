@@ -182,7 +182,7 @@
             "plugin_for": [],
             "extension_for": [],
             "file": "source/template/header.js",
-            "line": 94,
+            "line": 109,
             "description": "<h2>Before using Skylink</h2>\nPlease invoke {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}} method\nfirst to initialise the Application Key before using any functionalities in Skylink.\n\nIf you do not have an Application Key, you may register for a Skylink platform developer account\n  [to create one](http://developer.temasys.com.sg/register).\n\nTo get started you may [visit the getting started page](https://temasys.github.io/how-to/2014/08/08/\nGetting_started_with_WebRTC_and_SkylinkJS/), or alternatively fork a ready made demo application\nthat uses Skylink Web SDK at [getaroom.io](http://getaroom.io/).\n\nFor tips on using skylink and troubleshooting you can visit\n  [our support portal](http://support.temasys.com.sg/support/solutions/folders/5000267498).",
             "is_constructor": 1,
             "example": [
@@ -194,7 +194,7 @@
     "classitems": [
         {
             "file": "source/template/header.js",
-            "line": 166,
+            "line": 181,
             "description": "The current version of Skylink Web SDK.",
             "itemtype": "attribute",
             "name": "VERSION",
@@ -205,7 +205,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 176,
+            "line": 191,
             "description": "Helper function that generates an Unique ID (UUID) string.",
             "itemtype": "method",
             "name": "generateUUID",
@@ -2656,29 +2656,6 @@
         {
             "file": "source/ice-connection.js",
             "line": 206,
-            "description": "Reconfigures the <code>RTCConfiguration.iceServers</code> that is\n  to be passed in constructing the new <code>RTCPeerConnection</code>\n  object for different browsers support.\nPreviously known as <code>_setFirefoxIceServers</code>.\nThis method will reconfigure <code>urls</code> configuration to\n  an array of <code>url</code> configuration.",
-            "itemtype": "method",
-            "name": "_parseIceServers",
-            "params": [
-                {
-                    "name": "config",
-                    "description": "The RTCConfiguration that is to be passed for\n  constructing the new RTCPeerConnection object.",
-                    "type": "JSON"
-                }
-            ],
-            "return": {
-                "description": "The updated RTCConfiguration object with Firefox\n  specific STUN configuration.",
-                "type": "JSON"
-            },
-            "access": "private",
-            "tagname": "",
-            "since": "0.6.1",
-            "component": "ICE",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/ice-connection.js",
-            "line": 290,
             "description": "Reconfigures the <code>RTCConfiguration.iceServers</code> that is\n  to be passed in constructing the new <code>RTCPeerConnection</code>\n  object to remove (disable) STUN or remove TURN (disable) server\n  connections based on the\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  configuration passed in.",
             "itemtype": "method",
             "name": "_setIceServers",
@@ -2983,13 +2960,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 486,
+            "line": 490,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 534,
+            "line": 538,
             "description": "Refreshes a Peer connection.\nThis feature can be used to refresh a Peer connection when the\n  remote Stream received does not stream any audio/video stream.\nIf there are more than 1 refresh during 5 seconds\n  or refresh is less than 3 seconds since the last refresh\n  initiated by the other peer, it will be aborted.\nAs for MCU connection, the restart mechanism makes the self user\n   leave and join the currently connected room again.",
             "itemtype": "method",
             "name": "refreshConnection",
@@ -3053,7 +3030,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 693,
+            "line": 697,
             "description": "Restarts all Peers connection in a MCU connection environment.\nThis would require the current user to leave the room and restart all\n  current existing Peers connection.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -6242,7 +6219,7 @@
         {
             "file": "source/skylink-events.js",
             "line": 20,
-            "description": "Event triggered when the platform signaling socket connection is open and is ready for room connection.",
+            "description": "Event triggered when the socket connection to the platform signaling is opened.\n- This event means that socket connection is open and self is ready to join the room.\n- <sub>SOCKET CONNECTION STAGE</sub><br>\n  <small>\n  <b>channelOpen</b> &#8594;\n  <a href=\"#event_channelMessage\">channelMessage</a> &#8594;\n  (<a href=\"#event_channelError\">channelError</a>) &#8594;\n  <a href=\"#event_channelClose\">channelClose</a>\n  </small>",
             "itemtype": "event",
             "name": "channelOpen",
             "component": "Events",
@@ -6251,8 +6228,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 29,
-            "description": "Event triggered when the platform signaling socket connection has closed.\nserver has closed.",
+            "line": 37,
+            "description": "Event triggered when the socket connection to the platform signaling is closed.\n- This event means that socket connection is closed and self has left the room.\n- <sub>SOCKET CONNECTION STAGE</sub><br>\n  <small>\n  <a href=\"#event_channelOpen\">channelOpen</a> &#8594;\n  <a href=\"#event_channelMessage\">channelMessage</a> &#8594;\n  (<a href=\"#event_channelError\">channelError</a>) &#8594;\n  <b>channelClose</b>\n  </small>",
             "itemtype": "event",
             "name": "channelClose",
             "component": "Events",
@@ -6261,8 +6238,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 39,
-            "description": "Event triggered when Skylink is exchanging socket messages with the platform signaling\n  through the socket connection.\nThis is a debugging feature, and it's not advisable to subscribe to this event unless\n  you are debugging the socket messages received from the platform signaling.\nfrom the signaling server.",
+            "line": 54,
+            "description": "Event triggered when the socket connection is exchanging messages with the platform signaling.\n- This event is a debugging feature, and it's not advisable to subscribe to\n  this event unless you are debugging the socket messages\n  received from the platform signaling.\n- <sub>SOCKET CONNECTION STAGE</sub><br>\n  <small>\n  <a href=\"#event_channelOpen\">channelOpen</a> &#8594;\n  <b>channelMessage</b> &#8594;\n  (<a href=\"#event_channelError\">channelError</a>) &#8594;\n  <a href=\"#event_channelClose\">channelClose</a>\n  </small>",
             "itemtype": "event",
             "name": "channelMessage",
             "params": [
@@ -6278,8 +6255,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 53,
-            "description": "Event triggered when Skylink socket connection with the platform signaling has occurred an exception.\nThis happens after a successful socket connection with the platform signaling.\nUsually at this stage, the signaling socket connection could be disrupted.",
+            "line": 74,
+            "description": "Event triggered when the socket connection has occurred an exception\n  during a connection with the platform signaling.\n- After this event is triggered, it may result in <a href=\"#event_channelClose\">channelClose</a>,\n  and the socket connection with the platform signaling could be disrupted.\n- <sub>SOCKET CONNECTION STAGE</sub><br>\n  <small>\n  <a href=\"#event_channelOpen\">channelOpen</a> &#8594;\n  <a href=\"#event_channelMessage\">channelMessage</a> &#8594;\n  (<b>channelError</b>) &#8594;\n  <a href=\"#event_channelClose\">channelClose</a>\n  </small>",
             "itemtype": "event",
             "name": "channelError",
             "params": [
@@ -6295,8 +6272,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 65,
-            "description": "Event triggered when Skylink attempting to reconnect the socket connection with the platform signaling.",
+            "line": 94,
+            "description": "Event triggered when attempting to reconnect the socket connection with the platform signaling.\n- Depending on the current <code>type</code> triggered in <a href=\"#event_socketError\">\n  socketError</a> event before, it may or may not attempt the socket reconnection and\n  this event may not be triggered.\n- If reconnection attempt fails, it will trigger <a href=\"#event_socketError\">socketError</a> event\n  again and repeat the stage from there.\n- <sub>SOCKET RECONNECTION STAGE</sub><br>\n  <small>\n  <a href=\"#event_socketError\">socketError</a> &#8594;\n  <b>channelRetry</b> &#8594;\n  (&#8592;<em>socketError</em>) &#8594;\n  <a href=\"#event_channelOpen\">channelOpen</a>\n  </small>",
             "itemtype": "event",
             "name": "channelRetry",
             "params": [
@@ -6317,8 +6294,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 77,
-            "description": "Event triggered when Skylink has failed to establish a socket connection with the platform signaling.",
+            "line": 118,
+            "description": "Event triggered when attempt to <em>(re)</em>connect the socket connection with the platform signaling has failed.\n- Depending on the current <code>type</code> payload, it may or may not attempt the\n  socket reconnection and <a href=\"#event_channelRetry\">channelRetry</a> event may not be triggered.\n- If reconnection attempt fails and there are still available ports to reconnect with,\n  it will trigger <a href=\"#event_channelRetry\">channelRetry</a> event again and\n  repeat the stage from there.\n- <sub>SOCKET RECONNECTION STAGE</sub><br>\n  <small>\n  <b>socketError</b> &#8594;\n  <a href=\"#event_channelRetry\">channelRetry</a> &#8594;\n  (&#8592;<em>socketError</em>) &#8594;\n  <a href=\"#event_channelOpen\">channelOpen</a>\n  </small>",
             "itemtype": "event",
             "name": "socketError",
             "params": [
@@ -6344,8 +6321,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 91,
-            "description": "Event triggered when Skylink is retrieving the connection information from the platform server.",
+            "line": 144,
+            "description": "Event triggered when room connection information is being retrieved from platform server.\n- This is also triggered when <a href=\"#method_init\">init()</a> is invoked, but\n  the socket connection events like <a href=\"#event_channelOpen\">channelOpen</a> does\n  not get triggered but stops at <u>readyStateChange</u> event.\n- <sub>ROOM CONNECTION STAGE</sub><br>\n  <small>\n  <b>readyStateChange</b> &#8594;\n  (<a href=\"#event_channelRetry\">channelRetry</a>) &#8594;\n  <a href=\"#event_channelOpen\">channelOpen</a> &#8594;\n  (<a href=\"#event_mediaAccessSuccess\">mediaAccessSuccess</a>) &#8594;\n  [<a href=\"#event_systemAction\">systemAction</a> &#8594;\n  <a href=\"#event_channelClose\">channelClose</a>] &nbsp; / &nbsp;\n  [<a href=\"#event_peerJoined\">peerJoined <sup>(isSelf = true)</sub></a> &#8594;\n  (<a href=\"#event_serverPeerJoined\">serverPeerJoined</a>) &#8594;\n  (<a href=\"#event_serverPeerLeft\">serverPeerLeft</a>) &#8594;\n  (<a href=\"#event_roomLock\">roomLock</a>) &#8594;\n  <a href=\"#event_peerLeft\">peerLeft <sup>(isSelf = true)</sub></a> &#8594;\n  <a href=\"#event_channelClose\">channelClose</a>]\n  </small>",
             "itemtype": "event",
             "name": "readyStateChange",
             "params": [
@@ -6395,13 +6372,13 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 117,
-            "description": "Event triggered when a Peer connection handshake state has changed.",
+            "line": 188,
+            "description": "Event triggered when a Peer handshaking state has changed.\n- This event may trigger <code>state</code> <code>HANDSHAKE_PROGRESS.ENTER</code> for\n  self to indicate that broadcast to ping for any existing Peers in the room has\n  been made.\n- This event is a debugging feature, and it's used to check the\n  Peer handshaking connection status.\n- This starts the Peer connection handshaking, where it retrieves all the Peer\n  information and then proceeds to start the ICE connection.\n- <sub>PEER CONNECTION STATUS STAGE</sub><br>\n  <small>\n  <b>handshakeProgress</b> &#8596;\n  <a href=\"#event_peerConnectionState\">peerConnectionState</a> &#8594;\n  <a href=\"#event_candidateGenerationState\">candidateGenerationState</a> &#8596;\n  <a href=\"#event_iceConnectionState\">iceConnectionState</a>\n  </small>",
             "itemtype": "event",
             "name": "handshakeProgress",
             "params": [
                 {
-                    "name": "step",
+                    "name": "state",
                     "description": "The Peer connection handshake state.\n  [Rel: Skylink.HANDSHAKE_PROGRESS]",
                     "type": "String"
                 },
@@ -6423,8 +6400,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 132,
-            "description": "Event triggered when a Peer connection ICE gathering state has changed.",
+            "line": 217,
+            "description": "Event triggered when a Peer connection ICE gathering state has changed.\n- This event is a debugging feature, and it's used to check the\n  Peer ICE candidate gathering status.\n- This indicates if the ICE gathering has been completed to\n  start ICE connection for DataChannel and media streaming connection.\n- <sub>PEER CONNECTION STATUS STAGE</sub><br>\n  <small>\n  <a href=\"#event_handshakeProgress\">handshakeProgress</a> &#8596;\n  <a href=\"#event_peerConnectionState\">peerConnectionState</a> &#8594;\n  <b>candidateGenerationState</b> &#8596;\n  <a href=\"#event_iceConnectionState\">iceConnectionState</a>\n  </small>",
             "itemtype": "event",
             "name": "candidateGenerationState",
             "params": [
@@ -6445,8 +6422,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 144,
-            "description": "Event triggered when a Peer connection signaling state has changed.",
+            "line": 240,
+            "description": "Event triggered when a Peer connection signaling state has changed.\n- This event is a debugging feature, and it's used to check the\n  Peer signaling connection status.\n- This event indicates if the session description is received\n  to start ICE gathering for DataChannel and media streaming connection.\n- <sub>PEER CONNECTION STATUS STAGE</sub><br>\n  <small>\n  <a href=\"#event_handshakeProgress\">handshakeProgress</a> &#8596;\n  <b>peerConnectionState</b> &#8594;\n  <a href=\"#event_candidateGenerationState\">candidateGenerationState</a> &#8596;\n  <a href=\"#event_iceConnectionState\">iceConnectionState</a>\n  </small>",
             "itemtype": "event",
             "name": "peerConnectionState",
             "params": [
@@ -6467,8 +6444,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 157,
-            "description": "Event triggered when a Peer connection ICE connection state has changed.",
+            "line": 264,
+            "description": "Event triggered when a Peer connection ICE connection state has changed.\n- This event is a debugging feature, and it's used to check the\n  Peer ICE connection of added ICE candidates status.\n- This event indicates if the ICE connection is established for successful\n  DataChannel and media streaming connection.\n- <sub>PEER CONNECTION STATUS STAGE</sub><br>\n  <small>\n  <a href=\"#event_handshakeProgress\">handshakeProgress</a> &#8596;\n  <a href=\"#event_peerConnectionState\">peerConnectionState</a> &#8594;\n  <a href=\"#event_candidateGenerationState\">candidateGenerationState</a> &#8596;\n  <b>iceConnectionState</b>\n  </small>",
             "itemtype": "event",
             "name": "iceConnectionState",
             "params": [
@@ -6489,8 +6466,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 169,
-            "description": "Event triggered when Skylink fails to have access to self user media stream.",
+            "line": 287,
+            "description": "Event triggered when access to self user media stream has failed.\n- If <code>audioFallback</code> is enabled in <a href=\"#method_init\">init()</a>,\n  it will throw an error if audio only user media stream failed after\n  a failed attempt to retrieve video and audio user media.\n- <sub>USER STREAM STAGE</sub><br>\n  <small>\n  (<a href=\"#event_mediaAccessRequired\">mediaAccessRequired</a>) &#8594;\n  [(<a href=\"#event_mediaAccessFallback\">mediaAccessFallback</a>) &#8594;\n  (<b>mediaAccessError</b>)] &#8594;\n  <a href=\"#event_mediaAccessSuccess\">mediaAccessSuccess</a> &#8594;\n  (<a href=\"#event_streamMuted\">streamMuted</a>) &#8594;\n  <a href=\"#event_mediaAccessStopped\">mediaAccessStopped</a> &#8594;\n  <a href=\"#event_streamEnded\">streamEnded</a>\n  </small>",
             "itemtype": "event",
             "name": "mediaAccessError",
             "params": [
@@ -6516,8 +6493,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 183,
-            "description": "Event triggered when Skylink does an audio fallback when retrieving video and audio\n  user media stream fails.",
+            "line": 314,
+            "description": "Event triggered when attempt to fallback to retrieve audio only user media stream\n  has been made.\n- If <code>audioFallback</code> is enabled in <a href=\"#method_init\">init()</a>,\n  and if there is a failed attempt to retrieve video and audio user media,\n  it will attempt to do the audio fallback.\n- <sub>USER STREAM STAGE</sub><br>\n  <small>\n  (<a href=\"#event_mediaAccessRequired\">mediaAccessRequired</a>) &#8594;\n  [(<b>mediaAccessFallback</b>) &#8594;\n  (<a href=\"#event_mediaAccessError\">mediaAccessError</a>)] &#8594;\n  <a href=\"#event_mediaAccessSuccess\">mediaAccessSuccess</a> &#8594;\n  (<a href=\"#event_streamMuted\">streamMuted</a>) &#8594;\n  <a href=\"#event_mediaAccessStopped\">mediaAccessStopped</a> &#8594;\n  <a href=\"#event_streamEnded\">streamEnded</a>\n  </small>",
             "itemtype": "event",
             "name": "mediaAccessFallback",
             "params": [
@@ -6533,8 +6510,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 195,
-            "description": "Event triggered when Skylink have been successfully granted access to self user media stream and\n  attached to Skylink.",
+            "line": 339,
+            "description": "Event triggered when access to self user media stream is successfully\n  attached to Skylink.\n- <sub>USER STREAM STAGE</sub><br>\n  <small>\n  (<a href=\"#event_mediaAccessRequired\">mediaAccessRequired</a>) &#8594;\n  [(<a href=\"#event_mediaAccessFallback\">mediaAccessFallback</a>) &#8594;\n  (<a href=\"#event_mediaAccessError\">mediaAccessError</a>)] &#8594;\n  <b>mediaAccessSuccess</b> &#8594;\n  (<a href=\"#event_streamMuted\">streamMuted</a>) &#8594;\n  <a href=\"#event_mediaAccessStopped\">mediaAccessStopped</a> &#8594;\n  <a href=\"#event_streamEnded\">streamEnded</a>\n  </small>",
             "itemtype": "event",
             "name": "mediaAccessSuccess",
             "params": [
@@ -6555,8 +6532,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 210,
-            "description": "Event triggered when thhe application requires to retrieve self user media stream with\n  {{#crossLink \"Skylink/getUserMedia:method\"}}getUserMedia(){{/crossLink}}.\nOnce the self user media stream is attached to Skylink, the socket connection to\n  the signaling will start and then join self to the selected room.\nThis event will be triggered if <code>manualGetUserMedia</code> is set to <code>true</code> in\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom() options{{/crossLink}}.",
+            "line": 364,
+            "description": "Event triggered when the application requires to retrieve self\n  user media stream manually instead of doing it automatically in\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}.\n- This event triggers based on the configuration of <code>manualGetUserMedia</code>\n  in the <a href=\"#method_joinRoom\">joinRoom() configuration settings</a>.\n- Developers must manually invoke <a href=\"#method_getUserMedia\">getUserMedia()</a>\n  to retrieve the user media stream before self would join the room.\n  Once the user media stream is attached, self would proceed to join the room\n  automatically.\n- <sub>USER STREAM STAGE</sub><br>\n  <small>\n  (<b>mediaAccessRequired</b>) &#8594;\n  [(<a href=\"#event_mediaAccessFallback\">mediaAccessFallback</a>) &#8594;\n  (<a href=\"#event_mediaAccessError\">mediaAccessError</a>)] &#8594;\n  <a href=\"#event_mediaAccessSuccess\">mediaAccessSuccess</a> &#8594;\n  (<a href=\"#event_streamMuted\">streamMuted</a>) &#8594;\n  <a href=\"#event_mediaAccessStopped\">mediaAccessStopped</a> &#8594;\n  <a href=\"#event_streamEnded\">streamEnded</a>\n  </small>",
             "itemtype": "event",
             "name": "mediaAccessRequired",
             "component": "Events",
@@ -6565,8 +6542,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 224,
-            "description": "Event triggered when self user media stream attached to Skylink has been stopped.",
+            "line": 391,
+            "description": "Event triggered when self user media stream attached to Skylink has been stopped.\n- <sub>USER STREAM STAGE</sub><br>\n  <small>\n  (<a href=\"#event_mediaAccessRequired\">mediaAccessRequired</a>) &#8594;\n  [(<a href=\"#event_mediaAccessFallback\">mediaAccessFallback</a>) &#8594;\n  (<a href=\"#event_mediaAccessError\">mediaAccessError</a>)] &#8594;\n  <a href=\"#event_mediaAccessSuccess\">mediaAccessSuccess</a> &#8594;\n  (<a href=\"#event_streamMuted\">streamMuted</a>) &#8594;\n  <b>mediaAccessStopped</b> &#8594;\n  <a href=\"#event_streamEnded\">streamEnded</a>\n  </small>",
             "itemtype": "event",
             "name": "mediaAccessStopped",
             "params": [
@@ -6582,8 +6559,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 235,
-            "description": "Event triggered when a Peer joins the room.",
+            "line": 412,
+            "description": "Event triggered when a Peer joins the room.\n- <sub>PEER CONNECTION STAGE</sub><br>\n  <small>\n  <b>peerJoined</b> &#8594;\n  <a href=\"#event_handshakeProgress\">handshakeProgress</a> &#8594;\n  (<a href=\"#event_incomingStream\">incomingStream</a>) &#8594;\n  (<a href=\"#event_dataChannelState\">dataChannelState</a>) &#8594;\n  [(<a href=\"#event_incomingMessage\">incomingMessage</a>) -\n  (<a href=\"#event_incomingData\">incomingData</a>) -\n  (<a href=\"#event_peerUpdated\">peerUpdated</a>)] &#8594;\n  [(<a href=\"#event_peerRestart\">peerRestart</a>) &#8594;\n  (&#8592;<em>handshakeProgress</em>)] &#8594;\n  <a href=\"#event_peerLeft\">peerLeft</a>\n  </small>",
             "itemtype": "event",
             "name": "peerJoined",
             "params": [
@@ -6746,8 +6723,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 312,
-            "description": "Event triggered when a Peer connection has been restarted for\n  a reconnection.",
+            "line": 502,
+            "description": "Event triggered when a Peer connection has been restarted for\n  a reconnection.\n- <sub>PEER RECONNECTION STAGE</sub><br>\n  <small>\n  [<var>(P2P conn.)</var> <b>peerRestart</b> &#8594;\n  <a href=\"#event_handshakeProgress\">handshakeProgress</a> &#8594;\n  (<a href=\"#event_incomingStream\">incomingStream</a>) &#8594;\n  (<a href=\"#event_dataChannelState\">dataChannelState</a>) ] &nbsp; / &nbsp;\n  [<var>(MCU conn.)</var> <b>peerRestart</b> &#8594;\n   <a href=\"#event_peerLeft\">peerLeft</a> &#8594;\n  <a href=\"#event_peerJoined\">peerJoined</a> &#8594;\n  <a href=\"#event_handshakeProgress\">handshakeProgress</a> &#8594;\n  (<a href=\"#event_incomingStream\">incomingStream</a>) &#8594;\n  (<a href=\"#event_dataChannelState\">dataChannelState</a>)]\n  </small>",
             "itemtype": "event",
             "name": "peerRestart",
             "params": [
@@ -6910,8 +6887,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 391,
-            "description": "Event triggered when a Peer information have been updated.\nThis event would only be triggered if self is in the room.",
+            "line": 594,
+            "description": "Event triggered when a Peer information have been updated.\nThis event would only be triggered if self is in the room.\n- <sub>PEER CONNECTION STAGE</sub><br>\n  <small>\n  <a href=\"#event_peerJoined\">peerJoined</a> &#8594;\n  <a href=\"#event_handshakeProgress\">handshakeProgress</a> &#8594;\n  (<a href=\"#event_incomingStream\">incomingStream</a>) &#8594;\n  (<a href=\"#event_dataChannelState\">dataChannelState</a>) &#8594;\n  [(<a href=\"#event_incomingMessage\">incomingMessage</a>) -\n  (<a href=\"#event_incomingData\">incomingData</a>) -\n  (<b>peerUpdated</b>)] &#8594;\n  [(<a href=\"#event_peerRestart\">peerRestart</a>) &#8594;\n  (&#8592;<em>handshakeProgress</em>)] &#8594;\n  <a href=\"#event_peerLeft\">peerLeft</a>\n  </small>",
             "itemtype": "event",
             "name": "peerUpdated",
             "params": [
@@ -7074,8 +7051,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 468,
-            "description": "Event triggered when a Peer leaves the room.",
+            "line": 684,
+            "description": "Event triggered when a Peer leaves the room.\n- <sub>PEER CONNECTION STAGE</sub><br>\n  <small>\n  <a href=\"#event_peerJoined\">peerJoined</a> &#8594;\n  <a href=\"#event_handshakeProgress\">handshakeProgress</a> &#8594;\n  (<a href=\"#event_incomingStream\">incomingStream</a>) &#8594;\n  (<a href=\"#event_dataChannelState\">dataChannelState</a>) &#8594;\n  [(<a href=\"#event_incomingMessage\">incomingMessage</a>) -\n  (<a href=\"#event_incomingData\">incomingData</a>) -\n  (<a href=\"#event_peerUpdated\">peerUpdated</a>)] &#8594;\n  [(<a href=\"#event_peerRestart\">peerRestart</a>) &#8594;\n  (&#8592;<em>handshakeProgress</em>)] &#8594;\n  <b>peerLeft</b>\n  </small>",
             "itemtype": "event",
             "name": "peerLeft",
             "params": [
@@ -7238,8 +7215,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 545,
-            "description": "Event triggered when a Stream is available from a Peer\n  in the room.",
+            "line": 774,
+            "description": "Event triggered when a Stream is available from a Peer\n  in the room.\n- <sub>SENDING STREAM STAGE</sub><br>\n  <small>\n  <b>incomingStream</b> &#8594;\n  [(<a href=\"#event_streamMuted\">streamMuted</a>) &#8594;\n  (<a href=\"#event_peerUpdated\">peerUpdated</a>)] &#8594;\n  <a href=\"#event_streamEnded\">streamEnded</a>\n  </small>",
             "itemtype": "event",
             "name": "incomingStream",
             "params": [
@@ -7407,7 +7384,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 627,
+            "line": 863,
             "description": "Event triggered when a message is received from a Peer.",
             "itemtype": "event",
             "name": "incomingMessage",
@@ -7605,8 +7582,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 718,
-            "description": "Event triggered when a data transfer is completed in a DataChannel connection.",
+            "line": 954,
+            "description": "Event triggered when a data transfer is completed in a DataChannel connection.\n- <sub>DATA TRANSFER STAGE</sub><br>\n  <small>\n  <a href=\"#event_dataTransferState\">dataTransferState</a> &#8594;\n  <a href=\"#event_incomingDataRequest\">incomingDataRequest</a> &#8594;\n  <b>incomingData</b>\n  </small>",
             "itemtype": "event",
             "name": "incomingData",
             "params": [
@@ -7671,8 +7648,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 746,
-            "description": "Event triggered when a data transfer request is made to Peer in a\n  DataChannel connection.",
+            "line": 988,
+            "description": "Event triggered when a data transfer request is made to Peer in a\n  DataChannel connection.\n- <sub>DATA TRANSFER STAGE</sub><br>\n  <small>\n  <a href=\"#event_dataTransferState\">dataTransferState</a> &#8594;\n  <b>incomingDataRequest</b> &#8594;\n  <a href=\"#event_incomingData\">incomingData</a>\n  </small>",
             "itemtype": "event",
             "name": "incomingDataRequest",
             "params": [
@@ -7732,8 +7709,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 770,
-            "description": "Event triggered when the currently connected room lock status have been updated.",
+            "line": 1018,
+            "description": "Event triggered when the currently connected room lock status have been updated.\n- <sub>ROOM CONNECTION STAGE</sub><br>\n  <small>\n  <a href=\"#event_readyStateChange\">readyStateChange</a> &#8594;\n  (<a href=\"#event_channelRetry\">channelRetry</a>) &#8594;\n  <a href=\"#event_channelOpen\">channelOpen</a> &#8594;\n  (<a href=\"#event_mediaAccessSuccess\">mediaAccessSuccess</a>) &#8594;\n  [<a href=\"#event_systemAction\">systemAction</a> &#8594;\n  <a href=\"#event_channelClose\">channelClose</a>] &nbsp; / &nbsp;\n  [<a href=\"#event_peerJoined\">peerJoined <sup>(isSelf = true)</sub></a> &#8594;\n  (<a href=\"#event_serverPeerJoined\">serverPeerJoined</a>) &#8594;\n  (<a href=\"#event_serverPeerLeft\">serverPeerLeft</a>) &#8594;\n  (<b>roomLock</b>) &#8594;\n  <a href=\"#event_peerLeft\">peerLeft <sup>(isSelf = true)</sub></a> &#8594;\n  <a href=\"#event_channelClose\">channelClose</a>]\n  </small>",
             "itemtype": "event",
             "name": "roomLock",
             "params": [
@@ -7901,8 +7878,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 848,
-            "description": "Event triggered when a Peer connection DataChannel connection state has changed.",
+            "line": 1111,
+            "description": "Event triggered when a Peer connection DataChannel connection state has changed.\n- This event is a debugging feature, and it's used to check the\n  Peer DataChannel connection, which is used for P2P messaging and transfers for\n  methods like <a href=\"#method_sendBlobData\">sendBlobData()</a>,\n  <a href=\"#method_sendURLData\">sendURLData()</a> and\n  <a href=\"#method_sendP2PMessage\">sendP2PMessage()</a>.\n- <sub>PEER CONNECTION STAGE</sub><br>\n  <small>\n  <a href=\"#event_peerJoined\">peerJoined</a> &#8594;\n  <a href=\"#event_handshakeProgress\">handshakeProgress</a> &#8594;\n  (<a href=\"#event_incomingStream\">incomingStream</a>) &#8594;\n  (<b>dataChannelState</b>) &#8594;\n  [(<a href=\"#event_incomingMessage\">incomingMessage</a>) -\n  (<a href=\"#event_incomingData\">incomingData</a>) -\n  (<a href=\"#event_peerUpdated\">peerUpdated</a>)] &#8594;\n  [(<a href=\"#event_peerRestart\">peerRestart</a>) &#8594;\n  (&#8592;<em>handshakeProgress</em>)] &#8594;\n  <a href=\"#event_peerLeft\">peerLeft</a>\n  </small>",
             "itemtype": "event",
             "name": "dataChannelState",
             "params": [
@@ -7940,8 +7917,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 866,
-            "description": "Event triggered when a data transfer made to Peer in a\n  DataChannel connection state has changed.",
+            "line": 1147,
+            "description": "Event triggered when a data transfer made to Peer in a\n  DataChannel connection state has changed.\n- <sub>DATA TRANSFER STAGE</sub><br>\n  <small>\n  <b>dataTransferState</b> &#8594;\n  <a href=\"#event_incomingDataRequest\">incomingDataRequest</a> &#8594;\n  <a href=\"#event_incomingData\">incomingData</a>\n  </small>",
             "itemtype": "event",
             "name": "dataTransferState",
             "params": [
@@ -8024,8 +8001,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 904,
-            "description": "Event triggered when Skylink receives an system action from the platform signaling.",
+            "line": 1191,
+            "description": "Event triggered when Skylink receives an system action from the platform signaling.\n- <sub>ROOM CONNECTION STAGE</sub><br>\n  <small>\n  <a href=\"#event_readyStateChange\">readyStateChange</a> &#8594;\n  (<a href=\"#event_channelRetry\">channelRetry</a>) &#8594;\n  <a href=\"#event_channelOpen\">channelOpen</a> &#8594;\n  (<a href=\"#event_mediaAccessSuccess\">mediaAccessSuccess</a>) &#8594;\n  [<b>systemAction</b> &#8594;\n  <a href=\"#event_channelClose\">channelClose</a>] &nbsp; / &nbsp;\n  [<a href=\"#event_peerJoined\">peerJoined <sup>(isSelf = true)</sub></a> &#8594;\n  (<a href=\"#event_serverPeerJoined\">serverPeerJoined</a>) &#8594;\n  (<a href=\"#event_serverPeerLeft\">serverPeerLeft</a>) &#8594;\n  (<a href=\"#event_roomLock\">roomLock</a>) &#8594;\n  <a href=\"#event_peerLeft\">peerLeft <sup>(isSelf = true)</sub></a> &#8594;\n  <a href=\"#event_channelClose\">channelClose</a>]\n  </small>",
             "itemtype": "event",
             "name": "systemAction",
             "params": [
@@ -8051,8 +8028,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 920,
-            "description": "Event triggered when a server Peer joins the room.",
+            "line": 1222,
+            "description": "Event triggered when a server Peer joins the room.\n- <sub>SERVER PEER CONNECTION STAGE</sub><br>\n  <small>\n  <b>serverPeerJoined</b> &#8594;\n  <a href=\"#event_handshakeProgress\">handshakeProgress</a> &#8594;\n  (<a href=\"#event_dataChannelState\">dataChannelState</a>) &#8594;\n  [(<a href=\"#event_serverPeerRestart\">serverPeerRestart</a>) &#8594;\n  (&#8592;<em>handshakeProgress</em>)] &#8594;\n  <a href=\"#event_serverPeerLeft\">serverPeerLeft</a>\n  </small>",
             "itemtype": "event",
             "name": "serverPeerJoined",
             "params": [
@@ -8073,8 +8050,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 933,
-            "description": "Event triggered when a server Peer leaves the room.",
+            "line": 1244,
+            "description": "Event triggered when a server Peer leaves the room.\n- <sub>SERVER PEER CONNECTION STAGE</sub><br>\n  <small>\n  <a href=\"#event_serverPeerJoined\">serverPeerJoined</a> &#8594;\n  <a href=\"#event_handshakeProgress\">handshakeProgress</a> &#8594;\n  (<a href=\"#event_dataChannelState\">dataChannelState</a>) &#8594;\n  [(<a href=\"#event_serverPeerRestart\">serverPeerRestart</a>) &#8594;\n  (&#8592;<em>handshakeProgress</em>)] &#8594;\n  <b>serverPeerLeft</b>\n  </small>",
             "itemtype": "event",
             "name": "serverPeerLeft",
             "params": [
@@ -8095,8 +8072,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 946,
-            "description": "Event triggered when a sever Peer connection has been restarted for\n  a reconnection.",
+            "line": 1266,
+            "description": "Event triggered when a sever Peer connection has been restarted for\n  a reconnection.\n- <sub>SERVER PEER RECONNECTION STAGE</sub><br>\n  <small>\n  <b>serverPeerRestart</b> &#8594;\n  <a href=\"#event_serverPeerLeft\">serverPeerLeft</a> &#8594;\n  <a href=\"#event_serverPeerJoined\">serverPeerJoined</a> &#8594;\n  <a href=\"#event_handshakeProgress\">handshakeProgress</a> &#8594;\n  (<a href=\"#event_dataChannelState\">dataChannelState</a>)\n  </small>",
             "itemtype": "event",
             "name": "serverPeerRestart",
             "params": [
@@ -8117,8 +8094,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 960,
-            "description": "Event triggered when a Peer connection Stream streaming has stopped.",
+            "line": 1288,
+            "description": "Event triggered when a Peer connection Stream streaming has stopped.\n- <sub>SENDING STREAM STAGE</sub><br>\n  <small>\n  <a href=\"#event_incomingStream\">incomingStream</a> &#8594;\n  [(<a href=\"#event_streamMuted\">streamMuted</a>) &#8594;\n  (<a href=\"#event_peerUpdated\">peerUpdated</a>)] &#8594;\n  <b>streamEnded</b>\n  </small>",
             "itemtype": "event",
             "name": "streamEnded",
             "params": [
@@ -8288,8 +8265,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1039,
-            "description": "Event triggered when a Peer connection Stream streaming audio or video\n  stream muted status have been updated.",
+            "line": 1374,
+            "description": "Event triggered when a Peer connection Stream streaming audio or video\n  stream muted status have been updated.\n- <sub>SENDING STREAM STAGE</sub><br>\n  <small>\n  <a href=\"#event_incomingStream\">incomingStream</a> &#8594;\n  [(<b>streamMuted</b>) &#8594;\n  (<a href=\"#event_peerUpdated\">peerUpdated</a>)] &#8594;\n  <a href=\"#event_streamEnded\">streamEnded</a>\n  </small>",
             "itemtype": "event",
             "name": "streamMuted",
             "params": [
@@ -8457,7 +8434,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1119,
+            "line": 1461,
             "description": "Event triggered when the retrieval of the list of rooms and peers under the same realm based\n  on the Application Key configured in {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  from the platform signaling state has changed.",
             "itemtype": "event",
             "name": "getPeersStateChange",
@@ -8484,7 +8461,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1134,
+            "line": 1476,
             "description": "Event triggered when introductory state of two Peer peers to each other\n  selected by the privileged Peer state has changed.",
             "itemtype": "event",
             "name": "introduceStateChange",
@@ -8521,7 +8498,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1154,
+            "line": 1496,
             "description": "Stores the list of {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}}\n  event subscription handlers.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -8549,7 +8526,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1175,
+            "line": 1517,
             "description": "The throttling function datetime stamp in\n  [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601).",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -8563,7 +8540,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1190,
+            "line": 1532,
             "description": "Triggers event subscription handlers that is associated with the event name.\n{{#crossLink \"Skylink/on:method\"}}on() event subscription handlers{{/crossLink}}\n  will be triggered always, but\n  {{#crossLink \"Skylink/once:method\"}}once() event subscription hadlers{{/crossLink}}\n  will only be triggered once the condition is met.",
             "itemtype": "method",
             "name": "_trigger",
@@ -8582,7 +8559,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1249,
+            "line": 1591,
             "description": "Subscribes an event handler associated to the event name.\nThis event handler will always be triggered when the event name is triggered. If you\n  are looking for subscription event handler to be triggered once, check out\n  {{#crossLink \"Skylink/once:method\"}}once() event subscription{{/crossLink}}.",
             "itemtype": "method",
             "name": "on",
@@ -8607,7 +8584,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1276,
+            "line": 1618,
             "description": "Subscribes an event handler associated to the event name that\n   would only be triggered once the provided condition function has been met.",
             "itemtype": "method",
             "name": "once",
@@ -8645,7 +8622,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1325,
+            "line": 1667,
             "description": "Unsubscribes an event handler associated to the event name.",
             "itemtype": "method",
             "name": "off",
@@ -8671,7 +8648,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1372,
+            "line": 1714,
             "description": "Checks if the first condition is already met before doing an event\n  handler subscription to wait for the second condition to be met.\nThis method will do a event subscription with\n  {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}} as this\n  <code>_condition()</code> would only trigger once, unless <code>fireAlways</code>\n  is set to <code>true</code>.",
             "itemtype": "method",
             "name": "_condition",
@@ -8714,7 +8691,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1423,
+            "line": 1765,
             "description": "Starts the interval check for the condition provided to meet before clearing\n  the interval and triggering the callback provided.\nThis utilises <code>setInterval()</code> function.",
             "itemtype": "method",
             "name": "_wait",
@@ -8745,7 +8722,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1473,
+            "line": 1815,
             "description": "Returns a wrapper of the original function, which fires only once during\n a specified amount of time.",
             "itemtype": "method",
             "name": "_throttle",
@@ -12788,10 +12765,6 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:290"
-        },
-        {
-            "message": "unknown tag: component",
             "line": " source/peer-connection.js:1"
         },
         {
@@ -12832,19 +12805,19 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:534"
+            "line": " source/peer-connection.js:538"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:534"
+            "line": " source/peer-connection.js:538"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:693"
+            "line": " source/peer-connection.js:697"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:693"
+            "line": " source/peer-connection.js:697"
         },
         {
             "message": "unknown tag: component",
@@ -13296,35 +13269,23 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:29"
+            "line": " source/skylink-events.js:37"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:39"
+            "line": " source/skylink-events.js:54"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:53"
+            "line": " source/skylink-events.js:74"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:65"
+            "line": " source/skylink-events.js:94"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:77"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/skylink-events.js:91"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/skylink-events.js:117"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/skylink-events.js:132"
+            "line": " source/skylink-events.js:118"
         },
         {
             "message": "unknown tag: component",
@@ -13332,35 +13293,35 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:157"
+            "line": " source/skylink-events.js:188"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:169"
+            "line": " source/skylink-events.js:217"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:183"
+            "line": " source/skylink-events.js:240"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:195"
+            "line": " source/skylink-events.js:264"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:210"
+            "line": " source/skylink-events.js:287"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:224"
+            "line": " source/skylink-events.js:314"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:235"
+            "line": " source/skylink-events.js:339"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:312"
+            "line": " source/skylink-events.js:364"
         },
         {
             "message": "unknown tag: component",
@@ -13368,103 +13329,115 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:468"
+            "line": " source/skylink-events.js:412"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:545"
+            "line": " source/skylink-events.js:502"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:627"
+            "line": " source/skylink-events.js:594"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:718"
+            "line": " source/skylink-events.js:684"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:746"
+            "line": " source/skylink-events.js:774"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:770"
+            "line": " source/skylink-events.js:863"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:848"
+            "line": " source/skylink-events.js:954"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:866"
+            "line": " source/skylink-events.js:988"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:904"
+            "line": " source/skylink-events.js:1018"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:920"
+            "line": " source/skylink-events.js:1111"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:933"
+            "line": " source/skylink-events.js:1147"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:946"
+            "line": " source/skylink-events.js:1191"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:960"
+            "line": " source/skylink-events.js:1222"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1039"
+            "line": " source/skylink-events.js:1244"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1119"
+            "line": " source/skylink-events.js:1266"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1134"
+            "line": " source/skylink-events.js:1288"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1154"
+            "line": " source/skylink-events.js:1374"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1175"
+            "line": " source/skylink-events.js:1461"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1190"
+            "line": " source/skylink-events.js:1476"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1249"
+            "line": " source/skylink-events.js:1496"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1276"
+            "line": " source/skylink-events.js:1517"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1325"
+            "line": " source/skylink-events.js:1532"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1372"
+            "line": " source/skylink-events.js:1591"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1423"
+            "line": " source/skylink-events.js:1618"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1473"
+            "line": " source/skylink-events.js:1667"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/skylink-events.js:1714"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/skylink-events.js:1765"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/skylink-events.js:1815"
         },
         {
             "message": "unknown tag: component",
@@ -13952,7 +13925,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:486"
+            "line": " source/peer-connection.js:490"
         }
     ]
 }

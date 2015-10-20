@@ -289,90 +289,6 @@ Skylink.prototype._ICEConnectionFailures = {};
 /**
  * Reconfigures the &lt;code&gt;RTCConfiguration.iceServers&lt;/code&gt; that is
  *   to be passed in constructing the new &lt;code&gt;RTCPeerConnection&lt;/code&gt;
- *   object for different browsers support.
- * Previously known as &lt;code&gt;_setFirefoxIceServers&lt;/code&gt;.
- * This method will reconfigure &lt;code&gt;urls&lt;/code&gt; configuration to
- *   an array of &lt;code&gt;url&lt;/code&gt; configuration.
- * @method _parseIceServers
- * @param {JSON} config The RTCConfiguration that is to be passed for
- *   constructing the new RTCPeerConnection object.
- * @return {JSON} The updated RTCConfiguration object with Firefox
- *   specific STUN configuration.
- * @private
- * @since 0.6.1
- * @component ICE
- * @for Skylink
- */
-Skylink.prototype._parseIceServers = function(config) {
-  var self = this;
-  var newIceServers = [];
-
-  var parseIceServer = function (iceServer) {
-    if (iceServer.url.indexOf(&#x27;@&#x27;) &gt; 0) {
-      var protocolParts = iceServer.url.split(&#x27;:&#x27;);
-      var urlParts = protocolParts[1].split(&#x27;@&#x27;);
-      iceServer.username = urlParts[0];
-      iceServer.url = protocolParts[0] + &#x27;:&#x27; + urlParts[1];
-
-      // add the ICE server port
-      if (protocolParts[2]) {
-        iceServer.url += &#x27;:&#x27; + protocolParts[2];
-      }
-    }
-
-    if (iceServer.url.indexOf(&#x27;stun:&#x27;) === 0 &amp;&amp;
-      window.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp;
-      iceServer.url.indexOf(&#x27;google&#x27;) &gt; 0) {
-      return null;
-    }
-
-    return createIceServer(iceServer.url,
-      iceServer.username || null, iceServer.credential || null);
-  };
-
-  for (var i = 0; i &lt; config.iceServers.length; i++) {
-    var iceServer = config.iceServers[i];
-    var newIceServer = null;
-
-    if (Array.isArray(iceServer.urls)) {
-      for (var j = 0; j &lt; iceServer.urls.length; j++) {
-        var iceServerIndex = {
-          username: iceServer.username,
-          url: iceServer.urls[j],
-          credential: iceServer.credential
-        };
-
-        newIceServer = parseIceServer(iceServerIndex);
-
-        if (newIceServer !== null) {
-          newIceServers.push(newIceServer);
-        }
-      }
-    } else {
-      newIceServer = parseIceServer(iceServer);
-
-      if (newIceServer !== null) {
-        newIceServers.push(newIceServer);
-      }
-    }
-  }
-
-
-  // for firefox STUN
-  if (window.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp; this._enableSTUN) {
-    newIceServers.splice(0, 0, {
-      url: &#x27;stun:stun.services.mozilla.com&#x27;
-    });
-  }
-
-  return {
-    iceServers: newIceServers
-  };
-};
-
-/**
- * Reconfigures the &lt;code&gt;RTCConfiguration.iceServers&lt;/code&gt; that is
- *   to be passed in constructing the new &lt;code&gt;RTCPeerConnection&lt;/code&gt;
  *   object to remove (disable) STUN or remove TURN (disable) server
  *   connections based on the
  *   {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}
@@ -390,40 +306,24 @@ Skylink.prototype._parseIceServers = function(config) {
  * @for Skylink
  */
 Skylink.prototype._setIceServers = function(givenConfig) {
-  // firstly, set the STUN server specially for firefox
-  var config = this._parseIceServers(givenConfig);
-
-  var newConfig = {
-    iceServers: []
-  };
-
-  // to prevent repeat
-  var iceServerUrls = [];
-
+  var givenIceServers = clone(givenConfig.iceServers);
+  var iceServersList = {};
+  var newIceServers = [];
+  // TURN SSL config
   var useTURNSSLProtocol = false;
   var useTURNSSLPort = false;
 
-  var clone = function (obj) {
-    if (obj === null || typeof obj !== &#x27;object&#x27;) {
-      return obj;
-    }
 
-    var copy = obj.constructor();
-    for (var attr in obj) {
-      if (obj.hasOwnProperty(attr)) {
-        copy[attr] = obj[attr];
-      }
-    }
-    return copy;
-  };
 
   if (window.location.protocol === &#x27;https:&#x27; || this._forceTURNSSL) {
     if (window.webrtcDetectedBrowser === &#x27;chrome&#x27; ||
       window.webrtcDetectedBrowser === &#x27;safari&#x27; ||
       window.webrtcDetectedBrowser === &#x27;IE&#x27;) {
       useTURNSSLProtocol = true;
+      useTURNSSLPort = false;
+    } else {
+      useTURNSSLPort = true;
     }
-    useTURNSSLPort = true;
   }
 
   log.log(&#x27;TURN server connections SSL configuration&#x27;, {
@@ -431,102 +331,173 @@ Skylink.prototype._setIceServers = function(givenConfig) {
     useTURNSSLPort: useTURNSSLPort
   });
 
-  for (var i = 0; i &lt; config.iceServers.length; i++) {
-    var iceServer = config.iceServers[i];
-    var iceServerParts = iceServer.url.split(&#x27;:&#x27;);
-    var copyIceServers = [];
+  var pushIceServer = function (username, credential, url, index) {
+    if (!iceServersList[username]) {
+      iceServersList[username] = {};
+    }
 
-    // check for stun servers
-    if (iceServerParts[0] === &#x27;stun&#x27; || iceServerParts[0] === &#x27;stuns&#x27;) {
-      if (!this._enableSTUN) {
-        log.log(&#x27;Removing STUN Server support&#x27;, iceServer);
-        continue;
+    if (!iceServersList[username][credential]) {
+      iceServersList[username][credential] = [];
+    }
+
+    if (iceServersList[username][credential].indexOf(url) === -1) {
+      if (typeof index === &#x27;number&#x27;) {
+        iceServersList[username][credential].splice(index, 0, url);
       } else {
-        if (!this._usePublicSTUN &amp;&amp; iceServer.url.indexOf(&#x27;temasys&#x27;) === -1) {
-          log.log(&#x27;Remove public STUN Server support&#x27;, iceServer);
+        iceServersList[username][credential].push(url);
+      }
+    }
+  };
+
+  var i, serverItem;
+
+  for (i = 0; i &lt; givenIceServers.length; i++) {
+    var server = givenIceServers[i];
+
+    if (typeof server.url !== &#x27;string&#x27;) {
+      log.warn(&#x27;Ignoring ICE server provided at index &#x27; + i, clone(server));
+      continue;
+    }
+
+    if (server.url.indexOf(&#x27;stun&#x27;) === 0) {
+      if (!this._enableSTUN) {
+        log.warn(&#x27;Ignoring STUN server provided at index &#x27; + i, clone(server));
+        continue;
+      }
+
+      if (!this._usePublicSTUN &amp;&amp; server.url.indexOf(&#x27;temasys&#x27;) === -1) {
+        log.warn(&#x27;Ignoring public STUN server provided at index &#x27; + i, clone(server));
+        continue;
+      }
+
+    } else if (server.url.indexOf(&#x27;turn&#x27;) === 0) {
+      if (!this._enableTURN) {
+        log.warn(&#x27;Ignoring TURN server provided at index &#x27; + i, clone(server));
+        continue;
+      }
+
+      if (server.url.indexOf(&#x27;:443&#x27;) === -1 &amp;&amp; useTURNSSLPort) {
+        log.log(&#x27;Ignoring TURN Server (non-SSL port) provided at index &#x27; + i, clone(server));
+        continue;
+      }
+
+      if (useTURNSSLProtocol) {
+        var parts = server.url.split(&#x27;:&#x27;);
+        parts[0] = &#x27;turns&#x27;;
+        server.url = parts.join(&#x27;:&#x27;);
+      }
+    }
+
+    // parse &quot;@&quot; settings
+    if (server.url.indexOf(&#x27;@&#x27;) &gt; 0) {
+      var protocolParts = server.url.split(&#x27;:&#x27;);
+      var urlParts = protocolParts[1].split(&#x27;@&#x27;);
+      server.username = urlParts[0];
+      server.url = protocolParts[0] + &#x27;:&#x27; + urlParts[1];
+
+      // add the ICE server port
+      if (protocolParts[2]) {
+        server.url += &#x27;:&#x27; + protocolParts[2];
+      }
+    }
+
+    var username = typeof server.username === &#x27;string&#x27; ? server.username : &#x27;none&#x27;;
+    var credential = typeof server.credential === &#x27;string&#x27; ? server.credential : &#x27;none&#x27;;
+
+    if (server.url.indexOf(&#x27;turn&#x27;) === 0) {
+      if (this._TURNTransport === this.TURN_TRANSPORT.ANY) {
+        pushIceServer(username, credential, server.url);
+
+      } else {
+        var rawUrl = server.url;
+
+        if (rawUrl.indexOf(&#x27;?transport=&#x27;) &gt; 0) {
+          rawUrl = rawUrl.split(&#x27;?transport=&#x27;)[0];
+        }
+
+        if (this._TURNTransport === this.TURN_TRANSPORT.NONE) {
+          pushIceServer(username, credential, rawUrl);
+        } else if (this._TURNTransport === this.TURN_TRANSPORT.UDP) {
+          pushIceServer(username, credential, rawUrl + &#x27;?transport=udp&#x27;);
+        } else if (this._TURNTransport === this.TURN_TRANSPORT.TCP) {
+          pushIceServer(username, credential, rawUrl + &#x27;?transport=tcp&#x27;);
+        } else if (this._TURNTransport === this.TURN_TRANSPORT.ALL) {
+          pushIceServer(username, credential, rawUrl + &#x27;?transport=tcp&#x27;);
+          pushIceServer(username, credential, rawUrl + &#x27;?transport=udp&#x27;);
+        } else {
+          log.warn(&#x27;Invalid TURN transport option &quot;&#x27; + this._TURNTransport +
+            &#x27;&quot;. Ignoring TURN server at index&#x27; + i, clone(server));
           continue;
         }
-        // STUNS is unsupported
-        //iceServerParts[0] = (this._STUNSSL) ? &#x27;stuns&#x27; : &#x27;stun&#x27;;
       }
-      iceServer.url = iceServerParts.join(&#x27;:&#x27;);
+    } else {
+      pushIceServer(username, credential, server.url);
     }
-    // check for turn servers
-    if (iceServerParts[0] === &#x27;turn&#x27; || iceServerParts[0] === &#x27;turns&#x27;) {
-      if (!this._enableTURN) {
-        log.log(&#x27;Removing TURN Server support&#x27;, iceServer);
-        continue;
-      } else if (iceServer.url.indexOf(&#x27;:443&#x27;) === -1 &amp;&amp; useTURNSSLPort) {
-        log.log(&#x27;Ignoring TURN Server with non-SSL port&#x27;, iceServer);
-        continue;
-      } else {
-        // this is terrible. No turns please
-        iceServerParts[0] = (useTURNSSLProtocol) ? &#x27;turns&#x27; : &#x27;turn&#x27;;
-        iceServer.url = iceServerParts.join(&#x27;:&#x27;);
-        // check if requires SSL
-        log.log(&#x27;Transport option:&#x27;, this._TURNTransport);
-        if (this._TURNTransport !== this.TURN_TRANSPORT.ANY) {
-          // this has a transport attached to it
-          if (iceServer.url.indexOf(&#x27;?transport=&#x27;) &gt; -1) {
-            // remove transport because user does not want it
-            if (this._TURNTransport === this.TURN_TRANSPORT.NONE) {
-              log.log(&#x27;Removing transport option&#x27;);
-              iceServer.url = iceServer.url.split(&#x27;?&#x27;)[0];
-            } else if (this._TURNTransport === this.TURN_TRANSPORT.ALL) {
-              log.log(&#x27;Setting for all transport option&#x27;);
+  }
 
+  // add mozilla STUN for firefox
+  if (this._enableSTUN &amp;&amp; this._usePublicSTUN &amp;&amp; window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
+    pushIceServer(&#x27;none&#x27;, &#x27;none&#x27;, &#x27;stun:stun.services.mozilla.com&#x27;, 0);
+  }
 
+  var hasUrlsSupport = false;
 
-              var originalUrl = iceServer.url.split(&#x27;?&#x27;)[0];
+  if (window.webrtcDetectedBrowser === &#x27;chrome&#x27; &amp;&amp; window.webrtcDetectedVersion &gt; 34) {
+    hasUrlsSupport = true;
+  }
 
-              // turn:turn.test.com
-              var iceServerTransportNone = clone(iceServer);
-              iceServerTransportNone.url = originalUrl;
-              copyIceServers.push(iceServerTransportNone);
+  if (window.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp; window.webrtcDetectedVersion &gt; 38) {
+    hasUrlsSupport = true;
+  }
 
-              // turn:turn.test.com?transport=tcp
-              var iceServerTransportTcp = clone(iceServer);
-              iceServerTransportTcp.url = originalUrl + &#x27;?transport=&#x27; + this.TURN_TRANSPORT.TCP;
-              copyIceServers.push(iceServerTransportTcp);
+  if (window.webrtcDetectedBrowser === &#x27;opera&#x27; &amp;&amp; window.webrtcDetectedVersion &gt; 31) {
+    hasUrlsSupport = true;
+  }
 
-              // turn:turn.test.com?transport=udp
-              var iceServerTransportUdp = clone(iceServer);
-              iceServerTransportUdp.url = originalUrl + &#x27;?transport=&#x27; + this.TURN_TRANSPORT.UDP;
-              copyIceServers.push(iceServerTransportUdp);
+  // plugin supports .urls
+  if (window.webrtcDetectedBrowser === &#x27;safari&#x27; || window.webrtcDetectedBrowser === &#x27;IE&#x27;) {
+    hasUrlsSupport = true;
+  }
 
-            } else {
-              // UDP or TCP
-              log.log(&#x27;Setting transport option&#x27;);
-              var urlProtocolParts = iceServer.url.split(&#x27;=&#x27;);
-              urlProtocolParts[1] = this._TURNTransport;
-              iceServer.url = urlProtocolParts.join(&#x27;=&#x27;);
+  for (var serverUsername in iceServersList) {
+    if (iceServersList.hasOwnProperty(serverUsername)) {
+      for (var serverCred in iceServersList[serverUsername]) {
+        if (iceServersList[serverUsername].hasOwnProperty(serverCred)) {
+          if (hasUrlsSupport) {
+            var urlsItem = {
+              urls: iceServersList[serverUsername][serverCred]
+            };
+            if (serverUsername !== &#x27;none&#x27;) {
+              urlsItem.username = serverUsername;
             }
+            if (serverCred !== &#x27;none&#x27;) {
+              urlsItem.credential = serverCred;
+            }
+            newIceServers.push(urlsItem);
           } else {
-            if (this._TURNTransport !== this.TURN_TRANSPORT.NONE) {
-              log.log(&#x27;Setting transport option&#x27;);
-              // no transport here. manually add
-              iceServer.url += &#x27;?transport=&#x27; + this._TURNTransport;
+            for (var j = 0; j &lt; iceServersList[serverUsername][serverCred].length; j++) {
+              var urlItem = {
+                url: iceServersList[serverUsername][serverCred][j]
+              };
+              if (serverUsername !== &#x27;none&#x27;) {
+                urlItem.username = serverUsername;
+              }
+              if (serverCred !== &#x27;none&#x27;) {
+                urlItem.credential = serverCred;
+              }
+              newIceServers.push(urlItem);
             }
           }
         }
       }
     }
-
-    if (copyIceServers.length &gt; 0) {
-      for (var j = 0; j &lt; copyIceServers.length; j++) {
-        if (iceServerUrls.indexOf(copyIceServers[j].url) === -1) {
-          newConfig.iceServers.push(copyIceServers[j]);
-          iceServerUrls.push(copyIceServers[j].url);
-        }
-      }
-    } else if (iceServerUrls.indexOf(iceServer.url) === -1) {
-      newConfig.iceServers.push(iceServer);
-      iceServerUrls.push(iceServer.url);
-    }
   }
 
-  log.log(&#x27;Output iceServers configuration:&#x27;, newConfig.iceServers);
-  return newConfig;
+  log.log(&#x27;Output iceServers configuration:&#x27;, newIceServers);
+
+  return {
+    iceServers: newIceServers
+  };
 };
     </pre>
 </div>
