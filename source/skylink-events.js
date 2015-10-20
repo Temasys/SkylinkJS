@@ -772,8 +772,9 @@ Skylink.prototype._EVENTS = {
   peerLeft: [],
 
   /**
-   * Event triggered when a Stream is available from a Peer
-   *   in the room.
+   * Event triggered when a Stream is sent by Peer.
+   * - This event may trigger for self, which indicates that self has joined the room
+   *   and is sending this Stream object to other Peers connected in the room.
    * - <sub>SENDING STREAM STAGE</sub><br>
    *   <small>
    *   <b>incomingStream</b> &#8594;
@@ -861,7 +862,22 @@ Skylink.prototype._EVENTS = {
   incomingStream: [],
 
   /**
-   * Event triggered when a message is received from a Peer.
+   * Event triggered when message data is received from Peer.
+   * - This event may trigger for self when sending message data to Peer,
+   *   which indicates that self has sent the message data.
+   * - <sub>PEER CONNECTION STAGE</sub><br>
+   *   <small>
+   *   <a href="#event_peerJoined">peerJoined</a> &#8594;
+   *   <a href="#event_handshakeProgress">handshakeProgress</a> &#8594;
+   *   (<a href="#event_incomingStream">incomingStream</a>) &#8594;
+   *   (<a href="#event_dataChannelState">dataChannelState</a>) &#8594;
+   *   [(<b>incomingMessage</b>) -
+   *   (<a href="#event_incomingData">incomingData</a>) -
+   *   (<a href="#event_peerUpdated">peerUpdated</a>)] &#8594;
+   *   [(<a href="#event_peerRestart">peerRestart</a>) &#8594;
+   *   (&#8592;<em>handshakeProgress</em>)] &#8594;
+   *   <a href="#event_peerLeft">peerLeft</a>
+   *   </small>
    * @event incomingMessage
    * @param {JSON} message The message object received from Peer.
    * @param {JSON|String} message.content The message object content. This is the
@@ -952,7 +968,14 @@ Skylink.prototype._EVENTS = {
   incomingMessage: [],
 
   /**
-   * Event triggered when a data transfer is completed in a DataChannel connection.
+   * Event triggered when a data transfer is completed.
+   * - This event may trigger for self when transferring data to Peer,
+   *   which indicates that self has transferred the data successfully.
+   * - For more extensive states like the outgoing and incoming
+   *   data transfer progress and rejection of data transfer requests,
+   *   you may subscribe to the <a href="#event_dataTransferState">dataTransferState</a> event.
+   * - If <code>enableDataChannel</code> disabled in <a href="#method_init">init() configuration
+   *   settings</a>, this event will not be triggered at all.
    * - <sub>DATA TRANSFER STAGE</sub><br>
    *   <small>
    *   <a href="#event_dataTransferState">dataTransferState</a> &#8594;
@@ -986,8 +1009,14 @@ Skylink.prototype._EVENTS = {
 
 
   /**
-   * Event triggered when a data transfer request is made to Peer in a
-   *   DataChannel connection.
+   * Event triggered when there is a request to start a data transfer.
+   * - This event may trigger for self when requesting a data transfer to Peer,
+   *   which indicates that self has sent the data transfer request.
+   * - For more extensive states like the outgoing and incoming
+   *   data transfer progress and rejection of data transfer requests,
+   *   you may subscribe to the <a href="#event_dataTransferState">dataTransferState</a> event.
+   * - If <code>enableDataChannel</code> disabled in <a href="#method_init">init() configuration
+   *   settings</a>, this event will not be triggered at all.
    * - <sub>DATA TRANSFER STAGE</sub><br>
    *   <small>
    *   <a href="#event_dataTransferState">dataTransferState</a> &#8594;
@@ -1017,6 +1046,8 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when the currently connected room lock status have been updated.
+   * - If this event is triggered, this means that the room is locked / unlocked which
+   *   may allow or prevent any other Peers from joining the room.
    * - <sub>ROOM CONNECTION STAGE</sub><br>
    *   <small>
    *   <a href="#event_readyStateChange">readyStateChange</a> &#8594;
@@ -1115,6 +1146,8 @@ Skylink.prototype._EVENTS = {
    *   methods like <a href="#method_sendBlobData">sendBlobData()</a>,
    *   <a href="#method_sendURLData">sendURLData()</a> and
    *   <a href="#method_sendP2PMessage">sendP2PMessage()</a>.
+   * - If <code>enableDataChannel</code> disabled in <a href="#method_init">init() configuration
+   *   settings</a>, this event will not be triggered at all.
    * - <sub>PEER CONNECTION STAGE</sub><br>
    *   <small>
    *   <a href="#event_peerJoined">peerJoined</a> &#8594;
@@ -1145,8 +1178,14 @@ Skylink.prototype._EVENTS = {
   dataChannelState: [],
 
   /**
-   * Event triggered when a data transfer made to Peer in a
-   *   DataChannel connection state has changed.
+   * Event triggered when a data transfer state has changed.
+   * - This event triggers more extensive states like the outgoing and incoming
+   *   data transfer progress and rejection of data transfer requests.
+   *   For simplified events, you may subscribe to the
+   *   <a href="#event_incomingDataRequest">incomingDataRequest</a> and
+   *   <a href="#event_incomingData">incomingData</a> events.
+   * - If <code>enableDataChannel</code> disabled in <a href="#method_init">init() configuration
+   *   settings</a>, this event will not be triggered at all.
    * - <sub>DATA TRANSFER STAGE</sub><br>
    *   <small>
    *   <b>dataTransferState</b> &#8594;
