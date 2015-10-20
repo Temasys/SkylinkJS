@@ -240,6 +240,7 @@ Skylink.prototype._EVENTS = {
    *   [&lt;a href=&quot;#event_peerJoined&quot;&gt;peerJoined &lt;sup&gt;(isSelf = true)&lt;/sub&gt;&lt;/a&gt; &amp;#8594;
    *   (&lt;a href=&quot;#event_serverPeerJoined&quot;&gt;serverPeerJoined&lt;/a&gt;) &amp;#8594;
    *   (&lt;a href=&quot;#event_serverPeerLeft&quot;&gt;serverPeerLeft&lt;/a&gt;) &amp;#8594;
+   *   (&lt;a href=&quot;#event_introduceStateChange&quot;&gt;introduceStateChange&lt;/a&gt;) &amp;#8594;
    *   (&lt;a href=&quot;#event_roomLock&quot;&gt;roomLock&lt;/a&gt;) &amp;#8594;
    *   &lt;a href=&quot;#event_peerLeft&quot;&gt;peerLeft &lt;sup&gt;(isSelf = true)&lt;/sub&gt;&lt;/a&gt; &amp;#8594;
    *   &lt;a href=&quot;#event_channelClose&quot;&gt;channelClose&lt;/a&gt;]
@@ -855,8 +856,9 @@ Skylink.prototype._EVENTS = {
   peerLeft: [],
 
   /**
-   * Event triggered when a Stream is available from a Peer
-   *   in the room.
+   * Event triggered when a Stream is sent by Peer.
+   * - This event may trigger for self, which indicates that self has joined the room
+   *   and is sending this Stream object to other Peers connected in the room.
    * - &lt;sub&gt;SENDING STREAM STAGE&lt;/sub&gt;&lt;br&gt;
    *   &lt;small&gt;
    *   &lt;b&gt;incomingStream&lt;/b&gt; &amp;#8594;
@@ -944,7 +946,22 @@ Skylink.prototype._EVENTS = {
   incomingStream: [],
 
   /**
-   * Event triggered when a message is received from a Peer.
+   * Event triggered when message data is received from Peer.
+   * - This event may trigger for self when sending message data to Peer,
+   *   which indicates that self has sent the message data.
+   * - &lt;sub&gt;PEER CONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
+   *   &lt;small&gt;
+   *   &lt;a href=&quot;#event_peerJoined&quot;&gt;peerJoined&lt;/a&gt; &amp;#8594;
+   *   &lt;a href=&quot;#event_handshakeProgress&quot;&gt;handshakeProgress&lt;/a&gt; &amp;#8594;
+   *   (&lt;a href=&quot;#event_incomingStream&quot;&gt;incomingStream&lt;/a&gt;) &amp;#8594;
+   *   (&lt;a href=&quot;#event_dataChannelState&quot;&gt;dataChannelState&lt;/a&gt;) &amp;#8594;
+   *   [(&lt;b&gt;incomingMessage&lt;/b&gt;) -
+   *   (&lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt;) -
+   *   (&lt;a href=&quot;#event_peerUpdated&quot;&gt;peerUpdated&lt;/a&gt;)] &amp;#8594;
+   *   [(&lt;a href=&quot;#event_peerRestart&quot;&gt;peerRestart&lt;/a&gt;) &amp;#8594;
+   *   (&amp;#8592;&lt;em&gt;handshakeProgress&lt;/em&gt;)] &amp;#8594;
+   *   &lt;a href=&quot;#event_peerLeft&quot;&gt;peerLeft&lt;/a&gt;
+   *   &lt;/small&gt;
    * @event incomingMessage
    * @param {JSON} message The message object received from Peer.
    * @param {JSON|String} message.content The message object content. This is the
@@ -1035,7 +1052,14 @@ Skylink.prototype._EVENTS = {
   incomingMessage: [],
 
   /**
-   * Event triggered when a data transfer is completed in a DataChannel connection.
+   * Event triggered when a data transfer is completed.
+   * - This event may trigger for self when transferring data to Peer,
+   *   which indicates that self has transferred the data successfully.
+   * - For more extensive states like the outgoing and incoming
+   *   data transfer progress and rejection of data transfer requests,
+   *   you may subscribe to the &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; event.
+   * - If &lt;code&gt;enableDataChannel&lt;/code&gt; disabled in &lt;a href=&quot;#method_init&quot;&gt;init() configuration
+   *   settings&lt;/a&gt;, this event will not be triggered at all.
    * - &lt;sub&gt;DATA TRANSFER STAGE&lt;/sub&gt;&lt;br&gt;
    *   &lt;small&gt;
    *   &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; &amp;#8594;
@@ -1069,8 +1093,14 @@ Skylink.prototype._EVENTS = {
 
 
   /**
-   * Event triggered when a data transfer request is made to Peer in a
-   *   DataChannel connection.
+   * Event triggered when there is a request to start a data transfer.
+   * - This event may trigger for self when requesting a data transfer to Peer,
+   *   which indicates that self has sent the data transfer request.
+   * - For more extensive states like the outgoing and incoming
+   *   data transfer progress and rejection of data transfer requests,
+   *   you may subscribe to the &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; event.
+   * - If &lt;code&gt;enableDataChannel&lt;/code&gt; disabled in &lt;a href=&quot;#method_init&quot;&gt;init() configuration
+   *   settings&lt;/a&gt;, this event will not be triggered at all.
    * - &lt;sub&gt;DATA TRANSFER STAGE&lt;/sub&gt;&lt;br&gt;
    *   &lt;small&gt;
    *   &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; &amp;#8594;
@@ -1100,6 +1130,8 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when the currently connected room lock status have been updated.
+   * - If this event is triggered, this means that the room is locked / unlocked which
+   *   may allow or prevent any other Peers from joining the room.
    * - &lt;sub&gt;ROOM CONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
    *   &lt;small&gt;
    *   &lt;a href=&quot;#event_readyStateChange&quot;&gt;readyStateChange&lt;/a&gt; &amp;#8594;
@@ -1111,6 +1143,7 @@ Skylink.prototype._EVENTS = {
    *   [&lt;a href=&quot;#event_peerJoined&quot;&gt;peerJoined &lt;sup&gt;(isSelf = true)&lt;/sub&gt;&lt;/a&gt; &amp;#8594;
    *   (&lt;a href=&quot;#event_serverPeerJoined&quot;&gt;serverPeerJoined&lt;/a&gt;) &amp;#8594;
    *   (&lt;a href=&quot;#event_serverPeerLeft&quot;&gt;serverPeerLeft&lt;/a&gt;) &amp;#8594;
+   *   (&lt;a href=&quot;#event_introduceStateChange&quot;&gt;introduceStateChange&lt;/a&gt;) &amp;#8594;
    *   (&lt;b&gt;roomLock&lt;/b&gt;) &amp;#8594;
    *   &lt;a href=&quot;#event_peerLeft&quot;&gt;peerLeft &lt;sup&gt;(isSelf = true)&lt;/sub&gt;&lt;/a&gt; &amp;#8594;
    *   &lt;a href=&quot;#event_channelClose&quot;&gt;channelClose&lt;/a&gt;]
@@ -1198,6 +1231,8 @@ Skylink.prototype._EVENTS = {
    *   methods like &lt;a href=&quot;#method_sendBlobData&quot;&gt;sendBlobData()&lt;/a&gt;,
    *   &lt;a href=&quot;#method_sendURLData&quot;&gt;sendURLData()&lt;/a&gt; and
    *   &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;sendP2PMessage()&lt;/a&gt;.
+   * - If &lt;code&gt;enableDataChannel&lt;/code&gt; disabled in &lt;a href=&quot;#method_init&quot;&gt;init() configuration
+   *   settings&lt;/a&gt;, this event will not be triggered at all.
    * - &lt;sub&gt;PEER CONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
    *   &lt;small&gt;
    *   &lt;a href=&quot;#event_peerJoined&quot;&gt;peerJoined&lt;/a&gt; &amp;#8594;
@@ -1228,8 +1263,14 @@ Skylink.prototype._EVENTS = {
   dataChannelState: [],
 
   /**
-   * Event triggered when a data transfer made to Peer in a
-   *   DataChannel connection state has changed.
+   * Event triggered when a data transfer state has changed.
+   * - This event triggers more extensive states like the outgoing and incoming
+   *   data transfer progress and rejection of data transfer requests.
+   *   For simplified events, you may subscribe to the
+   *   &lt;a href=&quot;#event_incomingDataRequest&quot;&gt;incomingDataRequest&lt;/a&gt; and
+   *   &lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt; events.
+   * - If &lt;code&gt;enableDataChannel&lt;/code&gt; disabled in &lt;a href=&quot;#method_init&quot;&gt;init() configuration
+   *   settings&lt;/a&gt;, this event will not be triggered at all.
    * - &lt;sub&gt;DATA TRANSFER STAGE&lt;/sub&gt;&lt;br&gt;
    *   &lt;small&gt;
    *   &lt;b&gt;dataTransferState&lt;/b&gt; &amp;#8594;
@@ -1283,8 +1324,9 @@ Skylink.prototype._EVENTS = {
    *   &lt;a href=&quot;#event_channelClose&quot;&gt;channelClose&lt;/a&gt;] &amp;nbsp; / &amp;nbsp;
    *   [&lt;a href=&quot;#event_peerJoined&quot;&gt;peerJoined &lt;sup&gt;(isSelf = true)&lt;/sub&gt;&lt;/a&gt; &amp;#8594;
    *   (&lt;a href=&quot;#event_serverPeerJoined&quot;&gt;serverPeerJoined&lt;/a&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_serverPeerLeft&quot;&gt;serverPeerLeft&lt;/a&gt;) &amp;#8594;
+   *   (&lt;a href=&quot;#event_introduceStateChange&quot;&gt;introduceStateChange&lt;/a&gt;) &amp;#8594;
    *   (&lt;a href=&quot;#event_roomLock&quot;&gt;roomLock&lt;/a&gt;) &amp;#8594;
+   *   (&lt;a href=&quot;#event_serverPeerLeft&quot;&gt;serverPeerLeft&lt;/a&gt;) &amp;#8594;
    *   &lt;a href=&quot;#event_peerLeft&quot;&gt;peerLeft &lt;sup&gt;(isSelf = true)&lt;/sub&gt;&lt;/a&gt; &amp;#8594;
    *   &lt;a href=&quot;#event_channelClose&quot;&gt;channelClose&lt;/a&gt;]
    *   &lt;/small&gt;
@@ -1545,6 +1587,13 @@ Skylink.prototype._EVENTS = {
    * Event triggered when the retrieval of the list of rooms and peers under the same realm based
    *   on the Application Key configured in {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}
    *   from the platform signaling state has changed.
+   * - This requires that the provided alias Application Key has privileged feature configured.
+   * - &lt;sub&gt;PEER INTRODUCTION STAGE&lt;/sub&gt;&lt;br&gt;
+   *   &lt;small&gt;
+   *   &lt;b&gt;getPeersStateChange&lt;/b&gt; &amp;#8594;
+   *   &lt;a href=&quot;#event_introduceStateChange&quot;&gt;introduceStateChange&lt;/a&gt; &amp;#8594;
+   *   &lt;a href=&quot;#event_handshakeProgress&quot;&gt;handshakeProgress&lt;/a&gt;
+   *   &lt;/small&gt;
    * @event getPeersStateChange
    * @param {String} state The retrieval current status.
    * @param {String} privilegedPeerId The Peer ID of the privileged Peer.
@@ -1559,6 +1608,13 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when introductory state of two Peer peers to each other
    *   selected by the privileged Peer state has changed.
+   * - This requires that the provided alias Application Key has privileged feature configured.
+   * - &lt;sub&gt;PEER INTRODUCTION STAGE&lt;/sub&gt;&lt;br&gt;
+   *   &lt;small&gt;
+   *   &lt;a href=&quot;#event_getPeersStateChange&quot;&gt;getPeersStateChange&lt;/a&gt; &amp;#8594;
+   *   &lt;b&gt;introduceStateChange&lt;/b&gt; &amp;#8594;
+   *   &lt;a href=&quot;#event_handshakeProgress&quot;&gt;handshakeProgress&lt;/a&gt;
+   *   &lt;/small&gt;
    * @event introduceStateChange
    * @param {String} state The Peer introduction state.
    * @param {String} privilegedPeerId The Peer ID of the privileged Peer.
