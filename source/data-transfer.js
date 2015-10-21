@@ -1288,12 +1288,12 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
 /**
  * Starts a [Blob](https://developer.mozilla.org/en/docs/Web/API/Blob) data transfer
  *   with Peers using the DataChannel connection.
- * You can transfer files using the <code>input</code> [fileupload object](
+ * - You can transfer files using the <code>input</code> [fileupload object](
  *   http://www.w3schools.com/jsref/dom_obj_fileupload.asp) and accessing the receiving
  *   files using [FileUpload files property](http://www.w3schools.com/jsref/prop_fileupload_files.asp).
- * The [File](https://developer.mozilla.org/en/docs/Web/API/File) object inherits from
+ * - The [File](https://developer.mozilla.org/en/docs/Web/API/File) object inherits from
  *   the Blob interface which is passable in this method as a Blob object.
- * The receiving Peer have the option to accept or reject the data transfer.
+ * - The receiving Peer have the option to accept or reject the data transfer.
  * @method sendBlobData
  * @param {Blob} data The Blob data object to transfer to Peer.
  * @param {Number} [timeout=60] The waiting timeout in seconds that the DataChannel connection

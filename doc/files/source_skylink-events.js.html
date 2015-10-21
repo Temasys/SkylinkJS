@@ -259,7 +259,7 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
    * @param {Object} error.content The exception thrown that caused the failure
    *   for initialising Skylink.
-   * @param {Number} callback.error.status The XMLHttpRequest status code received
+   * @param {Number} error.status The XMLHttpRequest status code received
    *   when exception is thrown that caused the failure for initialising Skylink.
    * @param {String} room The selected room connection information that Skylink is attempting
    *   to retrieve the information for to start connection to.
@@ -312,9 +312,10 @@ Skylink.prototype._EVENTS = {
    *   &lt;a href=&quot;#event_iceConnectionState&quot;&gt;iceConnectionState&lt;/a&gt;
    *   &lt;/small&gt;
    * @event candidateGenerationState
-   * @param {String} state The Peer connection ICE gathering state.
+   * @param {String} state The current ICE gathering state.
+   *   &lt;small&gt;See the list of available triggered states in the related link.&lt;/small&gt;
    *   [Rel: Skylink.CANDIDATE_GENERATION_STATE]
-   * @param {String} peerId The Peer ID associated with the ICE gathering state.
+   * @param {String} peerId The Peer ID associated with the current ICE gathering state.
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -527,7 +528,7 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
    *   stereo option should be explictly enabled to an OPUS enabled audio stream.
    *   Check the &lt;code&gt;audioCodec&lt;/code&gt; configuration settings in
-   *   {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}
+   *   &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
    *   to enable OPUS as the audio codec. Note that stereo is already enabled
    *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
    *   enable stereo in the audio streaming.
@@ -618,7 +619,7 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
    *   stereo option should be explictly enabled to an OPUS enabled audio stream.
    *   Check the &lt;code&gt;audioCodec&lt;/code&gt; configuration settings in
-   *   {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}
+   *   &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
    *   to enable OPUS as the audio codec. Note that stereo is already enabled
    *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
    *   enable stereo in the audio streaming.
@@ -677,7 +678,11 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when a Peer information have been updated.
-   * This event would only be triggered if self is in the room.
+   * - This event would only be triggered if self is in the room.
+   * - This event triggers when the &lt;code&gt;peerInfo&lt;/code&gt; data is updated,
+   *   like &lt;code&gt;peerInfo.mediaStatus&lt;/code&gt; or the &lt;code&gt;peerInfo.userData&lt;/code&gt;,
+   *   which is invoked through &lt;a href=&quot;#method_muteStream&quot;&gt;muteStream()&lt;/a&gt; or
+   *   &lt;a href=&quot;#method_setUserData&quot;&gt;setUserData()&lt;/a&gt;.
    * - &lt;sub&gt;PEER CONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
    *   &lt;small&gt;
    *   &lt;a href=&quot;#event_peerJoined&quot;&gt;peerJoined&lt;/a&gt; &amp;#8594;
@@ -709,7 +714,7 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
    *   stereo option should be explictly enabled to an OPUS enabled audio stream.
    *   Check the &lt;code&gt;audioCodec&lt;/code&gt; configuration settings in
-   *   {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}
+   *   &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
    *   to enable OPUS as the audio codec. Note that stereo is already enabled
    *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
    *   enable stereo in the audio streaming.
@@ -799,7 +804,7 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
    *   stereo option should be explictly enabled to an OPUS enabled audio stream.
    *   Check the &lt;code&gt;audioCodec&lt;/code&gt; configuration settings in
-   *   {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}
+   *   &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
    *   to enable OPUS as the audio codec. Note that stereo is already enabled
    *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
    *   enable stereo in the audio streaming.
@@ -889,7 +894,7 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
    *   stereo option should be explictly enabled to an OPUS enabled audio stream.
    *   Check the &lt;code&gt;audioCodec&lt;/code&gt; configuration settings in
-   *   {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}
+   *   &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
    *   to enable OPUS as the audio codec. Note that stereo is already enabled
    *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
    *   enable stereo in the audio streaming.
@@ -995,7 +1000,7 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
    *   stereo option should be explictly enabled to an OPUS enabled audio stream.
    *   Check the &lt;code&gt;audioCodec&lt;/code&gt; configuration settings in
-   *   {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}
+   *   &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
    *   to enable OPUS as the audio codec. Note that stereo is already enabled
    *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
    *   enable stereo in the audio streaming.
@@ -1168,7 +1173,7 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
    *   stereo option should be explictly enabled to an OPUS enabled audio stream.
    *   Check the &lt;code&gt;audioCodec&lt;/code&gt; configuration settings in
-   *   {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}
+   *   &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
    *   to enable OPUS as the audio codec. Note that stereo is already enabled
    *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
    *   enable stereo in the audio streaming.
@@ -1438,7 +1443,7 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
    *   stereo option should be explictly enabled to an OPUS enabled audio stream.
    *   Check the &lt;code&gt;audioCodec&lt;/code&gt; configuration settings in
-   *   {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}
+   *   &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
    *   to enable OPUS as the audio codec. Note that stereo is already enabled
    *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
    *   enable stereo in the audio streaming.
@@ -1525,7 +1530,7 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
    *   stereo option should be explictly enabled to an OPUS enabled audio stream.
    *   Check the &lt;code&gt;audioCodec&lt;/code&gt; configuration settings in
-   *   {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}
+   *   &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
    *   to enable OPUS as the audio codec. Note that stereo is already enabled
    *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
    *   enable stereo in the audio streaming.
@@ -1585,7 +1590,7 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when the retrieval of the list of rooms and peers under the same realm based
-   *   on the Application Key configured in {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}
+   *   on the Application Key configured in &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
    *   from the platform signaling state has changed.
    * - This requires that the provided alias Application Key has privileged feature configured.
    * - &lt;sub&gt;PEER INTRODUCTION STAGE&lt;/sub&gt;&lt;br&gt;

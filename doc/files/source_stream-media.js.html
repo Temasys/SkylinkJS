@@ -534,7 +534,8 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
     log.log([null, &#x27;MediaStream&#x27;, stream.id, &#x27;Local mediastream has ended&#x27;], {
       inRoom: self._inRoom,
       currentTime: stream.currentTime,
-      ended: stream.active || stream.ended
+      ended: typeof stream.active === &#x27;boolean&#x27; ?
+        stream.active : stream.ended
     });
 
     if (self._inRoom) {
