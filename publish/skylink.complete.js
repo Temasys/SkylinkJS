@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.2 - Wed Oct 21 2015 03:22:31 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Wed Oct 21 2015 11:09:35 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.2 - Wed Oct 21 2015 03:22:31 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Wed Oct 21 2015 11:09:35 GMT+0800 (SGT) */
 
 (function() {
 
@@ -16425,6 +16425,7 @@ Skylink.prototype._EVENTS = {
    *   [<a href="#event_peerJoined">peerJoined <sup>(isSelf = true)</sub></a> &#8594;
    *   (<a href="#event_serverPeerJoined">serverPeerJoined</a>) &#8594;
    *   (<a href="#event_serverPeerLeft">serverPeerLeft</a>) &#8594;
+   *   (<a href="#event_introduceStateChange">introduceStateChange</a>) &#8594;
    *   (<a href="#event_roomLock">roomLock</a>) &#8594;
    *   <a href="#event_peerLeft">peerLeft <sup>(isSelf = true)</sub></a> &#8594;
    *   <a href="#event_channelClose">channelClose</a>]
@@ -17327,6 +17328,7 @@ Skylink.prototype._EVENTS = {
    *   [<a href="#event_peerJoined">peerJoined <sup>(isSelf = true)</sub></a> &#8594;
    *   (<a href="#event_serverPeerJoined">serverPeerJoined</a>) &#8594;
    *   (<a href="#event_serverPeerLeft">serverPeerLeft</a>) &#8594;
+   *   (<a href="#event_introduceStateChange">introduceStateChange</a>) &#8594;
    *   (<b>roomLock</b>) &#8594;
    *   <a href="#event_peerLeft">peerLeft <sup>(isSelf = true)</sub></a> &#8594;
    *   <a href="#event_channelClose">channelClose</a>]
@@ -17507,8 +17509,9 @@ Skylink.prototype._EVENTS = {
    *   <a href="#event_channelClose">channelClose</a>] &nbsp; / &nbsp;
    *   [<a href="#event_peerJoined">peerJoined <sup>(isSelf = true)</sub></a> &#8594;
    *   (<a href="#event_serverPeerJoined">serverPeerJoined</a>) &#8594;
-   *   (<a href="#event_serverPeerLeft">serverPeerLeft</a>) &#8594;
+   *   (<a href="#event_introduceStateChange">introduceStateChange</a>) &#8594;
    *   (<a href="#event_roomLock">roomLock</a>) &#8594;
+   *   (<a href="#event_serverPeerLeft">serverPeerLeft</a>) &#8594;
    *   <a href="#event_peerLeft">peerLeft <sup>(isSelf = true)</sub></a> &#8594;
    *   <a href="#event_channelClose">channelClose</a>]
    *   </small>
@@ -17769,6 +17772,13 @@ Skylink.prototype._EVENTS = {
    * Event triggered when the retrieval of the list of rooms and peers under the same realm based
    *   on the Application Key configured in {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
    *   from the platform signaling state has changed.
+   * - This requires that the provided alias Application Key has privileged feature configured.
+   * - <sub>PEER INTRODUCTION STAGE</sub><br>
+   *   <small>
+   *   <b>getPeersStateChange</b> &#8594;
+   *   <a href="#event_introduceStateChange">introduceStateChange</a> &#8594;
+   *   <a href="#event_handshakeProgress">handshakeProgress</a>
+   *   </small>
    * @event getPeersStateChange
    * @param {String} state The retrieval current status.
    * @param {String} privilegedPeerId The Peer ID of the privileged Peer.
@@ -17783,6 +17793,13 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when introductory state of two Peer peers to each other
    *   selected by the privileged Peer state has changed.
+   * - This requires that the provided alias Application Key has privileged feature configured.
+   * - <sub>PEER INTRODUCTION STAGE</sub><br>
+   *   <small>
+   *   <a href="#event_getPeersStateChange">getPeersStateChange</a> &#8594;
+   *   <b>introduceStateChange</b> &#8594;
+   *   <a href="#event_handshakeProgress">handshakeProgress</a>
+   *   </small>
    * @event introduceStateChange
    * @param {String} state The Peer introduction state.
    * @param {String} privilegedPeerId The Peer ID of the privileged Peer.
@@ -18382,12 +18399,24 @@ Skylink.prototype._sendChannelMessage = function(message) {
             rid: self._room.id
           });
 
-        self._socket.send({
-          type: self._SIG_MESSAGE_TYPE.GROUP,
-          lists: self._socketMessageQueue.splice(0,self._socketMessageQueue.length),
-          mid: self._user.sid,
-          rid: self._room.id
-        });
+        // fix for self._socket undefined errors in firefox
+        if (self._socket) {
+          self._socket.send({
+            type: self._SIG_MESSAGE_TYPE.GROUP,
+            lists: self._socketMessageQueue.splice(0,self._socketMessageQueue.length),
+            mid: self._user.sid,
+            rid: self._room.id
+          });
+        } else {
+          log.error([(message.target ? message.target : 'server'), null, null,
+            'Dropping delayed message' + ((!message.target) ? 's' : '') +
+            ' as socket object is no longer defined ->'], {
+            type: self._SIG_MESSAGE_TYPE.GROUP,
+            lists: self._socketMessageQueue.slice(0,self._socketMessageQueue.length),
+            mid: self._user.sid,
+            rid: self._room.id
+          });
+        }
 
         clearTimeout(self._socketMessageTimeout);
         self._socketMessageTimeout = null;
@@ -18403,12 +18432,24 @@ Skylink.prototype._sendChannelMessage = function(message) {
             rid: self._room.id
           });
 
-        self._socket.send({
-          type: self._SIG_MESSAGE_TYPE.GROUP,
-          lists: self._socketMessageQueue.splice(0,throughput),
-          mid: self._user.sid,
-          rid: self._room.id
-        });
+        // fix for self._socket undefined errors in firefox
+        if (self._socket) {
+          self._socket.send({
+            type: self._SIG_MESSAGE_TYPE.GROUP,
+            lists: self._socketMessageQueue.splice(0,throughput),
+            mid: self._user.sid,
+            rid: self._room.id
+          });
+        } else {
+          log.error([(message.target ? message.target : 'server'), null, null,
+            'Dropping delayed message' + ((!message.target) ? 's' : '') +
+            ' as socket object is no longer defined ->'], {
+            type: self._SIG_MESSAGE_TYPE.GROUP,
+            lists: self._socketMessageQueue.slice(0,throughput),
+            mid: self._user.sid,
+            rid: self._room.id
+          });
+        }
 
         clearTimeout(self._socketMessageTimeout);
         self._socketMessageTimeout = null;

@@ -263,12 +263,24 @@ Skylink.prototype._sendChannelMessage = function(message) {
             rid: self._room.id
           });
 
-        self._socket.send({
-          type: self._SIG_MESSAGE_TYPE.GROUP,
-          lists: self._socketMessageQueue.splice(0,self._socketMessageQueue.length),
-          mid: self._user.sid,
-          rid: self._room.id
-        });
+        // fix for self._socket undefined errors in firefox
+        if (self._socket) {
+          self._socket.send({
+            type: self._SIG_MESSAGE_TYPE.GROUP,
+            lists: self._socketMessageQueue.splice(0,self._socketMessageQueue.length),
+            mid: self._user.sid,
+            rid: self._room.id
+          });
+        } else {
+          log.error([(message.target ? message.target : 'server'), null, null,
+            'Dropping delayed message' + ((!message.target) ? 's' : '') +
+            ' as socket object is no longer defined ->'], {
+            type: self._SIG_MESSAGE_TYPE.GROUP,
+            lists: self._socketMessageQueue.slice(0,self._socketMessageQueue.length),
+            mid: self._user.sid,
+            rid: self._room.id
+          });
+        }
 
         clearTimeout(self._socketMessageTimeout);
         self._socketMessageTimeout = null;
@@ -284,12 +296,24 @@ Skylink.prototype._sendChannelMessage = function(message) {
             rid: self._room.id
           });
 
-        self._socket.send({
-          type: self._SIG_MESSAGE_TYPE.GROUP,
-          lists: self._socketMessageQueue.splice(0,throughput),
-          mid: self._user.sid,
-          rid: self._room.id
-        });
+        // fix for self._socket undefined errors in firefox
+        if (self._socket) {
+          self._socket.send({
+            type: self._SIG_MESSAGE_TYPE.GROUP,
+            lists: self._socketMessageQueue.splice(0,throughput),
+            mid: self._user.sid,
+            rid: self._room.id
+          });
+        } else {
+          log.error([(message.target ? message.target : 'server'), null, null,
+            'Dropping delayed message' + ((!message.target) ? 's' : '') +
+            ' as socket object is no longer defined ->'], {
+            type: self._SIG_MESSAGE_TYPE.GROUP,
+            lists: self._socketMessageQueue.slice(0,throughput),
+            mid: self._user.sid,
+            rid: self._room.id
+          });
+        }
 
         clearTimeout(self._socketMessageTimeout);
         self._socketMessageTimeout = null;
