@@ -288,6 +288,34 @@ h3 code {
   background: #fff;
   color: #000;
 }
+blockquote {
+  padding: 0 35px 10px!important;
+  font-size: 1em;
+}
+
+blockquote em {
+  margin: 10px 0 5px;
+  display: block;
+  font-size: .9em;
+  margin-left: -10px;
+}
+
+blockquote small {
+  margin: 3px 0;
+  margin-left: 15px;
+}
+
+blockquote h6 {
+  font-weight: 600;
+  margin-left: -20px;
+}
+
+blockquote:before,
+blockquote:after,
+blockquote small:before,
+blockquote small:after {
+  content: ""!important;
+}
 @media (max-width: 991px) {
   .section-doc-group .col-md-3 {
     display: none;

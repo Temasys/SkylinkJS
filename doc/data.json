@@ -183,7 +183,7 @@
             "extension_for": [],
             "file": "source/template/header.js",
             "line": 109,
-            "description": "<h2>Before using Skylink</h2>\nPlease invoke {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}} method\nfirst to initialise the Application Key before using any functionalities in Skylink.\n\nIf you do not have an Application Key, you may register for a Skylink platform developer account\n  [to create one](http://developer.temasys.com.sg/register).\n\nTo get started you may [visit the getting started page](https://temasys.github.io/how-to/2014/08/08/\nGetting_started_with_WebRTC_and_SkylinkJS/), or alternatively fork a ready made demo application\nthat uses Skylink Web SDK at [getaroom.io](http://getaroom.io/).\n\nFor tips on using skylink and troubleshooting you can visit\n  [our support portal](http://support.temasys.com.sg/support/solutions/folders/5000267498).",
+            "description": "<h2>Before using Skylink</h2>\nPlease invoke {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}} method\nfirst to initialise the Application Key before using any functionalities in Skylink.\n\nIf you do not have an Application Key, you may register for a Skylink platform developer account\n  [to create one](http://developer.temasys.com.sg/register).\n\nTo get started you may [visit the getting started page](https://temasys.github.io/how-to/2014/08/08/\nGetting_started_with_WebRTC_and_SkylinkJS/), or alternatively fork a ready made demo application\nthat uses Skylink Web SDK at [getaroom.io](http://getaroom.io/).\n\nFor tips on using skylink and troubleshooting you can visit\n  [our support portal](http://support.temasys.com.sg/support/solutions/folders/5000267498).\n<hr>\n<h5>DATA TRANSFER FUNCTIONALITY REQUIREMENTS</h5>\n- Requires DataChannel connections to be enabled, and hence if\n  you have configure <code>enableDataChannel</code> set to <code>false</code> in\n  the <a href=\"#method_init\">init()</a>, this functionality would not work.\n- New DataChannel connection will be opened for every transfer, which\n  however if you are connecting with the mobile application built with our mobile SDKs\n  (<a href=\"http://skylink.io/ios/\">iOS</a> / <a href=\"http://skylink.io/android/\">Android</a>),\n  it will use only one DataChannel (<code>channelType</code> being <code>DATA_CHANNEL_TYPE.MESSAGING</code>)\n  which only allows one data transfer at a time.\n- If the <a href=\"#event_dataChannelState\">DataChannel connection state</a> for this\n  transfer is not <code>OPEN</code>, the data transfer will not proceed and if caught\n  with an exception, transfers will fail.",
             "is_constructor": 1,
             "example": [
                 "\n  // Here's a simple example on how you can start using Skylink\n  var SkylinkDemo = new Skylink();\n\n  // Subscribe all events first before init()\n  SkylinkDemo.on(\"incomingStream\", function (peerId, stream, peerInfo, isSelf) {\n    if (isSelf) {\n      attachMediaStream(document.getElementById(\"selfVideo\"), stream);\n    } else {\n      var peerVideo = document.createElement(\"video\");\n      peerVideo.id = peerId;\n      peerVideo.autoplay = \"autoplay\";\n      document.getElementById(\"peersVideo\").appendChild(peerVideo);\n      attachMediaStream(peerVideo, stream);\n    }\n  });\n\n  SkylinkDemo.on(\"peerLeft\", function (peerId, peerInfo, isSelf) {\n    if (!isSelf) {\n      var peerVideo = document.getElementById(peerId);\n      // do a check if peerVideo exists first\n      if (peerVideo) {\n        document.getElementById(\"peersVideo\").removeChild(peerVideo);\n      } else {\n        console.error(\"Peer video for \" + peerId + \" is not found.\");\n      }\n    }\n  });\n\n // never call joinRoom in readyStateChange event subscription.\n // call joinRoom after init() callback if you want to joinRoom instantly.\n SkylinkDemo.on(\"readyStateChange\", function (state, room) {\n   console.log(\"Room (\" + room + \") state: \", room);\n })\n\n // always remember to call init()\n SkylinkDemo.init(\"YOUR_APP_KEY_HERE\", function (error, success) {\n   // do a check for error or success\n   if (error) {\n     console.error(\"Init failed: \", error);\n   } else {\n     SkylinkDemo.joinRoom(\"my_room\", {\n       userData: \"My Username\",\n       audio: true,\n       video: true\n     });\n   }\n });"
@@ -194,7 +194,7 @@
     "classitems": [
         {
             "file": "source/template/header.js",
-            "line": 181,
+            "line": 194,
             "description": "The current version of Skylink Web SDK.",
             "itemtype": "attribute",
             "name": "VERSION",
@@ -205,7 +205,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 191,
+            "line": 204,
             "description": "Helper function that generates an Unique ID (UUID) string.",
             "itemtype": "method",
             "name": "generateUUID",
@@ -1511,7 +1511,7 @@
         {
             "file": "source/data-transfer.js",
             "line": 1288,
-            "description": "Starts a data transfer with Peers using the DataChannel connections with\n  [Blob](https://developer.mozilla.org/en/docs/Web/API/Blob datas).\n- This feature requires DataChannel connections to be enabled, and hence if\n  you have configure <code>enableDataChannel</code> set to <code>false</code> in\n  the <a href=\"#method_init\">init()</a>, this functionality would not work.\n- This method will open a new DataChannel connection for every transfer, which enabl\n  however if you are connecting with the mobile application built with our mobile SDKs\n  (<a href=\"http://skylink.io/ios/\">iOS</a> / <a href=\"http://skylink.io/android/\">Android</a>),\n  it will use only one DataChannel which the support\n- If the <a href=\"#event_dataChannelState\">DataChannel connection state</a> for this\n  transfer is\n- You can transfer files using the <code>input</code> [fileupload object](\n  http://www.w3schools.com/jsref/dom_obj_fileupload.asp) and accessing the receiving\n  files using [FileUpload files property](http://www.w3schools.com/jsref/prop_fileupload_files.asp).\n- The [File](https://developer.mozilla.org/en/docs/Web/API/File) object inherits from\n  the Blob interface which is passable in this method as a Blob object.\n- The receiving Peer have the option to accept or reject the data transfer.",
+            "description": "Starts a data transfer with Peers using the DataChannel connections with\n  [Blob](https://developer.mozilla.org/en/docs/Web/API/Blob datas).\n- You can transfer files using the <code>input</code> [fileupload object](\n  http://www.w3schools.com/jsref/dom_obj_fileupload.asp) and accessing the receiving\n  files using [FileUpload files property](http://www.w3schools.com/jsref/prop_fileupload_files.asp).\n- The [File](https://developer.mozilla.org/en/docs/Web/API/File) object inherits from\n  the Blob interface which is passable in this method as a Blob object.\n- The receiving Peers have the option to accept or reject the data transfer with\n  <a href=\"#method_acceptDataTransfer\">acceptDataTransfer()</a>.\n<blockquote>\n<h6>TRIGGER ORDER</h6>\n1a. SELF : Event <a href=\"#event_dataTransferState\">dataTransferState</a> triggers state\n   <code>UPLOAD_STARTED</code> with <code>transferInfo.dataType</code> being <code>\"blob\"</code>.<br>\n1a. SELF : Event <a href=\"#event_incomingDataRequest\">incomingDataRequest</a> will be\n   triggered with <code>isSelf</code> being <code>true</code>\n   and <code>transferInfo.dataType</code> being <code>\"blob\"</code>.<br>\n2a. PEER : Event <a href=\"#event_dataTransferState\">dataTransferState</a> triggers\n   <code>UPLOAD_REQUEST</code> with <code>transferInfo.dataType</code> being <code>\"blob\"</code>.\n  At this point, Peer has to respond to this\n  data transfer request with <a href=\"#method_acceptDataTransfer\">acceptDataTransfer()</a>.<br>\n2b. PEER : Event <a href=\"#event_incomingDataRequest\">incomingDataRequest</a> will be\n   triggered with <code>isSelf</code> being <code>false</code>\n   and <code>transferInfo.dataType</code> being <code>\"blob\"</code>.\n   At this point, Peer has to respond to this\n   data transfer request with <a href=\"#method_acceptDataTransfer\">acceptDataTransfer()</a>.<br>\n<h6>CALLBACK SUCCESS CONDITION</h6>\nTargeted Peers have event <a href=\"#event_dataTransferState\">dataTransferState</a> triggered\n  state <code>UPLOAD_COMPLETED</code> without errors, where states\n  <code>REJECTED</code>, <code>ERROR</code> or <code>CANCEL</code> are triggered.\n</blockquote>",
             "itemtype": "method",
             "name": "sendBlobData",
             "params": [
@@ -1716,7 +1716,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1541,
+            "line": 1554,
             "description": "Starts the actual data transfers with the array of Peers provided\n  and based on the data transfer type to start the DataChannel connection data transfer.",
             "itemtype": "method",
             "name": "_startDataTransfer",
@@ -1951,8 +1951,8 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1869,
-            "description": "Responds to a data transfer request by rejecting or accepting\n  the data transfer request initiated by a Peer.",
+            "line": 1882,
+            "description": "Responds to a data transfer request by a Peer.\n<blockquote>\n<h6>TRIGGER ORDER</h6>\n<em>If <code>accept</code> is <code>true</code>:</em>\n1. SELF : Event <a href=\"#event_dataTransferState\">dataTransferState</a> triggers state\n   <code>DOWNLOAD_STARTED</code>.<br>\n2. PEER : Event <a href=\"#event_dataTransferState\">dataTransferState</a> triggers\n   <code>UPLOADING</code>. This step may be skipped to 4.<br>\n3. PEER : Event <a href=\"#event_dataTransferState\">dataTransferState</a> triggers\n   <code>DOWNLOADING</code>. This step may be skipped to 5.<br>\n<small>Step 2 and 3 may be repeated before step 4</small>\n4a. PEER : Event <a href=\"#event_dataTransferState\">dataTransferState</a> triggers state\n   <code>UPLOAD_COMPLETED</code>.<br>\n4b. PEER : Event <a href=\"#event_incomingData\">incomingData</a> will be triggered with\n   <code>isSelf</code> being <code>true</code>.\n5a. SELF : Event <a href=\"#event_dataTransferState\">dataTransferState</a> triggers state\n   <code>DOWNLOAD_COMPLETED</code>.<br>\n5b. SELF : Event <a href=\"#event_incomingData\">incomingData</a> will be triggered with\n   <code>isSelf</code> being <code>false</code>.\n<br>\n<em>If <code>accept</code> is <code>false</code>:</em>\n1. PEER : Event <a href=\"#event_dataTransferState\">dataTransferState</a> triggers state\n   <code>REJECTED</code>.\n</blockquote>",
             "itemtype": "method",
             "name": "respondBlobRequest",
             "params": [
@@ -1974,7 +1974,7 @@
                     "optdefault": "false"
                 }
             ],
-            "trigger": "incomingData, dataTransferState",
+            "trigger": "dataTransferState, incomingDataRequest, incomingData",
             "component": "DataTransfer",
             "deprecated": true,
             "deprecationMessage": "Use .acceptDataTransfer()",
@@ -1984,8 +1984,8 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1887,
-            "description": "Responds to a data transfer request by rejecting or accepting\n  the data transfer request initiated by a Peer.",
+            "line": 1922,
+            "description": "Responds to a data transfer request by a Peer.\n<blockquote>\n<h6>TRIGGER ORDER</h6>\n<em>If <code>accept</code> is <code>true</code>:</em>\n1. SELF : Event <a href=\"#event_dataTransferState\">dataTransferState</a> triggers state\n   <code>DOWNLOAD_STARTED</code>.<br>\n2. PEER : Event <a href=\"#event_dataTransferState\">dataTransferState</a> triggers\n   <code>UPLOADING</code>. This step may be skipped to 4.<br>\n3. PEER : Event <a href=\"#event_dataTransferState\">dataTransferState</a> triggers\n   <code>DOWNLOADING</code>. This step may be skipped to 5.<br>\n<small>Step 2 and 3 may be repeated before step 4</small>\n4a. PEER : Event <a href=\"#event_dataTransferState\">dataTransferState</a> triggers state\n   <code>UPLOAD_COMPLETED</code>.<br>\n4b. PEER : Event <a href=\"#event_incomingData\">incomingData</a> will be triggered with\n   <code>isSelf</code> being <code>true</code>.\n5a. SELF : Event <a href=\"#event_dataTransferState\">dataTransferState</a> triggers state\n   <code>DOWNLOAD_COMPLETED</code>.<br>\n5b. SELF : Event <a href=\"#event_incomingData\">incomingData</a> will be triggered with\n   <code>isSelf</code> being <code>false</code>.\n<br>\n<em>If <code>accept</code> is <code>false</code>:</em>\n1. PEER : Event <a href=\"#event_dataTransferState\">dataTransferState</a> triggers state\n   <code>REJECTED</code>.\n</blockquote>",
             "itemtype": "method",
             "name": "acceptDataTransfer",
             "params": [
@@ -2007,7 +2007,7 @@
                     "optdefault": "false"
                 }
             ],
-            "trigger": "incomingData, dataTransferState",
+            "trigger": "dataTransferState, incomingDataRequest, incomingData",
             "component": "DataTransfer",
             "partof": "DATA TRANSFER FUNCTIONALITY",
             "since": "0.6.1",
@@ -2015,8 +2015,8 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1976,
-            "description": "Terminates an ongoing DataChannel connection data transfer.",
+            "line": 2033,
+            "description": "Terminates a current data transfer with Peer.\n<blockquote>\n<h6>TRIGGER ORDER</h6>\n1. SELF : Event <a href=\"#event_dataTransferState\">dataTransferState</a> triggers state\n   <code>CANCEL</code>.<br>\n2. PEER : Event <a href=\"#event_dataTransferState\">dataTransferState</a> triggers\n   <code>CANCEL</code>. If there is an exception, <code>ERROR</code> may be triggered.<br>\n</blockquote>",
             "itemtype": "method",
             "name": "cancelBlobTransfer",
             "params": [
@@ -2041,8 +2041,8 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1990,
-            "description": "Terminates an ongoing DataChannel connection data transfer.",
+            "line": 2054,
+            "description": "Terminates a current data transfer with Peer.\n<blockquote>\n<h6>TRIGGER ORDER</h6>\n1. SELF : Event <a href=\"#event_dataTransferState\">dataTransferState</a> triggers state\n   <code>CANCEL</code>.<br>\n2. PEER : Event <a href=\"#event_dataTransferState\">dataTransferState</a> triggers\n   <code>CANCEL</code>. If there is an exception, <code>ERROR</code> may be triggered.<br>\n</blockquote>",
             "itemtype": "method",
             "name": "cancelDataTransfer",
             "params": [
@@ -2065,8 +2065,8 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2078,
-            "description": "Send a message object or string using the DataChannel connection\n  associated with the list of targeted Peers.\nThe maximum size for the message object would be<code>16Kb</code>.<br>\nTo send a string length longer than <code>16kb</code>, please considered\n  to use {{#crossLink \"Skylink/sendURLData:method\"}}sendURLData(){{/crossLink}}\n  to send longer strings (for that instance base64 binary strings are long).\nTo send message objects with platform signaling socket connection, see\n  {{#crossLink \"Skylink/sendMessage:method\"}}sendMessage(){{/crossLink}}.",
+            "line": 2149,
+            "description": "Send a message object or string using the DataChannel connection\n  associated with the list of targeted Peers.\n- The maximum size for the message object would be<code>16Kb</code>.<br>\n- To send a string length longer than <code>16kb</code>, please considered\n  to use {{#crossLink \"Skylink/sendURLData:method\"}}sendURLData(){{/crossLink}}\n  to send longer strings (for that instance base64 binary strings are long).\n- To send message objects with platform signaling socket connection, see\n  {{#crossLink \"Skylink/sendMessage:method\"}}sendMessage(){{/crossLink}}.\n<blockquote>\n<h6>TRIGGER ORDER</h6>\n 1. SELF : Event <a href=\"#event_incomingMessage\">incomingMessage</a> will be triggered with\n   <code>isSelf</code> being <code>true</code> and <code>message.isDataChannel</code> being <code>true</code>.<br>\n 2. PEER : Event <a href=\"#event_incomingMessage\">incomingMessage</a> will be triggered with\n   <code>isSelf</code> being <code>false</code> and <code>message.isDataChannel</code> being <code>true</code>.\n</blockquote>",
             "itemtype": "method",
             "name": "sendP2PMessage",
             "params": [
@@ -2088,12 +2088,13 @@
             "trigger": "incomingMessage",
             "since": "0.5.5",
             "component": "DataTransfer",
+            "partof": "MESSAGING FUNCTIONALITY",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2173,
-            "description": "Starts a [dataURL](https://developer.mozilla.org/en-US/docs/Web/API/FileReader\n  /readAsDataURL) data transfer with Peers using the DataChannel connection.\nThe receiving Peers have the option to accept or reject the data transfer.",
+            "line": 2252,
+            "description": "Starts a [data URI](https://developer.mozilla.org/en-US/docs/Web/API/FileReader\n  /readAsDataURL) transfer with Peers using the DataChannel connection.\n- The receiving Peers have the option to accept or reject the data transfer with\n  <a href=\"#method_acceptDataTransfer\">acceptDataTransfer()</a>.\n<blockquote>\n<h6>TRIGGER ORDER</h6>\n1a. SELF : Event <a href=\"#event_dataTransferState\">dataTransferState</a> triggers state\n   <code>UPLOAD_STARTED</code> with <code>transferInfo.dataType</code> being <code>\"dataURL\"</code>.<br>\n1a. SELF : Event <a href=\"#event_incomingDataRequest\">incomingDataRequest</a> will be\n   triggered with <code>isSelf</code> being <code>true</code> and\n   <code>transferInfo.dataType</code> being <code>\"dataURL\"</code>.<br>\n2a. PEER : Event <a href=\"#event_dataTransferState\">dataTransferState</a> triggers\n   <code>UPLOAD_REQUEST</code>  with <code>transferInfo.dataType</code> being <code>\"dataURL\"</code>.\n   At this point, Peer has to respond to this\n  data transfer request with <a href=\"#method_acceptDataTransfer\">acceptDataTransfer()</a>.<br>\n2b. PEER : Event <a href=\"#event_incomingDataRequest\">incomingDataRequest</a> will be\n   triggered with <code>isSelf</code> being <code>false</code> and\n   <code>transferInfo.dataType</code> being <code>\"dataURL\"</code>.\n   At this point, Peer has to respond to this\n   data transfer request with <a href=\"#method_acceptDataTransfer\">acceptDataTransfer()</a>.<br>\n<h6>CALLBACK SUCCESS CONDITION</h6>\nTargeted Peers have event <a href=\"#event_dataTransferState\">dataTransferState</a> triggered\n  state <code>UPLOAD_COMPLETED</code> without errors, where states\n  <code>REJECTED</code>, <code>ERROR</code> or <code>CANCEL</code> are triggered.\n</blockquote>",
             "itemtype": "method",
             "name": "sendURLData",
             "params": [
@@ -12671,75 +12672,79 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1541"
+            "line": " source/data-transfer.js:1554"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1869"
+            "line": " source/data-transfer.js:1882"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1869"
+            "line": " source/data-transfer.js:1882"
         },
         {
             "message": "unknown tag: partof",
-            "line": " source/data-transfer.js:1869"
+            "line": " source/data-transfer.js:1882"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1887"
+            "line": " source/data-transfer.js:1922"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1887"
+            "line": " source/data-transfer.js:1922"
         },
         {
             "message": "unknown tag: partof",
-            "line": " source/data-transfer.js:1887"
+            "line": " source/data-transfer.js:1922"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1976"
+            "line": " source/data-transfer.js:2033"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1976"
+            "line": " source/data-transfer.js:2033"
         },
         {
             "message": "unknown tag: partof",
-            "line": " source/data-transfer.js:1976"
+            "line": " source/data-transfer.js:2033"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1990"
+            "line": " source/data-transfer.js:2054"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1990"
+            "line": " source/data-transfer.js:2054"
         },
         {
             "message": "unknown tag: partof",
-            "line": " source/data-transfer.js:1990"
+            "line": " source/data-transfer.js:2054"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:2078"
+            "line": " source/data-transfer.js:2149"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:2078"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:2173"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:2173"
+            "line": " source/data-transfer.js:2149"
         },
         {
             "message": "unknown tag: partof",
-            "line": " source/data-transfer.js:2173"
+            "line": " source/data-transfer.js:2149"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/data-transfer.js:2252"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/data-transfer.js:2252"
+        },
+        {
+            "message": "unknown tag: partof",
+            "line": " source/data-transfer.js:2252"
         },
         {
             "message": "unknown tag: component",

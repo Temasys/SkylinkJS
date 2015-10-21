@@ -1371,21 +1371,34 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
 /**
  * Starts a data transfer with Peers using the DataChannel connections with
  *   [Blob](https://developer.mozilla.org/en/docs/Web/API/Blob datas).
- * - This feature requires DataChannel connections to be enabled, and hence if
- *   you have configure &lt;code&gt;enableDataChannel&lt;/code&gt; set to &lt;code&gt;false&lt;/code&gt; in
- *   the &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;, this functionality would not work.
- * - This method will open a new DataChannel connection for every transfer, which enabl
- *   however if you are connecting with the mobile application built with our mobile SDKs
- *   (&lt;a href=&quot;http://skylink.io/ios/&quot;&gt;iOS&lt;/a&gt; / &lt;a href=&quot;http://skylink.io/android/&quot;&gt;Android&lt;/a&gt;),
- *   it will use only one DataChannel which the support
- * - If the &lt;a href=&quot;#event_dataChannelState&quot;&gt;DataChannel connection state&lt;/a&gt; for this
- *   transfer is
  * - You can transfer files using the &lt;code&gt;input&lt;/code&gt; [fileupload object](
  *   http://www.w3schools.com/jsref/dom_obj_fileupload.asp) and accessing the receiving
  *   files using [FileUpload files property](http://www.w3schools.com/jsref/prop_fileupload_files.asp).
  * - The [File](https://developer.mozilla.org/en/docs/Web/API/File) object inherits from
  *   the Blob interface which is passable in this method as a Blob object.
- * - The receiving Peer have the option to accept or reject the data transfer.
+ * - The receiving Peers have the option to accept or reject the data transfer with
+ *   &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;acceptDataTransfer()&lt;/a&gt;.
+ * &lt;blockquote&gt;
+ * &lt;h6&gt;TRIGGER ORDER&lt;/h6&gt;
+ * 1a. SELF : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
+ *    &lt;code&gt;UPLOAD_STARTED&lt;/code&gt; with &lt;code&gt;transferInfo.dataType&lt;/code&gt; being &lt;code&gt;&quot;blob&quot;&lt;/code&gt;.&lt;br&gt;
+ * 1a. SELF : Event &lt;a href=&quot;#event_incomingDataRequest&quot;&gt;incomingDataRequest&lt;/a&gt; will be
+ *    triggered with &lt;code&gt;isSelf&lt;/code&gt; being &lt;code&gt;true&lt;/code&gt;
+ *    and &lt;code&gt;transferInfo.dataType&lt;/code&gt; being &lt;code&gt;&quot;blob&quot;&lt;/code&gt;.&lt;br&gt;
+ * 2a. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers
+ *    &lt;code&gt;UPLOAD_REQUEST&lt;/code&gt; with &lt;code&gt;transferInfo.dataType&lt;/code&gt; being &lt;code&gt;&quot;blob&quot;&lt;/code&gt;.
+ *   At this point, Peer has to respond to this
+ *   data transfer request with &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;acceptDataTransfer()&lt;/a&gt;.&lt;br&gt;
+ * 2b. PEER : Event &lt;a href=&quot;#event_incomingDataRequest&quot;&gt;incomingDataRequest&lt;/a&gt; will be
+ *    triggered with &lt;code&gt;isSelf&lt;/code&gt; being &lt;code&gt;false&lt;/code&gt;
+ *    and &lt;code&gt;transferInfo.dataType&lt;/code&gt; being &lt;code&gt;&quot;blob&quot;&lt;/code&gt;.
+ *    At this point, Peer has to respond to this
+ *    data transfer request with &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;acceptDataTransfer()&lt;/a&gt;.&lt;br&gt;
+ * &lt;h6&gt;CALLBACK SUCCESS CONDITION&lt;/h6&gt;
+ * Targeted Peers have event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggered
+ *   state &lt;code&gt;UPLOAD_COMPLETED&lt;/code&gt; without errors, where states
+ *   &lt;code&gt;REJECTED&lt;/code&gt;, &lt;code&gt;ERROR&lt;/code&gt; or &lt;code&gt;CANCEL&lt;/code&gt; are triggered.
+ * &lt;/blockquote&gt;
  * @method sendBlobData
  * @param {Blob} data The Blob data object to transfer to Peer.
  * @param {Number} [timeout=60] The waiting timeout in seconds that the DataChannel connection
@@ -1950,8 +1963,30 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
 
 
 /**
- * Responds to a data transfer request by rejecting or accepting
- *   the data transfer request initiated by a Peer.
+ * Responds to a data transfer request by a Peer.
+ * &lt;blockquote&gt;
+ * &lt;h6&gt;TRIGGER ORDER&lt;/h6&gt;
+ * &lt;em&gt;If &lt;code&gt;accept&lt;/code&gt; is &lt;code&gt;true&lt;/code&gt;:&lt;/em&gt;
+ * 1. SELF : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
+ *    &lt;code&gt;DOWNLOAD_STARTED&lt;/code&gt;.&lt;br&gt;
+ * 2. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers
+ *    &lt;code&gt;UPLOADING&lt;/code&gt;. This step may be skipped to 4.&lt;br&gt;
+ * 3. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers
+ *    &lt;code&gt;DOWNLOADING&lt;/code&gt;. This step may be skipped to 5.&lt;br&gt;
+ * &lt;small&gt;Step 2 and 3 may be repeated before step 4&lt;/small&gt;
+ * 4a. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
+ *    &lt;code&gt;UPLOAD_COMPLETED&lt;/code&gt;.&lt;br&gt;
+ * 4b. PEER : Event &lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt; will be triggered with
+ *    &lt;code&gt;isSelf&lt;/code&gt; being &lt;code&gt;true&lt;/code&gt;.
+ * 5a. SELF : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
+ *    &lt;code&gt;DOWNLOAD_COMPLETED&lt;/code&gt;.&lt;br&gt;
+ * 5b. SELF : Event &lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt; will be triggered with
+ *    &lt;code&gt;isSelf&lt;/code&gt; being &lt;code&gt;false&lt;/code&gt;.
+ * &lt;br&gt;
+ * &lt;em&gt;If &lt;code&gt;accept&lt;/code&gt; is &lt;code&gt;false&lt;/code&gt;:&lt;/em&gt;
+ * 1. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
+ *    &lt;code&gt;REJECTED&lt;/code&gt;.
+ * &lt;/blockquote&gt;
  * @method respondBlobRequest
  * @param {String} peerId The sender Peer ID.
  * @param {String} transferId The data transfer ID of the data transfer request
@@ -1959,7 +1994,7 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
  * @param {Boolean} [accept=false] The flag that indicates &lt;code&gt;true&lt;/code&gt; as a response
  *   to accept the data transfer and &lt;code&gt;false&lt;/code&gt; as a response to reject the
  *   data transfer request.
- * @trigger incomingData, dataTransferState
+ * @trigger dataTransferState, incomingDataRequest, incomingData
  * @component DataTransfer
  * @deprecated Use .acceptDataTransfer()
  * @partof DATA TRANSFER FUNCTIONALITY
@@ -1968,8 +2003,30 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
  */
 Skylink.prototype.respondBlobRequest =
 /**
- * Responds to a data transfer request by rejecting or accepting
- *   the data transfer request initiated by a Peer.
+ * Responds to a data transfer request by a Peer.
+ * &lt;blockquote&gt;
+ * &lt;h6&gt;TRIGGER ORDER&lt;/h6&gt;
+ * &lt;em&gt;If &lt;code&gt;accept&lt;/code&gt; is &lt;code&gt;true&lt;/code&gt;:&lt;/em&gt;
+ * 1. SELF : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
+ *    &lt;code&gt;DOWNLOAD_STARTED&lt;/code&gt;.&lt;br&gt;
+ * 2. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers
+ *    &lt;code&gt;UPLOADING&lt;/code&gt;. This step may be skipped to 4.&lt;br&gt;
+ * 3. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers
+ *    &lt;code&gt;DOWNLOADING&lt;/code&gt;. This step may be skipped to 5.&lt;br&gt;
+ * &lt;small&gt;Step 2 and 3 may be repeated before step 4&lt;/small&gt;
+ * 4a. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
+ *    &lt;code&gt;UPLOAD_COMPLETED&lt;/code&gt;.&lt;br&gt;
+ * 4b. PEER : Event &lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt; will be triggered with
+ *    &lt;code&gt;isSelf&lt;/code&gt; being &lt;code&gt;true&lt;/code&gt;.
+ * 5a. SELF : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
+ *    &lt;code&gt;DOWNLOAD_COMPLETED&lt;/code&gt;.&lt;br&gt;
+ * 5b. SELF : Event &lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt; will be triggered with
+ *    &lt;code&gt;isSelf&lt;/code&gt; being &lt;code&gt;false&lt;/code&gt;.
+ * &lt;br&gt;
+ * &lt;em&gt;If &lt;code&gt;accept&lt;/code&gt; is &lt;code&gt;false&lt;/code&gt;:&lt;/em&gt;
+ * 1. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
+ *    &lt;code&gt;REJECTED&lt;/code&gt;.
+ * &lt;/blockquote&gt;
  * @method acceptDataTransfer
  * @param {String} peerId The sender Peer ID.
  * @param {String} transferId The data transfer ID of the data transfer request
@@ -1977,7 +2034,7 @@ Skylink.prototype.respondBlobRequest =
  * @param {Boolean} [accept=false] The flag that indicates &lt;code&gt;true&lt;/code&gt; as a response
  *   to accept the data transfer and &lt;code&gt;false&lt;/code&gt; as a response to reject the
  *   data transfer request.
- * @trigger incomingData, dataTransferState
+ * @trigger dataTransferState, incomingDataRequest, incomingData
  * @component DataTransfer
  * @partof DATA TRANSFER FUNCTIONALITY
  * @for Skylink
@@ -2057,7 +2114,14 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
 };
 
 /**
- * Terminates an ongoing DataChannel connection data transfer.
+ * Terminates a current data transfer with Peer.
+ * &lt;blockquote&gt;
+ * &lt;h6&gt;TRIGGER ORDER&lt;/h6&gt;
+ * 1. SELF : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
+ *    &lt;code&gt;CANCEL&lt;/code&gt;.&lt;br&gt;
+ * 2. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers
+ *    &lt;code&gt;CANCEL&lt;/code&gt;. If there is an exception, &lt;code&gt;ERROR&lt;/code&gt; may be triggered.&lt;br&gt;
+ * &lt;/blockquote&gt;
  * @method cancelBlobTransfer
  * @param {String} peerId The Peer ID associated with the data transfer.
  * @param {String} transferId The data transfer ID of the data transfer request
@@ -2071,7 +2135,14 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
  */
 Skylink.prototype.cancelBlobTransfer =
 /**
- * Terminates an ongoing DataChannel connection data transfer.
+ * Terminates a current data transfer with Peer.
+ * &lt;blockquote&gt;
+ * &lt;h6&gt;TRIGGER ORDER&lt;/h6&gt;
+ * 1. SELF : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
+ *    &lt;code&gt;CANCEL&lt;/code&gt;.&lt;br&gt;
+ * 2. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers
+ *    &lt;code&gt;CANCEL&lt;/code&gt;. If there is an exception, &lt;code&gt;ERROR&lt;/code&gt; may be triggered.&lt;br&gt;
+ * &lt;/blockquote&gt;
  * @method cancelDataTransfer
  * @param {String} peerId The Peer ID associated with the data transfer.
  * @param {String} transferId The data transfer ID of the data transfer request
@@ -2161,12 +2232,19 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
 /**
  * Send a message object or string using the DataChannel connection
  *   associated with the list of targeted Peers.
- * The maximum size for the message object would be&lt;code&gt;16Kb&lt;/code&gt;.&lt;br&gt;
- * To send a string length longer than &lt;code&gt;16kb&lt;/code&gt;, please considered
+ * - The maximum size for the message object would be&lt;code&gt;16Kb&lt;/code&gt;.&lt;br&gt;
+ * - To send a string length longer than &lt;code&gt;16kb&lt;/code&gt;, please considered
  *   to use {{#crossLink &quot;Skylink/sendURLData:method&quot;}}sendURLData(){{/crossLink}}
  *   to send longer strings (for that instance base64 binary strings are long).
- * To send message objects with platform signaling socket connection, see
+ * - To send message objects with platform signaling socket connection, see
  *   {{#crossLink &quot;Skylink/sendMessage:method&quot;}}sendMessage(){{/crossLink}}.
+ * &lt;blockquote&gt;
+ * &lt;h6&gt;TRIGGER ORDER&lt;/h6&gt;
+ *  1. SELF : Event &lt;a href=&quot;#event_incomingMessage&quot;&gt;incomingMessage&lt;/a&gt; will be triggered with
+ *    &lt;code&gt;isSelf&lt;/code&gt; being &lt;code&gt;true&lt;/code&gt; and &lt;code&gt;message.isDataChannel&lt;/code&gt; being &lt;code&gt;true&lt;/code&gt;.&lt;br&gt;
+ *  2. PEER : Event &lt;a href=&quot;#event_incomingMessage&quot;&gt;incomingMessage&lt;/a&gt; will be triggered with
+ *    &lt;code&gt;isSelf&lt;/code&gt; being &lt;code&gt;false&lt;/code&gt; and &lt;code&gt;message.isDataChannel&lt;/code&gt; being &lt;code&gt;true&lt;/code&gt;.
+ * &lt;/blockquote&gt;
  * @method sendP2PMessage
  * @param {String|JSON} message The message object.
  * @param {String|Array} [targetPeerId] The array of targeted Peers to
@@ -2181,6 +2259,7 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
  * @trigger incomingMessage
  * @since 0.5.5
  * @component DataTransfer
+ * @partof MESSAGING FUNCTIONALITY
  * @for Skylink
  */
 Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
@@ -2254,9 +2333,31 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
 };
 
 /**
- * Starts a [dataURL](https://developer.mozilla.org/en-US/docs/Web/API/FileReader
- *   /readAsDataURL) data transfer with Peers using the DataChannel connection.
- * The receiving Peers have the option to accept or reject the data transfer.
+ * Starts a [data URI](https://developer.mozilla.org/en-US/docs/Web/API/FileReader
+ *   /readAsDataURL) transfer with Peers using the DataChannel connection.
+ * - The receiving Peers have the option to accept or reject the data transfer with
+ *   &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;acceptDataTransfer()&lt;/a&gt;.
+ * &lt;blockquote&gt;
+ * &lt;h6&gt;TRIGGER ORDER&lt;/h6&gt;
+ * 1a. SELF : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
+ *    &lt;code&gt;UPLOAD_STARTED&lt;/code&gt; with &lt;code&gt;transferInfo.dataType&lt;/code&gt; being &lt;code&gt;&quot;dataURL&quot;&lt;/code&gt;.&lt;br&gt;
+ * 1a. SELF : Event &lt;a href=&quot;#event_incomingDataRequest&quot;&gt;incomingDataRequest&lt;/a&gt; will be
+ *    triggered with &lt;code&gt;isSelf&lt;/code&gt; being &lt;code&gt;true&lt;/code&gt; and
+ *    &lt;code&gt;transferInfo.dataType&lt;/code&gt; being &lt;code&gt;&quot;dataURL&quot;&lt;/code&gt;.&lt;br&gt;
+ * 2a. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers
+ *    &lt;code&gt;UPLOAD_REQUEST&lt;/code&gt;  with &lt;code&gt;transferInfo.dataType&lt;/code&gt; being &lt;code&gt;&quot;dataURL&quot;&lt;/code&gt;.
+ *    At this point, Peer has to respond to this
+ *   data transfer request with &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;acceptDataTransfer()&lt;/a&gt;.&lt;br&gt;
+ * 2b. PEER : Event &lt;a href=&quot;#event_incomingDataRequest&quot;&gt;incomingDataRequest&lt;/a&gt; will be
+ *    triggered with &lt;code&gt;isSelf&lt;/code&gt; being &lt;code&gt;false&lt;/code&gt; and
+ *    &lt;code&gt;transferInfo.dataType&lt;/code&gt; being &lt;code&gt;&quot;dataURL&quot;&lt;/code&gt;.
+ *    At this point, Peer has to respond to this
+ *    data transfer request with &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;acceptDataTransfer()&lt;/a&gt;.&lt;br&gt;
+ * &lt;h6&gt;CALLBACK SUCCESS CONDITION&lt;/h6&gt;
+ * Targeted Peers have event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggered
+ *   state &lt;code&gt;UPLOAD_COMPLETED&lt;/code&gt; without errors, where states
+ *   &lt;code&gt;REJECTED&lt;/code&gt;, &lt;code&gt;ERROR&lt;/code&gt; or &lt;code&gt;CANCEL&lt;/code&gt; are triggered.
+ * &lt;/blockquote&gt;
  * @method sendURLData
  * @param {String} data The dataURL (base64 binary string) string to transfer to Peers.
  * @param {Number} [timeout=60] The waiting timeout in seconds that the DataChannel connection
