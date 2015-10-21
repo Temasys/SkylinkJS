@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.2 - Wed Oct 21 2015 11:09:35 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Wed Oct 21 2015 11:13:59 GMT+0800 (SGT) */
 
 (function() {
 
@@ -12274,7 +12274,8 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
     log.log([null, 'MediaStream', stream.id, 'Local mediastream has ended'], {
       inRoom: self._inRoom,
       currentTime: stream.currentTime,
-      ended: stream.active || stream.ended
+      ended: typeof stream.active === 'boolean' ?
+        stream.active : stream.ended
     });
 
     if (self._inRoom) {

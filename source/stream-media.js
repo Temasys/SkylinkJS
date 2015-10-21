@@ -451,7 +451,8 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
     log.log([null, 'MediaStream', stream.id, 'Local mediastream has ended'], {
       inRoom: self._inRoom,
       currentTime: stream.currentTime,
-      ended: stream.active || stream.ended
+      ended: typeof stream.active === 'boolean' ?
+        stream.active : stream.ended
     });
 
     if (self._inRoom) {
