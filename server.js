@@ -15,10 +15,14 @@ fs.stat('certificates/server.key', function(err, stat) {
         key: fs.readFileSync('certificates/server.key'),
         cert: fs.readFileSync('certificates/server.crt')
       }, app).listen(8082);
-      console.log("Server start @ 8082 (HTTPS)");
+      console.warn("\nNOTE: Running HTTP server has been deprecated as " +
+        "getUserMedia() has been deprecated for HTTP on Chrome 42 and above. " +
+        "Please run demo on HTTPS as recommended\n\n-\n");
+      console.log("HTTP server instance running @ 8081 (deprecated)");
+      console.log("HTTPS server instance running @ 8082");
     } else {
-        console.warn('Server cannot start @ 8082 (HTTPS)'
-        + ' Certificate File error: ' + err.code 
-        + ' for certificates/server.key'); 
+        console.warn("HTTPS server instance failed to start as" +
+        + " certificate failed to load\n" +
+        "Error (for certificates/server.key): " + err.code);
     }
 });
