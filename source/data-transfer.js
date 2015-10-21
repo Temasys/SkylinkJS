@@ -1286,8 +1286,17 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
 };
 
 /**
- * Starts a [Blob](https://developer.mozilla.org/en/docs/Web/API/Blob) data transfer
- *   with Peers using the DataChannel connection.
+ * Starts a data transfer with Peers using the DataChannel connections with
+ *   [Blob](https://developer.mozilla.org/en/docs/Web/API/Blob datas).
+ * - This feature requires DataChannel connections to be enabled, and hence if
+ *   you have configure <code>enableDataChannel</code> set to <code>false</code> in
+ *   the <a href="#method_init">init()</a>, this functionality would not work.
+ * - This method will open a new DataChannel connection for every transfer, which enabl
+ *   however if you are connecting with the mobile application built with our mobile SDKs
+ *   (<a href="http://skylink.io/ios/">iOS</a> / <a href="http://skylink.io/android/">Android</a>),
+ *   it will use only one DataChannel which the support
+ * - If the <a href="#event_dataChannelState">DataChannel connection state</a> for this
+ *   transfer is
  * - You can transfer files using the <code>input</code> [fileupload object](
  *   http://www.w3schools.com/jsref/dom_obj_fileupload.asp) and accessing the receiving
  *   files using [FileUpload files property](http://www.w3schools.com/jsref/prop_fileupload_files.asp).
@@ -1379,6 +1388,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  * @trigger incomingData, incomingDataRequest, dataTransferState, dataChannelState
  * @since 0.5.5
  * @component DataTransfer
+ * @partof DATA TRANSFER FUNCTIONALITY
  * @for Skylink
  */
 Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback) {
@@ -1869,6 +1879,7 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
  * @trigger incomingData, dataTransferState
  * @component DataTransfer
  * @deprecated Use .acceptDataTransfer()
+ * @partof DATA TRANSFER FUNCTIONALITY
  * @for Skylink
  * @since 0.5.0
  */
@@ -1885,6 +1896,7 @@ Skylink.prototype.respondBlobRequest =
  *   data transfer request.
  * @trigger incomingData, dataTransferState
  * @component DataTransfer
+ * @partof DATA TRANSFER FUNCTIONALITY
  * @for Skylink
  * @since 0.6.1
  */
@@ -1970,6 +1982,7 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
  * @trigger dataTransferState
  * @component DataTransfer
  * @deprecated Use .cancelDataTransfer()
+ * @partof DATA TRANSFER FUNCTIONALITY
  * @for Skylink
  * @since 0.5.7
  */
@@ -1982,6 +1995,7 @@ Skylink.prototype.cancelBlobTransfer =
  *   to terminate the request.
  * @trigger dataTransferState
  * @component DataTransfer
+ * @partof DATA TRANSFER FUNCTIONALITY
  * @for Skylink
  * @since 0.6.1
  */
@@ -2241,6 +2255,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
  * @trigger incomingData, incomingDataRequest, dataTransferState, dataChannelState
  * @since 0.6.1
  * @component DataTransfer
+ * @partof DATA TRANSFER FUNCTIONALITY
  * @for Skylink
  */
 Skylink.prototype.sendURLData = function(data, timeout, targetPeerId, callback) {

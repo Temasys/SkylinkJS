@@ -47,6 +47,7 @@
  * @readOnly
  * @since 0.1.0
  * @component ICE
+ * @partof PEER CONNECTION STATUS
  * @for Skylink
  */
 Skylink.prototype.ICE_CONNECTION_STATE = {
@@ -108,6 +109,7 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
  * @readOnly
  * @since 0.5.4
  * @component ICE
+ * @partof CONNECTION CONFIGURATION
  * @for Skylink
  */
 Skylink.prototype.TURN_TRANSPORT = {

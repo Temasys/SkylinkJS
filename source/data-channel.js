@@ -24,6 +24,7 @@
  *   This may happen during any state not after <code>CLOSED</code>.
  * @readOnly
  * @component DataChannel
+ * @partof DATA TRANSFER FUNCTIONALITY | MESSAGING FUNCTIONALITY
  * @for Skylink
  * @since 0.1.0
  */
@@ -58,6 +59,7 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
  *   This connection will be closed once the data transfer has completed or terminated.
  * @readOnly
  * @component DataChannel
+ * @partof DATA TRANSFER FUNCTIONALITY | MESSAGING FUNCTIONALITY
  * @for Skylink
  * @since 0.6.1
  */

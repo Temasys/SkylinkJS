@@ -315,7 +315,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} state The current ICE gathering state.
    *   &lt;small&gt;See the list of available triggered states in the related link.&lt;/small&gt;
    *   [Rel: Skylink.CANDIDATE_GENERATION_STATE]
-   * @param {String} peerId The Peer ID associated with the current ICE gathering state.
+   * @param {String} peerId The Peer ID associated with the connection
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -336,9 +336,9 @@ Skylink.prototype._EVENTS = {
    *   &lt;a href=&quot;#event_iceConnectionState&quot;&gt;iceConnectionState&lt;/a&gt;
    *   &lt;/small&gt;
    * @event peerConnectionState
-   * @param {String} state The Peer connection signaling state.
+   * @param {String} state The current connection signaling state.
    *   [Rel: Skylink.PEER_CONNECTION_STATE]
-   * @param {String} peerId The Peer ID associated with the connection
+   * @param {String} peerId The Peer ID associated with the current connection
    *   signaling state.
    * @component Events
    * @for Skylink
@@ -360,9 +360,9 @@ Skylink.prototype._EVENTS = {
    *   &lt;b&gt;iceConnectionState&lt;/b&gt;
    *   &lt;/small&gt;
    * @event iceConnectionState
-   * @param {String} state The Peer connection ICE connection state.
+   * @param {String} state The current ICE connection state.
    *   [Rel: Skylink.ICE_CONNECTION_STATE]
-   * @param {String} peerId The Peer ID associated with the ICE connection state.
+   * @param {String} peerId The Peer ID associated with the current ICE connection state.
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -1252,9 +1252,9 @@ Skylink.prototype._EVENTS = {
    *   &lt;a href=&quot;#event_peerLeft&quot;&gt;peerLeft&lt;/a&gt;
    *   &lt;/small&gt;
    * @event dataChannelState
-   * @param {String} state The Peer connection DataChannel connection state.
+   * @param {String} state The current DataChannel connection state.
    *   [Rel: Skylink.DATA_CHANNEL_STATE]
-   * @param {String} peerId The Peer ID associated with the DataChannel connection.
+   * @param {String} peerId The Peer ID associated with the current DataChannel connection state.
    * @param {Object} [error=null] The error object thrown when there is a failure in
    *   the DataChannel connection.
    *   If received as &lt;code&gt;null&lt;/code&gt;, it means that there is no errors.

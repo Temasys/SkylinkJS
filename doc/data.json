@@ -255,12 +255,13 @@
             ],
             "readonly": "",
             "component": "DataChannel",
+            "partof": "DATA TRANSFER FUNCTIONALITY | MESSAGING FUNCTIONALITY",
             "since": "0.1.0",
             "class": "Skylink"
         },
         {
             "file": "source/data-channel.js",
-            "line": 38,
+            "line": 39,
             "description": "These are the types of DataChannel connection that Skylink provides.\n- Different channels serves different functionalities.",
             "itemtype": "attribute",
             "name": "DATA_CHANNEL_TYPE",
@@ -279,12 +280,13 @@
             ],
             "readonly": "",
             "component": "DataChannel",
+            "partof": "DATA TRANSFER FUNCTIONALITY | MESSAGING FUNCTIONALITY",
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/data-channel.js",
-            "line": 69,
+            "line": 71,
             "description": "The flag that indicates if Peers connection should have any\n  DataChannel connections.",
             "itemtype": "attribute",
             "name": "_enableDataChannel",
@@ -298,7 +300,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 82,
+            "line": 84,
             "description": "Stores the list of DataChannel connections.",
             "itemtype": "attribute",
             "name": "_dataChannels",
@@ -330,7 +332,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 108,
+            "line": 110,
             "description": "Starts a DataChannel connection with a Peer connection. If the\n  DataChannel is provided in the parameter, it simply appends\n  event handlers to check the current state of the DataChannel.",
             "itemtype": "method",
             "name": "_createDataChannel",
@@ -370,7 +372,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 285,
+            "line": 287,
             "description": "Sends data over the DataChannel connection associated\n   with the Peer connection.\nThe current supported data type is <code>string</code>. <code>Blob</code>,\n  <code>ArrayBuffer</code> types support is not yet currently handled or\n  implemented.",
             "itemtype": "method",
             "name": "_sendDataChannelMessage",
@@ -402,7 +404,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 359,
+            "line": 361,
             "description": "Stops DataChannel connections associated with a Peer connection\n  and remove any object references to the DataChannel connection(s).",
             "itemtype": "method",
             "name": "_closeDataChannel",
@@ -494,12 +496,13 @@
             ],
             "readonly": "",
             "component": "DataProcess",
+            "partof": "DATA TRANSFER FUNCTIONALITY",
             "since": "0.1.0",
             "class": "Skylink"
         },
         {
             "file": "source/data-process.js",
-            "line": 77,
+            "line": 78,
             "description": "Converts a binary string (base64) derived from\n [dataURL conversion](https://developer.mozilla.org/en-US\n  /docs/Web/API/FileReader/readAsDataURL)\n  to a Blob data object.<br>\n<small>Author: devnull69@stackoverflow.com #6850276</small>",
             "itemtype": "method",
             "name": "_base64ToBlob",
@@ -522,7 +525,7 @@
         },
         {
             "file": "source/data-process.js",
-            "line": 103,
+            "line": 104,
             "description": "Converts a Blob data object into a binary string (base64) using\n  [dataURL conversion](https://developer.mozilla.org/en-US\n  /docs/Web/API/FileReader/readAsDataURL)",
             "itemtype": "method",
             "name": "_blobToBase64",
@@ -553,7 +556,7 @@
         },
         {
             "file": "source/data-process.js",
-            "line": 127,
+            "line": 128,
             "description": "Chunks a huge Blob data object into smaller Blob data object chunks\n  based on the chunk sizes provided.\nIf provided Blob data object is smaller than chunk sizes, it will return an array\n  length of <code>1</code> with the Blob data object.",
             "itemtype": "method",
             "name": "_chunkBlobData",
@@ -581,7 +584,7 @@
         },
         {
             "file": "source/data-process.js",
-            "line": 166,
+            "line": 167,
             "description": "Chunks a huge dataURL binary string (base64)\n  into smaller strings based on the chunk length provided.\nIf provided dataURL binary string (base64)\n  is smaller than chunk length, it will return an array\n  length of <code>1</code> with the dataURL string.",
             "itemtype": "method",
             "name": "_chunkDataURL",
@@ -609,7 +612,7 @@
         },
         {
             "file": "source/data-process.js",
-            "line": 208,
+            "line": 209,
             "description": "Assembles the data string chunks of a chunked dataURL\n  binary string (base64) into the original dataURL binary string (base64).",
             "itemtype": "method",
             "name": "_assembleDataURL",
@@ -1508,7 +1511,7 @@
         {
             "file": "source/data-transfer.js",
             "line": 1288,
-            "description": "Starts a [Blob](https://developer.mozilla.org/en/docs/Web/API/Blob) data transfer\n  with Peers using the DataChannel connection.\n- You can transfer files using the <code>input</code> [fileupload object](\n  http://www.w3schools.com/jsref/dom_obj_fileupload.asp) and accessing the receiving\n  files using [FileUpload files property](http://www.w3schools.com/jsref/prop_fileupload_files.asp).\n- The [File](https://developer.mozilla.org/en/docs/Web/API/File) object inherits from\n  the Blob interface which is passable in this method as a Blob object.\n- The receiving Peer have the option to accept or reject the data transfer.",
+            "description": "Starts a data transfer with Peers using the DataChannel connections with\n  [Blob](https://developer.mozilla.org/en/docs/Web/API/Blob datas).\n- This feature requires DataChannel connections to be enabled, and hence if\n  you have configure <code>enableDataChannel</code> set to <code>false</code> in\n  the <a href=\"#method_init\">init()</a>, this functionality would not work.\n- This method will open a new DataChannel connection for every transfer, which enabl\n  however if you are connecting with the mobile application built with our mobile SDKs\n  (<a href=\"http://skylink.io/ios/\">iOS</a> / <a href=\"http://skylink.io/android/\">Android</a>),\n  it will use only one DataChannel which the support\n- If the <a href=\"#event_dataChannelState\">DataChannel connection state</a> for this\n  transfer is\n- You can transfer files using the <code>input</code> [fileupload object](\n  http://www.w3schools.com/jsref/dom_obj_fileupload.asp) and accessing the receiving\n  files using [FileUpload files property](http://www.w3schools.com/jsref/prop_fileupload_files.asp).\n- The [File](https://developer.mozilla.org/en/docs/Web/API/File) object inherits from\n  the Blob interface which is passable in this method as a Blob object.\n- The receiving Peer have the option to accept or reject the data transfer.",
             "itemtype": "method",
             "name": "sendBlobData",
             "params": [
@@ -1708,11 +1711,12 @@
             "trigger": "incomingData, incomingDataRequest, dataTransferState, dataChannelState",
             "since": "0.5.5",
             "component": "DataTransfer",
+            "partof": "DATA TRANSFER FUNCTIONALITY",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1531,
+            "line": 1541,
             "description": "Starts the actual data transfers with the array of Peers provided\n  and based on the data transfer type to start the DataChannel connection data transfer.",
             "itemtype": "method",
             "name": "_startDataTransfer",
@@ -1947,7 +1951,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1859,
+            "line": 1869,
             "description": "Responds to a data transfer request by rejecting or accepting\n  the data transfer request initiated by a Peer.",
             "itemtype": "method",
             "name": "respondBlobRequest",
@@ -1974,12 +1978,13 @@
             "component": "DataTransfer",
             "deprecated": true,
             "deprecationMessage": "Use .acceptDataTransfer()",
+            "partof": "DATA TRANSFER FUNCTIONALITY",
             "since": "0.5.0",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1876,
+            "line": 1887,
             "description": "Responds to a data transfer request by rejecting or accepting\n  the data transfer request initiated by a Peer.",
             "itemtype": "method",
             "name": "acceptDataTransfer",
@@ -2004,12 +2009,13 @@
             ],
             "trigger": "incomingData, dataTransferState",
             "component": "DataTransfer",
+            "partof": "DATA TRANSFER FUNCTIONALITY",
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1964,
+            "line": 1976,
             "description": "Terminates an ongoing DataChannel connection data transfer.",
             "itemtype": "method",
             "name": "cancelBlobTransfer",
@@ -2029,12 +2035,13 @@
             "component": "DataTransfer",
             "deprecated": true,
             "deprecationMessage": "Use .cancelDataTransfer()",
+            "partof": "DATA TRANSFER FUNCTIONALITY",
             "since": "0.5.7",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1977,
+            "line": 1990,
             "description": "Terminates an ongoing DataChannel connection data transfer.",
             "itemtype": "method",
             "name": "cancelDataTransfer",
@@ -2052,12 +2059,13 @@
             ],
             "trigger": "dataTransferState",
             "component": "DataTransfer",
+            "partof": "DATA TRANSFER FUNCTIONALITY",
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2064,
+            "line": 2078,
             "description": "Send a message object or string using the DataChannel connection\n  associated with the list of targeted Peers.\nThe maximum size for the message object would be<code>16Kb</code>.<br>\nTo send a string length longer than <code>16kb</code>, please considered\n  to use {{#crossLink \"Skylink/sendURLData:method\"}}sendURLData(){{/crossLink}}\n  to send longer strings (for that instance base64 binary strings are long).\nTo send message objects with platform signaling socket connection, see\n  {{#crossLink \"Skylink/sendMessage:method\"}}sendMessage(){{/crossLink}}.",
             "itemtype": "method",
             "name": "sendP2PMessage",
@@ -2084,7 +2092,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2159,
+            "line": 2173,
             "description": "Starts a [dataURL](https://developer.mozilla.org/en-US/docs/Web/API/FileReader\n  /readAsDataURL) data transfer with Peers using the DataChannel connection.\nThe receiving Peers have the option to accept or reject the data transfer.",
             "itemtype": "method",
             "name": "sendURLData",
@@ -2285,6 +2293,7 @@
             "trigger": "incomingData, incomingDataRequest, dataTransferState, dataChannelState",
             "since": "0.6.1",
             "component": "DataTransfer",
+            "partof": "DATA TRANSFER FUNCTIONALITY",
             "class": "Skylink"
         },
         {
@@ -2363,11 +2372,12 @@
             "readonly": "",
             "since": "0.4.1",
             "component": "ICE",
+            "partof": "PEER CONNECTION STATUS",
             "class": "Skylink"
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 67,
+            "line": 68,
             "description": "Handles the ICE candidate object received from associated Peer connection\n  to send the ICE candidate object or wait for all gathering to complete\n  before sending the candidate to prevent trickle ICE.",
             "itemtype": "method",
             "name": "_onIceCandidate",
@@ -2392,7 +2402,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 120,
+            "line": 121,
             "description": "Buffers an ICE candidate object associated with a Peer connection\n  to prevent disruption to ICE connection when ICE candidate\n  is received before <code>RTCPeerConnection.setRemoteDescription</code>\n  is called.",
             "itemtype": "method",
             "name": "_addIceCandidateToQueue",
@@ -2416,7 +2426,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 142,
+            "line": 143,
             "description": "Handles the event when adding an ICE candidate has been added\n  successfully. This is mainly to prevent JShint errors.",
             "itemtype": "method",
             "name": "_onAddIceCandidateSuccess",
@@ -2428,7 +2438,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 155,
+            "line": 156,
             "description": "Handles the event when adding an ICE candidate has failed.\nThis is mainly to prevent JShint errors.",
             "itemtype": "method",
             "name": "_onAddIceCandidateFailure",
@@ -2447,7 +2457,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 170,
+            "line": 171,
             "description": "Adds the list of ICE candidates bufferred before <code>RTCPeerConnection.setRemoteDescription\n  </code> is called associated with the Peer connection.",
             "itemtype": "method",
             "name": "_addIceCandidateFromQueue",
@@ -2516,11 +2526,12 @@
             "readonly": "",
             "since": "0.1.0",
             "component": "ICE",
+            "partof": "PEER CONNECTION STATUS",
             "class": "Skylink"
         },
         {
             "file": "source/ice-connection.js",
-            "line": 63,
+            "line": 64,
             "description": "These are the list of available transports that\n  Skylink would use to connect to the TURN servers with.\n- For example as explanation how these options works below, let's take that\n  these are list of TURN servers given by the platform signaling:<br>\n  <small><code>turn:turnurl:123?transport=tcp</code><br>\n  <code>turn:turnurl?transport=udp</code><br>\n  <code>turn:turnurl:1234</code><br>\n  <code>turn:turnurl</code></small>",
             "itemtype": "attribute",
             "name": "TURN_TRANSPORT",
@@ -2555,11 +2566,12 @@
             "readonly": "",
             "since": "0.5.4",
             "component": "ICE",
+            "partof": "CONNECTION CONFIGURATION",
             "class": "Skylink"
         },
         {
             "file": "source/ice-connection.js",
-            "line": 121,
+            "line": 123,
             "description": "The flag that indicates if PeerConnections should enable\n   trickling of ICE to connect the ICE connection.",
             "itemtype": "attribute",
             "name": "_enableIceTrickle",
@@ -2574,7 +2586,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 135,
+            "line": 137,
             "description": "The flag that indicates if PeerConnections ICE gathering\n  should use STUN server connection.",
             "itemtype": "attribute",
             "name": "_enableSTUN",
@@ -2589,7 +2601,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 148,
+            "line": 150,
             "description": "The flag that indicates if PeerConnections ICE gathering\n  should use TURN server connection.\nTampering this flag may disable any successful Peer connection\n  that is behind any firewalls.",
             "itemtype": "attribute",
             "name": "_enableTURN",
@@ -2604,7 +2616,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 163,
+            "line": 165,
             "description": "The flag to enable using of public STUN server connections.",
             "itemtype": "attribute",
             "name": "_usePublicSTUN",
@@ -2619,7 +2631,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 176,
+            "line": 178,
             "description": "Stores the TURN server transport to enable for TURN server connections.\n[Rel: Skylink.TURN_TRANSPORT]",
             "itemtype": "attribute",
             "name": "_TURNTransport",
@@ -2634,7 +2646,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 190,
+            "line": 192,
             "description": "Stores the list of Peer connection ICE connection failures.\nAfter an third attempt of ICE connection failure, the\n  trickling of ICE would be disabled.",
             "itemtype": "attribute",
             "name": "_ICEConnectionFailures",
@@ -2655,7 +2667,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 206,
+            "line": 208,
             "description": "Reconfigures the <code>RTCConfiguration.iceServers</code> that is\n  to be passed in constructing the new <code>RTCPeerConnection</code>\n  object to remove (disable) STUN or remove TURN (disable) server\n  connections based on the\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  configuration passed in.",
             "itemtype": "method",
             "name": "_setIceServers",
@@ -2707,12 +2719,13 @@
             ],
             "readonly": "",
             "component": "Peer",
+            "partof": "PEER CONNECTION STATUS",
             "since": "0.5.0",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 33,
+            "line": 34,
             "description": "These are the types of server Peers that Skylink would connect with.\n- Different server Peers that serves different functionalities.\n- The server Peers functionalities are only available depending on the\n  Application Key configuration.\n- Eventually, this list will be populated as there are more server Peer\n  functionalities provided by the Skylink platform.",
             "itemtype": "attribute",
             "name": "SERVER_PEER_TYPE",
@@ -2726,12 +2739,13 @@
             "type": "JSON",
             "readonly": "",
             "component": "Peer",
+            "partof": "SERVER PEER FUNCTIONALITY",
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 54,
+            "line": 56,
             "description": "Stores the timestamp of the moment when the last Peers connection\n  restarts has happened. Used for the restart Peers connection functionality.",
             "itemtype": "attribute",
             "name": "_lastRestart",
@@ -2745,7 +2759,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 67,
+            "line": 69,
             "description": "Stores the counter of the number of consecutive\n  Peers connection restarts retries.",
             "itemtype": "attribute",
             "name": "_retryCount",
@@ -2759,7 +2773,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 80,
+            "line": 82,
             "description": "Stores the list of Peers connection.",
             "itemtype": "attribute",
             "name": "_peerConnections",
@@ -2780,7 +2794,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 93,
+            "line": 95,
             "description": "Stores the list of Peer connection restart weights received\n  that would be compared against to indicate if Peer connection\n  should initiates a restart from the other connection end should.\nThe one that sends restart later is the one who initiates the restart.",
             "itemtype": "attribute",
             "name": "_peerRestartPriorities",
@@ -2800,7 +2814,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 109,
+            "line": 111,
             "description": "Connects to the Peer.",
             "itemtype": "method",
             "name": "_addPeer",
@@ -2869,7 +2883,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 180,
+            "line": 182,
             "description": "Restarts a Peer connection in a P2P environment.\nThis is usually done for replacing the previous Stream attached and restarting\n  the connection with a new one, or when the ICE connection has issues\n  streaming video/audio stream in the remote Stream which requires\n  a refresh in the ICE connection.",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -2910,7 +2924,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 316,
+            "line": 318,
             "description": "Disconnects the Peer connection and remove object references associated.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -2930,7 +2944,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 374,
+            "line": 376,
             "description": "Creates a Peer connection. This does not start the handshake connection\n  but creates the Peer connection object ready for connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -2960,13 +2974,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 490,
+            "line": 492,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 538,
+            "line": 540,
             "description": "Refreshes a Peer connection.\nThis feature can be used to refresh a Peer connection when the\n  remote Stream received does not stream any audio/video stream.\nIf there are more than 1 refresh during 5 seconds\n  or refresh is less than 3 seconds since the last refresh\n  initiated by the other peer, it will be aborted.\nAs for MCU connection, the restart mechanism makes the self user\n   leave and join the currently connected room again.",
             "itemtype": "method",
             "name": "refreshConnection",
@@ -3030,7 +3044,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 697,
+            "line": 699,
             "description": "Restarts all Peers connection in a MCU connection environment.\nThis would require the current user to leave the room and restart all\n  current existing Peers connection.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -6412,7 +6426,7 @@
                 },
                 {
                     "name": "peerId",
-                    "description": "The Peer ID associated with the current ICE gathering state.",
+                    "description": "The Peer ID associated with the connection",
                     "type": "String"
                 }
             ],
@@ -6429,12 +6443,12 @@
             "params": [
                 {
                     "name": "state",
-                    "description": "The Peer connection signaling state.\n  [Rel: Skylink.PEER_CONNECTION_STATE]",
+                    "description": "The current connection signaling state.\n  [Rel: Skylink.PEER_CONNECTION_STATE]",
                     "type": "String"
                 },
                 {
                     "name": "peerId",
-                    "description": "The Peer ID associated with the connection\n  signaling state.",
+                    "description": "The Peer ID associated with the current connection\n  signaling state.",
                     "type": "String"
                 }
             ],
@@ -6451,12 +6465,12 @@
             "params": [
                 {
                     "name": "state",
-                    "description": "The Peer connection ICE connection state.\n  [Rel: Skylink.ICE_CONNECTION_STATE]",
+                    "description": "The current ICE connection state.\n  [Rel: Skylink.ICE_CONNECTION_STATE]",
                     "type": "String"
                 },
                 {
                     "name": "peerId",
-                    "description": "The Peer ID associated with the ICE connection state.",
+                    "description": "The Peer ID associated with the current ICE connection state.",
                     "type": "String"
                 }
             ],
@@ -7885,12 +7899,12 @@
             "params": [
                 {
                     "name": "state",
-                    "description": "The Peer connection DataChannel connection state.\n  [Rel: Skylink.DATA_CHANNEL_STATE]",
+                    "description": "The current DataChannel connection state.\n  [Rel: Skylink.DATA_CHANNEL_STATE]",
                     "type": "String"
                 },
                 {
                     "name": "peerId",
-                    "description": "The Peer ID associated with the DataChannel connection.",
+                    "description": "The Peer ID associated with the current DataChannel connection state.",
                     "type": "String"
                 },
                 {
@@ -12456,40 +12470,48 @@
             "line": " source/data-channel.js:1"
         },
         {
-            "message": "unknown tag: component",
-            "line": " source/data-channel.js:38"
+            "message": "unknown tag: partof",
+            "line": " source/data-channel.js:1"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:69"
+            "line": " source/data-channel.js:39"
+        },
+        {
+            "message": "unknown tag: partof",
+            "line": " source/data-channel.js:39"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:82"
+            "line": " source/data-channel.js:71"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/data-channel.js:84"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-channel.js:108"
+            "line": " source/data-channel.js:110"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:108"
+            "line": " source/data-channel.js:110"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-channel.js:285"
+            "line": " source/data-channel.js:287"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:285"
+            "line": " source/data-channel.js:287"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-channel.js:359"
+            "line": " source/data-channel.js:361"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:359"
+            "line": " source/data-channel.js:361"
         },
         {
             "message": "unknown tag: component",
@@ -12508,24 +12530,28 @@
             "line": " source/data-process.js:48"
         },
         {
-            "message": "unknown tag: component",
-            "line": " source/data-process.js:77"
+            "message": "unknown tag: partof",
+            "line": " source/data-process.js:48"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-process.js:103"
+            "line": " source/data-process.js:78"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-process.js:127"
+            "line": " source/data-process.js:104"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-process.js:166"
+            "line": " source/data-process.js:128"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-process.js:208"
+            "line": " source/data-process.js:167"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/data-process.js:209"
         },
         {
             "message": "unknown tag: component",
@@ -12640,56 +12666,80 @@
             "line": " source/data-transfer.js:1288"
         },
         {
+            "message": "unknown tag: partof",
+            "line": " source/data-transfer.js:1288"
+        },
+        {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1531"
+            "line": " source/data-transfer.js:1541"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1859"
+            "line": " source/data-transfer.js:1869"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1859"
+            "line": " source/data-transfer.js:1869"
+        },
+        {
+            "message": "unknown tag: partof",
+            "line": " source/data-transfer.js:1869"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1876"
+            "line": " source/data-transfer.js:1887"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1876"
+            "line": " source/data-transfer.js:1887"
+        },
+        {
+            "message": "unknown tag: partof",
+            "line": " source/data-transfer.js:1887"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1964"
+            "line": " source/data-transfer.js:1976"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1964"
+            "line": " source/data-transfer.js:1976"
+        },
+        {
+            "message": "unknown tag: partof",
+            "line": " source/data-transfer.js:1976"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1977"
+            "line": " source/data-transfer.js:1990"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1977"
+            "line": " source/data-transfer.js:1990"
+        },
+        {
+            "message": "unknown tag: partof",
+            "line": " source/data-transfer.js:1990"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:2064"
+            "line": " source/data-transfer.js:2078"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:2064"
+            "line": " source/data-transfer.js:2078"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:2159"
+            "line": " source/data-transfer.js:2173"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:2159"
+            "line": " source/data-transfer.js:2173"
+        },
+        {
+            "message": "unknown tag: partof",
+            "line": " source/data-transfer.js:2173"
         },
         {
             "message": "unknown tag: component",
@@ -12704,120 +12754,140 @@
             "line": " source/ice-candidate.js:41"
         },
         {
+            "message": "unknown tag: partof",
+            "line": " source/ice-candidate.js:41"
+        },
+        {
             "message": "unknown tag: trigger",
-            "line": " source/ice-candidate.js:67"
+            "line": " source/ice-candidate.js:68"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:67"
+            "line": " source/ice-candidate.js:68"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:120"
+            "line": " source/ice-candidate.js:121"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:142"
+            "line": " source/ice-candidate.js:143"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:155"
+            "line": " source/ice-candidate.js:156"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:170"
+            "line": " source/ice-candidate.js:171"
         },
         {
             "message": "unknown tag: component",
             "line": " source/ice-connection.js:1"
         },
         {
-            "message": "unknown tag: component",
-            "line": " source/ice-connection.js:63"
+            "message": "unknown tag: partof",
+            "line": " source/ice-connection.js:1"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:121"
+            "line": " source/ice-connection.js:64"
+        },
+        {
+            "message": "unknown tag: partof",
+            "line": " source/ice-connection.js:64"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:135"
+            "line": " source/ice-connection.js:123"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:148"
+            "line": " source/ice-connection.js:137"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:163"
+            "line": " source/ice-connection.js:150"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:176"
+            "line": " source/ice-connection.js:165"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:190"
+            "line": " source/ice-connection.js:178"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:206"
+            "line": " source/ice-connection.js:192"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/ice-connection.js:208"
         },
         {
             "message": "unknown tag: component",
             "line": " source/peer-connection.js:1"
         },
         {
-            "message": "unknown tag: component",
-            "line": " source/peer-connection.js:33"
+            "message": "unknown tag: partof",
+            "line": " source/peer-connection.js:1"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:54"
+            "line": " source/peer-connection.js:34"
+        },
+        {
+            "message": "unknown tag: partof",
+            "line": " source/peer-connection.js:34"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:67"
+            "line": " source/peer-connection.js:56"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:80"
+            "line": " source/peer-connection.js:69"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:109"
+            "line": " source/peer-connection.js:82"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:180"
+            "line": " source/peer-connection.js:111"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/peer-connection.js:182"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:316"
+            "line": " source/peer-connection.js:318"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:316"
+            "line": " source/peer-connection.js:318"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:374"
+            "line": " source/peer-connection.js:376"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:538"
+            "line": " source/peer-connection.js:540"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:538"
+            "line": " source/peer-connection.js:540"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:697"
+            "line": " source/peer-connection.js:699"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:697"
+            "line": " source/peer-connection.js:699"
         },
         {
             "message": "unknown tag: component",
@@ -13925,7 +13995,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:490"
+            "line": " source/peer-connection.js:492"
         }
     ]
 }

@@ -56,6 +56,7 @@ Skylink.prototype._peerIceTrickleDisabled = {};
  * @readOnly
  * @since 0.4.1
  * @component ICE
+ * @partof PEER CONNECTION STATUS
  * @for Skylink
  */
 Skylink.prototype.CANDIDATE_GENERATION_STATE = {

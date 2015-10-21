@@ -20,6 +20,7 @@
  * This state occurs when connection with Peer has been closed, usually when Peer leaves the room.
  * @readOnly
  * @component Peer
+ * @partof PEER CONNECTION STATUS
  * @for Skylink
  * @since 0.5.0
  */
@@ -43,6 +44,7 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
  * @type JSON
  * @readOnly
  * @component Peer
+ * @partof SERVER PEER FUNCTIONALITY
  * @for Skylink
  * @since 0.6.1
  */
