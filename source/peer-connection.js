@@ -544,29 +544,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
  *   initiated by the other peer, it will be aborted.
  * - As for MCU connection, the restart mechanism makes the self user
  *    leave and join the currently connected room again.
- * <blockquote>
- * <h6>TRIGGER ORDER</h6>
- * <em>If MCU is enabled:</em>
- * 1. PEER : Event <a href="#event_peerRestart">peerRestart</a> triggers state
- *    <code>DOWNLOAD_STARTED</code>.<br>
- * 2. SELF : Event <a href="#event_dataTransferState">dataTransferState</a> triggers
- *    <code>UPLOADING</code>. This step may be skipped to 4.<br>
- * 3. PEER : Event <a href="#event_dataTransferState">dataTransferState</a> triggers
- *    <code>DOWNLOADING</code>. This step may be skipped to 5.<br>
- * <small>Step 2 and 3 may be repeated before step 4</small>
- * 4a. PEER : Event <a href="#event_dataTransferState">dataTransferState</a> triggers state
- *    <code>UPLOAD_COMPLETED</code>.<br>
- * 4b. PEER : Event <a href="#event_incomingData">incomingData</a> will be triggered with
- *    <code>isSelf</code> being <code>true</code>.
- * 5a. SELF : Event <a href="#event_dataTransferState">dataTransferState</a> triggers state
- *    <code>DOWNLOAD_COMPLETED</code>.<br>
- * 5b. SELF : Event <a href="#event_incomingData">incomingData</a> will be triggered with
- *    <code>isSelf</code> being <code>false</code>.
- * <br>
- * <em>Else:</em>
- * 1. PEER : Event <a href="#event_dataTransferState">dataTransferState</a> triggers state
- *    <code>REJECTED</code>.
- * </blockquote>
  * @method refreshConnection
  * @param {String|Array} [targetPeerId] The array of targeted Peers connection to refresh
  *   the connection with.
