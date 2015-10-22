@@ -289,7 +289,9 @@ h3 code {
   color: #000;
 }
 blockquote {
-  padding: 0 35px 10px!important;
+  padding: 0!important;
+  border: 0!important;
+  margin: 28px;
   font-size: 1em;
 }
 
@@ -297,17 +299,58 @@ blockquote em {
   margin: 10px 0 5px;
   display: block;
   font-size: .9em;
-  margin-left: -10px;
-}
-
-blockquote small {
-  margin: 3px 0;
-  margin-left: 15px;
+  margin-left: -18px;
+  font-style: normal;
+  opacity: .85;
 }
 
 blockquote h6 {
   font-weight: 600;
-  margin-left: -20px;
+  margin-left: -28px;
+}
+
+blockquote ol {
+  padding: 0;
+  list-style-position: inside;
+  font-size: .9em;
+}
+
+blockquote ol li {
+  margin: 5px 0;
+}
+
+blockquote ol li span {
+  padding: 1px 5px;
+  border: solid 1px #888;
+  border-radius: 5px;
+  font-size: .8em;
+  margin-left: 17px;
+  margin-top: 5px;
+  display: inline-block;
+}
+
+blockquote ol li span:first-child {
+  margin-left: 5px;
+  margin-top: 0;
+}
+
+blockquote ol li small {
+  margin: 3px 0;
+  margin-left: 23px;
+  font-size: .9em;
+}
+
+blockquote ol li section {
+  display: block;
+  margin: 10px 0 10px;
+  margin-left: 25px;
+  font-size: .9em;
+  font-style: normal;
+  color: #888;
+}
+
+blockquote ol li section ul {
+  padding: 0;
 }
 
 blockquote:before,

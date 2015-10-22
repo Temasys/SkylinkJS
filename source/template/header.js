@@ -120,19 +120,6 @@ var clone = function (obj) {
  *
  * For tips on using skylink and troubleshooting you can visit
  *   [our support portal](http://support.temasys.com.sg/support/solutions/folders/5000267498).
- * <hr>
- * <h5>DATA TRANSFER FUNCTIONALITY REQUIREMENTS</h5>
- * - Requires DataChannel connections to be enabled, and hence if
- *   you have configure <code>enableDataChannel</code> set to <code>false</code> in
- *   the <a href="#method_init">init()</a>, this functionality would not work.
- * - New DataChannel connection will be opened for every transfer, which
- *   however if you are connecting with the mobile application built with our mobile SDKs
- *   (<a href="http://skylink.io/ios/">iOS</a> / <a href="http://skylink.io/android/">Android</a>),
- *   it will use only one DataChannel (<code>channelType</code> being <code>DATA_CHANNEL_TYPE.MESSAGING</code>)
- *   which only allows one data transfer at a time.
- * - If the <a href="#event_dataChannelState">DataChannel connection state</a> for this
- *   transfer is not <code>OPEN</code>, the data transfer will not proceed and if caught
- *   with an exception, transfers will fail.
  * @class Skylink
  * @constructor
  * @example

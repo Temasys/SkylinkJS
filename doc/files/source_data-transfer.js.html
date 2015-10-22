@@ -1378,26 +1378,68 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  *   the Blob interface which is passable in this method as a Blob object.
  * - The receiving Peers have the option to accept or reject the data transfer with
  *   &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;acceptDataTransfer()&lt;/a&gt;.
+ * - For Peers connecting from our mobile platforms
+ *   (&lt;a href=&quot;http://skylink.io/ios/&quot;&gt;iOS&lt;/a&gt; / &lt;a href=&quot;http://skylink.io/android/&quot;&gt;Android&lt;/a&gt;),
+ *   the DataChannel connection channel type would be &lt;code&gt;DATA_CHANNEL_TYPE.MESSAGING&lt;/code&gt;.&lt;br&gt;
+ *   For Peers connecting from the Web platform, the DataChannel connection channel type would be
+ *  &lt;code&gt;DATA_CHANNEL_TYPE.DATA&lt;/code&gt;.
  * &lt;blockquote&gt;
  * &lt;h6&gt;TRIGGER ORDER&lt;/h6&gt;
- * 1a. SELF : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
- *    &lt;code&gt;UPLOAD_STARTED&lt;/code&gt; with &lt;code&gt;transferInfo.dataType&lt;/code&gt; being &lt;code&gt;&quot;blob&quot;&lt;/code&gt;.&lt;br&gt;
- * 1a. SELF : Event &lt;a href=&quot;#event_incomingDataRequest&quot;&gt;incomingDataRequest&lt;/a&gt; will be
- *    triggered with &lt;code&gt;isSelf&lt;/code&gt; being &lt;code&gt;true&lt;/code&gt;
- *    and &lt;code&gt;transferInfo.dataType&lt;/code&gt; being &lt;code&gt;&quot;blob&quot;&lt;/code&gt;.&lt;br&gt;
- * 2a. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers
- *    &lt;code&gt;UPLOAD_REQUEST&lt;/code&gt; with &lt;code&gt;transferInfo.dataType&lt;/code&gt; being &lt;code&gt;&quot;blob&quot;&lt;/code&gt;.
- *   At this point, Peer has to respond to this
- *   data transfer request with &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;acceptDataTransfer()&lt;/a&gt;.&lt;br&gt;
- * 2b. PEER : Event &lt;a href=&quot;#event_incomingDataRequest&quot;&gt;incomingDataRequest&lt;/a&gt; will be
- *    triggered with &lt;code&gt;isSelf&lt;/code&gt; being &lt;code&gt;false&lt;/code&gt;
- *    and &lt;code&gt;transferInfo.dataType&lt;/code&gt; being &lt;code&gt;&quot;blob&quot;&lt;/code&gt;.
- *    At this point, Peer has to respond to this
- *    data transfer request with &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;acceptDataTransfer()&lt;/a&gt;.&lt;br&gt;
- * &lt;h6&gt;CALLBACK SUCCESS CONDITION&lt;/h6&gt;
- * Targeted Peers have event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggered
- *   state &lt;code&gt;UPLOAD_COMPLETED&lt;/code&gt; without errors, where states
- *   &lt;code&gt;REJECTED&lt;/code&gt;, &lt;code&gt;ERROR&lt;/code&gt; or &lt;code&gt;CANCEL&lt;/code&gt; are triggered.
+ * &lt;ol&gt;
+ * &lt;li&gt;&lt;span&gt;SELF&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.UPLOAD_STARTED&lt;/code&gt;&lt;/li&gt;
+ *     &lt;li&gt;&lt;code&gt;transferInfo.dataType&lt;/code&gt; as &lt;code&gt;&quot;blob&quot;&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;span&gt;SELF&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_incomingDataRequest&quot;&gt;incomingDataRequest&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *    &lt;li&gt;&lt;code&gt;isSelf&lt;/code&gt; as &lt;code&gt;true&lt;/code&gt;&lt;/li&gt;
+ *    &lt;li&gt;&lt;code&gt;transferInfo.dataType&lt;/code&gt; as &lt;code&gt;&quot;blob&quot;&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;/li&gt;
+ * &lt;li&gt;&lt;span&gt;PEER&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *    &lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.UPLOAD_REQUEST&lt;/code&gt;&lt;/li&gt;
+ *    &lt;li&gt;&lt;code&gt;transferInfo.dataType&lt;/code&gt; as &lt;code&gt;&quot;blob&quot;&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;span&gt;PEER&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_incomingDataRequest&quot;&gt;incomingDataRequest&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;isSelf&lt;/code&gt; as &lt;code&gt;false&lt;/code&gt;&lt;/li&gt;
+ *     &lt;li&gt;&lt;code&gt;transferInfo.dataType&lt;/code&gt; as &lt;code&gt;&quot;blob&quot;&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;small&gt;At this point, Peer has to respond to this
+ *    data transfer request with &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;acceptDataTransfer()&lt;/a&gt;. From there
+ *    subsequently, the rest of the data transfer steps will follow, with
+ *    payload &lt;code&gt;transferInfo.dataType&lt;/code&gt; as &lt;code&gt;&quot;blob&quot;&lt;/code&gt;&lt;/small&gt;
+ * &lt;/li&gt;
+ * &lt;/ol&gt;
+ * &lt;h6&gt;CALLBACK CONDITION&lt;/h6&gt;
+ * &lt;em&gt;Callback &lt;code&gt;success&lt;/code&gt;:&lt;/em&gt;
+ * &lt;ol&gt;
+ * &lt;li&gt;Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; has been triggered with
+ *   payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.UPLOAD_COMPLETED&lt;/code&gt;
+ *   for all targeted Peers.&lt;/li&gt;
+ * &lt;/ol&gt;
+ * &lt;em&gt;Callback &lt;code&gt;error&lt;/code&gt;:&lt;/em&gt;
+ * &lt;ol&gt;
+ * &lt;li&gt;&lt;code&gt;enableDataChannel&lt;/code&gt; was configured as &lt;code&gt;false&lt;/code&gt; in &lt;a href=&quot;#method_init&quot;&gt;init() settings&lt;/a&gt;.&lt;/li&gt;
+ * &lt;li&gt;Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; was triggered with
+ *   with payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.REJECTED&lt;/code&gt;,
+ *   &lt;code&gt;DATA_TRANSFER_STATE.ERROR&lt;/code&gt; or &lt;code&gt;DATA_TRANSFER_STATE.CANCEL&lt;/code&gt;
+ *   with a Peer.&lt;/li&gt;
+ * &lt;/ol&gt;
  * &lt;/blockquote&gt;
  * @method sendBlobData
  * @param {Blob} data The Blob data object to transfer to Peer.
@@ -1966,26 +2008,76 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
  * Responds to a data transfer request by a Peer.
  * &lt;blockquote&gt;
  * &lt;h6&gt;TRIGGER ORDER&lt;/h6&gt;
- * &lt;em&gt;If &lt;code&gt;accept&lt;/code&gt; is &lt;code&gt;true&lt;/code&gt;:&lt;/em&gt;
- * 1. SELF : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
- *    &lt;code&gt;DOWNLOAD_STARTED&lt;/code&gt;.&lt;br&gt;
- * 2. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers
- *    &lt;code&gt;UPLOADING&lt;/code&gt;. This step may be skipped to 4.&lt;br&gt;
- * 3. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers
- *    &lt;code&gt;DOWNLOADING&lt;/code&gt;. This step may be skipped to 5.&lt;br&gt;
- * &lt;small&gt;Step 2 and 3 may be repeated before step 4&lt;/small&gt;
- * 4a. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
- *    &lt;code&gt;UPLOAD_COMPLETED&lt;/code&gt;.&lt;br&gt;
- * 4b. PEER : Event &lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt; will be triggered with
- *    &lt;code&gt;isSelf&lt;/code&gt; being &lt;code&gt;true&lt;/code&gt;.
- * 5a. SELF : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
- *    &lt;code&gt;DOWNLOAD_COMPLETED&lt;/code&gt;.&lt;br&gt;
- * 5b. SELF : Event &lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt; will be triggered with
- *    &lt;code&gt;isSelf&lt;/code&gt; being &lt;code&gt;false&lt;/code&gt;.
- * &lt;br&gt;
- * &lt;em&gt;If &lt;code&gt;accept&lt;/code&gt; is &lt;code&gt;false&lt;/code&gt;:&lt;/em&gt;
- * 1. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
- *    &lt;code&gt;REJECTED&lt;/code&gt;.
+ * &lt;em&gt;&amp;#8627; If &lt;code&gt;accept&lt;/code&gt; is &lt;code&gt;true&lt;/code&gt;:&lt;/em&gt;
+ * &lt;ol&gt;
+ * &lt;li&gt;&lt;span&gt;SELF&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.DOWNLOAD_STARTED&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;/li&gt;
+ * &lt;li&gt;&lt;span&gt;PEER&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;&lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.UPLOADING&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;small&gt;&amp;#8603; This step may be skipped to 4.&lt;/small&gt;
+ * &lt;/li&gt;
+ * &lt;li&gt;&lt;span&gt;PEER&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.DOWNLOADING&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;small&gt;&amp;#8603; This step may be skipped to 5.&lt;/small&gt;
+ * &lt;small&gt;&amp;#8635; Step 2 and 3 may be repeated before step 4&lt;/small&gt;
+ * &lt;/li&gt;
+ * &lt;li&gt;&lt;span&gt;PEER&lt;/span&gt; &amp;#8594;  Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.UPLOAD_COMPlETED&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;span&gt;PEER&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;isSelf&lt;/code&gt; as &lt;code&gt;true&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;/li&gt;
+ * &lt;li&gt;&lt;span&gt;SELF&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;span&gt;SELF&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;isSelf&lt;/code&gt; as &lt;code&gt;false&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;/li&gt;
+ * &lt;/ol&gt;
+ * &lt;em&gt;&amp;#8627; Else &lt;code&gt;accept&lt;/code&gt; is &lt;code&gt;false&lt;/code&gt;:&lt;/em&gt;
+ * &lt;ol&gt;
+ * &lt;li&gt;&lt;span&gt;PEER&lt;/span&gt; &amp;#8594;  Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.REJECTED&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;/li&gt;
+ * &lt;/ol&gt;
  * &lt;/blockquote&gt;
  * @method respondBlobRequest
  * @param {String} peerId The sender Peer ID.
@@ -2006,26 +2098,76 @@ Skylink.prototype.respondBlobRequest =
  * Responds to a data transfer request by a Peer.
  * &lt;blockquote&gt;
  * &lt;h6&gt;TRIGGER ORDER&lt;/h6&gt;
- * &lt;em&gt;If &lt;code&gt;accept&lt;/code&gt; is &lt;code&gt;true&lt;/code&gt;:&lt;/em&gt;
- * 1. SELF : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
- *    &lt;code&gt;DOWNLOAD_STARTED&lt;/code&gt;.&lt;br&gt;
- * 2. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers
- *    &lt;code&gt;UPLOADING&lt;/code&gt;. This step may be skipped to 4.&lt;br&gt;
- * 3. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers
- *    &lt;code&gt;DOWNLOADING&lt;/code&gt;. This step may be skipped to 5.&lt;br&gt;
- * &lt;small&gt;Step 2 and 3 may be repeated before step 4&lt;/small&gt;
- * 4a. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
- *    &lt;code&gt;UPLOAD_COMPLETED&lt;/code&gt;.&lt;br&gt;
- * 4b. PEER : Event &lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt; will be triggered with
- *    &lt;code&gt;isSelf&lt;/code&gt; being &lt;code&gt;true&lt;/code&gt;.
- * 5a. SELF : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
- *    &lt;code&gt;DOWNLOAD_COMPLETED&lt;/code&gt;.&lt;br&gt;
- * 5b. SELF : Event &lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt; will be triggered with
- *    &lt;code&gt;isSelf&lt;/code&gt; being &lt;code&gt;false&lt;/code&gt;.
- * &lt;br&gt;
- * &lt;em&gt;If &lt;code&gt;accept&lt;/code&gt; is &lt;code&gt;false&lt;/code&gt;:&lt;/em&gt;
- * 1. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
- *    &lt;code&gt;REJECTED&lt;/code&gt;.
+ * &lt;em&gt;&amp;#8627; If &lt;code&gt;accept&lt;/code&gt; is &lt;code&gt;true&lt;/code&gt;:&lt;/em&gt;
+ * &lt;ol&gt;
+ * &lt;li&gt;&lt;span&gt;SELF&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.DOWNLOAD_STARTED&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;/li&gt;
+ * &lt;li&gt;&lt;span&gt;PEER&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;&lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.UPLOADING&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;small&gt;&amp;#8603; This step may be skipped to 4.&lt;/small&gt;
+ * &lt;/li&gt;
+ * &lt;li&gt;&lt;span&gt;PEER&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.DOWNLOADING&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;small&gt;&amp;#8603; This step may be skipped to 5.&lt;/small&gt;
+ * &lt;small&gt;&amp;#8635; Step 2 and 3 may be repeated before step 4&lt;/small&gt;
+ * &lt;/li&gt;
+ * &lt;li&gt;&lt;span&gt;PEER&lt;/span&gt; &amp;#8594;  Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.UPLOAD_COMPlETED&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;span&gt;PEER&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;isSelf&lt;/code&gt; as &lt;code&gt;true&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;/li&gt;
+ * &lt;li&gt;&lt;span&gt;SELF&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;span&gt;SELF&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;isSelf&lt;/code&gt; as &lt;code&gt;false&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;/li&gt;
+ * &lt;/ol&gt;
+ * &lt;em&gt;&amp;#8627; Else &lt;code&gt;accept&lt;/code&gt; is &lt;code&gt;false&lt;/code&gt;:&lt;/em&gt;
+ * &lt;ol&gt;
+ * &lt;li&gt;&lt;span&gt;PEER&lt;/span&gt; &amp;#8594;  Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.REJECTED&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;/li&gt;
+ * &lt;/ol&gt;
  * &lt;/blockquote&gt;
  * @method acceptDataTransfer
  * @param {String} peerId The sender Peer ID.
@@ -2117,10 +2259,33 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
  * Terminates a current data transfer with Peer.
  * &lt;blockquote&gt;
  * &lt;h6&gt;TRIGGER ORDER&lt;/h6&gt;
- * 1. SELF : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
- *    &lt;code&gt;CANCEL&lt;/code&gt;.&lt;br&gt;
- * 2. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers
- *    &lt;code&gt;CANCEL&lt;/code&gt;. If there is an exception, &lt;code&gt;ERROR&lt;/code&gt; may be triggered.&lt;br&gt;
+ * &lt;ol&gt;
+ * &lt;li&gt;&lt;span&gt;SELF&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *    &lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.CANCEL&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;/li&gt;
+ * &lt;li&gt;&lt;span&gt;PEER&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.ERROR&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;small&gt;&amp;#8603; This step may be skipped to 3 if there is no exception whilst termination.&lt;/small&gt;
+ * &lt;/li&gt;
+ * &lt;li&gt;&lt;span&gt;PEER&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.CANCEL&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;/li&gt;
+ * &lt;/ol&gt;
  * &lt;/blockquote&gt;
  * @method cancelBlobTransfer
  * @param {String} peerId The Peer ID associated with the data transfer.
@@ -2138,10 +2303,33 @@ Skylink.prototype.cancelBlobTransfer =
  * Terminates a current data transfer with Peer.
  * &lt;blockquote&gt;
  * &lt;h6&gt;TRIGGER ORDER&lt;/h6&gt;
- * 1. SELF : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
- *    &lt;code&gt;CANCEL&lt;/code&gt;.&lt;br&gt;
- * 2. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers
- *    &lt;code&gt;CANCEL&lt;/code&gt;. If there is an exception, &lt;code&gt;ERROR&lt;/code&gt; may be triggered.&lt;br&gt;
+ * &lt;ol&gt;
+ * &lt;li&gt;&lt;span&gt;SELF&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *    &lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.CANCEL&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;/li&gt;
+ * &lt;li&gt;&lt;span&gt;PEER&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.ERROR&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;small&gt;&amp;#8603; This step may be skipped to 3 if there is no exception whilst termination.&lt;/small&gt;
+ * &lt;/li&gt;
+ * &lt;li&gt;&lt;span&gt;PEER&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.CANCEL&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;/li&gt;
+ * &lt;/ol&gt;
  * &lt;/blockquote&gt;
  * @method cancelDataTransfer
  * @param {String} peerId The Peer ID associated with the data transfer.
@@ -2337,26 +2525,68 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
  *   /readAsDataURL) transfer with Peers using the DataChannel connection.
  * - The receiving Peers have the option to accept or reject the data transfer with
  *   &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;acceptDataTransfer()&lt;/a&gt;.
+ * - For Peers connecting from our mobile platforms
+ *   (&lt;a href=&quot;http://skylink.io/ios/&quot;&gt;iOS&lt;/a&gt; / &lt;a href=&quot;http://skylink.io/android/&quot;&gt;Android&lt;/a&gt;),
+ *   the DataChannel connection channel type would be &lt;code&gt;DATA_CHANNEL_TYPE.MESSAGING&lt;/code&gt;.&lt;br&gt;
+ *   For Peers connecting from the Web platform, the DataChannel connection channel type would be
+ *  &lt;code&gt;DATA_CHANNEL_TYPE.DATA&lt;/code&gt;.
  * &lt;blockquote&gt;
  * &lt;h6&gt;TRIGGER ORDER&lt;/h6&gt;
- * 1a. SELF : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
- *    &lt;code&gt;UPLOAD_STARTED&lt;/code&gt; with &lt;code&gt;transferInfo.dataType&lt;/code&gt; being &lt;code&gt;&quot;dataURL&quot;&lt;/code&gt;.&lt;br&gt;
- * 1a. SELF : Event &lt;a href=&quot;#event_incomingDataRequest&quot;&gt;incomingDataRequest&lt;/a&gt; will be
- *    triggered with &lt;code&gt;isSelf&lt;/code&gt; being &lt;code&gt;true&lt;/code&gt; and
- *    &lt;code&gt;transferInfo.dataType&lt;/code&gt; being &lt;code&gt;&quot;dataURL&quot;&lt;/code&gt;.&lt;br&gt;
- * 2a. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers
- *    &lt;code&gt;UPLOAD_REQUEST&lt;/code&gt;  with &lt;code&gt;transferInfo.dataType&lt;/code&gt; being &lt;code&gt;&quot;dataURL&quot;&lt;/code&gt;.
- *    At this point, Peer has to respond to this
- *   data transfer request with &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;acceptDataTransfer()&lt;/a&gt;.&lt;br&gt;
- * 2b. PEER : Event &lt;a href=&quot;#event_incomingDataRequest&quot;&gt;incomingDataRequest&lt;/a&gt; will be
- *    triggered with &lt;code&gt;isSelf&lt;/code&gt; being &lt;code&gt;false&lt;/code&gt; and
- *    &lt;code&gt;transferInfo.dataType&lt;/code&gt; being &lt;code&gt;&quot;dataURL&quot;&lt;/code&gt;.
- *    At this point, Peer has to respond to this
- *    data transfer request with &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;acceptDataTransfer()&lt;/a&gt;.&lt;br&gt;
- * &lt;h6&gt;CALLBACK SUCCESS CONDITION&lt;/h6&gt;
- * Targeted Peers have event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggered
- *   state &lt;code&gt;UPLOAD_COMPLETED&lt;/code&gt; without errors, where states
- *   &lt;code&gt;REJECTED&lt;/code&gt;, &lt;code&gt;ERROR&lt;/code&gt; or &lt;code&gt;CANCEL&lt;/code&gt; are triggered.
+ * &lt;ol&gt;
+ * &lt;li&gt;&lt;span&gt;SELF&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.UPLOAD_STARTED&lt;/code&gt;&lt;/li&gt;
+ *     &lt;li&gt;&lt;code&gt;transferInfo.dataType&lt;/code&gt; as &lt;code&gt;&quot;dataURL&quot;&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;span&gt;SELF&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_incomingDataRequest&quot;&gt;incomingDataRequest&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *    &lt;li&gt;&lt;code&gt;isSelf&lt;/code&gt; as &lt;code&gt;true&lt;/code&gt;&lt;/li&gt;
+ *    &lt;li&gt;&lt;code&gt;transferInfo.dataType&lt;/code&gt; as &lt;code&gt;&quot;dataURL&quot;&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;/li&gt;
+ * &lt;li&gt;&lt;span&gt;PEER&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *    &lt;li&gt;&lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.UPLOAD_REQUEST&lt;/code&gt;&lt;/li&gt;
+ *    &lt;li&gt;&lt;code&gt;transferInfo.dataType&lt;/code&gt; as &lt;code&gt;&quot;dataURL&quot;&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;span&gt;PEER&lt;/span&gt; &amp;#8594; Event &lt;a href=&quot;#event_incomingDataRequest&quot;&gt;incomingDataRequest&lt;/a&gt; triggers.
+ * &lt;section&gt;
+ *   Payload:
+ *   &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;isSelf&lt;/code&gt; as &lt;code&gt;false&lt;/code&gt;&lt;/li&gt;
+ *     &lt;li&gt;&lt;code&gt;transferInfo.dataType&lt;/code&gt; as &lt;code&gt;&quot;dataURL&quot;&lt;/code&gt;&lt;/li&gt;
+ *   &lt;/ul&gt;
+ * &lt;/section&gt;
+ * &lt;small&gt;At this point, Peer has to respond to this
+ *    data transfer request with &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;acceptDataTransfer()&lt;/a&gt;. From there
+ *    subsequently, the rest of the data transfer steps will follow, with
+ *    payload &lt;code&gt;transferInfo.dataType&lt;/code&gt; as &lt;code&gt;&quot;dataURL&quot;&lt;/code&gt;&lt;/small&gt;
+ * &lt;/li&gt;
+ * &lt;/ol&gt;
+ * &lt;h6&gt;CALLBACK CONDITION&lt;/h6&gt;
+ * &lt;em&gt;Callback &lt;code&gt;success&lt;/code&gt;:&lt;/em&gt;
+ * &lt;ol&gt;
+ * &lt;li&gt;Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; has been triggered with
+ *   payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.UPLOAD_COMPLETED&lt;/code&gt;
+ *   for all targeted Peers.&lt;/li&gt;
+ * &lt;/ol&gt;
+ * &lt;em&gt;Callback &lt;code&gt;error&lt;/code&gt;:&lt;/em&gt;
+ * &lt;ol&gt;
+ * &lt;li&gt;&lt;code&gt;enableDataChannel&lt;/code&gt; was configured as &lt;code&gt;false&lt;/code&gt; in &lt;a href=&quot;#method_init&quot;&gt;init() settings&lt;/a&gt;.&lt;/li&gt;
+ * &lt;li&gt;Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; was triggered with
+ *   with payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DATA_TRANSFER_STATE.REJECTED&lt;/code&gt;,
+ *   &lt;code&gt;DATA_TRANSFER_STATE.ERROR&lt;/code&gt; or &lt;code&gt;DATA_TRANSFER_STATE.CANCEL&lt;/code&gt;
+ *   with a Peer.&lt;/li&gt;
+ * &lt;/ol&gt;
  * &lt;/blockquote&gt;
  * @method sendURLData
  * @param {String} data The dataURL (base64 binary string) string to transfer to Peers.

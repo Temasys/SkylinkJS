@@ -622,13 +622,36 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 
 /**
  * Refreshes a Peer connection.
- * This feature can be used to refresh a Peer connection when the
+ * - This feature can be used to refresh a Peer connection when the
  *   remote Stream received does not stream any audio/video stream.
- * If there are more than 1 refresh during 5 seconds
+ * - If there are more than 1 refresh during 5 seconds
  *   or refresh is less than 3 seconds since the last refresh
  *   initiated by the other peer, it will be aborted.
- * As for MCU connection, the restart mechanism makes the self user
+ * - As for MCU connection, the restart mechanism makes the self user
  *    leave and join the currently connected room again.
+ * &lt;blockquote&gt;
+ * &lt;h6&gt;TRIGGER ORDER&lt;/h6&gt;
+ * &lt;em&gt;If MCU is enabled:&lt;/em&gt;
+ * 1. PEER : Event &lt;a href=&quot;#event_peerRestart&quot;&gt;peerRestart&lt;/a&gt; triggers state
+ *    &lt;code&gt;DOWNLOAD_STARTED&lt;/code&gt;.&lt;br&gt;
+ * 2. SELF : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers
+ *    &lt;code&gt;UPLOADING&lt;/code&gt;. This step may be skipped to 4.&lt;br&gt;
+ * 3. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers
+ *    &lt;code&gt;DOWNLOADING&lt;/code&gt;. This step may be skipped to 5.&lt;br&gt;
+ * &lt;small&gt;Step 2 and 3 may be repeated before step 4&lt;/small&gt;
+ * 4a. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
+ *    &lt;code&gt;UPLOAD_COMPLETED&lt;/code&gt;.&lt;br&gt;
+ * 4b. PEER : Event &lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt; will be triggered with
+ *    &lt;code&gt;isSelf&lt;/code&gt; being &lt;code&gt;true&lt;/code&gt;.
+ * 5a. SELF : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
+ *    &lt;code&gt;DOWNLOAD_COMPLETED&lt;/code&gt;.&lt;br&gt;
+ * 5b. SELF : Event &lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt; will be triggered with
+ *    &lt;code&gt;isSelf&lt;/code&gt; being &lt;code&gt;false&lt;/code&gt;.
+ * &lt;br&gt;
+ * &lt;em&gt;Else:&lt;/em&gt;
+ * 1. PEER : Event &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; triggers state
+ *    &lt;code&gt;REJECTED&lt;/code&gt;.
+ * &lt;/blockquote&gt;
  * @method refreshConnection
  * @param {String|Array} [targetPeerId] The array of targeted Peers connection to refresh
  *   the connection with.

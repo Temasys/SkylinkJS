@@ -15103,7 +15103,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l699"><code>source&#x2F;peer-connection.js:699</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l722"><code>source&#x2F;peer-connection.js:722</code></a>
       </small>
     
 
@@ -17220,7 +17220,7 @@ Setting the bandwidth flags may not
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1554"><code>source&#x2F;data-transfer.js:1554</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1596"><code>source&#x2F;data-transfer.js:1596</code></a>
       </small>
     
 
@@ -20926,7 +20926,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1922"><code>source&#x2F;data-transfer.js:1922</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l2014"><code>source&#x2F;data-transfer.js:2014</code></a>
       </small>
     
 
@@ -20945,26 +20945,76 @@ This will stop any currently attached Stream object to Skylink.</p>
     <p>Responds to a data transfer request by a Peer.</p>
 <blockquote>
 <h6>TRIGGER ORDER</h6>
-<em>If <code>accept</code> is <code>true</code>:</em>
-1. SELF : Event <a href="#event_dataTransferState">dataTransferState</a> triggers state
-   <code>DOWNLOAD_STARTED</code>.<br>
-2. PEER : Event <a href="#event_dataTransferState">dataTransferState</a> triggers
-   <code>UPLOADING</code>. This step may be skipped to 4.<br>
-3. PEER : Event <a href="#event_dataTransferState">dataTransferState</a> triggers
-   <code>DOWNLOADING</code>. This step may be skipped to 5.<br>
-<small>Step 2 and 3 may be repeated before step 4</small>
-4a. PEER : Event <a href="#event_dataTransferState">dataTransferState</a> triggers state
-   <code>UPLOAD_COMPLETED</code>.<br>
-4b. PEER : Event <a href="#event_incomingData">incomingData</a> will be triggered with
-   <code>isSelf</code> being <code>true</code>.
-5a. SELF : Event <a href="#event_dataTransferState">dataTransferState</a> triggers state
-   <code>DOWNLOAD_COMPLETED</code>.<br>
-5b. SELF : Event <a href="#event_incomingData">incomingData</a> will be triggered with
-   <code>isSelf</code> being <code>false</code>.
-<br>
-<em>If <code>accept</code> is <code>false</code>:</em>
-1. PEER : Event <a href="#event_dataTransferState">dataTransferState</a> triggers state
-   <code>REJECTED</code>.
+<em>&#8627; If <code>accept</code> is <code>true</code>:</em>
+<ol>
+<li><span>SELF</span> &#8594; Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+  Payload:
+  <ul>
+    <li><code>state</code> as <code>DATA_TRANSFER_STATE.DOWNLOAD_STARTED</code></li>
+  </ul>
+</section>
+</li>
+<li><span>PEER</span> &#8594; Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+  Payload:
+  <ul><li><code>state</code> as <code>DATA_TRANSFER_STATE.UPLOADING</code></li>
+  </ul>
+</section>
+<small>&#8603; This step may be skipped to 4.</small>
+</li>
+<li><span>PEER</span> &#8594; Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+  Payload:
+  <ul>
+    <li><code>state</code> as <code>DATA_TRANSFER_STATE.DOWNLOADING</code></li>
+  </ul>
+</section>
+<small>&#8603; This step may be skipped to 5.</small>
+<small>&#8635; Step 2 and 3 may be repeated before step 4</small>
+</li>
+<li><span>PEER</span> &#8594;  Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+  Payload:
+  <ul>
+    <li><code>state</code> as <code>DATA_TRANSFER_STATE.UPLOAD_COMPlETED</code></li>
+  </ul>
+</section>
+<span>PEER</span> &#8594; Event <a href="#event_incomingData">incomingData</a> triggers.
+<section>
+  Payload:
+  <ul>
+    <li><code>isSelf</code> as <code>true</code></li>
+  </ul>
+</section>
+</li>
+<li><span>SELF</span> &#8594; Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+  Payload:
+  <ul>
+    <li><code>state</code> as <code>DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED</code></li>
+  </ul>
+</section>
+<span>SELF</span> &#8594; Event <a href="#event_incomingData">incomingData</a> triggers.
+<section>
+  Payload:
+  <ul>
+    <li><code>isSelf</code> as <code>false</code></li>
+  </ul>
+</section>
+</li>
+</ol>
+<em>&#8627; Else <code>accept</code> is <code>false</code>:</em>
+<ol>
+<li><span>PEER</span> &#8594;  Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+  Payload:
+  <ul>
+    <li><code>state</code> as <code>DATA_TRANSFER_STATE.REJECTED</code></li>
+  </ul>
+</section>
+</li>
+</ol>
 </blockquote>
   </div>
 
@@ -21105,7 +21155,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l2033"><code>source&#x2F;data-transfer.js:2033</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l2175"><code>source&#x2F;data-transfer.js:2175</code></a>
       </small>
     
 
@@ -21124,10 +21174,33 @@ This will stop any currently attached Stream object to Skylink.</p>
     <p>Terminates a current data transfer with Peer.</p>
 <blockquote>
 <h6>TRIGGER ORDER</h6>
-1. SELF : Event <a href="#event_dataTransferState">dataTransferState</a> triggers state
-   <code>CANCEL</code>.<br>
-2. PEER : Event <a href="#event_dataTransferState">dataTransferState</a> triggers
-   <code>CANCEL</code>. If there is an exception, <code>ERROR</code> may be triggered.<br>
+<ol>
+<li><span>SELF</span> &#8594; Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+  Payload:
+  <ul>
+   <li><code>state</code> as <code>DATA_TRANSFER_STATE.CANCEL</code></li>
+  </ul>
+</section>
+</li>
+<li><span>PEER</span> &#8594; Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+  Payload:
+  <ul>
+    <li><code>state</code> as <code>DATA_TRANSFER_STATE.ERROR</code></li>
+  </ul>
+</section>
+<small>&#8603; This step may be skipped to 3 if there is no exception whilst termination.</small>
+</li>
+<li><span>PEER</span> &#8594; Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+  Payload:
+  <ul>
+    <li><code>state</code> as <code>DATA_TRANSFER_STATE.CANCEL</code></li>
+  </ul>
+</section>
+</li>
+</ol>
 </blockquote>
   </div>
 
@@ -21246,7 +21319,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l2054"><code>source&#x2F;data-transfer.js:2054</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l2219"><code>source&#x2F;data-transfer.js:2219</code></a>
       </small>
     
 
@@ -21265,10 +21338,33 @@ This will stop any currently attached Stream object to Skylink.</p>
     <p>Terminates a current data transfer with Peer.</p>
 <blockquote>
 <h6>TRIGGER ORDER</h6>
-1. SELF : Event <a href="#event_dataTransferState">dataTransferState</a> triggers state
-   <code>CANCEL</code>.<br>
-2. PEER : Event <a href="#event_dataTransferState">dataTransferState</a> triggers
-   <code>CANCEL</code>. If there is an exception, <code>ERROR</code> may be triggered.<br>
+<ol>
+<li><span>SELF</span> &#8594; Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+  Payload:
+  <ul>
+   <li><code>state</code> as <code>DATA_TRANSFER_STATE.CANCEL</code></li>
+  </ul>
+</section>
+</li>
+<li><span>PEER</span> &#8594; Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+  Payload:
+  <ul>
+    <li><code>state</code> as <code>DATA_TRANSFER_STATE.ERROR</code></li>
+  </ul>
+</section>
+<small>&#8603; This step may be skipped to 3 if there is no exception whilst termination.</small>
+</li>
+<li><span>PEER</span> &#8594; Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+  Payload:
+  <ul>
+    <li><code>state</code> as <code>DATA_TRANSFER_STATE.CANCEL</code></li>
+  </ul>
+</section>
+</li>
+</ol>
 </blockquote>
   </div>
 
@@ -25779,14 +25875,39 @@ This event handler will always be triggered when the event name is triggered. If
   </div>
 
   <div class="code-item-description">
-    <p>Refreshes a Peer connection.
-This feature can be used to refresh a Peer connection when the
-  remote Stream received does not stream any audio/video stream.
-If there are more than 1 refresh during 5 seconds
-  or refresh is less than 3 seconds since the last refresh
-  initiated by the other peer, it will be aborted.
-As for MCU connection, the restart mechanism makes the self user
-   leave and join the currently connected room again.</p>
+    <p>Refreshes a Peer connection.</p>
+<ul>
+<li>This feature can be used to refresh a Peer connection when the
+remote Stream received does not stream any audio/video stream.</li>
+<li>If there are more than 1 refresh during 5 seconds
+or refresh is less than 3 seconds since the last refresh
+initiated by the other peer, it will be aborted.</li>
+<li>As for MCU connection, the restart mechanism makes the self user
+ leave and join the currently connected room again.
+<blockquote>
+<h6>TRIGGER ORDER</h6>
+<em>If MCU is enabled:</em></li>
+<li>PEER : Event <a href="#event_peerRestart">peerRestart</a> triggers state
+<code>DOWNLOAD_STARTED</code>.<br></li>
+<li>SELF : Event <a href="#event_dataTransferState">dataTransferState</a> triggers
+<code>UPLOADING</code>. This step may be skipped to 4.<br></li>
+<li>PEER : Event <a href="#event_dataTransferState">dataTransferState</a> triggers
+<code>DOWNLOADING</code>. This step may be skipped to 5.<br>
+<small>Step 2 and 3 may be repeated before step 4</small>
+4a. PEER : Event <a href="#event_dataTransferState">dataTransferState</a> triggers state
+<code>UPLOAD_COMPLETED</code>.<br>
+4b. PEER : Event <a href="#event_incomingData">incomingData</a> will be triggered with
+<code>isSelf</code> being <code>true</code>.
+5a. SELF : Event <a href="#event_dataTransferState">dataTransferState</a> triggers state
+<code>DOWNLOAD_COMPLETED</code>.<br>
+5b. SELF : Event <a href="#event_incomingData">incomingData</a> will be triggered with
+<code>isSelf</code> being <code>false</code>.
+<br>
+<em>Else:</em></li>
+<li>PEER : Event <a href="#event_dataTransferState">dataTransferState</a> triggers state
+<code>REJECTED</code>.
+</blockquote></li>
+</ul>
 
   </div>
 
@@ -26031,7 +26152,7 @@ As for MCU connection, the restart mechanism makes the self user
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1882"><code>source&#x2F;data-transfer.js:1882</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1924"><code>source&#x2F;data-transfer.js:1924</code></a>
       </small>
     
 
@@ -26050,26 +26171,76 @@ As for MCU connection, the restart mechanism makes the self user
     <p>Responds to a data transfer request by a Peer.</p>
 <blockquote>
 <h6>TRIGGER ORDER</h6>
-<em>If <code>accept</code> is <code>true</code>:</em>
-1. SELF : Event <a href="#event_dataTransferState">dataTransferState</a> triggers state
-   <code>DOWNLOAD_STARTED</code>.<br>
-2. PEER : Event <a href="#event_dataTransferState">dataTransferState</a> triggers
-   <code>UPLOADING</code>. This step may be skipped to 4.<br>
-3. PEER : Event <a href="#event_dataTransferState">dataTransferState</a> triggers
-   <code>DOWNLOADING</code>. This step may be skipped to 5.<br>
-<small>Step 2 and 3 may be repeated before step 4</small>
-4a. PEER : Event <a href="#event_dataTransferState">dataTransferState</a> triggers state
-   <code>UPLOAD_COMPLETED</code>.<br>
-4b. PEER : Event <a href="#event_incomingData">incomingData</a> will be triggered with
-   <code>isSelf</code> being <code>true</code>.
-5a. SELF : Event <a href="#event_dataTransferState">dataTransferState</a> triggers state
-   <code>DOWNLOAD_COMPLETED</code>.<br>
-5b. SELF : Event <a href="#event_incomingData">incomingData</a> will be triggered with
-   <code>isSelf</code> being <code>false</code>.
-<br>
-<em>If <code>accept</code> is <code>false</code>:</em>
-1. PEER : Event <a href="#event_dataTransferState">dataTransferState</a> triggers state
-   <code>REJECTED</code>.
+<em>&#8627; If <code>accept</code> is <code>true</code>:</em>
+<ol>
+<li><span>SELF</span> &#8594; Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+  Payload:
+  <ul>
+    <li><code>state</code> as <code>DATA_TRANSFER_STATE.DOWNLOAD_STARTED</code></li>
+  </ul>
+</section>
+</li>
+<li><span>PEER</span> &#8594; Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+  Payload:
+  <ul><li><code>state</code> as <code>DATA_TRANSFER_STATE.UPLOADING</code></li>
+  </ul>
+</section>
+<small>&#8603; This step may be skipped to 4.</small>
+</li>
+<li><span>PEER</span> &#8594; Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+  Payload:
+  <ul>
+    <li><code>state</code> as <code>DATA_TRANSFER_STATE.DOWNLOADING</code></li>
+  </ul>
+</section>
+<small>&#8603; This step may be skipped to 5.</small>
+<small>&#8635; Step 2 and 3 may be repeated before step 4</small>
+</li>
+<li><span>PEER</span> &#8594;  Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+  Payload:
+  <ul>
+    <li><code>state</code> as <code>DATA_TRANSFER_STATE.UPLOAD_COMPlETED</code></li>
+  </ul>
+</section>
+<span>PEER</span> &#8594; Event <a href="#event_incomingData">incomingData</a> triggers.
+<section>
+  Payload:
+  <ul>
+    <li><code>isSelf</code> as <code>true</code></li>
+  </ul>
+</section>
+</li>
+<li><span>SELF</span> &#8594; Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+  Payload:
+  <ul>
+    <li><code>state</code> as <code>DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED</code></li>
+  </ul>
+</section>
+<span>SELF</span> &#8594; Event <a href="#event_incomingData">incomingData</a> triggers.
+<section>
+  Payload:
+  <ul>
+    <li><code>isSelf</code> as <code>false</code></li>
+  </ul>
+</section>
+</li>
+</ol>
+<em>&#8627; Else <code>accept</code> is <code>false</code>:</em>
+<ol>
+<li><span>PEER</span> &#8594;  Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+  Payload:
+  <ul>
+    <li><code>state</code> as <code>DATA_TRANSFER_STATE.REJECTED</code></li>
+  </ul>
+</section>
+</li>
+</ol>
 </blockquote>
   </div>
 
@@ -26240,26 +26411,68 @@ files using <a href="http://www.w3schools.com/jsref/prop_fileupload_files.asp">F
 <li>The <a href="https://developer.mozilla.org/en/docs/Web/API/File">File</a> object inherits from
 the Blob interface which is passable in this method as a Blob object.</li>
 <li>The receiving Peers have the option to accept or reject the data transfer with
-<a href="#method_acceptDataTransfer">acceptDataTransfer()</a>.<blockquote>
+<a href="#method_acceptDataTransfer">acceptDataTransfer()</a>.</li>
+<li>For Peers connecting from our mobile platforms
+(<a href="http://skylink.io/ios/">iOS</a> / <a href="http://skylink.io/android/">Android</a>),
+the DataChannel connection channel type would be <code>DATA_CHANNEL_TYPE.MESSAGING</code>.<br>
+For Peers connecting from the Web platform, the DataChannel connection channel type would be
+<code>DATA_CHANNEL_TYPE.DATA</code>.<blockquote>
 <h6>TRIGGER ORDER</h6>
-1a. SELF : Event <a href="#event_dataTransferState">dataTransferState</a> triggers state
- <code>UPLOAD_STARTED</code> with <code>transferInfo.dataType</code> being <code>&quot;blob&quot;</code>.<br>
-1a. SELF : Event <a href="#event_incomingDataRequest">incomingDataRequest</a> will be
- triggered with <code>isSelf</code> being <code>true</code>
- and <code>transferInfo.dataType</code> being <code>&quot;blob&quot;</code>.<br>
-2a. PEER : Event <a href="#event_dataTransferState">dataTransferState</a> triggers
- <code>UPLOAD_REQUEST</code> with <code>transferInfo.dataType</code> being <code>&quot;blob&quot;</code>.
-At this point, Peer has to respond to this
-data transfer request with <a href="#method_acceptDataTransfer">acceptDataTransfer()</a>.<br>
-2b. PEER : Event <a href="#event_incomingDataRequest">incomingDataRequest</a> will be
- triggered with <code>isSelf</code> being <code>false</code>
- and <code>transferInfo.dataType</code> being <code>&quot;blob&quot;</code>.
- At this point, Peer has to respond to this
- data transfer request with <a href="#method_acceptDataTransfer">acceptDataTransfer()</a>.<br>
-<h6>CALLBACK SUCCESS CONDITION</h6>
-Targeted Peers have event <a href="#event_dataTransferState">dataTransferState</a> triggered
-state <code>UPLOAD_COMPLETED</code> without errors, where states
-<code>REJECTED</code>, <code>ERROR</code> or <code>CANCEL</code> are triggered.
+<ol>
+<li><span>SELF</span> &#8594; Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+Payload:
+<ul>
+  <li><code>state</code> as <code>DATA_TRANSFER_STATE.UPLOAD_STARTED</code></li>
+  <li><code>transferInfo.dataType</code> as <code>&quot;blob&quot;</code>.</li>
+</ul>
+</section>
+<span>SELF</span> &#8594; Event <a href="#event_incomingDataRequest">incomingDataRequest</a> triggers.
+<section>
+Payload:
+<ul>
+ <li><code>isSelf</code> as <code>true</code></li>
+ <li><code>transferInfo.dataType</code> as <code>&quot;blob&quot;</code></li>
+</ul>
+</section>
+</li>
+<li><span>PEER</span> &#8594; Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+Payload:
+<ul>
+ <li><code>state</code> as <code>DATA_TRANSFER_STATE.UPLOAD_REQUEST</code></li>
+ <li><code>transferInfo.dataType</code> as <code>&quot;blob&quot;</code></li>
+</ul>
+</section>
+<span>PEER</span> &#8594; Event <a href="#event_incomingDataRequest">incomingDataRequest</a> triggers.
+<section>
+Payload:
+<ul>
+  <li><code>isSelf</code> as <code>false</code></li>
+  <li><code>transferInfo.dataType</code> as <code>&quot;blob&quot;</code></li>
+</ul>
+</section>
+<small>At this point, Peer has to respond to this
+ data transfer request with <a href="#method_acceptDataTransfer">acceptDataTransfer()</a>. From there
+ subsequently, the rest of the data transfer steps will follow, with
+ payload <code>transferInfo.dataType</code> as <code>&quot;blob&quot;</code></small>
+</li>
+</ol>
+<h6>CALLBACK CONDITION</h6>
+<em>Callback <code>success</code>:</em>
+<ol>
+<li>Event <a href="#event_dataTransferState">dataTransferState</a> has been triggered with
+payload <code>state</code> as <code>DATA_TRANSFER_STATE.UPLOAD_COMPLETED</code>
+for all targeted Peers.</li>
+</ol>
+<em>Callback <code>error</code>:</em>
+<ol>
+<li><code>enableDataChannel</code> was configured as <code>false</code> in <a href="#method_init">init() settings</a>.</li>
+<li>Event <a href="#event_dataTransferState">dataTransferState</a> was triggered with
+with payload <code>state</code> as <code>DATA_TRANSFER_STATE.REJECTED</code>,
+<code>DATA_TRANSFER_STATE.ERROR</code> or <code>DATA_TRANSFER_STATE.CANCEL</code>
+with a Peer.</li>
+</ol>
 </blockquote></li>
 </ul>
 
@@ -27005,7 +27218,7 @@ To send message objects with DataChannel connections, see
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l2149"><code>source&#x2F;data-transfer.js:2149</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l2337"><code>source&#x2F;data-transfer.js:2337</code></a>
       </small>
     
 
@@ -27586,7 +27799,7 @@ Reference <a href="../classes/Skylink.html#method_refreshConnection" class="cros
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l2252"><code>source&#x2F;data-transfer.js:2252</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l2440"><code>source&#x2F;data-transfer.js:2440</code></a>
       </small>
     
 
@@ -27606,26 +27819,68 @@ Reference <a href="../classes/Skylink.html#method_refreshConnection" class="cros
   /readAsDataURL">data URI</a> transfer with Peers using the DataChannel connection.</p>
 <ul>
 <li>The receiving Peers have the option to accept or reject the data transfer with
-<a href="#method_acceptDataTransfer">acceptDataTransfer()</a>.<blockquote>
+<a href="#method_acceptDataTransfer">acceptDataTransfer()</a>.</li>
+<li>For Peers connecting from our mobile platforms
+(<a href="http://skylink.io/ios/">iOS</a> / <a href="http://skylink.io/android/">Android</a>),
+the DataChannel connection channel type would be <code>DATA_CHANNEL_TYPE.MESSAGING</code>.<br>
+For Peers connecting from the Web platform, the DataChannel connection channel type would be
+<code>DATA_CHANNEL_TYPE.DATA</code>.<blockquote>
 <h6>TRIGGER ORDER</h6>
-1a. SELF : Event <a href="#event_dataTransferState">dataTransferState</a> triggers state
- <code>UPLOAD_STARTED</code> with <code>transferInfo.dataType</code> being <code>&quot;dataURL&quot;</code>.<br>
-1a. SELF : Event <a href="#event_incomingDataRequest">incomingDataRequest</a> will be
- triggered with <code>isSelf</code> being <code>true</code> and
- <code>transferInfo.dataType</code> being <code>&quot;dataURL&quot;</code>.<br>
-2a. PEER : Event <a href="#event_dataTransferState">dataTransferState</a> triggers
- <code>UPLOAD_REQUEST</code>  with <code>transferInfo.dataType</code> being <code>&quot;dataURL&quot;</code>.
- At this point, Peer has to respond to this
-data transfer request with <a href="#method_acceptDataTransfer">acceptDataTransfer()</a>.<br>
-2b. PEER : Event <a href="#event_incomingDataRequest">incomingDataRequest</a> will be
- triggered with <code>isSelf</code> being <code>false</code> and
- <code>transferInfo.dataType</code> being <code>&quot;dataURL&quot;</code>.
- At this point, Peer has to respond to this
- data transfer request with <a href="#method_acceptDataTransfer">acceptDataTransfer()</a>.<br>
-<h6>CALLBACK SUCCESS CONDITION</h6>
-Targeted Peers have event <a href="#event_dataTransferState">dataTransferState</a> triggered
-state <code>UPLOAD_COMPLETED</code> without errors, where states
-<code>REJECTED</code>, <code>ERROR</code> or <code>CANCEL</code> are triggered.
+<ol>
+<li><span>SELF</span> &#8594; Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+Payload:
+<ul>
+  <li><code>state</code> as <code>DATA_TRANSFER_STATE.UPLOAD_STARTED</code></li>
+  <li><code>transferInfo.dataType</code> as <code>&quot;dataURL&quot;</code>.</li>
+</ul>
+</section>
+<span>SELF</span> &#8594; Event <a href="#event_incomingDataRequest">incomingDataRequest</a> triggers.
+<section>
+Payload:
+<ul>
+ <li><code>isSelf</code> as <code>true</code></li>
+ <li><code>transferInfo.dataType</code> as <code>&quot;dataURL&quot;</code></li>
+</ul>
+</section>
+</li>
+<li><span>PEER</span> &#8594; Event <a href="#event_dataTransferState">dataTransferState</a> triggers.
+<section>
+Payload:
+<ul>
+ <li><code>state</code> as <code>DATA_TRANSFER_STATE.UPLOAD_REQUEST</code></li>
+ <li><code>transferInfo.dataType</code> as <code>&quot;dataURL&quot;</code></li>
+</ul>
+</section>
+<span>PEER</span> &#8594; Event <a href="#event_incomingDataRequest">incomingDataRequest</a> triggers.
+<section>
+Payload:
+<ul>
+  <li><code>isSelf</code> as <code>false</code></li>
+  <li><code>transferInfo.dataType</code> as <code>&quot;dataURL&quot;</code></li>
+</ul>
+</section>
+<small>At this point, Peer has to respond to this
+ data transfer request with <a href="#method_acceptDataTransfer">acceptDataTransfer()</a>. From there
+ subsequently, the rest of the data transfer steps will follow, with
+ payload <code>transferInfo.dataType</code> as <code>&quot;dataURL&quot;</code></small>
+</li>
+</ol>
+<h6>CALLBACK CONDITION</h6>
+<em>Callback <code>success</code>:</em>
+<ol>
+<li>Event <a href="#event_dataTransferState">dataTransferState</a> has been triggered with
+payload <code>state</code> as <code>DATA_TRANSFER_STATE.UPLOAD_COMPLETED</code>
+for all targeted Peers.</li>
+</ol>
+<em>Callback <code>error</code>:</em>
+<ol>
+<li><code>enableDataChannel</code> was configured as <code>false</code> in <a href="#method_init">init() settings</a>.</li>
+<li>Event <a href="#event_dataTransferState">dataTransferState</a> was triggered with
+with payload <code>state</code> as <code>DATA_TRANSFER_STATE.REJECTED</code>,
+<code>DATA_TRANSFER_STATE.ERROR</code> or <code>DATA_TRANSFER_STATE.CANCEL</code>
+with a Peer.</li>
+</ol>
 </blockquote></li>
 </ul>
 
