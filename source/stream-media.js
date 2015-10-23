@@ -1554,6 +1554,15 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     return;
   }
 
+  if (window.location.protocol !== 'https:') {
+    errorMsg = 'getUserMedia() has to be called in https:// application';
+    log.error(errorMsg, options);
+    if (typeof callback === 'function') {
+      callback(new Error(errorMsg), null);
+    }
+    return;
+  }
+
   // parse stream settings
   self._parseMediaStreamSettings(options);
 

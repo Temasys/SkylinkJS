@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.2 - Fri Oct 23 2015 15:51:30 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Fri Oct 23 2015 15:54:18 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8381,7 +8381,7 @@ if (navigator.mozGetUserMedia) {
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.2 - Fri Oct 23 2015 15:51:30 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Fri Oct 23 2015 15:54:18 GMT+0800 (SGT) */
 
 (function() {
 
@@ -21471,6 +21471,15 @@ Skylink.prototype.getUserMedia = function(options,callback) {
   }
   else if (!options.audio && !options.video) {
     errorMsg = 'Please select audio or video';
+    log.error(errorMsg, options);
+    if (typeof callback === 'function') {
+      callback(new Error(errorMsg), null);
+    }
+    return;
+  }
+
+  if (window.location.protocol !== 'https:') {
+    errorMsg = 'getUserMedia() has to be called in https:// application';
     log.error(errorMsg, options);
     if (typeof callback === 'function') {
       callback(new Error(errorMsg), null);

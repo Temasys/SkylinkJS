@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.2 - Fri Oct 23 2015 15:51:30 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Fri Oct 23 2015 15:54:18 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13088,6 +13088,15 @@ Skylink.prototype.getUserMedia = function(options,callback) {
   }
   else if (!options.audio && !options.video) {
     errorMsg = 'Please select audio or video';
+    log.error(errorMsg, options);
+    if (typeof callback === 'function') {
+      callback(new Error(errorMsg), null);
+    }
+    return;
+  }
+
+  if (window.location.protocol !== 'https:') {
+    errorMsg = 'getUserMedia() has to be called in https:// application';
     log.error(errorMsg, options);
     if (typeof callback === 'function') {
       callback(new Error(errorMsg), null);
