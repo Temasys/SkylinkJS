@@ -929,6 +929,12 @@ Skylink.prototype._restartHandler = function(message){
   var self = this;
   var targetMid = message.mid;
 
+  if (!self._peerInformations[targetMid]) {
+    log.error([targetMid, null, null, 'Peer does not have an existing ' +
+      'session. Ignoring restart process.']);
+    return;
+  }
+
   if (self._hasMCU) {
     self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false);
     return;

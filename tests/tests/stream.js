@@ -187,7 +187,7 @@ test('muteStream(): Testing mute stream settings', function(t) {
     if (success) {
       test1();
     } else {
-      console.log('ERROR: Failed initialising muteStream()');
+      console.log('ERROR: Failed initialising muteStream()', error);
     }
   });
 
@@ -195,8 +195,6 @@ test('muteStream(): Testing mute stream settings', function(t) {
 
 test('Media access stopped', function(t) {
   t.plan(1);
-
-  sw.leaveRoom();
 
   sw.on('incomingStream', function () {
     sw.leaveRoom();
@@ -209,6 +207,7 @@ test('Media access stopped', function(t) {
     sw.off('incomingStream');
     sw.off('mediaAccessError');
 
+    t.end();
   });
 
   sw.on('mediaAccessError', function (error) {
@@ -218,14 +217,25 @@ test('Media access stopped', function(t) {
     sw.off('incomingStream');
     sw.off('mediaAccessError');
 
+    t.end();
+
   });
 
   console.log(': Test joinRoom with audio and video');
 
-  sw.init(apikey, function(){
+  sw.init(apikey, function(initError, initSuccess){
+    if (initError) {
+      console.log('ERROR - Failed initialising room for "Media access stopped"', initError);
+      t.end();
+    }
     sw.joinRoom({
       audio: true,
       video: true
+    }, function (jRError, jRSuccess) {
+      if (initError) {
+        console.log('ERROR - Failed joining room for "Media access stopped"', jRError);
+        t.end();
+      }
     });
   });
 
@@ -233,8 +243,6 @@ test('Media access stopped', function(t) {
 
 test('joinRoom() - manualGetUserMedia: Testing manual getUserMedia', function(t) {
   t.plan(2);
-
-  sw.leaveRoom();
 
   sw.once('mediaAccessRequired', function () {
     t.pass('Triggers mediaAccessRequired');
@@ -319,8 +327,6 @@ test('sendStream(): Test parsed video resolutions', function (t) {
 test('sendStream(): Test getUserMedia should not be called if all settings is false', function (t) {
   t.plan(1);
 
-  sw.leaveRoom();
-
   sw.on('peerRestart', function (peerId, peerInfo) {
     // check the set stream settings
     t.deepEqual([
@@ -344,8 +350,6 @@ test('sendStream(): Test getUserMedia should not be called if all settings is fa
 
 test('sendStream(): Test default settings and making sure it\'s called before init', function(t) {
   t.plan(1);
-
-  sw.leaveRoom();
 
   var array = [];
 
@@ -391,8 +395,6 @@ test('sendStream(): Test default settings and making sure it\'s called before in
 // get user media tests
 test('getUserMedia(): Test the default settings and making sure it\'s called before init', function(t) {
   t.plan(3);
-
-  sw.leaveRoom();
 
   var audio_array = [];
   var video_array = [];
@@ -452,8 +454,6 @@ test('getUserMedia(): Test the default settings and making sure it\'s called bef
 test('getUserMedia(): Test that it should not be called if all settings is false', function (t){
   t.plan(3);
 
-  sw.leaveRoom();
-
   var getUserMediaCalled = false;
 
   var originalStreamSettings = sw._streamSettings;
@@ -490,8 +490,6 @@ test('getUserMedia(): Test that it should not be called if all settings is false
 
 test('getUserMedia(): Test parsed video resolutions', function (t) {
   t.plan(4);
-
-  sw.leaveRoom();
 
   var settings = {
     audio: {
@@ -577,8 +575,6 @@ test('getUserMedia(): Test parsed video resolutions', function (t) {
 
 test('getUserMedia(): Test optional configurations', function (t) {
   t.plan(12);
-
-  sw.leaveRoom();
 
   var test_case = function (settings) {
     sw.once('mediaAccessSuccess', function (stream) {
@@ -702,8 +698,6 @@ test('getUserMedia(): Test optional configurations', function (t) {
 test('joinRoom(): Testing parsed default constraints', function(t) {
   t.plan(1);
 
-  sw.leaveRoom();
-
   var getUserMediaCalled = false;
 
   sw.on('mediaAccessSuccess', function () {
@@ -729,8 +723,6 @@ test('joinRoom(): Testing parsed default constraints', function(t) {
 
 test('joinRoom(): Testing passed "false" constraints', function (t) {
   t.plan(2);
-
-  sw.leaveRoom();
 
   var getUserMediaCalled = false;
 
@@ -839,8 +831,6 @@ test('joinRoom(): Testing all passed media constraints', function (t) {
 
 test('joinRoom(): Test all passed bandwidth constraints', function (t) {
   t.plan(4);
-
-  sw.leaveRoom();
 
   var settings = {
     audio: {
