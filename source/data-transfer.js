@@ -1288,21 +1288,18 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
 /**
  * Starts a data transfer with Peers using the DataChannel connections with
  *   [Blob](https://developer.mozilla.org/en/docs/Web/API/Blob datas).
- * - This feature requires DataChannel connections to be enabled, and hence if
- *   you have configure <code>enableDataChannel</code> set to <code>false</code> in
- *   the <a href="#method_init">init()</a>, this functionality would not work.
- * - This method will open a new DataChannel connection for every transfer, which enabl
- *   however if you are connecting with the mobile application built with our mobile SDKs
- *   (<a href="http://skylink.io/ios/">iOS</a> / <a href="http://skylink.io/android/">Android</a>),
- *   it will use only one DataChannel which the support
- * - If the <a href="#event_dataChannelState">DataChannel connection state</a> for this
- *   transfer is
  * - You can transfer files using the <code>input</code> [fileupload object](
  *   http://www.w3schools.com/jsref/dom_obj_fileupload.asp) and accessing the receiving
  *   files using [FileUpload files property](http://www.w3schools.com/jsref/prop_fileupload_files.asp).
  * - The [File](https://developer.mozilla.org/en/docs/Web/API/File) object inherits from
  *   the Blob interface which is passable in this method as a Blob object.
- * - The receiving Peer have the option to accept or reject the data transfer.
+ * - The receiving Peers have the option to accept or reject the data transfer with
+ *   <a href="#method_acceptDataTransfer">acceptDataTransfer()</a>.
+ * - For Peers connecting from our mobile platforms
+ *   (<a href="http://skylink.io/ios/">iOS</a> / <a href="http://skylink.io/android/">Android</a>),
+ *   the DataChannel connection channel type would be <code>DATA_CHANNEL_TYPE.MESSAGING</code>.<br>
+ *   For Peers connecting from the Web platform, the DataChannel connection channel type would be
+ *  <code>DATA_CHANNEL_TYPE.DATA</code>.
  * @method sendBlobData
  * @param {Blob} data The Blob data object to transfer to Peer.
  * @param {Number} [timeout=60] The waiting timeout in seconds that the DataChannel connection
@@ -1388,7 +1385,6 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  * @trigger incomingData, incomingDataRequest, dataTransferState, dataChannelState
  * @since 0.5.5
  * @component DataTransfer
- * @partof DATA TRANSFER FUNCTIONALITY
  * @for Skylink
  */
 Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback) {
@@ -1867,8 +1863,7 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
 
 
 /**
- * Responds to a data transfer request by rejecting or accepting
- *   the data transfer request initiated by a Peer.
+ * Responds to a data transfer request by a Peer.
  * @method respondBlobRequest
  * @param {String} peerId The sender Peer ID.
  * @param {String} transferId The data transfer ID of the data transfer request
@@ -1876,17 +1871,15 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
  * @param {Boolean} [accept=false] The flag that indicates <code>true</code> as a response
  *   to accept the data transfer and <code>false</code> as a response to reject the
  *   data transfer request.
- * @trigger incomingData, dataTransferState
+ * @trigger dataTransferState, incomingDataRequest, incomingData
  * @component DataTransfer
  * @deprecated Use .acceptDataTransfer()
- * @partof DATA TRANSFER FUNCTIONALITY
  * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype.respondBlobRequest =
 /**
- * Responds to a data transfer request by rejecting or accepting
- *   the data transfer request initiated by a Peer.
+ * Responds to a data transfer request by a Peer.
  * @method acceptDataTransfer
  * @param {String} peerId The sender Peer ID.
  * @param {String} transferId The data transfer ID of the data transfer request
@@ -1894,9 +1887,8 @@ Skylink.prototype.respondBlobRequest =
  * @param {Boolean} [accept=false] The flag that indicates <code>true</code> as a response
  *   to accept the data transfer and <code>false</code> as a response to reject the
  *   data transfer request.
- * @trigger incomingData, dataTransferState
+ * @trigger dataTransferState, incomingDataRequest, incomingData
  * @component DataTransfer
- * @partof DATA TRANSFER FUNCTIONALITY
  * @for Skylink
  * @since 0.6.1
  */
@@ -1974,7 +1966,7 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
 };
 
 /**
- * Terminates an ongoing DataChannel connection data transfer.
+ * Terminates a current data transfer with Peer.
  * @method cancelBlobTransfer
  * @param {String} peerId The Peer ID associated with the data transfer.
  * @param {String} transferId The data transfer ID of the data transfer request
@@ -1982,20 +1974,18 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
  * @trigger dataTransferState
  * @component DataTransfer
  * @deprecated Use .cancelDataTransfer()
- * @partof DATA TRANSFER FUNCTIONALITY
  * @for Skylink
  * @since 0.5.7
  */
 Skylink.prototype.cancelBlobTransfer =
 /**
- * Terminates an ongoing DataChannel connection data transfer.
+ * Terminates a current data transfer with Peer.
  * @method cancelDataTransfer
  * @param {String} peerId The Peer ID associated with the data transfer.
  * @param {String} transferId The data transfer ID of the data transfer request
  *   to terminate the request.
  * @trigger dataTransferState
  * @component DataTransfer
- * @partof DATA TRANSFER FUNCTIONALITY
  * @for Skylink
  * @since 0.6.1
  */
@@ -2078,11 +2068,11 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
 /**
  * Send a message object or string using the DataChannel connection
  *   associated with the list of targeted Peers.
- * The maximum size for the message object would be<code>16Kb</code>.<br>
- * To send a string length longer than <code>16kb</code>, please considered
+ * - The maximum size for the message object would be<code>16Kb</code>.<br>
+ * - To send a string length longer than <code>16kb</code>, please considered
  *   to use {{#crossLink "Skylink/sendURLData:method"}}sendURLData(){{/crossLink}}
  *   to send longer strings (for that instance base64 binary strings are long).
- * To send message objects with platform signaling socket connection, see
+ * - To send message objects with platform signaling socket connection, see
  *   {{#crossLink "Skylink/sendMessage:method"}}sendMessage(){{/crossLink}}.
  * @method sendP2PMessage
  * @param {String|JSON} message The message object.
@@ -2171,9 +2161,15 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
 };
 
 /**
- * Starts a [dataURL](https://developer.mozilla.org/en-US/docs/Web/API/FileReader
- *   /readAsDataURL) data transfer with Peers using the DataChannel connection.
- * The receiving Peers have the option to accept or reject the data transfer.
+ * Starts a [data URI](https://developer.mozilla.org/en-US/docs/Web/API/FileReader
+ *   /readAsDataURL) transfer with Peers using the DataChannel connection.
+ * - The receiving Peers have the option to accept or reject the data transfer with
+ *   <a href="#method_acceptDataTransfer">acceptDataTransfer()</a>.
+ * - For Peers connecting from our mobile platforms
+ *   (<a href="http://skylink.io/ios/">iOS</a> / <a href="http://skylink.io/android/">Android</a>),
+ *   the DataChannel connection channel type would be <code>DATA_CHANNEL_TYPE.MESSAGING</code>.<br>
+ *   For Peers connecting from the Web platform, the DataChannel connection channel type would be
+ *  <code>DATA_CHANNEL_TYPE.DATA</code>.
  * @method sendURLData
  * @param {String} data The dataURL (base64 binary string) string to transfer to Peers.
  * @param {Number} [timeout=60] The waiting timeout in seconds that the DataChannel connection
@@ -2255,7 +2251,6 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
  * @trigger incomingData, incomingDataRequest, dataTransferState, dataChannelState
  * @since 0.6.1
  * @component DataTransfer
- * @partof DATA TRANSFER FUNCTIONALITY
  * @for Skylink
  */
 Skylink.prototype.sendURLData = function(data, timeout, targetPeerId, callback) {

@@ -20,7 +20,6 @@
  * This state occurs when connection with Peer has been closed, usually when Peer leaves the room.
  * @readOnly
  * @component Peer
- * @partof PEER CONNECTION STATUS
  * @for Skylink
  * @since 0.5.0
  */
@@ -44,7 +43,6 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
  * @type JSON
  * @readOnly
  * @component Peer
- * @partof SERVER PEER FUNCTIONALITY
  * @for Skylink
  * @since 0.6.1
  */
@@ -146,6 +144,11 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
 
   if (!restartConn) {
     self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS);
+  }
+
+  if (!self._peerConnections[targetMid]) {
+    log.error([targetMid, null, null, 'Failed creating the connection to peer']);
+    return;
   }
 
   self._peerConnections[targetMid].receiveOnly = !!receiveOnly;
@@ -326,8 +329,16 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
  * @since 0.5.5
  */
 Skylink.prototype._removePeer = function(peerId) {
+  var peerInfo = clone(this.getPeerInfo(peerId)) || {
+    userData: '',
+    settings: {},
+    mediaStatus: {},
+    agent: {},
+    room: clone(this._selectedRoom)
+  };
+
   if (peerId !== 'MCU') {
-    this._trigger('peerLeft', peerId, this.getPeerInfo(peerId), false);
+    this._trigger('peerLeft', peerId, peerInfo, false);
   } else {
     this._hasMCU = false;
     log.log([peerId, null, null, 'MCU has stopped listening and left']);
@@ -539,12 +550,12 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 
 /**
  * Refreshes a Peer connection.
- * This feature can be used to refresh a Peer connection when the
+ * - This feature can be used to refresh a Peer connection when the
  *   remote Stream received does not stream any audio/video stream.
- * If there are more than 1 refresh during 5 seconds
+ * - If there are more than 1 refresh during 5 seconds
  *   or refresh is less than 3 seconds since the last refresh
  *   initiated by the other peer, it will be aborted.
- * As for MCU connection, the restart mechanism makes the self user
+ * - As for MCU connection, the restart mechanism makes the self user
  *    leave and join the currently connected room again.
  * @method refreshConnection
  * @param {String|Array} [targetPeerId] The array of targeted Peers connection to refresh

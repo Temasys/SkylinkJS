@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.2 - Fri Oct 23 2015 14:15:57 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.2 - Fri Oct 23 2015 15:51:30 GMT+0800 (SGT) */
 
 (function() {
 
@@ -243,7 +243,6 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
  *   This connection will be closed once the data transfer has completed or terminated.
  * @readOnly
  * @component DataChannel
- * @partof DATA TRANSFER FUNCTIONALITY | MESSAGING FUNCTIONALITY
  * @for Skylink
  * @since 0.6.1
  */
@@ -2096,21 +2095,18 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
 /**
  * Starts a data transfer with Peers using the DataChannel connections with
  *   [Blob](https://developer.mozilla.org/en/docs/Web/API/Blob datas).
- * - This feature requires DataChannel connections to be enabled, and hence if
- *   you have configure <code>enableDataChannel</code> set to <code>false</code> in
- *   the <a href="#method_init">init()</a>, this functionality would not work.
- * - This method will open a new DataChannel connection for every transfer, which enabl
- *   however if you are connecting with the mobile application built with our mobile SDKs
- *   (<a href="http://skylink.io/ios/">iOS</a> / <a href="http://skylink.io/android/">Android</a>),
- *   it will use only one DataChannel which the support
- * - If the <a href="#event_dataChannelState">DataChannel connection state</a> for this
- *   transfer is
  * - You can transfer files using the <code>input</code> [fileupload object](
  *   http://www.w3schools.com/jsref/dom_obj_fileupload.asp) and accessing the receiving
  *   files using [FileUpload files property](http://www.w3schools.com/jsref/prop_fileupload_files.asp).
  * - The [File](https://developer.mozilla.org/en/docs/Web/API/File) object inherits from
  *   the Blob interface which is passable in this method as a Blob object.
- * - The receiving Peer have the option to accept or reject the data transfer.
+ * - The receiving Peers have the option to accept or reject the data transfer with
+ *   <a href="#method_acceptDataTransfer">acceptDataTransfer()</a>.
+ * - For Peers connecting from our mobile platforms
+ *   (<a href="http://skylink.io/ios/">iOS</a> / <a href="http://skylink.io/android/">Android</a>),
+ *   the DataChannel connection channel type would be <code>DATA_CHANNEL_TYPE.MESSAGING</code>.<br>
+ *   For Peers connecting from the Web platform, the DataChannel connection channel type would be
+ *  <code>DATA_CHANNEL_TYPE.DATA</code>.
  * @method sendBlobData
  * @param {Blob} data The Blob data object to transfer to Peer.
  * @param {Number} [timeout=60] The waiting timeout in seconds that the DataChannel connection
@@ -2196,7 +2192,6 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  * @trigger incomingData, incomingDataRequest, dataTransferState, dataChannelState
  * @since 0.5.5
  * @component DataTransfer
- * @partof DATA TRANSFER FUNCTIONALITY
  * @for Skylink
  */
 Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback) {
@@ -2675,8 +2670,7 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
 
 
 /**
- * Responds to a data transfer request by rejecting or accepting
- *   the data transfer request initiated by a Peer.
+ * Responds to a data transfer request by a Peer.
  * @method respondBlobRequest
  * @param {String} peerId The sender Peer ID.
  * @param {String} transferId The data transfer ID of the data transfer request
@@ -2684,17 +2678,15 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
  * @param {Boolean} [accept=false] The flag that indicates <code>true</code> as a response
  *   to accept the data transfer and <code>false</code> as a response to reject the
  *   data transfer request.
- * @trigger incomingData, dataTransferState
+ * @trigger dataTransferState, incomingDataRequest, incomingData
  * @component DataTransfer
  * @deprecated Use .acceptDataTransfer()
- * @partof DATA TRANSFER FUNCTIONALITY
  * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype.respondBlobRequest =
 /**
- * Responds to a data transfer request by rejecting or accepting
- *   the data transfer request initiated by a Peer.
+ * Responds to a data transfer request by a Peer.
  * @method acceptDataTransfer
  * @param {String} peerId The sender Peer ID.
  * @param {String} transferId The data transfer ID of the data transfer request
@@ -2702,9 +2694,8 @@ Skylink.prototype.respondBlobRequest =
  * @param {Boolean} [accept=false] The flag that indicates <code>true</code> as a response
  *   to accept the data transfer and <code>false</code> as a response to reject the
  *   data transfer request.
- * @trigger incomingData, dataTransferState
+ * @trigger dataTransferState, incomingDataRequest, incomingData
  * @component DataTransfer
- * @partof DATA TRANSFER FUNCTIONALITY
  * @for Skylink
  * @since 0.6.1
  */
@@ -2782,7 +2773,7 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
 };
 
 /**
- * Terminates an ongoing DataChannel connection data transfer.
+ * Terminates a current data transfer with Peer.
  * @method cancelBlobTransfer
  * @param {String} peerId The Peer ID associated with the data transfer.
  * @param {String} transferId The data transfer ID of the data transfer request
@@ -2790,20 +2781,18 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
  * @trigger dataTransferState
  * @component DataTransfer
  * @deprecated Use .cancelDataTransfer()
- * @partof DATA TRANSFER FUNCTIONALITY
  * @for Skylink
  * @since 0.5.7
  */
 Skylink.prototype.cancelBlobTransfer =
 /**
- * Terminates an ongoing DataChannel connection data transfer.
+ * Terminates a current data transfer with Peer.
  * @method cancelDataTransfer
  * @param {String} peerId The Peer ID associated with the data transfer.
  * @param {String} transferId The data transfer ID of the data transfer request
  *   to terminate the request.
  * @trigger dataTransferState
  * @component DataTransfer
- * @partof DATA TRANSFER FUNCTIONALITY
  * @for Skylink
  * @since 0.6.1
  */
@@ -2886,11 +2875,11 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
 /**
  * Send a message object or string using the DataChannel connection
  *   associated with the list of targeted Peers.
- * The maximum size for the message object would be<code>16Kb</code>.<br>
- * To send a string length longer than <code>16kb</code>, please considered
+ * - The maximum size for the message object would be<code>16Kb</code>.<br>
+ * - To send a string length longer than <code>16kb</code>, please considered
  *   to use {{#crossLink "Skylink/sendURLData:method"}}sendURLData(){{/crossLink}}
  *   to send longer strings (for that instance base64 binary strings are long).
- * To send message objects with platform signaling socket connection, see
+ * - To send message objects with platform signaling socket connection, see
  *   {{#crossLink "Skylink/sendMessage:method"}}sendMessage(){{/crossLink}}.
  * @method sendP2PMessage
  * @param {String|JSON} message The message object.
@@ -2979,9 +2968,15 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
 };
 
 /**
- * Starts a [dataURL](https://developer.mozilla.org/en-US/docs/Web/API/FileReader
- *   /readAsDataURL) data transfer with Peers using the DataChannel connection.
- * The receiving Peers have the option to accept or reject the data transfer.
+ * Starts a [data URI](https://developer.mozilla.org/en-US/docs/Web/API/FileReader
+ *   /readAsDataURL) transfer with Peers using the DataChannel connection.
+ * - The receiving Peers have the option to accept or reject the data transfer with
+ *   <a href="#method_acceptDataTransfer">acceptDataTransfer()</a>.
+ * - For Peers connecting from our mobile platforms
+ *   (<a href="http://skylink.io/ios/">iOS</a> / <a href="http://skylink.io/android/">Android</a>),
+ *   the DataChannel connection channel type would be <code>DATA_CHANNEL_TYPE.MESSAGING</code>.<br>
+ *   For Peers connecting from the Web platform, the DataChannel connection channel type would be
+ *  <code>DATA_CHANNEL_TYPE.DATA</code>.
  * @method sendURLData
  * @param {String} data The dataURL (base64 binary string) string to transfer to Peers.
  * @param {Number} [timeout=60] The waiting timeout in seconds that the DataChannel connection
@@ -3063,7 +3058,6 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
  * @trigger incomingData, incomingDataRequest, dataTransferState, dataChannelState
  * @since 0.6.1
  * @component DataTransfer
- * @partof DATA TRANSFER FUNCTIONALITY
  * @for Skylink
  */
 Skylink.prototype.sendURLData = function(data, timeout, targetPeerId, callback) {
@@ -3252,7 +3246,6 @@ Skylink.prototype._peerIceTrickleDisabled = {};
  * @readOnly
  * @since 0.4.1
  * @component ICE
- * @partof PEER CONNECTION STATUS
  * @for Skylink
  */
 Skylink.prototype.CANDIDATE_GENERATION_STATE = {
@@ -3449,7 +3442,6 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
  * @readOnly
  * @since 0.5.4
  * @component ICE
- * @partof CONNECTION CONFIGURATION
  * @for Skylink
  */
 Skylink.prototype.TURN_TRANSPORT = {
@@ -3778,7 +3770,6 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
  * @type JSON
  * @readOnly
  * @component Peer
- * @partof SERVER PEER FUNCTIONALITY
  * @for Skylink
  * @since 0.6.1
  */
@@ -3880,6 +3871,11 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
 
   if (!restartConn) {
     self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS);
+  }
+
+  if (!self._peerConnections[targetMid]) {
+    log.error([targetMid, null, null, 'Failed creating the connection to peer']);
+    return;
   }
 
   self._peerConnections[targetMid].receiveOnly = !!receiveOnly;
@@ -4060,8 +4056,16 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
  * @since 0.5.5
  */
 Skylink.prototype._removePeer = function(peerId) {
+  var peerInfo = clone(this.getPeerInfo(peerId)) || {
+    userData: '',
+    settings: {},
+    mediaStatus: {},
+    agent: {},
+    room: clone(this._selectedRoom)
+  };
+
   if (peerId !== 'MCU') {
-    this._trigger('peerLeft', peerId, this.getPeerInfo(peerId), false);
+    this._trigger('peerLeft', peerId, peerInfo, false);
   } else {
     this._hasMCU = false;
     log.log([peerId, null, null, 'MCU has stopped listening and left']);
@@ -4273,12 +4277,12 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 
 /**
  * Refreshes a Peer connection.
- * This feature can be used to refresh a Peer connection when the
+ * - This feature can be used to refresh a Peer connection when the
  *   remote Stream received does not stream any audio/video stream.
- * If there are more than 1 refresh during 5 seconds
+ * - If there are more than 1 refresh during 5 seconds
  *   or refresh is less than 3 seconds since the last refresh
  *   initiated by the other peer, it will be aborted.
- * As for MCU connection, the restart mechanism makes the self user
+ * - As for MCU connection, the restart mechanism makes the self user
  *    leave and join the currently connected room again.
  * @method refreshConnection
  * @param {String|Array} [targetPeerId] The array of targeted Peers connection to refresh
@@ -7995,13 +7999,6 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when the socket connection to the platform signaling is opened.
    * - This event means that socket connection is open and self is ready to join the room.
-   * - <sub>SOCKET CONNECTION STAGE</sub><br>
-   *   <small>
-   *   <b>channelOpen</b> &#8594;
-   *   <a href="#event_channelMessage">channelMessage</a> &#8594;
-   *   (<a href="#event_channelError">channelError</a>) &#8594;
-   *   <a href="#event_channelClose">channelClose</a>
-   *   </small>
    * @event channelOpen
    * @component Events
    * @for Skylink
@@ -8012,13 +8009,6 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when the socket connection to the platform signaling is closed.
    * - This event means that socket connection is closed and self has left the room.
-   * - <sub>SOCKET CONNECTION STAGE</sub><br>
-   *   <small>
-   *   <a href="#event_channelOpen">channelOpen</a> &#8594;
-   *   <a href="#event_channelMessage">channelMessage</a> &#8594;
-   *   (<a href="#event_channelError">channelError</a>) &#8594;
-   *   <b>channelClose</b>
-   *   </small>
    * @event channelClose
    * @component Events
    * @for Skylink
@@ -8031,13 +8021,6 @@ Skylink.prototype._EVENTS = {
    * - This event is a debugging feature, and it's not advisable to subscribe to
    *   this event unless you are debugging the socket messages
    *   received from the platform signaling.
-   * - <sub>SOCKET CONNECTION STAGE</sub><br>
-   *   <small>
-   *   <a href="#event_channelOpen">channelOpen</a> &#8594;
-   *   <b>channelMessage</b> &#8594;
-   *   (<a href="#event_channelError">channelError</a>) &#8594;
-   *   <a href="#event_channelClose">channelClose</a>
-   *   </small>
    * @event channelMessage
    * @param {JSON} message The socket message object data received from the platform signaling.
    * @component Events
@@ -8051,13 +8034,6 @@ Skylink.prototype._EVENTS = {
    *   during a connection with the platform signaling.
    * - After this event is triggered, it may result in <a href="#event_channelClose">channelClose</a>,
    *   and the socket connection with the platform signaling could be disrupted.
-   * - <sub>SOCKET CONNECTION STAGE</sub><br>
-   *   <small>
-   *   <a href="#event_channelOpen">channelOpen</a> &#8594;
-   *   <a href="#event_channelMessage">channelMessage</a> &#8594;
-   *   (<b>channelError</b>) &#8594;
-   *   <a href="#event_channelClose">channelClose</a>
-   *   </small>
    * @event channelError
    * @param {Object|String} error The error object thrown that caused the exception.
    * @component Events
@@ -8073,13 +8049,6 @@ Skylink.prototype._EVENTS = {
    *   this event may not be triggered.
    * - If reconnection attempt fails, it will trigger <a href="#event_socketError">socketError</a> event
    *   again and repeat the stage from there.
-   * - <sub>SOCKET RECONNECTION STAGE</sub><br>
-   *   <small>
-   *   <a href="#event_socketError">socketError</a> &#8594;
-   *   <b>channelRetry</b> &#8594;
-   *   (&#8592;<em>socketError</em>) &#8594;
-   *   <a href="#event_channelOpen">channelOpen</a>
-   *   </small>
    * @event channelRetry
    * @param {String} fallbackType The fallback socket transport that Skylink is attempting to reconnect with.
    *   [Rel: Skylink.SOCKET_FALLBACK]
@@ -8097,13 +8066,6 @@ Skylink.prototype._EVENTS = {
    * - If reconnection attempt fails and there are still available ports to reconnect with,
    *   it will trigger <a href="#event_channelRetry">channelRetry</a> event again and
    *   repeat the stage from there.
-   * - <sub>SOCKET RECONNECTION STAGE</sub><br>
-   *   <small>
-   *   <b>socketError</b> &#8594;
-   *   <a href="#event_channelRetry">channelRetry</a> &#8594;
-   *   (&#8592;<em>socketError</em>) &#8594;
-   *   <a href="#event_channelOpen">channelOpen</a>
-   *   </small>
    * @event socketError
    * @param {String} errorCode The socket connection error code received.
    *   [Rel: Skylink.SOCKET_ERROR]
@@ -8121,22 +8083,6 @@ Skylink.prototype._EVENTS = {
    * - This is also triggered when <a href="#method_init">init()</a> is invoked, but
    *   the socket connection events like <a href="#event_channelOpen">channelOpen</a> does
    *   not get triggered but stops at <u>readyStateChange</u> event.
-   * - <sub>ROOM CONNECTION STAGE</sub><br>
-   *   <small>
-   *   <b>readyStateChange</b> &#8594;
-   *   (<a href="#event_channelRetry">channelRetry</a>) &#8594;
-   *   <a href="#event_channelOpen">channelOpen</a> &#8594;
-   *   (<a href="#event_mediaAccessSuccess">mediaAccessSuccess</a>) &#8594;
-   *   [<a href="#event_systemAction">systemAction</a> &#8594;
-   *   <a href="#event_channelClose">channelClose</a>] &nbsp; / &nbsp;
-   *   [<a href="#event_peerJoined">peerJoined <sup>(isSelf = true)</sub></a> &#8594;
-   *   (<a href="#event_serverPeerJoined">serverPeerJoined</a>) &#8594;
-   *   (<a href="#event_serverPeerLeft">serverPeerLeft</a>) &#8594;
-   *   (<a href="#event_introduceStateChange">introduceStateChange</a>) &#8594;
-   *   (<a href="#event_roomLock">roomLock</a>) &#8594;
-   *   <a href="#event_peerLeft">peerLeft <sup>(isSelf = true)</sub></a> &#8594;
-   *   <a href="#event_channelClose">channelClose</a>]
-   *   </small>
    * @event readyStateChange
    * @param {String} readyState The current ready state of the retrieval when the event is triggered.
    *   [Rel: Skylink.READY_STATE_CHANGE]
@@ -8170,13 +8116,6 @@ Skylink.prototype._EVENTS = {
    *   Peer handshaking connection status.
    * - This starts the Peer connection handshaking, where it retrieves all the Peer
    *   information and then proceeds to start the ICE connection.
-   * - <sub>PEER CONNECTION STATUS STAGE</sub><br>
-   *   <small>
-   *   <b>handshakeProgress</b> &#8596;
-   *   <a href="#event_peerConnectionState">peerConnectionState</a> &#8594;
-   *   <a href="#event_candidateGenerationState">candidateGenerationState</a> &#8596;
-   *   <a href="#event_iceConnectionState">iceConnectionState</a>
-   *   </small>
    * @event handshakeProgress
    * @param {String} state The Peer connection handshake state.
    *   [Rel: Skylink.HANDSHAKE_PROGRESS]
@@ -8196,13 +8135,6 @@ Skylink.prototype._EVENTS = {
    *   Peer ICE candidate gathering status.
    * - This indicates if the ICE gathering has been completed to
    *   start ICE connection for DataChannel and media streaming connection.
-   * - <sub>PEER CONNECTION STATUS STAGE</sub><br>
-   *   <small>
-   *   <a href="#event_handshakeProgress">handshakeProgress</a> &#8596;
-   *   <a href="#event_peerConnectionState">peerConnectionState</a> &#8594;
-   *   <b>candidateGenerationState</b> &#8596;
-   *   <a href="#event_iceConnectionState">iceConnectionState</a>
-   *   </small>
    * @event candidateGenerationState
    * @param {String} state The current ICE gathering state.
    *   <small>See the list of available triggered states in the related link.</small>
@@ -8220,13 +8152,6 @@ Skylink.prototype._EVENTS = {
    *   Peer signaling connection status.
    * - This event indicates if the session description is received
    *   to start ICE gathering for DataChannel and media streaming connection.
-   * - <sub>PEER CONNECTION STATUS STAGE</sub><br>
-   *   <small>
-   *   <a href="#event_handshakeProgress">handshakeProgress</a> &#8596;
-   *   <b>peerConnectionState</b> &#8594;
-   *   <a href="#event_candidateGenerationState">candidateGenerationState</a> &#8596;
-   *   <a href="#event_iceConnectionState">iceConnectionState</a>
-   *   </small>
    * @event peerConnectionState
    * @param {String} state The current connection signaling state.
    *   [Rel: Skylink.PEER_CONNECTION_STATE]
@@ -8244,13 +8169,6 @@ Skylink.prototype._EVENTS = {
    *   Peer ICE connection of added ICE candidates status.
    * - This event indicates if the ICE connection is established for successful
    *   DataChannel and media streaming connection.
-   * - <sub>PEER CONNECTION STATUS STAGE</sub><br>
-   *   <small>
-   *   <a href="#event_handshakeProgress">handshakeProgress</a> &#8596;
-   *   <a href="#event_peerConnectionState">peerConnectionState</a> &#8594;
-   *   <a href="#event_candidateGenerationState">candidateGenerationState</a> &#8596;
-   *   <b>iceConnectionState</b>
-   *   </small>
    * @event iceConnectionState
    * @param {String} state The current ICE connection state.
    *   [Rel: Skylink.ICE_CONNECTION_STATE]
@@ -8266,16 +8184,6 @@ Skylink.prototype._EVENTS = {
    * - If <code>audioFallback</code> is enabled in <a href="#method_init">init()</a>,
    *   it will throw an error if audio only user media stream failed after
    *   a failed attempt to retrieve video and audio user media.
-   * - <sub>USER STREAM STAGE</sub><br>
-   *   <small>
-   *   (<a href="#event_mediaAccessRequired">mediaAccessRequired</a>) &#8594;
-   *   [(<a href="#event_mediaAccessFallback">mediaAccessFallback</a>) &#8594;
-   *   (<b>mediaAccessError</b>)] &#8594;
-   *   <a href="#event_mediaAccessSuccess">mediaAccessSuccess</a> &#8594;
-   *   (<a href="#event_streamMuted">streamMuted</a>) &#8594;
-   *   <a href="#event_mediaAccessStopped">mediaAccessStopped</a> &#8594;
-   *   <a href="#event_streamEnded">streamEnded</a>
-   *   </small>
    * @event mediaAccessError
    * @param {Object|String} error The error object thrown that caused the failure.
    * @param {Boolean} isScreensharing The flag that indicates if self
@@ -8294,16 +8202,6 @@ Skylink.prototype._EVENTS = {
    * - If <code>audioFallback</code> is enabled in <a href="#method_init">init()</a>,
    *   and if there is a failed attempt to retrieve video and audio user media,
    *   it will attempt to do the audio fallback.
-   * - <sub>USER STREAM STAGE</sub><br>
-   *   <small>
-   *   (<a href="#event_mediaAccessRequired">mediaAccessRequired</a>) &#8594;
-   *   [(<b>mediaAccessFallback</b>) &#8594;
-   *   (<a href="#event_mediaAccessError">mediaAccessError</a>)] &#8594;
-   *   <a href="#event_mediaAccessSuccess">mediaAccessSuccess</a> &#8594;
-   *   (<a href="#event_streamMuted">streamMuted</a>) &#8594;
-   *   <a href="#event_mediaAccessStopped">mediaAccessStopped</a> &#8594;
-   *   <a href="#event_streamEnded">streamEnded</a>
-   *   </small>
    * @event mediaAccessFallback
    * @param {Object|String} error The error object thrown that caused the failure
    *   from retrieve video and audio user media stream.
@@ -8316,16 +8214,6 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when access to self user media stream is successfully
    *   attached to Skylink.
-   * - <sub>USER STREAM STAGE</sub><br>
-   *   <small>
-   *   (<a href="#event_mediaAccessRequired">mediaAccessRequired</a>) &#8594;
-   *   [(<a href="#event_mediaAccessFallback">mediaAccessFallback</a>) &#8594;
-   *   (<a href="#event_mediaAccessError">mediaAccessError</a>)] &#8594;
-   *   <b>mediaAccessSuccess</b> &#8594;
-   *   (<a href="#event_streamMuted">streamMuted</a>) &#8594;
-   *   <a href="#event_mediaAccessStopped">mediaAccessStopped</a> &#8594;
-   *   <a href="#event_streamEnded">streamEnded</a>
-   *   </small>
    * @event mediaAccessSuccess
    * @param {Object} stream The self user [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_API)
    *   object. To display the MediaStream object to a <code>video</code> or <code>audio</code>, simply invoke:<br>
@@ -8348,16 +8236,6 @@ Skylink.prototype._EVENTS = {
    *   to retrieve the user media stream before self would join the room.
    *   Once the user media stream is attached, self would proceed to join the room
    *   automatically.
-   * - <sub>USER STREAM STAGE</sub><br>
-   *   <small>
-   *   (<b>mediaAccessRequired</b>) &#8594;
-   *   [(<a href="#event_mediaAccessFallback">mediaAccessFallback</a>) &#8594;
-   *   (<a href="#event_mediaAccessError">mediaAccessError</a>)] &#8594;
-   *   <a href="#event_mediaAccessSuccess">mediaAccessSuccess</a> &#8594;
-   *   (<a href="#event_streamMuted">streamMuted</a>) &#8594;
-   *   <a href="#event_mediaAccessStopped">mediaAccessStopped</a> &#8594;
-   *   <a href="#event_streamEnded">streamEnded</a>
-   *   </small>
    * @event mediaAccessRequired
    * @component Events
    * @for Skylink
@@ -8367,16 +8245,6 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when self user media stream attached to Skylink has been stopped.
-   * - <sub>USER STREAM STAGE</sub><br>
-   *   <small>
-   *   (<a href="#event_mediaAccessRequired">mediaAccessRequired</a>) &#8594;
-   *   [(<a href="#event_mediaAccessFallback">mediaAccessFallback</a>) &#8594;
-   *   (<a href="#event_mediaAccessError">mediaAccessError</a>)] &#8594;
-   *   <a href="#event_mediaAccessSuccess">mediaAccessSuccess</a> &#8594;
-   *   (<a href="#event_streamMuted">streamMuted</a>) &#8594;
-   *   <b>mediaAccessStopped</b> &#8594;
-   *   <a href="#event_streamEnded">streamEnded</a>
-   *   </small>
    * @event mediaAccessStopped
    * @param {Boolean} isScreensharing The flag that indicates if self
    *    Stream object is a screensharing stream or not.
@@ -8388,19 +8256,6 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when a Peer joins the room.
-   * - <sub>PEER CONNECTION STAGE</sub><br>
-   *   <small>
-   *   <b>peerJoined</b> &#8594;
-   *   <a href="#event_handshakeProgress">handshakeProgress</a> &#8594;
-   *   (<a href="#event_incomingStream">incomingStream</a>) &#8594;
-   *   (<a href="#event_dataChannelState">dataChannelState</a>) &#8594;
-   *   [(<a href="#event_incomingMessage">incomingMessage</a>) -
-   *   (<a href="#event_incomingData">incomingData</a>) -
-   *   (<a href="#event_peerUpdated">peerUpdated</a>)] &#8594;
-   *   [(<a href="#event_peerRestart">peerRestart</a>) &#8594;
-   *   (&#8592;<em>handshakeProgress</em>)] &#8594;
-   *   <a href="#event_peerLeft">peerLeft</a>
-   *   </small>
    * @event peerJoined
    * @param {String} peerId The Peer ID of the new peer
    *   that has joined the room.
@@ -8479,19 +8334,6 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when a Peer connection has been restarted for
    *   a reconnection.
-   * - <sub>PEER RECONNECTION STAGE</sub><br>
-   *   <small>
-   *   [<var>(P2P conn.)</var> <b>peerRestart</b> &#8594;
-   *   <a href="#event_handshakeProgress">handshakeProgress</a> &#8594;
-   *   (<a href="#event_incomingStream">incomingStream</a>) &#8594;
-   *   (<a href="#event_dataChannelState">dataChannelState</a>) ] &nbsp; / &nbsp;
-   *   [<var>(MCU conn.)</var> <b>peerRestart</b> &#8594;
-   *    <a href="#event_peerLeft">peerLeft</a> &#8594;
-   *   <a href="#event_peerJoined">peerJoined</a> &#8594;
-   *   <a href="#event_handshakeProgress">handshakeProgress</a> &#8594;
-   *   (<a href="#event_incomingStream">incomingStream</a>) &#8594;
-   *   (<a href="#event_dataChannelState">dataChannelState</a>)]
-   *   </small>
    * @event peerRestart
    * @param {String} peerId The Peer ID of the connection that
    *   is restarted for a reconnection.
@@ -8575,19 +8417,6 @@ Skylink.prototype._EVENTS = {
    *   like <code>peerInfo.mediaStatus</code> or the <code>peerInfo.userData</code>,
    *   which is invoked through <a href="#method_muteStream">muteStream()</a> or
    *   <a href="#method_setUserData">setUserData()</a>.
-   * - <sub>PEER CONNECTION STAGE</sub><br>
-   *   <small>
-   *   <a href="#event_peerJoined">peerJoined</a> &#8594;
-   *   <a href="#event_handshakeProgress">handshakeProgress</a> &#8594;
-   *   (<a href="#event_incomingStream">incomingStream</a>) &#8594;
-   *   (<a href="#event_dataChannelState">dataChannelState</a>) &#8594;
-   *   [(<a href="#event_incomingMessage">incomingMessage</a>) -
-   *   (<a href="#event_incomingData">incomingData</a>) -
-   *   (<b>peerUpdated</b>)] &#8594;
-   *   [(<a href="#event_peerRestart">peerRestart</a>) &#8594;
-   *   (&#8592;<em>handshakeProgress</em>)] &#8594;
-   *   <a href="#event_peerLeft">peerLeft</a>
-   *   </small>
    * @event peerUpdated
    * @param {String} peerId The Peer ID of the peer with updated information.
    * @param {Object} peerInfo The peer information associated
@@ -8664,19 +8493,6 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when a Peer leaves the room.
-   * - <sub>PEER CONNECTION STAGE</sub><br>
-   *   <small>
-   *   <a href="#event_peerJoined">peerJoined</a> &#8594;
-   *   <a href="#event_handshakeProgress">handshakeProgress</a> &#8594;
-   *   (<a href="#event_incomingStream">incomingStream</a>) &#8594;
-   *   (<a href="#event_dataChannelState">dataChannelState</a>) &#8594;
-   *   [(<a href="#event_incomingMessage">incomingMessage</a>) -
-   *   (<a href="#event_incomingData">incomingData</a>) -
-   *   (<a href="#event_peerUpdated">peerUpdated</a>)] &#8594;
-   *   [(<a href="#event_peerRestart">peerRestart</a>) &#8594;
-   *   (&#8592;<em>handshakeProgress</em>)] &#8594;
-   *   <b>peerLeft</b>
-   *   </small>
    * @event peerLeft
    * @param {String} peerId The Peer ID of the peer
    *   that had left the room.
@@ -8756,13 +8572,6 @@ Skylink.prototype._EVENTS = {
    * Event triggered when a Stream is sent by Peer.
    * - This event may trigger for self, which indicates that self has joined the room
    *   and is sending this Stream object to other Peers connected in the room.
-   * - <sub>SENDING STREAM STAGE</sub><br>
-   *   <small>
-   *   <b>incomingStream</b> &#8594;
-   *   [(<a href="#event_streamMuted">streamMuted</a>) &#8594;
-   *   (<a href="#event_peerUpdated">peerUpdated</a>)] &#8594;
-   *   <a href="#event_streamEnded">streamEnded</a>
-   *   </small>
    * @event incomingStream
    * @param {String} peerId The Peer ID associated to the Stream object.
    * @param {Object} stream The Peer
@@ -8846,19 +8655,6 @@ Skylink.prototype._EVENTS = {
    * Event triggered when message data is received from Peer.
    * - This event may trigger for self when sending message data to Peer,
    *   which indicates that self has sent the message data.
-   * - <sub>PEER CONNECTION STAGE</sub><br>
-   *   <small>
-   *   <a href="#event_peerJoined">peerJoined</a> &#8594;
-   *   <a href="#event_handshakeProgress">handshakeProgress</a> &#8594;
-   *   (<a href="#event_incomingStream">incomingStream</a>) &#8594;
-   *   (<a href="#event_dataChannelState">dataChannelState</a>) &#8594;
-   *   [(<b>incomingMessage</b>) -
-   *   (<a href="#event_incomingData">incomingData</a>) -
-   *   (<a href="#event_peerUpdated">peerUpdated</a>)] &#8594;
-   *   [(<a href="#event_peerRestart">peerRestart</a>) &#8594;
-   *   (&#8592;<em>handshakeProgress</em>)] &#8594;
-   *   <a href="#event_peerLeft">peerLeft</a>
-   *   </small>
    * @event incomingMessage
    * @param {JSON} message The message object received from Peer.
    * @param {JSON|String} message.content The message object content. This is the
@@ -8957,12 +8753,6 @@ Skylink.prototype._EVENTS = {
    *   you may subscribe to the <a href="#event_dataTransferState">dataTransferState</a> event.
    * - If <code>enableDataChannel</code> disabled in <a href="#method_init">init() configuration
    *   settings</a>, this event will not be triggered at all.
-   * - <sub>DATA TRANSFER STAGE</sub><br>
-   *   <small>
-   *   <a href="#event_dataTransferState">dataTransferState</a> &#8594;
-   *   <a href="#event_incomingDataRequest">incomingDataRequest</a> &#8594;
-   *   <b>incomingData</b>
-   *   </small>
    * @event incomingData
    * @param {Blob|String} data The transferred data object.<br>
    *   For Blob data object, see the
@@ -9029,22 +8819,6 @@ Skylink.prototype._EVENTS = {
    * Event triggered when the currently connected room lock status have been updated.
    * - If this event is triggered, this means that the room is locked / unlocked which
    *   may allow or prevent any other Peers from joining the room.
-   * - <sub>ROOM CONNECTION STAGE</sub><br>
-   *   <small>
-   *   <a href="#event_readyStateChange">readyStateChange</a> &#8594;
-   *   (<a href="#event_channelRetry">channelRetry</a>) &#8594;
-   *   <a href="#event_channelOpen">channelOpen</a> &#8594;
-   *   (<a href="#event_mediaAccessSuccess">mediaAccessSuccess</a>) &#8594;
-   *   [<a href="#event_systemAction">systemAction</a> &#8594;
-   *   <a href="#event_channelClose">channelClose</a>] &nbsp; / &nbsp;
-   *   [<a href="#event_peerJoined">peerJoined <sup>(isSelf = true)</sub></a> &#8594;
-   *   (<a href="#event_serverPeerJoined">serverPeerJoined</a>) &#8594;
-   *   (<a href="#event_serverPeerLeft">serverPeerLeft</a>) &#8594;
-   *   (<a href="#event_introduceStateChange">introduceStateChange</a>) &#8594;
-   *   (<b>roomLock</b>) &#8594;
-   *   <a href="#event_peerLeft">peerLeft <sup>(isSelf = true)</sub></a> &#8594;
-   *   <a href="#event_channelClose">channelClose</a>]
-   *   </small>
    * @event roomLock
    * @param {Boolean} isLocked The flag that indicates if the currently connected room is locked.
    * @param {String} peerId The Peer ID of the peer that updated the
@@ -9130,19 +8904,6 @@ Skylink.prototype._EVENTS = {
    *   <a href="#method_sendP2PMessage">sendP2PMessage()</a>.
    * - If <code>enableDataChannel</code> disabled in <a href="#method_init">init() configuration
    *   settings</a>, this event will not be triggered at all.
-   * - <sub>PEER CONNECTION STAGE</sub><br>
-   *   <small>
-   *   <a href="#event_peerJoined">peerJoined</a> &#8594;
-   *   <a href="#event_handshakeProgress">handshakeProgress</a> &#8594;
-   *   (<a href="#event_incomingStream">incomingStream</a>) &#8594;
-   *   (<b>dataChannelState</b>) &#8594;
-   *   [(<a href="#event_incomingMessage">incomingMessage</a>) -
-   *   (<a href="#event_incomingData">incomingData</a>) -
-   *   (<a href="#event_peerUpdated">peerUpdated</a>)] &#8594;
-   *   [(<a href="#event_peerRestart">peerRestart</a>) &#8594;
-   *   (&#8592;<em>handshakeProgress</em>)] &#8594;
-   *   <a href="#event_peerLeft">peerLeft</a>
-   *   </small>
    * @event dataChannelState
    * @param {String} state The current DataChannel connection state.
    *   [Rel: Skylink.DATA_CHANNEL_STATE]
@@ -9168,12 +8929,6 @@ Skylink.prototype._EVENTS = {
    *   <a href="#event_incomingData">incomingData</a> events.
    * - If <code>enableDataChannel</code> disabled in <a href="#method_init">init() configuration
    *   settings</a>, this event will not be triggered at all.
-   * - <sub>DATA TRANSFER STAGE</sub><br>
-   *   <small>
-   *   <b>dataTransferState</b> &#8594;
-   *   <a href="#event_incomingDataRequest">incomingDataRequest</a> &#8594;
-   *   <a href="#event_incomingData">incomingData</a>
-   *   </small>
    * @event dataTransferState
    * @param {String} state The data transfer made to Peer
    *   in a DataChannel connection state.
@@ -9211,22 +8966,6 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when Skylink receives an system action from the platform signaling.
-   * - <sub>ROOM CONNECTION STAGE</sub><br>
-   *   <small>
-   *   <a href="#event_readyStateChange">readyStateChange</a> &#8594;
-   *   (<a href="#event_channelRetry">channelRetry</a>) &#8594;
-   *   <a href="#event_channelOpen">channelOpen</a> &#8594;
-   *   (<a href="#event_mediaAccessSuccess">mediaAccessSuccess</a>) &#8594;
-   *   [<b>systemAction</b> &#8594;
-   *   <a href="#event_channelClose">channelClose</a>] &nbsp; / &nbsp;
-   *   [<a href="#event_peerJoined">peerJoined <sup>(isSelf = true)</sub></a> &#8594;
-   *   (<a href="#event_serverPeerJoined">serverPeerJoined</a>) &#8594;
-   *   (<a href="#event_introduceStateChange">introduceStateChange</a>) &#8594;
-   *   (<a href="#event_roomLock">roomLock</a>) &#8594;
-   *   (<a href="#event_serverPeerLeft">serverPeerLeft</a>) &#8594;
-   *   <a href="#event_peerLeft">peerLeft <sup>(isSelf = true)</sub></a> &#8594;
-   *   <a href="#event_channelClose">channelClose</a>]
-   *   </small>
    * @event systemAction
    * @param {String} action The system action that is received from the platform signaling.
    *   [Rel: Skylink.SYSTEM_ACTION]
@@ -9243,15 +8982,6 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when a server Peer joins the room.
-   * - <sub>SERVER PEER CONNECTION STAGE</sub><br>
-   *   <small>
-   *   <b>serverPeerJoined</b> &#8594;
-   *   <a href="#event_handshakeProgress">handshakeProgress</a> &#8594;
-   *   (<a href="#event_dataChannelState">dataChannelState</a>) &#8594;
-   *   [(<a href="#event_serverPeerRestart">serverPeerRestart</a>) &#8594;
-   *   (&#8592;<em>handshakeProgress</em>)] &#8594;
-   *   <a href="#event_serverPeerLeft">serverPeerLeft</a>
-   *   </small>
    * @event serverPeerJoined
    * @param {String} peerId The Peer ID of the new server peer
    *   that has joined the room.
@@ -9265,15 +8995,6 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when a server Peer leaves the room.
-   * - <sub>SERVER PEER CONNECTION STAGE</sub><br>
-   *   <small>
-   *   <a href="#event_serverPeerJoined">serverPeerJoined</a> &#8594;
-   *   <a href="#event_handshakeProgress">handshakeProgress</a> &#8594;
-   *   (<a href="#event_dataChannelState">dataChannelState</a>) &#8594;
-   *   [(<a href="#event_serverPeerRestart">serverPeerRestart</a>) &#8594;
-   *   (&#8592;<em>handshakeProgress</em>)] &#8594;
-   *   <b>serverPeerLeft</b>
-   *   </small>
    * @event serverPeerLeft
    * @param {String} peerId The Peer ID of the new server peer
    *   that has left the room.
@@ -9288,14 +9009,6 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when a sever Peer connection has been restarted for
    *   a reconnection.
-   * - <sub>SERVER PEER RECONNECTION STAGE</sub><br>
-   *   <small>
-   *   <b>serverPeerRestart</b> &#8594;
-   *   <a href="#event_serverPeerLeft">serverPeerLeft</a> &#8594;
-   *   <a href="#event_serverPeerJoined">serverPeerJoined</a> &#8594;
-   *   <a href="#event_handshakeProgress">handshakeProgress</a> &#8594;
-   *   (<a href="#event_dataChannelState">dataChannelState</a>)
-   *   </small>
    * @event serverPeerRestart
    * @param {String} peerId The Peer ID of the new server peer
    *   that has joined the room.
@@ -9309,13 +9022,6 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when a Peer connection Stream streaming has stopped.
-   * - <sub>SENDING STREAM STAGE</sub><br>
-   *   <small>
-   *   <a href="#event_incomingStream">incomingStream</a> &#8594;
-   *   [(<a href="#event_streamMuted">streamMuted</a>) &#8594;
-   *   (<a href="#event_peerUpdated">peerUpdated</a>)] &#8594;
-   *   <b>streamEnded</b>
-   *   </small>
    * @event streamEnded
    * @param {String} [peerId=null] The Peer ID associated to the Stream object.
    *   If self is not in the room, the value returned would be <code>null</code>.
@@ -9396,13 +9102,6 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when a Peer connection Stream streaming audio or video
    *   stream muted status have been updated.
-   * - <sub>SENDING STREAM STAGE</sub><br>
-   *   <small>
-   *   <a href="#event_incomingStream">incomingStream</a> &#8594;
-   *   [(<b>streamMuted</b>) &#8594;
-   *   (<a href="#event_peerUpdated">peerUpdated</a>)] &#8594;
-   *   <a href="#event_streamEnded">streamEnded</a>
-   *   </small>
    * @event streamMuted
    * @param {String} peerId The Peer ID associated to the Stream object.
    *   If self is not in the room, the value returned would be <code>null</code>.
@@ -9485,12 +9184,6 @@ Skylink.prototype._EVENTS = {
    *   on the Application Key configured in <a href="#method_init">init()</a>
    *   from the platform signaling state has changed.
    * - This requires that the provided alias Application Key has privileged feature configured.
-   * - <sub>PEER INTRODUCTION STAGE</sub><br>
-   *   <small>
-   *   <b>getPeersStateChange</b> &#8594;
-   *   <a href="#event_introduceStateChange">introduceStateChange</a> &#8594;
-   *   <a href="#event_handshakeProgress">handshakeProgress</a>
-   *   </small>
    * @event getPeersStateChange
    * @param {String} state The retrieval current status.
    * @param {String} privilegedPeerId The Peer ID of the privileged Peer.
@@ -9506,12 +9199,6 @@ Skylink.prototype._EVENTS = {
    * Event triggered when introductory state of two Peer peers to each other
    *   selected by the privileged Peer state has changed.
    * - This requires that the provided alias Application Key has privileged feature configured.
-   * - <sub>PEER INTRODUCTION STAGE</sub><br>
-   *   <small>
-   *   <a href="#event_getPeersStateChange">getPeersStateChange</a> &#8594;
-   *   <b>introduceStateChange</b> &#8594;
-   *   <a href="#event_handshakeProgress">handshakeProgress</a>
-   *   </small>
    * @event introduceStateChange
    * @param {String} state The Peer introduction state.
    * @param {String} privilegedPeerId The Peer ID of the privileged Peer.

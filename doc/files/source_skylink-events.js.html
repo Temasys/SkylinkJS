@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>source/skylink-events.js - skylinkjs</title>
+    <title>SkylinkJS 0.6.2</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -103,13 +103,6 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when the socket connection to the platform signaling is opened.
    * - This event means that socket connection is open and self is ready to join the room.
-   * - &lt;sub&gt;SOCKET CONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;b&gt;channelOpen&lt;/b&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_channelMessage&quot;&gt;channelMessage&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_channelError&quot;&gt;channelError&lt;/a&gt;) &amp;#8594;
-   *   &lt;a href=&quot;#event_channelClose&quot;&gt;channelClose&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event channelOpen
    * @component Events
    * @for Skylink
@@ -120,13 +113,6 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when the socket connection to the platform signaling is closed.
    * - This event means that socket connection is closed and self has left the room.
-   * - &lt;sub&gt;SOCKET CONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;a href=&quot;#event_channelOpen&quot;&gt;channelOpen&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_channelMessage&quot;&gt;channelMessage&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_channelError&quot;&gt;channelError&lt;/a&gt;) &amp;#8594;
-   *   &lt;b&gt;channelClose&lt;/b&gt;
-   *   &lt;/small&gt;
    * @event channelClose
    * @component Events
    * @for Skylink
@@ -139,13 +125,6 @@ Skylink.prototype._EVENTS = {
    * - This event is a debugging feature, and it&#x27;s not advisable to subscribe to
    *   this event unless you are debugging the socket messages
    *   received from the platform signaling.
-   * - &lt;sub&gt;SOCKET CONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;a href=&quot;#event_channelOpen&quot;&gt;channelOpen&lt;/a&gt; &amp;#8594;
-   *   &lt;b&gt;channelMessage&lt;/b&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_channelError&quot;&gt;channelError&lt;/a&gt;) &amp;#8594;
-   *   &lt;a href=&quot;#event_channelClose&quot;&gt;channelClose&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event channelMessage
    * @param {JSON} message The socket message object data received from the platform signaling.
    * @component Events
@@ -159,13 +138,6 @@ Skylink.prototype._EVENTS = {
    *   during a connection with the platform signaling.
    * - After this event is triggered, it may result in &lt;a href=&quot;#event_channelClose&quot;&gt;channelClose&lt;/a&gt;,
    *   and the socket connection with the platform signaling could be disrupted.
-   * - &lt;sub&gt;SOCKET CONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;a href=&quot;#event_channelOpen&quot;&gt;channelOpen&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_channelMessage&quot;&gt;channelMessage&lt;/a&gt; &amp;#8594;
-   *   (&lt;b&gt;channelError&lt;/b&gt;) &amp;#8594;
-   *   &lt;a href=&quot;#event_channelClose&quot;&gt;channelClose&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event channelError
    * @param {Object|String} error The error object thrown that caused the exception.
    * @component Events
@@ -181,13 +153,6 @@ Skylink.prototype._EVENTS = {
    *   this event may not be triggered.
    * - If reconnection attempt fails, it will trigger &lt;a href=&quot;#event_socketError&quot;&gt;socketError&lt;/a&gt; event
    *   again and repeat the stage from there.
-   * - &lt;sub&gt;SOCKET RECONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;a href=&quot;#event_socketError&quot;&gt;socketError&lt;/a&gt; &amp;#8594;
-   *   &lt;b&gt;channelRetry&lt;/b&gt; &amp;#8594;
-   *   (&amp;#8592;&lt;em&gt;socketError&lt;/em&gt;) &amp;#8594;
-   *   &lt;a href=&quot;#event_channelOpen&quot;&gt;channelOpen&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event channelRetry
    * @param {String} fallbackType The fallback socket transport that Skylink is attempting to reconnect with.
    *   [Rel: Skylink.SOCKET_FALLBACK]
@@ -205,13 +170,6 @@ Skylink.prototype._EVENTS = {
    * - If reconnection attempt fails and there are still available ports to reconnect with,
    *   it will trigger &lt;a href=&quot;#event_channelRetry&quot;&gt;channelRetry&lt;/a&gt; event again and
    *   repeat the stage from there.
-   * - &lt;sub&gt;SOCKET RECONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;b&gt;socketError&lt;/b&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_channelRetry&quot;&gt;channelRetry&lt;/a&gt; &amp;#8594;
-   *   (&amp;#8592;&lt;em&gt;socketError&lt;/em&gt;) &amp;#8594;
-   *   &lt;a href=&quot;#event_channelOpen&quot;&gt;channelOpen&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event socketError
    * @param {String} errorCode The socket connection error code received.
    *   [Rel: Skylink.SOCKET_ERROR]
@@ -229,22 +187,6 @@ Skylink.prototype._EVENTS = {
    * - This is also triggered when &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt; is invoked, but
    *   the socket connection events like &lt;a href=&quot;#event_channelOpen&quot;&gt;channelOpen&lt;/a&gt; does
    *   not get triggered but stops at &lt;u&gt;readyStateChange&lt;/u&gt; event.
-   * - &lt;sub&gt;ROOM CONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;b&gt;readyStateChange&lt;/b&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_channelRetry&quot;&gt;channelRetry&lt;/a&gt;) &amp;#8594;
-   *   &lt;a href=&quot;#event_channelOpen&quot;&gt;channelOpen&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;mediaAccessSuccess&lt;/a&gt;) &amp;#8594;
-   *   [&lt;a href=&quot;#event_systemAction&quot;&gt;systemAction&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_channelClose&quot;&gt;channelClose&lt;/a&gt;] &amp;nbsp; / &amp;nbsp;
-   *   [&lt;a href=&quot;#event_peerJoined&quot;&gt;peerJoined &lt;sup&gt;(isSelf = true)&lt;/sub&gt;&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_serverPeerJoined&quot;&gt;serverPeerJoined&lt;/a&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_serverPeerLeft&quot;&gt;serverPeerLeft&lt;/a&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_introduceStateChange&quot;&gt;introduceStateChange&lt;/a&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_roomLock&quot;&gt;roomLock&lt;/a&gt;) &amp;#8594;
-   *   &lt;a href=&quot;#event_peerLeft&quot;&gt;peerLeft &lt;sup&gt;(isSelf = true)&lt;/sub&gt;&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_channelClose&quot;&gt;channelClose&lt;/a&gt;]
-   *   &lt;/small&gt;
    * @event readyStateChange
    * @param {String} readyState The current ready state of the retrieval when the event is triggered.
    *   [Rel: Skylink.READY_STATE_CHANGE]
@@ -278,13 +220,6 @@ Skylink.prototype._EVENTS = {
    *   Peer handshaking connection status.
    * - This starts the Peer connection handshaking, where it retrieves all the Peer
    *   information and then proceeds to start the ICE connection.
-   * - &lt;sub&gt;PEER CONNECTION STATUS STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;b&gt;handshakeProgress&lt;/b&gt; &amp;#8596;
-   *   &lt;a href=&quot;#event_peerConnectionState&quot;&gt;peerConnectionState&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_candidateGenerationState&quot;&gt;candidateGenerationState&lt;/a&gt; &amp;#8596;
-   *   &lt;a href=&quot;#event_iceConnectionState&quot;&gt;iceConnectionState&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event handshakeProgress
    * @param {String} state The Peer connection handshake state.
    *   [Rel: Skylink.HANDSHAKE_PROGRESS]
@@ -304,13 +239,6 @@ Skylink.prototype._EVENTS = {
    *   Peer ICE candidate gathering status.
    * - This indicates if the ICE gathering has been completed to
    *   start ICE connection for DataChannel and media streaming connection.
-   * - &lt;sub&gt;PEER CONNECTION STATUS STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;a href=&quot;#event_handshakeProgress&quot;&gt;handshakeProgress&lt;/a&gt; &amp;#8596;
-   *   &lt;a href=&quot;#event_peerConnectionState&quot;&gt;peerConnectionState&lt;/a&gt; &amp;#8594;
-   *   &lt;b&gt;candidateGenerationState&lt;/b&gt; &amp;#8596;
-   *   &lt;a href=&quot;#event_iceConnectionState&quot;&gt;iceConnectionState&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event candidateGenerationState
    * @param {String} state The current ICE gathering state.
    *   &lt;small&gt;See the list of available triggered states in the related link.&lt;/small&gt;
@@ -328,13 +256,6 @@ Skylink.prototype._EVENTS = {
    *   Peer signaling connection status.
    * - This event indicates if the session description is received
    *   to start ICE gathering for DataChannel and media streaming connection.
-   * - &lt;sub&gt;PEER CONNECTION STATUS STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;a href=&quot;#event_handshakeProgress&quot;&gt;handshakeProgress&lt;/a&gt; &amp;#8596;
-   *   &lt;b&gt;peerConnectionState&lt;/b&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_candidateGenerationState&quot;&gt;candidateGenerationState&lt;/a&gt; &amp;#8596;
-   *   &lt;a href=&quot;#event_iceConnectionState&quot;&gt;iceConnectionState&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event peerConnectionState
    * @param {String} state The current connection signaling state.
    *   [Rel: Skylink.PEER_CONNECTION_STATE]
@@ -352,13 +273,6 @@ Skylink.prototype._EVENTS = {
    *   Peer ICE connection of added ICE candidates status.
    * - This event indicates if the ICE connection is established for successful
    *   DataChannel and media streaming connection.
-   * - &lt;sub&gt;PEER CONNECTION STATUS STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;a href=&quot;#event_handshakeProgress&quot;&gt;handshakeProgress&lt;/a&gt; &amp;#8596;
-   *   &lt;a href=&quot;#event_peerConnectionState&quot;&gt;peerConnectionState&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_candidateGenerationState&quot;&gt;candidateGenerationState&lt;/a&gt; &amp;#8596;
-   *   &lt;b&gt;iceConnectionState&lt;/b&gt;
-   *   &lt;/small&gt;
    * @event iceConnectionState
    * @param {String} state The current ICE connection state.
    *   [Rel: Skylink.ICE_CONNECTION_STATE]
@@ -374,16 +288,6 @@ Skylink.prototype._EVENTS = {
    * - If &lt;code&gt;audioFallback&lt;/code&gt; is enabled in &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;,
    *   it will throw an error if audio only user media stream failed after
    *   a failed attempt to retrieve video and audio user media.
-   * - &lt;sub&gt;USER STREAM STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   (&lt;a href=&quot;#event_mediaAccessRequired&quot;&gt;mediaAccessRequired&lt;/a&gt;) &amp;#8594;
-   *   [(&lt;a href=&quot;#event_mediaAccessFallback&quot;&gt;mediaAccessFallback&lt;/a&gt;) &amp;#8594;
-   *   (&lt;b&gt;mediaAccessError&lt;/b&gt;)] &amp;#8594;
-   *   &lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;mediaAccessSuccess&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_streamMuted&quot;&gt;streamMuted&lt;/a&gt;) &amp;#8594;
-   *   &lt;a href=&quot;#event_mediaAccessStopped&quot;&gt;mediaAccessStopped&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_streamEnded&quot;&gt;streamEnded&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event mediaAccessError
    * @param {Object|String} error The error object thrown that caused the failure.
    * @param {Boolean} isScreensharing The flag that indicates if self
@@ -402,16 +306,6 @@ Skylink.prototype._EVENTS = {
    * - If &lt;code&gt;audioFallback&lt;/code&gt; is enabled in &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;,
    *   and if there is a failed attempt to retrieve video and audio user media,
    *   it will attempt to do the audio fallback.
-   * - &lt;sub&gt;USER STREAM STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   (&lt;a href=&quot;#event_mediaAccessRequired&quot;&gt;mediaAccessRequired&lt;/a&gt;) &amp;#8594;
-   *   [(&lt;b&gt;mediaAccessFallback&lt;/b&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_mediaAccessError&quot;&gt;mediaAccessError&lt;/a&gt;)] &amp;#8594;
-   *   &lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;mediaAccessSuccess&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_streamMuted&quot;&gt;streamMuted&lt;/a&gt;) &amp;#8594;
-   *   &lt;a href=&quot;#event_mediaAccessStopped&quot;&gt;mediaAccessStopped&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_streamEnded&quot;&gt;streamEnded&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event mediaAccessFallback
    * @param {Object|String} error The error object thrown that caused the failure
    *   from retrieve video and audio user media stream.
@@ -424,16 +318,6 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when access to self user media stream is successfully
    *   attached to Skylink.
-   * - &lt;sub&gt;USER STREAM STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   (&lt;a href=&quot;#event_mediaAccessRequired&quot;&gt;mediaAccessRequired&lt;/a&gt;) &amp;#8594;
-   *   [(&lt;a href=&quot;#event_mediaAccessFallback&quot;&gt;mediaAccessFallback&lt;/a&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_mediaAccessError&quot;&gt;mediaAccessError&lt;/a&gt;)] &amp;#8594;
-   *   &lt;b&gt;mediaAccessSuccess&lt;/b&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_streamMuted&quot;&gt;streamMuted&lt;/a&gt;) &amp;#8594;
-   *   &lt;a href=&quot;#event_mediaAccessStopped&quot;&gt;mediaAccessStopped&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_streamEnded&quot;&gt;streamEnded&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event mediaAccessSuccess
    * @param {Object} stream The self user [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_API)
    *   object. To display the MediaStream object to a &lt;code&gt;video&lt;/code&gt; or &lt;code&gt;audio&lt;/code&gt;, simply invoke:&lt;br&gt;
@@ -456,16 +340,6 @@ Skylink.prototype._EVENTS = {
    *   to retrieve the user media stream before self would join the room.
    *   Once the user media stream is attached, self would proceed to join the room
    *   automatically.
-   * - &lt;sub&gt;USER STREAM STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   (&lt;b&gt;mediaAccessRequired&lt;/b&gt;) &amp;#8594;
-   *   [(&lt;a href=&quot;#event_mediaAccessFallback&quot;&gt;mediaAccessFallback&lt;/a&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_mediaAccessError&quot;&gt;mediaAccessError&lt;/a&gt;)] &amp;#8594;
-   *   &lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;mediaAccessSuccess&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_streamMuted&quot;&gt;streamMuted&lt;/a&gt;) &amp;#8594;
-   *   &lt;a href=&quot;#event_mediaAccessStopped&quot;&gt;mediaAccessStopped&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_streamEnded&quot;&gt;streamEnded&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event mediaAccessRequired
    * @component Events
    * @for Skylink
@@ -475,16 +349,6 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when self user media stream attached to Skylink has been stopped.
-   * - &lt;sub&gt;USER STREAM STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   (&lt;a href=&quot;#event_mediaAccessRequired&quot;&gt;mediaAccessRequired&lt;/a&gt;) &amp;#8594;
-   *   [(&lt;a href=&quot;#event_mediaAccessFallback&quot;&gt;mediaAccessFallback&lt;/a&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_mediaAccessError&quot;&gt;mediaAccessError&lt;/a&gt;)] &amp;#8594;
-   *   &lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;mediaAccessSuccess&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_streamMuted&quot;&gt;streamMuted&lt;/a&gt;) &amp;#8594;
-   *   &lt;b&gt;mediaAccessStopped&lt;/b&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_streamEnded&quot;&gt;streamEnded&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event mediaAccessStopped
    * @param {Boolean} isScreensharing The flag that indicates if self
    *    Stream object is a screensharing stream or not.
@@ -496,19 +360,6 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when a Peer joins the room.
-   * - &lt;sub&gt;PEER CONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;b&gt;peerJoined&lt;/b&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_handshakeProgress&quot;&gt;handshakeProgress&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_incomingStream&quot;&gt;incomingStream&lt;/a&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_dataChannelState&quot;&gt;dataChannelState&lt;/a&gt;) &amp;#8594;
-   *   [(&lt;a href=&quot;#event_incomingMessage&quot;&gt;incomingMessage&lt;/a&gt;) -
-   *   (&lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt;) -
-   *   (&lt;a href=&quot;#event_peerUpdated&quot;&gt;peerUpdated&lt;/a&gt;)] &amp;#8594;
-   *   [(&lt;a href=&quot;#event_peerRestart&quot;&gt;peerRestart&lt;/a&gt;) &amp;#8594;
-   *   (&amp;#8592;&lt;em&gt;handshakeProgress&lt;/em&gt;)] &amp;#8594;
-   *   &lt;a href=&quot;#event_peerLeft&quot;&gt;peerLeft&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event peerJoined
    * @param {String} peerId The Peer ID of the new peer
    *   that has joined the room.
@@ -587,19 +438,6 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when a Peer connection has been restarted for
    *   a reconnection.
-   * - &lt;sub&gt;PEER RECONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   [&lt;var&gt;(P2P conn.)&lt;/var&gt; &lt;b&gt;peerRestart&lt;/b&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_handshakeProgress&quot;&gt;handshakeProgress&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_incomingStream&quot;&gt;incomingStream&lt;/a&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_dataChannelState&quot;&gt;dataChannelState&lt;/a&gt;) ] &amp;nbsp; / &amp;nbsp;
-   *   [&lt;var&gt;(MCU conn.)&lt;/var&gt; &lt;b&gt;peerRestart&lt;/b&gt; &amp;#8594;
-   *    &lt;a href=&quot;#event_peerLeft&quot;&gt;peerLeft&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_peerJoined&quot;&gt;peerJoined&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_handshakeProgress&quot;&gt;handshakeProgress&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_incomingStream&quot;&gt;incomingStream&lt;/a&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_dataChannelState&quot;&gt;dataChannelState&lt;/a&gt;)]
-   *   &lt;/small&gt;
    * @event peerRestart
    * @param {String} peerId The Peer ID of the connection that
    *   is restarted for a reconnection.
@@ -683,19 +521,6 @@ Skylink.prototype._EVENTS = {
    *   like &lt;code&gt;peerInfo.mediaStatus&lt;/code&gt; or the &lt;code&gt;peerInfo.userData&lt;/code&gt;,
    *   which is invoked through &lt;a href=&quot;#method_muteStream&quot;&gt;muteStream()&lt;/a&gt; or
    *   &lt;a href=&quot;#method_setUserData&quot;&gt;setUserData()&lt;/a&gt;.
-   * - &lt;sub&gt;PEER CONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;a href=&quot;#event_peerJoined&quot;&gt;peerJoined&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_handshakeProgress&quot;&gt;handshakeProgress&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_incomingStream&quot;&gt;incomingStream&lt;/a&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_dataChannelState&quot;&gt;dataChannelState&lt;/a&gt;) &amp;#8594;
-   *   [(&lt;a href=&quot;#event_incomingMessage&quot;&gt;incomingMessage&lt;/a&gt;) -
-   *   (&lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt;) -
-   *   (&lt;b&gt;peerUpdated&lt;/b&gt;)] &amp;#8594;
-   *   [(&lt;a href=&quot;#event_peerRestart&quot;&gt;peerRestart&lt;/a&gt;) &amp;#8594;
-   *   (&amp;#8592;&lt;em&gt;handshakeProgress&lt;/em&gt;)] &amp;#8594;
-   *   &lt;a href=&quot;#event_peerLeft&quot;&gt;peerLeft&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event peerUpdated
    * @param {String} peerId The Peer ID of the peer with updated information.
    * @param {Object} peerInfo The peer information associated
@@ -772,19 +597,6 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when a Peer leaves the room.
-   * - &lt;sub&gt;PEER CONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;a href=&quot;#event_peerJoined&quot;&gt;peerJoined&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_handshakeProgress&quot;&gt;handshakeProgress&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_incomingStream&quot;&gt;incomingStream&lt;/a&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_dataChannelState&quot;&gt;dataChannelState&lt;/a&gt;) &amp;#8594;
-   *   [(&lt;a href=&quot;#event_incomingMessage&quot;&gt;incomingMessage&lt;/a&gt;) -
-   *   (&lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt;) -
-   *   (&lt;a href=&quot;#event_peerUpdated&quot;&gt;peerUpdated&lt;/a&gt;)] &amp;#8594;
-   *   [(&lt;a href=&quot;#event_peerRestart&quot;&gt;peerRestart&lt;/a&gt;) &amp;#8594;
-   *   (&amp;#8592;&lt;em&gt;handshakeProgress&lt;/em&gt;)] &amp;#8594;
-   *   &lt;b&gt;peerLeft&lt;/b&gt;
-   *   &lt;/small&gt;
    * @event peerLeft
    * @param {String} peerId The Peer ID of the peer
    *   that had left the room.
@@ -864,13 +676,6 @@ Skylink.prototype._EVENTS = {
    * Event triggered when a Stream is sent by Peer.
    * - This event may trigger for self, which indicates that self has joined the room
    *   and is sending this Stream object to other Peers connected in the room.
-   * - &lt;sub&gt;SENDING STREAM STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;b&gt;incomingStream&lt;/b&gt; &amp;#8594;
-   *   [(&lt;a href=&quot;#event_streamMuted&quot;&gt;streamMuted&lt;/a&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_peerUpdated&quot;&gt;peerUpdated&lt;/a&gt;)] &amp;#8594;
-   *   &lt;a href=&quot;#event_streamEnded&quot;&gt;streamEnded&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event incomingStream
    * @param {String} peerId The Peer ID associated to the Stream object.
    * @param {Object} stream The Peer
@@ -954,19 +759,6 @@ Skylink.prototype._EVENTS = {
    * Event triggered when message data is received from Peer.
    * - This event may trigger for self when sending message data to Peer,
    *   which indicates that self has sent the message data.
-   * - &lt;sub&gt;PEER CONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;a href=&quot;#event_peerJoined&quot;&gt;peerJoined&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_handshakeProgress&quot;&gt;handshakeProgress&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_incomingStream&quot;&gt;incomingStream&lt;/a&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_dataChannelState&quot;&gt;dataChannelState&lt;/a&gt;) &amp;#8594;
-   *   [(&lt;b&gt;incomingMessage&lt;/b&gt;) -
-   *   (&lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt;) -
-   *   (&lt;a href=&quot;#event_peerUpdated&quot;&gt;peerUpdated&lt;/a&gt;)] &amp;#8594;
-   *   [(&lt;a href=&quot;#event_peerRestart&quot;&gt;peerRestart&lt;/a&gt;) &amp;#8594;
-   *   (&amp;#8592;&lt;em&gt;handshakeProgress&lt;/em&gt;)] &amp;#8594;
-   *   &lt;a href=&quot;#event_peerLeft&quot;&gt;peerLeft&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event incomingMessage
    * @param {JSON} message The message object received from Peer.
    * @param {JSON|String} message.content The message object content. This is the
@@ -1065,12 +857,6 @@ Skylink.prototype._EVENTS = {
    *   you may subscribe to the &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; event.
    * - If &lt;code&gt;enableDataChannel&lt;/code&gt; disabled in &lt;a href=&quot;#method_init&quot;&gt;init() configuration
    *   settings&lt;/a&gt;, this event will not be triggered at all.
-   * - &lt;sub&gt;DATA TRANSFER STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_incomingDataRequest&quot;&gt;incomingDataRequest&lt;/a&gt; &amp;#8594;
-   *   &lt;b&gt;incomingData&lt;/b&gt;
-   *   &lt;/small&gt;
    * @event incomingData
    * @param {Blob|String} data The transferred data object.&lt;br&gt;
    *   For Blob data object, see the
@@ -1137,22 +923,6 @@ Skylink.prototype._EVENTS = {
    * Event triggered when the currently connected room lock status have been updated.
    * - If this event is triggered, this means that the room is locked / unlocked which
    *   may allow or prevent any other Peers from joining the room.
-   * - &lt;sub&gt;ROOM CONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;a href=&quot;#event_readyStateChange&quot;&gt;readyStateChange&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_channelRetry&quot;&gt;channelRetry&lt;/a&gt;) &amp;#8594;
-   *   &lt;a href=&quot;#event_channelOpen&quot;&gt;channelOpen&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;mediaAccessSuccess&lt;/a&gt;) &amp;#8594;
-   *   [&lt;a href=&quot;#event_systemAction&quot;&gt;systemAction&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_channelClose&quot;&gt;channelClose&lt;/a&gt;] &amp;nbsp; / &amp;nbsp;
-   *   [&lt;a href=&quot;#event_peerJoined&quot;&gt;peerJoined &lt;sup&gt;(isSelf = true)&lt;/sub&gt;&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_serverPeerJoined&quot;&gt;serverPeerJoined&lt;/a&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_serverPeerLeft&quot;&gt;serverPeerLeft&lt;/a&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_introduceStateChange&quot;&gt;introduceStateChange&lt;/a&gt;) &amp;#8594;
-   *   (&lt;b&gt;roomLock&lt;/b&gt;) &amp;#8594;
-   *   &lt;a href=&quot;#event_peerLeft&quot;&gt;peerLeft &lt;sup&gt;(isSelf = true)&lt;/sub&gt;&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_channelClose&quot;&gt;channelClose&lt;/a&gt;]
-   *   &lt;/small&gt;
    * @event roomLock
    * @param {Boolean} isLocked The flag that indicates if the currently connected room is locked.
    * @param {String} peerId The Peer ID of the peer that updated the
@@ -1238,19 +1008,6 @@ Skylink.prototype._EVENTS = {
    *   &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;sendP2PMessage()&lt;/a&gt;.
    * - If &lt;code&gt;enableDataChannel&lt;/code&gt; disabled in &lt;a href=&quot;#method_init&quot;&gt;init() configuration
    *   settings&lt;/a&gt;, this event will not be triggered at all.
-   * - &lt;sub&gt;PEER CONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;a href=&quot;#event_peerJoined&quot;&gt;peerJoined&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_handshakeProgress&quot;&gt;handshakeProgress&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_incomingStream&quot;&gt;incomingStream&lt;/a&gt;) &amp;#8594;
-   *   (&lt;b&gt;dataChannelState&lt;/b&gt;) &amp;#8594;
-   *   [(&lt;a href=&quot;#event_incomingMessage&quot;&gt;incomingMessage&lt;/a&gt;) -
-   *   (&lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt;) -
-   *   (&lt;a href=&quot;#event_peerUpdated&quot;&gt;peerUpdated&lt;/a&gt;)] &amp;#8594;
-   *   [(&lt;a href=&quot;#event_peerRestart&quot;&gt;peerRestart&lt;/a&gt;) &amp;#8594;
-   *   (&amp;#8592;&lt;em&gt;handshakeProgress&lt;/em&gt;)] &amp;#8594;
-   *   &lt;a href=&quot;#event_peerLeft&quot;&gt;peerLeft&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event dataChannelState
    * @param {String} state The current DataChannel connection state.
    *   [Rel: Skylink.DATA_CHANNEL_STATE]
@@ -1276,12 +1033,6 @@ Skylink.prototype._EVENTS = {
    *   &lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt; events.
    * - If &lt;code&gt;enableDataChannel&lt;/code&gt; disabled in &lt;a href=&quot;#method_init&quot;&gt;init() configuration
    *   settings&lt;/a&gt;, this event will not be triggered at all.
-   * - &lt;sub&gt;DATA TRANSFER STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;b&gt;dataTransferState&lt;/b&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_incomingDataRequest&quot;&gt;incomingDataRequest&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event dataTransferState
    * @param {String} state The data transfer made to Peer
    *   in a DataChannel connection state.
@@ -1319,22 +1070,6 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when Skylink receives an system action from the platform signaling.
-   * - &lt;sub&gt;ROOM CONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;a href=&quot;#event_readyStateChange&quot;&gt;readyStateChange&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_channelRetry&quot;&gt;channelRetry&lt;/a&gt;) &amp;#8594;
-   *   &lt;a href=&quot;#event_channelOpen&quot;&gt;channelOpen&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;mediaAccessSuccess&lt;/a&gt;) &amp;#8594;
-   *   [&lt;b&gt;systemAction&lt;/b&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_channelClose&quot;&gt;channelClose&lt;/a&gt;] &amp;nbsp; / &amp;nbsp;
-   *   [&lt;a href=&quot;#event_peerJoined&quot;&gt;peerJoined &lt;sup&gt;(isSelf = true)&lt;/sub&gt;&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_serverPeerJoined&quot;&gt;serverPeerJoined&lt;/a&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_introduceStateChange&quot;&gt;introduceStateChange&lt;/a&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_roomLock&quot;&gt;roomLock&lt;/a&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_serverPeerLeft&quot;&gt;serverPeerLeft&lt;/a&gt;) &amp;#8594;
-   *   &lt;a href=&quot;#event_peerLeft&quot;&gt;peerLeft &lt;sup&gt;(isSelf = true)&lt;/sub&gt;&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_channelClose&quot;&gt;channelClose&lt;/a&gt;]
-   *   &lt;/small&gt;
    * @event systemAction
    * @param {String} action The system action that is received from the platform signaling.
    *   [Rel: Skylink.SYSTEM_ACTION]
@@ -1351,15 +1086,6 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when a server Peer joins the room.
-   * - &lt;sub&gt;SERVER PEER CONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;b&gt;serverPeerJoined&lt;/b&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_handshakeProgress&quot;&gt;handshakeProgress&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_dataChannelState&quot;&gt;dataChannelState&lt;/a&gt;) &amp;#8594;
-   *   [(&lt;a href=&quot;#event_serverPeerRestart&quot;&gt;serverPeerRestart&lt;/a&gt;) &amp;#8594;
-   *   (&amp;#8592;&lt;em&gt;handshakeProgress&lt;/em&gt;)] &amp;#8594;
-   *   &lt;a href=&quot;#event_serverPeerLeft&quot;&gt;serverPeerLeft&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event serverPeerJoined
    * @param {String} peerId The Peer ID of the new server peer
    *   that has joined the room.
@@ -1373,15 +1099,6 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when a server Peer leaves the room.
-   * - &lt;sub&gt;SERVER PEER CONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;a href=&quot;#event_serverPeerJoined&quot;&gt;serverPeerJoined&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_handshakeProgress&quot;&gt;handshakeProgress&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_dataChannelState&quot;&gt;dataChannelState&lt;/a&gt;) &amp;#8594;
-   *   [(&lt;a href=&quot;#event_serverPeerRestart&quot;&gt;serverPeerRestart&lt;/a&gt;) &amp;#8594;
-   *   (&amp;#8592;&lt;em&gt;handshakeProgress&lt;/em&gt;)] &amp;#8594;
-   *   &lt;b&gt;serverPeerLeft&lt;/b&gt;
-   *   &lt;/small&gt;
    * @event serverPeerLeft
    * @param {String} peerId The Peer ID of the new server peer
    *   that has left the room.
@@ -1396,14 +1113,6 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when a sever Peer connection has been restarted for
    *   a reconnection.
-   * - &lt;sub&gt;SERVER PEER RECONNECTION STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;b&gt;serverPeerRestart&lt;/b&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_serverPeerLeft&quot;&gt;serverPeerLeft&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_serverPeerJoined&quot;&gt;serverPeerJoined&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_handshakeProgress&quot;&gt;handshakeProgress&lt;/a&gt; &amp;#8594;
-   *   (&lt;a href=&quot;#event_dataChannelState&quot;&gt;dataChannelState&lt;/a&gt;)
-   *   &lt;/small&gt;
    * @event serverPeerRestart
    * @param {String} peerId The Peer ID of the new server peer
    *   that has joined the room.
@@ -1417,13 +1126,6 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when a Peer connection Stream streaming has stopped.
-   * - &lt;sub&gt;SENDING STREAM STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;a href=&quot;#event_incomingStream&quot;&gt;incomingStream&lt;/a&gt; &amp;#8594;
-   *   [(&lt;a href=&quot;#event_streamMuted&quot;&gt;streamMuted&lt;/a&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_peerUpdated&quot;&gt;peerUpdated&lt;/a&gt;)] &amp;#8594;
-   *   &lt;b&gt;streamEnded&lt;/b&gt;
-   *   &lt;/small&gt;
    * @event streamEnded
    * @param {String} [peerId=null] The Peer ID associated to the Stream object.
    *   If self is not in the room, the value returned would be &lt;code&gt;null&lt;/code&gt;.
@@ -1504,13 +1206,6 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when a Peer connection Stream streaming audio or video
    *   stream muted status have been updated.
-   * - &lt;sub&gt;SENDING STREAM STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;a href=&quot;#event_incomingStream&quot;&gt;incomingStream&lt;/a&gt; &amp;#8594;
-   *   [(&lt;b&gt;streamMuted&lt;/b&gt;) &amp;#8594;
-   *   (&lt;a href=&quot;#event_peerUpdated&quot;&gt;peerUpdated&lt;/a&gt;)] &amp;#8594;
-   *   &lt;a href=&quot;#event_streamEnded&quot;&gt;streamEnded&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event streamMuted
    * @param {String} peerId The Peer ID associated to the Stream object.
    *   If self is not in the room, the value returned would be &lt;code&gt;null&lt;/code&gt;.
@@ -1593,12 +1288,6 @@ Skylink.prototype._EVENTS = {
    *   on the Application Key configured in &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
    *   from the platform signaling state has changed.
    * - This requires that the provided alias Application Key has privileged feature configured.
-   * - &lt;sub&gt;PEER INTRODUCTION STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;b&gt;getPeersStateChange&lt;/b&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_introduceStateChange&quot;&gt;introduceStateChange&lt;/a&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_handshakeProgress&quot;&gt;handshakeProgress&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event getPeersStateChange
    * @param {String} state The retrieval current status.
    * @param {String} privilegedPeerId The Peer ID of the privileged Peer.
@@ -1614,12 +1303,6 @@ Skylink.prototype._EVENTS = {
    * Event triggered when introductory state of two Peer peers to each other
    *   selected by the privileged Peer state has changed.
    * - This requires that the provided alias Application Key has privileged feature configured.
-   * - &lt;sub&gt;PEER INTRODUCTION STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;a href=&quot;#event_getPeersStateChange&quot;&gt;getPeersStateChange&lt;/a&gt; &amp;#8594;
-   *   &lt;b&gt;introduceStateChange&lt;/b&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_handshakeProgress&quot;&gt;handshakeProgress&lt;/a&gt;
-   *   &lt;/small&gt;
    * @event introduceStateChange
    * @param {String} state The Peer introduction state.
    * @param {String} privilegedPeerId The Peer ID of the privileged Peer.
