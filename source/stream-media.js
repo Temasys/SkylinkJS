@@ -1554,7 +1554,8 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     return;
   }
 
-  if (window.location.protocol !== 'https:') {
+  if (window.location.protocol !== 'https:' && window.webrtcDetectedBrowser === 'chrome' &&
+    window.webrtcDetectedVersion > 46) {
     errorMsg = 'getUserMedia() has to be called in https:// application';
     log.error(errorMsg, options);
     if (typeof callback === 'function') {
