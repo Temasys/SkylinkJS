@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.2</title>
+    <title>SkylinkJS 0.6.3</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.2</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.3</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -1011,6 +1011,12 @@ Skylink.prototype._enterHandler = function(message) {
 Skylink.prototype._restartHandler = function(message){
   var self = this;
   var targetMid = message.mid;
+
+  if (!self._peerInformations[targetMid]) {
+    log.error([targetMid, null, null, &#x27;Peer does not have an existing &#x27; +
+      &#x27;session. Ignoring restart process.&#x27;]);
+    return;
+  }
 
   if (self._hasMCU) {
     self._trigger(&#x27;peerRestart&#x27;, targetMid, self.getPeerInfo(targetMid), false);

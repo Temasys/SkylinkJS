@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "SkylinkJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.2",
+        "version": "0.6.3",
         "url": "https://temasys.github.io/"
     },
     "files": {
@@ -2870,7 +2870,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 180,
+            "line": 185,
             "description": "Restarts a Peer connection in a P2P environment.\nThis is usually done for replacing the previous Stream attached and restarting\n  the connection with a new one, or when the ICE connection has issues\n  streaming video/audio stream in the remote Stream which requires\n  a refresh in the ICE connection.",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -2911,7 +2911,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 316,
+            "line": 321,
             "description": "Disconnects the Peer connection and remove object references associated.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -2931,7 +2931,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 374,
+            "line": 387,
             "description": "Creates a Peer connection. This does not start the handshake connection\n  but creates the Peer connection object ready for connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -2961,13 +2961,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 490,
+            "line": 503,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 538,
+            "line": 551,
             "description": "Refreshes a Peer connection.\n- This feature can be used to refresh a Peer connection when the\n  remote Stream received does not stream any audio/video stream.\n- If there are more than 1 refresh during 5 seconds\n  or refresh is less than 3 seconds since the last refresh\n  initiated by the other peer, it will be aborted.\n- As for MCU connection, the restart mechanism makes the self user\n   leave and join the currently connected room again.",
             "itemtype": "method",
             "name": "refreshConnection",
@@ -3031,7 +3031,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 697,
+            "line": 710,
             "description": "Restarts all Peers connection in a MCU connection environment.\nThis would require the current user to leave the room and restart all\n  current existing Peers connection.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -10237,7 +10237,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 996,
+            "line": 1002,
             "description": "Handles the WELCOME Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -10434,7 +10434,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1161,
+            "line": 1167,
             "description": "Handles the OFFER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -10481,7 +10481,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1212,
+            "line": 1218,
             "description": "Handles the CANDIDATE Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -10537,7 +10537,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1292,
+            "line": 1298,
             "description": "Handles the ANSWER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -10584,7 +10584,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1356,
+            "line": 1362,
             "description": "Send a message object or string using the platform signaling socket connection\n  to the list of targeted PeerConnections.\nTo send message objects with DataChannel connections, see\n  {{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.",
             "itemtype": "method",
             "name": "sendMessage",
@@ -12043,7 +12043,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1633,
+            "line": 1643,
             "description": "Replaces the currently attached Stream object in Skylink and refreshes all\n  connection with Peer connections to send the updated Stream object.\nThe application may provide their own MediaStream object to send to\n  all PeerConnections connection.\nReference {{#crossLink \"Skylink/refreshConnection:method\"}}refreshConnection(){{/crossLink}}\n   on the events triggered and restart mechanism.",
             "itemtype": "method",
             "name": "sendStream",
@@ -12160,7 +12160,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1866,
+            "line": 1876,
             "description": "Mutes the currently attached Stream object in Skylink.",
             "itemtype": "method",
             "name": "muteStream",
@@ -12197,7 +12197,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1968,
+            "line": 1978,
             "description": "Unmutes the currently attached Stream object audio stream.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -12213,7 +12213,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1986,
+            "line": 1996,
             "description": "Mutes the currently attached Stream object audio stream.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -12229,7 +12229,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2004,
+            "line": 2014,
             "description": "Unmutes the currently attached Stream object video stream.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -12245,7 +12245,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2022,
+            "line": 2032,
             "description": "Mutes the currently attached Stream object video stream.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -12260,7 +12260,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2039,
+            "line": 2049,
             "description": "Shares the current screen with Peer connections and will refresh all\n   Peer connections to send the screensharing Stream object with\n   <code>HTTPS</code> protocol accessing application.\nReference {{#crossLink \"Skylink/refreshConnection:method\"}}refreshConnection(){{/crossLink}}\n   on the events triggered and restart mechanism.\nThis will require our own Temasys Skylink extension to do screensharing.\nFor screensharing feature in IE / Safari with our Temasys Plugin, please\n  [contact us](https://www.temasys.com.sg/contact-us).\nCurrently, Opera does not support screensharing feature.\nThis does not replace the currently attached user media Stream object in Skylink.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -12301,7 +12301,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2184,
+            "line": 2194,
             "description": "Stops self screensharing Stream object attached to Skylink.\nIf user media Stream object is available, Skylink will refresh all\n   Peer connections to send the user media Stream object.\nReference {{#crossLink \"Skylink/refreshConnection:method\"}}refreshConnection(){{/crossLink}}\n   on the events triggered and restart mechanism.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -12794,35 +12794,35 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:180"
+            "line": " source/peer-connection.js:185"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:316"
+            "line": " source/peer-connection.js:321"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:316"
+            "line": " source/peer-connection.js:321"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:374"
+            "line": " source/peer-connection.js:387"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:538"
+            "line": " source/peer-connection.js:551"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:538"
+            "line": " source/peer-connection.js:551"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:697"
+            "line": " source/peer-connection.js:710"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:697"
+            "line": " source/peer-connection.js:710"
         },
         {
             "message": "unknown tag: component",
@@ -13662,39 +13662,39 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:996"
+            "line": " source/socket-message.js:1002"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:996"
+            "line": " source/socket-message.js:1002"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1161"
+            "line": " source/socket-message.js:1167"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1161"
+            "line": " source/socket-message.js:1167"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1212"
+            "line": " source/socket-message.js:1218"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1292"
+            "line": " source/socket-message.js:1298"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1292"
+            "line": " source/socket-message.js:1298"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1356"
+            "line": " source/socket-message.js:1362"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1356"
+            "line": " source/socket-message.js:1362"
         },
         {
             "message": "unknown tag: component",
@@ -13830,79 +13830,79 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1633"
+            "line": " source/stream-media.js:1643"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1633"
+            "line": " source/stream-media.js:1643"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1866"
+            "line": " source/stream-media.js:1876"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1866"
+            "line": " source/stream-media.js:1876"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1968"
+            "line": " source/stream-media.js:1978"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1968"
+            "line": " source/stream-media.js:1978"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1968"
+            "line": " source/stream-media.js:1978"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1986"
+            "line": " source/stream-media.js:1996"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1986"
+            "line": " source/stream-media.js:1996"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1986"
+            "line": " source/stream-media.js:1996"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2004"
+            "line": " source/stream-media.js:2014"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2004"
+            "line": " source/stream-media.js:2014"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2004"
+            "line": " source/stream-media.js:2014"
         },
         {
             "message": "unknown tag: depcreated",
-            "line": " source/stream-media.js:2022"
+            "line": " source/stream-media.js:2032"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2022"
+            "line": " source/stream-media.js:2032"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2022"
+            "line": " source/stream-media.js:2032"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2039"
+            "line": " source/stream-media.js:2049"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2039"
+            "line": " source/stream-media.js:2049"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2184"
+            "line": " source/stream-media.js:2194"
         },
         {
             "message": "unknown tag: component",
@@ -13930,7 +13930,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:490"
+            "line": " source/peer-connection.js:503"
         }
     ]
 }

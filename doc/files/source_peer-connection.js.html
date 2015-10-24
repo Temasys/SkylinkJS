@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.2</title>
+    <title>SkylinkJS 0.6.3</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.2</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.3</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -229,6 +229,11 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
     self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS);
   }
 
+  if (!self._peerConnections[targetMid]) {
+    log.error([targetMid, null, null, &#x27;Failed creating the connection to peer&#x27;]);
+    return;
+  }
+
   self._peerConnections[targetMid].receiveOnly = !!receiveOnly;
   self._peerConnections[targetMid].hasScreen = !!isSS;
   if (!receiveOnly) {
@@ -407,8 +412,16 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
  * @since 0.5.5
  */
 Skylink.prototype._removePeer = function(peerId) {
+  var peerInfo = clone(this.getPeerInfo(peerId)) || {
+    userData: &#x27;&#x27;,
+    settings: {},
+    mediaStatus: {},
+    agent: {},
+    room: clone(this._selectedRoom)
+  };
+
   if (peerId !== &#x27;MCU&#x27;) {
-    this._trigger(&#x27;peerLeft&#x27;, peerId, this.getPeerInfo(peerId), false);
+    this._trigger(&#x27;peerLeft&#x27;, peerId, peerInfo, false);
   } else {
     this._hasMCU = false;
     log.log([peerId, null, null, &#x27;MCU has stopped listening and left&#x27;]);
