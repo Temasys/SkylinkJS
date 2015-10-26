@@ -1,6 +1,9 @@
 /**
- * The current version of SM (Signaling Message) Protocol
- *   that the SDK is using.
+ * The current version of the internal <u>Signaling Message (SM)</u> Protocol that Skylink is using.<br>
+ * - This is not a feature for developers to use but rather for SDK developers to
+ *   see the Protocol version used in this Skylink version.
+ * - In some cases, this information may be used for reporting issues with Skylink.
+ * - SM_PROTOCOL VERSION: <code>0.1.</code>.
  * @attribute SM_PROTOCOL_VERSION
  * @type String
  * @required
@@ -661,6 +664,12 @@ Skylink.prototype._inRoomHandler = function(message) {
 
   self._trigger('peerJoined', self._user.sid, self.getPeerInfo(), true);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
+
+  if (self._mediaScreen && self._mediaScreen !== null) {
+    self._trigger('incomingStream', self._user.sid, self._mediaScreen, true, self.getPeerInfo());
+  } else if (self._mediaStream && self._mediaStream !== null) {
+    self._trigger('incomingStream', self._user.sid, self._mediaStream, true, self.getPeerInfo());
+  }
   // NOTE ALEX: should we wait for local streams?
   // or just go with what we have (if no stream, then one way?)
   // do we hardcode the logic here, or give the flexibility?
@@ -782,7 +791,8 @@ Skylink.prototype._enterHandler = function(message) {
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
     name: message.agent,
-    version: message.version
+    version: message.version,
+    os: message.os || ''
   };
   if (targetMid !== 'MCU') {
     self._trigger('peerJoined', targetMid, message.userInfo, false);
@@ -919,8 +929,14 @@ Skylink.prototype._restartHandler = function(message){
   var self = this;
   var targetMid = message.mid;
 
+  if (!self._peerInformations[targetMid]) {
+    log.error([targetMid, null, null, 'Peer does not have an existing ' +
+      'session. Ignoring restart process.']);
+    return;
+  }
+
   if (self._hasMCU) {
-    self._restartMCUConnection();
+    self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false);
     return;
   }
 
@@ -948,7 +964,8 @@ Skylink.prototype._restartHandler = function(message){
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
     name: message.agent,
-    version: message.version
+    version: message.version,
+    os: message.os || ''
   };
 
   // mcu has joined
@@ -972,12 +989,12 @@ Skylink.prototype._restartHandler = function(message){
   	self._addPeer(targetMid, {
 	    agent: message.agent,
 	    version: message.version,
-	    os: message.os || window.navigator.platform
+	    os: message.os
 	  }, true, true, message.receiveOnly, message.sessionType === 'screensharing');
 
     self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false);
 
-	// do a peer connection health check
+	  // do a peer connection health check
   	self._startPeerConnectionHealthCheck(targetMid);
   }, message.explicit);
 };
@@ -1124,7 +1141,8 @@ Skylink.prototype._welcomeHandler = function(message) {
     this._peerInformations[targetMid] = message.userInfo || {};
     this._peerInformations[targetMid].agent = {
       name: message.agent,
-      version: message.version
+      version: message.version,
+      os: message.os || ''
     };
     // disable mcu for incoming peer sent by MCU
     /*if (message.agent === 'MCU') {

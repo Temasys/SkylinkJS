@@ -18,7 +18,8 @@
  */
 Skylink.prototype._EVENTS = {
   /**
-   * Event triggered when the platform signaling socket connection is open and is ready for room connection.
+   * Event triggered when the socket connection to the platform signaling is opened.
+   * - This event means that socket connection is open and self is ready to join the room.
    * @event channelOpen
    * @component Events
    * @for Skylink
@@ -27,8 +28,8 @@ Skylink.prototype._EVENTS = {
   channelOpen: [],
 
   /**
-   * Event triggered when the platform signaling socket connection has closed.
-   * server has closed.
+   * Event triggered when the socket connection to the platform signaling is closed.
+   * - This event means that socket connection is closed and self has left the room.
    * @event channelClose
    * @component Events
    * @for Skylink
@@ -37,11 +38,10 @@ Skylink.prototype._EVENTS = {
   channelClose: [],
 
   /**
-   * Event triggered when Skylink is exchanging socket messages with the platform signaling
-   *   through the socket connection.
-   * This is a debugging feature, and it's not advisable to subscribe to this event unless
-   *   you are debugging the socket messages received from the platform signaling.
-   * from the signaling server.
+   * Event triggered when the socket connection is exchanging messages with the platform signaling.
+   * - This event is a debugging feature, and it's not advisable to subscribe to
+   *   this event unless you are debugging the socket messages
+   *   received from the platform signaling.
    * @event channelMessage
    * @param {JSON} message The socket message object data received from the platform signaling.
    * @component Events
@@ -51,9 +51,10 @@ Skylink.prototype._EVENTS = {
   channelMessage: [],
 
   /**
-   * Event triggered when Skylink socket connection with the platform signaling has occurred an exception.
-   * This happens after a successful socket connection with the platform signaling.
-   * Usually at this stage, the signaling socket connection could be disrupted.
+   * Event triggered when the socket connection has occurred an exception
+   *   during a connection with the platform signaling.
+   * - After this event is triggered, it may result in <a href="#event_channelClose">channelClose</a>,
+   *   and the socket connection with the platform signaling could be disrupted.
    * @event channelError
    * @param {Object|String} error The error object thrown that caused the exception.
    * @component Events
@@ -63,7 +64,12 @@ Skylink.prototype._EVENTS = {
   channelError: [],
 
   /**
-   * Event triggered when Skylink attempting to reconnect the socket connection with the platform signaling.
+   * Event triggered when attempting to reconnect the socket connection with the platform signaling.
+   * - Depending on the current <code>type</code> triggered in <a href="#event_socketError">
+   *   socketError</a> event before, it may or may not attempt the socket reconnection and
+   *   this event may not be triggered.
+   * - If reconnection attempt fails, it will trigger <a href="#event_socketError">socketError</a> event
+   *   again and repeat the stage from there.
    * @event channelRetry
    * @param {String} fallbackType The fallback socket transport that Skylink is attempting to reconnect with.
    *   [Rel: Skylink.SOCKET_FALLBACK]
@@ -75,7 +81,12 @@ Skylink.prototype._EVENTS = {
   channelRetry: [],
 
   /**
-   * Event triggered when Skylink has failed to establish a socket connection with the platform signaling.
+   * Event triggered when attempt to <em>(re)</em>connect the socket connection with the platform signaling has failed.
+   * - Depending on the current <code>type</code> payload, it may or may not attempt the
+   *   socket reconnection and <a href="#event_channelRetry">channelRetry</a> event may not be triggered.
+   * - If reconnection attempt fails and there are still available ports to reconnect with,
+   *   it will trigger <a href="#event_channelRetry">channelRetry</a> event again and
+   *   repeat the stage from there.
    * @event socketError
    * @param {String} errorCode The socket connection error code received.
    *   [Rel: Skylink.SOCKET_ERROR]
@@ -89,7 +100,10 @@ Skylink.prototype._EVENTS = {
   socketError: [],
 
   /**
-   * Event triggered when Skylink is retrieving the connection information from the platform server.
+   * Event triggered when room connection information is being retrieved from platform server.
+   * - This is also triggered when <a href="#method_init">init()</a> is invoked, but
+   *   the socket connection events like <a href="#event_channelOpen">channelOpen</a> does
+   *   not get triggered but stops at <u>readyStateChange</u> event.
    * @event readyStateChange
    * @param {String} readyState The current ready state of the retrieval when the event is triggered.
    *   [Rel: Skylink.READY_STATE_CHANGE]
@@ -104,7 +118,7 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
    * @param {Object} error.content The exception thrown that caused the failure
    *   for initialising Skylink.
-   * @param {Number} callback.error.status The XMLHttpRequest status code received
+   * @param {Number} error.status The XMLHttpRequest status code received
    *   when exception is thrown that caused the failure for initialising Skylink.
    * @param {String} room The selected room connection information that Skylink is attempting
    *   to retrieve the information for to start connection to.
@@ -115,9 +129,16 @@ Skylink.prototype._EVENTS = {
   readyStateChange: [],
 
   /**
-   * Event triggered when a Peer connection handshake state has changed.
+   * Event triggered when a Peer handshaking state has changed.
+   * - This event may trigger <code>state</code> <code>HANDSHAKE_PROGRESS.ENTER</code> for
+   *   self to indicate that broadcast to ping for any existing Peers in the room has
+   *   been made.
+   * - This event is a debugging feature, and it's used to check the
+   *   Peer handshaking connection status.
+   * - This starts the Peer connection handshaking, where it retrieves all the Peer
+   *   information and then proceeds to start the ICE connection.
    * @event handshakeProgress
-   * @param {String} step The Peer connection handshake state.
+   * @param {String} state The Peer connection handshake state.
    *   [Rel: Skylink.HANDSHAKE_PROGRESS]
    * @param {String} peerId The Peer ID associated with the connection
    *   handshake state.
@@ -131,10 +152,15 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when a Peer connection ICE gathering state has changed.
+   * - This event is a debugging feature, and it's used to check the
+   *   Peer ICE candidate gathering status.
+   * - This indicates if the ICE gathering has been completed to
+   *   start ICE connection for DataChannel and media streaming connection.
    * @event candidateGenerationState
-   * @param {String} state The Peer connection ICE gathering state.
+   * @param {String} state The current ICE gathering state.
+   *   <small>See the list of available triggered states in the related link.</small>
    *   [Rel: Skylink.CANDIDATE_GENERATION_STATE]
-   * @param {String} peerId The Peer ID associated with the ICE gathering state.
+   * @param {String} peerId The Peer ID associated with the connection
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -143,10 +169,14 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when a Peer connection signaling state has changed.
+   * - This event is a debugging feature, and it's used to check the
+   *   Peer signaling connection status.
+   * - This event indicates if the session description is received
+   *   to start ICE gathering for DataChannel and media streaming connection.
    * @event peerConnectionState
-   * @param {String} state The Peer connection signaling state.
+   * @param {String} state The current connection signaling state.
    *   [Rel: Skylink.PEER_CONNECTION_STATE]
-   * @param {String} peerId The Peer ID associated with the connection
+   * @param {String} peerId The Peer ID associated with the current connection
    *   signaling state.
    * @component Events
    * @for Skylink
@@ -156,10 +186,14 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when a Peer connection ICE connection state has changed.
+   * - This event is a debugging feature, and it's used to check the
+   *   Peer ICE connection of added ICE candidates status.
+   * - This event indicates if the ICE connection is established for successful
+   *   DataChannel and media streaming connection.
    * @event iceConnectionState
-   * @param {String} state The Peer connection ICE connection state.
+   * @param {String} state The current ICE connection state.
    *   [Rel: Skylink.ICE_CONNECTION_STATE]
-   * @param {String} peerId The Peer ID associated with the ICE connection state.
+   * @param {String} peerId The Peer ID associated with the current ICE connection state.
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -167,11 +201,16 @@ Skylink.prototype._EVENTS = {
   iceConnectionState: [],
 
   /**
-   * Event triggered when Skylink fails to have access to self user media stream.
+   * Event triggered when access to self user media stream has failed.
+   * - If <code>audioFallback</code> is enabled in <a href="#method_init">init()</a>,
+   *   it will throw an error if audio only user media stream failed after
+   *   a failed attempt to retrieve video and audio user media.
    * @event mediaAccessError
    * @param {Object|String} error The error object thrown that caused the failure.
    * @param {Boolean} isScreensharing The flag that indicates if self
    *    Stream object is a screensharing stream or not.
+   * @param {Boolean} isAudioFallbackError The flag that indicates if Skylink throws
+   *    the error after an audio fallback has been attempted.
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -179,7 +218,22 @@ Skylink.prototype._EVENTS = {
   mediaAccessError: [],
 
   /**
-   * Event triggered when Skylink have been successfully granted access to self user media stream and
+   * Event triggered when attempt to fallback to retrieve audio only user media stream
+   *   has been made.
+   * - If <code>audioFallback</code> is enabled in <a href="#method_init">init()</a>,
+   *   and if there is a failed attempt to retrieve video and audio user media,
+   *   it will attempt to do the audio fallback.
+   * @event mediaAccessFallback
+   * @param {Object|String} error The error object thrown that caused the failure
+   *   from retrieve video and audio user media stream.
+   * @component Events
+   * @for Skylink
+   * @since 0.6.3
+   */
+  mediaAccessFallback: [],
+
+  /**
+   * Event triggered when access to self user media stream is successfully
    *   attached to Skylink.
    * @event mediaAccessSuccess
    * @param {Object} stream The self user [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_API)
@@ -194,12 +248,15 @@ Skylink.prototype._EVENTS = {
   mediaAccessSuccess: [],
 
   /**
-   * Event triggered when thhe application requires to retrieve self user media stream with
-   *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}.
-   * Once the self user media stream is attached to Skylink, the socket connection to
-   *   the signaling will start and then join self to the selected room.
-   * This event will be triggered if <code>manualGetUserMedia</code> is set to <code>true</code> in
-   *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom() options{{/crossLink}}.
+   * Event triggered when the application requires to retrieve self
+   *   user media stream manually instead of doing it automatically in
+   *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}.
+   * - This event triggers based on the configuration of <code>manualGetUserMedia</code>
+   *   in the <a href="#method_joinRoom">joinRoom() configuration settings</a>.
+   * - Developers must manually invoke <a href="#method_getUserMedia">getUserMedia()</a>
+   *   to retrieve the user media stream before self would join the room.
+   *   Once the user media stream is attached, self would proceed to join the room
+   *   automatically.
    * @event mediaAccessRequired
    * @component Events
    * @for Skylink
@@ -239,7 +296,7 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
    *   stereo option should be explictly enabled to an OPUS enabled audio stream.
    *   Check the <code>audioCodec</code> configuration settings in
-   *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+   *   <a href="#method_init">init()</a>
    *   to enable OPUS as the audio codec. Note that stereo is already enabled
    *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
    *   enable stereo in the audio streaming.
@@ -317,7 +374,7 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
    *   stereo option should be explictly enabled to an OPUS enabled audio stream.
    *   Check the <code>audioCodec</code> configuration settings in
-   *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+   *   <a href="#method_init">init()</a>
    *   to enable OPUS as the audio codec. Note that stereo is already enabled
    *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
    *   enable stereo in the audio streaming.
@@ -376,7 +433,11 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when a Peer information have been updated.
-   * This event would only be triggered if self is in the room.
+   * - This event would only be triggered if self is in the room.
+   * - This event triggers when the <code>peerInfo</code> data is updated,
+   *   like <code>peerInfo.mediaStatus</code> or the <code>peerInfo.userData</code>,
+   *   which is invoked through <a href="#method_muteStream">muteStream()</a> or
+   *   <a href="#method_setUserData">setUserData()</a>.
    * @event peerUpdated
    * @param {String} peerId The Peer ID of the peer with updated information.
    * @param {Object} peerInfo The peer information associated
@@ -395,7 +456,7 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
    *   stereo option should be explictly enabled to an OPUS enabled audio stream.
    *   Check the <code>audioCodec</code> configuration settings in
-   *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+   *   <a href="#method_init">init()</a>
    *   to enable OPUS as the audio codec. Note that stereo is already enabled
    *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
    *   enable stereo in the audio streaming.
@@ -472,7 +533,7 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
    *   stereo option should be explictly enabled to an OPUS enabled audio stream.
    *   Check the <code>audioCodec</code> configuration settings in
-   *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+   *   <a href="#method_init">init()</a>
    *   to enable OPUS as the audio codec. Note that stereo is already enabled
    *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
    *   enable stereo in the audio streaming.
@@ -529,8 +590,9 @@ Skylink.prototype._EVENTS = {
   peerLeft: [],
 
   /**
-   * Event triggered when a Stream is available from a Peer
-   *   in the room.
+   * Event triggered when a Stream is sent by Peer.
+   * - This event may trigger for self, which indicates that self has joined the room
+   *   and is sending this Stream object to other Peers connected in the room.
    * @event incomingStream
    * @param {String} peerId The Peer ID associated to the Stream object.
    * @param {Object} stream The Peer
@@ -554,7 +616,7 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
    *   stereo option should be explictly enabled to an OPUS enabled audio stream.
    *   Check the <code>audioCodec</code> configuration settings in
-   *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+   *   <a href="#method_init">init()</a>
    *   to enable OPUS as the audio codec. Note that stereo is already enabled
    *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
    *   enable stereo in the audio streaming.
@@ -611,7 +673,9 @@ Skylink.prototype._EVENTS = {
   incomingStream: [],
 
   /**
-   * Event triggered when a message is received from a Peer.
+   * Event triggered when message data is received from Peer.
+   * - This event may trigger for self when sending message data to Peer,
+   *   which indicates that self has sent the message data.
    * @event incomingMessage
    * @param {JSON} message The message object received from Peer.
    * @param {JSON|String} message.content The message object content. This is the
@@ -645,7 +709,7 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
    *   stereo option should be explictly enabled to an OPUS enabled audio stream.
    *   Check the <code>audioCodec</code> configuration settings in
-   *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+   *   <a href="#method_init">init()</a>
    *   to enable OPUS as the audio codec. Note that stereo is already enabled
    *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
    *   enable stereo in the audio streaming.
@@ -702,7 +766,14 @@ Skylink.prototype._EVENTS = {
   incomingMessage: [],
 
   /**
-   * Event triggered when a data transfer is completed in a DataChannel connection.
+   * Event triggered when a data transfer is completed.
+   * - This event may trigger for self when transferring data to Peer,
+   *   which indicates that self has transferred the data successfully.
+   * - For more extensive states like the outgoing and incoming
+   *   data transfer progress and rejection of data transfer requests,
+   *   you may subscribe to the <a href="#event_dataTransferState">dataTransferState</a> event.
+   * - If <code>enableDataChannel</code> disabled in <a href="#method_init">init() configuration
+   *   settings</a>, this event will not be triggered at all.
    * @event incomingData
    * @param {Blob|String} data The transferred data object.<br>
    *   For Blob data object, see the
@@ -730,8 +801,20 @@ Skylink.prototype._EVENTS = {
 
 
   /**
-   * Event triggered when a data transfer request is made to Peer in a
-   *   DataChannel connection.
+   * Event triggered when there is a request to start a data transfer.
+   * - This event may trigger for self when requesting a data transfer to Peer,
+   *   which indicates that self has sent the data transfer request.
+   * - For more extensive states like the outgoing and incoming
+   *   data transfer progress and rejection of data transfer requests,
+   *   you may subscribe to the <a href="#event_dataTransferState">dataTransferState</a> event.
+   * - If <code>enableDataChannel</code> disabled in <a href="#method_init">init() configuration
+   *   settings</a>, this event will not be triggered at all.
+   * - <sub>DATA TRANSFER STAGE</sub><br>
+   *   <small>
+   *   <a href="#event_dataTransferState">dataTransferState</a> &#8594;
+   *   <b>incomingDataRequest</b> &#8594;
+   *   <a href="#event_incomingData">incomingData</a>
+   *   </small>
    * @event incomingDataRequest
    * @param {String} transferId The transfer ID of the data transfer request.
    * @param {String} peerId The Peer ID associated with the data transfer request.
@@ -755,6 +838,8 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when the currently connected room lock status have been updated.
+   * - If this event is triggered, this means that the room is locked / unlocked which
+   *   may allow or prevent any other Peers from joining the room.
    * @event roomLock
    * @param {Boolean} isLocked The flag that indicates if the currently connected room is locked.
    * @param {String} peerId The Peer ID of the peer that updated the
@@ -775,7 +860,7 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
    *   stereo option should be explictly enabled to an OPUS enabled audio stream.
    *   Check the <code>audioCodec</code> configuration settings in
-   *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+   *   <a href="#method_init">init()</a>
    *   to enable OPUS as the audio codec. Note that stereo is already enabled
    *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
    *   enable stereo in the audio streaming.
@@ -833,10 +918,17 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when a Peer connection DataChannel connection state has changed.
+   * - This event is a debugging feature, and it's used to check the
+   *   Peer DataChannel connection, which is used for P2P messaging and transfers for
+   *   methods like <a href="#method_sendBlobData">sendBlobData()</a>,
+   *   <a href="#method_sendURLData">sendURLData()</a> and
+   *   <a href="#method_sendP2PMessage">sendP2PMessage()</a>.
+   * - If <code>enableDataChannel</code> disabled in <a href="#method_init">init() configuration
+   *   settings</a>, this event will not be triggered at all.
    * @event dataChannelState
-   * @param {String} state The Peer connection DataChannel connection state.
+   * @param {String} state The current DataChannel connection state.
    *   [Rel: Skylink.DATA_CHANNEL_STATE]
-   * @param {String} peerId The Peer ID associated with the DataChannel connection.
+   * @param {String} peerId The Peer ID associated with the current DataChannel connection state.
    * @param {Object} [error=null] The error object thrown when there is a failure in
    *   the DataChannel connection.
    *   If received as <code>null</code>, it means that there is no errors.
@@ -850,8 +942,14 @@ Skylink.prototype._EVENTS = {
   dataChannelState: [],
 
   /**
-   * Event triggered when a data transfer made to Peer in a
-   *   DataChannel connection state has changed.
+   * Event triggered when a data transfer state has changed.
+   * - This event triggers more extensive states like the outgoing and incoming
+   *   data transfer progress and rejection of data transfer requests.
+   *   For simplified events, you may subscribe to the
+   *   <a href="#event_incomingDataRequest">incomingDataRequest</a> and
+   *   <a href="#event_incomingData">incomingData</a> events.
+   * - If <code>enableDataChannel</code> disabled in <a href="#method_init">init() configuration
+   *   settings</a>, this event will not be triggered at all.
    * @event dataTransferState
    * @param {String} state The data transfer made to Peer
    *   in a DataChannel connection state.
@@ -964,7 +1062,7 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
    *   stereo option should be explictly enabled to an OPUS enabled audio stream.
    *   Check the <code>audioCodec</code> configuration settings in
-   *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+   *   <a href="#method_init">init()</a>
    *   to enable OPUS as the audio codec. Note that stereo is already enabled
    *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
    *   enable stereo in the audio streaming.
@@ -1044,7 +1142,7 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
    *   stereo option should be explictly enabled to an OPUS enabled audio stream.
    *   Check the <code>audioCodec</code> configuration settings in
-   *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+   *   <a href="#method_init">init()</a>
    *   to enable OPUS as the audio codec. Note that stereo is already enabled
    *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
    *   enable stereo in the audio streaming.
@@ -1104,8 +1202,9 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when the retrieval of the list of rooms and peers under the same realm based
-   *   on the Application Key configured in {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+   *   on the Application Key configured in <a href="#method_init">init()</a>
    *   from the platform signaling state has changed.
+   * - This requires that the provided alias Application Key has privileged feature configured.
    * @event getPeersStateChange
    * @param {String} state The retrieval current status.
    * @param {String} privilegedPeerId The Peer ID of the privileged Peer.
@@ -1120,6 +1219,7 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when introductory state of two Peer peers to each other
    *   selected by the privileged Peer state has changed.
+   * - This requires that the provided alias Application Key has privileged feature configured.
    * @event introduceStateChange
    * @param {String} state The Peer introduction state.
    * @param {String} privilegedPeerId The Peer ID of the privileged Peer.

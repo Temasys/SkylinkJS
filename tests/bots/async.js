@@ -3,7 +3,7 @@
 'use strict';
 
 var exports = require('../config.js');
-var sw = new Skylink();
+window.sw = new Skylink();
 
 console.log('BOT Async intiailized');
 

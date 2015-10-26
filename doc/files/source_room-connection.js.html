@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>source/room-connection.js - skylinkjs</title>
+    <title>SkylinkJS 0.6.3</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,19 +32,25 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.2</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.3</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
         <ul id="api-list" class="nav navbar-nav navbar-right">
-  <li class="dropdown">
+  <li><a href="https://temasys.github.io">Getting Started</a></li>
+  
+    <li><a href="../classes/Skylink.html">Documentation</a></li>
+  
+  <!--<li class="dropdown">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
     <ul class="dropdown-menu" role="menu">
       
         <li><a href="../classes/Skylink.html">Skylink</a></li>
       
     </ul>
-  </li>
+  </li>-->
+  <li><a class="btn btn-info btn-navbar" href="http://developer.temasys.com.sg/">Developer Console</a></li>
+  <li><a class="btn btn-info btn-navbar" href="http://support.temasys.com.sg/">Support</a></li>
   <!--<li class="dropdown">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
     <ul class="dropdown-menu" role="menu">
@@ -52,7 +58,6 @@
       
     </ul>
   </li>-->
-  <li><a href="https://temasys.github.io">Getting Started</a></li>
 </ul>
 <!--<form id="api-tabview" class="navbar-form navbar-right" role="form">
   <div id="api-tabview-filter" class="form-group">
@@ -77,17 +82,19 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * The list of Skylink platform signaling system action that might be given.
- * Upon receiving from the signaling, the application has to reflect the
+ * These are the list of platform signaling system actions that Skylink would be given with.
+ * - Upon receiving from the signaling, the application has to reflect the
  *   relevant actions given.
- * You may refer to {{#crossLink &quot;Skylink/SYSTEM_ACTION_REASON:attribute&quot;}}SYSTEM_ACTION_REASON{{/crossLink}}
+ * - You may refer to {{#crossLink &quot;Skylink/SYSTEM_ACTION_REASON:attribute&quot;}}SYSTEM_ACTION_REASON{{/crossLink}}
  *   for the types of system action reasons that would be given.
  * @attribute SYSTEM_ACTION
  * @type JSON
- * @param {String} WARNING This action serves a warning to self. Usually if
+ * @param {String} WARNING &lt;small&gt;Value &lt;code&gt;&quot;warning&quot;&lt;/code&gt;&lt;/small&gt;
+ *   This action serves a warning to self. Usually if
  *   warning is not heeded, it may result in an &lt;code&gt;REJECT&lt;/code&gt; action.
- * @param {String} REJECT This action means that self has been kicked out
- *   of the current signaling room connection, and subsequent PeerConnections
+ * @param {String} REJECT &lt;small&gt;Value &lt;code&gt;&quot;reject&quot;&lt;/code&gt;&lt;/small&gt;
+ *   This action means that self has been kicked out
+ *   of the current signaling room connection, and subsequent Peer connections
  *   would be disconnected.
  * @readOnly
  * @component Room
@@ -100,31 +107,36 @@ Skylink.prototype.SYSTEM_ACTION = {
 };
 
 /**
- * The list of Skylink platform signaling code as the reason
- *   for the system action given by the current signaling connection.
- * You may refer to {{#crossLink &quot;Skylink/SYSTEM_ACTION:attribute&quot;}}SYSTEM_ACTION{{/crossLink}}
+ * These are the list of Skylink platform signaling codes as the reason
+ *   for the system action given by the platform signaling that Skylink would receive.
+ * - You may refer to {{#crossLink &quot;Skylink/SYSTEM_ACTION:attribute&quot;}}SYSTEM_ACTION{{/crossLink}}
  *   for the types of system actions that would be given.
+ * - Reason codes like &lt;code&gt;FAST_MESSAGE&lt;/code&gt;, &lt;code&gt;ROOM_FULL&lt;/code&gt;, &lt;code&gt;VERIFICATION&lt;/code&gt; and
+ *   &lt;code&gt;OVER_SEAT_LIMIT&lt;/code&gt; has been removed as they are no longer supported.
  * @attribute SYSTEM_ACTION_REASON
  * @type JSON
- * @param {String} ROOM_LOCKED Given as &lt;code&gt;REJECT&lt;/code&gt;. The room is
- *   locked and self is rejected from joining the room connection.
- * @param {String} DUPLICATED_LOGIN Given as &lt;code&gt;REJECT&lt;/code&gt;.
- *   The credentials given is already in use, which the signaling server
- *   throws an exception for this error.
- *   This should rarely happen as Skylink handles this issue.
- * @param {String} SERVER_ERROR Given as &lt;code&gt;REJECT&lt;/code&gt;. The connection
- *   with the server has an exception that is caught during the server connection.
- * @param {String} EXPIRED Given as &lt;code&gt;REJECT&lt;/code&gt;. The persistent
- *   room meeting has expired so self is unable to join the room as
- *   the end time of the meeting has ended. Depending on other
- *   meeting timings available for this room, the persistent room will appear
- *   expired.
- * @param {String} ROOM_CLOSED Given as &lt;code&gt;REJECT&lt;/code&gt;. The persistent
- *   room meeting has ended and has been rendered expired so self is rejected
- *   from the room as the meeting is over.
- * @param {String} ROOM_CLOSING Given as &lt;code&gt;WARNING&lt;/code&gt;. The persistent
- *   room meeting is going to end soon, so this warning is given to inform
- *   users before self is rejected from the room.
+ * @param {String} ROOM_LOCKED &lt;small&gt;Value &lt;code&gt;&quot;locked&quot;&lt;/code&gt; | Action ties with &lt;code&gt;REJECT&lt;/code&gt;&lt;/small&gt;
+ *   The reason code when room is locked and self is rejected from joining the room.
+ * @param {String} DUPLICATED_LOGIN &lt;small&gt;Value &lt;code&gt;&quot;duplicatedLogin&quot;&lt;/code&gt; | Action ties with &lt;code&gt;REJECT&lt;/code&gt;&lt;/small&gt;
+ *   The reason code when the credentials given is already in use, which the platform signaling
+ *   throws an exception for this error.&lt;br&gt;
+ * This rarely occurs as Skylink handles this issue, and it&#x27;s recommended to report this issue if this occurs.
+ * @param {String} SERVER_ERROR &lt;small&gt;Value &lt;code&gt;&quot;serverError&quot;&lt;/code&gt; | Action ties with &lt;code&gt;REJECT&lt;/code&gt;&lt;/small&gt;
+ *   The reason code when the connection with the platform signaling has an exception with self.&lt;br&gt;
+ * This rarely (and should not) occur and it&#x27;s recommended to  report this issue if this occurs.
+ * @param {String} EXPIRED &lt;small&gt;Value &lt;code&gt;&quot;expired&quot;&lt;/code&gt; | Action ties with &lt;code&gt;REJECT&lt;/code&gt;&lt;/small&gt;
+ *   The reason code when the persistent room meeting has expired so self is unable to join the room as
+ *   the end time of the meeting has ended.&lt;br&gt;
+ * Depending on other meeting timings available for this room, the persistent room will appear expired.&lt;br&gt;
+ * This relates to the persistent room feature configured in the Application Key.
+ * @param {String} ROOM_CLOSED &lt;small&gt;Value &lt;code&gt;&quot;roomclose&quot;&lt;/code&gt; | Action ties with &lt;code&gt;REJECT&lt;/code&gt;&lt;/small&gt;
+ *   The reason code when the persistent room meeting has ended and has been rendered expired so self is rejected
+ *   from the room as the meeting is over.&lt;br&gt;
+ * This relates to the persistent room feature configured in the Application Key.
+ * @param {String} ROOM_CLOSING &lt;small&gt;Value &lt;code&gt;&quot;toclose&quot;&lt;/code&gt; | Action ties with &lt;code&gt;WARNING&lt;/code&gt;&lt;/small&gt;
+ *   The reason code when the persistent room meeting is going to end soon, so this warning is given to inform
+ *   users before self is rejected from the room.&lt;br&gt;
+ * This relates to the persistent room feature configured in the Application Key.
  * @readOnly
  * @component Room
  * @for Skylink
@@ -168,6 +180,17 @@ Skylink.prototype._selectedRoom = null;
  * @since 0.5.2
  */
 Skylink.prototype._roomLocked = false;
+
+/**
+ * The flag that indicates if self is currently joined in a room.
+ * @attribute _inRoom
+ * @type Boolean
+ * @private
+ * @component Room
+ * @for Skylink
+ * @since 0.4.0
+ */
+Skylink.prototype._inRoom = false;
 
 /**
  * Connects self to the selected room.
@@ -708,8 +731,16 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 /**
  * Disconnects self from current connected room.
  * @method leaveRoom
- * @param {Boolean} [stopUserMedia=true] The flag that indicates if leaving the room
+ * @param {Boolean|JSON} [stopMediaOptions=true] The stop attached Stream options for
+ *   Skylink when leaving the room. If provided options is a
+ *   &lt;var&gt;typeof&lt;/var&gt; &lt;code&gt;boolean&lt;/code&gt;, it will be interpreted as both
+ *   &lt;code&gt;userMedia&lt;/code&gt; and &lt;code&gt;screenshare&lt;/code&gt; Streams would be stopped.
+ * @param {Boolean} [stopMediaOptions.userMedia=true]  The flag that indicates if leaving the room
  *   should automatically stop and clear the existing user media stream attached to skylink.
+ *   This would trigger &lt;code&gt;mediaAccessStopped&lt;/code&gt; for this Stream if available.
+ * @param {Boolean} [stopMediaOptions.screenshare=true] The flag that indicates if leaving the room
+ *   should automatically stop and clear the existing screensharing stream attached to skylink.
+ *   This would trigger &lt;code&gt;mediaAccessStopped&lt;/code&gt; for this Stream if available.
  * @param {Function} [callback] The callback fired after self has
  *   left the room successfully or have met with an exception.
  *   The callback signature is &lt;code&gt;function (error, success)&lt;/code&gt;.
@@ -739,22 +770,28 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype.leaveRoom = function(stopUserMedia, callback) {
+Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
   var self = this;
   var error; // j-shint !!!
+  var stopUserMedia = true;
+  var stopScreenshare = true;
 
   // shift parameters
-  if (typeof stopUserMedia === &#x27;function&#x27;) {
-    callback = stopUserMedia;
-    stopUserMedia = true;
-  } else if (typeof stopUserMedia === &#x27;undefined&#x27;) {
-    stopUserMedia = true;
+  if (typeof stopMediaOptions === &#x27;function&#x27;) {
+    callback = stopMediaOptions;
+    stopMediaOptions = true;
+  } else if (typeof stopMediaOptions === &#x27;undefined&#x27;) {
+    stopMediaOptions = true;
   }
 
-  // stopUserMedia === null or {} ?
-  if (typeof stopUserMedia !== &#x27;boolean&#x27;) {
-    error = &#x27;stopUserMedia parameter provided is not a boolean&#x27;;
-    log.error(error, stopUserMedia);
+  // stopMediaOptions === null or {} ?
+  if (typeof stopMediaOptions === &#x27;object&#x27; &amp;&amp; stopMediaOptions !== null) {
+    stopUserMedia = stopMediaOptions.userMedia !== false;
+    stopScreenshare = stopMediaOptions.screenshare !== false;
+
+  } else if (typeof stopMediaOptions !== &#x27;boolean&#x27;) {
+    error = &#x27;stopMediaOptions parameter provided is not a boolean or valid object&#x27;;
+    log.error(error, stopMediaOptions);
     if (typeof callback === &#x27;function&#x27;) {
       log.log([null, &#x27;Socket&#x27;, self._selectedRoom, &#x27;Error occurred. &#x27; +
         &#x27;Firing callback with error -&gt; &#x27;
@@ -762,6 +799,10 @@ Skylink.prototype.leaveRoom = function(stopUserMedia, callback) {
       callback(new Error(error), null);
     }
     return;
+
+  } else if (stopMediaOptions === false) {
+    stopUserMedia = false;
+    stopScreenshare = false;
   }
 
   if (!self._inRoom) {
@@ -782,12 +823,11 @@ Skylink.prototype.leaveRoom = function(stopUserMedia, callback) {
   }
   self._inRoom = false;
   self._closeChannel();
-  if (stopUserMedia) {
-    log.log([null, &#x27;MediaStream&#x27;, self._selectedRoom, &#x27;Stopping user\&#x27;s MediaStream&#x27;]);
-    self.stopStream();
-  } else {
-    log.log([null, &#x27;MediaStream&#x27;, self._selectedRoom, &#x27;User\&#x27;s MediaStream will not be stopped&#x27;]);
-  }
+
+  self._stopLocalMediaStreams({
+    userMedia: stopUserMedia,
+    screenshare: stopScreenshare
+  });
 
   self._wait(function() {
     log.log([null, &#x27;Socket&#x27;, self._selectedRoom, &#x27;User left the room. Callback fired.&#x27;]);
@@ -801,8 +841,8 @@ Skylink.prototype.leaveRoom = function(stopUserMedia, callback) {
     }
   }, function() {
     return (Object.keys(self._peerConnections).length === 0 &amp;&amp;
-      self._channelOpen === false &amp;&amp;
-      self._readyState === self.READY_STATE_CHANGE.COMPLETED);
+      self._channelOpen === false); // &amp;&amp;
+      //self._readyState === self.READY_STATE_CHANGE.COMPLETED);
   }, false);
 };
 

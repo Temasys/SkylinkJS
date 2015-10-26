@@ -1,16 +1,19 @@
 /**
- * The list of Skylink <code>console</code> logging levels available.
- * Refer to [Javascript Web Console](https://developer.mozilla.org/en/docs/Web/API/console).
+ * These are the logging levels that Skylink provides.
+ * - This manipulates the debugging messages sent to <code>console</code> object.
+ * - Refer to [Javascript Web Console](https://developer.mozilla.org/en/docs/Web/API/console).
  * @attribute LOG_LEVEL
  * @type JSON
- * @param {Number} DEBUG Displays <code>debug</code>, <code>log</code>,
- *   <code>info</code>, <code>warn</code> and <code>error</code> console logs.
- * @param {Number} LOG Displays <code>log</code>,
- *   <code>info</code>, <code>warn</code> and <code>error</code> console logs.
- * @param {Number} INFO Displays <code>info</code>, <code>warn</code> and
- *   <code>error</code> console logs.
- * @param {Number} WARN Displays <code>warn</code> and <code>error</code> console logs.
- * @param {Number} ERROR <i>This is the default log level.</i> Displays <code>error</code> console logs only.
+ * @param {Number} DEBUG <small>Value <code>4</code> | Level higher than <code>LOG</code></small>
+ *   Displays debugging logs from <code>LOG</code> level onwards with <code>DEBUG</code> logs.
+ * @param {Number} LOG <small>Value <code>3</code> | Level higher than <code>INFO</code></small>
+ *   Displays debugging logs from <code>INFO</code> level onwards with <code>LOG</code> logs.
+ * @param {Number} INFO <small>Value <code>2</code> | Level higher than <code>WARN</code></small>
+ *   Displays debugging logs from <code>WARN</code> level onwards with <code>INFO</code> logs.
+ * @param {Number} WARN <small>Value <code>1</code> | Level higher than <code>ERROR</code></small>
+ *   Displays debugging logs of <code>ERROR</code> level with <code>WARN</code> logs.
+ * @param {Number} ERROR <small><b>DEFAULT</b> | Value <code>0</code> | Lowest level</small>
+ *   Displays only <code>ERROR</code> logs.
  * @readOnly
  * @component Log
  * @for Skylink
@@ -204,7 +207,7 @@ var _printAllStoredLogsFn = function () {
 
 /**
  * The object that handles the stored Skylink console logs.
- * Skylink {{#crossLink "Skylink/setDebugMode:method"}}setDebugMode(){{/crossLink}} <code>storeLogs</code>
+ * - {{#crossLink "Skylink/setDebugMode:method"}}setDebugMode(){{/crossLink}} <code>storeLogs</code> flag
  *   must be set as <code>true</code> to enable the storage of logs.
  * @property SkylinkLogs
  * @type JSON
@@ -219,9 +222,15 @@ window.SkylinkLogs = {
    * Gets the stored Skylink console logs.
    * @property SkylinkLogs.getLogs
    * @param {Number} [logLevel] The specific log level of Skylink console logs
-   *   that should be returned. If value is not provided, it will return all stored console logs.
+   *   that should be returned.<br>If value is not provided, it will return all stored console logs.
    *  [Rel: Skylink.LOG_LEVEL]
    * @return {Array} The array of stored console logs based on the log level provided.
+   * @example
+   *  // Example 1: Get logs of specific level
+   *  var debugLogs = SkylinkLogs.getLogs(SkylinkDemo.LOG_LEVEL.DEBUG);
+   *
+   *  // Example 2: Get all logs
+   *  var allLogs = SkylinkLogs.getLogs();
    * @type Function
    * @required
    * @global true
@@ -238,6 +247,8 @@ window.SkylinkLogs = {
    *   that should be cleared. If value is not provided, it will clear all stored console logs.
    *  [Rel: Skylink.LOG_LEVEL]
    * @type Function
+   * @example
+   *   SkylinkLogs.clearAllLogs(); // empties all logs
    * @required
    * @global true
    * @component Log
@@ -250,6 +261,8 @@ window.SkylinkLogs = {
    * Prints all the stored Skylink console logs into the [Web console](https://developer.mozilla.org/en/docs/Web/API/console).
    * @property SkylinkLogs.printAllLogs
    * @type Function
+   * @example
+   *   SkylinkLogs.printAllLogs(); // check the console
    * @required
    * @global true
    * @component Log
