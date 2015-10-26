@@ -1,15 +1,23 @@
 /**
- * The list of Skylink Peer connection signaling triggered states.
- * Refer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCSignalingState).
+ * These are the list of Peer connection signaling states that Skylink would trigger.
+ * - Some of the state references the [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCSignalingState).
  * @attribute PEER_CONNECTION_STATE
  * @type JSON
- * @param {String} STABLE There is no handshaking in progress. This state occurs
- *   when handshaking has just started or close.
- * @param {String} HAVE_LOCAL_OFFER The session description "offer" is generated
- *   and to be sent.
- * @param {String} HAVE_REMOTE_OFFER The session description "offer" is received.
- *   The handshaking has been completed.
- * @param {String} CLOSED The connection is closed.
+ * @param {String} STABLE <small>Value <code>"stable"</code></small>
+ *   The state when there is no handshaking in progress and when
+ *   handshaking has just started or close.<br>
+ * This state occurs when Peer connection has just been initialised and after
+ *   <code>HAVE_LOCAL_OFFER</code> or <code>HAVE_REMOTE_OFFER</code>.
+ * @param {String} HAVE_LOCAL_OFFER <small>Value <code>"have-local-offer"</code></small>
+ *   The state when the local session description <code>"offer"</code> is generated and to be sent.<br>
+ * This state occurs after <code>STABLE</code> state.
+ * @param {String} HAVE_REMOTE_OFFER <small>Value <code>"have-remote-offer"</code></small>
+ *   The state when the remote session description <code>"offer"</code> is received.<br>
+ * At this stage, this indicates that the Peer connection signaling handshaking has been completed, and
+ *   likely would go back to <code>STABLE</code> after local <code>"answer"</code> is received by Peer.
+ * @param {String} CLOSED <small>Value <code>"closed"</code></small>
+ *   The state when the Peer connection is closed.<br>
+ * This state occurs when connection with Peer has been closed, usually when Peer leaves the room.
  * @readOnly
  * @component Peer
  * @for Skylink
@@ -23,17 +31,24 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 };
 
 /**
- * The types of Skylink server Peers that serves different functionalities.
- * @type JSON
+ * These are the types of server Peers that Skylink would connect with.
+ * - Different server Peers that serves different functionalities.
+ * - The server Peers functionalities are only available depending on the
+ *   Application Key configuration.
+ * - Eventually, this list will be populated as there are more server Peer
+ *   functionalities provided by the Skylink platform.
  * @attribute SERVER_PEER_TYPE
- * @param {String} MCU The server Peer is a MCU server.
+ * @param {String} MCU <small>Value <code>"mcu"</code></small>
+ *   This server Peer is a MCU server connection.
+ * @type JSON
  * @readOnly
  * @component Peer
  * @for Skylink
  * @since 0.6.1
  */
 Skylink.prototype.SERVER_PEER_TYPE = {
-  MCU: 'mcu'
+  MCU: 'mcu',
+  //SIP: 'sip'
 };
 
 /**
@@ -131,6 +146,11 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
     self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS);
   }
 
+  if (!self._peerConnections[targetMid]) {
+    log.error([targetMid, null, null, 'Failed creating the connection to peer']);
+    return;
+  }
+
   self._peerConnections[targetMid].receiveOnly = !!receiveOnly;
   self._peerConnections[targetMid].hasScreen = !!isSS;
   if (!receiveOnly) {
@@ -153,7 +173,13 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
   }
 
   // do a peer connection health check
-  this._startPeerConnectionHealthCheck(targetMid, toOffer);
+  // let MCU handle this case
+  if (!self._hasMCU) {
+    this._startPeerConnectionHealthCheck(targetMid, toOffer);
+  } else {
+    log.warn([targetMid, 'PeerConnectionHealth', null, 'Not setting health timer for MCU connection']);
+    return;
+  }
 };
 
 /**
@@ -303,8 +329,16 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
  * @since 0.5.5
  */
 Skylink.prototype._removePeer = function(peerId) {
+  var peerInfo = clone(this.getPeerInfo(peerId)) || {
+    userData: '',
+    settings: {},
+    mediaStatus: {},
+    agent: {},
+    room: clone(this._selectedRoom)
+  };
+
   if (peerId !== 'MCU') {
-    this._trigger('peerLeft', peerId, this.getPeerInfo(peerId), false);
+    this._trigger('peerLeft', peerId, peerInfo, false);
   } else {
     this._hasMCU = false;
     log.log([peerId, null, null, 'MCU has stopped listening and left']);
@@ -367,8 +401,12 @@ Skylink.prototype._removePeer = function(peerId) {
  */
 Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   var pc, self = this;
+  // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
+  // using .urls feature
+  var newRTCPeerConnection = window.webkitRTCPeerConnection || window.mozRTCPeerConnection ||
+    window.RTCPeerConnection;
   try {
-    pc = new window.RTCPeerConnection(
+    pc = new newRTCPeerConnection(
       self._room.connection.peerConfig,
       self._room.connection.peerConstraints);
     log.info([targetMid, null, null, 'Created peer connection']);
@@ -456,10 +494,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
           self._trigger('iceConnectionState',
             self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
         }
-        // refresh when failed
-        if (self._hasMCU) {
-          self._restartMCUConnection();
-        } else {
+        // refresh when failed. ignore for MCU case since restart is handled by MCU in this case
+        if (!self._hasMCU) {
           self._restartPeerConnection(targetMid, true, true, null, false);
         }
       }
@@ -514,11 +550,13 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 
 /**
  * Refreshes a Peer connection.
- * This feature can be used to refresh a Peer connection when the
+ * - This feature can be used to refresh a Peer connection when the
  *   remote Stream received does not stream any audio/video stream.
- * If there are more than 1 refresh during 5 seconds
+ * - If there are more than 1 refresh during 5 seconds
  *   or refresh is less than 3 seconds since the last refresh
  *   initiated by the other peer, it will be aborted.
+ * - As for MCU connection, the restart mechanism makes the self user
+ *    leave and join the currently connected room again.
  * @method refreshConnection
  * @param {String|Array} [targetPeerId] The array of targeted Peers connection to refresh
  *   the connection with.
@@ -544,7 +582,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
  *       SkylinkDemo.refreshConnection(peerId);
  *     }
  *   });
- * @trigger peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined
+ * @trigger peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined, serverPeerLeft
  * @component Peer
  * @for Skylink
  * @since 0.5.5
@@ -705,12 +743,9 @@ Skylink.prototype._restartMCUConnection = function(callback) {
   var listOfPeerRestartErrors = {};
   var peerId; // j shint is whinning
   var receiveOnly = false;
-
-  // Save username if it's been modified (should be used to keep same name after rejoin)
-  /*if (((self._userData).length <= 10) || ( ((self._userData).length > 10) &&
-    ((self._userData).substring(0, 10) !== 'name_user_'))) {
-    var name = self._userData;
-  }*/
+  // for MCU case, these dont matter at all
+  var lastRestart = Date.now() || function() { return +new Date(); };
+  var weight = (new Date()).valueOf();
 
   self._trigger('serverPeerRestart', 'MCU', self.SERVER_PEER_TYPE.MCU);
 
@@ -728,37 +763,12 @@ Skylink.prototype._restartMCUConnection = function(callback) {
       receiveOnly = !!self._peerConnections[peerId].receiveOnly;
     }
 
-    self._peerConnections[peerId].dataChannelClosed = true;
-    self._stopPeerConnectionHealthCheck(peerId);
-
-    if (self._peerConnections[peerId].signalingState !== 'closed') {
-      self._peerConnections[peerId].close();
-    }
-
-    if (self._peerConnections[peerId].hasStream) {
-      self._trigger('streamEnded', peerId, self.getPeerInfo(peerId), false);
-    }
-
     if (peerId !== 'MCU') {
       self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
-    }
-
-    delete self._peerConnections[peerId];
-  }
-
-  //self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true);
-
-  // Restart with MCU = peer leaves then rejoins room
-  var peerJoinedFn = function (peerId, peerInfo, isSelf) {
-    if (isSelf) {
-      self.off('peerJoined', peerJoinedFn);
 
       log.log([peerId, null, null, 'Sending restart message to signaling server']);
 
-      var lastRestart = Date.now() || function() { return +new Date(); };
-
-      var weight = (new Date()).valueOf();
-      self._peerRestartPriorities.MCU = weight;
+      self._peerRestartPriorities[peerId] = weight;
 
       self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.RESTART,
@@ -768,7 +778,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         version: window.webrtcDetectedVersion,
         os: window.navigator.platform,
         userInfo: self.getPeerInfo(),
-        target: 'MCU',
+        target: peerId, //'MCU',
         isConnectionRestart: false,
         lastRestart: lastRestart,
         weight: weight,
@@ -778,23 +788,30 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
         explicit: true
       });
+    }
+  }
 
-      if (typeof callback === 'function') {
-        if (Object.keys(listOfPeerRestartErrors).length > 0) {
-          callback({
-            refreshErrors: listOfPeerRestartErrors,
-            listOfPeers: listOfPeers
-          }, null);
-        } else {
-          callback(null, {
-            listOfPeers: listOfPeers
-          });
-        }
+  // Restart with MCU = peer leaves then rejoins room
+  var peerJoinedFn = function (peerId, peerInfo, isSelf) {
+    log.log([null, 'PeerConnection', null, 'Invoked all peers to restart with MCU. Firing callback']);
+
+    if (typeof callback === 'function') {
+      if (Object.keys(listOfPeerRestartErrors).length > 0) {
+        callback({
+          refreshErrors: listOfPeerRestartErrors,
+          listOfPeers: listOfPeers
+        }, null);
+      } else {
+        callback(null, {
+          listOfPeers: listOfPeers
+        });
       }
     }
   };
 
-  self.on('peerJoined', peerJoinedFn);
+  self.once('peerJoined', peerJoinedFn, function (peerId, peerInfo, isSelf) {
+    return isSelf;
+  });
 
   self.leaveRoom(false, function (error, success) {
     if (error) {
@@ -808,8 +825,8 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         }, null);
       }
     } else {
-      self._trigger('serverPeerLeft', 'MCU', self.SERVER_PEER_TYPE.MCU);
-      self.joinRoom();
+      //self._trigger('serverPeerLeft', 'MCU', self.SERVER_PEER_TYPE.MCU);
+      self.joinRoom(self._selectedRoom);
     }
   });
 };

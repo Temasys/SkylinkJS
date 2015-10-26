@@ -91,6 +91,21 @@ if (!Object.keys) {
   }
 })(window, document);
 
+// global clone function
+var clone = function (obj) {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+
+  var copy = obj.constructor();
+  for (var attr in obj) {
+    if (obj.hasOwnProperty(attr)) {
+      copy[attr] = obj[attr];
+    }
+  }
+  return copy;
+};
+
 /**
  * <h2>Before using Skylink</h2>
  * Please invoke {{#crossLink "Skylink/init:method"}}init(){{/crossLink}} method

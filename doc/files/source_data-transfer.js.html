@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>source/data-transfer.js - skylinkjs</title>
+    <title>SkylinkJS 0.6.3</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,19 +32,25 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.2</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.3</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
         <ul id="api-list" class="nav navbar-nav navbar-right">
-  <li class="dropdown">
+  <li><a href="https://temasys.github.io">Getting Started</a></li>
+  
+    <li><a href="../classes/Skylink.html">Documentation</a></li>
+  
+  <!--<li class="dropdown">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
     <ul class="dropdown-menu" role="menu">
       
         <li><a href="../classes/Skylink.html">Skylink</a></li>
       
     </ul>
-  </li>
+  </li>-->
+  <li><a class="btn btn-info btn-navbar" href="http://developer.temasys.com.sg/">Developer Console</a></li>
+  <li><a class="btn btn-info btn-navbar" href="http://support.temasys.com.sg/">Support</a></li>
   <!--<li class="dropdown">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
     <ul class="dropdown-menu" role="menu">
@@ -52,7 +58,6 @@
       
     </ul>
   </li>-->
-  <li><a href="https://temasys.github.io">Getting Started</a></li>
 </ul>
 <!--<form id="api-tabview" class="navbar-form navbar-right" role="form">
   <div id="api-tabview-filter" class="form-group">
@@ -77,12 +82,14 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * The current version of DT (Data Transfer) Protocol
- *   that the Skylink SDK is using.
+ * The current version of the internal &lt;u&gt;Data Transfer (DT)&lt;/u&gt; Protocol that Skylink is using.&lt;br&gt;
+ * - This is not a feature for developers to use but rather for SDK developers to
+ *   see the Protocol version used in this Skylink version.
+ * - In some cases, this information may be used for reporting issues with Skylink.
+ * - DT_PROTOCOL VERSION: &lt;code&gt;0.1.0&lt;/code&gt;.
  * @attribute DT_PROTOCOL_VERSION
  * @type String
- * @final
- * @required
+ * @readOnly
  * @component DataTransfer
  * @for Skylink
  * @since 0.5.10
@@ -155,15 +162,17 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
 Skylink.prototype._INTEROP_MULTI_TRANSFERS = [&#x27;Android&#x27;, &#x27;iOS&#x27;];
 
 /**
- * The types of data transfers to indicate if the DataChannel is
- *   uploading or downloading the data transfer.
+ * These are the types of data transfers that indicates if transfer is an
+ *   outgoing &lt;small&gt;&lt;em&gt;(uploading)&lt;/em&gt;&lt;/small&gt; or incoming &lt;small&gt;&lt;em&gt;(downloding)&lt;/em&gt;&lt;/small&gt; transfers.
  * @attribute DATA_TRANSFER_TYPE
  * @type JSON
- * @param {String} UPLOAD The DataChannel connection is uploading data packets to
- *   receiving end.
- * @param {String} DOWNLOAD The DataChannel connection is downloading data packets
- *   from sending point.
- * @final
+ * @param {String} UPLOAD &lt;small&gt;Value &lt;code&gt;&quot;upload&quot;&lt;/code&gt;&lt;/small&gt;
+ *   This data transfer is an outgoing &lt;em&gt;(uploading)&lt;/em&gt; transfer.&lt;br&gt;
+ *   Data is sent to the receiving Peer using the associated DataChannel connection.
+ * @param {String} DOWNLOAD &lt;small&gt;Value &lt;code&gt;&quot;download&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The data transfer is an incoming &lt;em&gt;(downloading)&lt;/em&gt; transfer.&lt;br&gt;
+ *   Data is received from the sending Peer using the associated DataChannel connection.
+ * @readOnly
  * @component DataTransfer
  * @for Skylink
  * @since 0.1.0
@@ -174,25 +183,50 @@ Skylink.prototype.DATA_TRANSFER_TYPE = {
 };
 
 /**
- * The states of a data transfer in a DataChannel connection.
+ * These are the list of data transfer states that Skylink would trigger.
  * @attribute DATA_TRANSFER_STATE
  * @type JSON
- * @param {String} UPLOAD_REQUEST Request to start a data transfer.
- * @param {String} UPLOAD_STARTED Request to start the data transfer has been accepted
- *   and data transfer is starting to upload data packets to receiving end.
- * @param {String} DOWNLOAD_STARTED Request to start the data transfer has been accepted
- *   and data transfer is starting to receive data packets from sending point.
- * @param {String} REJECTED Request to start a data transfer is rejected.
- * @param {String} UPLOADING The data transfer upload is ongoing with receiving end.
- * @param {String} DOWNLOADING The data transfer download is ongoing with sending point.
- * @param {String} UPLOAD_COMPLETED The data transfer uploaded to receiving end has
- *   been completed successfully.
- * @param {String} DOWNLOAD_COMPLETED The data transfer downloaded from sending point
- *   has been completed successfully.
- * @param {String} CANCEL The ongoing data transfer has cancelled from receiving end
- *   or sending point and has been terminated.
- * @param {String} ERROR The ongoing data transfer has occurred an exception and
- *   has been terminated.
+ * @param {String} UPLOAD_REQUEST &lt;small&gt;Value &lt;code&gt;&quot;request&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The state when a data transfer request has been received from Peer.
+ * This happens after Peer starts a data transfer using
+ *   {{#crossLink &quot;Skylink/sendBlobData:method&quot;}}sendBlobData(){{/crossLink}} or
+ *   {{#crossLink &quot;Skylink/sendURLData:method&quot;}}sendURLData(){{/crossLink}}.
+ * @param {String} UPLOAD_STARTED &lt;small&gt;Value &lt;code&gt;&quot;uploadStarted&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The state when the data transfer will begin and start to upload the first data
+ *   packets to receiving Peer.&lt;br&gt;
+ * This happens after receiving Peer accepts a data transfer using
+ *   {{#crossLink &quot;Skylink/acceptDataTransfer:method&quot;}}acceptDataTransfer(){{/crossLink}}.
+ * @param {String} DOWNLOAD_STARTED &lt;small&gt;Value &lt;code&gt;&quot;downloadStarted&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The state when the data transfer has begin and associated DataChannel connection is
+ *   expected to receive the first data packet from sending Peer.&lt;br&gt;
+ * This happens after self accepts a data transfer using
+ *   {{#crossLink &quot;Skylink/acceptDataTransfer:method&quot;}}acceptDataTransfer(){{/crossLink}} upon
+ *   the triggered state of &lt;code&gt;UPLOAD_REQUEST&lt;/code&gt;.
+ * @param {String} REJECTED &lt;small&gt;Value &lt;code&gt;&quot;rejected&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The state when the data transfer has been rejected by receiving Peer and data transfer is
+ *   terminated.&lt;br&gt;
+ * This happens after Peer rejects a data transfer using
+ *   {{#crossLink &quot;Skylink/acceptDataTransfer:method&quot;}}acceptDataTransfer(){{/crossLink}}.
+ * @param {String} UPLOADING &lt;small&gt;Value &lt;code&gt;&quot;uploading&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The state when the data transfer is still being transferred to receiving Peer.&lt;br&gt;
+ * This happens after state &lt;code&gt;UPLOAD_STARTED&lt;/code&gt;.
+ * @param {String} DOWNLOADING &lt;small&gt;Value &lt;code&gt;&quot;downloading&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The state when the data transfer is still being transferred from sending Peer.&lt;br&gt;
+ * This happens after state &lt;code&gt;DOWNLOAD_STARTED&lt;/code&gt;.
+ * @param {String} UPLOAD_COMPLETED &lt;small&gt;Value &lt;code&gt;&quot;uploadCompleted&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The state when the data transfer has been transferred to receiving Peer successfully.&lt;br&gt;
+ * This happens after state &lt;code&gt;UPLOADING&lt;/code&gt; or &lt;code&gt;UPLOAD_STARTED&lt;/code&gt;, depending
+ *   on how huge the data being transferred is.
+ * @param {String} DOWNLOAD_COMPLETED &lt;small&gt;Value &lt;code&gt;&quot;downloadCompleted&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The state when the data transfer has been transferred from sending Peer successfully.&lt;br&gt;
+ * This happens after state &lt;code&gt;DOWNLOADING&lt;/code&gt; or &lt;code&gt;DOWNLOAD_STARTED&lt;/code&gt;, depending
+ *   on how huge the data being transferred is.
+ * @param {String} CANCEL &lt;small&gt;Value &lt;code&gt;&quot;cancel&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The state when the data transfer has been terminated by Peer.&lt;br&gt;
+ * This happens after state &lt;code&gt;DOWNLOAD_STARTED&lt;/code&gt; or &lt;code&gt;UPLOAD_STARTED&lt;/code&gt;.
+ * @param {String} ERROR &lt;small&gt;Value &lt;code&gt;&quot;error&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The state when the data transfer has occurred an exception.&lt;br&gt;
+ * At this stage, the data transfer would usually be terminated and may lead to state &lt;code&gt;CANCEL&lt;/code&gt;.
  * @readOnly
  * @component DataTransfer
  * @for Skylink
@@ -1335,14 +1369,20 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
 };
 
 /**
- * Starts a [Blob](https://developer.mozilla.org/en/docs/Web/API/Blob) data transfer
- *   with Peers using the DataChannel connection.
- * You can transfer files using the &lt;code&gt;input&lt;/code&gt; [fileupload object](
+ * Starts a data transfer with Peers using the DataChannel connections with
+ *   [Blob](https://developer.mozilla.org/en/docs/Web/API/Blob datas).
+ * - You can transfer files using the &lt;code&gt;input&lt;/code&gt; [fileupload object](
  *   http://www.w3schools.com/jsref/dom_obj_fileupload.asp) and accessing the receiving
  *   files using [FileUpload files property](http://www.w3schools.com/jsref/prop_fileupload_files.asp).
- * The [File](https://developer.mozilla.org/en/docs/Web/API/File) object inherits from
+ * - The [File](https://developer.mozilla.org/en/docs/Web/API/File) object inherits from
  *   the Blob interface which is passable in this method as a Blob object.
- * The receiving Peer have the option to accept or reject the data transfer.
+ * - The receiving Peers have the option to accept or reject the data transfer with
+ *   &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;acceptDataTransfer()&lt;/a&gt;.
+ * - For Peers connecting from our mobile platforms
+ *   (&lt;a href=&quot;http://skylink.io/ios/&quot;&gt;iOS&lt;/a&gt; / &lt;a href=&quot;http://skylink.io/android/&quot;&gt;Android&lt;/a&gt;),
+ *   the DataChannel connection channel type would be &lt;code&gt;DATA_CHANNEL_TYPE.MESSAGING&lt;/code&gt;.&lt;br&gt;
+ *   For Peers connecting from the Web platform, the DataChannel connection channel type would be
+ *  &lt;code&gt;DATA_CHANNEL_TYPE.DATA&lt;/code&gt;.
  * @method sendBlobData
  * @param {Blob} data The Blob data object to transfer to Peer.
  * @param {Number} [timeout=60] The waiting timeout in seconds that the DataChannel connection
@@ -1906,8 +1946,7 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
 
 
 /**
- * Responds to a data transfer request by rejecting or accepting
- *   the data transfer request initiated by a Peer.
+ * Responds to a data transfer request by a Peer.
  * @method respondBlobRequest
  * @param {String} peerId The sender Peer ID.
  * @param {String} transferId The data transfer ID of the data transfer request
@@ -1915,7 +1954,7 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
  * @param {Boolean} [accept=false] The flag that indicates &lt;code&gt;true&lt;/code&gt; as a response
  *   to accept the data transfer and &lt;code&gt;false&lt;/code&gt; as a response to reject the
  *   data transfer request.
- * @trigger incomingData, dataTransferState
+ * @trigger dataTransferState, incomingDataRequest, incomingData
  * @component DataTransfer
  * @deprecated Use .acceptDataTransfer()
  * @for Skylink
@@ -1923,8 +1962,7 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
  */
 Skylink.prototype.respondBlobRequest =
 /**
- * Responds to a data transfer request by rejecting or accepting
- *   the data transfer request initiated by a Peer.
+ * Responds to a data transfer request by a Peer.
  * @method acceptDataTransfer
  * @param {String} peerId The sender Peer ID.
  * @param {String} transferId The data transfer ID of the data transfer request
@@ -1932,7 +1970,7 @@ Skylink.prototype.respondBlobRequest =
  * @param {Boolean} [accept=false] The flag that indicates &lt;code&gt;true&lt;/code&gt; as a response
  *   to accept the data transfer and &lt;code&gt;false&lt;/code&gt; as a response to reject the
  *   data transfer request.
- * @trigger incomingData, dataTransferState
+ * @trigger dataTransferState, incomingDataRequest, incomingData
  * @component DataTransfer
  * @for Skylink
  * @since 0.6.1
@@ -2011,7 +2049,7 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
 };
 
 /**
- * Terminates an ongoing DataChannel connection data transfer.
+ * Terminates a current data transfer with Peer.
  * @method cancelBlobTransfer
  * @param {String} peerId The Peer ID associated with the data transfer.
  * @param {String} transferId The data transfer ID of the data transfer request
@@ -2024,7 +2062,7 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
  */
 Skylink.prototype.cancelBlobTransfer =
 /**
- * Terminates an ongoing DataChannel connection data transfer.
+ * Terminates a current data transfer with Peer.
  * @method cancelDataTransfer
  * @param {String} peerId The Peer ID associated with the data transfer.
  * @param {String} transferId The data transfer ID of the data transfer request
@@ -2113,11 +2151,11 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
 /**
  * Send a message object or string using the DataChannel connection
  *   associated with the list of targeted Peers.
- * The maximum size for the message object would be&lt;code&gt;16Kb&lt;/code&gt;.&lt;br&gt;
- * To send a string length longer than &lt;code&gt;16kb&lt;/code&gt;, please considered
+ * - The maximum size for the message object would be&lt;code&gt;16Kb&lt;/code&gt;.&lt;br&gt;
+ * - To send a string length longer than &lt;code&gt;16kb&lt;/code&gt;, please considered
  *   to use {{#crossLink &quot;Skylink/sendURLData:method&quot;}}sendURLData(){{/crossLink}}
  *   to send longer strings (for that instance base64 binary strings are long).
- * To send message objects with platform signaling socket connection, see
+ * - To send message objects with platform signaling socket connection, see
  *   {{#crossLink &quot;Skylink/sendMessage:method&quot;}}sendMessage(){{/crossLink}}.
  * @method sendP2PMessage
  * @param {String|JSON} message The message object.
@@ -2206,9 +2244,15 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
 };
 
 /**
- * Starts a [dataURL](https://developer.mozilla.org/en-US/docs/Web/API/FileReader
- *   /readAsDataURL) data transfer with Peers using the DataChannel connection.
- * The receiving Peers have the option to accept or reject the data transfer.
+ * Starts a [data URI](https://developer.mozilla.org/en-US/docs/Web/API/FileReader
+ *   /readAsDataURL) transfer with Peers using the DataChannel connection.
+ * - The receiving Peers have the option to accept or reject the data transfer with
+ *   &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;acceptDataTransfer()&lt;/a&gt;.
+ * - For Peers connecting from our mobile platforms
+ *   (&lt;a href=&quot;http://skylink.io/ios/&quot;&gt;iOS&lt;/a&gt; / &lt;a href=&quot;http://skylink.io/android/&quot;&gt;Android&lt;/a&gt;),
+ *   the DataChannel connection channel type would be &lt;code&gt;DATA_CHANNEL_TYPE.MESSAGING&lt;/code&gt;.&lt;br&gt;
+ *   For Peers connecting from the Web platform, the DataChannel connection channel type would be
+ *  &lt;code&gt;DATA_CHANNEL_TYPE.DATA&lt;/code&gt;.
  * @method sendURLData
  * @param {String} data The dataURL (base64 binary string) string to transfer to Peers.
  * @param {Number} [timeout=60] The waiting timeout in seconds that the DataChannel connection

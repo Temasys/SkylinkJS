@@ -13,7 +13,7 @@ var _peerId = null;
 
 var selectedPeers = [];
 
-//Demo.Skylink.setLogLevel(4);
+Demo.Skylink.setLogLevel(4);
 
 
 Demo.Methods.displayFileItemHTML = function (content) {
@@ -468,12 +468,7 @@ Demo.Skylink.init(config, function (error, success) {
     Demo.Skylink.joinRoom({
       userData: displayName,
       audio: { stereo: true },
-      video: {
-        resolution: {
-          width: 1280,
-          height: 720
-        }
-      }
+      video: true
     });
   }
 });
