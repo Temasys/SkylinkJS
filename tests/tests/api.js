@@ -270,6 +270,25 @@ test('init(): Testing forceTURNSSL', function(t) {
     }]
   };
 
+  var hasUrlsSupport = false;
+
+  if (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 34) {
+    hasUrlsSupport = true;
+  }
+
+  if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion > 38) {
+    hasUrlsSupport = true;
+  }
+
+  if (window.webrtcDetectedBrowser === 'opera' && window.webrtcDetectedVersion > 31) {
+    hasUrlsSupport = true;
+  }
+
+  // plugin supports .urls
+  if (window.webrtcDetectedBrowser === 'safari' || window.webrtcDetectedBrowser === 'IE') {
+    hasUrlsSupport = true;
+  }
+
   var test1 = function() {
     sw.init({
       apiKey: valid_apikey,
@@ -287,10 +306,21 @@ test('init(): Testing forceTURNSSL', function(t) {
       for (var i = 0; i < outputTURNServers.iceServers.length; i++) {
         var server = outputTURNServers.iceServers[i];
 
-        if (server.url.indexOf('turn:') === 0 && server.url.indexOf(':443') === -1) {
+        if (!hasUrlsSupport) {
+          if (server.url.indexOf('turn:') === 0 && server.url.indexOf(':443') === -1) {
+            console.info(server);
+            hasNonTURN = true;
+            break;
+          }
+        } else {
           console.info(server);
-          hasNonTURN = true;
-          break;
+          for (var j = 0; j < server.urls.length; j++) {
+            if (server.urls[j].indexOf('turn:') === 0 && server.urls[j].indexOf(':443') === -1) {
+              console.info(server);
+              hasNonTURN = true;
+              break;
+            }
+          }
         }
       }
 
@@ -325,12 +355,35 @@ test('init(): Testing forceTURNSSL', function(t) {
         }
       }
 
+      console.info('output', outputTURNServers);
+
       for (var j = 0; j < outputTURNServers.iceServers.length; j++) {
         var server = outputTURNServers.iceServers[j];
-        if (server.url.indexOf('turn:') === 0) {
-          actual.push(server);
+
+        if (!hasUrlsSupport) {
+          if (server.url.indexOf('turn:') === 0) {
+            actual.push(server);
+          }
+        } else {
+          for (var l = 0; l < server.urls.length; l++) {
+            console.info(l, server.urls[l]);
+            if (server.urls[l].indexOf('turn:') === 0) {
+              var partServer = {
+                url: server.urls[l]
+              };
+              if (typeof server.credential === 'string') {
+                partServer.credential = server.credential;
+              }
+              if (typeof server.username === 'string') {
+                partServer.username = server.username;
+              }
+              actual.push(partServer);
+            }
+          }
         }
       }
+
+      console.info(actual, expected, outputTURNServers);
 
       t.deepEqual(actual.length, expected.length,
         'Does not filter out all TURN servers in _setIceServers');

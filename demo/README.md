@@ -98,7 +98,6 @@ In this demo, you can find an example of the overview of all types of stream set
 ##### Events used
 `peerJoined`, `peerLeft`, `incomingStream`, `mediaAccessSuccess`, `incomingMessage`
 
-
 ### demo/video-call
 In this demo, you can find an example of how you can create a simple video call with Skylink.
 
@@ -107,3 +106,15 @@ In this demo, you can find an example of how you can create a simple video call 
 
 ##### Events used
 `mediaAccessSuccess`, `incomingStream`, `streamEnded`, `peerLeft`
+
+### demo/privileged
+In this demo, you can find an example of how to utilize the privileged key concept for different types of clients.
+
+##### Functionalities covered
+`getPeers()`, `introducePeer()`
+
+##### Events used
+`getPeersStateChange`, `introduceStateChange`
+
+##### How to use
+First, open the index page of the privileged demo. Each button there when being clicked will open another browser tab for the corresponding type of user, with corresponding functionalities available. For example privileged users have getPeers() and introduce() options while the rest do not. To introduce two peers, enter the peer ID of each peer to the textbox then hit "Introduce".

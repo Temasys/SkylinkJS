@@ -1,9 +1,13 @@
 /**
- * The types of get peers states available
+ * These are the list of Peer list retrieval states that Skylink would trigger.
+ * - This relates to and requires the Privileged Key feature where Peers using
+ *   that Privileged alias Key becomes a privileged Peer with privileged functionalities.
  * @attribute GET_PEERS_STATE
  * @type JSON
- * @param {String} ENQUIRED The privileged Peer already enquired signaling for list of peers
- * @param {String} RECEIVED The privileged Peer received list of peers from signaling
+ * @param {String} ENQUIRED <small>Value <code>"enquired"</code></small>
+ *   The state when the privileged Peer already enquired signaling for list of peers.
+ * @param {String} RECEIVED <small>Value <code>"received"</code></small>
+ *   The state when the privileged Peer received list of peers from signaling.
  * @readOnly
  * @component Peer
  * @for Skylink
@@ -15,11 +19,15 @@ Skylink.prototype.GET_PEERS_STATE = {
 };
 
 /**
- * The types of peer introduction states available
+ * These are the list of Peer introduction states that Skylink would trigger.
+ * - This relates to and requires the Privileged Key feature where Peers using
+ *   that Privileged alias Key becomes a privileged Peer with privileged functionalities.
  * @attribute INTRODUCE_STATE
  * @type JSON
- * @param {String} INTRODUCING The privileged Peer sent the introduction signal
- * @param {String} ERROR The Peer introduction has occurred an exception.
+ * @param {String} INTRODUCING <small>Value <code>"enquired"</code></small>
+ *   The state when the privileged Peer have sent the introduction signal.
+ * @param {String} ERROR <small>Value <code>"error"</code></small>
+ *   The state when the Peer introduction has occurred an exception.
  * @readOnly
  * @component Peer
  * @for Skylink
@@ -86,7 +94,8 @@ Skylink.prototype._peerList = null;
  * This will only work if self is a privileged Peer.
  * @method getPeers
  * @param {Boolean} [showAll=false] The flag that indicates if returned list should
- *   also include privileged peers in the list. By default, the value is <code>false</code>.
+ *   also include privileged and standard in the list. By default, the value is <code>false</code>.
+ *   Which means only unprivileged peers' ID (isPrivileged = autoIntroduce = false) is included.
  * @param {Function} [callback] The callback fired after the receiving the current
  *   list of Peers from platform signaling or have met with an exception.
  *   The callback signature is <code>function (error, success)</code>.

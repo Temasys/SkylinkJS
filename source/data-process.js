@@ -46,23 +46,26 @@ Skylink.prototype._CHUNK_DATAURL_SIZE = 1212;
 Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 12288;
 
 /**
- * The list of native data types that is transferred through the DataChannel connection.
- * The current supported data types is <code>string</code>. <code>Blob</code>,
- *   <code>ArrayBuffer</code> types support is not yet currently handled or
- *   implemented.
+ * These are the list of available transfer encodings that would be used by Skylink during a data transfer.
+ * - The currently supported data type is <code>BINARY_STRING</code>.
+ * - Support for data types <code>BLOB</code> and <code>ARRAY_BUFFER</code> is still in implementation.
  * @attribute DATA_TRANSFER_DATA_TYPE
  * @type JSON
- * @param {String} BINARY_STRING Data is transferred using
- *   [binary converted strings](https://developer.mozilla.org/en-US/
- *   docs/Web/HTTP/data_URIs) through the DataChannel connection.
- * @param {String} ARRAY_BUFFER Data is transferred using
- *   [ArrayBuffers](https://developer.mozilla.org/en-US/docs/Web/JavaScript
-  *  /Reference/Global_Objects/ArrayBuffer) through the DataChannel connection.
- * @param {String} BLOB Data is transferred using
+ * @param {String} BINARY_STRING <small><b>DEFAULT</b> | Value <code>"binaryString"</code></small>
+ *   The option to let Skylink encode data packets using
+ *   [binary converted strings](https://developer.mozilla.org/en-US/docs/Web/HTTP/data_URIs)
+ *   when sending the data packets through the DataChannel connection during data transfers.
+ * @param {String} ARRAY_BUFFER <small><em>IN IMPLEMENTATION</em> | Value <code>"arrayBuffer"</code></small>
+ *   The option to let Skylink encode data packets using
+ *   [ArrayBuffers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
+ *   when sending the data packets through the DataChannel connection during data transfers.
+ * @param {String} BLOB <small><em>IN IMPLEMENTATION</em> | Value <code>"blob"</code></small>
+ *   The option to let Skylink encode data packets using
  *   [Blobs](https://developer.mozilla.org/en/docs/Web/API/Blob)
- *   through the DataChannel connection.
- * @final
+ *   when sending the data packets through the DataChannel connection during data transfers.
+ * @readOnly
  * @component DataProcess
+ * @partof DATA TRANSFER FUNCTIONALITY
  * @for Skylink
  * @since 0.1.0
  */

@@ -975,7 +975,7 @@ test('joinRoom() - callback: Testing failure callback', function(t){
 });
 
 test('leaveRoom() - callback: Testing success callback', function(t){
-  t.plan(24);
+  t.plan(28);
   var roomName;
   var leave_callback = function(error, success, roomName, noMedia){
     t.deepEqual([error, typeof success],
@@ -1091,11 +1091,31 @@ test('leaveRoom() - callback: Testing success callback', function(t){
       if (jRError) {
         sw.leaveRoom(true, function(error, success){
           leave_callback(error, success, roomName, true);
+          test7();
         });
       } else {
         console.log('ERROR: Failed joining room for leaveRoom() - success callback test 6');
         console.error('leaveRoom() - success callback (test6): Joining room error', jRError);
         t.fail('Failed joining room for Test 6');
+        test7();
+      }
+    });
+  };
+
+  var test7 = function () {
+    console.log('Testing scenario 7: Leaving room with options ({}, callback) in "test7"');
+
+    roomName = 'test7';
+
+    sw.joinRoom(roomName, function(jRError, jRSuccess) {
+      if (jRError) {
+        sw.leaveRoom({}, function(error, success){
+          leave_callback(error, success, roomName, true);
+        });
+      } else {
+        console.log('ERROR: Failed joining room for leaveRoom() - success callback test 7');
+        console.error('leaveRoom() - success callback (test7): Joining room error', jRError);
+        t.fail('Failed joining room for Test 7');
       }
     });
   };
@@ -1115,7 +1135,7 @@ test('leaveRoom() - callback: Testing success callback', function(t){
 });
 
 test('leaveRoom() - callback: Testing failure callback', function(t){
-  t.plan(4);
+  t.plan(3);
   var leave_callback = function(error, success){
     t.deepEqual([typeof error, success],
       ['object', null], 'Callback returns an error instead of success');
@@ -1140,16 +1160,7 @@ test('leaveRoom() - callback: Testing failure callback', function(t){
   };
 
   var test3 = function () {
-    console.log('Testing scenario 3: Leaving room with options ("string", callback)');
-
-    sw.leaveRoom('string', function(error, success){
-      leave_callback(error, success);
-      test4();
-    });
-  };
-
-  var test4 = function () {
-    console.log('Testing scenario 4: Leaving room when user is not in room');
+    console.log('Testing scenario 3: Leaving room when user is not in room');
 
     sw._inRoom = false;
     sw.leaveRoom(function(error, success){

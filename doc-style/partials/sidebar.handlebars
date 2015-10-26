@@ -1,12 +1,18 @@
 <ul id="api-list" class="nav navbar-nav navbar-right">
-  <li class="dropdown">
+  <li><a href="https://temasys.github.io">Getting Started</a></li>
+  {{#classes}}
+    <li><a href="{{../projectRoot}}classes/Skylink.html">Documentation</a></li>
+  {{/classes}}
+  <!--<li class="dropdown">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
     <ul class="dropdown-menu" role="menu">
       {{#classes}}
         <li><a href="{{../projectRoot}}classes/{{name}}.html">{{displayName}}</a></li>
       {{/classes}}
     </ul>
-  </li>
+  </li>-->
+  <li><a class="btn btn-info btn-navbar" href="http://developer.temasys.com.sg/">Developer Console</a></li>
+  <li><a class="btn btn-info btn-navbar" href="http://support.temasys.com.sg/">Support</a></li>
   <!--<li class="dropdown">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
     <ul class="dropdown-menu" role="menu">
@@ -16,7 +22,6 @@
       {{/allModules}}
     </ul>
   </li>-->
-  <li><a href="https://temasys.github.io">Getting Started</a></li>
 </ul>
 <!--<form id="api-tabview" class="navbar-form navbar-right" role="form">
   <div id="api-tabview-filter" class="form-group">
