@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>source/room-init.js - skylinkjs</title>
+    <title>SkylinkJS 0.6.3</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,19 +32,25 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.2</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.3</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
         <ul id="api-list" class="nav navbar-nav navbar-right">
-  <li class="dropdown">
+  <li><a href="https://temasys.github.io">Getting Started</a></li>
+  
+    <li><a href="../classes/Skylink.html">Documentation</a></li>
+  
+  <!--<li class="dropdown">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
     <ul class="dropdown-menu" role="menu">
       
         <li><a href="../classes/Skylink.html">Skylink</a></li>
       
     </ul>
-  </li>
+  </li>-->
+  <li><a class="btn btn-info btn-navbar" href="http://developer.temasys.com.sg/">Developer Console</a></li>
+  <li><a class="btn btn-info btn-navbar" href="http://support.temasys.com.sg/">Support</a></li>
   <!--<li class="dropdown">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
     <ul class="dropdown-menu" role="menu">
@@ -52,7 +58,6 @@
       
     </ul>
   </li>-->
-  <li><a href="https://temasys.github.io">Getting Started</a></li>
 </ul>
 <!--<form id="api-tabview" class="navbar-form navbar-right" role="form">
   <div id="api-tabview-filter" class="form-group">
@@ -77,22 +82,30 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * The list of Skylink platform room initialization ready state that indicates
- *   if the required connection information has been retrieved successfully from
+ * These are the list of room initialization ready states that Skylink would trigger.
+ * - The states indicates if the required connection information has been retrieved successfully from
  *   the platform server to start a connection.
+ * - These states are triggered when {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}} or
+ *   {{#crossLink &quot;Skylink/joinRoom:attr&quot;}}joinRoom(){{/crossLink}} is invoked.
  * @attribute READY_STATE_CHANGE
  * @type JSON
- * @param {Number} INIT Retrieval Step 1. The ready state is at it&#x27;s beginning.
- *   When {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}} is invoked, or
- *   when {{#crossLink &quot;Skylink/joinRoom:attr&quot;}}joinRoom(){{/crossLink}} is invoked
- *   with a provided room, it will start proceeding to Step 2.
- * @param {Number} LOADING Retrieval Step 2. Skylink starts retrieving the
- *   connection information from the platform server.
- * @param {Number} COMPLETED Retrieval Step 3. The connection information
- *   has been retrieved successfully.
- * @param {Number} ERROR Retrieval failure Step. An exception occured while retrieving
- *   the connection information. This could also be due to missing dependencies or the
- *   lack of WebRTC support.
+ * @param {Number} INIT &lt;small&gt;Value &lt;code&gt;0&lt;/code&gt;&lt;/small&gt;
+ *   The state when Skylink is at the initial state before retrieval.&lt;br&gt;
+ * If all dependencies has been loaded, this would proceed to &lt;code&gt;LOADING&lt;/code&gt; state.
+ * @param {Number} LOADING &lt;small&gt;Value &lt;code&gt;1&lt;/code&gt;&lt;/small&gt;
+ *   The state when Skylink starts retrieving the connection information from the platform server.&lt;br&gt;
+ * This state occurs after &lt;code&gt;INIT&lt;/code&gt; state and if retrieval is successful, this would
+ *   proceed to &lt;code&gt;COMPLETED&lt;/code&gt; state.
+ * @param {Number} COMPLETED &lt;small&gt;Value &lt;code&gt;2&lt;/code&gt;&lt;/small&gt;
+ *   The state when the connection information has been retrieved successfully.&lt;br&gt;
+ * This state occurs after &lt;code&gt;LOADING&lt;/code&gt;, and if it&#x27;s
+ *   {{#crossLink &quot;Skylink/joinRoom:attr&quot;}}joinRoom(){{/crossLink}} that is invoked, room connection
+ *   would commerce.
+ * @param {Number} ERROR &lt;small&gt;Value &lt;code&gt;-1&lt;/code&gt;&lt;/small&gt;
+ *   The state when an exception occured while retrieving the connection information.&lt;br&gt;
+ * This state might be triggered when dependencies failed to load or HTTP retrieval fails.&lt;br&gt;
+ * Reference {{#crossLink &quot;Skylink/READY_STATE_CHANGE_ERROR:attr&quot;}}READY_STATE_CHANGE_ERROR{{/crossLink}}
+ *   to see the list of errors that might have triggered the &lt;code&gt;ERROR&lt;/code&gt; state.
  * @readOnly
  * @component Room
  * @for Skylink
@@ -106,42 +119,63 @@ Skylink.prototype.READY_STATE_CHANGE = {
 };
 
 /**
- * The list of Skylink platform room initialization ready state errors when
- *   the error state is triggered by
- *   {{#crossLink &quot;Skylink/readyStateChange:event&quot;}}readyStateChange{{/crossLink}}
-     The list of ready state change errors.
- * - These are the error states from the error object error code.
- * - &lt;b&gt;ROOM_LOCKED&lt;/b&gt; is deprecated in 0.5.2. Please use
- *   {{#crossLink &quot;Skylink/:attr&quot;}}leaveRoom(){{/crossLink}}
- * - The states that would occur are:
+ * These are the list of room initialization ready state errors that Skylink has.
+ * - Ready state errors like &lt;code&gt;ROOM_LOCKED&lt;/code&gt;, &lt;code&gt;API_NOT_ENOUGH_CREDIT&lt;/code&gt;,
+ *   &lt;code&gt;API_NOT_ENOUGH_PREPAID_CREDIT&lt;/code&gt;, &lt;code&gt;API_FAILED_FINDING_PREPAID_CREDIT&lt;/code&gt; and
+ *   &lt;code&gt;SCRIPT_ERROR&lt;/code&gt; has been removed as they are no longer supported.
  * @attribute READY_STATE_CHANGE_ERROR
  * @type JSON
- * @param {Number} API_INVALID Provided Application Key does not exists (invalid).
- * @param {Number} API_DOMAIN_NOT_MATCH Application accessing from backend IP address
- *   is not valid for provided Application Key.
- * @param {Number} API_CORS_DOMAIN_NOT_MATCH Application accessing from the CORS domain
- *   is not valid for provided Application Key.
- * @param {Number} API_CREDENTIALS_INVALID Credentials provided is not valid for
- *   provided Application Key.
- * @param {Number} API_CREDENTIALS_NOT_MATCH Credentials does not match as expected
- *   generated credentials for provided Application Key.
- * @param {Number} API_INVALID_PARENT_KEY Provided alias Application Key has an
- *   error because parent Application Key does not exists.
- * @param {Number} API_NO_MEETING_RECORD_FOUND For persistent room feature configured
- *   Application Key. There is no meeting currently that is open or available to join
- *   for self at the current time in the selected room.
- * @param {Number} NO_SOCKET_IO Socket.io dependency is not loaded.
- * @param {Number} NO_XMLHTTPREQUEST_SUPPORT XMLHttpRequest is not supported
- *   in current browser.
- * @param {Number} NO_WEBRTC_SUPPORT WebRTC is not supported in
- *   current browser.
- * @param {Number} NO_PATH Error thrown when {{#crossLink &quot;Skylink/joinRoom:method&quot;}}joinRoom(){{/crossLink}}
- *   is invoked before {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}.
- * @param {Number} INVALID_XMLHTTPREQUEST_STATUS XMLHttpRequest does not return a
- *   HTTP status code of &lt;code&gt;200&lt;/code&gt;, which is a HTTP failure.
- * @param {Number} ADAPTER_NO_LOADED AdapterJS dependency is not loaded.
- * @param {Number} XML_HTTP_REQUEST_ERROR XMLHttpRequest failure on the network level when attempting to
- *   connect to the platform server to retrieve selected room connection information.
+ * @param {Number} API_INVALID &lt;small&gt;Value &lt;code&gt;4001&lt;/code&gt;&lt;/small&gt;
+ *   The error when provided Application Key does not exists &lt;em&gt;(invalid)&lt;/em&gt;.&lt;br&gt;
+ * For this error, it&#x27;s recommended that you check if the Application Key exists in your account
+ *   in the developer console.
+ * @param {Number} API_DOMAIN_NOT_MATCH &lt;small&gt;Value &lt;code&gt;4002&lt;/code&gt;&lt;/small&gt;
+ *   The error when application accessing from backend IP address is not valid for provided Application Key.&lt;br&gt;
+ * This rarely (and should not) occur and it&#x27;s recommended to report this issue if this occurs.
+ * @param {Number} API_CORS_DOMAIN_NOT_MATCH &lt;small&gt;Value &lt;code&gt;4003&lt;/code&gt;&lt;/small&gt;
+ *   The error when application accessing from the CORS domain is not valid for provided Application Key.&lt;br&gt;
+ * For this error, it&#x27;s recommended that you check the CORS configuration for the provided Application Key
+ *   in the developer console.
+ * @param {Number} API_CREDENTIALS_INVALID &lt;small&gt;Value &lt;code&gt;4004&lt;/code&gt;&lt;/small&gt;
+ *   The error when credentials provided is not valid for provided Application Key.&lt;br&gt;
+ * For this error, it&#x27;s recommended to check the &lt;code&gt;credentials&lt;/code&gt; provided in
+ *   {{#crossLink &quot;Skylink/init:method&quot;}}init() configuration{{/crossLink}}.
+ * @param {Number} API_CREDENTIALS_NOT_MATCH &lt;small&gt;Value &lt;code&gt;4005&lt;/code&gt;&lt;/small&gt;
+ *   The error when credentials does not match as expected generated credentials for provided Application Key.&lt;br&gt;
+ * For this error, it&#x27;s recommended to check the &lt;code&gt;credentials&lt;/code&gt; provided in
+ *   {{#crossLink &quot;Skylink/init:method&quot;}}init() configuration{{/crossLink}}.
+ * @param {Number} API_INVALID_PARENT_KEY &lt;small&gt;Value &lt;code&gt;4006&lt;/code&gt;&lt;/small&gt;
+ *   The error when provided alias Application Key has an error because parent Application Key does not exists.&lt;br&gt;
+ * For this error, it&#x27;s recommended to provide another alias Application Key.
+ * @param {Number} API_NO_MEETING_RECORD_FOUND &lt;small&gt;Value &lt;code&gt;4010&lt;/code&gt;&lt;/small&gt;
+ *   The error when there is no meeting currently that is open or available to join
+ *   for self at the current time in the selected room.&lt;br&gt;
+ * For this error, it&#x27;s recommended to retrieve the list of meetings and check if it exists using
+ *   the [Meeting Resource REST API](https://temasys.atlassian.net/wiki/display/TPD/SkylinkAPI+-+Meeting+%28Persistent+Room%29+Resources).
+ * @param {Number} NO_SOCKET_IO &lt;small&gt;Value &lt;code&gt;1&lt;/code&gt;&lt;/small&gt;
+ *   The error when socket.io dependency is not loaded.&lt;br&gt;
+ * For this error, it&#x27;s recommended to load the
+ *   [correct socket.io-client dependency](http://socket.io/download/) from the CDN.
+ * @param {Number} NO_XMLHTTPREQUEST_SUPPORT &lt;small&gt;Value &lt;code&gt;2&lt;/code&gt;&lt;/small&gt;
+ *   The error when XMLHttpRequest is not supported in current browser.&lt;br&gt;
+ * For this error, it&#x27;s recommended to ask user to switch to another browser that supports &lt;code&gt;XMLHttpRequest&lt;/code&gt;.
+ * @param {Number} NO_WEBRTC_SUPPORT &lt;small&gt;Value &lt;code&gt;3&lt;/code&gt;&lt;/small&gt;
+ *   The error when WebRTC is not supported in current browser.&lt;br&gt;
+ * For this error, it&#x27;s recommended to ask user to switch to another browser that supports WebRTC.
+ * @param {Number} NO_PATH &lt;small&gt;Value &lt;code&gt;4&lt;/code&gt;&lt;/small&gt;
+ *   The error when constructed path is invalid.&lt;br&gt;
+ * This rarely (and should not) occur and it&#x27;s recommended to report this issue if this occurs.
+ * @param {Number} INVALID_XMLHTTPREQUEST_STATUS &lt;small&gt;Value &lt;code&gt;5&lt;/code&gt;&lt;/small&gt;
+ *   The error when XMLHttpRequest does not return a HTTP status code of &lt;code&gt;200&lt;/code&gt; but a HTTP failure.&lt;br&gt;
+ * This rarely (and should not) occur and it&#x27;s recommended to report this issue if this occurs.
+ * @param {Number} ADAPTER_NO_LOADED &lt;small&gt;Value &lt;code&gt;7&lt;/code&gt;&lt;/small&gt;
+ *   The error when AdapterJS dependency is not loaded.&lt;br&gt;
+ * For this error, it&#x27;s recommended to load the
+ *   [correct AdapterJS dependency](https://github.com/Temasys/AdapterJS/releases) from the CDN.
+ * @param {Number} XML_HTTP_REQUEST_ERROR &lt;small&gt;Value &lt;code&gt;-1&lt;/code&gt;&lt;/small&gt;
+ *   The error when XMLHttpRequest failure on the network level when attempting to
+ *   connect to the platform server to retrieve selected room connection information.&lt;br&gt;
+ * This might happen when connection timeouts. If this is a persistent issue, it&#x27;s recommended to report this issue.
  * @readOnly
  * @component Room
  * @for Skylink
@@ -167,15 +201,17 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
 };
 
 /**
- * The list of available platform signaling servers Skylink
+ * These are the list of available platform signaling servers Skylink
  *   should connect to for faster connectivity.
  * @attribute REGIONAL_SERVER
  * @type JSON
- * @param {String} APAC1 Asia pacific server 1.
- * @param {String} US1 server 1.
+ * @param {String} APAC1 &lt;small&gt;Value &lt;code&gt;&quot;sg&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The option to select the Asia pacific server 1 regional server.
+ * @param {String} US1 &lt;small&gt;Value &lt;code&gt;&quot;us2&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The option to select the US server 1 regional server.
  * @deprecated Signaling server selection is handled on
  *    the server side based on load and latency.
- * @final
+ * @readOnly
  * @component Room
  * @for Skylink
  * @since 0.5.0

@@ -105,9 +105,15 @@
       </small>
     {{/if}}
 
-    {{#if since}}
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">{{since}}</span></small>
-    {{/if}}
+    <small>
+      {{#if since}}
+        <i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">{{since}}</span>
+      {{/if}}
+
+      {{#if partof}}
+        &nbsp;&nbsp; | &nbsp;&nbsp;Part of &#187; <b style="font-weight:600;text-transform:uppercase;">{{partof}}</b>
+      {{/if}}
+    </small>
   </div>
 
   <div class="code-item-description">

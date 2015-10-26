@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>source/skylink-debug.js - skylinkjs</title>
+    <title>SkylinkJS 0.6.3</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,19 +32,25 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.2</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.3</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
         <ul id="api-list" class="nav navbar-nav navbar-right">
-  <li class="dropdown">
+  <li><a href="https://temasys.github.io">Getting Started</a></li>
+  
+    <li><a href="../classes/Skylink.html">Documentation</a></li>
+  
+  <!--<li class="dropdown">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
     <ul class="dropdown-menu" role="menu">
       
         <li><a href="../classes/Skylink.html">Skylink</a></li>
       
     </ul>
-  </li>
+  </li>-->
+  <li><a class="btn btn-info btn-navbar" href="http://developer.temasys.com.sg/">Developer Console</a></li>
+  <li><a class="btn btn-info btn-navbar" href="http://support.temasys.com.sg/">Support</a></li>
   <!--<li class="dropdown">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
     <ul class="dropdown-menu" role="menu">
@@ -52,7 +58,6 @@
       
     </ul>
   </li>-->
-  <li><a href="https://temasys.github.io">Getting Started</a></li>
 </ul>
 <!--<form id="api-tabview" class="navbar-form navbar-right" role="form">
   <div id="api-tabview-filter" class="form-group">
@@ -77,18 +82,21 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * The list of Skylink &lt;code&gt;console&lt;/code&gt; logging levels available.
- * Refer to [Javascript Web Console](https://developer.mozilla.org/en/docs/Web/API/console).
+ * These are the logging levels that Skylink provides.
+ * - This manipulates the debugging messages sent to &lt;code&gt;console&lt;/code&gt; object.
+ * - Refer to [Javascript Web Console](https://developer.mozilla.org/en/docs/Web/API/console).
  * @attribute LOG_LEVEL
  * @type JSON
- * @param {Number} DEBUG Displays &lt;code&gt;debug&lt;/code&gt;, &lt;code&gt;log&lt;/code&gt;,
- *   &lt;code&gt;info&lt;/code&gt;, &lt;code&gt;warn&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt; console logs.
- * @param {Number} LOG Displays &lt;code&gt;log&lt;/code&gt;,
- *   &lt;code&gt;info&lt;/code&gt;, &lt;code&gt;warn&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt; console logs.
- * @param {Number} INFO Displays &lt;code&gt;info&lt;/code&gt;, &lt;code&gt;warn&lt;/code&gt; and
- *   &lt;code&gt;error&lt;/code&gt; console logs.
- * @param {Number} WARN Displays &lt;code&gt;warn&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt; console logs.
- * @param {Number} ERROR &lt;i&gt;This is the default log level.&lt;/i&gt; Displays &lt;code&gt;error&lt;/code&gt; console logs only.
+ * @param {Number} DEBUG &lt;small&gt;Value &lt;code&gt;4&lt;/code&gt; | Level higher than &lt;code&gt;LOG&lt;/code&gt;&lt;/small&gt;
+ *   Displays debugging logs from &lt;code&gt;LOG&lt;/code&gt; level onwards with &lt;code&gt;DEBUG&lt;/code&gt; logs.
+ * @param {Number} LOG &lt;small&gt;Value &lt;code&gt;3&lt;/code&gt; | Level higher than &lt;code&gt;INFO&lt;/code&gt;&lt;/small&gt;
+ *   Displays debugging logs from &lt;code&gt;INFO&lt;/code&gt; level onwards with &lt;code&gt;LOG&lt;/code&gt; logs.
+ * @param {Number} INFO &lt;small&gt;Value &lt;code&gt;2&lt;/code&gt; | Level higher than &lt;code&gt;WARN&lt;/code&gt;&lt;/small&gt;
+ *   Displays debugging logs from &lt;code&gt;WARN&lt;/code&gt; level onwards with &lt;code&gt;INFO&lt;/code&gt; logs.
+ * @param {Number} WARN &lt;small&gt;Value &lt;code&gt;1&lt;/code&gt; | Level higher than &lt;code&gt;ERROR&lt;/code&gt;&lt;/small&gt;
+ *   Displays debugging logs of &lt;code&gt;ERROR&lt;/code&gt; level with &lt;code&gt;WARN&lt;/code&gt; logs.
+ * @param {Number} ERROR &lt;small&gt;&lt;b&gt;DEFAULT&lt;/b&gt; | Value &lt;code&gt;0&lt;/code&gt; | Lowest level&lt;/small&gt;
+ *   Displays only &lt;code&gt;ERROR&lt;/code&gt; logs.
  * @readOnly
  * @component Log
  * @for Skylink
@@ -282,7 +290,7 @@ var _printAllStoredLogsFn = function () {
 
 /**
  * The object that handles the stored Skylink console logs.
- * Skylink {{#crossLink &quot;Skylink/setDebugMode:method&quot;}}setDebugMode(){{/crossLink}} &lt;code&gt;storeLogs&lt;/code&gt;
+ * - {{#crossLink &quot;Skylink/setDebugMode:method&quot;}}setDebugMode(){{/crossLink}} &lt;code&gt;storeLogs&lt;/code&gt; flag
  *   must be set as &lt;code&gt;true&lt;/code&gt; to enable the storage of logs.
  * @property SkylinkLogs
  * @type JSON
@@ -297,9 +305,15 @@ window.SkylinkLogs = {
    * Gets the stored Skylink console logs.
    * @property SkylinkLogs.getLogs
    * @param {Number} [logLevel] The specific log level of Skylink console logs
-   *   that should be returned. If value is not provided, it will return all stored console logs.
+   *   that should be returned.&lt;br&gt;If value is not provided, it will return all stored console logs.
    *  [Rel: Skylink.LOG_LEVEL]
    * @return {Array} The array of stored console logs based on the log level provided.
+   * @example
+   *  // Example 1: Get logs of specific level
+   *  var debugLogs = SkylinkLogs.getLogs(SkylinkDemo.LOG_LEVEL.DEBUG);
+   *
+   *  // Example 2: Get all logs
+   *  var allLogs = SkylinkLogs.getLogs();
    * @type Function
    * @required
    * @global true
@@ -316,6 +330,8 @@ window.SkylinkLogs = {
    *   that should be cleared. If value is not provided, it will clear all stored console logs.
    *  [Rel: Skylink.LOG_LEVEL]
    * @type Function
+   * @example
+   *   SkylinkLogs.clearAllLogs(); // empties all logs
    * @required
    * @global true
    * @component Log
@@ -328,6 +344,8 @@ window.SkylinkLogs = {
    * Prints all the stored Skylink console logs into the [Web console](https://developer.mozilla.org/en/docs/Web/API/console).
    * @property SkylinkLogs.printAllLogs
    * @type Function
+   * @example
+   *   SkylinkLogs.printAllLogs(); // check the console
    * @required
    * @global true
    * @component Log
