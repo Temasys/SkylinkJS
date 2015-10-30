@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.3 - Fri Oct 30 2015 12:16:24 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.3 - Fri Oct 30 2015 12:17:35 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8387,7 +8387,7 @@ if (navigator.mozGetUserMedia) {
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.3 - Fri Oct 30 2015 12:16:24 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.3 - Fri Oct 30 2015 12:17:35 GMT+0800 (SGT) */
 
 (function() {
 
@@ -22067,7 +22067,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
           if (self._hasMCU) {
             self._restartMCUConnection();
           } else {
-            self._trigger('incomingStream', self._user.sid, self._mediaStream,
+            self._trigger('incomingStream', self._user.sid, stream,
               true, self.getPeerInfo(), false);
             for (var peer in self._peerConnections) {
               if (self._peerConnections.hasOwnProperty(peer)) {
@@ -22078,6 +22078,8 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
         } else if (typeof callback === 'function') {
           callback(null, stream);
         }
+      }, function (stream, isScreenSharing) {
+        return isScreenSharing;
       });
 
       if (window.webrtcDetectedBrowser !== 'firefox' && enableAudio) {

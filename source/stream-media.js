@@ -2137,7 +2137,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
           if (self._hasMCU) {
             self._restartMCUConnection();
           } else {
-            self._trigger('incomingStream', self._user.sid, self._mediaStream,
+            self._trigger('incomingStream', self._user.sid, stream,
               true, self.getPeerInfo(), false);
             for (var peer in self._peerConnections) {
               if (self._peerConnections.hasOwnProperty(peer)) {
@@ -2148,6 +2148,8 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
         } else if (typeof callback === 'function') {
           callback(null, stream);
         }
+      }, function (stream, isScreenSharing) {
+        return isScreenSharing;
       });
 
       if (window.webrtcDetectedBrowser !== 'firefox' && enableAudio) {

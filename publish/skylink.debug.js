@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.3 - Fri Oct 30 2015 12:16:24 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.3 - Fri Oct 30 2015 12:17:35 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13678,7 +13678,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
           if (self._hasMCU) {
             self._restartMCUConnection();
           } else {
-            self._trigger('incomingStream', self._user.sid, self._mediaStream,
+            self._trigger('incomingStream', self._user.sid, stream,
               true, self.getPeerInfo(), false);
             for (var peer in self._peerConnections) {
               if (self._peerConnections.hasOwnProperty(peer)) {
@@ -13689,6 +13689,8 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
         } else if (typeof callback === 'function') {
           callback(null, stream);
         }
+      }, function (stream, isScreenSharing) {
+        return isScreenSharing;
       });
 
       if (window.webrtcDetectedBrowser !== 'firefox' && enableAudio) {
