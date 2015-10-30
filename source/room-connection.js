@@ -361,6 +361,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   var self = this;
   var error;
   var stopStream = false;
+  var previousRoom = self._selectedRoom;
 
   if (typeof room === 'string') {
     //joinRoom(room, callback)
@@ -484,7 +485,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
     }
   };
 
-  if (self._channelOpen) {
+  if (self._inRoom) {
     if (typeof mediaOptions === 'object') {
       if (mediaOptions.audio === false && mediaOptions.video === false) {
         stopStream = true;
@@ -493,7 +494,13 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
       }
     }
 
-    self.leaveRoom(stopStream, function() {
+    log.log([null, 'Socket', previousRoom, 'Leaving room before joining new room'], self._selectedRoom);
+
+    self.leaveRoom(stopStream, function(error, success) {
+      log.log([null, 'Socket', previousRoom, 'Leave room callback result'], {
+        error: error,
+        success: success
+      });
       log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'], mediaOptions);
       if (typeof room === 'string' ? room !== self._selectedRoom : false) {
         self._initSelectedRoom(room, function(errorObj) {

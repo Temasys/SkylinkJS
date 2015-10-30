@@ -456,6 +456,10 @@ Demo.Skylink.on('peerRestart', function (peerId, peerInfo, isSelf) {
   console.info('peerRestart', peerId, peerInfo, isSelf);
 });
 
+Demo.Skylink.on('incomingStream', function (peerId, peerInfo, isSelf) {
+  console.info('incomingStream', peerId, peerInfo, isSelf);
+});
+
 Demo.Skylink.on('serverPeerRestart', function (serverPeerId, serverPeerType) {
   console.info('serverPeerRestart', serverPeerId, serverPeerType);
 });
