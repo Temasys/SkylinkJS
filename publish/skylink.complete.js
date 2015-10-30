@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.3 - Sun Oct 25 2015 00:24:30 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.3 - Fri Oct 30 2015 12:16:24 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8387,7 +8387,7 @@ if (navigator.mozGetUserMedia) {
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.3 - Sun Oct 25 2015 00:24:30 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.3 - Fri Oct 30 2015 12:16:24 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13251,7 +13251,6 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
     if (window.webrtcDetectedBrowser === 'firefox' &&
       window.navigator.platform.indexOf('Win') === 0 &&
       peerBrowser.agent !== 'firefox' &&
-      peerBrowser.agent !== 'MCU' &&
       peerBrowser.os.indexOf('Mac') === 0) {
       beOfferer = false;
     }
@@ -13631,7 +13630,8 @@ Skylink.prototype._peerList = null;
  * This will only work if self is a privileged Peer.
  * @method getPeers
  * @param {Boolean} [showAll=false] The flag that indicates if returned list should
- *   also include privileged peers in the list. By default, the value is <code>false</code>.
+ *   also include privileged and standard in the list. By default, the value is <code>false</code>.
+ *   Which means only unprivileged peers' ID (isPrivileged = autoIntroduce = false) is included.
  * @param {Function} [callback] The callback fired after the receiving the current
  *   list of Peers from platform signaling or have met with an exception.
  *   The callback signature is <code>function (error, success)</code>.
@@ -14193,7 +14193,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
         }, false);
       }
 
-      self._sendChannelMessage({     
+      self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
         uid: self._user.uid,
         cid: self._key,
@@ -14205,7 +14205,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
         start: self._room.startDateTime,
         len: self._room.duration,
         isPrivileged: self._isPrivileged === true, // Default to false if undefined
-        autoIntroduce: self._autoIntroduce !== false // Default to true if undefined      
+        autoIntroduce: self._autoIntroduce!== false // Default to true if undefined
       });
     }
   };
@@ -14345,28 +14345,27 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
   self._socketCurrentReconnectionAttempt = 0;
 
   // wait for ready state before opening
-   
-  self._wait(function() {  
-    self._condition('channelOpen', function() {   
+  self._wait(function() {
+    self._condition('channelOpen', function() {
       mediaOptions = mediaOptions || {};
 
-      // parse user data settings   
-      self._parseUserData(mediaOptions.userData || self._userData);   
+      // parse user data settings
+      self._parseUserData(mediaOptions.userData || self._userData);
       self._parseBandwidthSettings(mediaOptions.bandwidth);
 
-      // wait for local mediastream 
+      // wait for local mediastream
       self._waitForLocalMediaStream(callback, mediaOptions);
-    }, function() {    // open channel first if it's not opened
-         
-      if (!self._channelOpen) {    
-        self._openChannel();   
-      }   
-      return self._channelOpen;  
-    }, function(state) {   
-      return true;  
-    }); 
-  }, function() {  
-    return self._readyState === self.READY_STATE_CHANGE.COMPLETED; 
+    }, function() { // open channel first if it's not opened
+
+      if (!self._channelOpen) {
+        self._openChannel();
+      }
+      return self._channelOpen;
+    }, function(state) {
+      return true;
+    });
+  }, function() {
+    return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
   });
 
 };
