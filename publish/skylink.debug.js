@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.3 - Fri Oct 30 2015 18:17:13 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.3 - Mon Nov 02 2015 12:15:35 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3956,20 +3956,6 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   var peerConnectionStateClosed = false;
   var dataChannelStateClosed = !self._enableDataChannel;
 
-  self._peerConnections[peerId].dataChannelClosed = true;
-
-  self.once('iceConnectionState', function () {
-    iceConnectionStateClosed = true;
-  }, function (state, currentPeerId) {
-    return state === self.ICE_CONNECTION_STATE.CLOSED && peerId === currentPeerId;
-  });
-
-  self.once('peerConnectionState', function () {
-    peerConnectionStateClosed = true;
-  }, function (state, currentPeerId) {
-    return state === self.PEER_CONNECTION_STATE.CLOSED && peerId === currentPeerId;
-  });
-
   delete self._peerConnectionHealth[peerId];
   delete self._peerRestartPriorities[peerId];
 
@@ -3983,66 +3969,60 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
     self._trigger('streamEnded', peerId, self.getPeerInfo(peerId), false);
   }
 
-  self._wait(function () {
+  self._peerConnections[peerId].dataChannelClosed = true;
 
-    log.log([peerId, null, null, 'Ice and peer connections closed']);
-
+  setTimeout(function () {
     delete self._peerConnections[peerId];
 
     log.log([peerId, null, null, 'Re-creating peer connection']);
 
     self._peerConnections[peerId] = self._createPeerConnection(peerId, !!hasScreenSharing);
 
-    // Set one second tiemout before sending the offer or the message gets received
-    setTimeout(function () {
-      if (self._peerConnections[peerId]){
-        self._peerConnections[peerId].receiveOnly = receiveOnly;
-        self._peerConnections[peerId].hasScreen = hasScreenSharing;
-      }
+    if (self._peerConnections[peerId]){
+      self._peerConnections[peerId].receiveOnly = receiveOnly;
+      self._peerConnections[peerId].hasScreen = hasScreenSharing;
+    }
 
-      if (!receiveOnly) {
-        self._addLocalMediaStreams(peerId);
-      }
+    if (!receiveOnly) {
+      self._addLocalMediaStreams(peerId);
+    }
 
-      if (isSelfInitiatedRestart){
-        log.log([peerId, null, null, 'Sending restart message to signaling server']);
+    if (isSelfInitiatedRestart){
+      log.log([peerId, null, null, 'Sending restart message to signaling server']);
 
-        var lastRestart = Date.now() || function() { return +new Date(); };
+      var lastRestart = Date.now() || function() { return +new Date(); };
 
-        var weight = (new Date()).valueOf();
-        self._peerRestartPriorities[peerId] = weight;
+      var weight = (new Date()).valueOf();
+      self._peerRestartPriorities[peerId] = weight;
 
-        self._sendChannelMessage({
-          type: self._SIG_MESSAGE_TYPE.RESTART,
-          mid: self._user.sid,
-          rid: self._room.id,
-          agent: window.webrtcDetectedBrowser,
-          version: window.webrtcDetectedVersion,
-          os: window.navigator.platform,
-          userInfo: self.getPeerInfo(),
-          target: peerId,
-          isConnectionRestart: !!isConnectionRestart,
-          lastRestart: lastRestart,
-          weight: weight,
-          receiveOnly: receiveOnly,
-          enableIceTrickle: self._enableIceTrickle,
-          enableDataChannel: self._enableDataChannel,
-          sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-          explicit: !!explicit
-        });
-      }
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.RESTART,
+        mid: self._user.sid,
+        rid: self._room.id,
+        agent: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion,
+        os: window.navigator.platform,
+        userInfo: self.getPeerInfo(),
+        target: peerId,
+        isConnectionRestart: !!isConnectionRestart,
+        lastRestart: lastRestart,
+        weight: weight,
+        receiveOnly: receiveOnly,
+        enableIceTrickle: self._enableIceTrickle,
+        enableDataChannel: self._enableDataChannel,
+        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+        explicit: !!explicit
+      });
+    }
 
-      self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
+    self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
 
-      // NOTE
-      if (typeof callback === 'function') {
-        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
-        callback();
-      }
-    }, 1000);
-  }, function () {
-    return iceConnectionStateClosed && peerConnectionStateClosed;
-  });
+    // NOTE
+    if (typeof callback === 'function') {
+      log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
+      callback();
+    }
+  }, 150);
 };
 
 /**
