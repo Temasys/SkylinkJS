@@ -151,7 +151,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
     }
 
     // Does the restart in the case when the candidates are extremely a lot
-    var doACandidateRestart = self._addedCandidates[targetMid].relay.length > 20 &&
+    /*var doACandidateRestart = self._addedCandidates[targetMid].relay.length > 20 &&
       (window.webrtcDetectedBrowser === 'chrome' || window.webrtcDetectedBrowser === 'opera');
 
     log.debug([targetMid, 'RTCIceCandidate', null, 'Relay candidates generated length'], self._addedCandidates[targetMid].relay.length);
@@ -166,7 +166,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
           }
         }
       }, self._addedCandidates[targetMid].relay.length * 50);
-    }
+    }*/
   }
 };
 
