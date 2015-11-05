@@ -13,7 +13,7 @@ var _peerId = null;
 
 var selectedPeers = [];
 
-Demo.Skylink.setLogLevel(4);
+//Demo.Skylink.setLogLevel(4);
 
 
 Demo.Methods.displayFileItemHTML = function (content) {
@@ -659,3 +659,45 @@ $(document).ready(function () {
     selectedPeers = [];
   })
 });
+
+
+(function(){
+
+  var data = {};
+  //window.candidatesCounter = {};
+
+  Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
+    data[peerId] = peerInfo;
+  });
+
+  Demo.Skylink.on('channelMessage', function (message, isSelf) {
+    //console.log('messaging', message, isSelf);
+
+    /*if (isSelf && message.type === 'candidate') {
+      candidatesCounter[message.target][candidatesCounter[message.target].length - 1]++;
+    }*/
+  });
+
+  Demo.Skylink.on('peerJoined', function (peerId) {
+    //candidatesCounter[peerId] = [];
+  });
+
+  /*Demo.Skylink.on('peerRestart', function (peerId) {
+    console.info('candidates counter for ' + peerId + ' is ' + candidatesCounter[peerId][candidatesCounter[peerId].length - 1]);
+    candidatesCounter[peerId].push(0);
+  });*/
+
+  Demo.Skylink.on('iceConnectionState', function (state, peerId) {
+    if (state === 'completed') {
+      /*if (Demo.Skylink._mediaScreen && Demo.Skylink._mediaScreen !== null) {
+        Demo.Skylink.stopScreen();
+      } else {
+        Demo.Skylink.shareScreen();
+      }*/
+      //setTimeout(function () {
+        Demo.Skylink._restartPeerConnection(peerId, true, false, null, true);
+      //}, 500);
+    }
+  });
+
+})();

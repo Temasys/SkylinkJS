@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.3 - Mon Nov 02 2015 12:15:35 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.3 - Thu Nov 05 2015 12:58:40 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3229,6 +3229,22 @@ Skylink.prototype._peerCandidatesQueue = {};
 Skylink.prototype._peerIceTrickleDisabled = {};
 
 /**
+ * Stores the list of candidates sent <code>local</code> and added <code>remote</code> information.
+ * @attribute _addedCandidates
+ * @param {JSON} (#peerId) The list of candidates sent and added associated with the Peer ID.
+ * @param {Array} (#peerId).relay The number of relay candidates added and sent.
+ * @param {Array} (#peerId).srflx The number of server reflexive candidates added and sent.
+ * @param {Array} (#peerId).host The number of host candidates added and sent.
+ * @type JSON
+ * @private
+ * @required
+ * @since 0.6.4
+ * @component ICE
+ * @for Skylink
+ */
+Skylink.prototype._addedCandidates = {};
+
+/**
  * The list of Peer connection ICE candidate generation states that Skylink would trigger.
  * - These states references the [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState).
  * @attribute CANDIDATE_GENERATION_STATE
@@ -3271,38 +3287,75 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
  * @for Skylink
  */
 Skylink.prototype._onIceCandidate = function(targetMid, event) {
+  var self = this;
   if (event.candidate) {
-    if (this._enableIceTrickle && !this._peerIceTrickleDisabled[targetMid]) {
+    if (self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid]) {
       var messageCan = event.candidate.candidate.split(' ');
       var candidateType = messageCan[7];
       log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
         candidateType + ' candidate:'], event);
 
-      this._sendChannelMessage({
-        type: this._SIG_MESSAGE_TYPE.CANDIDATE,
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.CANDIDATE,
         label: event.candidate.sdpMLineIndex,
         id: event.candidate.sdpMid,
         candidate: event.candidate.candidate,
-        mid: this._user.sid,
+        mid: self._user.sid,
         target: targetMid,
-        rid: this._room.id
+        rid: self._room.id
       });
+
+      if (!self._addedCandidates[targetMid]) {
+        self._addedCandidates[targetMid] = {
+          relay: [],
+          host: [],
+          srflx: []
+        };
+      }
+
+      // shouldnt happen but just incase
+      if (!self._addedCandidates[targetMid][candidateType]) {
+        self._addedCandidates[targetMid][candidateType] = [];
+      }
+
+      self._addedCandidates[targetMid][candidateType].push('local:' + messageCan[4] +
+        (messageCan[5] !== '0' ? ':' + messageCan[5] : '') +
+        (messageCan[2] ? '?transport=' + messageCan[2].toLowerCase() : ''));
+
     }
   } else {
     log.debug([targetMid, 'RTCIceCandidate', null, 'End of gathering']);
-    this._trigger('candidateGenerationState', this.CANDIDATE_GENERATION_STATE.COMPLETED,
+    self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.COMPLETED,
       targetMid);
     // Disable Ice trickle option
-    if (!this._enableIceTrickle || this._peerIceTrickleDisabled[targetMid]) {
-      var sessionDescription = this._peerConnections[targetMid].localDescription;
-      this._sendChannelMessage({
+    if (!self._enableIceTrickle || self._peerIceTrickleDisabled[targetMid]) {
+      var sessionDescription = self._peerConnections[targetMid].localDescription;
+      self._sendChannelMessage({
         type: sessionDescription.type,
         sdp: sessionDescription.sdp,
-        mid: this._user.sid,
+        mid: self._user.sid,
         agent: window.webrtcDetectedBrowser,
         target: targetMid,
-        rid: this._room.id
+        rid: self._room.id
       });
+    }
+
+    // Does the restart in the case when the candidates are extremely a lot
+    var doACandidateRestart = self._addedCandidates[targetMid].relay.length > 20 &&
+      (window.webrtcDetectedBrowser === 'chrome' || window.webrtcDetectedBrowser === 'opera');
+
+    log.debug([targetMid, 'RTCIceCandidate', null, 'Relay candidates generated length'], self._addedCandidates[targetMid].relay.length);
+
+    if (doACandidateRestart) {
+      setTimeout(function () {
+        if (self._peerConnections[targetMid]) {
+          if(self._peerConnections[targetMid].iceConnectionState !== self.ICE_CONNECTION_STATE.CONNECTED &&
+            self._peerConnections[targetMid].iceConnectionState !== self.ICE_CONNECTION_STATE.COMPLETED) {
+            // restart
+            self._restartPeerConnection(targetMid, true, true, null, false);
+          }
+        }
+      }, self._addedCandidates[targetMid].relay.length * 50);
     }
   }
 };
@@ -3971,7 +4024,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
   self._peerConnections[peerId].dataChannelClosed = true;
 
-  setTimeout(function () {
+  //setTimeout(function () {
     delete self._peerConnections[peerId];
 
     log.log([peerId, null, null, 'Re-creating peer connection']);
@@ -4022,7 +4075,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
       log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
       callback();
     }
-  }, 150);
+    //self._startPeerConnectionHealthCheck(peerId, false);
+  //}, 150);
 };
 
 /**
@@ -4132,7 +4186,14 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.hasScreen = !!isScreenSharing;
   pc.hasMainChannel = false;
 
+  // datachannels
   self._dataChannels[targetMid] = {};
+  // candidates
+  self._addedCandidates[targetMid] = {
+    relay: [],
+    host: [],
+    srflx: []
+  };
 
   // callbacks
   // standard not implemented: onnegotiationneeded,
@@ -11395,6 +11456,23 @@ Skylink.prototype._candidateHandler = function(message) {
     // we might keep a buffer of candidates to replay after receiving an offer.
     this._addIceCandidateToQueue(targetMid, candidate);
   }
+
+  if (!this._addedCandidates[targetMid]) {
+    this._addedCandidates[targetMid] = {
+      relay: [],
+      host: [],
+      srflx: []
+    };
+  }
+
+  // shouldnt happen but just incase
+  if (!this._addedCandidates[targetMid][canType]) {
+    this._addedCandidates[targetMid][canType] = [];
+  }
+
+  this._addedCandidates[targetMid][canType].push('remote:' + messageCan[4] +
+    (messageCan[5] !== '0' ? ':' + messageCan[5] : '') +
+    (messageCan[2] ? '?transport=' + messageCan[2].toLowerCase() : ''));
 };
 
 /**
@@ -13658,67 +13736,72 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     settings.audio = !!enableAudio;
   }
 
-  try {
-    window.getUserMedia(settings, function (stream) {
-      self.once('mediaAccessSuccess', function (stream) {
-        if (self._inRoom) {
-          if (self._hasMCU) {
-            self._restartMCUConnection();
-          } else {
-            self._trigger('incomingStream', self._user.sid, stream,
-              true, self.getPeerInfo(), false);
-            for (var peer in self._peerConnections) {
-              if (self._peerConnections.hasOwnProperty(peer)) {
-                self._restartPeerConnection(peer, true, false, null, true);
+  var toShareScreen = function(){
+    try {
+      window.getUserMedia(settings, function (stream) {
+        self.once('mediaAccessSuccess', function (stream) {
+          if (self._inRoom) {
+            if (self._hasMCU) {
+              self._restartMCUConnection();
+            } else {
+              self._trigger('incomingStream', self._user.sid, stream,
+                true, self.getPeerInfo(), false);
+              for (var peer in self._peerConnections) {
+                if (self._peerConnections.hasOwnProperty(peer)) {
+                  self._restartPeerConnection(peer, true, false, null, true);
+                }
               }
             }
+          } else if (typeof callback === 'function') {
+            callback(null, stream);
           }
-        } else if (typeof callback === 'function') {
-          callback(null, stream);
-        }
-      }, function (stream, isScreenSharing) {
-        return isScreenSharing;
-      });
+        }, function (stream, isScreenSharing) {
+          return isScreenSharing;
+        });
 
-      if (window.webrtcDetectedBrowser !== 'firefox' && enableAudio) {
-        window.getUserMedia({
-          audio: true
-        }, function (audioStream) {
-          try {
-            audioStream.addTrack(stream.getVideoTracks()[0]);
-            self._mediaScreenClone = stream;
-            hasAudio = true;
-            triggerSuccessFn(audioStream, true);
+        if (window.webrtcDetectedBrowser !== 'firefox' && enableAudio) {
+          window.getUserMedia({
+            audio: true
+          }, function (audioStream) {
+            try {
+              audioStream.addTrack(stream.getVideoTracks()[0]);
+              self._mediaScreenClone = stream;
+              hasAudio = true;
+              triggerSuccessFn(audioStream, true);
 
-          } catch (error) {
+            } catch (error) {
+              log.error('Failed retrieving audio stream for screensharing stream', error);
+              triggerSuccessFn(stream, true);
+            }
+
+          }, function (error) {
             log.error('Failed retrieving audio stream for screensharing stream', error);
             triggerSuccessFn(stream, true);
-          }
-
-        }, function (error) {
-          log.error('Failed retrieving audio stream for screensharing stream', error);
+          });
+        } else {
+          hasAudio = window.webrtcDetectedBrowser === 'firefox' ? enableAudio : false;
           triggerSuccessFn(stream, true);
-        });
-      } else {
-        hasAudio = window.webrtcDetectedBrowser === 'firefox' ? enableAudio : false;
-        triggerSuccessFn(stream, true);
-      }
+        }
 
-    }, function (error) {
+      }, function (error) {
+        self._onUserMediaError(error, true, false);
+
+        if (typeof callback === 'function') {
+          callback(error, null);
+        }
+      });
+
+    } catch (error) {
       self._onUserMediaError(error, true, false);
 
       if (typeof callback === 'function') {
         callback(error, null);
       }
-    });
-
-  } catch (error) {
-    self._onUserMediaError(error, true, false);
-
-    if (typeof callback === 'function') {
-      callback(error, null);
     }
-  }
+  };
+
+  self._throttle(toShareScreen,10000)();
+
 };
 
 /**

@@ -244,7 +244,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
   self._peerConnections[peerId].dataChannelClosed = true;
 
-  setTimeout(function () {
+  //setTimeout(function () {
     delete self._peerConnections[peerId];
 
     log.log([peerId, null, null, 'Re-creating peer connection']);
@@ -295,7 +295,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
       log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
       callback();
     }
-  }, 150);
+    //self._startPeerConnectionHealthCheck(peerId, false);
+  //}, 150);
 };
 
 /**
@@ -405,7 +406,14 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.hasScreen = !!isScreenSharing;
   pc.hasMainChannel = false;
 
+  // datachannels
   self._dataChannels[targetMid] = {};
+  // candidates
+  self._addedCandidates[targetMid] = {
+    relay: [],
+    host: [],
+    srflx: []
+  };
 
   // callbacks
   // standard not implemented: onnegotiationneeded,
