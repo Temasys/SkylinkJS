@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.3 - Thu Nov 05 2015 12:58:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.3 - Thu Nov 05 2015 13:06:04 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5018,7 +5018,29 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
 
   self._peerConnectionHealthTimers[peerId] = setTimeout(function () {
     // re-handshaking should start here.
-    if (!self._peerConnectionHealth[peerId]) {
+    var connectionStable = false;
+    var pc = self._peerConnections[peerId];
+
+    if (pc) {
+      var dc = (self._dataChannels[peerId] || {}).main;
+
+      var dcConnected = pc.hasMainChannel ? dc && dc.readyState === self.DATA_CHANNEL_STATE.OPEN : true;
+      var iceConnected = pc.iceConnectionState === self.ICE_CONNECTION_STATE.CONNECTED ||
+        pc.iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED;
+      var signalingConnected = pc.signalingState === self.PEER_CONNECTION_STATE.STABLE;
+
+      connectionStable = dcConnected && iceConnected && signalingConnected;
+
+      log.debug([peerId, 'PeerConnectionHealth', null, 'Connection status'], {
+        dcConnected: dcConnected,
+        iceConnected: iceConnected,
+        signalingConnected: signalingConnected
+      });
+    }
+
+    log.debug([peerId, 'PeerConnectionHealth', null, 'Require reconnection?'], connectionStable);
+
+    if (!connectionStable) {
       log.warn([peerId, 'PeerConnectionHealth', null, 'Peer\'s health timer ' +
       'has expired'], 10000);
 
@@ -5040,6 +5062,8 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
       } else {
         self._restartMCUConnection();
       }
+    } else {
+      self._peerConnectionHealth[peerId] = true;
     }
   }, timer);
 };
