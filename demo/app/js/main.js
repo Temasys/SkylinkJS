@@ -257,7 +257,7 @@ Demo.Skylink.on('mediaAccessSuccess', function (stream){
 });
 //---------------------------------------------------
 Demo.Skylink.on('mediaAccessError', function (error){
-  alert((typeof error === 'object') ? error.message : error);
+  //alert((typeof error === 'object') ? error.message : error);
   Demo.Methods.displayChatMessage('System', 'Failed to join room as video and audio stream is required.');
 });
 //---------------------------------------------------
@@ -433,7 +433,7 @@ Demo.Skylink.on('channelError', function (error) {
 });
 //---------------------------------------------------
 Demo.Skylink.on('mediaAccessError', function (error) {
-  alert((error.message || error));
+  //alert((error.message || error));
 });
 
 Demo.Skylink.on('serverPeerJoined', function (serverPeerId, serverPeerType) {

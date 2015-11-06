@@ -2124,11 +2124,29 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
       self._screenSharingStreamSettings.audio = false;
     }
     self._onUserMediaSuccess(sStream, true);
+    self._timestamp.screen = true;
   };
 
   if (window.webrtcDetectedBrowser === 'firefox') {
     settings.audio = !!enableAudio;
   }
+
+  var throttleFn = function (fn, wait) {
+    if (!self._timestamp.func){
+      //First time run, need to force timestamp to skip condition
+      self._timestamp.func = self._timestamp.now - wait;
+    }
+    var now = Date.now();
+
+    if (!self._timestamp.screen) {
+      if (now - self._timestamp.func < wait) {
+        return;
+      }
+    }
+    fn();
+    self._timestamp.screen = false;
+    self._timestamp.func = now;
+  };
 
   var toShareScreen = function(){
     try {
@@ -2180,6 +2198,8 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
       }, function (error) {
         self._onUserMediaError(error, true, false);
 
+        self._timestamp.screen = true;
+
         if (typeof callback === 'function') {
           callback(error, null);
         }
@@ -2194,8 +2214,8 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     }
   };
 
-  self._throttle(toShareScreen,10000)();
-
+  //self._throttle(toShareScreen,10000)();
+  throttleFn(toShareScreen, 10000);
 };
 
 /**

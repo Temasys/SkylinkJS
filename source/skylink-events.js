@@ -1270,7 +1270,8 @@ Skylink.prototype._onceEvents = {};
  * @since 0.5.8
  */
 Skylink.prototype._timestamp = {
-  now: Date.now() || function() { return +new Date(); }
+  now: Date.now() || function() { return +new Date(); },
+  screen: false
 };
 
 /**
