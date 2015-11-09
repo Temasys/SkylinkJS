@@ -146,8 +146,11 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
   var channelName = (dc) ? dc.label : customChannelName;
   var pc = self._peerConnections[peerId];
 
-  if (window.webrtcDetectedDCSupport !== 'SCTP' &&
-    window.webrtcDetectedDCSupport !== 'plugin') {
+  var SctpSupported = 
+    !(window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion < 30 || 
+      window.webrtcDetectedBrowser === 'opera'  && window.webrtcDetectedVersion < 20 );
+
+  if (!SctpSupported) {
     log.warn([peerId, 'RTCDataChannel', channelName, 'SCTP not supported'], {
       channelType: channelType
     });
