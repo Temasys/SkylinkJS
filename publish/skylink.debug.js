@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.3 - Thu Nov 05 2015 13:57:51 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.3 - Tue Nov 10 2015 23:12:37 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4066,9 +4066,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
         explicit: !!explicit
       });
-    }
 
-    self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
+      self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
+    }
 
     // NOTE
     if (typeof callback === 'function') {
