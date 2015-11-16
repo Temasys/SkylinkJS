@@ -361,6 +361,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   var self = this;
   var error;
   var stopStream = false;
+  var previousRoom = self._selectedRoom;
 
   if (typeof room === 'string') {
     //joinRoom(room, callback)
@@ -467,7 +468,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
         }, false);
       }
 
-      self._sendChannelMessage({     
+      self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
         uid: self._user.uid,
         cid: self._key,
@@ -479,12 +480,12 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
         start: self._room.startDateTime,
         len: self._room.duration,
         isPrivileged: self._isPrivileged === true, // Default to false if undefined
-        autoIntroduce: self._autoIntroduce !== false // Default to true if undefined      
+        autoIntroduce: self._autoIntroduce!== false // Default to true if undefined
       });
     }
   };
 
-  if (self._channelOpen) {
+  if (self._inRoom) {
     if (typeof mediaOptions === 'object') {
       if (mediaOptions.audio === false && mediaOptions.video === false) {
         stopStream = true;
@@ -493,7 +494,13 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
       }
     }
 
-    self.leaveRoom(stopStream, function() {
+    log.log([null, 'Socket', previousRoom, 'Leaving room before joining new room'], self._selectedRoom);
+
+    self.leaveRoom(stopStream, function(error, success) {
+      log.log([null, 'Socket', previousRoom, 'Leave room callback result'], {
+        error: error,
+        success: success
+      });
       log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'], mediaOptions);
       if (typeof room === 'string' ? room !== self._selectedRoom : false) {
         self._initSelectedRoom(room, function(errorObj) {
@@ -619,28 +626,27 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
   self._socketCurrentReconnectionAttempt = 0;
 
   // wait for ready state before opening
-   
-  self._wait(function() {  
-    self._condition('channelOpen', function() {   
+  self._wait(function() {
+    self._condition('channelOpen', function() {
       mediaOptions = mediaOptions || {};
 
-      // parse user data settings   
-      self._parseUserData(mediaOptions.userData || self._userData);   
+      // parse user data settings
+      self._parseUserData(mediaOptions.userData || self._userData);
       self._parseBandwidthSettings(mediaOptions.bandwidth);
 
-      // wait for local mediastream 
+      // wait for local mediastream
       self._waitForLocalMediaStream(callback, mediaOptions);
-    }, function() {    // open channel first if it's not opened
-         
-      if (!self._channelOpen) {    
-        self._openChannel();   
-      }   
-      return self._channelOpen;  
-    }, function(state) {   
-      return true;  
-    }); 
-  }, function() {  
-    return self._readyState === self.READY_STATE_CHANGE.COMPLETED; 
+    }, function() { // open channel first if it's not opened
+
+      if (!self._channelOpen) {
+        self._openChannel();
+      }
+      return self._channelOpen;
+    }, function(state) {
+      return true;
+    });
+  }, function() {
+    return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
   });
 
 };

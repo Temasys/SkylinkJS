@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.3 - Sun Oct 25 2015 00:24:30 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.3 - Mon Nov 16 2015 15:35:35 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3229,6 +3229,22 @@ Skylink.prototype._peerCandidatesQueue = {};
 Skylink.prototype._peerIceTrickleDisabled = {};
 
 /**
+ * Stores the list of candidates sent <code>local</code> and added <code>remote</code> information.
+ * @attribute _addedCandidates
+ * @param {JSON} (#peerId) The list of candidates sent and added associated with the Peer ID.
+ * @param {Array} (#peerId).relay The number of relay candidates added and sent.
+ * @param {Array} (#peerId).srflx The number of server reflexive candidates added and sent.
+ * @param {Array} (#peerId).host The number of host candidates added and sent.
+ * @type JSON
+ * @private
+ * @required
+ * @since 0.6.4
+ * @component ICE
+ * @for Skylink
+ */
+Skylink.prototype._addedCandidates = {};
+
+/**
  * The list of Peer connection ICE candidate generation states that Skylink would trigger.
  * - These states references the [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState).
  * @attribute CANDIDATE_GENERATION_STATE
@@ -3271,39 +3287,76 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
  * @for Skylink
  */
 Skylink.prototype._onIceCandidate = function(targetMid, event) {
+  var self = this;
   if (event.candidate) {
-    if (this._enableIceTrickle && !this._peerIceTrickleDisabled[targetMid]) {
+    if (self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid]) {
       var messageCan = event.candidate.candidate.split(' ');
       var candidateType = messageCan[7];
       log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
         candidateType + ' candidate:'], event);
 
-      this._sendChannelMessage({
-        type: this._SIG_MESSAGE_TYPE.CANDIDATE,
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.CANDIDATE,
         label: event.candidate.sdpMLineIndex,
         id: event.candidate.sdpMid,
         candidate: event.candidate.candidate,
-        mid: this._user.sid,
+        mid: self._user.sid,
         target: targetMid,
-        rid: this._room.id
+        rid: self._room.id
       });
+
+      if (!self._addedCandidates[targetMid]) {
+        self._addedCandidates[targetMid] = {
+          relay: [],
+          host: [],
+          srflx: []
+        };
+      }
+
+      // shouldnt happen but just incase
+      if (!self._addedCandidates[targetMid][candidateType]) {
+        self._addedCandidates[targetMid][candidateType] = [];
+      }
+
+      self._addedCandidates[targetMid][candidateType].push('local:' + messageCan[4] +
+        (messageCan[5] !== '0' ? ':' + messageCan[5] : '') +
+        (messageCan[2] ? '?transport=' + messageCan[2].toLowerCase() : ''));
+
     }
   } else {
     log.debug([targetMid, 'RTCIceCandidate', null, 'End of gathering']);
-    this._trigger('candidateGenerationState', this.CANDIDATE_GENERATION_STATE.COMPLETED,
+    self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.COMPLETED,
       targetMid);
     // Disable Ice trickle option
-    if (!this._enableIceTrickle || this._peerIceTrickleDisabled[targetMid]) {
-      var sessionDescription = this._peerConnections[targetMid].localDescription;
-      this._sendChannelMessage({
+    if (!self._enableIceTrickle || self._peerIceTrickleDisabled[targetMid]) {
+      var sessionDescription = self._peerConnections[targetMid].localDescription;
+      self._sendChannelMessage({
         type: sessionDescription.type,
         sdp: sessionDescription.sdp,
-        mid: this._user.sid,
+        mid: self._user.sid,
         agent: window.webrtcDetectedBrowser,
         target: targetMid,
-        rid: this._room.id
+        rid: self._room.id
       });
     }
+
+    // Does the restart in the case when the candidates are extremely a lot
+    /*var doACandidateRestart = self._addedCandidates[targetMid].relay.length > 20 &&
+      (window.webrtcDetectedBrowser === 'chrome' || window.webrtcDetectedBrowser === 'opera');
+
+    log.debug([targetMid, 'RTCIceCandidate', null, 'Relay candidates generated length'], self._addedCandidates[targetMid].relay.length);
+
+    if (doACandidateRestart) {
+      setTimeout(function () {
+        if (self._peerConnections[targetMid]) {
+          if(self._peerConnections[targetMid].iceConnectionState !== self.ICE_CONNECTION_STATE.CONNECTED &&
+            self._peerConnections[targetMid].iceConnectionState !== self.ICE_CONNECTION_STATE.COMPLETED) {
+            // restart
+            self._restartPeerConnection(targetMid, true, true, null, false);
+          }
+        }
+      }, self._addedCandidates[targetMid].relay.length * 50);
+    }*/
   }
 };
 
@@ -3956,20 +4009,6 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   var peerConnectionStateClosed = false;
   var dataChannelStateClosed = !self._enableDataChannel;
 
-  self._peerConnections[peerId].dataChannelClosed = true;
-
-  self.once('iceConnectionState', function () {
-    iceConnectionStateClosed = true;
-  }, function (state, currentPeerId) {
-    return state === self.ICE_CONNECTION_STATE.CLOSED && peerId === currentPeerId;
-  });
-
-  self.once('peerConnectionState', function () {
-    peerConnectionStateClosed = true;
-  }, function (state, currentPeerId) {
-    return state === self.PEER_CONNECTION_STATE.CLOSED && peerId === currentPeerId;
-  });
-
   delete self._peerConnectionHealth[peerId];
   delete self._peerRestartPriorities[peerId];
 
@@ -3983,66 +4022,61 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
     self._trigger('streamEnded', peerId, self.getPeerInfo(peerId), false);
   }
 
-  self._wait(function () {
+  self._peerConnections[peerId].dataChannelClosed = true;
 
-    log.log([peerId, null, null, 'Ice and peer connections closed']);
-
+  //setTimeout(function () {
     delete self._peerConnections[peerId];
 
     log.log([peerId, null, null, 'Re-creating peer connection']);
 
     self._peerConnections[peerId] = self._createPeerConnection(peerId, !!hasScreenSharing);
 
-    // Set one second tiemout before sending the offer or the message gets received
-    setTimeout(function () {
-      if (self._peerConnections[peerId]){
-        self._peerConnections[peerId].receiveOnly = receiveOnly;
-        self._peerConnections[peerId].hasScreen = hasScreenSharing;
-      }
+    if (self._peerConnections[peerId]){
+      self._peerConnections[peerId].receiveOnly = receiveOnly;
+      self._peerConnections[peerId].hasScreen = hasScreenSharing;
+    }
 
-      if (!receiveOnly) {
-        self._addLocalMediaStreams(peerId);
-      }
+    if (!receiveOnly) {
+      self._addLocalMediaStreams(peerId);
+    }
 
-      if (isSelfInitiatedRestart){
-        log.log([peerId, null, null, 'Sending restart message to signaling server']);
+    if (isSelfInitiatedRestart){
+      log.log([peerId, null, null, 'Sending restart message to signaling server']);
 
-        var lastRestart = Date.now() || function() { return +new Date(); };
+      var lastRestart = Date.now() || function() { return +new Date(); };
 
-        var weight = (new Date()).valueOf();
-        self._peerRestartPriorities[peerId] = weight;
+      var weight = (new Date()).valueOf();
+      self._peerRestartPriorities[peerId] = weight;
 
-        self._sendChannelMessage({
-          type: self._SIG_MESSAGE_TYPE.RESTART,
-          mid: self._user.sid,
-          rid: self._room.id,
-          agent: window.webrtcDetectedBrowser,
-          version: window.webrtcDetectedVersion,
-          os: window.navigator.platform,
-          userInfo: self.getPeerInfo(),
-          target: peerId,
-          isConnectionRestart: !!isConnectionRestart,
-          lastRestart: lastRestart,
-          weight: weight,
-          receiveOnly: receiveOnly,
-          enableIceTrickle: self._enableIceTrickle,
-          enableDataChannel: self._enableDataChannel,
-          sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-          explicit: !!explicit
-        });
-      }
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.RESTART,
+        mid: self._user.sid,
+        rid: self._room.id,
+        agent: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion,
+        os: window.navigator.platform,
+        userInfo: self.getPeerInfo(),
+        target: peerId,
+        isConnectionRestart: !!isConnectionRestart,
+        lastRestart: lastRestart,
+        weight: weight,
+        receiveOnly: receiveOnly,
+        enableIceTrickle: self._enableIceTrickle,
+        enableDataChannel: self._enableDataChannel,
+        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+        explicit: !!explicit
+      });
 
       self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
+    }
 
-      // NOTE
-      if (typeof callback === 'function') {
-        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
-        callback();
-      }
-    }, 1000);
-  }, function () {
-    return iceConnectionStateClosed && peerConnectionStateClosed;
-  });
+    // NOTE
+    if (typeof callback === 'function') {
+      log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
+      callback();
+    }
+    //self._startPeerConnectionHealthCheck(peerId, false);
+  //}, 150);
 };
 
 /**
@@ -4152,7 +4186,14 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.hasScreen = !!isScreenSharing;
   pc.hasMainChannel = false;
 
+  // datachannels
   self._dataChannels[targetMid] = {};
+  // candidates
+  self._addedCandidates[targetMid] = {
+    relay: [],
+    host: [],
+    srflx: []
+  };
 
   // callbacks
   // standard not implemented: onnegotiationneeded,
@@ -4977,7 +5018,29 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
 
   self._peerConnectionHealthTimers[peerId] = setTimeout(function () {
     // re-handshaking should start here.
-    if (!self._peerConnectionHealth[peerId]) {
+    var connectionStable = false;
+    var pc = self._peerConnections[peerId];
+
+    if (pc) {
+      var dc = (self._dataChannels[peerId] || {}).main;
+
+      var dcConnected = pc.hasMainChannel ? dc && dc.readyState === self.DATA_CHANNEL_STATE.OPEN : true;
+      var iceConnected = pc.iceConnectionState === self.ICE_CONNECTION_STATE.CONNECTED ||
+        pc.iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED;
+      var signalingConnected = pc.signalingState === self.PEER_CONNECTION_STATE.STABLE;
+
+      connectionStable = dcConnected && iceConnected && signalingConnected;
+
+      log.debug([peerId, 'PeerConnectionHealth', null, 'Connection status'], {
+        dcConnected: dcConnected,
+        iceConnected: iceConnected,
+        signalingConnected: signalingConnected
+      });
+    }
+
+    log.debug([peerId, 'PeerConnectionHealth', null, 'Require reconnection?'], connectionStable);
+
+    if (!connectionStable) {
       log.warn([peerId, 'PeerConnectionHealth', null, 'Peer\'s health timer ' +
       'has expired'], 10000);
 
@@ -4999,6 +5062,8 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
       } else {
         self._restartMCUConnection();
       }
+    } else {
+      self._peerConnectionHealth[peerId] = true;
     }
   }, timer);
 };
@@ -5241,7 +5306,8 @@ Skylink.prototype._peerList = null;
  * This will only work if self is a privileged Peer.
  * @method getPeers
  * @param {Boolean} [showAll=false] The flag that indicates if returned list should
- *   also include privileged peers in the list. By default, the value is <code>false</code>.
+ *   also include privileged and standard in the list. By default, the value is <code>false</code>.
+ *   Which means only unprivileged peers' ID (isPrivileged = autoIntroduce = false) is included.
  * @param {Function} [callback] The callback fired after the receiving the current
  *   list of Peers from platform signaling or have met with an exception.
  *   The callback signature is <code>function (error, success)</code>.
@@ -5697,6 +5763,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   var self = this;
   var error;
   var stopStream = false;
+  var previousRoom = self._selectedRoom;
 
   if (typeof room === 'string') {
     //joinRoom(room, callback)
@@ -5803,7 +5870,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
         }, false);
       }
 
-      self._sendChannelMessage({     
+      self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
         uid: self._user.uid,
         cid: self._key,
@@ -5815,12 +5882,12 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
         start: self._room.startDateTime,
         len: self._room.duration,
         isPrivileged: self._isPrivileged === true, // Default to false if undefined
-        autoIntroduce: self._autoIntroduce !== false // Default to true if undefined      
+        autoIntroduce: self._autoIntroduce!== false // Default to true if undefined
       });
     }
   };
 
-  if (self._channelOpen) {
+  if (self._inRoom) {
     if (typeof mediaOptions === 'object') {
       if (mediaOptions.audio === false && mediaOptions.video === false) {
         stopStream = true;
@@ -5829,7 +5896,13 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
       }
     }
 
-    self.leaveRoom(stopStream, function() {
+    log.log([null, 'Socket', previousRoom, 'Leaving room before joining new room'], self._selectedRoom);
+
+    self.leaveRoom(stopStream, function(error, success) {
+      log.log([null, 'Socket', previousRoom, 'Leave room callback result'], {
+        error: error,
+        success: success
+      });
       log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'], mediaOptions);
       if (typeof room === 'string' ? room !== self._selectedRoom : false) {
         self._initSelectedRoom(room, function(errorObj) {
@@ -5955,28 +6028,27 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
   self._socketCurrentReconnectionAttempt = 0;
 
   // wait for ready state before opening
-   
-  self._wait(function() {  
-    self._condition('channelOpen', function() {   
+  self._wait(function() {
+    self._condition('channelOpen', function() {
       mediaOptions = mediaOptions || {};
 
-      // parse user data settings   
-      self._parseUserData(mediaOptions.userData || self._userData);   
+      // parse user data settings
+      self._parseUserData(mediaOptions.userData || self._userData);
       self._parseBandwidthSettings(mediaOptions.bandwidth);
 
-      // wait for local mediastream 
+      // wait for local mediastream
       self._waitForLocalMediaStream(callback, mediaOptions);
-    }, function() {    // open channel first if it's not opened
-         
-      if (!self._channelOpen) {    
-        self._openChannel();   
-      }   
-      return self._channelOpen;  
-    }, function(state) {   
-      return true;  
-    }); 
-  }, function() {  
-    return self._readyState === self.READY_STATE_CHANGE.COMPLETED; 
+    }, function() { // open channel first if it's not opened
+
+      if (!self._channelOpen) {
+        self._openChannel();
+      }
+      return self._channelOpen;
+    }, function(state) {
+      return true;
+    });
+  }, function() {
+    return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
   });
 
 };
@@ -9249,7 +9321,8 @@ Skylink.prototype._onceEvents = {};
  * @since 0.5.8
  */
 Skylink.prototype._timestamp = {
-  now: Date.now() || function() { return +new Date(); }
+  now: Date.now() || function() { return +new Date(); },
+  screen: false
 };
 
 /**
@@ -11408,6 +11481,23 @@ Skylink.prototype._candidateHandler = function(message) {
     // we might keep a buffer of candidates to replay after receiving an offer.
     this._addIceCandidateToQueue(targetMid, candidate);
   }
+
+  if (!this._addedCandidates[targetMid]) {
+    this._addedCandidates[targetMid] = {
+      relay: [],
+      host: [],
+      srflx: []
+    };
+  }
+
+  // shouldnt happen but just incase
+  if (!this._addedCandidates[targetMid][canType]) {
+    this._addedCandidates[targetMid][canType] = [];
+  }
+
+  this._addedCandidates[targetMid][canType].push('remote:' + messageCan[4] +
+    (messageCan[5] !== '0' ? ':' + messageCan[5] : '') +
+    (messageCan[2] ? '?transport=' + messageCan[2].toLowerCase() : ''));
 };
 
 /**
@@ -13665,71 +13755,98 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
       self._screenSharingStreamSettings.audio = false;
     }
     self._onUserMediaSuccess(sStream, true);
+    self._timestamp.screen = true;
   };
 
   if (window.webrtcDetectedBrowser === 'firefox') {
     settings.audio = !!enableAudio;
   }
 
-  try {
-    window.getUserMedia(settings, function (stream) {
-      self.once('mediaAccessSuccess', function (stream) {
-        if (self._inRoom) {
-          if (self._hasMCU) {
-            self._restartMCUConnection();
-          } else {
-            self._trigger('incomingStream', self._user.sid, self._mediaStream,
-              true, self.getPeerInfo(), false);
-            for (var peer in self._peerConnections) {
-              if (self._peerConnections.hasOwnProperty(peer)) {
-                self._restartPeerConnection(peer, true, false, null, true);
+  var throttleFn = function (fn, wait) {
+    if (!self._timestamp.func){
+      //First time run, need to force timestamp to skip condition
+      self._timestamp.func = self._timestamp.now - wait;
+    }
+    var now = Date.now();
+
+    if (!self._timestamp.screen) {
+      if (now - self._timestamp.func < wait) {
+        return;
+      }
+    }
+    fn();
+    self._timestamp.screen = false;
+    self._timestamp.func = now;
+  };
+
+  var toShareScreen = function(){
+    try {
+      window.getUserMedia(settings, function (stream) {
+        self.once('mediaAccessSuccess', function (stream) {
+          if (self._inRoom) {
+            if (self._hasMCU) {
+              self._restartMCUConnection();
+            } else {
+              self._trigger('incomingStream', self._user.sid, stream,
+                true, self.getPeerInfo(), false);
+              for (var peer in self._peerConnections) {
+                if (self._peerConnections.hasOwnProperty(peer)) {
+                  self._restartPeerConnection(peer, true, false, null, true);
+                }
               }
             }
+          } else if (typeof callback === 'function') {
+            callback(null, stream);
           }
-        } else if (typeof callback === 'function') {
-          callback(null, stream);
+        }, function (stream, isScreenSharing) {
+          return isScreenSharing;
+        });
+
+        if (window.webrtcDetectedBrowser !== 'firefox' && enableAudio) {
+          window.getUserMedia({
+            audio: true
+          }, function (audioStream) {
+            try {
+              audioStream.addTrack(stream.getVideoTracks()[0]);
+              self._mediaScreenClone = stream;
+              hasAudio = true;
+              triggerSuccessFn(audioStream, true);
+
+            } catch (error) {
+              log.error('Failed retrieving audio stream for screensharing stream', error);
+              triggerSuccessFn(stream, true);
+            }
+
+          }, function (error) {
+            log.error('Failed retrieving audio stream for screensharing stream', error);
+            triggerSuccessFn(stream, true);
+          });
+        } else {
+          hasAudio = window.webrtcDetectedBrowser === 'firefox' ? enableAudio : false;
+          triggerSuccessFn(stream, true);
+        }
+
+      }, function (error) {
+        self._onUserMediaError(error, true, false);
+
+        self._timestamp.screen = true;
+
+        if (typeof callback === 'function') {
+          callback(error, null);
         }
       });
 
-      if (window.webrtcDetectedBrowser !== 'firefox' && enableAudio) {
-        window.getUserMedia({
-          audio: true
-        }, function (audioStream) {
-          try {
-            audioStream.addTrack(stream.getVideoTracks()[0]);
-            self._mediaScreenClone = stream;
-            hasAudio = true;
-            triggerSuccessFn(audioStream, true);
-
-          } catch (error) {
-            log.error('Failed retrieving audio stream for screensharing stream', error);
-            triggerSuccessFn(stream, true);
-          }
-
-        }, function (error) {
-          log.error('Failed retrieving audio stream for screensharing stream', error);
-          triggerSuccessFn(stream, true);
-        });
-      } else {
-        hasAudio = window.webrtcDetectedBrowser === 'firefox' ? enableAudio : false;
-        triggerSuccessFn(stream, true);
-      }
-
-    }, function (error) {
+    } catch (error) {
       self._onUserMediaError(error, true, false);
 
       if (typeof callback === 'function') {
         callback(error, null);
       }
-    });
-
-  } catch (error) {
-    self._onUserMediaError(error, true, false);
-
-    if (typeof callback === 'function') {
-      callback(error, null);
     }
-  }
+  };
+
+  //self._throttle(toShareScreen,10000)();
+  throttleFn(toShareScreen, 10000);
 };
 
 /**
