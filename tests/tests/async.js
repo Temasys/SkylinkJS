@@ -352,7 +352,6 @@ test('init() - callback: Testing success callback', function(t){
 
     sw.init(options, function (error, success) {
       init_callback(error, success, options, true);
-      console.log('test hehe', error, success);
     });
   };
 
@@ -457,6 +456,8 @@ test('sendBlobData() - callback: Testing success callback', function(t){
   var hasEnded = false;
   var hasJoinedRoom = false;
 
+  sw.setLogLevel(4);
+
   var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
   data.name = 'accept';
   var targetPeer = null;
@@ -539,11 +540,17 @@ test('sendBlobData() - callback: Testing success callback', function(t){
             console.log('ERROR: Failed leaving the room for sendBlobData() - success callback tests');
             console.error('sendBlobData() - success callback: Leave room error', lRError);
           }
+        });
+        sw.once('dataChannelState', function () {
+          sw._EVENTS.dataChannelState = [];
           t.end();
+        }, function (state, peerId, error, name, type) {
+          return state === sw.DATA_CHANNEL_STATE.CLOSED &&
+            type === sw.DATA_CHANNEL_TYPE.MESSAGING;
         });
       } else t.end();
     }
-  }, 12000);
+  }, 25000);
 });
 
 test('sendBlobData() - callback: Testing failure callback', function(t){
@@ -675,8 +682,13 @@ test('sendBlobData() - callback: Testing failure callback', function(t){
             console.log('ERROR: Failed leaving the room for sendBlobData() - failure callback tests');
             console.error('sendBlobData() - failure callback: Leave room error', lRError);
           }
+        });
+        sw.once('dataChannelState', function () {
           sw._EVENTS.dataChannelState = [];
           t.end();
+        }, function (state, peerId, error, name, type) {
+          return state === sw.DATA_CHANNEL_STATE.CLOSED &&
+            type === sw.DATA_CHANNEL_TYPE.MESSAGING;
         });
       } else t.end();
     }
@@ -771,11 +783,17 @@ test('sendURLData() - callback: Testing success callback', function(t){
             console.log('ERROR: Failed leaving the room for sendURLData() - success callback tests');
             console.error('sendURLData() - success callback: Leave room error', lRError);
           }
+        });
+        sw.once('dataChannelState', function () {
+          sw._EVENTS.dataChannelState = [];
           t.end();
+        }, function (state, peerId, error, name, type) {
+          return state === sw.DATA_CHANNEL_STATE.CLOSED &&
+            type === sw.DATA_CHANNEL_TYPE.MESSAGING;
         });
       } else t.end();
     }
-  }, 12000);
+  }, 25000);
 });
 
 test('sendURLData() - callback: Testing failure callback', function(t){
@@ -906,12 +924,17 @@ test('sendURLData() - callback: Testing failure callback', function(t){
             console.log('ERROR: Failed leaving the room for sendURLData() - failure callback tests');
             console.error('sendURLData() - failure callback: Leave room error', lRError);
           }
+        });
+        sw.once('dataChannelState', function () {
           sw._EVENTS.dataChannelState = [];
           t.end();
+        }, function (state, peerId, error, name, type) {
+          return state === sw.DATA_CHANNEL_STATE.CLOSED &&
+            type === sw.DATA_CHANNEL_TYPE.MESSAGING;
         });
       } else t.end();
     }
-  }, 25000);
+  }, 45000);
 });
 
 test('joinRoom() - callback: Testing success callback', function(t){
