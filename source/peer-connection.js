@@ -286,9 +286,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
         explicit: !!explicit
       });
-    }
 
-    self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
+      self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
+    }
 
     // NOTE
     if (typeof callback === 'function') {
