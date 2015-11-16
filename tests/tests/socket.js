@@ -4,6 +4,7 @@
 
 // Dependencies
 var exports = require('../config.js');
+var test    = require('tape');
 window.sw = new Skylink();
 
 console.log('API: Tests the socket connection and fallback connections');
