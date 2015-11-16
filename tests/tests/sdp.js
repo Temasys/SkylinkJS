@@ -7,9 +7,6 @@ var exports = require('../config.js');
 var test    = require('tape');
 var sw      = new Skylink();
 
-// Testing attributes
-var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
-
 
 console.log('API: Tests that the sdp is modified correctly based on settings passed in joinRoom()');
 console.log('===============================================================================================');
