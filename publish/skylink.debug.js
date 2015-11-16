@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.3 - Mon Nov 16 2015 15:35:35 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.3 - Mon Nov 16 2015 17:55:42 GMT+0800 (SGT) */
 
 (function() {
 
@@ -331,8 +331,11 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
   var channelName = (dc) ? dc.label : customChannelName;
   var pc = self._peerConnections[peerId];
 
-  if (window.webrtcDetectedDCSupport !== 'SCTP' &&
-    window.webrtcDetectedDCSupport !== 'plugin') {
+  var SctpSupported = 
+    !(window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion < 30 || 
+      window.webrtcDetectedBrowser === 'opera'  && window.webrtcDetectedVersion < 20 );
+
+  if (!SctpSupported) {
     log.warn([peerId, 'RTCDataChannel', channelName, 'SCTP not supported'], {
       channelType: channelType
     });
@@ -4903,6 +4906,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
     if (window.webrtcDetectedBrowser === 'firefox' &&
       window.navigator.platform.indexOf('Win') === 0 &&
       peerBrowser.agent !== 'firefox' &&
+      peerBrowser.agent !== 'MCU' &&
       peerBrowser.os.indexOf('Mac') === 0) {
       beOfferer = false;
     }
