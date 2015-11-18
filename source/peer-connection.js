@@ -47,7 +47,7 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
  * @since 0.6.1
  */
 Skylink.prototype.SERVER_PEER_TYPE = {
-  MCU: 'mcu',
+  MCU: 'mcu'
   //SIP: 'sip'
 };
 

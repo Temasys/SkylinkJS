@@ -7,6 +7,114 @@ var exports = require('../config.js');
 var test    = require('tape');
 window.sw = new Skylink();
 
+
+(function () {
+  test('#SOCKET_ERROR', function (t) {
+    t.plan(2);
+
+    t.deepEqual(typeof sw.SOCKET_ERROR, 'string', 'To be defined');
+    t.deepEqual(sw.VERSION, '0.6.4', 'To be expected version for current release');
+
+    t.end();
+  });
+
+  test('#SM_PROTOCOL_VERSION', function (t) {
+    t.plan(2);
+
+    t.deepEqual(typeof sw.SM_PROTOCOL_VERSION, 'string', 'To be defined');
+    t.deepEqual(sw.SM_PROTOCOL_VERSION, '0.1.1', 'To be as expected version for current release');
+
+    t.end();
+  });
+
+  test('#DT_PROTOCOL_VERSION', function (t) {
+    t.plan(2);
+
+    t.deepEqual(typeof sw.DT_PROTOCOL_VERSION, 'string', 'To be defined');
+    t.deepEqual(sw.DT_PROTOCOL_VERSION, '0.1.0', 'To be as expected version for current release');
+
+    t.end();
+  });
+
+  test('#READY_STATE_CHANGE', function (t) {
+    t.plan(3);
+
+    t.deepEqual(typeof sw.READY_STATE_CHANGE, 'object', 'To be defined');
+    t.deepEqual(Object.keys(sw.READY_STATE_CHANGE).length, 4, 'To have a length of 4');
+    t.deepEqual(sw.READY_STATE_CHANGE, {
+      INIT: 0,
+      LOADING: 1,
+      COMPLETED: 2,
+      ERROR: -1
+    }, 'To be as what the documentation stated');
+
+    t.end();
+  });
+
+  test('#READY_STATE_CHANGE_ERROR', function (t) {
+    t.plan(3);
+
+    t.deepEqual(typeof sw.READY_STATE_CHANGE_ERROR, 'object', 'To be defined');
+    t.deepEqual(Object.keys(sw.READY_STATE_CHANGE_ERROR).length, 14, 'To have a length of 14');
+    t.deepEqual(sw.READY_STATE_CHANGE_ERROR, {
+      API_INVALID: 4001,
+      API_DOMAIN_NOT_MATCH: 4002,
+      API_CORS_DOMAIN_NOT_MATCH: 4003,
+      API_CREDENTIALS_INVALID: 4004,
+      API_CREDENTIALS_NOT_MATCH: 4005,
+      API_INVALID_PARENT_KEY: 4006,
+      API_NO_MEETING_RECORD_FOUND: 4010,
+      XML_HTTP_REQUEST_ERROR: -1,
+      NO_SOCKET_IO: 1,
+      NO_XMLHTTPREQUEST_SUPPORT: 2,
+      NO_WEBRTC_SUPPORT: 3,
+      NO_PATH: 4,
+      INVALID_XMLHTTPREQUEST_STATUS: 5,
+      ADAPTER_NO_LOADED: 7
+    }, 'To be as what the documentation stated');
+
+    t.end();
+  });
+
+  /* Note: Deprecated */
+  test('#REGIONAL_SERVER', function (t) {
+    t.plan(3);
+
+    t.deepEqual(typeof sw.REGIONAL_SERVER, 'object', 'To be defined');
+    t.deepEqual(Object.keys(sw.REGIONAL_SERVER).length, 2, 'To have a length of 2');
+    t.deepEqual(sw.REGIONAL_SERVER, {
+      APAC1: 'sg',
+      US1: 'us2'
+    }, 'To be as what the documentation stated');
+  });
+
+  test('#SYSTEM_ACTION', function (t) {
+    t.plan(3);
+
+    t.deepEqual(typeof sw.SYSTEM_ACTION, 'object', 'To be defined');
+    t.deepEqual(Object.keys(sw.SYSTEM_ACTION).length, 2, 'To have a length of 2');
+    t.deepEqual(sw.SYSTEM_ACTION, {
+      WARNING: 'warning',
+      REJECT: 'reject'
+    }, 'To be as what the documentation stated');
+  });
+
+  test('#SYSTEM_ACTION_REASON', function (t) {
+    t.plan(3);
+
+    t.deepEqual(typeof sw.SYSTEM_ACTION_REASON, 'object', 'To be defined');
+    t.deepEqual(Object.keys(sw.SYSTEM_ACTION_REASON).length, 6, 'To have a length of 2');
+    t.deepEqual(sw.SYSTEM_ACTION_REASON, {
+      ROOM_LOCKED: 'locked',
+      DUPLICATED_LOGIN: 'duplicatedLogin',
+      SERVER_ERROR: 'serverError',
+      EXPIRED: 'expired',
+      ROOM_CLOSED: 'roomclose',
+      ROOM_CLOSING: 'toclose'
+    }, 'To be as what the documentation stated');
+  });
+})();
+
 console.log('API: Tests the socket connection and fallback connections');
 console.log('===============================================================================================');
 
@@ -14,6 +122,8 @@ sw.init({
   apiKey: apikey,
   socketTimeout: 5000
 });
+
+
 
 test('channelRetry, socketError: Check socket reconnection fallback', function(t) {
   t.plan(2);
