@@ -59,7 +59,72 @@ test('#constant_REGIONAL_SERVER', function (t) {
 });
 
 test('#method_init()', function(t) {
-  t.plan(2);
+  t.plan(2);//(3);
+
+  t.test('Testing parameters', function (st) {
+    st.plan(4);
+
+    st.test('When parameters is ()', function (sst) {
+      sst.plan(1);
+
+      var called = false;
+      sw.on('readyStateChange', function () {
+        called = true;
+      });
+
+      sw.init();
+
+      setTimeout(function () {
+        sw.off('readyStateChange');
+        sst.deepEqual(called, false, 'Does not trigger event');
+      }, 1000);
+    });
+
+    st.test('When parameters is (callback)', function (sst) {
+      sst.plan(1);
+
+      var called = false;
+      sw.on('readyStateChange', function () {
+        called = true;
+      });
+
+      sw.init(function () {});
+
+      setTimeout(function () {
+        sw.off('readyStateChange');
+        sst.deepEqual(called, false, 'Does not trigger event');
+      }, 1000);
+    });
+
+    st.test('When parameters is (options)', function (sst) {
+      sst.plan(2);
+
+      // NOTE: without waiting can throw an error to the other connection..
+      sw.on('readyStateChange', function (state) {
+        if (state === sw.READY_STATE_CHANGE.COMPLETED) {
+          sw.off('readyStateChange');
+          sst.pass('Triggers event');
+          sst.pass('Triggers completed since its valid');
+        }
+      });
+
+      sw.init(apikey);
+    });
+
+    st.test('When parameters is (options, callback)', function (sst) {
+      sst.plan(2);
+
+      sw.on('readyStateChange', function (state) {
+        if (state === sw.READY_STATE_CHANGE.COMPLETED) {
+          sw.off('readyStateChange');
+          sst.pass('Triggers event');
+          sst.pass('Triggers completed since its valid');
+        }
+      });
+
+      sw.init(apikey, function () {});
+    });
+  });
 
   t.test('Testing callback error states', function(st) {
     st.plan(5);
@@ -76,6 +141,7 @@ test('#method_init()', function(t) {
         };
 
         sw.init(options, function(err, success) {
+          console.info('hey there', err, success);
           if (err) {
             sst.deepEqual(success, null, 'Success should be empty');
             sst.deepEqual({
@@ -108,7 +174,7 @@ test('#method_init()', function(t) {
     });
   });
 
-  t.test('Testing callback success states', function(st) {
+  /*t.test('Testing callback success states', function(st) {
     st.plan(25);
 
     var testItem = function(options) {
@@ -165,7 +231,6 @@ test('#method_init()', function(t) {
         }
 
         sw.init(options, function(err, success) {
-          console.info('hey there', err, success);
           if (err) {
             sst.fail('Received error instead of success ' + JSON.stringify(err));
             sst.end();
@@ -348,7 +413,7 @@ test('#method_init()', function(t) {
         };
       })()
     });
-  });
+  });*/
 });
 
 test('#event_readyStateChange', function(t) {
