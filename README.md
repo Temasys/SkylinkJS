@@ -79,7 +79,7 @@ npm install testling -g
 
 # 5. Run the start script to start a local webserver to be able access the demo and doc folders. This will popup Chrome (Mac). You can configure a different browsers in the start.sh file. Alternatively, you can run (sh start.sh)
 
-npm start
+npm start # note that this runs in Chrome currently..
 ```
 
 After making edits, here are some commands to run and build Skylink:
