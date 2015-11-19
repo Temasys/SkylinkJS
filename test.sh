@@ -1,4 +1,4 @@
-grunt jshint;
+grunt dev;
 type="$1";
 param="$2";
 
@@ -14,8 +14,8 @@ function get_test () {
         room-init)
           browserify tests/tests/room-init.js | testling -x "$1";
           ;;
-        data-transfer)
-          browserify tests/tests/data-transfer.js | testling -x "$1";
+        room-connection)
+          browserify tests/tests/room-connection.js | testling -x "$1";
           ;;
         event)
           browserify tests/tests/event.js | testling -x "$1";
@@ -63,6 +63,9 @@ function get_test () {
     bot)
       echo "Running bot for test '$param'..";
       case "$param" in
+        room-connection)
+          browserify tests/bots/room-connection.js | testling -x "$1";
+          ;;
         webrtc)
           browserify tests/bots/webrtc.js | testling -x "$1";
           ;;

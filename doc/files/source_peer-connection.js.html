@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.3</title>
+    <title>SkylinkJS 0.6.4</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.3</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.4</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -130,7 +130,7 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
  * @since 0.6.1
  */
 Skylink.prototype.SERVER_PEER_TYPE = {
-  MCU: &#x27;mcu&#x27;,
+  MCU: &#x27;mcu&#x27;
   //SIP: &#x27;sip&#x27;
 };
 
@@ -312,20 +312,6 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   var peerConnectionStateClosed = false;
   var dataChannelStateClosed = !self._enableDataChannel;
 
-  self._peerConnections[peerId].dataChannelClosed = true;
-
-  self.once(&#x27;iceConnectionState&#x27;, function () {
-    iceConnectionStateClosed = true;
-  }, function (state, currentPeerId) {
-    return state === self.ICE_CONNECTION_STATE.CLOSED &amp;&amp; peerId === currentPeerId;
-  });
-
-  self.once(&#x27;peerConnectionState&#x27;, function () {
-    peerConnectionStateClosed = true;
-  }, function (state, currentPeerId) {
-    return state === self.PEER_CONNECTION_STATE.CLOSED &amp;&amp; peerId === currentPeerId;
-  });
-
   delete self._peerConnectionHealth[peerId];
   delete self._peerRestartPriorities[peerId];
 
@@ -339,66 +325,61 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
     self._trigger(&#x27;streamEnded&#x27;, peerId, self.getPeerInfo(peerId), false);
   }
 
-  self._wait(function () {
+  self._peerConnections[peerId].dataChannelClosed = true;
 
-    log.log([peerId, null, null, &#x27;Ice and peer connections closed&#x27;]);
-
+  //setTimeout(function () {
     delete self._peerConnections[peerId];
 
     log.log([peerId, null, null, &#x27;Re-creating peer connection&#x27;]);
 
     self._peerConnections[peerId] = self._createPeerConnection(peerId, !!hasScreenSharing);
 
-    // Set one second tiemout before sending the offer or the message gets received
-    setTimeout(function () {
-      if (self._peerConnections[peerId]){
-        self._peerConnections[peerId].receiveOnly = receiveOnly;
-        self._peerConnections[peerId].hasScreen = hasScreenSharing;
-      }
+    if (self._peerConnections[peerId]){
+      self._peerConnections[peerId].receiveOnly = receiveOnly;
+      self._peerConnections[peerId].hasScreen = hasScreenSharing;
+    }
 
-      if (!receiveOnly) {
-        self._addLocalMediaStreams(peerId);
-      }
+    if (!receiveOnly) {
+      self._addLocalMediaStreams(peerId);
+    }
 
-      if (isSelfInitiatedRestart){
-        log.log([peerId, null, null, &#x27;Sending restart message to signaling server&#x27;]);
+    if (isSelfInitiatedRestart){
+      log.log([peerId, null, null, &#x27;Sending restart message to signaling server&#x27;]);
 
-        var lastRestart = Date.now() || function() { return +new Date(); };
+      var lastRestart = Date.now() || function() { return +new Date(); };
 
-        var weight = (new Date()).valueOf();
-        self._peerRestartPriorities[peerId] = weight;
+      var weight = (new Date()).valueOf();
+      self._peerRestartPriorities[peerId] = weight;
 
-        self._sendChannelMessage({
-          type: self._SIG_MESSAGE_TYPE.RESTART,
-          mid: self._user.sid,
-          rid: self._room.id,
-          agent: window.webrtcDetectedBrowser,
-          version: window.webrtcDetectedVersion,
-          os: window.navigator.platform,
-          userInfo: self.getPeerInfo(),
-          target: peerId,
-          isConnectionRestart: !!isConnectionRestart,
-          lastRestart: lastRestart,
-          weight: weight,
-          receiveOnly: receiveOnly,
-          enableIceTrickle: self._enableIceTrickle,
-          enableDataChannel: self._enableDataChannel,
-          sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
-          explicit: !!explicit
-        });
-      }
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.RESTART,
+        mid: self._user.sid,
+        rid: self._room.id,
+        agent: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion,
+        os: window.navigator.platform,
+        userInfo: self.getPeerInfo(),
+        target: peerId,
+        isConnectionRestart: !!isConnectionRestart,
+        lastRestart: lastRestart,
+        weight: weight,
+        receiveOnly: receiveOnly,
+        enableIceTrickle: self._enableIceTrickle,
+        enableDataChannel: self._enableDataChannel,
+        sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
+        explicit: !!explicit
+      });
 
       self._trigger(&#x27;peerRestart&#x27;, peerId, self.getPeerInfo(peerId), true);
+    }
 
-      // NOTE
-      if (typeof callback === &#x27;function&#x27;) {
-        log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart callback&#x27;]);
-        callback();
-      }
-    }, 1000);
-  }, function () {
-    return iceConnectionStateClosed &amp;&amp; peerConnectionStateClosed;
-  });
+    // NOTE
+    if (typeof callback === &#x27;function&#x27;) {
+      log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart callback&#x27;]);
+      callback();
+    }
+    self._startPeerConnectionHealthCheck(peerId, false);
+  //}, 150);
 };
 
 /**
@@ -508,7 +489,14 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.hasScreen = !!isScreenSharing;
   pc.hasMainChannel = false;
 
+  // datachannels
   self._dataChannels[targetMid] = {};
+  // candidates
+  self._addedCandidates[targetMid] = {
+    relay: [],
+    host: [],
+    srflx: []
+  };
 
   // callbacks
   // standard not implemented: onnegotiationneeded,

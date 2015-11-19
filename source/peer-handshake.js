@@ -422,6 +422,12 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   var self = this;
   var pc = self._peerConnections[targetMid];
 
+  if (!sessionDescription) {
+    log.log([targetMid, 'RTCSessionDescription', null,
+      'Ignoring session description as it is empty'], sessionDescription);
+    return;
+  }
+
   if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && pc.setAnswer) {
     log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
       'Ignoring session description. User has already set local answer'], sessionDescription);
