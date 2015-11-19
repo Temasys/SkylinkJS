@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.3 - Wed Nov 18 2015 17:05:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.3 - Thu Nov 19 2015 12:19:22 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3830,7 +3830,7 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
  * @since 0.6.1
  */
 Skylink.prototype.SERVER_PEER_TYPE = {
-  MCU: 'mcu',
+  MCU: 'mcu'
   //SIP: 'sip'
 };
 
@@ -5231,7 +5231,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
 Skylink.prototype.GET_PEERS_STATE = {
 	ENQUIRED: 'enquired',
-	RECEIVED: 'received',
+	RECEIVED: 'received'
 };
 
 /**
@@ -7378,12 +7378,14 @@ Skylink.prototype.init = function(options, callback) {
     audioFallback = options.audioFallback || audioFallback;
     // Custom default meeting timing and duration
     // Fallback to default if no duration or startDateTime provided
-    if (options.credentials) {
+    if (options.credentials &&
+      typeof options.credentials.credentials === 'string' &&
+      typeof options.credentials.duration === 'number' &&
+      typeof options.credentials.startDateTime === 'string') {
       // set start data time
-      startDateTime = options.credentials.startDateTime ||
-        (new Date()).toISOString();
+      startDateTime = options.credentials.startDateTime;
       // set the duration
-      duration = options.credentials.duration || 200;
+      duration = options.credentials.duration;
       // set the credentials
       credentials = options.credentials.credentials;
     }

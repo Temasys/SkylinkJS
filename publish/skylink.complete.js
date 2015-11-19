@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.3 - Wed Nov 18 2015 17:05:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.3 - Thu Nov 19 2015 12:19:22 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -93,7 +93,7 @@ exports.connect = lookup;
 exports.Manager = _dereq_('./manager');
 exports.Socket = _dereq_('./socket');
 
-},{"./manager":3,"./socket":5,"./url":6,"debug":10,"socket.io-parser":44}],3:[function(_dereq_,module,exports){
+},{"./manager":3,"./socket":5,"./url":6,"debug":10,"socket.io-parser":46}],3:[function(_dereq_,module,exports){
 
 /**
  * Module dependencies.
@@ -598,7 +598,7 @@ Manager.prototype.onreconnect = function(){
   this.emitAll('reconnect', attempt);
 };
 
-},{"./on":4,"./socket":5,"./url":6,"backo2":7,"component-bind":8,"component-emitter":9,"debug":10,"engine.io-client":11,"indexof":40,"object-component":41,"socket.io-parser":44}],4:[function(_dereq_,module,exports){
+},{"./on":4,"./socket":5,"./url":6,"backo2":7,"component-bind":8,"component-emitter":9,"debug":10,"engine.io-client":11,"indexof":42,"object-component":43,"socket.io-parser":46}],4:[function(_dereq_,module,exports){
 
 /**
  * Module exports.
@@ -1011,7 +1011,7 @@ Socket.prototype.disconnect = function(){
   return this;
 };
 
-},{"./on":4,"component-bind":8,"component-emitter":9,"debug":10,"has-binary":36,"socket.io-parser":44,"to-array":48}],6:[function(_dereq_,module,exports){
+},{"./on":4,"component-bind":8,"component-emitter":9,"debug":10,"has-binary":38,"socket.io-parser":46,"to-array":50}],6:[function(_dereq_,module,exports){
 (function (global){
 
 /**
@@ -1088,7 +1088,7 @@ function url(uri, loc){
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"debug":10,"parseuri":42}],7:[function(_dereq_,module,exports){
+},{"debug":10,"parseuri":44}],7:[function(_dereq_,module,exports){
 
 /**
  * Expose `Backoff`.
@@ -2230,7 +2230,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./transport":14,"./transports":15,"component-emitter":9,"debug":22,"engine.io-parser":25,"indexof":40,"parsejson":32,"parseqs":33,"parseuri":34}],14:[function(_dereq_,module,exports){
+},{"./transport":14,"./transports":15,"component-emitter":9,"debug":22,"engine.io-parser":25,"indexof":42,"parsejson":34,"parseqs":35,"parseuri":36}],14:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
@@ -3320,7 +3320,7 @@ Polling.prototype.uri = function(){
   return schema + '://' + this.hostname + port + this.path + query;
 };
 
-},{"../transport":14,"component-inherit":21,"debug":22,"engine.io-parser":25,"parseqs":33,"xmlhttprequest":20}],19:[function(_dereq_,module,exports){
+},{"../transport":14,"component-inherit":21,"debug":22,"engine.io-parser":25,"parseqs":35,"xmlhttprequest":20}],19:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
@@ -3560,7 +3560,7 @@ WS.prototype.check = function(){
   return !!WebSocket && !('__initialize' in WebSocket && this.name === WS.prototype.name);
 };
 
-},{"../transport":14,"component-inherit":21,"debug":22,"engine.io-parser":25,"parseqs":33,"ws":35}],20:[function(_dereq_,module,exports){
+},{"../transport":14,"component-inherit":21,"debug":22,"engine.io-parser":25,"parseqs":35,"ws":37}],20:[function(_dereq_,module,exports){
 // browser shim for xmlhttprequest module
 var hasCORS = _dereq_('has-cors');
 
@@ -3598,7 +3598,7 @@ module.exports = function(opts) {
   }
 }
 
-},{"has-cors":38}],21:[function(_dereq_,module,exports){
+},{"has-cors":40}],21:[function(_dereq_,module,exports){
 
 module.exports = function(a, b){
   var fn = function(){};
@@ -3689,7 +3689,7 @@ function formatArgs() {
   var index = 0;
   var lastC = 0;
   args[0].replace(/%[a-z%]/g, function(match) {
-    if ('%%' === match) return;
+    if ('%' === match) return;
     index++;
     if ('%c' === match) {
       // we only are interested in the *last* %c
@@ -3854,7 +3854,7 @@ function debug(namespace) {
     var index = 0;
     args[0] = args[0].replace(/%([a-z%])/g, function(match, format) {
       // if we encounter an escaped % then don't increase the array index
-      if (match === '%%') return match;
+      if (match === '%') return match;
       index++;
       var formatter = exports.formatters[format];
       if ('function' === typeof formatter) {
@@ -4665,7 +4665,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./keys":26,"after":27,"arraybuffer.slice":28,"base64-arraybuffer":29,"blob":30,"has-binary":36,"utf8":31}],26:[function(_dereq_,module,exports){
+},{"./keys":26,"after":27,"arraybuffer.slice":28,"base64-arraybuffer":29,"blob":30,"has-binary":31,"utf8":33}],26:[function(_dereq_,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -4825,22 +4825,8 @@ var BlobBuilder = global.BlobBuilder
 
 var blobSupported = (function() {
   try {
-    var a = new Blob(['hi']);
-    return a.size === 2;
-  } catch(e) {
-    return false;
-  }
-})();
-
-/**
- * Check if Blob constructor supports ArrayBufferViews
- * Fails in Safari 6, so we need to map to ArrayBuffers there.
- */
-
-var blobSupportsArrayBufferView = blobSupported && (function() {
-  try {
-    var b = new Blob([new Uint8Array([1,2])]);
-    return b.size === 2;
+    var b = new Blob(['hi']);
+    return b.size == 2;
   } catch(e) {
     return false;
   }
@@ -4854,52 +4840,19 @@ var blobBuilderSupported = BlobBuilder
   && BlobBuilder.prototype.append
   && BlobBuilder.prototype.getBlob;
 
-/**
- * Helper function that maps ArrayBufferViews to ArrayBuffers
- * Used by BlobBuilder constructor and old browsers that didn't
- * support it in the Blob constructor.
- */
-
-function mapArrayBufferViews(ary) {
-  for (var i = 0; i < ary.length; i++) {
-    var chunk = ary[i];
-    if (chunk.buffer instanceof ArrayBuffer) {
-      var buf = chunk.buffer;
-
-      // if this is a subarray, make a copy so we only
-      // include the subarray region from the underlying buffer
-      if (chunk.byteLength !== buf.byteLength) {
-        var copy = new Uint8Array(chunk.byteLength);
-        copy.set(new Uint8Array(buf, chunk.byteOffset, chunk.byteLength));
-        buf = copy.buffer;
-      }
-
-      ary[i] = buf;
-    }
-  }
-}
-
 function BlobBuilderConstructor(ary, options) {
   options = options || {};
 
   var bb = new BlobBuilder();
-  mapArrayBufferViews(ary);
-
   for (var i = 0; i < ary.length; i++) {
     bb.append(ary[i]);
   }
-
   return (options.type) ? bb.getBlob(options.type) : bb.getBlob();
-};
-
-function BlobConstructor(ary, options) {
-  mapArrayBufferViews(ary);
-  return new Blob(ary, options || {});
 };
 
 module.exports = (function() {
   if (blobSupported) {
-    return blobSupportsArrayBufferView ? global.Blob : BlobConstructor;
+    return global.Blob;
   } else if (blobBuilderSupported) {
     return BlobBuilderConstructor;
   } else {
@@ -4910,7 +4863,74 @@ module.exports = (function() {
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],31:[function(_dereq_,module,exports){
 (function (global){
-/*! https://mths.be/utf8js v2.0.0 by @mathias */
+
+/*
+ * Module requirements.
+ */
+
+var isArray = _dereq_('isarray');
+
+/**
+ * Module exports.
+ */
+
+module.exports = hasBinary;
+
+/**
+ * Checks for binary data.
+ *
+ * Right now only Buffer and ArrayBuffer are supported..
+ *
+ * @param {Object} anything
+ * @api public
+ */
+
+function hasBinary(data) {
+
+  function _hasBinary(obj) {
+    if (!obj) return false;
+
+    if ( (global.Buffer && global.Buffer.isBuffer(obj)) ||
+         (global.ArrayBuffer && obj instanceof ArrayBuffer) ||
+         (global.Blob && obj instanceof Blob) ||
+         (global.File && obj instanceof File)
+        ) {
+      return true;
+    }
+
+    if (isArray(obj)) {
+      for (var i = 0; i < obj.length; i++) {
+          if (_hasBinary(obj[i])) {
+              return true;
+          }
+      }
+    } else if (obj && 'object' == typeof obj) {
+      if (obj.toJSON) {
+        obj = obj.toJSON();
+      }
+
+      for (var key in obj) {
+        if (obj.hasOwnProperty(key) && _hasBinary(obj[key])) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  return _hasBinary(data);
+}
+
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"isarray":32}],32:[function(_dereq_,module,exports){
+module.exports = Array.isArray || function (arr) {
+  return Object.prototype.toString.call(arr) == '[object Array]';
+};
+
+},{}],33:[function(_dereq_,module,exports){
+(function (global){
+/*! http://mths.be/utf8js v2.0.0 by @mathias */
 ;(function(root) {
 
 	// Detect free variables `exports`
@@ -4931,7 +4951,7 @@ module.exports = (function() {
 
 	var stringFromCharCode = String.fromCharCode;
 
-	// Taken from https://mths.be/punycode
+	// Taken from http://mths.be/punycode
 	function ucs2decode(string) {
 		var output = [];
 		var counter = 0;
@@ -4958,7 +4978,7 @@ module.exports = (function() {
 		return output;
 	}
 
-	// Taken from https://mths.be/punycode
+	// Taken from http://mths.be/punycode
 	function ucs2encode(array) {
 		var length = array.length;
 		var index = -1;
@@ -4976,14 +4996,6 @@ module.exports = (function() {
 		return output;
 	}
 
-	function checkScalarValue(codePoint) {
-		if (codePoint >= 0xD800 && codePoint <= 0xDFFF) {
-			throw Error(
-				'Lone surrogate U+' + codePoint.toString(16).toUpperCase() +
-				' is not a scalar value'
-			);
-		}
-	}
 	/*--------------------------------------------------------------------------*/
 
 	function createByte(codePoint, shift) {
@@ -4999,7 +5011,6 @@ module.exports = (function() {
 			symbol = stringFromCharCode(((codePoint >> 6) & 0x1F) | 0xC0);
 		}
 		else if ((codePoint & 0xFFFF0000) == 0) { // 3-byte sequence
-			checkScalarValue(codePoint);
 			symbol = stringFromCharCode(((codePoint >> 12) & 0x0F) | 0xE0);
 			symbol += createByte(codePoint, 6);
 		}
@@ -5014,6 +5025,11 @@ module.exports = (function() {
 
 	function utf8encode(string) {
 		var codePoints = ucs2decode(string);
+
+		// console.log(JSON.stringify(codePoints.map(function(x) {
+		// 	return 'U+' + x.toString(16).toUpperCase();
+		// })));
+
 		var length = codePoints.length;
 		var index = -1;
 		var codePoint;
@@ -5084,7 +5100,6 @@ module.exports = (function() {
 			byte3 = readContinuationByte();
 			codePoint = ((byte1 & 0x0F) << 12) | (byte2 << 6) | byte3;
 			if (codePoint >= 0x0800) {
-				checkScalarValue(codePoint);
 				return codePoint;
 			} else {
 				throw Error('Invalid continuation byte');
@@ -5156,7 +5171,7 @@ module.exports = (function() {
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],32:[function(_dereq_,module,exports){
+},{}],34:[function(_dereq_,module,exports){
 (function (global){
 /**
  * JSON parse.
@@ -5191,7 +5206,7 @@ module.exports = function parsejson(data) {
   }
 };
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],33:[function(_dereq_,module,exports){
+},{}],35:[function(_dereq_,module,exports){
 /**
  * Compiles a querystring
  * Returns string representation of the object
@@ -5230,7 +5245,7 @@ exports.decode = function(qs){
   return qry;
 };
 
-},{}],34:[function(_dereq_,module,exports){
+},{}],36:[function(_dereq_,module,exports){
 /**
  * Parses an URI
  *
@@ -5271,7 +5286,7 @@ module.exports = function parseuri(str) {
     return uri;
 };
 
-},{}],35:[function(_dereq_,module,exports){
+},{}],37:[function(_dereq_,module,exports){
 
 /**
  * Module dependencies.
@@ -5316,7 +5331,7 @@ function ws(uri, protocols, opts) {
 
 if (WebSocket) ws.prototype = WebSocket.prototype;
 
-},{}],36:[function(_dereq_,module,exports){
+},{}],38:[function(_dereq_,module,exports){
 (function (global){
 
 /*
@@ -5378,12 +5393,9 @@ function hasBinary(data) {
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"isarray":37}],37:[function(_dereq_,module,exports){
-module.exports = Array.isArray || function (arr) {
-  return Object.prototype.toString.call(arr) == '[object Array]';
-};
-
-},{}],38:[function(_dereq_,module,exports){
+},{"isarray":39}],39:[function(_dereq_,module,exports){
+module.exports=_dereq_(32)
+},{}],40:[function(_dereq_,module,exports){
 
 /**
  * Module dependencies.
@@ -5408,7 +5420,7 @@ try {
   module.exports = false;
 }
 
-},{"global":39}],39:[function(_dereq_,module,exports){
+},{"global":41}],41:[function(_dereq_,module,exports){
 
 /**
  * Returns `this`. Execute this without a "context" (i.e. without it being
@@ -5418,7 +5430,7 @@ try {
 
 module.exports = (function () { return this; })();
 
-},{}],40:[function(_dereq_,module,exports){
+},{}],42:[function(_dereq_,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -5429,7 +5441,7 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],41:[function(_dereq_,module,exports){
+},{}],43:[function(_dereq_,module,exports){
 
 /**
  * HOP ref.
@@ -5514,7 +5526,7 @@ exports.length = function(obj){
 exports.isEmpty = function(obj){
   return 0 == exports.length(obj);
 };
-},{}],42:[function(_dereq_,module,exports){
+},{}],44:[function(_dereq_,module,exports){
 /**
  * Parses an URI
  *
@@ -5541,7 +5553,7 @@ module.exports = function parseuri(str) {
   return uri;
 };
 
-},{}],43:[function(_dereq_,module,exports){
+},{}],45:[function(_dereq_,module,exports){
 (function (global){
 /*global Blob,File*/
 
@@ -5686,7 +5698,7 @@ exports.removeBlobs = function(data, callback) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./is-buffer":45,"isarray":46}],44:[function(_dereq_,module,exports){
+},{"./is-buffer":47,"isarray":48}],46:[function(_dereq_,module,exports){
 
 /**
  * Module dependencies.
@@ -6088,7 +6100,7 @@ function error(data){
   };
 }
 
-},{"./binary":43,"./is-buffer":45,"component-emitter":9,"debug":10,"isarray":46,"json3":47}],45:[function(_dereq_,module,exports){
+},{"./binary":45,"./is-buffer":47,"component-emitter":9,"debug":10,"isarray":48,"json3":49}],47:[function(_dereq_,module,exports){
 (function (global){
 
 module.exports = isBuf;
@@ -6105,9 +6117,9 @@ function isBuf(obj) {
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],46:[function(_dereq_,module,exports){
-module.exports=_dereq_(37)
-},{}],47:[function(_dereq_,module,exports){
+},{}],48:[function(_dereq_,module,exports){
+module.exports=_dereq_(32)
+},{}],49:[function(_dereq_,module,exports){
 /*! JSON v3.2.6 | http://bestiejs.github.io/json3 | Copyright 2012-2013, Kit Cambridge | http://kit.mit-license.org */
 ;(function (window) {
   // Convenience aliases.
@@ -6970,7 +6982,7 @@ module.exports=_dereq_(37)
   }
 }(this));
 
-},{}],48:[function(_dereq_,module,exports){
+},{}],50:[function(_dereq_,module,exports){
 module.exports = toArray
 
 function toArray(list, index) {
@@ -6989,7 +7001,7 @@ function toArray(list, index) {
 (1)
 });
 
-/*! adapterjs - v0.12.3 - 2015-11-16 */
+/*! adapterjs - v0.12.2 - 2015-10-19 */
 
 // Adapter's interface.
 var AdapterJS = AdapterJS || {};
@@ -7008,7 +7020,7 @@ AdapterJS.options = AdapterJS.options || {};
 // AdapterJS.options.hidePluginInstallPrompt = true;
 
 // AdapterJS version
-AdapterJS.VERSION = '0.12.3';
+AdapterJS.VERSION = '0.12.2';
 
 // This function will be called when the WebRTC API is ready to be used
 // Whether it is the native implementation (Chrome, Firefox, Opera) or
@@ -7598,7 +7610,7 @@ if (navigator.mozGetUserMedia) {
 
   createIceServers = function (urls, username, password) {
     var iceServers = [];
-    for (var i = 0; i < urls.length; i++) {
+    for (i = 0; i < urls.length; i++) {
       var iceServer = createIceServer(urls[i], username, password);
       if (iceServer !== null) {
         iceServers.push(iceServer);
@@ -7688,7 +7700,7 @@ if (navigator.mozGetUserMedia) {
         'username' : username
       };
     } else {
-      for (var i = 0; i < urls.length; i++) {
+      for (i = 0; i < urls.length; i++) {
         var iceServer = createIceServer(urls[i], username, password);
         if (iceServer !== null) {
           iceServers.push(iceServer);
@@ -7990,13 +8002,12 @@ if (navigator.mozGetUserMedia) {
         return;
       }
 
-      var streamId;
+      var streamId
       if (stream === null) {
         streamId = '';
-      } else {
-        if (typeof stream.enableSoundTracks !== 'undefined') {
-          stream.enableSoundTracks(true);
-        }
+      }
+      else {
+        stream.enableSoundTracks(true); // TODO: remove on 0.12.0
         streamId = stream.id;
       }
 
@@ -8092,16 +8103,11 @@ if (navigator.mozGetUserMedia) {
 
       for(prop in properties) {
         propName = properties[prop];
-
-        if (typeof(propName.slice) === 'function') {
-          if (propName.slice(0,2) == 'on' && srcElem[propName] != null) {
-            if (isIE) {
-              destElem.attachEvent(propName,srcElem[propName]);
-            } else {
-              destElem.addEventListener(propName.slice(2), srcElem[propName], false)
-            }
+        if(propName.slice(0,2) == 'on' && srcElem[propName] != null) {
+          if(isIE){
+            destElem.attachEvent(propName,srcElem[propName]);
           } else {
-            //TODO (http://jira.temasys.com.sg/browse/TWP-328) Forward non-event properties ?
+            destElem.addEventListener(propName.slice(2), srcElem[propName], false)
           }
         }
       }
@@ -8201,10 +8207,8 @@ if (navigator.mozGetUserMedia) {
       if (constraints && constraints.video && !!constraints.video.mediaSource) {
         // intercepting screensharing requests
 
-        // Invalid mediaSource for firefox, only "screen" and "window" are supported
         if (constraints.video.mediaSource !== 'screen' && constraints.video.mediaSource !== 'window') {
-          failureCb(new Error('GetUserMedia: Only "screen" and "window" are supported as mediaSource constraints'));
-          return;
+          throw new Error('Only "screen" and "window" option is available as mediaSource');
         }
 
         var updatedConstraints = clone(constraints);
@@ -8242,11 +8246,10 @@ if (navigator.mozGetUserMedia) {
     baseGetUserMedia = window.navigator.getUserMedia;
 
     navigator.getUserMedia = function (constraints, successCb, failureCb) {
+
       if (constraints && constraints.video && !!constraints.video.mediaSource) {
         if (window.webrtcDetectedBrowser !== 'chrome') {
-          // This is Opera, which does not support screensharing
-          failureCb(new Error('Current browser does not support screensharing'));
-          return;
+          throw new Error('Current browser does not support screensharing');
         }
 
         // would be fine since no methods
@@ -8267,13 +8270,11 @@ if (navigator.mozGetUserMedia) {
 
             baseGetUserMedia(updatedConstraints, successCb, failureCb);
 
-          } else { // GUM failed
+          } else {
             if (error === 'permission-denied') {
-              failureCb(new Error('Permission denied for screen retrieval'));
+              throw new Error('Permission denied for screen retrieval');
             } else {
-              // NOTE(J-O): I don't think we ever pass in here. 
-              // A failure to capture the screen does not lead here.
-              failureCb(new Error('Failed retrieving selected screen'));
+              throw new Error('Failed retrieving selected screen');
             }
           }
         };
@@ -8335,6 +8336,8 @@ if (navigator.mozGetUserMedia) {
           // check if screensharing feature is available
           if (!!AdapterJS.WebRTCPlugin.plugin.HasScreensharingFeature &&
             !!AdapterJS.WebRTCPlugin.plugin.isScreensharingAvailable) {
+
+
             // set the constraints
             updatedConstraints.video.optional = updatedConstraints.video.optional || [];
             updatedConstraints.video.optional.push({
@@ -8343,8 +8346,7 @@ if (navigator.mozGetUserMedia) {
 
             delete updatedConstraints.video.mediaSource;
           } else {
-            failureCb(new Error('Your version of the WebRTC plugin does not support screensharing'));
-            return;
+            throw new Error('Your WebRTC plugin does not support screensharing');
           }
           baseGetUserMedia(updatedConstraints, successCb, failureCb);
         });
@@ -8356,9 +8358,6 @@ if (navigator.mozGetUserMedia) {
     getUserMedia = window.navigator.getUserMedia;
   }
 
-  // For chrome, use an iframe to load the screensharing extension
-  // in the correct domain.
-  // Modify here for custom screensharing extension in chrome
   if (window.webrtcDetectedBrowser === 'chrome') {
     var iframe = document.createElement('iframe');
 
@@ -8367,6 +8366,7 @@ if (navigator.mozGetUserMedia) {
     };
 
     iframe.src = 'https://cdn.temasys.com.sg/skylink/extensions/detectRTC.html';
+      //'https://temasys-cdn.s3.amazonaws.com/skylink/extensions/detection-script-dev/detectRTC.html';
     iframe.style.display = 'none';
 
     (document.body || document.documentElement).appendChild(iframe);
@@ -8387,7 +8387,7 @@ if (navigator.mozGetUserMedia) {
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.3 - Wed Nov 18 2015 17:05:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.3 - Thu Nov 19 2015 12:19:22 GMT+0800 (SGT) */
 
 (function() {
 
@@ -12219,7 +12219,7 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
  * @since 0.6.1
  */
 Skylink.prototype.SERVER_PEER_TYPE = {
-  MCU: 'mcu',
+  MCU: 'mcu'
   //SIP: 'sip'
 };
 
@@ -13620,7 +13620,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
 Skylink.prototype.GET_PEERS_STATE = {
 	ENQUIRED: 'enquired',
-	RECEIVED: 'received',
+	RECEIVED: 'received'
 };
 
 /**
@@ -15767,12 +15767,14 @@ Skylink.prototype.init = function(options, callback) {
     audioFallback = options.audioFallback || audioFallback;
     // Custom default meeting timing and duration
     // Fallback to default if no duration or startDateTime provided
-    if (options.credentials) {
+    if (options.credentials &&
+      typeof options.credentials.credentials === 'string' &&
+      typeof options.credentials.duration === 'number' &&
+      typeof options.credentials.startDateTime === 'string') {
       // set start data time
-      startDateTime = options.credentials.startDateTime ||
-        (new Date()).toISOString();
+      startDateTime = options.credentials.startDateTime;
       // set the duration
-      duration = options.credentials.duration || 200;
+      duration = options.credentials.duration;
       // set the credentials
       credentials = options.credentials.credentials;
     }

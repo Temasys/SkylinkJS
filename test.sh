@@ -11,14 +11,20 @@ function get_test () {
     test)
       echo "Running test '$param'..";
       case "$param" in
+        room-init)
+          browserify tests/tests/room-init.js | testling -x "$1";
+          ;;
+        data-transfer)
+          browserify tests/tests/data-transfer.js | testling -x "$1";
+          ;;
         event)
           browserify tests/tests/event.js | testling -x "$1";
           ;;
         socket)
           browserify tests/tests/socket.js | testling -x "$1";
           ;;
-        api)
-          browserify tests/tests/api.js | testling -x "$1";
+        api-test)
+          browserify tests/tests/api-test.js | testling -x "$1";
           ;;
         webrtc)
           browserify tests/tests/webrtc.js | testling -x "$1";

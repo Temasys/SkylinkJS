@@ -1186,12 +1186,14 @@ Skylink.prototype.init = function(options, callback) {
     audioFallback = options.audioFallback || audioFallback;
     // Custom default meeting timing and duration
     // Fallback to default if no duration or startDateTime provided
-    if (options.credentials) {
+    if (options.credentials &&
+      typeof options.credentials.credentials === 'string' &&
+      typeof options.credentials.duration === 'number' &&
+      typeof options.credentials.startDateTime === 'string') {
       // set start data time
-      startDateTime = options.credentials.startDateTime ||
-        (new Date()).toISOString();
+      startDateTime = options.credentials.startDateTime;
       // set the duration
-      duration = options.credentials.duration || 200;
+      duration = options.credentials.duration;
       // set the credentials
       credentials = options.credentials.credentials;
     }
