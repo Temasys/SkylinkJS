@@ -75,7 +75,7 @@ npm install grunt-cli -g
 # 4. Install Browserify and Testling to run test scripts :
 
 npm install browserify -g
-npm install testling -f
+npm install testling -g
 
 # 5. Run the start script to start a local webserver to be able access the demo and doc folders. This will popup Chrome (Mac). You can configure a different browsers in the start.sh file. Alternatively, you can run (sh start.sh)
 

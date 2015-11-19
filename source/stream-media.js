@@ -2124,71 +2124,98 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
       self._screenSharingStreamSettings.audio = false;
     }
     self._onUserMediaSuccess(sStream, true);
+    self._timestamp.screen = true;
   };
 
   if (window.webrtcDetectedBrowser === 'firefox') {
     settings.audio = !!enableAudio;
   }
 
-  try {
-    window.getUserMedia(settings, function (stream) {
-      self.once('mediaAccessSuccess', function (stream) {
-        if (self._inRoom) {
-          if (self._hasMCU) {
-            self._restartMCUConnection();
-          } else {
-            self._trigger('incomingStream', self._user.sid, self._mediaStream,
-              true, self.getPeerInfo(), false);
-            for (var peer in self._peerConnections) {
-              if (self._peerConnections.hasOwnProperty(peer)) {
-                self._restartPeerConnection(peer, true, false, null, true);
+  var throttleFn = function (fn, wait) {
+    if (!self._timestamp.func){
+      //First time run, need to force timestamp to skip condition
+      self._timestamp.func = self._timestamp.now - wait;
+    }
+    var now = Date.now();
+
+    if (!self._timestamp.screen) {
+      if (now - self._timestamp.func < wait) {
+        return;
+      }
+    }
+    fn();
+    self._timestamp.screen = false;
+    self._timestamp.func = now;
+  };
+
+  var toShareScreen = function(){
+    try {
+      window.getUserMedia(settings, function (stream) {
+        self.once('mediaAccessSuccess', function (stream) {
+          if (self._inRoom) {
+            if (self._hasMCU) {
+              self._restartMCUConnection();
+            } else {
+              self._trigger('incomingStream', self._user.sid, stream,
+                true, self.getPeerInfo(), false);
+              for (var peer in self._peerConnections) {
+                if (self._peerConnections.hasOwnProperty(peer)) {
+                  self._restartPeerConnection(peer, true, false, null, true);
+                }
               }
             }
+          } else if (typeof callback === 'function') {
+            callback(null, stream);
           }
-        } else if (typeof callback === 'function') {
-          callback(null, stream);
+        }, function (stream, isScreenSharing) {
+          return isScreenSharing;
+        });
+
+        if (window.webrtcDetectedBrowser !== 'firefox' && enableAudio) {
+          window.getUserMedia({
+            audio: true
+          }, function (audioStream) {
+            try {
+              audioStream.addTrack(stream.getVideoTracks()[0]);
+              self._mediaScreenClone = stream;
+              hasAudio = true;
+              triggerSuccessFn(audioStream, true);
+
+            } catch (error) {
+              log.error('Failed retrieving audio stream for screensharing stream', error);
+              triggerSuccessFn(stream, true);
+            }
+
+          }, function (error) {
+            log.error('Failed retrieving audio stream for screensharing stream', error);
+            triggerSuccessFn(stream, true);
+          });
+        } else {
+          hasAudio = window.webrtcDetectedBrowser === 'firefox' ? enableAudio : false;
+          triggerSuccessFn(stream, true);
+        }
+
+      }, function (error) {
+        self._onUserMediaError(error, true, false);
+
+        self._timestamp.screen = true;
+
+        if (typeof callback === 'function') {
+          callback(error, null);
         }
       });
 
-      if (window.webrtcDetectedBrowser !== 'firefox' && enableAudio) {
-        window.getUserMedia({
-          audio: true
-        }, function (audioStream) {
-          try {
-            audioStream.addTrack(stream.getVideoTracks()[0]);
-            self._mediaScreenClone = stream;
-            hasAudio = true;
-            triggerSuccessFn(audioStream, true);
-
-          } catch (error) {
-            log.error('Failed retrieving audio stream for screensharing stream', error);
-            triggerSuccessFn(stream, true);
-          }
-
-        }, function (error) {
-          log.error('Failed retrieving audio stream for screensharing stream', error);
-          triggerSuccessFn(stream, true);
-        });
-      } else {
-        hasAudio = window.webrtcDetectedBrowser === 'firefox' ? enableAudio : false;
-        triggerSuccessFn(stream, true);
-      }
-
-    }, function (error) {
+    } catch (error) {
       self._onUserMediaError(error, true, false);
 
       if (typeof callback === 'function') {
         callback(error, null);
       }
-    });
-
-  } catch (error) {
-    self._onUserMediaError(error, true, false);
-
-    if (typeof callback === 'function') {
-      callback(error, null);
     }
-  }
+  };
+
+  //self._throttle(toShareScreen,10000)();
+  throttleFn(toShareScreen, 10000);
 };
 
 /**

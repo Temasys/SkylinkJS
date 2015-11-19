@@ -1293,6 +1293,23 @@ Skylink.prototype._candidateHandler = function(message) {
     // we might keep a buffer of candidates to replay after receiving an offer.
     this._addIceCandidateToQueue(targetMid, candidate);
   }
+
+  if (!this._addedCandidates[targetMid]) {
+    this._addedCandidates[targetMid] = {
+      relay: [],
+      host: [],
+      srflx: []
+    };
+  }
+
+  // shouldnt happen but just incase
+  if (!this._addedCandidates[targetMid][canType]) {
+    this._addedCandidates[targetMid][canType] = [];
+  }
+
+  this._addedCandidates[targetMid][canType].push('remote:' + messageCan[4] +
+    (messageCan[5] !== '0' ? ':' + messageCan[5] : '') +
+    (messageCan[2] ? '?transport=' + messageCan[2].toLowerCase() : ''));
 };
 
 /**

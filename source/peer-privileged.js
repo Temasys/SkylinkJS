@@ -15,7 +15,7 @@
  */
 Skylink.prototype.GET_PEERS_STATE = {
 	ENQUIRED: 'enquired',
-	RECEIVED: 'received',
+	RECEIVED: 'received'
 };
 
 /**
