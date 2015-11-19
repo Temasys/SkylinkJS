@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.3</title>
+    <title>SkylinkJS 0.6.4</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.3</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.4</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -444,65 +444,16 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   var self = this;
   var error;
   var stopStream = false;
+  var previousRoom = self._selectedRoom;
 
-  if (typeof room === &#x27;string&#x27;) {
-    //joinRoom(room, callback)
+  if (room === null) {
+    error = &#x27;Invalid room name is provided&#x27;;
+    log.error(error, room);
+
     if (typeof mediaOptions === &#x27;function&#x27;) {
       callback = mediaOptions;
       mediaOptions = undefined;
-
-    // joinRoom(room, null, callback)
-    } else if (mediaOptions === null || typeof mediaOptions !== &#x27;object&#x27; &amp;&amp;
-      typeof mediaOptions !== &#x27;undefined&#x27;) {
-      error = &#x27;Invalid mediaOptions is provided&#x27;;
-      log.error(error, mediaOptions);
-
-      if (typeof callback === &#x27;function&#x27;) {
-        callback({
-          room: room,
-          errorCode: self._readyState,
-          error: new Error(error)
-        }, null);
-      }
-      return;
     }
-
-  } else if (typeof room === &#x27;object&#x27;) {
-    //joinRoom(mediaOptions, callback);
-    if (typeof mediaOptions === &#x27;function&#x27;) {
-      callback = mediaOptions;
-      mediaOptions = room;
-      room = undefined;
-    }
-    //joinRoom(mediaOptions);
-    else {
-      mediaOptions = room;
-    }
-
-    //joinRoom(null, callback);
-    if (mediaOptions === null) {
-      error = &#x27;Invalid mediaOptions is provided&#x27;;
-      log.error(error, mediaOptions);
-
-      if (typeof callback === &#x27;function&#x27;) {
-        callback({
-          room: self._defaultRoom,
-          errorCode: self._readyState,
-          error: new Error(error)
-        }, null);
-      }
-      return;
-    }
-  } else if (typeof room === &#x27;function&#x27;) {
-    //joinRoom(callback);
-    callback = room;
-    room = undefined;
-    mediaOptions = undefined;
-
-  // joinRoom(null)
-  } else if (room === null) {
-    error = &#x27;Invalid room name is provided&#x27;;
-    log.error(error, room);
 
     if (typeof callback === &#x27;function&#x27;) {
       callback({
@@ -512,6 +463,69 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
       }, null);
     }
     return;
+  }
+  else if (typeof room === &#x27;string&#x27;) {
+    //joinRoom(room+); - skip
+
+    //joinRoom(room+,mediaOptions+) - skip
+
+    // joinRoom(room+,callback+)
+    if (typeof mediaOptions === &#x27;function&#x27;) {
+      callback = mediaOptions;
+      mediaOptions = undefined;
+
+    // joinRoom(room+, mediaOptions-)
+    } else if (typeof mediaOptions !== &#x27;undefined&#x27;) {
+      if (mediaOptions === null || typeof mediaOptions !== &#x27;object&#x27;) {
+        error = &#x27;Invalid mediaOptions is provided&#x27;;
+        log.error(error, mediaOptions);
+
+        // joinRoom(room+,mediaOptions-,callback+)
+        if (typeof callback === &#x27;function&#x27;) {
+          callback({
+            room: room,
+            errorCode: self._readyState,
+            error: new Error(error)
+          }, null);
+        }
+        return;
+      }
+    }
+
+  } else if (typeof room === &#x27;object&#x27;) {
+    //joinRoom(mediaOptions+, callback);
+    if (typeof mediaOptions === &#x27;function&#x27;) {
+      callback = mediaOptions;
+    }
+
+    //joinRoom(mediaOptions);
+    mediaOptions = room;
+    room = undefined;
+
+  } else if (typeof room === &#x27;function&#x27;) {
+    //joinRoom(callback);
+    callback = room;
+    room = undefined;
+    mediaOptions = undefined;
+
+  } else if (typeof room !== &#x27;undefined&#x27;) {
+    //joinRoom(mediaOptions-,callback?);
+    error = &#x27;Invalid mediaOptions is provided&#x27;;
+    log.error(error, mediaOptions);
+
+    if (typeof mediaOptions === &#x27;function&#x27;) {
+      callback = mediaOptions;
+      mediaOptions = undefined;
+    }
+
+    if (typeof callback === &#x27;function&#x27;) {
+      callback({
+        room: self._defaultRoom,
+        errorCode: self._readyState,
+        error: new Error(error)
+      }, null);
+      return;
+    }
   }
 
   // If no room provided, join the default room
@@ -550,7 +564,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
         }, false);
       }
 
-      self._sendChannelMessage({     
+      self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
         uid: self._user.uid,
         cid: self._key,
@@ -562,12 +576,12 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
         start: self._room.startDateTime,
         len: self._room.duration,
         isPrivileged: self._isPrivileged === true, // Default to false if undefined
-        autoIntroduce: self._autoIntroduce !== false // Default to true if undefined      
+        autoIntroduce: self._autoIntroduce!== false // Default to true if undefined
       });
     }
   };
 
-  if (self._channelOpen) {
+  if (self._inRoom) {
     if (typeof mediaOptions === &#x27;object&#x27;) {
       if (mediaOptions.audio === false &amp;&amp; mediaOptions.video === false) {
         stopStream = true;
@@ -576,7 +590,13 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
       }
     }
 
-    self.leaveRoom(stopStream, function() {
+    log.log([null, &#x27;Socket&#x27;, previousRoom, &#x27;Leaving room before joining new room&#x27;], self._selectedRoom);
+
+    self.leaveRoom(stopStream, function(error, success) {
+      log.log([null, &#x27;Socket&#x27;, previousRoom, &#x27;Leave room callback result&#x27;], {
+        error: error,
+        success: success
+      });
       log.log([null, &#x27;Socket&#x27;, self._selectedRoom, &#x27;Joining room. Media options:&#x27;], mediaOptions);
       if (typeof room === &#x27;string&#x27; ? room !== self._selectedRoom : false) {
         self._initSelectedRoom(room, function(errorObj) {
@@ -702,28 +722,27 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
   self._socketCurrentReconnectionAttempt = 0;
 
   // wait for ready state before opening
-   
-  self._wait(function() {  
-    self._condition(&#x27;channelOpen&#x27;, function() {   
+  self._wait(function() {
+    self._condition(&#x27;channelOpen&#x27;, function() {
       mediaOptions = mediaOptions || {};
 
-      // parse user data settings   
-      self._parseUserData(mediaOptions.userData || self._userData);   
+      // parse user data settings
+      self._parseUserData(mediaOptions.userData || self._userData);
       self._parseBandwidthSettings(mediaOptions.bandwidth);
 
-      // wait for local mediastream 
+      // wait for local mediastream
       self._waitForLocalMediaStream(callback, mediaOptions);
-    }, function() {    // open channel first if it&#x27;s not opened
-         
-      if (!self._channelOpen) {    
-        self._openChannel();   
-      }   
-      return self._channelOpen;  
-    }, function(state) {   
-      return true;  
-    }); 
-  }, function() {  
-    return self._readyState === self.READY_STATE_CHANGE.COMPLETED; 
+    }, function() { // open channel first if it&#x27;s not opened
+
+      if (!self._channelOpen) {
+        self._openChannel();
+      }
+      return self._channelOpen;
+    }, function(state) {
+      return true;
+    });
+  }, function() {
+    return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
   });
 
 };
@@ -816,10 +835,20 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
     }
     return;
   }
-  for (var pc_index in self._peerConnections) {
-    if (self._peerConnections.hasOwnProperty(pc_index)) {
-      self._removePeer(pc_index);
+
+  // NOTE: ENTER/WELCOME made but no peerconnection...
+  // which may result in peerLeft not triggered..
+  // WHY? but to ensure clear all
+  var peers = Object.keys(self._peerInformations);
+  var conns = Object.keys(self._peerConnections);
+  var i;
+  for (i = 0; i &lt; conns.length; i++) {
+    if (peers.indexOf(conns[i]) === -1) {
+      peers.push(conns[i]);
     }
+  }
+  for (i = 0; i &lt; peers.length; i++) {
+    self._removePeer(peers[i]);
   }
   self._inRoom = false;
   self._closeChannel();
@@ -865,6 +894,7 @@ Skylink.prototype.lockRoom = function() {
     rid: this._room.id,
     lock: true
   });
+  this._roomLocked = true;
   this._trigger(&#x27;roomLock&#x27;, true, this._user.sid,
     this.getPeerInfo(), true);
 };
@@ -888,6 +918,7 @@ Skylink.prototype.unlockRoom = function() {
     rid: this._room.id,
     lock: false
   });
+  this._roomLocked = false;
   this._trigger(&#x27;roomLock&#x27;, false, this._user.sid,
     this.getPeerInfo(), true);
 };

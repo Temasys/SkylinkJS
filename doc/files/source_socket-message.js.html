@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.3</title>
+    <title>SkylinkJS 0.6.4</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.3</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.4</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -1376,6 +1376,23 @@ Skylink.prototype._candidateHandler = function(message) {
     // we might keep a buffer of candidates to replay after receiving an offer.
     this._addIceCandidateToQueue(targetMid, candidate);
   }
+
+  if (!this._addedCandidates[targetMid]) {
+    this._addedCandidates[targetMid] = {
+      relay: [],
+      host: [],
+      srflx: []
+    };
+  }
+
+  // shouldnt happen but just incase
+  if (!this._addedCandidates[targetMid][canType]) {
+    this._addedCandidates[targetMid][canType] = [];
+  }
+
+  this._addedCandidates[targetMid][canType].push(&#x27;remote:&#x27; + messageCan[4] +
+    (messageCan[5] !== &#x27;0&#x27; ? &#x27;:&#x27; + messageCan[5] : &#x27;&#x27;) +
+    (messageCan[2] ? &#x27;?transport=&#x27; + messageCan[2].toLowerCase() : &#x27;&#x27;));
 };
 
 /**

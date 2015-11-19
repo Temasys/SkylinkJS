@@ -4,8 +4,8 @@
 
 // Dependencies
 var exports = require('../config.js');
-var sw = new Skylink();
-
+var test    = require('tape');
+var sw      = new Skylink();
 
 console.log('API: Tests the all the callbacks in functions');
 console.log('===============================================================================================');
@@ -14,7 +14,10 @@ console.log('===================================================================
 test('sendStream() - callback: Testing success callback', function(t){
   t.plan(18);
 
-  var stream_callback = function(error, success, hasNoVideo){
+  var hasEnded = false;
+  var hasJoinedRoom = false;
+
+  var stream_callback = function(error, success, hasNoVideo, end){
     t.deepEqual([error, typeof success],
       [null, 'object'], 'Callback returns a success instead of error');
 
@@ -48,6 +51,8 @@ test('sendStream() - callback: Testing success callback', function(t){
         t.pass('Callback success.getVideoTracks()[0].enabled fails');
       }
     }
+
+    hasEnded = end;
   };
 
   var test1 = function () {
@@ -66,7 +71,7 @@ test('sendStream() - callback: Testing success callback', function(t){
 
     getUserMedia({ audio: true, video: false }, function (stream) {
       sw.sendStream(stream, function (error, success) {
-        stream_callback(error, success, true);
+        stream_callback(error, success, true, true);
       });
     }, function (error) {
       console.error('Failed getting user media for sendStream() - success callback Test 2', error);
@@ -84,6 +89,7 @@ test('sendStream() - callback: Testing success callback', function(t){
           console.log('ERROR: Failed joining room for sendStream() - success callback tests');
           console.error('sendStream() - success callback: Joining room error', jRError);
         } else {
+          hasJoinedRoom = true;
           test1();
         }
       });
@@ -91,22 +97,30 @@ test('sendStream() - callback: Testing success callback', function(t){
   });
 
   setTimeout(function () {
-    sw.leaveRoom(function (lRError, lRSuccess) {
-      if (lRError) {
-        console.log('ERROR: Failed leaving the room for sendStream() - success callback tests');
-        console.error('sendStream() - success callback: Leave room error', lRError);
-      }
-      t.end();
-    });
+    if (!hasEnded) {
+      if (hasJoinedRoom) {
+        sw.leaveRoom(function (lRError, lRSuccess) {
+          if (lRError) {
+            console.log('ERROR: Failed leaving the room for sendStream() - success callback tests');
+            console.error('sendStream() - success callback: Leave room error', lRError);
+          }
+          t.end();
+        });
+      } else t.end();
+    }
   }, 18000);
 });
 
 test('sendStream() - callback: Testing failure callback', function(t){
   t.plan(2);
 
-  var stream_callback = function(error, success){
+  var hasEnded = false;
+  var hasJoinedRoom = false;
+
+  var stream_callback = function(error, success, end){
     t.deepEqual([typeof error, success], ['object', null],
       'Callback returns an error instead of success')
+    hasEnded = end;
   };
 
   var test1 = function () {
@@ -119,7 +133,9 @@ test('sendStream() - callback: Testing failure callback', function(t){
 
   var test2 = function () {
     console.log('Testing scenario 2: Sending null');
-    sw.sendStream(null, stream_callback);
+    sw.sendStream(null, function (error, success) {
+      stream_callback(error, success, true)
+    });
   };
 
   sw.init(apikey,function(initError, initSuccess){
@@ -132,6 +148,7 @@ test('sendStream() - callback: Testing failure callback', function(t){
           console.log('ERROR: Failed joining room for sendStream() - failure callback tests');
           console.error('sendStream() - failure callback: Joining room error', jRError);
         } else {
+          hasJoinedRoom = true;
           test1();
         }
       });
@@ -139,20 +156,26 @@ test('sendStream() - callback: Testing failure callback', function(t){
   });
 
   setTimeout(function () {
-    sw.leaveRoom(function (lRError, lRSuccess) {
-      if (lRError) {
-        console.log('ERROR: Failed leaving the room for sendStream() - failure callback tests');
-        console.error('sendStream() - failure callback: Leave room error', lRError);
-      }
-      t.end();
-    });
+    if (!hasEnded) {
+      if (hasJoinedRoom) {
+        sw.leaveRoom(function (lRError, lRSuccess) {
+          if (lRError) {
+            console.log('ERROR: Failed leaving the room for sendStream() - failure callback tests');
+            console.error('sendStream() - failure callback: Leave room error', lRError);
+          }
+          t.end();
+        });
+      } else t.end();
+    }
   }, 9000);
 });
 
 test('getUserMedia() - callback: Testing success callback', function(t){
   t.plan(15);
 
-  var media_callback = function(error,success){
+  var hasEnded = false;
+
+  var media_callback = function(error,success,end){
     t.deepEqual([error, typeof success],
       [null, 'object'], 'Callback returns a success instead of error');
     t.deepEqual(typeof success.getAudioTracks, 'function',
@@ -163,6 +186,7 @@ test('getUserMedia() - callback: Testing success callback', function(t){
       'Callback success.getAudioTracks() returns an array');
     t.deepEqual(Array.isArray(success.getVideoTracks()), true,
       'Callback success.getAudioTracks() returns an array');
+    hasEnded = end;
   };
 
   var test1 = function () {
@@ -189,22 +213,27 @@ test('getUserMedia() - callback: Testing success callback', function(t){
 
   var test3 = function () {
     console.log('Testing scenario 3: Constraints not provided');
-    sw.getUserMedia(media_callback);
+    sw.getUserMedia(function (error, success) {
+      media_callback(error, success, true);
+    });
   };
 
   test1();
 
   setTimeout(function () {
-    t.end();
+    if (!hasEnded) t.end();
   }, 5000);
 });
 
 test('getUserMedia() - callback: Testing failure callback', function(t){
   t.plan(3);
 
-  var media_callback = function(error,success){
+  var hasEnded = false;
+
+  var media_callback = function(error,success,end){
     t.deepEqual([typeof error, success],
       ['object', null], 'Callback returns an error instead of success');
+    hasEnded = end;
   };
 
   var test1 = function () {
@@ -228,20 +257,24 @@ test('getUserMedia() - callback: Testing failure callback', function(t){
     sw.getUserMedia({
       audio: false,
       video: false
-    }, media_callback);
+    }, function (error, success) {
+      media_callback(error, success, true)
+    });
   };
 
   test1();
 
   setTimeout(function () {
-    t.end();
+    if (!hasEnded) t.end();
   }, 5000);
 });
 
 test('init() - callback: Testing success callback', function(t){
-  t.plan(46);
+  t.plan(44);
 
-  var init_callback = function(error, success, options){
+  var hasEnded = false;
+
+  var init_callback = function(error, success, options, end){
     t.deepEqual([error, typeof success],
       [null, 'object'], 'Callback returns a success instead of error');
 
@@ -297,6 +330,7 @@ test('init() - callback: Testing success callback', function(t){
       t.deepEqual(success.appKey, options,
         'Callback success.appKey returned matches the apiKey provided');
     }
+    hasEnded = end;
   };
 
   var test1 = function () {
@@ -317,21 +351,23 @@ test('init() - callback: Testing success callback', function(t){
     };
 
     sw.init(options, function (error, success) {
-      init_callback(error, success, options);
+      init_callback(error, success, options, true);
     });
   };
 
   test1();
 
   setTimeout(function () {
-    t.end();
+    if (!hasEnded) t.end();
   }, 18000);
 });
 
 test('init() - callback: Testing failure callback', function(t){
   t.plan(15);
 
-  var init_callback = function(error, success){
+  var hasEnded = false;
+
+  var init_callback = function(error, success, end){
     console.log(JSON.stringify(error));
     t.deepEqual([typeof error, success],
       ['object', null], 'Callback returns an error instead of success');
@@ -340,6 +376,7 @@ test('init() - callback: Testing failure callback', function(t){
       'Callback error.error returns an object');
     t.deepEqual(typeof error.errorCode, 'number',
       'Callback error.errorCode returns a number');
+    hasEnded = end;
   };
 
   var test1 = function () {
@@ -402,24 +439,29 @@ test('init() - callback: Testing failure callback', function(t){
     console.log('Testing scenario 5: ApiKey is not provided');
 
     sw.init({}, function (error, success) {
-      init_callback(error, success);
+      init_callback(error, success, true);
     });
   };
 
   test1();
 
-  /*setTimeout(function () {
-    t.end();
-  }, 18000);*/
+  setTimeout(function () {
+    if (!hasEnded) t.end();
+  }, 18000);
 });
 
 test('sendBlobData() - callback: Testing success callback', function(t){
   t.plan(14);
 
+  var hasEnded = false;
+  var hasJoinedRoom = false;
+
+  sw.setLogLevel(4);
+
   var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
   data.name = 'accept';
   var targetPeer = null;
-  var file_callback = function(error, success){
+  var file_callback = function(error, success,end){
     t.deepEqual([error, typeof success], [null, 'object'],
       'Callback returns an success instead of error');
     t.deepEqual(typeof success.transferId, 'string',
@@ -448,6 +490,7 @@ test('sendBlobData() - callback: Testing success callback', function(t){
       t.deepEqual(success.peerId, null,
         'Callback success.peerId returns null for non-single peer');
     }
+    hasEnded = end;
   };
 
   var test1 = function () {
@@ -462,7 +505,9 @@ test('sendBlobData() - callback: Testing success callback', function(t){
   var test2 = function () {
     console.log('Testing scenario 2: Normal file sending - ' +
       'single targeted peer "' + targetPeer + '"');
-    sw.sendBlobData(data, targetPeer, file_callback);
+    sw.sendBlobData(data, targetPeer, function (error, success) {
+      file_callback(error, success, true)
+    });
   }
 
   sw.on('dataChannelState', function (state, peerId, error, name, type) {
@@ -482,30 +527,43 @@ test('sendBlobData() - callback: Testing success callback', function(t){
         if (jRError) {
           console.log('ERROR: Failed joining room for sendBlobData() - success callback tests');
           console.error('sendBlobData() - success callback: Joining room error', jRError);
-        }
+        } else hasJoinedRoom = true;
       });
     }
   });
 
   setTimeout(function () {
-    sw.leaveRoom(function (lRError, lRSuccess) {
-      if (lRError) {
-        console.log('ERROR: Failed leaving the room for sendBlobData() - success callback tests');
-        console.error('sendBlobData() - success callback: Leave room error', lRError);
-      }
-      t.end();
-    });
-  }, 12000);
+    if (!hasEnded) {
+      if (hasJoinedRoom) {
+        sw.leaveRoom(function (lRError, lRSuccess) {
+          if (lRError) {
+            console.log('ERROR: Failed leaving the room for sendBlobData() - success callback tests');
+            console.error('sendBlobData() - success callback: Leave room error', lRError);
+          }
+        });
+        sw.once('dataChannelState', function () {
+          sw._EVENTS.dataChannelState = [];
+          t.end();
+        }, function (state, peerId, error, name, type) {
+          return state === sw.DATA_CHANNEL_STATE.CLOSED &&
+            type === sw.DATA_CHANNEL_TYPE.MESSAGING;
+        });
+      } else t.end();
+    }
+  }, 25000);
 });
 
 test('sendBlobData() - callback: Testing failure callback', function(t){
   t.plan(40);
 
+  var hasEnded = false;
+  var hasJoinedRoom = false;
+
   var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
   data.name = 'reject';
   var targetPeer = null;
   var displayCloseChannel = true;
-  var file_callback = function(error, success){
+  var file_callback = function(error, success,end){
     t.deepEqual([typeof error, success], ['object', null],
       'Callback returns an error instead of success');
     t.deepEqual(typeof error.transferId, 'string',
@@ -542,6 +600,7 @@ test('sendBlobData() - callback: Testing failure callback', function(t){
       t.deepEqual(error.peerId, null,
         'Callback error.peerId returns null for non-single peer');
     }
+    hasEnded = end;
   };
 
   // scenario 1: provided data is not a blob
@@ -582,7 +641,9 @@ test('sendBlobData() - callback: Testing failure callback', function(t){
   var test4 = function () {
     console.log('Testing scenario 4: Peer rejected file - ' +
       'single targeted peer "' + targetPeer + '"');
-    sw.sendBlobData(data, targetPeer, file_callback);
+    sw.sendBlobData(data, targetPeer, function (error, success) {
+      file_callback(error, success, true);
+    });
   };
 
   sw.on('dataChannelState', function (state, peerId, error, name, type) {
@@ -608,30 +669,42 @@ test('sendBlobData() - callback: Testing failure callback', function(t){
         if (jRError) {
           console.log('ERROR: Failed joining room for sendBlobData() - failure callback tests');
           console.error('sendBlobData() - failure callback: Joining room error', jRError);
-        }
+        } else hasJoinedRoom = true;
       });
     }
   });
 
   setTimeout(function () {
-    sw.leaveRoom(function (lRError, lRSuccess) {
-      if (lRError) {
-        console.log('ERROR: Failed leaving the room for sendBlobData() - failure callback tests');
-        console.error('sendBlobData() - failure callback: Leave room error', lRError);
-      }
-      sw._EVENTS.dataChannelState = [];
-      t.end();
-    });
-  }, 25000);
+    if (!hasEnded) {
+      if (hasJoinedRoom) {
+        sw.leaveRoom(function (lRError, lRSuccess) {
+          if (lRError) {
+            console.log('ERROR: Failed leaving the room for sendBlobData() - failure callback tests');
+            console.error('sendBlobData() - failure callback: Leave room error', lRError);
+          }
+        });
+        sw.once('dataChannelState', function () {
+          sw._EVENTS.dataChannelState = [];
+          t.end();
+        }, function (state, peerId, error, name, type) {
+          return state === sw.DATA_CHANNEL_STATE.CLOSED &&
+            type === sw.DATA_CHANNEL_TYPE.MESSAGING;
+        });
+      } else t.end();
+    }
+  }, 45000);
 });
 
 test('sendURLData() - callback: Testing success callback', function(t){
   t.plan(14);
 
+  var hasEnded = false;
+  var hasJoinedRoom = false;
+
   // accept - 77
   var data = 'data:image/77;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
   var targetPeer = null;
-  var file_callback = function(error, success){
+  var file_callback = function(error, success,end){
     t.deepEqual([error, typeof success], [null, 'object'],
       'Callback returns an success instead of error');
     t.deepEqual(typeof success.transferId, 'string',
@@ -660,6 +733,7 @@ test('sendURLData() - callback: Testing success callback', function(t){
       t.deepEqual(success.peerId, null,
         'Callback success.peerId returns null for non-single peer');
     }
+    hasEnded = end;
   };
 
   var test1 = function () {
@@ -674,7 +748,9 @@ test('sendURLData() - callback: Testing success callback', function(t){
   var test2 = function () {
     console.log('Testing scenario 2: Normal dataURL sending - ' +
       'single targeted peer "' + targetPeer + '"');
-    sw.sendURLData(data, targetPeer, file_callback);
+    sw.sendURLData(data, targetPeer, function (error, success) {
+      file_callback(error, success, true);
+    });
   }
 
   sw.on('dataChannelState', function (state, peerId, error, name, type) {
@@ -694,30 +770,43 @@ test('sendURLData() - callback: Testing success callback', function(t){
         if (jRError) {
           console.log('ERROR: Failed joining room for sendURLData() - success callback tests');
           console.error('sendURLData() - success callback: Joining room error', jRError);
-        }
+        } else hasJoinedRoom = true;
       });
     }
   });
 
   var testEnd = setTimeout(function () {
-    sw.leaveRoom(function (lRError, lRSuccess) {
-      if (lRError) {
-        console.log('ERROR: Failed leaving the room for sendURLData() - success callback tests');
-        console.error('sendURLData() - success callback: Leave room error', lRError);
-      }
-      t.end();
-    });
-  }, 12000);
+    if (!hasEnded) {
+      if (hasJoinedRoom) {
+        sw.leaveRoom(function (lRError, lRSuccess) {
+          if (lRError) {
+            console.log('ERROR: Failed leaving the room for sendURLData() - success callback tests');
+            console.error('sendURLData() - success callback: Leave room error', lRError);
+          }
+        });
+        sw.once('dataChannelState', function () {
+          sw._EVENTS.dataChannelState = [];
+          t.end();
+        }, function (state, peerId, error, name, type) {
+          return state === sw.DATA_CHANNEL_STATE.CLOSED &&
+            type === sw.DATA_CHANNEL_TYPE.MESSAGING;
+        });
+      } else t.end();
+    }
+  }, 25000);
 });
 
 test('sendURLData() - callback: Testing failure callback', function(t){
   t.plan(40);
 
+  var hasEnded = false;
+  var hasJoinedRoom = false;
+
   // reject - 78
   var data = 'data:image/078;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
   var targetPeer = null;
   var displayCloseChannel = true;
-  var file_callback = function(error, success){
+  var file_callback = function(error, success,end){
     t.deepEqual([typeof error, success], ['object', null],
       'Callback returns an error instead of success');
     t.deepEqual(typeof error.transferId, 'string',
@@ -754,6 +843,7 @@ test('sendURLData() - callback: Testing failure callback', function(t){
       t.deepEqual(error.peerId, null,
         'Callback error.peerId returns null for non-single peer');
     }
+    hasEnded = end;
   };
 
   // scenario 1: provided data is not a blob
@@ -794,7 +884,9 @@ test('sendURLData() - callback: Testing failure callback', function(t){
   var test4 = function () {
     console.log('Testing scenario 4: Peer rejected dataURL - ' +
       'single targeted peer "' + targetPeer + '"');
-    sw.sendURLData(data, targetPeer, file_callback);
+    sw.sendURLData(data, targetPeer, function (error, success) {
+      file_callback(error, success, true);
+    });
   };
 
   sw.on('dataChannelState', function (state, peerId, error, name, type) {
@@ -820,26 +912,36 @@ test('sendURLData() - callback: Testing failure callback', function(t){
       if (jRError) {
         console.log('ERROR: Failed joining room for sendURLData() - failure callback tests');
         console.error('sendURLData() - failure callback: Joining room error', jRError);
-      }
+      } else hasJoinedRoom = true;
     });
   });
 
   setTimeout(function () {
-    sw.leaveRoom(function (lRError, lRSuccess) {
-      if (lRError) {
-        console.log('ERROR: Failed leaving the room for sendURLData() - failure callback tests');
-        console.error('sendURLData() - failure callback: Leave room error', lRError);
-      }
-      sw._EVENTS.dataChannelState = [];
-      t.end();
-    });
-  }, 25000);
+    if (!hasEnded) {
+      if (hasJoinedRoom) {
+        sw.leaveRoom(function (lRError, lRSuccess) {
+          if (lRError) {
+            console.log('ERROR: Failed leaving the room for sendURLData() - failure callback tests');
+            console.error('sendURLData() - failure callback: Leave room error', lRError);
+          }
+        });
+        sw.once('dataChannelState', function () {
+          sw._EVENTS.dataChannelState = [];
+          t.end();
+        }, function (state, peerId, error, name, type) {
+          return state === sw.DATA_CHANNEL_STATE.CLOSED &&
+            type === sw.DATA_CHANNEL_TYPE.MESSAGING;
+        });
+      } else t.end();
+    }
+  }, 45000);
 });
 
 test('joinRoom() - callback: Testing success callback', function(t){
   t.plan(20);
   var roomName;
-  var join_callback = function(error, success, roomName){
+  var hasEnded = false;
+  var join_callback = function(error, success, roomName,end){
     t.deepEqual([error, typeof success],
       [null, 'object'], 'Callback returns a success instead of error');
     t.deepEqual(typeof success.room,
@@ -850,6 +952,7 @@ test('joinRoom() - callback: Testing success callback', function(t){
       'string', 'Callback success.peerId returns a string');
     t.deepEqual(typeof success.peerInfo,
       'object', 'Callback success.peerInfo returns an object');
+    hasEnded = end;
   };
 
   var test1 = function () {
@@ -893,7 +996,7 @@ test('joinRoom() - callback: Testing success callback', function(t){
       audio: true,
       video: true
     }, function (error, success) {
-      join_callback(error, success, sw._defaultRoom);
+      join_callback(error, success, sw._defaultRoom, true);
     });
   };
 
@@ -907,14 +1010,15 @@ test('joinRoom() - callback: Testing success callback', function(t){
   });
 
   setTimeout(function () {
-    t.end();
+    if (!hasEnded) t.end();
   }, 18000);
 });
 
 test('joinRoom() - callback: Testing failure callback', function(t){
   t.plan(20);
+  var hasEnded = false;
   var roomName;
-  var join_callback = function(error, success, roomName){
+  var join_callback = function(error, success, roomName,end){
     t.deepEqual([typeof error, success],
       ['object', null], 'Callback returns an error instead of success');
     t.deepEqual(typeof error.room,
@@ -925,6 +1029,7 @@ test('joinRoom() - callback: Testing failure callback', function(t){
       'number', 'Callback error.errorCode returns a number');
     t.deepEqual(typeof error.error,
       'object', 'Callback error.error returns an object');
+    hasEnded = end;
   };
 
   var test1 = function () {
@@ -963,21 +1068,22 @@ test('joinRoom() - callback: Testing failure callback', function(t){
       audio: true,
       video: true
     }, function (error, success) {
-      join_callback(error, success, sw._defaultRoom);
+      join_callback(error, success, sw._defaultRoom, true);
     });
   };
 
   test1();
 
   setTimeout(function () {
-    t.end();
+    if (!hasEnded) t.end();
   }, 18000);
 });
 
 test('leaveRoom() - callback: Testing success callback', function(t){
   t.plan(28);
   var roomName;
-  var leave_callback = function(error, success, roomName, noMedia){
+  var hasEnded = false;
+  var leave_callback = function(error, success, roomName, noMedia,end){
     t.deepEqual([error, typeof success],
       [null, 'object'], 'Callback returns a success instead of error');
     t.deepEqual(typeof success.peerId,
@@ -986,6 +1092,7 @@ test('leaveRoom() - callback: Testing success callback', function(t){
       'string', 'Callback success.previousRoom returns a string');
     t.deepEqual(success.previousRoom,
       roomName, 'Callback success.previousRoom equals the expected roomname');
+    hasEnded = end;
   };
 
   var test1 = function () {
@@ -1089,15 +1196,16 @@ test('leaveRoom() - callback: Testing success callback', function(t){
 
     sw.joinRoom(roomName, function(jRError, jRSuccess) {
       if (jRError) {
-        sw.leaveRoom(true, function(error, success){
-          leave_callback(error, success, roomName, true);
-          test7();
-        });
-      } else {
+        console.info('test', jRError, jRSuccess);
         console.log('ERROR: Failed joining room for leaveRoom() - success callback test 6');
         console.error('leaveRoom() - success callback (test6): Joining room error', jRError);
         t.fail('Failed joining room for Test 6');
         test7();
+      } else {
+        sw.leaveRoom(true, function(error, success){
+          leave_callback(error, success, roomName, true);
+          test7();
+        });
       }
     });
   };
@@ -1109,13 +1217,13 @@ test('leaveRoom() - callback: Testing success callback', function(t){
 
     sw.joinRoom(roomName, function(jRError, jRSuccess) {
       if (jRError) {
-        sw.leaveRoom({}, function(error, success){
-          leave_callback(error, success, roomName, true);
-        });
-      } else {
         console.log('ERROR: Failed joining room for leaveRoom() - success callback test 7');
         console.error('leaveRoom() - success callback (test7): Joining room error', jRError);
         t.fail('Failed joining room for Test 7');
+      } else {
+        sw.leaveRoom({}, function(error, success){
+          leave_callback(error, success, roomName, true, true);
+        });
       }
     });
   };
@@ -1130,15 +1238,17 @@ test('leaveRoom() - callback: Testing success callback', function(t){
   });
 
   setTimeout(function () {
-    t.end();
+    if (!hasEnded) t.end();
   }, 28000);
 });
 
 test('leaveRoom() - callback: Testing failure callback', function(t){
   t.plan(3);
-  var leave_callback = function(error, success){
+  var hasEnded = false;
+  var leave_callback = function(error, success,end){
     t.deepEqual([typeof error, success],
       ['object', null], 'Callback returns an error instead of success');
+    hasEnded = end;
   };
 
   var test1 = function () {
@@ -1164,7 +1274,7 @@ test('leaveRoom() - callback: Testing failure callback', function(t){
 
     sw._inRoom = false;
     sw.leaveRoom(function(error, success){
-      leave_callback(error, success);
+      leave_callback(error, success, true);
     });
   };
 
@@ -1178,19 +1288,22 @@ test('leaveRoom() - callback: Testing failure callback', function(t){
   });
 
   setTimeout(function () {
-    if (sw._socket !== null) {
-      sw._inRoom = true;
+    if (!hasEnded) {
+      if (sw._socket !== null) {
+        sw._inRoom = true;
+      }
+      t.end();
     }
-    t.end();
   }, 8000);
 });
 
 test('refreshConnection() - callback: Testing success callback', function(t){
   t.plan(12);
 
+  var hasEnded = false;
   var targetPeer = null;
   var targetPeerId = null;
-  var refresh_callback = function(error, success, targetPeerList){
+  var refresh_callback = function(error, success, targetPeerList,end){
     t.deepEqual([error, typeof success], [null, 'object'],
       'Callback returns a success instead of error');
     t.deepEqual(typeof success.listOfPeers, 'object',
@@ -1205,6 +1318,7 @@ test('refreshConnection() - callback: Testing success callback', function(t){
       t.deepEqual(success.listOfPeers, targetPeerList,
         'Callback success.listOfPeers returns the correct list of peers (array)');
     }
+    hasEnded = end;
   };
 
   var test1 = function () {
@@ -1234,7 +1348,7 @@ test('refreshConnection() - callback: Testing success callback', function(t){
     targetPeer = targetPeerId;
 
     sw.refreshConnection(targetPeer, function (error, success) {
-      refresh_callback(error, success, targetPeer);
+      refresh_callback(error, success, targetPeer, true);
     });
   };
 
@@ -1268,15 +1382,16 @@ test('refreshConnection() - callback: Testing success callback', function(t){
   });
 
   setTimeout(function () {
-    t.end();
+    if (!hasEnded) t.end();
   }, 28000);
 });
 
 test('refreshConnection() - callback: Testing failure callback', function(t){
   t.plan(18);
 
+  var hasEnded = false;
   var targetPeer = null;
-  var refresh_callback = function(error, success, targetPeerList){
+  var refresh_callback = function(error, success, targetPeerList,end){
     t.deepEqual([typeof error, success], ['object', null],
       'Callback returns an error instead of success');
     t.deepEqual(typeof error.listOfPeers, 'object',
@@ -1298,6 +1413,7 @@ test('refreshConnection() - callback: Testing failure callback', function(t){
       t.deepEqual(Object.keys(error.refreshErrors), ['self'],
         'Callback error.refreshErrors returns the correct list of peers (undefined)');
     }
+    hasEnded = end;
   };
 
   var test1 = function () {
@@ -1327,7 +1443,7 @@ test('refreshConnection() - callback: Testing failure callback', function(t){
 
     targetPeer = ['xxxxxxxx'];
     sw.refreshConnection(targetPeer, function (error, success) {
-      refresh_callback(error, success, targetPeer);
+      refresh_callback(error, success, targetPeer, true);
     });
   };
 
@@ -1341,7 +1457,7 @@ test('refreshConnection() - callback: Testing failure callback', function(t){
   });
 
   setTimeout(function () {
-    t.end();
+    if (!hasEnded) t.end();
   }, 20000);
 });
 

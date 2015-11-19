@@ -13,7 +13,7 @@ var _peerId = null;
 
 var selectedPeers = [];
 
-Demo.Skylink.setLogLevel(4);
+//Demo.Skylink.setLogLevel(4);
 
 
 Demo.Methods.displayFileItemHTML = function (content) {
@@ -257,7 +257,7 @@ Demo.Skylink.on('mediaAccessSuccess', function (stream){
 });
 //---------------------------------------------------
 Demo.Skylink.on('mediaAccessError', function (error){
-  alert((typeof error === 'object') ? error.message : error);
+  //alert((typeof error === 'object') ? error.message : error);
   Demo.Methods.displayChatMessage('System', 'Failed to join room as video and audio stream is required.');
 });
 //---------------------------------------------------
@@ -433,7 +433,7 @@ Demo.Skylink.on('channelError', function (error) {
 });
 //---------------------------------------------------
 Demo.Skylink.on('mediaAccessError', function (error) {
-  alert((error.message || error));
+  //alert((error.message || error));
 });
 
 Demo.Skylink.on('serverPeerJoined', function (serverPeerId, serverPeerType) {
@@ -454,6 +454,10 @@ Demo.Skylink.on('peerLeft', function (peerId, peerInfo, isSelf) {
 
 Demo.Skylink.on('peerRestart', function (peerId, peerInfo, isSelf) {
   console.info('peerRestart', peerId, peerInfo, isSelf);
+});
+
+Demo.Skylink.on('incomingStream', function (peerId, peerInfo, isSelf) {
+  console.info('incomingStream', peerId, peerInfo, isSelf);
 });
 
 Demo.Skylink.on('serverPeerRestart', function (serverPeerId, serverPeerType) {
@@ -655,3 +659,31 @@ $(document).ready(function () {
     selectedPeers = [];
   })
 });
+
+
+/*(function(){
+
+  var data = {};
+  //window.candidatesCounter = {};
+
+  Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
+    data[peerId] = peerInfo;
+  });
+
+  Demo.Skylink.on('channelMessage', function (message, isSelf) {
+    //console.log('messaging', message, isSelf);
+  });
+
+  Demo.Skylink.on('peerJoined', function (peerId) {
+    //candidatesCounter[peerId] = [];
+  });
+
+  Demo.Skylink.on('iceConnectionState', function (state, peerId) {
+    if (state === 'completed') {
+      //setTimeout(function () {
+        Demo.Skylink._restartPeerConnection(peerId, true, false, null, true);
+      //}, 500);
+    }
+  });
+
+})();*/

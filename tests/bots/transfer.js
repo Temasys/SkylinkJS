@@ -3,7 +3,8 @@
 'use strict';
 
 var exports = require('../config.js');
-var sw = new Skylink();
+var test    = require('tape');
+var sw      = new Skylink();
 
 
 // the data expected to receive
@@ -26,7 +27,14 @@ var expectedTransfersSizes = {};
 
 console.log('BOT Transfer intiailized');
 
+sw.on('incomingMessage', function (message, peerId) {
+  if (message.content.action === 'RECEIVE-BLOB') {
+    sw.acceptDataTransfer(peerId,
+      sw._user.sid + '-' + message.content.transferId + sw._TRANSFER_DELIMITER + 'test', true);
+  }
 
+});
+/*
 sw.on('incomingMessage', function (message, peerId) {
 	if (message.content === 'RECEIVE-BLOB') {
 
@@ -100,10 +108,10 @@ sw.on('dataTransferState', function (state, transferId, peerId, transferInfo) {
 
     console.log('Sending "CANCEL-BLOB" to "' + peerId + '"', transferId);
   }
+});*/
+
+sw.init(apikey, function () {
+  sw.joinRoom();
 });
-
-sw.init(apikey);
-
-sw.joinRoom();
 
 })();
