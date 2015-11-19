@@ -106,14 +106,14 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
   API_CREDENTIALS_NOT_MATCH: 4005,
   API_INVALID_PARENT_KEY: 4006,
   API_NO_MEETING_RECORD_FOUND: 4010,
-  ROOM_LOCKED: 5001,
+  //ROOM_LOCKED: 5001,
   XML_HTTP_REQUEST_ERROR: -1,
   NO_SOCKET_IO: 1,
   NO_XMLHTTPREQUEST_SUPPORT: 2,
   NO_WEBRTC_SUPPORT: 3,
   NO_PATH: 4,
-  INVALID_XMLHTTPREQUEST_STATUS: 5,
-  SCRIPT_ERROR: 6,
+  //INVALID_XMLHTTPREQUEST_STATUS: 5,
+  //SCRIPT_ERROR: 6,
   ADAPTER_NO_LOADED: 7
 };
 
@@ -1119,15 +1119,18 @@ Skylink.prototype.init = function(options, callback) {
     // set the api key
     appKey = options.appKey || options.apiKey;
     // set the room server
-    roomServer = options.roomServer || roomServer;
+    roomServer = (typeof options.roomServer === 'string') ?
+      options.roomServer : roomServer;
     // check room server if it ends with /. Remove the extra /
     roomServer = (roomServer.lastIndexOf('/') ===
       (roomServer.length - 1)) ? roomServer.substring(0,
       roomServer.length - 1) : roomServer;
     // set the region
-    region = options.region || region;
+    region = (typeof options.region === 'string') ?
+      options.region : region;
     // set the default room
-    defaultRoom = options.defaultRoom || appKey;
+    defaultRoom = (typeof options.defaultRoom === 'string') ?
+      options.defaultRoom : appKey;
     // set the selected room
     room = defaultRoom;
     // set ice trickle option
@@ -1183,12 +1186,14 @@ Skylink.prototype.init = function(options, callback) {
     audioFallback = options.audioFallback || audioFallback;
     // Custom default meeting timing and duration
     // Fallback to default if no duration or startDateTime provided
-    if (options.credentials) {
+    if (options.credentials &&
+      typeof options.credentials.credentials === 'string' &&
+      typeof options.credentials.duration === 'number' &&
+      typeof options.credentials.startDateTime === 'string') {
       // set start data time
-      startDateTime = options.credentials.startDateTime ||
-        (new Date()).toISOString();
+      startDateTime = options.credentials.startDateTime;
       // set the duration
-      duration = options.credentials.duration || 200;
+      duration = options.credentials.duration;
       // set the credentials
       credentials = options.credentials.credentials;
     }
@@ -1207,7 +1212,7 @@ Skylink.prototype.init = function(options, callback) {
   self._serverRegion = region || null;
   self._path = roomServer + '/api/' + appKey + '/' + room;
   // set credentials if there is
-  if (credentials) {
+  if (credentials && startDateTime && duration) {
     self._roomStart = startDateTime;
     self._roomDuration = duration;
     self._roomCredentials = credentials;

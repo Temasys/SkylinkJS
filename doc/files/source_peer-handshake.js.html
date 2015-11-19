@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.3</title>
+    <title>SkylinkJS 0.6.4</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.3</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.4</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -291,6 +291,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
     if (window.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp;
       window.navigator.platform.indexOf(&#x27;Win&#x27;) === 0 &amp;&amp;
       peerBrowser.agent !== &#x27;firefox&#x27; &amp;&amp;
+      peerBrowser.agent !== &#x27;MCU&#x27; &amp;&amp;
       peerBrowser.os.indexOf(&#x27;Mac&#x27;) === 0) {
       beOfferer = false;
     }
@@ -406,7 +407,29 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
 
   self._peerConnectionHealthTimers[peerId] = setTimeout(function () {
     // re-handshaking should start here.
-    if (!self._peerConnectionHealth[peerId]) {
+    var connectionStable = false;
+    var pc = self._peerConnections[peerId];
+
+    if (pc) {
+      var dc = (self._dataChannels[peerId] || {}).main;
+
+      var dcConnected = pc.hasMainChannel ? dc &amp;&amp; dc.readyState === self.DATA_CHANNEL_STATE.OPEN : true;
+      var iceConnected = pc.iceConnectionState === self.ICE_CONNECTION_STATE.CONNECTED ||
+        pc.iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED;
+      var signalingConnected = pc.signalingState === self.PEER_CONNECTION_STATE.STABLE;
+
+      connectionStable = dcConnected &amp;&amp; iceConnected &amp;&amp; signalingConnected;
+
+      log.debug([peerId, &#x27;PeerConnectionHealth&#x27;, null, &#x27;Connection status&#x27;], {
+        dcConnected: dcConnected,
+        iceConnected: iceConnected,
+        signalingConnected: signalingConnected
+      });
+    }
+
+    log.debug([peerId, &#x27;PeerConnectionHealth&#x27;, null, &#x27;Require reconnection?&#x27;], connectionStable);
+
+    if (!connectionStable) {
       log.warn([peerId, &#x27;PeerConnectionHealth&#x27;, null, &#x27;Peer\&#x27;s health timer &#x27; +
       &#x27;has expired&#x27;], 10000);
 
@@ -428,6 +451,8 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
       } else {
         self._restartMCUConnection();
       }
+    } else {
+      self._peerConnectionHealth[peerId] = true;
     }
   }, timer);
 };
@@ -479,6 +504,12 @@ Skylink.prototype._stopPeerConnectionHealthCheck = function (peerId) {
 Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
   var self = this;
   var pc = self._peerConnections[targetMid];
+
+  if (!sessionDescription) {
+    log.log([targetMid, &#x27;RTCSessionDescription&#x27;, null,
+      &#x27;Ignoring session description as it is empty&#x27;], sessionDescription);
+    return;
+  }
 
   if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &amp;&amp; pc.setAnswer) {
     log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,

@@ -3,7 +3,8 @@
 'use strict';
 
 var exports = require('../config.js');
-var sw = new Skylink();
+var test    = require('tape');
+var sw      = new Skylink();
 
 console.log('BOT Message intiailized');
 
