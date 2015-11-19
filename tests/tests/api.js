@@ -4,8 +4,7 @@
 
 // Dependencies
 var exports = require('../config.js');
-var test    = require('tape');
-var sw      = new Skylink();
+var sw = new Skylink();
 
 
 // Testing attributes

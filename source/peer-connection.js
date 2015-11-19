@@ -47,7 +47,7 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
  * @since 0.6.1
  */
 Skylink.prototype.SERVER_PEER_TYPE = {
-  MCU: 'mcu',
+  MCU: 'mcu'
   //SIP: 'sip'
 };
 
@@ -295,7 +295,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
       log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
       callback();
     }
-    //self._startPeerConnectionHealthCheck(peerId, false);
+    self._startPeerConnectionHealthCheck(peerId, false);
   //}, 150);
 };
 

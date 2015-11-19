@@ -363,64 +363,14 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   var stopStream = false;
   var previousRoom = self._selectedRoom;
 
-  if (typeof room === 'string') {
-    //joinRoom(room, callback)
+  if (room === null) {
+    error = 'Invalid room name is provided';
+    log.error(error, room);
+
     if (typeof mediaOptions === 'function') {
       callback = mediaOptions;
       mediaOptions = undefined;
-
-    // joinRoom(room, null, callback)
-    } else if (mediaOptions === null || typeof mediaOptions !== 'object' &&
-      typeof mediaOptions !== 'undefined') {
-      error = 'Invalid mediaOptions is provided';
-      log.error(error, mediaOptions);
-
-      if (typeof callback === 'function') {
-        callback({
-          room: room,
-          errorCode: self._readyState,
-          error: new Error(error)
-        }, null);
-      }
-      return;
     }
-
-  } else if (typeof room === 'object') {
-    //joinRoom(mediaOptions, callback);
-    if (typeof mediaOptions === 'function') {
-      callback = mediaOptions;
-      mediaOptions = room;
-      room = undefined;
-    }
-    //joinRoom(mediaOptions);
-    else {
-      mediaOptions = room;
-    }
-
-    //joinRoom(null, callback);
-    if (mediaOptions === null) {
-      error = 'Invalid mediaOptions is provided';
-      log.error(error, mediaOptions);
-
-      if (typeof callback === 'function') {
-        callback({
-          room: self._defaultRoom,
-          errorCode: self._readyState,
-          error: new Error(error)
-        }, null);
-      }
-      return;
-    }
-  } else if (typeof room === 'function') {
-    //joinRoom(callback);
-    callback = room;
-    room = undefined;
-    mediaOptions = undefined;
-
-  // joinRoom(null)
-  } else if (room === null) {
-    error = 'Invalid room name is provided';
-    log.error(error, room);
 
     if (typeof callback === 'function') {
       callback({
@@ -430,6 +380,69 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
       }, null);
     }
     return;
+  }
+  else if (typeof room === 'string') {
+    //joinRoom(room+); - skip
+
+    //joinRoom(room+,mediaOptions+) - skip
+
+    // joinRoom(room+,callback+)
+    if (typeof mediaOptions === 'function') {
+      callback = mediaOptions;
+      mediaOptions = undefined;
+
+    // joinRoom(room+, mediaOptions-)
+    } else if (typeof mediaOptions !== 'undefined') {
+      if (mediaOptions === null || typeof mediaOptions !== 'object') {
+        error = 'Invalid mediaOptions is provided';
+        log.error(error, mediaOptions);
+
+        // joinRoom(room+,mediaOptions-,callback+)
+        if (typeof callback === 'function') {
+          callback({
+            room: room,
+            errorCode: self._readyState,
+            error: new Error(error)
+          }, null);
+        }
+        return;
+      }
+    }
+
+  } else if (typeof room === 'object') {
+    //joinRoom(mediaOptions+, callback);
+    if (typeof mediaOptions === 'function') {
+      callback = mediaOptions;
+    }
+
+    //joinRoom(mediaOptions);
+    mediaOptions = room;
+    room = undefined;
+
+  } else if (typeof room === 'function') {
+    //joinRoom(callback);
+    callback = room;
+    room = undefined;
+    mediaOptions = undefined;
+
+  } else if (typeof room !== 'undefined') {
+    //joinRoom(mediaOptions-,callback?);
+    error = 'Invalid mediaOptions is provided';
+    log.error(error, mediaOptions);
+
+    if (typeof mediaOptions === 'function') {
+      callback = mediaOptions;
+      mediaOptions = undefined;
+    }
+
+    if (typeof callback === 'function') {
+      callback({
+        room: self._defaultRoom,
+        errorCode: self._readyState,
+        error: new Error(error)
+      }, null);
+      return;
+    }
   }
 
   // If no room provided, join the default room
@@ -739,10 +752,20 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
     }
     return;
   }
-  for (var pc_index in self._peerConnections) {
-    if (self._peerConnections.hasOwnProperty(pc_index)) {
-      self._removePeer(pc_index);
+
+  // NOTE: ENTER/WELCOME made but no peerconnection...
+  // which may result in peerLeft not triggered..
+  // WHY? but to ensure clear all
+  var peers = Object.keys(self._peerInformations);
+  var conns = Object.keys(self._peerConnections);
+  var i;
+  for (i = 0; i < conns.length; i++) {
+    if (peers.indexOf(conns[i]) === -1) {
+      peers.push(conns[i]);
     }
+  }
+  for (i = 0; i < peers.length; i++) {
+    self._removePeer(peers[i]);
   }
   self._inRoom = false;
   self._closeChannel();
@@ -788,6 +811,7 @@ Skylink.prototype.lockRoom = function() {
     rid: this._room.id,
     lock: true
   });
+  this._roomLocked = true;
   this._trigger('roomLock', true, this._user.sid,
     this.getPeerInfo(), true);
 };
@@ -811,6 +835,7 @@ Skylink.prototype.unlockRoom = function() {
     rid: this._room.id,
     lock: false
   });
+  this._roomLocked = false;
   this._trigger('roomLock', false, this._user.sid,
     this.getPeerInfo(), true);
 };
