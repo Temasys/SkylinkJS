@@ -295,7 +295,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
       log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
       callback();
     }
-    //self._startPeerConnectionHealthCheck(peerId, false);
+    self._startPeerConnectionHealthCheck(peerId, false);
   //}, 150);
 };
 

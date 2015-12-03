@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>SkylinkJS 0.6.4</title>
+    <!-- font and icon -->
+    <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
+    <!-- styling -->
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap-theme.min.css">
+    <link href="../assets/vendor/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <!-- scripts -->
+    <script src="../assets/vendor/js/jquery.min.js"></script>
+    <script src="../assets/vendor/js/bootstrap.min.js"></script>
+    <script src="../assets/js/script.js"></script>
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body>
+
+<div id="doc">
+  <nav id="hd" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a href="" class="navbar-brand">
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.4</small>
+        </a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul id="api-list" class="nav navbar-nav navbar-right">
+  <li><a href="https://temasys.github.io">Getting Started</a></li>
+  
+    <li><a href="../classes/Skylink.html">Documentation</a></li>
+  
+  <!--<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      
+        <li><a href="../classes/Skylink.html">Skylink</a></li>
+      
+    </ul>
+  </li>-->
+  <li><a class="btn btn-info btn-navbar" href="http://developer.temasys.com.sg/">Developer Console</a></li>
+  <li><a class="btn btn-info btn-navbar" href="http://support.temasys.com.sg/">Support</a></li>
+  <!--<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      <li><a href="#api-modules">View all Modules</a></li>
+      
+    </ul>
+  </li>-->
+</ul>
+<!--<form id="api-tabview" class="navbar-form navbar-right" role="form">
+  <div id="api-tabview-filter" class="form-group">
+    <input type="search" id="api-filter" placeholder="Type to filter APIs">
+  </div>
+</form>-->
+      </div><!--/.navbar-collapse -->
+    </div>
+  </nav>
+  <div id="bd" class="yui3-g">
+
+      <div class="yui3-u-1-4">
+
+      </div>
+      <div class="yui3-u-3-4">
+          
+          <div class="apidocs">
+              <div id="docs-main">
+                  <div class="content content-main">
+                      <h1 class="file-heading">File: source/peer-privileged.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * These are the list of Peer list retrieval states that Skylink would trigger.
+ * - This relates to and requires the Privileged Key feature where Peers using
+ *   that Privileged alias Key becomes a privileged Peer with privileged functionalities.
+ * @attribute GET_PEERS_STATE
+ * @type JSON
+ * @param {String} ENQUIRED &lt;small&gt;Value &lt;code&gt;&quot;enquired&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The state when the privileged Peer already enquired signaling for list of peers.
+ * @param {String} RECEIVED &lt;small&gt;Value &lt;code&gt;&quot;received&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The state when the privileged Peer received list of peers from signaling.
+ * @readOnly
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.GET_PEERS_STATE = {
+	ENQUIRED: &#x27;enquired&#x27;,
+	RECEIVED: &#x27;received&#x27;
+};
+
+/**
+ * These are the list of Peer introduction states that Skylink would trigger.
+ * - This relates to and requires the Privileged Key feature where Peers using
+ *   that Privileged alias Key becomes a privileged Peer with privileged functionalities.
+ * @attribute INTRODUCE_STATE
+ * @type JSON
+ * @param {String} INTRODUCING &lt;small&gt;Value &lt;code&gt;&quot;enquired&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The state when the privileged Peer have sent the introduction signal.
+ * @param {String} ERROR &lt;small&gt;Value &lt;code&gt;&quot;error&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The state when the Peer introduction has occurred an exception.
+ * @readOnly
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.INTRODUCE_STATE = {
+	INTRODUCING: &#x27;introducing&#x27;,
+	ERROR: &#x27;error&#x27;
+};
+
+/**
+ * Whether this user automatically introduce to other peers.
+ * @attribute _autoIntroduce
+ * @type Boolean
+ * @default true
+ * @private
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._autoIntroduce = true;
+
+/**
+ * Whether this user is a privileged user.
+ * @attribute isPrivileged
+ * @type Boolean
+ * @default false
+ * @private
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._isPrivileged = false;
+
+/**
+ * Parent key in case the current key is alias.
+ * If the current key is not alias, this is the same as _appKey
+ * @attribute _parentKey
+ * @type String
+ * @default null
+ * @private
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._parentKey = null;
+
+/**
+ * List of peers retrieved from signaling
+ * @attribute _peerList
+ * @type Object
+ * @default null
+ * @private
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._peerList = null;
+
+/**
+ * Retrieves the list of rooms and peers under the same realm based
+ *   on the Application Key configured in {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}
+ *   from the platform signaling.
+ * This will only work if self is a privileged Peer.
+ * @method getPeers
+ * @param {Boolean} [showAll=false] The flag that indicates if returned list should
+ *   also include privileged and standard in the list. By default, the value is &lt;code&gt;false&lt;/code&gt;.
+ *   Which means only unprivileged peers&#x27; ID (isPrivileged = autoIntroduce = false) is included.
+ * @param {Function} [callback] The callback fired after the receiving the current
+ *   list of Peers from platform signaling or have met with an exception.
+ *   The callback signature is &lt;code&gt;function (error, success)&lt;/code&gt;.
+ * @param {Object} callback.error The error object received in the callback.
+ *   This is the exception thrown that caused the failure for getting self user media.
+ *   If received as &lt;code&gt;null&lt;/code&gt;, it means that there is no errors.
+ * @param {JSON} callback.success The success object received in the callback.
+ *   If received as &lt;code&gt;null&lt;/code&gt;, it means that there are errors.
+ * @example
+ *
+ *   // To get list of unprivileged peers only
+ *   SkylinkDemo.getPeers();
+ *
+ *   // To get list of all peers, including other privileged peers
+ *   SkylinkDemo.getPeers(true);
+ *
+ *   // To get a list of unprivileged peers then invoke the callback
+ *   SkylinkDemo.getPeers(function(error, success){
+ *     if (error){
+ *       console.log(&quot;Error happened. Can not retrieve list of peers&quot;);
+ *     }
+ *     else{
+ *       console.log(&quot;Success fully retrieved list of peers&quot;, success);
+ *     }
+ *   });
+ *
+ *   // To get a list of all peers then invoke the callback
+ *   SkylinkDemo.getPeers(true, function(error, success){
+ *     if (error){
+ *       console.log(&quot;Error happened. Can not retrieve list of peers&quot;);
+ *     }
+ *     else{
+ *       console.log(&quot;Success fully retrieved list of peers&quot;, success);
+ *     }
+ *   });
+ *
+ * @trigger getPeersStateChange
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.getPeers = function(showAll, callback){
+	var self = this;
+	if (!self._isPrivileged){
+		log.warn(&#x27;Please upgrade your key to privileged to use this function&#x27;);
+		return;
+	}
+	if (!self._appKey){
+		log.warn(&#x27;App key is not defined. Please authenticate again.&#x27;);
+		return;
+	}
+	if (!self._parentKey){
+		log.warn(&#x27;Parent key is not defined. Please authenticate again.&#x27;);
+		return;
+	}
+
+	// Only callback is provided
+	if (typeof showAll === &#x27;function&#x27;){
+		callback = showAll;
+		showAll = false;
+	}
+
+	self._sendChannelMessage({
+		type: self._SIG_MESSAGE_TYPE.GET_PEERS,
+		privilegedKey: self._appKey,
+		parentKey: self._parentKey,
+		showAll: showAll || false
+	});
+	self._trigger(&#x27;getPeersStateChange&#x27;,self.GET_PEERS_STATE.ENQUIRED, self._user.sid, null);
+
+	log.log(&#x27;Enquired server for peers within the realm&#x27;);
+
+	if (typeof callback === &#x27;function&#x27;){
+		self.once(&#x27;getPeersStateChange&#x27;, function(state, privilegedPeerId, peerList){
+			callback(null, peerList);
+		}, function(state, privilegedPeerId, peerList){
+			return state === self.GET_PEERS_STATE.RECEIVED;
+		});
+	}
+
+};
+
+/**
+ * Introduces two Peers to each other to start a connection with each other.
+ * This will only work if self is a privileged Peer.
+ * @method introducePeer
+ * @param {String} sendingPeerId The Peer ID of the peer
+ *   that initiates the connection with the introduced Peer.
+ * @param {String} receivingPeerId The Peer ID of the
+ *   introduced peer who would be introduced to the initiator Peer.
+ * @trigger introduceStateChange
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.introducePeer = function(sendingPeerId, receivingPeerId){
+	var self = this;
+	if (!self._isPrivileged){
+		log.warn(&#x27;Please upgrade your key to privileged to use this function&#x27;);
+		self._trigger(&#x27;introduceStateChange&#x27;, self.INTRODUCE_STATE.ERROR, self._user.sid, sendingPeerId, receivingPeerId, &#x27;notPrivileged&#x27;);
+		return;
+	}
+	self._sendChannelMessage({
+		type: self._SIG_MESSAGE_TYPE.INTRODUCE,
+		sendingPeerId: sendingPeerId,
+		receivingPeerId: receivingPeerId
+	});
+	self._trigger(&#x27;introduceStateChange&#x27;, self.INTRODUCE_STATE.INTRODUCING, self._user.sid, sendingPeerId, receivingPeerId, null);
+	log.log(&#x27;Introducing&#x27;,sendingPeerId,&#x27;to&#x27;,receivingPeerId);
+};
+
+
+    </pre>
+</div>
+
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>
