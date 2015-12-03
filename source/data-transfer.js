@@ -1724,12 +1724,12 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
         isPrivate: isPrivate
       }, true);
 
-      //if (!self._hasMCU) {
+      if (!self._hasMCU) {
         listOfPeersChannels[peerId] =
           self._sendBlobDataToPeer(data, dataInfo, peerId);
-      /*} else {
+      } else {
         listOfPeersChannels[peerId] = self._dataChannels[peerId].main.label;
-      }*/
+      }
 
       noOfPeersSent++;
 
@@ -1741,9 +1741,9 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
   }
 
   // if has MCU
-  /*if (self._hasMCU) {
+  if (self._hasMCU) {
     self._sendBlobDataToPeer(data, dataInfo, listOfPeers, isPrivate, transferId);
-  }*/
+  }
 
   if (noOfPeersSent === 0) {
     error = 'Failed sending data as there is no available datachannels to send data';
