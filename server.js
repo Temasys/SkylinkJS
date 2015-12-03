@@ -15,7 +15,7 @@ fs.stat('certificates/server.key', function(err, stat) {
       console.warn("\nNOTE: Running HTTP server has been removed as " +
         "getUserMedia() has been deprecated for HTTP on Chrome 42 and above. " +
         "Please run demo on HTTPS as recommended\n\n-\n");
-      console.log("HTTPS server instance running @ 8081");
+      console.log("HTTPS server instance running @ 8082");
     } else {
         console.warn("HTTPS server instance failed to start as" +
         + " certificate failed to load\n" +
