@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.3 - Wed Nov 18 2015 17:05:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.3 - Thu Dec 03 2015 18:21:12 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1268,7 +1268,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
         dataType: dataInfo.dataType,
         chunkSize: binaryChunkSize,
         timeout: dataInfo.timeout,
-        target: self._hasMCU ? 'MCU' : targetPeerId,
+        target: self._hasMCU ? targetPeerList : targetPeerId,
         isPrivate: dataInfo.isPrivate
       };
 
@@ -2923,33 +2923,38 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
   }
 
   // sending public message to MCU to relay. MCU case only
-  if (self._hasMCU && !isPrivate) {
-    log.log(['MCU', null, null, 'Relaying P2P message to peers']);
+  if (self._hasMCU) {
+    if (isPrivate) {
+      log.log(['MCU', null, null, 'Relaying private P2P message to peers'], listOfPeers);
+      self._sendDataChannelMessage('MCU', {
+        type: self._DC_PROTOCOL_TYPE.MESSAGE,
+        isPrivate: isPrivate,
+        sender: self._user.sid,
+        target: listOfPeers,
+        data: message
+      });
+    } else {
+      log.log(['MCU', null, null, 'Relaying P2P message to peers']);
 
-    self._sendDataChannelMessage('MCU', {
-      type: self._DC_PROTOCOL_TYPE.MESSAGE,
-      isPrivate: isPrivate,
-      sender: self._user.sid,
-      target: 'MCU',
-      data: message
-    });
-  }
-
-  for (var i = 0; i < listOfPeers.length; i++) {
-    var peerId = listOfPeers[i];
-    var useChannel = (self._hasMCU) ? 'MCU' : peerId;
-
-    // Ignore MCU peer
-    if (peerId === 'MCU') {
-      continue;
+      self._sendDataChannelMessage('MCU', {
+        type: self._DC_PROTOCOL_TYPE.MESSAGE,
+        isPrivate: isPrivate,
+        sender: self._user.sid,
+        target: 'MCU',
+        data: message
+      });
     }
+  } else {
+    for (var i = 0; i < listOfPeers.length; i++) {
+      var peerId = listOfPeers[i];
+      var useChannel = (self._hasMCU) ? 'MCU' : peerId;
 
-    if (isPrivate || !self._hasMCU) {
-      if (self._hasMCU) {
-        log.log([peerId, null, useChannel, 'Sending private P2P message to peer']);
-      } else {
-        log.log([peerId, null, useChannel, 'Sending P2P message to peer']);
+      // Ignore MCU peer
+      if (peerId === 'MCU') {
+        continue;
       }
+
+      log.log([peerId, null, useChannel, 'Sending P2P message to peer']);
 
       self._sendDataChannelMessage(useChannel, {
         type: self._DC_PROTOCOL_TYPE.MESSAGE,
@@ -3830,7 +3835,7 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
  * @since 0.6.1
  */
 Skylink.prototype.SERVER_PEER_TYPE = {
-  MCU: 'mcu',
+  MCU: 'mcu'
   //SIP: 'sip'
 };
 
@@ -5231,7 +5236,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
 Skylink.prototype.GET_PEERS_STATE = {
 	ENQUIRED: 'enquired',
-	RECEIVED: 'received',
+	RECEIVED: 'received'
 };
 
 /**
