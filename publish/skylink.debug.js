@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.4 - Thu Nov 19 2015 18:59:49 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Thu Dec 10 2015 18:36:33 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3965,6 +3965,40 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
   }
 };
 
+Skylink.prototype._recreatePeerConnection = function (peerId) {
+  var self = this;
+  // get the value of receiveOnly
+  log.log([peerId, null, null, 'Restarting a peer connection']);
+
+  var receiveOnly = self._peerConnections[peerId] ?
+    !!self._peerConnections[peerId].receiveOnly : false;
+  var hasScreenSharing = self._peerConnections[peerId] ?
+    !!self._peerConnections[peerId].hasScreen : false;
+
+  // close the peer connection and remove the reference
+  var iceConnectionStateClosed = false;
+  var peerConnectionStateClosed = false;
+  var dataChannelStateClosed = !self._enableDataChannel;
+
+  if (self._peerConnections[peerId].signalingState !== 'closed') {
+    self._peerConnections[peerId].close();
+  }
+
+  if (self._peerConnections[peerId].hasStream) {
+    self._trigger('streamEnded', peerId, self.getPeerInfo(peerId), false);
+  }
+
+  //self._peerConnections[peerId].dataChannelClosed = true;
+
+  delete self._peerConnections[peerId];
+  self._peerConnections[peerId] = self._createPeerConnection(peerId, !!hasScreenSharing);
+
+  if (self._peerConnections[peerId]){
+    self._peerConnections[peerId].receiveOnly = receiveOnly;
+    self._peerConnections[peerId].hasScreen = hasScreenSharing;
+  }
+};
+
 /**
  * Restarts a Peer connection in a P2P environment.
  * This is usually done for replacing the previous Stream attached and restarting
@@ -3999,78 +4033,79 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
     return;
   }
 
-  log.log([peerId, null, null, 'Restarting a peer connection']);
+  /*var hardRestart = self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.STABLE &&
+    self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.NEW;
 
-  // get the value of receiveOnly
-  var receiveOnly = self._peerConnections[peerId] ?
-    !!self._peerConnections[peerId].receiveOnly : false;
-  var hasScreenSharing = self._peerConnections[peerId] ?
-    !!self._peerConnections[peerId].hasScreen : false;
-
-  // close the peer connection and remove the reference
-  var iceConnectionStateClosed = false;
-  var peerConnectionStateClosed = false;
-  var dataChannelStateClosed = !self._enableDataChannel;
+  if (hardRestart) {
+    self._recreatePeerConnection(peerId);
+  }*/
 
   delete self._peerConnectionHealth[peerId];
   delete self._peerRestartPriorities[peerId];
 
   self._stopPeerConnectionHealthCheck(peerId);
 
-  if (self._peerConnections[peerId].signalingState !== 'closed') {
-    self._peerConnections[peerId].close();
-  }
-
-  if (self._peerConnections[peerId].hasStream) {
-    self._trigger('streamEnded', peerId, self.getPeerInfo(peerId), false);
-  }
-
-  self._peerConnections[peerId].dataChannelClosed = true;
+  var pc = self._peerConnections[peerId];
 
   //setTimeout(function () {
-    delete self._peerConnections[peerId];
+    //
 
-    log.log([peerId, null, null, 'Re-creating peer connection']);
+    if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
+      if (self._peerConnections[peerId] && !self._peerConnections[peerId].receiveOnly) {
+        self._addLocalMediaStreams(peerId);
+      }
 
-    self._peerConnections[peerId] = self._createPeerConnection(peerId, !!hasScreenSharing);
-
-    if (self._peerConnections[peerId]){
-      self._peerConnections[peerId].receiveOnly = receiveOnly;
-      self._peerConnections[peerId].hasScreen = hasScreenSharing;
-    }
-
-    if (!receiveOnly) {
-      self._addLocalMediaStreams(peerId);
+      var agent = self.getPeerInfo(peerId).agent;
+      self._doOffer(peerId, {
+        agent: agent.name,
+        version: agent.version,
+        os: agent.os
+      }, true);
+    } else if (pc.signalingState === self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER ||
+      pc.signalingState === self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
+      self._sendChannelMessage({
+        type: pc.localDescription.type,
+        sdp: pc.localDescription.sdp,
+        mid: self._user.sid,
+        target: peerId,
+        rid: self._room.id
+      });
+    } else {
+      return log.debug([peerId, 'RTCPeerConnection', null, 'Failed restarting as peer connection state is'], pc.signalingState);
     }
 
     if (isSelfInitiatedRestart){
-      log.log([peerId, null, null, 'Sending restart message to signaling server']);
+      log.log([peerId, null, null, 'Renegotiating peer connection']);
 
-      var lastRestart = Date.now() || function() { return +new Date(); };
+      /*if (hardRestart) {
+        log.log([peerId, null, null, 'Sending restart message to signaling server']);
 
-      var weight = (new Date()).valueOf();
-      self._peerRestartPriorities[peerId] = weight;
+        var lastRestart = Date.now() || function() { return +new Date(); };
 
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.RESTART,
-        mid: self._user.sid,
-        rid: self._room.id,
-        agent: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
-        os: window.navigator.platform,
-        userInfo: self.getPeerInfo(),
-        target: peerId,
-        isConnectionRestart: !!isConnectionRestart,
-        lastRestart: lastRestart,
-        weight: weight,
-        receiveOnly: receiveOnly,
-        enableIceTrickle: self._enableIceTrickle,
-        enableDataChannel: self._enableDataChannel,
-        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-        explicit: !!explicit
-      });
+        var weight = (new Date()).valueOf();
+        self._peerRestartPriorities[peerId] = weight;
 
-      self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.RESTART,
+          mid: self._user.sid,
+          rid: self._room.id,
+          agent: window.webrtcDetectedBrowser,
+          version: window.webrtcDetectedVersion,
+          os: window.navigator.platform,
+          userInfo: self.getPeerInfo(),
+          target: peerId,
+          isConnectionRestart: !!isConnectionRestart,
+          lastRestart: lastRestart,
+          weight: weight,
+          receiveOnly: self._peerConnections[peerId].receiveOnly,
+          enableIceTrickle: self._enableIceTrickle,
+          enableDataChannel: self._enableDataChannel,
+          sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+          explicit: !!explicit
+        });
+        self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
+      } else {*/
+      //}
     }
 
     // NOTE
@@ -4188,6 +4223,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.hasStream = false;
   pc.hasScreen = !!isScreenSharing;
   pc.hasMainChannel = false;
+  pc.firefoxTriggeredStream = false;
+  pc.firefoxStreamId = '';
 
   // datachannels
   self._dataChannels[targetMid] = {};
@@ -4224,8 +4261,10 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     }
   };
   pc.onaddstream = function(event) {
+    var stream = event.stream || event;
     pc.hasStream = true;
-    self._onRemoteStreamAdded(targetMid, event, !!pc.hasScreen);
+    pc.firefoxTriggeredStream = true;
+    self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
   };
   pc.onicecandidate = function(event) {
     log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'],
@@ -4316,6 +4355,21 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
       'Ice gathering state changed ->'], pc.iceGatheringState);
     self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
   };
+
+  if (window.webrtcDetectedBrowser === 'firefox') {
+    pc.removeStream = function (stream) {
+      var senders = pc.getSenders();
+      for (var s = 0; s < senders.length; s++) {
+        var tracks = stream.getTracks();
+        for (var t = 0; t < tracks.length; t++) {
+          if (tracks[t] === senders[s].track) {
+            pc.removeTrack(senders[s]);
+          }
+        }
+      }
+    };
+  }
+
   return pc;
 };
 
@@ -4900,15 +4954,22 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       beOfferer = true;
     }
 
+    unifiedOfferConstraints.mandatory.iceRestart = true;
     peerBrowser.os = peerBrowser.os || '';
 
-    // for windows firefox to mac chrome interopability
-    if (window.webrtcDetectedBrowser === 'firefox' &&
-      window.navigator.platform.indexOf('Win') === 0 &&
-      peerBrowser.agent !== 'firefox' &&
-      peerBrowser.agent !== 'MCU' &&
-      peerBrowser.os.indexOf('Mac') === 0) {
-      beOfferer = false;
+    if (peerBrowser.agent !== 'MCU') {
+      /*
+       // for windows firefox to mac chrome interopability
+      if (window.webrtcDetectedBrowser === 'firefox' &&
+        window.navigator.platform.indexOf('Win') === 0 &&
+        peerBrowser.agent !== 'firefox' &&
+        peerBrowser.agent !== 'MCU' &&
+        peerBrowser.os.indexOf('Mac') === 0) {
+        beOfferer = false;
+      }*/
+      if (window.webrtcDetectedBrowser === 'firefox' && peerBrowser.agent !== 'firefox') {
+        beOfferer = false;
+      }
     }
 
     if (beOfferer) {
@@ -5120,13 +5181,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   var self = this;
   var pc = self._peerConnections[targetMid];
 
-  if (!sessionDescription) {
-    log.log([targetMid, 'RTCSessionDescription', null,
-      'Ignoring session description as it is empty'], sessionDescription);
-    return;
-  }
-
-  if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && pc.setAnswer) {
+  /*if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && pc.setAnswer) {
     log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
       'Ignoring session description. User has already set local answer'], sessionDescription);
     return;
@@ -5135,7 +5190,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
       'Ignoring session description. User has already set local offer'], sessionDescription);
     return;
-  }
+  }*/
 
   // NOTE ALEX: handle the pc = 0 case, just to be sure
   var sdpLines = sessionDescription.sdp.split('\r\n');
@@ -5197,6 +5252,24 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   } else {
     log.log([targetMid, null, null, 'Not setting any audio codec']);
   }
+
+  // NOTE: supports one stream per pc only
+  /*var defaultStreamIndex = sdpLines.indexOf('a=msid-semantic: WMS default');
+  if (defaultStreamIndex > -1 && pc.getLocalStreams().length > 0) {
+    // get stream
+    var stream = pc.getLocalStreams()[0];
+    // replace default with correct id
+    sdpLines[defaultStreamIndex].replace(/default/g, stream.id);
+    // loop for the rest of the related defaults and replace with ID
+    for (var i = 0; i < sdpLines.length; i++) {
+      if (sdpLines[i].indexOf('msid:default') > 1) {
+        sdpLines[i].replace(/msid:default/g, 'msid:' + stream.id);
+      }
+      if (sdpLines[i].indexOf('mslabel:default') > 1) {
+        sdpLines[i].replace(/mslabel:default/g, 'mslabel:' + stream.id);
+      }
+    }
+  }*/
 
   sessionDescription.sdp = sdpLines.join('\r\n');
 
@@ -11419,20 +11492,23 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }
 
-  if (pc.localDescription ? !!pc.localDescription.sdp : false) {
-  	log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
-  		pc.localDescription);
+  /*if (pc.localDescription ? !!pc.localDescription.sdp : false) {
+    log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
+      pc.localDescription);
     return;
-  }
+  }*/
 
   log.log([targetMid, null, message.type, 'Received offer from peer. ' +
     'Session description:'], message.sdp);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
-  var offer = new window.RTCSessionDescription(message);
+  var offer = new window.RTCSessionDescription({
+    type: message.type,
+    sdp: message.sdp
+  });
   log.log([targetMid, 'RTCSessionDescription', message.type,
     'Session description object created'], offer);
 
-  pc.setRemoteDescription(new window.RTCSessionDescription(offer), function() {
+  pc.setRemoteDescription(offer, function() {
     log.debug([targetMid, 'RTCSessionDescription', message.type, 'Remote description set']);
     pc.setOffer = 'remote';
     self._addIceCandidateFromQueue(targetMid);
@@ -11442,6 +11518,7 @@ Skylink.prototype._offerHandler = function(message) {
     log.error([targetMid, null, message.type, 'Failed setting remote description:'], error);
   });
 };
+
 
 /**
  * Handles the CANDIDATE Protocol message event received from the platform signaling.
@@ -11564,7 +11641,10 @@ Skylink.prototype._answerHandler = function(message) {
     'Received answer from peer. Session description:'], message.sdp);
 
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
-  var answer = new window.RTCSessionDescription(message);
+  var answer = new window.RTCSessionDescription({
+    type: message.type,
+    sdp: message.sdp
+  });
 
   log.log([targetMid, 'RTCSessionDescription', message.type,
     'Session description object created'], answer);
@@ -11577,9 +11657,9 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }
 
-  if (pc.remoteDescription ? !!pc.remoteDescription.sdp : false) {
-  	log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
-  		pc.remoteDescription);
+  /*if (pc.remoteDescription ? !!pc.remoteDescription.sdp : false) {
+    log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
+      pc.remoteDescription);
     return;
   }
 
@@ -11587,17 +11667,77 @@ Skylink.prototype._answerHandler = function(message) {
     log.error([targetMid, null, message.type, 'Unable to set peer connection ' +
       'at signalingState "stable". Ignoring remote answer'], pc.signalingState);
     return;
-  }
+  }*/
 
   // if firefox and peer is mcu, replace the sdp to suit mcu needs
   if (window.webrtcDetectedType === 'moz' && targetMid === 'MCU') {
-    message.sdp = message.sdp.replace(/ generation 0/g, '');
-    message.sdp = message.sdp.replace(/ udp /g, ' UDP ');
+    answer.sdp = answer.sdp.replace(/ generation 0/g, '');
+    answer.sdp = answer.sdp.replace(/ udp /g, ' UDP ');
   }
-  pc.setRemoteDescription(new window.RTCSessionDescription(answer), function() {
+
+  var agent = self.getPeerInfo(targetMid).agent;
+
+  // for this case, this is because firefox uses Unified Plan and Chrome uses
+  // Plan B. we have to remodify this a bit to let the non-ff detect as new mediastream
+  // as chrome/opera/safari detects it as default due to missing ssrc specified as used in plan B.
+  if (window.webrtcDetectedBrowser !== 'firefox' && agent.name === 'firefox' &&
+    pc.localDescription.sdp.indexOf('a=msid-semantic: WMS *') === -1 &&
+    answer.sdp.indexOf('a=msid-semantic:WMS *') > 0) {
+    // start parsing
+    var sdpLines = answer.sdp.split('\r\n');
+    var streamId = '';
+    var replaceSSRCSemantic = -1;
+    var i;
+    var trackId = '';
+
+    var parseTracksSSRC = function (track) {
+      for (i = 0, trackId = ''; i < sdpLines.length; i++) {
+        if (!!trackId) {
+          if (sdpLines[i].indexOf('a=ssrc:') === 0) {
+            var ssrcId = sdpLines[i].split(':')[1].split(' ')[0];
+            sdpLines.splice(i+1, 0, 'a=ssrc:' + ssrcId +  ' msid:' + streamId + ' ' + trackId,
+              'a=ssrc:' + ssrcId + ' mslabel:default',
+              'a=ssrc:' + ssrcId + ' label:' + trackId);
+            break;
+          } else if (sdpLines[i].indexOf('a=mid:') === 0) {
+            break;
+          }
+        } else if (sdpLines[i].indexOf('a=msid:') === 0) {
+          if (i > 0 && sdpLines[i-1].indexOf('a=mid:' + track) === 0) {
+            var parts = sdpLines[i].split(':')[1].split(' ');
+
+            streamId = parts[0];
+            trackId = parts[1];
+            replaceSSRCSemantic = true;
+          }
+        }
+      }
+    };
+
+    parseTracksSSRC('video');
+    parseTracksSSRC('audio');
+
+    if (replaceSSRCSemantic) {
+      for (i = 0; i < sdpLines.length; i++) {
+        if (sdpLines[i].indexOf('a=msid-semantic:WMS ') === 0) {
+          var parts = sdpLines[i].split(' ');
+          parts[parts.length - 1] = streamId;
+          sdpLines[i] = parts.join(' ');
+          break;
+        }
+      }
+
+    }
+    answer.sdp = sdpLines.join('\r\n');
+
+    log.debug([targetMid, null, message.type, 'Parsed remote description from firefox'], answer);
+  }
+
+  pc.setRemoteDescription(answer, function() {
     log.debug([targetMid, null, message.type, 'Remote description set']);
     pc.setAnswer = 'remote';
     self._addIceCandidateFromQueue(targetMid);
+
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
     log.error([targetMid, null, message.type, 'Failed setting remote description:'], error);
@@ -12252,33 +12392,33 @@ Skylink.prototype._onUserMediaError = function(error, isScreenSharing, audioFall
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._onRemoteStreamAdded = function(targetMid, event, isScreenSharing) {
+Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSharing) {
   var self = this;
 
   if(targetMid !== 'MCU') {
     if (!self._peerInformations[targetMid]) {
-      log.error([targetMid, 'MediaStream', event.stream.id,
+      log.error([targetMid, 'MediaStream', stream.id,
           'Received remote stream when peer is not connected. ' +
-          'Ignoring stream ->'], event.stream);
+          'Ignoring stream ->'], stream);
       return;
     }
 
     if (!self._peerInformations[targetMid].settings.audio &&
       !self._peerInformations[targetMid].settings.video && !isScreenSharing) {
-      log.log([targetMid, 'MediaStream', event.stream.id,
+      log.log([targetMid, 'MediaStream', stream.id,
         'Receive remote stream but ignoring stream as it is empty ->'
-        ], event.stream);
+        ], stream);
       return;
     }
-    log.log([targetMid, 'MediaStream', event.stream.id,
-      'Received remote stream ->'], event.stream);
+    log.log([targetMid, 'MediaStream', stream.id,
+      'Received remote stream ->'], stream);
 
     if (isScreenSharing) {
-      log.log([targetMid, 'MediaStream', event.stream.id,
+      log.log([targetMid, 'MediaStream', stream.id,
         'Peer is having a screensharing session with user']);
     }
 
-    self._trigger('incomingStream', targetMid, event.stream,
+    self._trigger('incomingStream', targetMid, stream,
       false, self.getPeerInfo(targetMid), !!isScreenSharing);
   } else {
     log.log([targetMid, null, null, 'MCU is listening']);
@@ -12697,16 +12837,32 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
 
     if (pc) {
       if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
+        var hasStream = false;
+        var hasScreen = false;
+
+        // remove streams
+        var streams = pc.getLocalStreams();
+        for (var i = 0; i < streams.length; i++) {
+          // try removeStream
+          pc.removeStream(streams[i]);
+        }
+
+        if (this._mediaStream && this._mediaStream !== null) {
+          hasStream = true;
+        }
+
         if (this._mediaScreen && this._mediaScreen !== null) {
+          hasScreen = true;
+        }
+
+        if (hasScreen) {
+          log.debug([peerId, 'MediaStream', null, 'Sending screen'], this._mediaScreen);
           pc.addStream(this._mediaScreen);
-          log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending screen']);
-
-        } else if (this._mediaStream && this._mediaStream !== null) {
+        } else if (hasStream) {
+          log.debug([peerId, 'MediaStream', null, 'Sending stream'], this._mediaStream);
           pc.addStream(this._mediaStream);
-          log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending stream']);
-
         } else {
-          log.warn([peerId, null, null, 'No media to send. Will be only receiving']);
+          log.warn([peerId, 'MediaStream', null, 'No media to send. Will be only receiving']);
         }
 
       } else {

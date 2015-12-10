@@ -182,6 +182,40 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
   }
 };
 
+Skylink.prototype._recreatePeerConnection = function (peerId) {
+  var self = this;
+  // get the value of receiveOnly
+  log.log([peerId, null, null, 'Restarting a peer connection']);
+
+  var receiveOnly = self._peerConnections[peerId] ?
+    !!self._peerConnections[peerId].receiveOnly : false;
+  var hasScreenSharing = self._peerConnections[peerId] ?
+    !!self._peerConnections[peerId].hasScreen : false;
+
+  // close the peer connection and remove the reference
+  var iceConnectionStateClosed = false;
+  var peerConnectionStateClosed = false;
+  var dataChannelStateClosed = !self._enableDataChannel;
+
+  if (self._peerConnections[peerId].signalingState !== 'closed') {
+    self._peerConnections[peerId].close();
+  }
+
+  if (self._peerConnections[peerId].hasStream) {
+    self._trigger('streamEnded', peerId, self.getPeerInfo(peerId), false);
+  }
+
+  //self._peerConnections[peerId].dataChannelClosed = true;
+
+  delete self._peerConnections[peerId];
+  self._peerConnections[peerId] = self._createPeerConnection(peerId, !!hasScreenSharing);
+
+  if (self._peerConnections[peerId]){
+    self._peerConnections[peerId].receiveOnly = receiveOnly;
+    self._peerConnections[peerId].hasScreen = hasScreenSharing;
+  }
+};
+
 /**
  * Restarts a Peer connection in a P2P environment.
  * This is usually done for replacing the previous Stream attached and restarting
@@ -216,78 +250,79 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
     return;
   }
 
-  log.log([peerId, null, null, 'Restarting a peer connection']);
+  /*var hardRestart = self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.STABLE &&
+    self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.NEW;
 
-  // get the value of receiveOnly
-  var receiveOnly = self._peerConnections[peerId] ?
-    !!self._peerConnections[peerId].receiveOnly : false;
-  var hasScreenSharing = self._peerConnections[peerId] ?
-    !!self._peerConnections[peerId].hasScreen : false;
-
-  // close the peer connection and remove the reference
-  var iceConnectionStateClosed = false;
-  var peerConnectionStateClosed = false;
-  var dataChannelStateClosed = !self._enableDataChannel;
+  if (hardRestart) {
+    self._recreatePeerConnection(peerId);
+  }*/
 
   delete self._peerConnectionHealth[peerId];
   delete self._peerRestartPriorities[peerId];
 
   self._stopPeerConnectionHealthCheck(peerId);
 
-  if (self._peerConnections[peerId].signalingState !== 'closed') {
-    self._peerConnections[peerId].close();
-  }
-
-  if (self._peerConnections[peerId].hasStream) {
-    self._trigger('streamEnded', peerId, self.getPeerInfo(peerId), false);
-  }
-
-  self._peerConnections[peerId].dataChannelClosed = true;
+  var pc = self._peerConnections[peerId];
 
   //setTimeout(function () {
-    delete self._peerConnections[peerId];
+    //
 
-    log.log([peerId, null, null, 'Re-creating peer connection']);
+    if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
+      if (self._peerConnections[peerId] && !self._peerConnections[peerId].receiveOnly) {
+        self._addLocalMediaStreams(peerId);
+      }
 
-    self._peerConnections[peerId] = self._createPeerConnection(peerId, !!hasScreenSharing);
-
-    if (self._peerConnections[peerId]){
-      self._peerConnections[peerId].receiveOnly = receiveOnly;
-      self._peerConnections[peerId].hasScreen = hasScreenSharing;
-    }
-
-    if (!receiveOnly) {
-      self._addLocalMediaStreams(peerId);
+      var agent = self.getPeerInfo(peerId).agent;
+      self._doOffer(peerId, {
+        agent: agent.name,
+        version: agent.version,
+        os: agent.os
+      }, true);
+    } else if (pc.signalingState === self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER ||
+      pc.signalingState === self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
+      self._sendChannelMessage({
+        type: pc.localDescription.type,
+        sdp: pc.localDescription.sdp,
+        mid: self._user.sid,
+        target: peerId,
+        rid: self._room.id
+      });
+    } else {
+      return log.debug([peerId, 'RTCPeerConnection', null, 'Failed restarting as peer connection state is'], pc.signalingState);
     }
 
     if (isSelfInitiatedRestart){
-      log.log([peerId, null, null, 'Sending restart message to signaling server']);
+      log.log([peerId, null, null, 'Renegotiating peer connection']);
 
-      var lastRestart = Date.now() || function() { return +new Date(); };
+      /*if (hardRestart) {
+        log.log([peerId, null, null, 'Sending restart message to signaling server']);
 
-      var weight = (new Date()).valueOf();
-      self._peerRestartPriorities[peerId] = weight;
+        var lastRestart = Date.now() || function() { return +new Date(); };
 
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.RESTART,
-        mid: self._user.sid,
-        rid: self._room.id,
-        agent: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
-        os: window.navigator.platform,
-        userInfo: self.getPeerInfo(),
-        target: peerId,
-        isConnectionRestart: !!isConnectionRestart,
-        lastRestart: lastRestart,
-        weight: weight,
-        receiveOnly: receiveOnly,
-        enableIceTrickle: self._enableIceTrickle,
-        enableDataChannel: self._enableDataChannel,
-        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-        explicit: !!explicit
-      });
+        var weight = (new Date()).valueOf();
+        self._peerRestartPriorities[peerId] = weight;
 
-      self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.RESTART,
+          mid: self._user.sid,
+          rid: self._room.id,
+          agent: window.webrtcDetectedBrowser,
+          version: window.webrtcDetectedVersion,
+          os: window.navigator.platform,
+          userInfo: self.getPeerInfo(),
+          target: peerId,
+          isConnectionRestart: !!isConnectionRestart,
+          lastRestart: lastRestart,
+          weight: weight,
+          receiveOnly: self._peerConnections[peerId].receiveOnly,
+          enableIceTrickle: self._enableIceTrickle,
+          enableDataChannel: self._enableDataChannel,
+          sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+          explicit: !!explicit
+        });
+        self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
+      } else {*/
+      //}
     }
 
     // NOTE
@@ -405,6 +440,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.hasStream = false;
   pc.hasScreen = !!isScreenSharing;
   pc.hasMainChannel = false;
+  pc.firefoxTriggeredStream = false;
+  pc.firefoxStreamId = '';
 
   // datachannels
   self._dataChannels[targetMid] = {};
@@ -441,8 +478,10 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     }
   };
   pc.onaddstream = function(event) {
+    var stream = event.stream || event;
     pc.hasStream = true;
-    self._onRemoteStreamAdded(targetMid, event, !!pc.hasScreen);
+    pc.firefoxTriggeredStream = true;
+    self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
   };
   pc.onicecandidate = function(event) {
     log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'],
@@ -533,6 +572,21 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
       'Ice gathering state changed ->'], pc.iceGatheringState);
     self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
   };
+
+  if (window.webrtcDetectedBrowser === 'firefox') {
+    pc.removeStream = function (stream) {
+      var senders = pc.getSenders();
+      for (var s = 0; s < senders.length; s++) {
+        var tracks = stream.getTracks();
+        for (var t = 0; t < tracks.length; t++) {
+          if (tracks[t] === senders[s].track) {
+            pc.removeTrack(senders[s]);
+          }
+        }
+      }
+    };
+  }
+
   return pc;
 };
 
