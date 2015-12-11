@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.4 - Thu Nov 19 2015 18:59:49 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Fri Dec 11 2015 12:37:04 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13903,16 +13903,23 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
  * @since 0.6.0
  */
 Skylink.prototype.stopScreen = function () {
-  var endSession = false;
-
   if (this._mediaScreen && this._mediaScreen !== null) {
-    endSession = !!this._mediaScreen.endSession;
+    var ended = false;
 
-    this._stopLocalMediaStreams({
-      screenshare: true
-    });
+    if (typeof this._mediaScreen.active === 'boolean') {
+      ended = this._mediaScreen.active;
+    } else {
+      // .ended may not be defined but prevents deprecation errors
+      ended = !!this._mediaScreen.ended;
+    }
 
-    if (!endSession) {
+    if (!ended) {
+      this._stopLocalMediaStreams({
+        screenshare: true
+      });
+    }
+
+    if (this._inRoom) {
       if (this._hasMCU) {
         this._restartMCUConnection();
       } else {
