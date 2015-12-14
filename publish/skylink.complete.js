@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.4 - Fri Dec 11 2015 12:37:04 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Tue Dec 15 2015 05:45:34 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8399,7 +8399,7 @@ if (navigator.mozGetUserMedia) {
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.4 - Fri Dec 11 2015 12:37:04 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Tue Dec 15 2015 05:45:34 GMT+0800 (SGT) */
 
 (function() {
 
@@ -20540,17 +20540,19 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
     }
     self._trigger('streamEnded', self._user.sid || null, self.getPeerInfo(), true, !!isScreenSharing);
   };
-  stream.onended = streamEnded;
 
+  // chrome uses the new specs
+  if (window.webrtcDetectedBrowser === 'chrome' || window.webrtcDetectedBrowser === 'opera') {
+    stream.oninactive = streamEnded;
   // Workaround for local stream.onended because firefox has not yet implemented it
-  if (window.webrtcDetectedBrowser === 'firefox') {
-    stream.onended = setInterval(function () {
+  } else if (window.webrtcDetectedBrowser === 'firefox') {
+    stream.endedInterval = setInterval(function () {
       if (typeof stream.recordedTime === 'undefined') {
         stream.recordedTime = 0;
       }
 
       if (stream.recordedTime === stream.currentTime) {
-        clearInterval(stream.onended);
+        clearInterval(stream.endedInterval);
         // trigger that it has ended
         streamEnded();
 
@@ -20559,6 +20561,8 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
       }
 
     }, 1000);
+  } else {
+    stream.onended = streamEnded;
   }
 
   // check if readyStateChange is done
@@ -22305,20 +22309,9 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
  */
 Skylink.prototype.stopScreen = function () {
   if (this._mediaScreen && this._mediaScreen !== null) {
-    var ended = false;
-
-    if (typeof this._mediaScreen.active === 'boolean') {
-      ended = this._mediaScreen.active;
-    } else {
-      // .ended may not be defined but prevents deprecation errors
-      ended = !!this._mediaScreen.ended;
-    }
-
-    if (!ended) {
-      this._stopLocalMediaStreams({
-        screenshare: true
-      });
-    }
+    this._stopLocalMediaStreams({
+      screenshare: true
+    });
 
     if (this._inRoom) {
       if (this._hasMCU) {
