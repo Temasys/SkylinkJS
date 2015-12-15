@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.4 - Thu Dec 03 2015 19:17:09 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Tue Dec 15 2015 18:13:15 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6971,16 +6971,6 @@ Skylink.prototype._loadInfo = function() {
     }, self._selectedRoom);
     return;
   }
-  if (!window.RTCPeerConnection) {
-    log.error('WebRTC not supported. Please upgrade your browser');
-    self._readyState = -1;
-    self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-      status: null,
-      content: 'WebRTC not available',
-      errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
-    }, self._selectedRoom);
-    return;
-  }
   if (!self._path) {
     log.error('Skylink is not initialised. Please call init() first');
     self._readyState = -1;
@@ -6992,6 +6982,16 @@ Skylink.prototype._loadInfo = function() {
     return;
   }
   adapter.webRTCReady(function () {
+    if (!window.RTCPeerConnection) {
+      log.error('WebRTC not supported. Please upgrade your browser');
+      self._readyState = -1;
+      self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+        status: null,
+        content: 'WebRTC not available',
+        errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
+      }, self._selectedRoom);
+      return;
+    }
     self._readyState = 1;
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING, null, self._selectedRoom);
     self._requestServerInfo('GET', self._path, function(status, response) {
@@ -12144,17 +12144,19 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
     }
     self._trigger('streamEnded', self._user.sid || null, self.getPeerInfo(), true, !!isScreenSharing);
   };
-  stream.onended = streamEnded;
 
+  // chrome uses the new specs
+  if (window.webrtcDetectedBrowser === 'chrome' || window.webrtcDetectedBrowser === 'opera') {
+    stream.oninactive = streamEnded;
   // Workaround for local stream.onended because firefox has not yet implemented it
-  if (window.webrtcDetectedBrowser === 'firefox') {
-    stream.onended = setInterval(function () {
+  } else if (window.webrtcDetectedBrowser === 'firefox') {
+    stream.endedInterval = setInterval(function () {
       if (typeof stream.recordedTime === 'undefined') {
         stream.recordedTime = 0;
       }
 
       if (stream.recordedTime === stream.currentTime) {
-        clearInterval(stream.onended);
+        clearInterval(stream.endedInterval);
         // trigger that it has ended
         streamEnded();
 
@@ -12163,6 +12165,8 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
       }
 
     }, 1000);
+  } else {
+    stream.onended = streamEnded;
   }
 
   // check if readyStateChange is done
@@ -13908,16 +13912,12 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
  * @since 0.6.0
  */
 Skylink.prototype.stopScreen = function () {
-  var endSession = false;
-
   if (this._mediaScreen && this._mediaScreen !== null) {
-    endSession = !!this._mediaScreen.endSession;
-
     this._stopLocalMediaStreams({
       screenshare: true
     });
 
-    if (!endSession) {
+    if (this._inRoom) {
       if (this._hasMCU) {
         this._restartMCUConnection();
       } else {
