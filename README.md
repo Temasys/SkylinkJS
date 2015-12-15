@@ -9,7 +9,7 @@ You'll need a Temasys Developer Account and an App key to use this. [Register he
 - Chrome `47`. _Earlier versions `45+`_
 - Firefox `43`. _Earlier versions `40+`_
 - Opera `34`. _Earlier versions `32+`_
-- Plugin `v0.8.862+`
+- Plugin `v0.8.863+`
   - Safari `9`. _Earlier versions `7+`_
   - IE `11`. _Earlier versions `9+`_
 
