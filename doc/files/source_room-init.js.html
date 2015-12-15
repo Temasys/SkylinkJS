@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.4</title>
+    <title>SkylinkJS 0.6.5</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.4</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.5</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -826,16 +826,6 @@ Skylink.prototype._loadInfo = function() {
     }, self._selectedRoom);
     return;
   }
-  if (!window.RTCPeerConnection) {
-    log.error(&#x27;WebRTC not supported. Please upgrade your browser&#x27;);
-    self._readyState = -1;
-    self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
-      status: null,
-      content: &#x27;WebRTC not available&#x27;,
-      errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
-    }, self._selectedRoom);
-    return;
-  }
   if (!self._path) {
     log.error(&#x27;Skylink is not initialised. Please call init() first&#x27;);
     self._readyState = -1;
@@ -847,6 +837,16 @@ Skylink.prototype._loadInfo = function() {
     return;
   }
   adapter.webRTCReady(function () {
+    if (!window.RTCPeerConnection) {
+      log.error(&#x27;WebRTC not supported. Please upgrade your browser&#x27;);
+      self._readyState = -1;
+      self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
+        status: null,
+        content: &#x27;WebRTC not available&#x27;,
+        errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
+      }, self._selectedRoom);
+      return;
+    }
     self._readyState = 1;
     self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.LOADING, null, self._selectedRoom);
     self._requestServerInfo(&#x27;GET&#x27;, self._path, function(status, response) {
