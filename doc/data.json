@@ -2,10 +2,19 @@
     "project": {
         "name": "skylinkjs",
         "description": "SkylinkJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.4",
+        "version": "0.6.5",
         "url": "https://temasys.github.io/"
     },
     "files": {
+        "source/template/constants.js": {
+            "name": "source/template/constants.js",
+            "modules": {},
+            "classes": {},
+            "fors": {
+                "Skylink": 1
+            },
+            "namespaces": {}
+        },
         "source/template/header.js": {
             "name": "source/template/header.js",
             "modules": {},
@@ -192,6 +201,206 @@
         }
     },
     "classitems": [
+        {
+            "file": "source/template/constants.js",
+            "line": 1,
+            "description": "These are the list of available video codecs settings that Skylink would use\n  when streaming video stream with Peers.\n- The video codec would be used if the self and Peer's browser supports the selected codec.\n- This would default to the browser selected codec. In most cases, option <code>VP8</code> is\n  used by default.",
+            "itemtype": "attribute",
+            "name": "VIDEO_CODEC",
+            "params": [
+                {
+                    "name": "AUTO",
+                    "description": "<small><b>DEFAULT</b> | Value <code>\"auto\"</code></small>\n  The option to let Skylink use any video codec selected by the browser generated session description.",
+                    "type": "String"
+                },
+                {
+                    "name": "VP8",
+                    "description": "<small>Value <code>\"VP8\"</code></small>\n  The option to let Skylink use the [VP8](https://en.wikipedia.org/wiki/VP8) codec.<br>\n  This is the common and mandantory video codec used by most browsers.",
+                    "type": "String"
+                },
+                {
+                    "name": "H264",
+                    "description": "<small>Value <code>\"H264\"</code></small>\n  The option to let Skylink use the [H264](https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC) codec.<br>\n  This only works if the browser supports the H264 video codec.",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "component": "Stream",
+            "since": "0.5.10",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/template/constants.js",
+            "line": 28,
+            "description": "These are the list of available audio codecs settings that Skylink would use\n  when streaming audio stream with Peers.\n- The audio codec would be used if the self and Peer's browser supports the selected codec.\n- This would default to the browser selected codec. In most cases, option <code>OPUS</code> is\n  used by default.",
+            "itemtype": "attribute",
+            "name": "AUDIO_CODEC",
+            "params": [
+                {
+                    "name": "AUTO",
+                    "description": "<small><b>DEFAULT</b> | Value <code>\"auto\"</code></small>\n  The option to let Skylink use any audio codec selected by the browser generated session description.",
+                    "type": "String"
+                },
+                {
+                    "name": "OPUS",
+                    "description": "<small>Value <code>\"opus\"</code></small>\n  The option to let Skylink use the [OPUS](https://en.wikipedia.org/wiki/Opus_(audio_format)) codec.<br>\n  This is the common and mandantory audio codec used.",
+                    "type": "String"
+                },
+                {
+                    "name": "ISAC",
+                    "description": "<small>Value <code>\"ISAC\"</code></small>\n  The option to let Skylink use the [iSAC](https://en.wikipedia.org/wiki/Internet_Speech_Audio_Codec).<br>\n  This only works if the browser supports the iSAC video codec.",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "component": "Stream",
+            "since": "0.5.10",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/template/constants.js",
+            "line": 55,
+            "description": "Stores the preferred Peer connection streaming audio codec.",
+            "itemtype": "attribute",
+            "name": "_selectedAudioCodec",
+            "type": "String",
+            "default": "Skylink.AUDIO_CODEC.AUTO",
+            "access": "private",
+            "tagname": "",
+            "component": "Stream",
+            "since": "0.5.10",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/template/constants.js",
+            "line": 67,
+            "description": "Stores the preferred Peer connection streaming video codec.",
+            "itemtype": "attribute",
+            "name": "_selectedVideoCodec",
+            "type": "String",
+            "default": "Skylink.VIDEO_CODEC.AUTO",
+            "access": "private",
+            "tagname": "",
+            "component": "Stream",
+            "since": "0.5.10",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/template/constants.js",
+            "line": 80,
+            "description": "These are the list of suggested video resolutions that Skylink should configure\n  when retrieving self user media video stream.\n- Setting the resolution may not force set the resolution provided as it\n  depends on the how the browser handles the resolution.\n- It's recommended to use video resolution option to maximum <code>FHD</code>, as the other\n  resolution options may be unrealistic and create performance issues. However, we provide them\n  to allow developers to test with the browser capability, but do use it at your own risk.\n- The higher the resolution, the more CPU usage might be used, hence it's recommended to\n  use the default option <code>VGA</code>.\n- This follows the\n  [Wikipedia Graphics display resolution page](https://en.wikipedia.org/wiki/Graphics_display_resolution#Video_Graphics_Array)",
+            "params": [
+                {
+                    "name": "QQVGA",
+                    "description": "<small>Value <code>{ width: 160, height: 120 }</code> | Aspect Ratio <code>4:3</code></small>\n  The option to use QQVGA resolution.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "HQVGA",
+                    "description": "<small>Value <code>{ width: 240, height: 160 }</code> | Aspect Ratio <code>3:2</code></small>\n  The option to use HQVGA resolution.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "QVGA",
+                    "description": "<small>Value <code>{ width: 320, height: 240 }</code> | Aspect Ratio <code>4:3</code></small>\n  The option to use QVGA resolution.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "WQVGA",
+                    "description": "<small>Value <code>{ width: 384, height: 240 }</code> | Aspect Ratio <code>16:10</code></small>\n  The option to use WQVGA resolution.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "HVGA",
+                    "description": "<small>Value <code>{ width: 480, height: 320 }</code> | Aspect Ratio <code>3:2</code></small>\n  The option to use HVGA resolution.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "VGA",
+                    "description": "<small><b>DEFAULT</b> | Value <code>{ width: 640, height: 480 }</code> | Aspect Ratio <code>4:3</code></small>\n  The option to use VGA resolution.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "WVGA",
+                    "description": "<small>Value <code>{ width: 768, height: 480 }</code> | Aspect Ratio <code>16:10</code></small>\n  The option to use WVGA resolution.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "FWVGA",
+                    "description": "<small>Value <code>{ width: 854, height: 480 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use FWVGA resolution.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "SVGA",
+                    "description": "<small>Value <code>{ width: 800, height: 600 }</code> | Aspect Ratio <code>4:3</code></small>\n  The option to use SVGA resolution.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "DVGA",
+                    "description": "<small>Value <code>{ width: 960, height: 640 }</code> | Aspect Ratio <code>3:2</code></small>\n  The option to use DVGA resolution.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "WSVGA",
+                    "description": "<small>Value <code>{ width: 1024, height: 576 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use WSVGA resolution.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "HD",
+                    "description": "<small>Value <code>{ width: 1280, height: 720 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use HD resolution.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "HDPLUS",
+                    "description": "<small>Value <code>{ width: 1600, height: 900 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use HDPLUS resolution.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "FHD",
+                    "description": "<small>Value <code>{ width: 1920, height: 1080 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use FHD resolution.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "QHD",
+                    "description": "<small>Value <code>{ width: 2560, height: 1440 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use QHD resolution.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "WQXGAPLUS",
+                    "description": "<small>Value <code>{ width: 3200, height: 1800 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use WQXGAPLUS resolution.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "UHD",
+                    "description": "<small>Value <code>{ width: 3840, height: 2160 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use UHD resolution.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "UHDPLUS",
+                    "description": "<small>Value <code>{ width: 5120, height: 2880 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use UHDPLUS resolution.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "FUHD",
+                    "description": "<small>Value <code>{ width: 7680, height: 4320 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use FUHD resolution.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "QUHD",
+                    "description": "<small>Value <code>{ width: 15360, height: 8640 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use QUHD resolution.",
+                    "type": "JSON"
+                }
+            ],
+            "itemtype": "attribute",
+            "name": "VIDEO_RESOLUTION",
+            "type": "JSON",
+            "readonly": "",
+            "component": "Stream",
+            "since": "0.5.6",
+            "class": "Skylink"
+        },
         {
             "file": "source/template/header.js",
             "line": 181,
@@ -2085,7 +2294,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2163,
+            "line": 2168,
             "description": "Starts a [data URI](https://developer.mozilla.org/en-US/docs/Web/API/FileReader\n  /readAsDataURL) transfer with Peers using the DataChannel connection.\n- The receiving Peers have the option to accept or reject the data transfer with\n  <a href=\"#method_acceptDataTransfer\">acceptDataTransfer()</a>.\n- For Peers connecting from our mobile platforms\n  (<a href=\"http://skylink.io/ios/\">iOS</a> / <a href=\"http://skylink.io/android/\">Android</a>),\n  the DataChannel connection channel type would be <code>DATA_CHANNEL_TYPE.MESSAGING</code>.<br>\n  For Peers connecting from the Web platform, the DataChannel connection channel type would be\n <code>DATA_CHANNEL_TYPE.DATA</code>.",
             "itemtype": "method",
             "name": "sendURLData",
@@ -11290,7 +11499,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 528,
+            "line": 532,
             "description": "Handles the event when access to self user media MediaStream has failed.",
             "itemtype": "method",
             "name": "_onUserMediaError",
@@ -11324,7 +11533,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 570,
+            "line": 574,
             "description": "Handles the event when remote MediaStream is received from Peer connection.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -11356,7 +11565,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 617,
+            "line": 621,
             "description": "Parses the audio stream settings for self provided.",
             "itemtype": "method",
             "name": "_parseAudioStreamSettings",
@@ -11396,7 +11605,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 676,
+            "line": 680,
             "description": "Parses the video stream settings for self provided.",
             "itemtype": "method",
             "name": "_parseVideoStreamSettings",
@@ -11462,7 +11671,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 777,
+            "line": 781,
             "description": "Parses the streaming bandwidth settings for self provided.",
             "itemtype": "method",
             "name": "_parseBandwidthSettings",
@@ -11502,7 +11711,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 817,
+            "line": 821,
             "description": "Parses the <code>mediaStatus</code> settings for self provided.",
             "itemtype": "method",
             "name": "_parseMutedSettings",
@@ -11598,7 +11807,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 885,
+            "line": 889,
             "description": "Parses the default stream settings received from\n  the platform signaling.",
             "itemtype": "method",
             "name": "_parseDefaultMediaStreamSettings",
@@ -11631,7 +11840,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 919,
+            "line": 923,
             "description": "Parses the provided stream settings for self provided.",
             "itemtype": "method",
             "name": "_parseMediaStreamSettings",
@@ -11743,7 +11952,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1002,
+            "line": 1006,
             "description": "Sends self selected Stream object to current Peer connections.\nIf {{#crossLink \"Skylink/_mediaScreen:attribute\"}}_mediaScreen{{/crossLink}}\n  is not empty, it will send the screensharing stream, else it will\n  send the {{#crossLink \"Skylink/_mediaStream:attribute\"}}_mediaStream{{/crossLink}}\n  if is not empty.\nIf self does not have any Stream object to send, it will a connection without\n  any remote Stream sent to the Peer connection.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -11762,7 +11971,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1059,
+            "line": 1063,
             "description": "Stops self user media Stream object attached to Skylink.",
             "itemtype": "method",
             "name": "stopStream",
@@ -11775,7 +11984,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1075,
+            "line": 1079,
             "description": "Handles the muting of audio and video streams in\n  {{#crossLink \"Skylink/_mediaStream:attribute\"}}_mediaStream{{/crossLink}},\n  {{#crossLink \"Skylink/_mediaScreen:attribute\"}}_mediaScreen{{/crossLink}} and\n  {{#crossLink \"Skylink/_mediaScreenClone:attribute\"}}_mediaScreenClone{{/crossLink}},",
             "itemtype": "method",
             "name": "_muteLocalMediaStreams",
@@ -11790,7 +11999,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1187,
+            "line": 1191,
             "description": "Handles the stopping of audio and video streams.",
             "itemtype": "method",
             "name": "_stopLocalMediaStreams",
@@ -11824,7 +12033,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1277,
+            "line": 1281,
             "description": "Waits for self MediaStream object to be attached to Skylink based\n  on the options provided before firing the callback to indicate\n  that self Stream object is received.\nThis will stop any currently attached Stream object to Skylink.",
             "itemtype": "method",
             "name": "_waitForLocalMediaStream",
@@ -11963,7 +12172,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1414,
+            "line": 1418,
             "description": "Gets self user media Stream object to attach to Skylink.\nDo not invoke this function when user has already joined a room as\n  this may affect any currently attached stream. You may use\n {{#crossLink \"Skylink/sendStream:method\"}}sendStream(){{/crossLink}}\n instead if self is already in the room, and allows application to\n attach application own MediaStream object to Skylink.",
             "itemtype": "method",
             "name": "getUserMedia",
@@ -12081,7 +12290,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1643,
+            "line": 1647,
             "description": "Replaces the currently attached Stream object in Skylink and refreshes all\n  connection with Peer connections to send the updated Stream object.\nThe application may provide their own MediaStream object to send to\n  all PeerConnections connection.\nReference {{#crossLink \"Skylink/refreshConnection:method\"}}refreshConnection(){{/crossLink}}\n   on the events triggered and restart mechanism.",
             "itemtype": "method",
             "name": "sendStream",
@@ -12198,7 +12407,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1876,
+            "line": 1880,
             "description": "Mutes the currently attached Stream object in Skylink.",
             "itemtype": "method",
             "name": "muteStream",
@@ -12235,7 +12444,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1978,
+            "line": 1982,
             "description": "Unmutes the currently attached Stream object audio stream.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -12251,7 +12460,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1996,
+            "line": 2000,
             "description": "Mutes the currently attached Stream object audio stream.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -12267,7 +12476,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2014,
+            "line": 2018,
             "description": "Unmutes the currently attached Stream object video stream.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -12283,7 +12492,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2032,
+            "line": 2036,
             "description": "Mutes the currently attached Stream object video stream.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -12298,7 +12507,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2049,
+            "line": 2053,
             "description": "Shares the current screen with Peer connections and will refresh all\n   Peer connections to send the screensharing Stream object with\n   <code>HTTPS</code> protocol accessing application.\nReference {{#crossLink \"Skylink/refreshConnection:method\"}}refreshConnection(){{/crossLink}}\n   on the events triggered and restart mechanism.\nThis will require our own Temasys Skylink extension to do screensharing.\nFor screensharing feature in IE / Safari with our Temasys Plugin, please\n  [contact us](https://www.temasys.com.sg/contact-us).\nCurrently, Opera does not support screensharing feature.\nThis does not replace the currently attached user media Stream object in Skylink.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -12339,7 +12548,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2221,
+            "line": 2225,
             "description": "Stops self screensharing Stream object attached to Skylink.\nIf user media Stream object is available, Skylink will refresh all\n   Peer connections to send the user media Stream object.\nReference {{#crossLink \"Skylink/refreshConnection:method\"}}refreshConnection(){{/crossLink}}\n   on the events triggered and restart mechanism.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -12490,6 +12699,26 @@
         }
     ],
     "warnings": [
+        {
+            "message": "unknown tag: component",
+            "line": " source/template/constants.js:1"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/template/constants.js:28"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/template/constants.js:55"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/template/constants.js:67"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/template/constants.js:80"
+        },
         {
             "message": "unknown tag: component",
             "line": " source/data-channel.js:1"
@@ -12728,11 +12957,11 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:2163"
+            "line": " source/data-transfer.js:2168"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:2163"
+            "line": " source/data-transfer.js:2168"
         },
         {
             "message": "unknown tag: component",
@@ -13808,143 +14037,143 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:528"
+            "line": " source/stream-media.js:532"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:528"
+            "line": " source/stream-media.js:532"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:570"
+            "line": " source/stream-media.js:574"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:570"
+            "line": " source/stream-media.js:574"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:617"
+            "line": " source/stream-media.js:621"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:676"
+            "line": " source/stream-media.js:680"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:777"
+            "line": " source/stream-media.js:781"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:817"
+            "line": " source/stream-media.js:821"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:885"
+            "line": " source/stream-media.js:889"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:919"
+            "line": " source/stream-media.js:923"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1002"
+            "line": " source/stream-media.js:1006"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1059"
+            "line": " source/stream-media.js:1063"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1277"
+            "line": " source/stream-media.js:1281"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1277"
+            "line": " source/stream-media.js:1281"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1414"
+            "line": " source/stream-media.js:1418"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1414"
+            "line": " source/stream-media.js:1418"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1643"
+            "line": " source/stream-media.js:1647"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1643"
+            "line": " source/stream-media.js:1647"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1876"
+            "line": " source/stream-media.js:1880"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1876"
+            "line": " source/stream-media.js:1880"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1978"
+            "line": " source/stream-media.js:1982"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1978"
+            "line": " source/stream-media.js:1982"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1978"
+            "line": " source/stream-media.js:1982"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1996"
+            "line": " source/stream-media.js:2000"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1996"
+            "line": " source/stream-media.js:2000"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1996"
+            "line": " source/stream-media.js:2000"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2014"
+            "line": " source/stream-media.js:2018"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2014"
+            "line": " source/stream-media.js:2018"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2014"
+            "line": " source/stream-media.js:2018"
         },
         {
             "message": "unknown tag: depcreated",
-            "line": " source/stream-media.js:2032"
+            "line": " source/stream-media.js:2036"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2032"
+            "line": " source/stream-media.js:2036"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2032"
+            "line": " source/stream-media.js:2036"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2049"
+            "line": " source/stream-media.js:2053"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2049"
+            "line": " source/stream-media.js:2053"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2221"
+            "line": " source/stream-media.js:2225"
         },
         {
             "message": "unknown tag: component",

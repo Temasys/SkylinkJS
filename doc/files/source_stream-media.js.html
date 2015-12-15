@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.4</title>
+    <title>SkylinkJS 0.6.5</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.4</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.5</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -551,17 +551,19 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
     }
     self._trigger(&#x27;streamEnded&#x27;, self._user.sid || null, self.getPeerInfo(), true, !!isScreenSharing);
   };
-  stream.onended = streamEnded;
 
+  // chrome uses the new specs
+  if (window.webrtcDetectedBrowser === &#x27;chrome&#x27; || window.webrtcDetectedBrowser === &#x27;opera&#x27;) {
+    stream.oninactive = streamEnded;
   // Workaround for local stream.onended because firefox has not yet implemented it
-  if (window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
-    stream.onended = setInterval(function () {
+  } else if (window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
+    stream.endedInterval = setInterval(function () {
       if (typeof stream.recordedTime === &#x27;undefined&#x27;) {
         stream.recordedTime = 0;
       }
 
       if (stream.recordedTime === stream.currentTime) {
-        clearInterval(stream.onended);
+        clearInterval(stream.endedInterval);
         // trigger that it has ended
         streamEnded();
 
@@ -570,6 +572,8 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
       }
 
     }, 1000);
+  } else {
+    stream.onended = streamEnded;
   }
 
   // check if readyStateChange is done
@@ -2315,16 +2319,12 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
  * @since 0.6.0
  */
 Skylink.prototype.stopScreen = function () {
-  var endSession = false;
-
   if (this._mediaScreen &amp;&amp; this._mediaScreen !== null) {
-    endSession = !!this._mediaScreen.endSession;
-
     this._stopLocalMediaStreams({
       screenshare: true
     });
 
-    if (!endSession) {
+    if (this._inRoom) {
       if (this._hasMCU) {
         this._restartMCUConnection();
       } else {

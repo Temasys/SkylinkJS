@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.4</title>
+    <title>SkylinkJS 0.6.5</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.4</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.5</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -541,7 +541,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
         dataType: dataInfo.dataType,
         chunkSize: binaryChunkSize,
         timeout: dataInfo.timeout,
-        target: self._hasMCU ? &#x27;MCU&#x27; : targetPeerId,
+        target: self._hasMCU ? targetPeerList : targetPeerId,
         isPrivate: dataInfo.isPrivate
       };
 
@@ -1807,12 +1807,12 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
         isPrivate: isPrivate
       }, true);
 
-      //if (!self._hasMCU) {
+      if (!self._hasMCU) {
         listOfPeersChannels[peerId] =
           self._sendBlobDataToPeer(data, dataInfo, peerId);
-      /*} else {
+      } else {
         listOfPeersChannels[peerId] = self._dataChannels[peerId].main.label;
-      }*/
+      }
 
       noOfPeersSent++;
 
@@ -1824,9 +1824,9 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
   }
 
   // if has MCU
-  /*if (self._hasMCU) {
+  if (self._hasMCU) {
     self._sendBlobDataToPeer(data, dataInfo, listOfPeers, isPrivate, transferId);
-  }*/
+  }
 
   if (noOfPeersSent === 0) {
     error = &#x27;Failed sending data as there is no available datachannels to send data&#x27;;
@@ -2196,33 +2196,38 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
   }
 
   // sending public message to MCU to relay. MCU case only
-  if (self._hasMCU &amp;&amp; !isPrivate) {
-    log.log([&#x27;MCU&#x27;, null, null, &#x27;Relaying P2P message to peers&#x27;]);
+  if (self._hasMCU) {
+    if (isPrivate) {
+      log.log([&#x27;MCU&#x27;, null, null, &#x27;Relaying private P2P message to peers&#x27;], listOfPeers);
+      self._sendDataChannelMessage(&#x27;MCU&#x27;, {
+        type: self._DC_PROTOCOL_TYPE.MESSAGE,
+        isPrivate: isPrivate,
+        sender: self._user.sid,
+        target: listOfPeers,
+        data: message
+      });
+    } else {
+      log.log([&#x27;MCU&#x27;, null, null, &#x27;Relaying P2P message to peers&#x27;]);
 
-    self._sendDataChannelMessage(&#x27;MCU&#x27;, {
-      type: self._DC_PROTOCOL_TYPE.MESSAGE,
-      isPrivate: isPrivate,
-      sender: self._user.sid,
-      target: &#x27;MCU&#x27;,
-      data: message
-    });
-  }
-
-  for (var i = 0; i &lt; listOfPeers.length; i++) {
-    var peerId = listOfPeers[i];
-    var useChannel = (self._hasMCU) ? &#x27;MCU&#x27; : peerId;
-
-    // Ignore MCU peer
-    if (peerId === &#x27;MCU&#x27;) {
-      continue;
+      self._sendDataChannelMessage(&#x27;MCU&#x27;, {
+        type: self._DC_PROTOCOL_TYPE.MESSAGE,
+        isPrivate: isPrivate,
+        sender: self._user.sid,
+        target: &#x27;MCU&#x27;,
+        data: message
+      });
     }
+  } else {
+    for (var i = 0; i &lt; listOfPeers.length; i++) {
+      var peerId = listOfPeers[i];
+      var useChannel = (self._hasMCU) ? &#x27;MCU&#x27; : peerId;
 
-    if (isPrivate || !self._hasMCU) {
-      if (self._hasMCU) {
-        log.log([peerId, null, useChannel, &#x27;Sending private P2P message to peer&#x27;]);
-      } else {
-        log.log([peerId, null, useChannel, &#x27;Sending P2P message to peer&#x27;]);
+      // Ignore MCU peer
+      if (peerId === &#x27;MCU&#x27;) {
+        continue;
       }
+
+      log.log([peerId, null, useChannel, &#x27;Sending P2P message to peer&#x27;]);
 
       self._sendDataChannelMessage(useChannel, {
         type: self._DC_PROTOCOL_TYPE.MESSAGE,
