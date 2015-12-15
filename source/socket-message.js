@@ -1191,20 +1191,23 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }
 
-  if (pc.localDescription ? !!pc.localDescription.sdp : false) {
-  	log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
-  		pc.localDescription);
+  /*if (pc.localDescription ? !!pc.localDescription.sdp : false) {
+    log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
+      pc.localDescription);
     return;
-  }
+  }*/
 
   log.log([targetMid, null, message.type, 'Received offer from peer. ' +
     'Session description:'], message.sdp);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
-  var offer = new window.RTCSessionDescription(message);
+  var offer = new window.RTCSessionDescription({
+    type: message.type,
+    sdp: message.sdp
+  });
   log.log([targetMid, 'RTCSessionDescription', message.type,
     'Session description object created'], offer);
 
-  pc.setRemoteDescription(new window.RTCSessionDescription(offer), function() {
+  pc.setRemoteDescription(offer, function() {
     log.debug([targetMid, 'RTCSessionDescription', message.type, 'Remote description set']);
     pc.setOffer = 'remote';
     self._addIceCandidateFromQueue(targetMid);
@@ -1214,6 +1217,7 @@ Skylink.prototype._offerHandler = function(message) {
     log.error([targetMid, null, message.type, 'Failed setting remote description:'], error);
   });
 };
+
 
 /**
  * Handles the CANDIDATE Protocol message event received from the platform signaling.
@@ -1336,7 +1340,10 @@ Skylink.prototype._answerHandler = function(message) {
     'Received answer from peer. Session description:'], message.sdp);
 
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
-  var answer = new window.RTCSessionDescription(message);
+  var answer = new window.RTCSessionDescription({
+    type: message.type,
+    sdp: message.sdp
+  });
 
   log.log([targetMid, 'RTCSessionDescription', message.type,
     'Session description object created'], answer);
@@ -1349,9 +1356,9 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }
 
-  if (pc.remoteDescription ? !!pc.remoteDescription.sdp : false) {
-  	log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
-  		pc.remoteDescription);
+  /*if (pc.remoteDescription ? !!pc.remoteDescription.sdp : false) {
+    log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
+      pc.remoteDescription);
     return;
   }
 
@@ -1359,17 +1366,77 @@ Skylink.prototype._answerHandler = function(message) {
     log.error([targetMid, null, message.type, 'Unable to set peer connection ' +
       'at signalingState "stable". Ignoring remote answer'], pc.signalingState);
     return;
-  }
+  }*/
 
   // if firefox and peer is mcu, replace the sdp to suit mcu needs
   if (window.webrtcDetectedType === 'moz' && targetMid === 'MCU') {
-    message.sdp = message.sdp.replace(/ generation 0/g, '');
-    message.sdp = message.sdp.replace(/ udp /g, ' UDP ');
+    answer.sdp = answer.sdp.replace(/ generation 0/g, '');
+    answer.sdp = answer.sdp.replace(/ udp /g, ' UDP ');
   }
-  pc.setRemoteDescription(new window.RTCSessionDescription(answer), function() {
+
+  var agent = self.getPeerInfo(targetMid).agent;
+
+  // for this case, this is because firefox uses Unified Plan and Chrome uses
+  // Plan B. we have to remodify this a bit to let the non-ff detect as new mediastream
+  // as chrome/opera/safari detects it as default due to missing ssrc specified as used in plan B.
+  if (window.webrtcDetectedBrowser !== 'firefox' && agent.name === 'firefox' &&
+    pc.localDescription.sdp.indexOf('a=msid-semantic: WMS *') === -1 &&
+    answer.sdp.indexOf('a=msid-semantic:WMS *') > 0) {
+    // start parsing
+    var sdpLines = answer.sdp.split('\r\n');
+    var streamId = '';
+    var replaceSSRCSemantic = -1;
+    var i;
+    var trackId = '';
+
+    var parseTracksSSRC = function (track) {
+      for (i = 0, trackId = ''; i < sdpLines.length; i++) {
+        if (!!trackId) {
+          if (sdpLines[i].indexOf('a=ssrc:') === 0) {
+            var ssrcId = sdpLines[i].split(':')[1].split(' ')[0];
+            sdpLines.splice(i+1, 0, 'a=ssrc:' + ssrcId +  ' msid:' + streamId + ' ' + trackId,
+              'a=ssrc:' + ssrcId + ' mslabel:default',
+              'a=ssrc:' + ssrcId + ' label:' + trackId);
+            break;
+          } else if (sdpLines[i].indexOf('a=mid:') === 0) {
+            break;
+          }
+        } else if (sdpLines[i].indexOf('a=msid:') === 0) {
+          if (i > 0 && sdpLines[i-1].indexOf('a=mid:' + track) === 0) {
+            var parts = sdpLines[i].split(':')[1].split(' ');
+
+            streamId = parts[0];
+            trackId = parts[1];
+            replaceSSRCSemantic = true;
+          }
+        }
+      }
+    };
+
+    parseTracksSSRC('video');
+    parseTracksSSRC('audio');
+
+    if (replaceSSRCSemantic) {
+      for (i = 0; i < sdpLines.length; i++) {
+        if (sdpLines[i].indexOf('a=msid-semantic:WMS ') === 0) {
+          var parts = sdpLines[i].split(' ');
+          parts[parts.length - 1] = streamId;
+          sdpLines[i] = parts.join(' ');
+          break;
+        }
+      }
+
+    }
+    answer.sdp = sdpLines.join('\r\n');
+
+    log.debug([targetMid, null, message.type, 'Parsed remote description from firefox'], answer);
+  }
+
+  pc.setRemoteDescription(answer, function() {
     log.debug([targetMid, null, message.type, 'Remote description set']);
     pc.setAnswer = 'remote';
     self._addIceCandidateFromQueue(targetMid);
+
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
     log.error([targetMid, null, message.type, 'Failed setting remote description:'], error);

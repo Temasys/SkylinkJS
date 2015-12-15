@@ -202,15 +202,22 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       beOfferer = true;
     }
 
+    unifiedOfferConstraints.mandatory.iceRestart = true;
     peerBrowser.os = peerBrowser.os || '';
 
-    // for windows firefox to mac chrome interopability
-    if (window.webrtcDetectedBrowser === 'firefox' &&
-      window.navigator.platform.indexOf('Win') === 0 &&
-      peerBrowser.agent !== 'firefox' &&
-      peerBrowser.agent !== 'MCU' &&
-      peerBrowser.os.indexOf('Mac') === 0) {
-      beOfferer = false;
+    if (peerBrowser.agent !== 'MCU') {
+      /*
+       // for windows firefox to mac chrome interopability
+      if (window.webrtcDetectedBrowser === 'firefox' &&
+        window.navigator.platform.indexOf('Win') === 0 &&
+        peerBrowser.agent !== 'firefox' &&
+        peerBrowser.agent !== 'MCU' &&
+        peerBrowser.os.indexOf('Mac') === 0) {
+        beOfferer = false;
+      }*/
+      if (window.webrtcDetectedBrowser === 'firefox' && peerBrowser.agent !== 'firefox') {
+        beOfferer = false;
+      }
     }
 
     if (beOfferer) {
@@ -422,13 +429,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   var self = this;
   var pc = self._peerConnections[targetMid];
 
-  if (!sessionDescription) {
-    log.log([targetMid, 'RTCSessionDescription', null,
-      'Ignoring session description as it is empty'], sessionDescription);
-    return;
-  }
-
-  if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && pc.setAnswer) {
+  /*if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && pc.setAnswer) {
     log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
       'Ignoring session description. User has already set local answer'], sessionDescription);
     return;
@@ -437,7 +438,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
       'Ignoring session description. User has already set local offer'], sessionDescription);
     return;
-  }
+  }*/
 
   // NOTE ALEX: handle the pc = 0 case, just to be sure
   var sdpLines = sessionDescription.sdp.split('\r\n');
@@ -499,6 +500,24 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   } else {
     log.log([targetMid, null, null, 'Not setting any audio codec']);
   }
+
+  // NOTE: supports one stream per pc only
+  /*var defaultStreamIndex = sdpLines.indexOf('a=msid-semantic: WMS default');
+  if (defaultStreamIndex > -1 && pc.getLocalStreams().length > 0) {
+    // get stream
+    var stream = pc.getLocalStreams()[0];
+    // replace default with correct id
+    sdpLines[defaultStreamIndex].replace(/default/g, stream.id);
+    // loop for the rest of the related defaults and replace with ID
+    for (var i = 0; i < sdpLines.length; i++) {
+      if (sdpLines[i].indexOf('msid:default') > 1) {
+        sdpLines[i].replace(/msid:default/g, 'msid:' + stream.id);
+      }
+      if (sdpLines[i].indexOf('mslabel:default') > 1) {
+        sdpLines[i].replace(/mslabel:default/g, 'mslabel:' + stream.id);
+      }
+    }
+  }*/
 
   sessionDescription.sdp = sdpLines.join('\r\n');
 
