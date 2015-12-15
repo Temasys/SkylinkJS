@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.4 - Thu Nov 19 2015 18:59:49 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Tue Dec 15 2015 18:13:15 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8399,7 +8399,7 @@ if (navigator.mozGetUserMedia) {
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.4 - Thu Nov 19 2015 18:59:49 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Tue Dec 15 2015 18:13:15 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9669,7 +9669,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
         dataType: dataInfo.dataType,
         chunkSize: binaryChunkSize,
         timeout: dataInfo.timeout,
-        target: self._hasMCU ? 'MCU' : targetPeerId,
+        target: self._hasMCU ? targetPeerList : targetPeerId,
         isPrivate: dataInfo.isPrivate
       };
 
@@ -10935,12 +10935,12 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
         isPrivate: isPrivate
       }, true);
 
-      //if (!self._hasMCU) {
+      if (!self._hasMCU) {
         listOfPeersChannels[peerId] =
           self._sendBlobDataToPeer(data, dataInfo, peerId);
-      /*} else {
+      } else {
         listOfPeersChannels[peerId] = self._dataChannels[peerId].main.label;
-      }*/
+      }
 
       noOfPeersSent++;
 
@@ -10952,9 +10952,9 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
   }
 
   // if has MCU
-  /*if (self._hasMCU) {
+  if (self._hasMCU) {
     self._sendBlobDataToPeer(data, dataInfo, listOfPeers, isPrivate, transferId);
-  }*/
+  }
 
   if (noOfPeersSent === 0) {
     error = 'Failed sending data as there is no available datachannels to send data';
@@ -11324,33 +11324,38 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
   }
 
   // sending public message to MCU to relay. MCU case only
-  if (self._hasMCU && !isPrivate) {
-    log.log(['MCU', null, null, 'Relaying P2P message to peers']);
+  if (self._hasMCU) {
+    if (isPrivate) {
+      log.log(['MCU', null, null, 'Relaying private P2P message to peers'], listOfPeers);
+      self._sendDataChannelMessage('MCU', {
+        type: self._DC_PROTOCOL_TYPE.MESSAGE,
+        isPrivate: isPrivate,
+        sender: self._user.sid,
+        target: listOfPeers,
+        data: message
+      });
+    } else {
+      log.log(['MCU', null, null, 'Relaying P2P message to peers']);
 
-    self._sendDataChannelMessage('MCU', {
-      type: self._DC_PROTOCOL_TYPE.MESSAGE,
-      isPrivate: isPrivate,
-      sender: self._user.sid,
-      target: 'MCU',
-      data: message
-    });
-  }
-
-  for (var i = 0; i < listOfPeers.length; i++) {
-    var peerId = listOfPeers[i];
-    var useChannel = (self._hasMCU) ? 'MCU' : peerId;
-
-    // Ignore MCU peer
-    if (peerId === 'MCU') {
-      continue;
+      self._sendDataChannelMessage('MCU', {
+        type: self._DC_PROTOCOL_TYPE.MESSAGE,
+        isPrivate: isPrivate,
+        sender: self._user.sid,
+        target: 'MCU',
+        data: message
+      });
     }
+  } else {
+    for (var i = 0; i < listOfPeers.length; i++) {
+      var peerId = listOfPeers[i];
+      var useChannel = (self._hasMCU) ? 'MCU' : peerId;
 
-    if (isPrivate || !self._hasMCU) {
-      if (self._hasMCU) {
-        log.log([peerId, null, useChannel, 'Sending private P2P message to peer']);
-      } else {
-        log.log([peerId, null, useChannel, 'Sending P2P message to peer']);
+      // Ignore MCU peer
+      if (peerId === 'MCU') {
+        continue;
       }
+
+      log.log([peerId, null, useChannel, 'Sending P2P message to peer']);
 
       self._sendDataChannelMessage(useChannel, {
         type: self._DC_PROTOCOL_TYPE.MESSAGE,
@@ -15367,16 +15372,6 @@ Skylink.prototype._loadInfo = function() {
     }, self._selectedRoom);
     return;
   }
-  if (!window.RTCPeerConnection) {
-    log.error('WebRTC not supported. Please upgrade your browser');
-    self._readyState = -1;
-    self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-      status: null,
-      content: 'WebRTC not available',
-      errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
-    }, self._selectedRoom);
-    return;
-  }
   if (!self._path) {
     log.error('Skylink is not initialised. Please call init() first');
     self._readyState = -1;
@@ -15388,6 +15383,16 @@ Skylink.prototype._loadInfo = function() {
     return;
   }
   adapter.webRTCReady(function () {
+    if (!window.RTCPeerConnection) {
+      log.error('WebRTC not supported. Please upgrade your browser');
+      self._readyState = -1;
+      self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+        status: null,
+        content: 'WebRTC not available',
+        errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
+      }, self._selectedRoom);
+      return;
+    }
     self._readyState = 1;
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING, null, self._selectedRoom);
     self._requestServerInfo('GET', self._path, function(status, response) {
@@ -20540,17 +20545,19 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
     }
     self._trigger('streamEnded', self._user.sid || null, self.getPeerInfo(), true, !!isScreenSharing);
   };
-  stream.onended = streamEnded;
 
+  // chrome uses the new specs
+  if (window.webrtcDetectedBrowser === 'chrome' || window.webrtcDetectedBrowser === 'opera') {
+    stream.oninactive = streamEnded;
   // Workaround for local stream.onended because firefox has not yet implemented it
-  if (window.webrtcDetectedBrowser === 'firefox') {
-    stream.onended = setInterval(function () {
+  } else if (window.webrtcDetectedBrowser === 'firefox') {
+    stream.endedInterval = setInterval(function () {
       if (typeof stream.recordedTime === 'undefined') {
         stream.recordedTime = 0;
       }
 
       if (stream.recordedTime === stream.currentTime) {
-        clearInterval(stream.onended);
+        clearInterval(stream.endedInterval);
         // trigger that it has ended
         streamEnded();
 
@@ -20559,6 +20566,8 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
       }
 
     }, 1000);
+  } else {
+    stream.onended = streamEnded;
   }
 
   // check if readyStateChange is done
@@ -22304,16 +22313,12 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
  * @since 0.6.0
  */
 Skylink.prototype.stopScreen = function () {
-  var endSession = false;
-
   if (this._mediaScreen && this._mediaScreen !== null) {
-    endSession = !!this._mediaScreen.endSession;
-
     this._stopLocalMediaStreams({
       screenshare: true
     });
 
-    if (!endSession) {
+    if (this._inRoom) {
       if (this._hasMCU) {
         this._restartMCUConnection();
       } else {
