@@ -91,20 +91,15 @@ Skylink.prototype._retryCount = 0;
 Skylink.prototype._peerConnections = {};
 
 /**
- * Stores the list of Peer connection restart weights received
- *   that would be compared against to indicate if Peer connection
- *   should initiates a restart from the other connection end should.
- * The one that sends restart later is the one who initiates the restart.
- * @attribute _peerRestartPriorities
- * @param {Number} (#peerId) The Peer ID associated with the connection restart
- *   handshake reconnection weights. The weight is generated with <code>Date.valueOf()</code>.
- * @type JSON
+ * Stores the fixed weight for restart mechanism
+ * @attribute _peerRestartWeight
+ * @type Number
  * @private
  * @required
  * @for Skylink
  * @since 0.6.0
  */
-Skylink.prototype._peerRestartPriorities = {};
+Skylink.prototype._peerRestartWeight = Date.now();
 
 /**
  * Connects to the Peer.
@@ -251,7 +246,6 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   }
 
   delete self._peerConnectionHealth[peerId];
-  delete self._peerRestartPriorities[peerId];
 
   self._stopPeerConnectionHealthCheck(peerId);
 
@@ -265,66 +259,35 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
     }
 
     if (isSelfInitiatedRestart){
-      log.log([peerId, null, null, 'Renegotiating peer connection']);
+      log.log([peerId, null, null, 'Sending restart message to signaling server']);
 
-      self._peerRenegoCallbacks[peerId] = function (success, error) {
-        // delete the object reference
-        delete self._peerRenegoCallbacks[peerId];
-        // trigger the callback
-        if (error) {
-          log.error([peerId, 'RTCPeerConnection', null, 'Failed Re-negotiating'], error);
-          if (typeof callback === 'function') {
-            callback(null, error);
-          }
-        } else {
-          log.log([peerId, null, null, 'Sending restart message to signaling server']);
+      var lastRestart = Date.now() || function() { return +new Date(); };
 
-          var lastRestart = Date.now() || function() { return +new Date(); };
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.RESTART,
+        mid: self._user.sid,
+        rid: self._room.id,
+        agent: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion,
+        os: window.navigator.platform,
+        userInfo: self.getPeerInfo(),
+        target: peerId,
+        isConnectionRestart: !!isConnectionRestart,
+        lastRestart: lastRestart,
+        weight: self._peerRestartWeight,
+        receiveOnly: self._peerConnections[peerId].receiveOnly,
+        enableIceTrickle: self._enableIceTrickle,
+        enableDataChannel: self._enableDataChannel,
+        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+        explicit: !!explicit
+      });
 
-          var weight = (new Date()).valueOf();
-          self._peerRestartPriorities[peerId] = weight;
+      self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), false);
 
-          var offerSdp = null;
-
-          if (success && success.sdp) {
-            offerSdp = success.sdp;
-          }
-
-          self._sendChannelMessage({
-            type: self._SIG_MESSAGE_TYPE.RESTART,
-            mid: self._user.sid,
-            rid: self._room.id,
-            agent: window.webrtcDetectedBrowser,
-            version: window.webrtcDetectedVersion,
-            os: window.navigator.platform,
-            userInfo: self.getPeerInfo(),
-            offerSdp: offerSdp,
-            target: peerId,
-            isConnectionRestart: !!isConnectionRestart,
-            lastRestart: lastRestart,
-            weight: weight,
-            receiveOnly: self._peerConnections[peerId].receiveOnly,
-            enableIceTrickle: self._enableIceTrickle,
-            enableDataChannel: self._enableDataChannel,
-            sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-            explicit: !!explicit
-          });
-
-          self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), false);
-
-          if (typeof callback === 'function') {
-            log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
-            callback(null, null);
-          }
-        }
-      };
-
-      var agent = self.getPeerInfo(peerId).agent;
-      self._doOffer(peerId, {
-        agent: agent.name,
-        version: agent.version,
-        os: agent.os
-      }, true);
+      if (typeof callback === 'function') {
+        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
+        callback(null, null);
+      }
     } else {
       if (typeof callback === 'function') {
         log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback (receiving peer)']);
@@ -426,17 +389,11 @@ Skylink.prototype._removePeer = function(peerId) {
   if (typeof this._peerHSPriorities[peerId] !== 'undefined') {
     delete this._peerHSPriorities[peerId];
   }
-  if (typeof this._peerRestartPriorities[peerId] !== 'undefined') {
-    delete this._peerRestartPriorities[peerId];
-  }
   if (typeof this._peerInformations[peerId] !== 'undefined') {
     delete this._peerInformations[peerId];
   }
   if (typeof this._peerConnectionHealth[peerId] !== 'undefined') {
     delete this._peerConnectionHealth[peerId];
-  }
-  if (typeof this._peerRenegoCallbacks[peerId] !== 'undefined') {
-    delete this._peerRenegoCallbacks[peerId];
   }
   // close datachannel connection
   if (this._enableDataChannel) {
@@ -856,8 +813,6 @@ Skylink.prototype._restartMCUConnection = function(callback) {
 
       log.log([peerId, null, null, 'Sending restart message to signaling server']);
 
-      self._peerRestartPriorities[peerId] = weight;
-
       self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.RESTART,
         mid: self._user.sid,
@@ -869,7 +824,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         target: peerId, //'MCU',
         isConnectionRestart: false,
         lastRestart: lastRestart,
-        weight: weight,
+        weight: self._peerRestartWeight,
         receiveOnly: receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,

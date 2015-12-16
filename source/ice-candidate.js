@@ -140,19 +140,14 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
     // Disable Ice trickle option
     if (!self._enableIceTrickle || self._peerIceTrickleDisabled[targetMid]) {
       var sessionDescription = self._peerConnections[targetMid].localDescription;
-      // Trigger the re-negotation callback (after non-trickleICE)
-      if (typeof self._peerRenegoCallbacks[targetMid] === 'function') {
-        self._peerRenegoCallbacks[targetMid](sessionDescription, null);
-      } else {
-        self._sendChannelMessage({
-          type: sessionDescription.type,
-          sdp: sessionDescription.sdp,
-          mid: self._user.sid,
-          agent: window.webrtcDetectedBrowser,
-          target: targetMid,
-          rid: self._room.id
-        });
-      }
+      self._sendChannelMessage({
+        type: sessionDescription.type,
+        sdp: sessionDescription.sdp,
+        mid: self._user.sid,
+        agent: window.webrtcDetectedBrowser,
+        target: targetMid,
+        rid: self._room.id
+      });
     }
 
     // We should remove this.. this could be due to ICE failures

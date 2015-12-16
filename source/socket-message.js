@@ -949,18 +949,6 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  //Only consider peer's restart weight if self also sent a restart which cause a potential conflict
-  //Otherwise go ahead with peer's restart
-  if (self._peerRestartPriorities.hasOwnProperty(targetMid)){
-    //Peer's restart message was older --> ignore
-    if (self._peerRestartPriorities[targetMid] > message.weight){
-      log.log([targetMid, null, message.type, 'Peer\'s generated restart weight ' +
-          'is lesser than user\'s. Ignoring message'
-          ], this._peerRestartPriorities[targetMid] + ' > ' + message.weight);
-      return;
-    }
-  }
-
   // mcu has re-joined
   // NOTE: logic trip since _hasMCU flags are ignored, this could result in failure perhaps?
   if (targetMid === 'MCU') {
@@ -985,6 +973,8 @@ Skylink.prototype._restartHandler = function(message){
     os: message.os || ''
   };
 
+  var agent = self.getPeerInfo(targetMid).agent;
+
   // This variable is not used
   //var peerConnectionStateStable = false;
 
@@ -996,24 +986,44 @@ Skylink.prototype._restartHandler = function(message){
     os: message.os
   }, true, true, message.receiveOnly, message.sessionType === 'screensharing');*/
 
-  if (message.offerSdp) {
-    log.debug([targetMid, 'RTCPeerConnection', null, 'Received restart offer'], message.offerSdp);
-    // start offer / answer handshake again
-    self._offerHandler({
-      type: self._SIG_MESSAGE_TYPE.OFFER,
-      sdp: message.offerSdp,
-      mid: targetMid,
-      target: message.target,
-      rid: message.rid
-    });
-  } else {
-    var agent = self.getPeerInfo(targetMid).agent;
+  //Only consider peer's restart weight if self also sent a restart which cause a potential conflict
+  //Otherwise go ahead with peer's restart
+  var beOfferer = false;
+
+  // Works in this matter.. no idea why.
+  if (window.webrtcDetectedBrowser !== 'firefox' && message.agent === 'firefox') {
     log.debug([targetMid, 'RTCPeerConnection', null, 'Restarting as offerer as peer cannot be offerer'], agent);
+    beOfferer = true;
+  } else {
+    // Checks if weight is higher than peer's weight
+    // If higher, always do the restart mechanism
+    if (self._peerRestartWeight > message.weight) {
+      beOfferer = true;
+    }
+  }
+
+  if (beOfferer) {
+    log.debug([targetMid, 'RTCPeerConnection', null, 'Restarting negotiation'], agent);
     self._doOffer(targetMid, {
       agent: agent.name,
       version: agent.version,
       os: agent.os
     }, true);
+
+  } else {
+    log.debug([targetMid, 'RTCPeerConnection', null, 'Waiting for peer to start re-negotiation'], agent);
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.WELCOME,
+      mid: self._user.sid,
+      rid: self._room.id,
+      agent: window.webrtcDetectedBrowser,
+      version: window.webrtcDetectedVersion,
+      os: window.navigator.platform,
+      userInfo: self.getPeerInfo(),
+      target: targetMid,
+      weight: -1,
+      sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+    });
   }
 
   self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false);
