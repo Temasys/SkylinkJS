@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.4 - Wed Dec 16 2015 17:37:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Wed Dec 16 2015 18:06:00 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8399,7 +8399,7 @@ if (navigator.mozGetUserMedia) {
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.4 - Wed Dec 16 2015 17:37:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Wed Dec 16 2015 18:06:00 GMT+0800 (SGT) */
 
 (function() {
 
@@ -12489,7 +12489,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
             version: window.webrtcDetectedVersion,
             os: window.navigator.platform,
             userInfo: self.getPeerInfo(),
-            offer: offerSdp,
+            offerSdp: offerSdp,
             target: peerId,
             isConnectionRestart: !!isConnectionRestart,
             lastRestart: lastRestart,
@@ -19995,11 +19995,11 @@ Skylink.prototype._offerHandler = function(message) {
   }
 
   // This is always the initial state. or even after negotiation is successful
-  /*if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
-    log.error([targetMid, null, message.type, 'Peer connection state is not in ' +
-      '"stable" state for re-negotiation'], pc.signalingState);
+  if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
+    log.warn([targetMid, null, message.type, 'Peer connection state is not in ' +
+      '"stable" state for re-negotiation. Dropping message.'], pc.signalingState);
     return;
-  }*/
+  }
 
   /*if (pc.localDescription ? !!pc.localDescription.sdp : false) {
     log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
@@ -20158,11 +20158,11 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   // This should be the state after offer is received. or even after negotiation is successful
-  /*if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
-    log.error([targetMid, null, message.type, 'Peer connection state is not in ' +
-      '"have-local-offer" state for re-negotiation'], pc.signalingState);
+  if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
+    log.warn([targetMid, null, message.type, 'Peer connection state is not in ' +
+      '"have-local-offer" state for re-negotiation. Dropping message.'], pc.signalingState);
     return;
-  }*/
+  }
 
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
   var answer = new window.RTCSessionDescription({

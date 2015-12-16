@@ -298,7 +298,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
             version: window.webrtcDetectedVersion,
             os: window.navigator.platform,
             userInfo: self.getPeerInfo(),
-            offer: offerSdp,
+            offerSdp: offerSdp,
             target: peerId,
             isConnectionRestart: !!isConnectionRestart,
             lastRestart: lastRestart,

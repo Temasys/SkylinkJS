@@ -1215,11 +1215,11 @@ Skylink.prototype._offerHandler = function(message) {
   }
 
   // This is always the initial state. or even after negotiation is successful
-  /*if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
-    log.error([targetMid, null, message.type, 'Peer connection state is not in ' +
-      '"stable" state for re-negotiation'], pc.signalingState);
+  if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
+    log.warn([targetMid, null, message.type, 'Peer connection state is not in ' +
+      '"stable" state for re-negotiation. Dropping message.'], pc.signalingState);
     return;
-  }*/
+  }
 
   /*if (pc.localDescription ? !!pc.localDescription.sdp : false) {
     log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
@@ -1378,11 +1378,11 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   // This should be the state after offer is received. or even after negotiation is successful
-  /*if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
-    log.error([targetMid, null, message.type, 'Peer connection state is not in ' +
-      '"have-local-offer" state for re-negotiation'], pc.signalingState);
+  if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
+    log.warn([targetMid, null, message.type, 'Peer connection state is not in ' +
+      '"have-local-offer" state for re-negotiation. Dropping message.'], pc.signalingState);
     return;
-  }*/
+  }
 
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
   var answer = new window.RTCSessionDescription({
