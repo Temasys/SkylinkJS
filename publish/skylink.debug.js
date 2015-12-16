@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.4 - Wed Dec 16 2015 17:29:28 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Wed Dec 16 2015 17:37:00 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4224,6 +4224,9 @@ Skylink.prototype._removePeer = function(peerId) {
   }
   if (typeof this._peerConnectionHealth[peerId] !== 'undefined') {
     delete this._peerConnectionHealth[peerId];
+  }
+  if (typeof this._peerRenegoCallbacks[peerId] !== 'undefined') {
+    delete this._peerRenegoCallbacks[peerId];
   }
   // close datachannel connection
   if (this._enableDataChannel) {

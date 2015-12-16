@@ -435,6 +435,9 @@ Skylink.prototype._removePeer = function(peerId) {
   if (typeof this._peerConnectionHealth[peerId] !== 'undefined') {
     delete this._peerConnectionHealth[peerId];
   }
+  if (typeof this._peerRenegoCallbacks[peerId] !== 'undefined') {
+    delete this._peerRenegoCallbacks[peerId];
+  }
   // close datachannel connection
   if (this._enableDataChannel) {
     this._closeDataChannel(peerId);
