@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.4 - Wed Dec 16 2015 16:44:50 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Wed Dec 16 2015 17:29:28 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5113,14 +5113,14 @@ Skylink.prototype._doAnswer = function(targetMid) {
     self._room.connection.sdpConstraints);
   var pc = self._peerConnections[targetMid];
   if (pc) {
+    // No ICE restart constraints for createAnswer as it fails in chrome 48
+    // { iceRestart: true }
     pc.createAnswer(function(answer) {
       log.debug([targetMid, null, null, 'Created answer'], answer);
       self._setLocalAndSendMessage(targetMid, answer);
     }, function(error) {
       log.error([targetMid, null, null, 'Failed creating an answer:'], error);
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-    }, {
-      iceRestart: true
     });//, self._room.connection.sdpConstraints);
   } else {
     /* Houston ..*/
