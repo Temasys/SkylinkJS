@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.4 - Thu Dec 10 2015 18:42:41 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Wed Dec 16 2015 16:44:50 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8399,7 +8399,7 @@ if (navigator.mozGetUserMedia) {
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.4 - Thu Dec 10 2015 18:42:41 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Wed Dec 16 2015 16:44:50 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11734,16 +11734,23 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
     // Disable Ice trickle option
     if (!self._enableIceTrickle || self._peerIceTrickleDisabled[targetMid]) {
       var sessionDescription = self._peerConnections[targetMid].localDescription;
-      self._sendChannelMessage({
-        type: sessionDescription.type,
-        sdp: sessionDescription.sdp,
-        mid: self._user.sid,
-        agent: window.webrtcDetectedBrowser,
-        target: targetMid,
-        rid: self._room.id
-      });
+      // Trigger the re-negotation callback (after non-trickleICE)
+      if (typeof self._peerRenegoCallbacks[targetMid] === 'function') {
+        self._peerRenegoCallbacks[targetMid](sessionDescription, null);
+      } else {
+        self._sendChannelMessage({
+          type: sessionDescription.type,
+          sdp: sessionDescription.sdp,
+          mid: self._user.sid,
+          agent: window.webrtcDetectedBrowser,
+          target: targetMid,
+          rid: self._room.id
+        });
+      }
     }
 
+    // We should remove this.. this could be due to ICE failures
+    // Adding this fix is bad
     // Does the restart in the case when the candidates are extremely a lot
     /*var doACandidateRestart = self._addedCandidates[targetMid].relay.length > 20 &&
       (window.webrtcDetectedBrowser === 'chrome' || window.webrtcDetectedBrowser === 'opera');
@@ -12434,13 +12441,6 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
     return;
   }
 
-  /*var hardRestart = self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.STABLE &&
-    self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.NEW;
-
-  if (hardRestart) {
-    self._recreatePeerConnection(peerId);
-  }*/
-
   delete self._peerConnectionHealth[peerId];
   delete self._peerRestartPriorities[peerId];
 
@@ -12448,13 +12448,67 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
   var pc = self._peerConnections[peerId];
 
-  //setTimeout(function () {
-    //
+  // This is when the state is stable and re-handshaking is possible
+  // This could be due to previous connection handshaking that is already done
+  if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
+    if (self._peerConnections[peerId] && !self._peerConnections[peerId].receiveOnly) {
+      self._addLocalMediaStreams(peerId);
+    }
 
-    if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
-      if (self._peerConnections[peerId] && !self._peerConnections[peerId].receiveOnly) {
-        self._addLocalMediaStreams(peerId);
-      }
+    if (isSelfInitiatedRestart){
+      log.log([peerId, null, null, 'Renegotiating peer connection']);
+
+      self._peerRenegoCallbacks[peerId] = function (success, error) {
+        // delete the object reference
+        delete self._peerRenegoCallbacks[peerId];
+        // trigger the callback
+        if (error) {
+          log.error([peerId, 'RTCPeerConnection', null, 'Failed Re-negotiating'], error);
+          if (typeof callback === 'function') {
+            callback(null, error);
+          }
+        } else {
+          log.log([peerId, null, null, 'Sending restart message to signaling server']);
+
+          var lastRestart = Date.now() || function() { return +new Date(); };
+
+          var weight = (new Date()).valueOf();
+          self._peerRestartPriorities[peerId] = weight;
+
+          var offerSdp = null;
+
+          if (success && success.sdp) {
+            offerSdp = success.sdp;
+          }
+
+          self._sendChannelMessage({
+            type: self._SIG_MESSAGE_TYPE.RESTART,
+            mid: self._user.sid,
+            rid: self._room.id,
+            agent: window.webrtcDetectedBrowser,
+            version: window.webrtcDetectedVersion,
+            os: window.navigator.platform,
+            userInfo: self.getPeerInfo(),
+            offer: offerSdp,
+            target: peerId,
+            isConnectionRestart: !!isConnectionRestart,
+            lastRestart: lastRestart,
+            weight: weight,
+            receiveOnly: self._peerConnections[peerId].receiveOnly,
+            enableIceTrickle: self._enableIceTrickle,
+            enableDataChannel: self._enableDataChannel,
+            sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+            explicit: !!explicit
+          });
+
+          self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), false);
+
+          if (typeof callback === 'function') {
+            log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
+            callback(null, null);
+          }
+        }
+      };
 
       var agent = self.getPeerInfo(peerId).agent;
       self._doOffer(peerId, {
@@ -12462,60 +12516,56 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         version: agent.version,
         os: agent.os
       }, true);
-    } else if (pc.signalingState === self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER ||
-      pc.signalingState === self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
-      self._sendChannelMessage({
-        type: pc.localDescription.type,
-        sdp: pc.localDescription.sdp,
-        mid: self._user.sid,
-        target: peerId,
-        rid: self._room.id
-      });
     } else {
-      return log.debug([peerId, 'RTCPeerConnection', null, 'Failed restarting as peer connection state is'], pc.signalingState);
+      if (typeof callback === 'function') {
+        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback (receiving peer)']);
+        callback(null, null);
+      }
     }
 
-    if (isSelfInitiatedRestart){
-      log.log([peerId, null, null, 'Renegotiating peer connection']);
-
-      /*if (hardRestart) {
-        log.log([peerId, null, null, 'Sending restart message to signaling server']);
-
-        var lastRestart = Date.now() || function() { return +new Date(); };
-
-        var weight = (new Date()).valueOf();
-        self._peerRestartPriorities[peerId] = weight;
-
-        self._sendChannelMessage({
-          type: self._SIG_MESSAGE_TYPE.RESTART,
-          mid: self._user.sid,
-          rid: self._room.id,
-          agent: window.webrtcDetectedBrowser,
-          version: window.webrtcDetectedVersion,
-          os: window.navigator.platform,
-          userInfo: self.getPeerInfo(),
-          target: peerId,
-          isConnectionRestart: !!isConnectionRestart,
-          lastRestart: lastRestart,
-          weight: weight,
-          receiveOnly: self._peerConnections[peerId].receiveOnly,
-          enableIceTrickle: self._enableIceTrickle,
-          enableDataChannel: self._enableDataChannel,
-          sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-          explicit: !!explicit
-        });
-        self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
-      } else {*/
-      //}
-    }
-
-    // NOTE
-    if (typeof callback === 'function') {
-      log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
-      callback();
-    }
+    // following the previous logic to do checker always
     self._startPeerConnectionHealthCheck(peerId, false);
-  //}, 150);
+
+  } else {
+    // Let's check if the signalingState is stable first.
+    // In another galaxy or universe, where the local description gets dropped..
+    // In the offerHandler or answerHandler, do the appropriate flags to ignore or drop "extra" descriptions
+    if (pc.signalingState === self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER ||
+      pc.signalingState === self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
+      // Checks if the local description is defined first
+      var hasLocalDescription = pc.localDescription && pc.localDescription.sdp;
+      // By then it should have at least the local description..
+      if (hasLocalDescription) {
+        self._sendChannelMessage({
+          type: pc.localDescription.type,
+          sdp: pc.localDescription.sdp,
+          mid: self._user.sid,
+          target: peerId,
+          rid: self._room.id,
+          resend: true
+        });
+      } else {
+        var noLocalDescriptionError = 'Failed re-sending localDescription as there is ' +
+          'no localDescription set to connection. There could be a handshaking step error';
+        log.error([peerId, 'RTCPeerConnection', null, noLocalDescriptionError], {
+            localDescription: pc.localDescription,
+            remoteDescription: pc.remoteDescription
+        });
+        if (typeof callback === 'function') {
+          log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart failure callback']);
+          callback(null, new Error(noLocalDescriptionError));
+        }
+      }
+    // It could have connection state closed
+    } else {
+      var unableToRestartError = 'Failed restarting as peer connection state is ' + pc.signalingState;
+      log.warn([peerId, 'RTCPeerConnection', null, unableToRestartError]);
+      if (typeof callback === 'function') {
+        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart failure callback']);
+        callback(null, new Error(unableToRestartError));
+      }
+    }
+  }
 };
 
 /**
@@ -13315,6 +13365,26 @@ Skylink.prototype._peerConnectionHealth = {};
 Skylink.prototype._peerHSPriorities = {};
 
 /**
+ * Stores the list of Peer handshake callbacks that is awaitng to be
+ *   triggered for renegotiation.
+ * @attribute _peerRenegoCallbacks
+ * @param {Function} (#peerId) The callback function that triggers after
+ *   the offer has been created or responsed.
+ * @param {RTCSessionDescription} (#peerId).offer The sessionDescription object.
+ *   If <code>null</code>, this indicates that the the other party should be the
+ *   the offerer.
+ * @param {Error} (#peerId).error The error object when createOffer or
+ *   setLocalDescription fails.
+ * @param
+ * @type JSON
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.6.6
+ */
+Skylink.prototype._peerRenegoCallbacks = {};
+
+/**
  * Starts to initiate the WebRTC layer of handshake connection by
  *   creating the <code>OFFER</code> session description and then
  *   sending it to the associated Peer.
@@ -13327,6 +13397,8 @@ Skylink.prototype._peerHSPriorities = {};
  * @param {String} peerBrowser.name The Peer platform browser or agent name.
  * @param {Number} peerBrowser.version The Peer platform browser or agent version.
  * @param {Number} peerBrowser.os The Peer platform name.
+ * @param {Function} renegoCallback The callback function that triggers after
+ *   the offer has been created or responsed.
  * @private
  * @for Skylink
  * @component Peer
@@ -13394,23 +13466,33 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
         self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR,
           targetMid, error);
         log.error([targetMid, null, null, 'Failed creating an offer:'], error);
+        // Trigger the re-negotation callback error
+        if (typeof self._peerRenegoCallbacks[targetMid] === 'function') {
+          self._peerRenegoCallbacks[targetMid](null, error);
+        }
       }, unifiedOfferConstraints);
     } else {
       log.debug([targetMid, null, null, 'User\'s browser is not eligible to create ' +
         'the offer to the other peer. Requesting other peer to create the offer instead'
         ], peerBrowser);
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.WELCOME,
-        mid: self._user.sid,
-        rid: self._room.id,
-        agent: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
-        os: window.navigator.platform,
-        userInfo: self.getPeerInfo(),
-        target: targetMid,
-        weight: -1,
-        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
-      });
+
+      // Trigger the re-negotation callback non-offerer
+      if (typeof self._peerRenegoCallbacks[targetMid] === 'function') {
+        self._peerRenegoCallbacks[targetMid](null, null);
+      } else {
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.WELCOME,
+          mid: self._user.sid,
+          rid: self._room.id,
+          agent: window.webrtcDetectedBrowser,
+          version: window.webrtcDetectedVersion,
+          os: window.navigator.platform,
+          userInfo: self.getPeerInfo(),
+          target: targetMid,
+          weight: -1,
+          sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+        });
+      }
     }
   }, inputConstraints);
 };
@@ -13438,6 +13520,8 @@ Skylink.prototype._doAnswer = function(targetMid) {
     }, function(error) {
       log.error([targetMid, null, null, 'Failed creating an answer:'], error);
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+    }, {
+      iceRestart: true
     });//, self._room.connection.sdpConstraints);
   } else {
     /* Houston ..*/
@@ -13654,24 +13738,6 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     log.log([targetMid, null, null, 'Not setting any audio codec']);
   }
 
-  // NOTE: supports one stream per pc only
-  /*var defaultStreamIndex = sdpLines.indexOf('a=msid-semantic: WMS default');
-  if (defaultStreamIndex > -1 && pc.getLocalStreams().length > 0) {
-    // get stream
-    var stream = pc.getLocalStreams()[0];
-    // replace default with correct id
-    sdpLines[defaultStreamIndex].replace(/default/g, stream.id);
-    // loop for the rest of the related defaults and replace with ID
-    for (var i = 0; i < sdpLines.length; i++) {
-      if (sdpLines[i].indexOf('msid:default') > 1) {
-        sdpLines[i].replace(/msid:default/g, 'msid:' + stream.id);
-      }
-      if (sdpLines[i].indexOf('mslabel:default') > 1) {
-        sdpLines[i].replace(/mslabel:default/g, 'mslabel:' + stream.id);
-      }
-    }
-  }*/
-
   sessionDescription.sdp = sdpLines.join('\r\n');
 
   // NOTE ALEX: opus should not be used for mobile
@@ -13691,13 +13757,18 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       pc.setOffer = 'local';
     }
     if (self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid]) {
-      self._sendChannelMessage({
-        type: sessionDescription.type,
-        sdp: sessionDescription.sdp,
-        mid: self._user.sid,
-        target: targetMid,
-        rid: self._room.id
-      });
+      // Trigger the re-negotation callback success
+      if (typeof self._peerRenegoCallbacks[targetMid] === 'function') {
+        self._peerRenegoCallbacks[targetMid](sessionDescription, null);
+      } else {
+        self._sendChannelMessage({
+          type: sessionDescription.type,
+          sdp: sessionDescription.sdp,
+          mid: self._user.sid,
+          target: targetMid,
+          rid: self._room.id
+        });
+      }
     } else {
       log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
         'Waiting for Ice gathering to complete to prevent Ice trickle']);
@@ -13706,6 +13777,10 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
     log.error([targetMid, 'RTCSessionDescription', sessionDescription.type,
       'Failed setting local description: '], error);
+    // Trigger the re-negotation callback error (setLocalDescription)
+    if (typeof self._peerRenegoCallbacks[targetMid] === 'function') {
+      self._peerRenegoCallbacks[targetMid](null, error);
+    }
   });
 };
 
@@ -19637,6 +19712,7 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
+  // NOTE: for now we ignore, but we should take-note to implement in the near future
   if (self._hasMCU) {
     self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false);
     return;
@@ -19662,6 +19738,22 @@ Skylink.prototype._restartHandler = function(message){
     }
   }
 
+  // mcu has re-joined
+  // NOTE: logic trip since _hasMCU flags are ignored, this could result in failure perhaps?
+  if (targetMid === 'MCU') {
+    log.log([targetMid, null, message.type, 'MCU has restarted its connection']);
+    self._hasMCU = true;
+  }
+
+  // Uncomment because we do not need this
+  //self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+
+  message.agent = (!message.agent) ? 'chrome' : message.agent;
+  self._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
+    message.enableIceTrickle : self._enableIceTrickle;
+  self._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
+    message.enableDataChannel : self._enableDataChannel;
+
   // re-add information
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
@@ -19670,35 +19762,41 @@ Skylink.prototype._restartHandler = function(message){
     os: message.os || ''
   };
 
-  // mcu has joined
-  if (targetMid === 'MCU') {
-    log.log([targetMid, null, message.type, 'MCU has restarted its connection']);
-    self._hasMCU = true;
+  // This variable is not used
+  //var peerConnectionStateStable = false;
+
+  log.info([targetMid, 'RTCPeerConnection', null, 'Received restart request from peer'], message);
+  // we are no longer adding any peer
+  /*self._addPeer(targetMid, {
+    agent: message.agent,
+    version: message.version,
+    os: message.os
+  }, true, true, message.receiveOnly, message.sessionType === 'screensharing');*/
+
+  if (message.offerSdp) {
+    log.debug([targetMid, 'RTCPeerConnection', null, 'Received restart offer'], message.offerSdp);
+    // start offer / answer handshake again
+    self._offerHandler({
+      type: self._SIG_MESSAGE_TYPE.OFFER,
+      sdp: message.offerSdp,
+      mid: targetMid,
+      target: message.target,
+      rid: message.rid
+    });
+  } else {
+    var agent = self.getPeerInfo(targetMid).agent;
+    log.debug([targetMid, 'RTCPeerConnection', null, 'Restarting as offerer as peer cannot be offerer'], agent);
+    self._doOffer(targetMid, {
+      agent: agent.name,
+      version: agent.version,
+      os: agent.os
+    }, true);
   }
 
-  self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+  self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false);
 
-  message.agent = (!message.agent) ? 'chrome' : message.agent;
-  self._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
-    message.enableIceTrickle : self._enableIceTrickle;
-  self._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
-    message.enableDataChannel : self._enableDataChannel;
-
-  var peerConnectionStateStable = false;
-
-  self._restartPeerConnection(targetMid, false, false, function () {
-    log.info('Received message', message);
-  	self._addPeer(targetMid, {
-	    agent: message.agent,
-	    version: message.version,
-	    os: message.os
-	  }, true, true, message.receiveOnly, message.sessionType === 'screensharing');
-
-    self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false);
-
-	  // do a peer connection health check
-  	self._startPeerConnectionHealthCheck(targetMid);
-  }, message.explicit);
+  // following the previous logic to do checker always
+  self._startPeerConnectionHealthCheck(targetMid, false);
 };
 
 /**
@@ -19893,6 +19991,13 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }
 
+  // This is always the initial state. or even after negotiation is successful
+  /*if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
+    log.error([targetMid, null, message.type, 'Peer connection state is not in ' +
+      '"stable" state for re-negotiation'], pc.signalingState);
+    return;
+  }*/
+
   /*if (pc.localDescription ? !!pc.localDescription.sdp : false) {
     log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
       pc.localDescription);
@@ -20041,6 +20146,21 @@ Skylink.prototype._answerHandler = function(message) {
   log.log([targetMid, null, message.type,
     'Received answer from peer. Session description:'], message.sdp);
 
+  var pc = self._peerConnections[targetMid];
+
+  if (!pc) {
+    log.error([targetMid, null, message.type, 'Peer connection object ' +
+      'not found. Unable to setRemoteDescription for answer']);
+    return;
+  }
+
+  // This should be the state after offer is received. or even after negotiation is successful
+  /*if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
+    log.error([targetMid, null, message.type, 'Peer connection state is not in ' +
+      '"have-local-offer" state for re-negotiation'], pc.signalingState);
+    return;
+  }*/
+
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
   var answer = new window.RTCSessionDescription({
     type: message.type,
@@ -20049,14 +20169,6 @@ Skylink.prototype._answerHandler = function(message) {
 
   log.log([targetMid, 'RTCSessionDescription', message.type,
     'Session description object created'], answer);
-
-  var pc = self._peerConnections[targetMid];
-
-  if (!pc) {
-    log.error([targetMid, null, message.type, 'Peer connection object ' +
-      'not found. Unable to setRemoteDescription for offer']);
-    return;
-  }
 
   /*if (pc.remoteDescription ? !!pc.remoteDescription.sdp : false) {
     log.warn([targetMid, null, message.type, 'Peer has an existing connection'],

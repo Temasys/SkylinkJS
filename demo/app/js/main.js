@@ -13,7 +13,7 @@ var _peerId = null;
 
 var selectedPeers = [];
 
-//Demo.Skylink.setLogLevel(4);
+Demo.Skylink.setLogLevel(4);
 
 
 Demo.Methods.displayFileItemHTML = function (content) {
@@ -168,13 +168,13 @@ Demo.Skylink.on('incomingMessage', function (message, peerId, peerInfo, isSelf) 
 });
 //---------------------------------------------------
 Demo.Skylink.on('peerRestart', function (peerId, peerInfo, isSelf){
-  if (!isSelf) {
+  /*if (!isSelf) {
     $('#user' + peerId + ' .video').css('color',
       (peerInfo.mediaStatus.videoMuted) ? 'red' : 'green');
     $('#user' + peerId + ' .audio').css('color',
       (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
     $('#user' + peerId + ' .name').html(peerInfo.userData);
-  }
+  }*/
 });
 //---------------------------------------------------
 Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf){
@@ -344,6 +344,20 @@ Demo.Skylink.on('iceConnectionState', function (state, peerId) {
       }
     }, 30000);
   }
+  var printStream = function (method) {
+    var peer = Demo.Skylink._peerConnections[peerId];
+    var array = peer[method]();
+    if (array.length > 0) {
+      return array[0].id;
+    }
+  };
+
+  if (state === Demo.Skylink.ICE_CONNECTION_STATE.COMPLETED) {
+    console.info('receivedStream', peerId, {
+      received: printStream('getRemoteStreams'),
+      sending: printStream('getLocalStreams')
+    });
+  }
 });
 //---------------------------------------------------
 Demo.Skylink.on('peerConnectionState', function (state, peerId) {
@@ -456,8 +470,8 @@ Demo.Skylink.on('peerRestart', function (peerId, peerInfo, isSelf) {
   console.info('peerRestart', peerId, peerInfo, isSelf);
 });
 
-Demo.Skylink.on('incomingStream', function (peerId, peerInfo, isSelf) {
-  console.info('incomingStream', peerId, peerInfo, isSelf);
+Demo.Skylink.on('incomingStream', function (peerId, stream, peerInfo, isSelf) {
+  console.info('incomingStream', peerId, stream.id, isSelf);
 });
 
 Demo.Skylink.on('serverPeerRestart', function (serverPeerId, serverPeerType) {

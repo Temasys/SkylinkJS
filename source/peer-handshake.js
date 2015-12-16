@@ -162,6 +162,26 @@ Skylink.prototype._peerConnectionHealth = {};
 Skylink.prototype._peerHSPriorities = {};
 
 /**
+ * Stores the list of Peer handshake callbacks that is awaitng to be
+ *   triggered for renegotiation.
+ * @attribute _peerRenegoCallbacks
+ * @param {Function} (#peerId) The callback function that triggers after
+ *   the offer has been created or responsed.
+ * @param {RTCSessionDescription} (#peerId).offer The sessionDescription object.
+ *   If <code>null</code>, this indicates that the the other party should be the
+ *   the offerer.
+ * @param {Error} (#peerId).error The error object when createOffer or
+ *   setLocalDescription fails.
+ * @param
+ * @type JSON
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.6.6
+ */
+Skylink.prototype._peerRenegoCallbacks = {};
+
+/**
  * Starts to initiate the WebRTC layer of handshake connection by
  *   creating the <code>OFFER</code> session description and then
  *   sending it to the associated Peer.
@@ -174,6 +194,8 @@ Skylink.prototype._peerHSPriorities = {};
  * @param {String} peerBrowser.name The Peer platform browser or agent name.
  * @param {Number} peerBrowser.version The Peer platform browser or agent version.
  * @param {Number} peerBrowser.os The Peer platform name.
+ * @param {Function} renegoCallback The callback function that triggers after
+ *   the offer has been created or responsed.
  * @private
  * @for Skylink
  * @component Peer
@@ -241,23 +263,33 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
         self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR,
           targetMid, error);
         log.error([targetMid, null, null, 'Failed creating an offer:'], error);
+        // Trigger the re-negotation callback error
+        if (typeof self._peerRenegoCallbacks[targetMid] === 'function') {
+          self._peerRenegoCallbacks[targetMid](null, error);
+        }
       }, unifiedOfferConstraints);
     } else {
       log.debug([targetMid, null, null, 'User\'s browser is not eligible to create ' +
         'the offer to the other peer. Requesting other peer to create the offer instead'
         ], peerBrowser);
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.WELCOME,
-        mid: self._user.sid,
-        rid: self._room.id,
-        agent: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
-        os: window.navigator.platform,
-        userInfo: self.getPeerInfo(),
-        target: targetMid,
-        weight: -1,
-        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
-      });
+
+      // Trigger the re-negotation callback non-offerer
+      if (typeof self._peerRenegoCallbacks[targetMid] === 'function') {
+        self._peerRenegoCallbacks[targetMid](null, null);
+      } else {
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.WELCOME,
+          mid: self._user.sid,
+          rid: self._room.id,
+          agent: window.webrtcDetectedBrowser,
+          version: window.webrtcDetectedVersion,
+          os: window.navigator.platform,
+          userInfo: self.getPeerInfo(),
+          target: targetMid,
+          weight: -1,
+          sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+        });
+      }
     }
   }, inputConstraints);
 };
@@ -285,6 +317,8 @@ Skylink.prototype._doAnswer = function(targetMid) {
     }, function(error) {
       log.error([targetMid, null, null, 'Failed creating an answer:'], error);
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+    }, {
+      iceRestart: true
     });//, self._room.connection.sdpConstraints);
   } else {
     /* Houston ..*/
@@ -501,24 +535,6 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     log.log([targetMid, null, null, 'Not setting any audio codec']);
   }
 
-  // NOTE: supports one stream per pc only
-  /*var defaultStreamIndex = sdpLines.indexOf('a=msid-semantic: WMS default');
-  if (defaultStreamIndex > -1 && pc.getLocalStreams().length > 0) {
-    // get stream
-    var stream = pc.getLocalStreams()[0];
-    // replace default with correct id
-    sdpLines[defaultStreamIndex].replace(/default/g, stream.id);
-    // loop for the rest of the related defaults and replace with ID
-    for (var i = 0; i < sdpLines.length; i++) {
-      if (sdpLines[i].indexOf('msid:default') > 1) {
-        sdpLines[i].replace(/msid:default/g, 'msid:' + stream.id);
-      }
-      if (sdpLines[i].indexOf('mslabel:default') > 1) {
-        sdpLines[i].replace(/mslabel:default/g, 'mslabel:' + stream.id);
-      }
-    }
-  }*/
-
   sessionDescription.sdp = sdpLines.join('\r\n');
 
   // NOTE ALEX: opus should not be used for mobile
@@ -538,13 +554,18 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       pc.setOffer = 'local';
     }
     if (self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid]) {
-      self._sendChannelMessage({
-        type: sessionDescription.type,
-        sdp: sessionDescription.sdp,
-        mid: self._user.sid,
-        target: targetMid,
-        rid: self._room.id
-      });
+      // Trigger the re-negotation callback success
+      if (typeof self._peerRenegoCallbacks[targetMid] === 'function') {
+        self._peerRenegoCallbacks[targetMid](sessionDescription, null);
+      } else {
+        self._sendChannelMessage({
+          type: sessionDescription.type,
+          sdp: sessionDescription.sdp,
+          mid: self._user.sid,
+          target: targetMid,
+          rid: self._room.id
+        });
+      }
     } else {
       log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
         'Waiting for Ice gathering to complete to prevent Ice trickle']);
@@ -553,5 +574,9 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
     log.error([targetMid, 'RTCSessionDescription', sessionDescription.type,
       'Failed setting local description: '], error);
+    // Trigger the re-negotation callback error (setLocalDescription)
+    if (typeof self._peerRenegoCallbacks[targetMid] === 'function') {
+      self._peerRenegoCallbacks[targetMid](null, error);
+    }
   });
 };

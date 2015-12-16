@@ -250,13 +250,6 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
     return;
   }
 
-  /*var hardRestart = self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.STABLE &&
-    self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.NEW;
-
-  if (hardRestart) {
-    self._recreatePeerConnection(peerId);
-  }*/
-
   delete self._peerConnectionHealth[peerId];
   delete self._peerRestartPriorities[peerId];
 
@@ -264,13 +257,67 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
   var pc = self._peerConnections[peerId];
 
-  //setTimeout(function () {
-    //
+  // This is when the state is stable and re-handshaking is possible
+  // This could be due to previous connection handshaking that is already done
+  if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
+    if (self._peerConnections[peerId] && !self._peerConnections[peerId].receiveOnly) {
+      self._addLocalMediaStreams(peerId);
+    }
 
-    if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
-      if (self._peerConnections[peerId] && !self._peerConnections[peerId].receiveOnly) {
-        self._addLocalMediaStreams(peerId);
-      }
+    if (isSelfInitiatedRestart){
+      log.log([peerId, null, null, 'Renegotiating peer connection']);
+
+      self._peerRenegoCallbacks[peerId] = function (success, error) {
+        // delete the object reference
+        delete self._peerRenegoCallbacks[peerId];
+        // trigger the callback
+        if (error) {
+          log.error([peerId, 'RTCPeerConnection', null, 'Failed Re-negotiating'], error);
+          if (typeof callback === 'function') {
+            callback(null, error);
+          }
+        } else {
+          log.log([peerId, null, null, 'Sending restart message to signaling server']);
+
+          var lastRestart = Date.now() || function() { return +new Date(); };
+
+          var weight = (new Date()).valueOf();
+          self._peerRestartPriorities[peerId] = weight;
+
+          var offerSdp = null;
+
+          if (success && success.sdp) {
+            offerSdp = success.sdp;
+          }
+
+          self._sendChannelMessage({
+            type: self._SIG_MESSAGE_TYPE.RESTART,
+            mid: self._user.sid,
+            rid: self._room.id,
+            agent: window.webrtcDetectedBrowser,
+            version: window.webrtcDetectedVersion,
+            os: window.navigator.platform,
+            userInfo: self.getPeerInfo(),
+            offer: offerSdp,
+            target: peerId,
+            isConnectionRestart: !!isConnectionRestart,
+            lastRestart: lastRestart,
+            weight: weight,
+            receiveOnly: self._peerConnections[peerId].receiveOnly,
+            enableIceTrickle: self._enableIceTrickle,
+            enableDataChannel: self._enableDataChannel,
+            sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+            explicit: !!explicit
+          });
+
+          self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), false);
+
+          if (typeof callback === 'function') {
+            log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
+            callback(null, null);
+          }
+        }
+      };
 
       var agent = self.getPeerInfo(peerId).agent;
       self._doOffer(peerId, {
@@ -278,60 +325,56 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         version: agent.version,
         os: agent.os
       }, true);
-    } else if (pc.signalingState === self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER ||
-      pc.signalingState === self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
-      self._sendChannelMessage({
-        type: pc.localDescription.type,
-        sdp: pc.localDescription.sdp,
-        mid: self._user.sid,
-        target: peerId,
-        rid: self._room.id
-      });
     } else {
-      return log.debug([peerId, 'RTCPeerConnection', null, 'Failed restarting as peer connection state is'], pc.signalingState);
+      if (typeof callback === 'function') {
+        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback (receiving peer)']);
+        callback(null, null);
+      }
     }
 
-    if (isSelfInitiatedRestart){
-      log.log([peerId, null, null, 'Renegotiating peer connection']);
-
-      /*if (hardRestart) {
-        log.log([peerId, null, null, 'Sending restart message to signaling server']);
-
-        var lastRestart = Date.now() || function() { return +new Date(); };
-
-        var weight = (new Date()).valueOf();
-        self._peerRestartPriorities[peerId] = weight;
-
-        self._sendChannelMessage({
-          type: self._SIG_MESSAGE_TYPE.RESTART,
-          mid: self._user.sid,
-          rid: self._room.id,
-          agent: window.webrtcDetectedBrowser,
-          version: window.webrtcDetectedVersion,
-          os: window.navigator.platform,
-          userInfo: self.getPeerInfo(),
-          target: peerId,
-          isConnectionRestart: !!isConnectionRestart,
-          lastRestart: lastRestart,
-          weight: weight,
-          receiveOnly: self._peerConnections[peerId].receiveOnly,
-          enableIceTrickle: self._enableIceTrickle,
-          enableDataChannel: self._enableDataChannel,
-          sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-          explicit: !!explicit
-        });
-        self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
-      } else {*/
-      //}
-    }
-
-    // NOTE
-    if (typeof callback === 'function') {
-      log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
-      callback();
-    }
+    // following the previous logic to do checker always
     self._startPeerConnectionHealthCheck(peerId, false);
-  //}, 150);
+
+  } else {
+    // Let's check if the signalingState is stable first.
+    // In another galaxy or universe, where the local description gets dropped..
+    // In the offerHandler or answerHandler, do the appropriate flags to ignore or drop "extra" descriptions
+    if (pc.signalingState === self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER ||
+      pc.signalingState === self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
+      // Checks if the local description is defined first
+      var hasLocalDescription = pc.localDescription && pc.localDescription.sdp;
+      // By then it should have at least the local description..
+      if (hasLocalDescription) {
+        self._sendChannelMessage({
+          type: pc.localDescription.type,
+          sdp: pc.localDescription.sdp,
+          mid: self._user.sid,
+          target: peerId,
+          rid: self._room.id,
+          resend: true
+        });
+      } else {
+        var noLocalDescriptionError = 'Failed re-sending localDescription as there is ' +
+          'no localDescription set to connection. There could be a handshaking step error';
+        log.error([peerId, 'RTCPeerConnection', null, noLocalDescriptionError], {
+            localDescription: pc.localDescription,
+            remoteDescription: pc.remoteDescription
+        });
+        if (typeof callback === 'function') {
+          log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart failure callback']);
+          callback(null, new Error(noLocalDescriptionError));
+        }
+      }
+    // It could have connection state closed
+    } else {
+      var unableToRestartError = 'Failed restarting as peer connection state is ' + pc.signalingState;
+      log.warn([peerId, 'RTCPeerConnection', null, unableToRestartError]);
+      if (typeof callback === 'function') {
+        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart failure callback']);
+        callback(null, new Error(unableToRestartError));
+      }
+    }
+  }
 };
 
 /**
