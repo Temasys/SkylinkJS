@@ -1243,7 +1243,9 @@ Skylink.prototype._stopLocalMediaStreams = function (options) {
   };
 
   var stopFn = function (stream, name) {
-    if (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 44) {
+    //if (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 44) {
+    // chrome/opera/firefox uses mediastreamtrack.stop()
+    if (['chrome', 'opera', 'firefox'].indexOf(window.webrtcDetectedBrowser) > -1) {
       stopTracksFn(stream);
     } else {
       try {

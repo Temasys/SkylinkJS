@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.4 - Thu Dec 24 2015 01:04:30 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Thu Dec 24 2015 04:12:58 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13120,7 +13120,9 @@ Skylink.prototype._stopLocalMediaStreams = function (options) {
   };
 
   var stopFn = function (stream, name) {
-    if (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 44) {
+    //if (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 44) {
+    // chrome/opera/firefox uses mediastreamtrack.stop()
+    if (['chrome', 'opera', 'firefox'].indexOf(window.webrtcDetectedBrowser) > -1) {
       stopTracksFn(stream);
     } else {
       try {
