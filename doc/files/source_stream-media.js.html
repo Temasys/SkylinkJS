@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.4</title>
+    <title>SkylinkJS 0.6.5</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.4</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.5</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -551,17 +551,19 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
     }
     self._trigger(&#x27;streamEnded&#x27;, self._user.sid || null, self.getPeerInfo(), true, !!isScreenSharing);
   };
-  stream.onended = streamEnded;
 
+  // chrome uses the new specs
+  if (window.webrtcDetectedBrowser === &#x27;chrome&#x27; || window.webrtcDetectedBrowser === &#x27;opera&#x27;) {
+    stream.oninactive = streamEnded;
   // Workaround for local stream.onended because firefox has not yet implemented it
-  if (window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
-    stream.onended = setInterval(function () {
+  } else if (window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
+    stream.endedInterval = setInterval(function () {
       if (typeof stream.recordedTime === &#x27;undefined&#x27;) {
         stream.recordedTime = 0;
       }
 
       if (stream.recordedTime === stream.currentTime) {
-        clearInterval(stream.onended);
+        clearInterval(stream.endedInterval);
         // trigger that it has ended
         streamEnded();
 
@@ -570,6 +572,8 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
       }
 
     }, 1000);
+  } else {
+    stream.onended = streamEnded;
   }
 
   // check if readyStateChange is done
@@ -633,16 +637,30 @@ Skylink.prototype._onUserMediaError = function(error, isScreenSharing, audioFall
 
     log.debug([null, &#x27;MediaStream&#x27;, null, &#x27;Falling back to audio stream call&#x27;]);
 
-    self._trigger(&#x27;mediaAccessFallback&#x27;, error);
+    self._trigger(&#x27;mediaAccessFallback&#x27;, {
+      error: error,
+      diff: null
+    }, 0, false, true);
 
     window.getUserMedia({
       audio: true
     }, function(stream) {
       self._onUserMediaSuccess(stream);
+      self._trigger(&#x27;mediaAccessFallback&#x27;, {
+        error: null,
+        diff: {
+          video: { expected: 1, received: stream.getVideoTracks().length },
+          audio: { expected: 1, received: stream.getAudioTracks().length }
+        }
+      }, 1, false, true);
     }, function(error) {
       log.error([null, &#x27;MediaStream&#x27;, null,
         &#x27;Failed retrieving audio in audio fallback:&#x27;], error);
       self._trigger(&#x27;mediaAccessError&#x27;, error, !!isScreenSharing, true);
+      self._trigger(&#x27;mediaAccessFallback&#x27;, {
+        error: error,
+        diff: null
+      }, -1, false, true);
     });
   } else {
     log.error([null, &#x27;MediaStream&#x27;, null, &#x27;Failed retrieving stream:&#x27;], error);
@@ -664,33 +682,33 @@ Skylink.prototype._onUserMediaError = function(error, isScreenSharing, audioFall
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._onRemoteStreamAdded = function(targetMid, event, isScreenSharing) {
+Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSharing) {
   var self = this;
 
   if(targetMid !== &#x27;MCU&#x27;) {
     if (!self._peerInformations[targetMid]) {
-      log.error([targetMid, &#x27;MediaStream&#x27;, event.stream.id,
+      log.error([targetMid, &#x27;MediaStream&#x27;, stream.id,
           &#x27;Received remote stream when peer is not connected. &#x27; +
-          &#x27;Ignoring stream -&gt;&#x27;], event.stream);
+          &#x27;Ignoring stream -&gt;&#x27;], stream);
       return;
     }
 
     if (!self._peerInformations[targetMid].settings.audio &amp;&amp;
       !self._peerInformations[targetMid].settings.video &amp;&amp; !isScreenSharing) {
-      log.log([targetMid, &#x27;MediaStream&#x27;, event.stream.id,
+      log.log([targetMid, &#x27;MediaStream&#x27;, stream.id,
         &#x27;Receive remote stream but ignoring stream as it is empty -&gt;&#x27;
-        ], event.stream);
+        ], stream);
       return;
     }
-    log.log([targetMid, &#x27;MediaStream&#x27;, event.stream.id,
-      &#x27;Received remote stream -&gt;&#x27;], event.stream);
+    log.log([targetMid, &#x27;MediaStream&#x27;, stream.id,
+      &#x27;Received remote stream -&gt;&#x27;], stream);
 
     if (isScreenSharing) {
-      log.log([targetMid, &#x27;MediaStream&#x27;, event.stream.id,
+      log.log([targetMid, &#x27;MediaStream&#x27;, stream.id,
         &#x27;Peer is having a screensharing session with user&#x27;]);
     }
 
-    self._trigger(&#x27;incomingStream&#x27;, targetMid, event.stream,
+    self._trigger(&#x27;incomingStream&#x27;, targetMid, stream,
       false, self.getPeerInfo(targetMid), !!isScreenSharing);
   } else {
     log.log([targetMid, null, null, &#x27;MCU is listening&#x27;]);
@@ -1109,16 +1127,32 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
 
     if (pc) {
       if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
+        var hasStream = false;
+        var hasScreen = false;
+
+        // remove streams
+        var streams = pc.getLocalStreams();
+        for (var i = 0; i &lt; streams.length; i++) {
+          // try removeStream
+          pc.removeStream(streams[i]);
+        }
+
+        if (this._mediaStream &amp;&amp; this._mediaStream !== null) {
+          hasStream = true;
+        }
+
         if (this._mediaScreen &amp;&amp; this._mediaScreen !== null) {
+          hasScreen = true;
+        }
+
+        if (hasScreen) {
+          log.debug([peerId, &#x27;MediaStream&#x27;, null, &#x27;Sending screen&#x27;], this._mediaScreen);
           pc.addStream(this._mediaScreen);
-          log.debug([peerId, &#x27;MediaStream&#x27;, this._mediaStream, &#x27;Sending screen&#x27;]);
-
-        } else if (this._mediaStream &amp;&amp; this._mediaStream !== null) {
+        } else if (hasStream) {
+          log.debug([peerId, &#x27;MediaStream&#x27;, null, &#x27;Sending stream&#x27;], this._mediaStream);
           pc.addStream(this._mediaStream);
-          log.debug([peerId, &#x27;MediaStream&#x27;, this._mediaStream, &#x27;Sending stream&#x27;]);
-
         } else {
-          log.warn([peerId, null, null, &#x27;No media to send. Will be only receiving&#x27;]);
+          log.warn([peerId, &#x27;MediaStream&#x27;, null, &#x27;No media to send. Will be only receiving&#x27;]);
         }
 
       } else {
@@ -1306,7 +1340,9 @@ Skylink.prototype._stopLocalMediaStreams = function (options) {
   };
 
   var stopFn = function (stream, name) {
-    if (window.webrtcDetectedBrowser === &#x27;chrome&#x27; &amp;&amp; window.webrtcDetectedVersion &gt; 44) {
+    //if (window.webrtcDetectedBrowser === &#x27;chrome&#x27; &amp;&amp; window.webrtcDetectedVersion &gt; 44) {
+    // chrome/opera/firefox uses mediastreamtrack.stop()
+    if ([&#x27;chrome&#x27;, &#x27;opera&#x27;, &#x27;firefox&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1) {
       stopTracksFn(stream);
     } else {
       try {
@@ -1696,20 +1732,26 @@ Skylink.prototype.getUserMedia = function(options,callback) {
             if (requireVideo) {
               hasVideo =  stream.getVideoTracks().length &gt; 0;
 
-              if (self._audioFallback &amp;&amp; !hasVideo) {
+              /*if (self._audioFallback &amp;&amp; !hasVideo) {
                 hasVideo = true; // to trick isSuccess to be true
                 self._trigger(&#x27;mediaAccessFallback&#x27;, notSameTracksError);
-              }
+              }*/
             }
             if (hasAudio &amp;&amp; hasVideo) {
               isSuccess = true;
             }
 
-            if (isSuccess) {
-              self._onUserMediaSuccess(stream);
-            } else {
-              self._onUserMediaError(notSameTracksError, false, false);
+            if (!isSuccess) {
+              self._trigger(&#x27;mediaAccessFallback&#x27;, {
+                error: notSameTracksError,
+                diff: {
+                  video: { expected: requireAudio ? 1 : 0, received: stream.getVideoTracks().length },
+                  audio: { expected: requireVideo ? 1 : 0, received: stream.getAudioTracks().length }
+                }
+              }, 1, false, false);
             }
+
+            self._onUserMediaSuccess(stream);
           }
         }, function (error) {
           self._onUserMediaError(error, false, true);
@@ -2206,7 +2248,44 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
       log.warn(&#x27;This screensharing session will not support audio streaming&#x27;);
       self._screenSharingStreamSettings.audio = false;
     }
-    self._onUserMediaSuccess(sStream, true);
+
+    var requireAudio = enableAudio === true;
+    var requireVideo = true;
+    var checkAudio = !requireAudio;
+    var checkVideo = !requireVideo;
+    var notSameTracksError = new Error(
+      &#x27;Expected audio tracks length with &#x27; +
+      (requireAudio ? &#x27;1&#x27; : &#x27;0&#x27;) + &#x27; and video tracks length with &#x27; +
+      (requireVideo ? &#x27;1&#x27; : &#x27;0&#x27;) + &#x27; but received audio tracks length &#x27; +
+      &#x27;with &#x27; + sStream.getAudioTracks().length + &#x27; and video &#x27; +
+      &#x27;tracks length with &#x27; + sStream.getVideoTracks().length);
+
+    // do the check
+    if (requireAudio) {
+      checkAudio = sStream.getAudioTracks().length &gt; 0;
+    }
+    if (requireVideo) {
+      checkVideo =  sStream.getVideoTracks().length &gt; 0;
+    }
+
+    if (checkVideo) {
+      // no audio but has video for screensharing
+      if (!checkAudio) {
+        self._trigger(&#x27;mediaAccessFallback&#x27;, {
+          error: notSameTracksError,
+          diff: {
+            video: { expected: 1, received: sStream.getVideoTracks().length },
+            audio: { expected: requireAudio ? 1 : 0, received: sStream.getAudioTracks().length }
+          }
+        }, 1, true, false);
+      }
+
+      self._onUserMediaSuccess(sStream, true);
+
+    } else {
+      self._onUserMediaError(notSameTracksError, true);
+    }
+
     self._timestamp.screen = true;
   };
 
@@ -2315,16 +2394,12 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
  * @since 0.6.0
  */
 Skylink.prototype.stopScreen = function () {
-  var endSession = false;
-
   if (this._mediaScreen &amp;&amp; this._mediaScreen !== null) {
-    endSession = !!this._mediaScreen.endSession;
-
     this._stopLocalMediaStreams({
       screenshare: true
     });
 
-    if (!endSession) {
+    if (this._inRoom) {
       if (this._hasMCU) {
         this._restartMCUConnection();
       } else {

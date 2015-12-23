@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.4</title>
+    <title>SkylinkJS 0.6.5</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.4</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.5</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -223,6 +223,12 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
     // Disable Ice trickle option
     if (!self._enableIceTrickle || self._peerIceTrickleDisabled[targetMid]) {
       var sessionDescription = self._peerConnections[targetMid].localDescription;
+
+      // make checks for firefox session description
+      if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &amp;&amp; window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
+        sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
+      }
+
       self._sendChannelMessage({
         type: sessionDescription.type,
         sdp: sessionDescription.sdp,
@@ -233,6 +239,8 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
       });
     }
 
+    // We should remove this.. this could be due to ICE failures
+    // Adding this fix is bad
     // Does the restart in the case when the candidates are extremely a lot
     /*var doACandidateRestart = self._addedCandidates[targetMid].relay.length &gt; 20 &amp;&amp;
       (window.webrtcDetectedBrowser === &#x27;chrome&#x27; || window.webrtcDetectedBrowser === &#x27;opera&#x27;);

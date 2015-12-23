@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.4</title>
+    <title>SkylinkJS 0.6.5</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.4</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.5</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -185,6 +185,14 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
                 
                   <a href="#method__addPeer" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_addPeer
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#method__addSDPSsrcFirefoxAnswer" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_addSDPSsrcFirefoxAnswer
                     <span class="settings">
                       
                       
@@ -689,6 +697,14 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
                 
                   <a href="#method__restartMCUConnection" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_restartMCUConnection
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#method__restartPeerConnection" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_restartPeerConnection
                     <span class="settings">
                       
                       
@@ -1663,14 +1679,6 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
                     </span>
                   </a>
                 
-                  <a href="#attr__peerHSPriorities" class="list-group-item code-menu-item  private-attr-item ">
-                    &nbsp;&nbsp;_peerHSPriorities
-                    <span class="settings">
-                      
-                      
-                    </span>
-                  </a>
-                
                   <a href="#attr__peerIceTrickleDisabled" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_peerIceTrickleDisabled
                     <span class="settings">
@@ -1695,8 +1703,8 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
                     </span>
                   </a>
                 
-                  <a href="#attr__peerRestartPriorities" class="list-group-item code-menu-item  private-attr-item ">
-                    &nbsp;&nbsp;_peerRestartPriorities
+                  <a href="#attr__peerPriorityWeight" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_peerPriorityWeight
                     <span class="settings">
                       
                       
@@ -2910,7 +2918,7 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l223"><code>source&#x2F;ice-candidate.js:223</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l231"><code>source&#x2F;ice-candidate.js:231</code></a>
       </small>
     
 
@@ -3025,7 +3033,7 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l173"><code>source&#x2F;ice-candidate.js:173</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l181"><code>source&#x2F;ice-candidate.js:181</code></a>
       </small>
     
 
@@ -3153,7 +3161,7 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1002"><code>source&#x2F;stream-media.js:1002</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1020"><code>source&#x2F;stream-media.js:1020</code></a>
       </small>
     
 
@@ -3293,7 +3301,7 @@ If self does not have any Stream object to send, it will a connection without
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l109"><code>source&#x2F;peer-connection.js:109</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l93"><code>source&#x2F;peer-connection.js:93</code></a>
       </small>
     
 
@@ -3481,6 +3489,149 @@ If self does not have any Stream object to send, it will a connection without
   <hr>
 </div>
             
+              <div id="method__addSDPSsrcFirefoxAnswer" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_addSDPSsrcFirefoxAnswer</code></h3>
+  
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code>targetMid</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
+          <code>answerSdp</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+      <span class="paren">)</span>
+    </div>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l355"><code>source&#x2F;stream-sdp.js:355</code></a>
+      </small>
+    
+
+    <small>
+      
+        <i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.6</span>
+      
+
+      
+    </small>
+  </div>
+
+  <div class="code-item-description">
+    <p>Modifies the session description received to append the correct ssrc lines for Firefox.</p>
+
+  </div>
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">targetMid</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The peer connection ID.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">answerSdp</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The answer session description.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+    <div class="code-item-section">
+      <h4>Returns:</h4>
+
+      <div class="returns-description">
+        
+          
+            <span class="type"><b>{</b>String<b>}</b></span>:
+          
+          <p>The update answer session description with correct SSRC lines.</p>
+
+        
+      </div>
+    </div>
+  
+
+  
+  <hr>
+</div>
+            
               <div id="method__addSDPStereo" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_addSDPStereo</code></h3>
   
@@ -3661,7 +3812,7 @@ If self does not have any Stream object to send, it will a connection without
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1315"><code>source&#x2F;socket-message.js:1315</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1393"><code>source&#x2F;socket-message.js:1393</code></a>
       </small>
     
 
@@ -4795,7 +4946,7 @@ If self does not have any Stream object to send, it will a connection without
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1218"><code>source&#x2F;socket-message.js:1218</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1296"><code>source&#x2F;socket-message.js:1296</code></a>
       </small>
     
 
@@ -5819,7 +5970,7 @@ If provided dataURL binary string (base64)
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1459"><code>source&#x2F;skylink-events.js:1459</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1480"><code>source&#x2F;skylink-events.js:1480</code></a>
       </small>
     
 
@@ -6214,7 +6365,7 @@ This method will do a event subscription with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l368"><code>source&#x2F;peer-connection.js:368</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l439"><code>source&#x2F;peer-connection.js:439</code></a>
       </small>
     
 
@@ -6819,7 +6970,7 @@ In this handler, it actually handles and manipulates the received data transfer 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l258"><code>source&#x2F;peer-handshake.js:258</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l255"><code>source&#x2F;peer-handshake.js:255</code></a>
       </small>
     
 
@@ -6889,6 +7040,11 @@ In this handler, it actually handles and manipulates the received data transfer 
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
+        
+          <code>renegoCallback</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
       <span class="paren">)</span>
     </div>
   
@@ -6934,7 +7090,7 @@ In this handler, it actually handles and manipulates the received data transfer 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l164"><code>source&#x2F;peer-handshake.js:164</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l151"><code>source&#x2F;peer-handshake.js:151</code></a>
       </small>
     
 
@@ -7049,6 +7205,23 @@ The offerer status may be shifted to the other peer depending on
             
           </li>
       
+          <li class="param">
+            <code class="param-name">renegoCallback</code>
+            <span class="type"><b>{</b>Function<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The callback function that triggers after
+  the offer has been created or responsed.</p>
+
+            </div>
+
+            
+          </li>
+      
       </ul>
     </div>
   
@@ -7115,7 +7288,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l691"><code>source&#x2F;socket-message.js:691</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l696"><code>source&#x2F;socket-message.js:696</code></a>
       </small>
     
 
@@ -9263,7 +9436,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1075"><code>source&#x2F;stream-media.js:1075</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1109"><code>source&#x2F;stream-media.js:1109</code></a>
       </small>
     
 
@@ -9554,7 +9727,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1167"><code>source&#x2F;socket-message.js:1167</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1231"><code>source&#x2F;socket-message.js:1231</code></a>
       </small>
     
 
@@ -9752,7 +9925,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l208"><code>source&#x2F;ice-candidate.js:208</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l216"><code>source&#x2F;ice-candidate.js:216</code></a>
       </small>
     
 
@@ -9853,7 +10026,7 @@ This is mainly to prevent JShint errors.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l195"><code>source&#x2F;ice-candidate.js:195</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l203"><code>source&#x2F;ice-candidate.js:203</code></a>
       </small>
     
 
@@ -10087,7 +10260,7 @@ This is mainly to prevent JShint errors.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l570"><code>source&#x2F;stream-media.js:570</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l588"><code>source&#x2F;stream-media.js:588</code></a>
       </small>
     
 
@@ -10244,7 +10417,7 @@ This is mainly to prevent JShint errors.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l528"><code>source&#x2F;stream-media.js:528</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l532"><code>source&#x2F;stream-media.js:532</code></a>
       </small>
     
 
@@ -10612,7 +10785,7 @@ Once URI is formed, it will start a new socket.io connection with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l617"><code>source&#x2F;stream-media.js:617</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l635"><code>source&#x2F;stream-media.js:635</code></a>
       </small>
     
 
@@ -10781,7 +10954,7 @@ Once URI is formed, it will start a new socket.io connection with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l777"><code>source&#x2F;stream-media.js:777</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l795"><code>source&#x2F;stream-media.js:795</code></a>
       </small>
     
 
@@ -10951,7 +11124,7 @@ Once URI is formed, it will start a new socket.io connection with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l885"><code>source&#x2F;stream-media.js:885</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l903"><code>source&#x2F;stream-media.js:903</code></a>
       </small>
     
 
@@ -11564,7 +11737,7 @@ Once URI is formed, it will start a new socket.io connection with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l919"><code>source&#x2F;stream-media.js:919</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l937"><code>source&#x2F;stream-media.js:937</code></a>
       </small>
     
 
@@ -11903,7 +12076,7 @@ Once URI is formed, it will start a new socket.io connection with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l817"><code>source&#x2F;stream-media.js:817</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l835"><code>source&#x2F;stream-media.js:835</code></a>
       </small>
     
 
@@ -12320,7 +12493,7 @@ Once URI is formed, it will start a new socket.io connection with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l676"><code>source&#x2F;stream-media.js:676</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l694"><code>source&#x2F;stream-media.js:694</code></a>
       </small>
     
 
@@ -13636,7 +13809,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l302"><code>source&#x2F;peer-connection.js:302</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l380"><code>source&#x2F;peer-connection.js:380</code></a>
       </small>
     
 
@@ -14444,7 +14617,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l831"><code>source&#x2F;socket-message.js:831</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l834"><code>source&#x2F;socket-message.js:834</code></a>
       </small>
     
 
@@ -15096,7 +15269,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l698"><code>source&#x2F;peer-connection.js:698</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l797"><code>source&#x2F;peer-connection.js:797</code></a>
       </small>
     
 
@@ -15270,6 +15443,115 @@ This would require the current user to leave the room and restart all
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
+      <span class="paren">)</span>
+    </div>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l169"><code>source&#x2F;peer-connection.js:169</code></a>
+      </small>
+    
+
+    <small>
+      
+        <i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.6</span>
+      
+
+      
+    </small>
+  </div>
+
+  <div class="code-item-description">
+    <p>Recreates a peer connection.
+This is the fallback restart mechanism for other platforms.</p>
+
+  </div>
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">peerId</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The Peer ID to recreate the connection with.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="method__restartPeerConnection" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_restartPeerConnection</code></h3>
+  
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code>peerId</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
         
           <code>isSelfInitiatedRestart</code>
         
@@ -15335,7 +15617,7 @@ This would require the current user to leave the room and restart all
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l185"><code>source&#x2F;peer-connection.js:185</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l230"><code>source&#x2F;peer-connection.js:230</code></a>
       </small>
     
 
@@ -16564,7 +16846,7 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l404"><code>source&#x2F;peer-handshake.js:404</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l409"><code>source&#x2F;peer-handshake.js:409</code></a>
       </small>
     
 
@@ -17900,7 +18182,7 @@ Setting the bandwidth flags may not
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l290"><code>source&#x2F;peer-handshake.js:290</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l289"><code>source&#x2F;peer-handshake.js:289</code></a>
       </small>
     
 
@@ -18033,7 +18315,7 @@ This sets the timeout object associated with the Peer into
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1187"><code>source&#x2F;stream-media.js:1187</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1221"><code>source&#x2F;stream-media.js:1221</code></a>
       </small>
     
 
@@ -18182,7 +18464,7 @@ This sets the timeout object associated with the Peer into
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l377"><code>source&#x2F;peer-handshake.js:377</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l382"><code>source&#x2F;peer-handshake.js:382</code></a>
       </small>
     
 
@@ -18516,7 +18798,7 @@ This sets the timeout object associated with the Peer into
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1560"><code>source&#x2F;skylink-events.js:1560</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1581"><code>source&#x2F;skylink-events.js:1581</code></a>
       </small>
     
 
@@ -18655,7 +18937,7 @@ This sets the timeout object associated with the Peer into
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1277"><code>source&#x2F;skylink-events.js:1277</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1298"><code>source&#x2F;skylink-events.js:1298</code></a>
       </small>
     
 
@@ -18961,7 +19243,7 @@ This sets the timeout object associated with the Peer into
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1510"><code>source&#x2F;skylink-events.js:1510</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1531"><code>source&#x2F;skylink-events.js:1531</code></a>
       </small>
     
 
@@ -19118,7 +19400,7 @@ This utilises <code>setInterval()</code> function.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1277"><code>source&#x2F;stream-media.js:1277</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1313"><code>source&#x2F;stream-media.js:1313</code></a>
       </small>
     
 
@@ -19963,7 +20245,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1002"><code>source&#x2F;socket-message.js:1002</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1038"><code>source&#x2F;socket-message.js:1038</code></a>
       </small>
     
 
@@ -21330,7 +21612,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1996"><code>source&#x2F;stream-media.js:1996</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2038"><code>source&#x2F;stream-media.js:2038</code></a>
       </small>
     
 
@@ -21416,7 +21698,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2032"><code>source&#x2F;stream-media.js:2032</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2074"><code>source&#x2F;stream-media.js:2074</code></a>
       </small>
     
 
@@ -21506,7 +21788,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1978"><code>source&#x2F;stream-media.js:1978</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2020"><code>source&#x2F;stream-media.js:2020</code></a>
       </small>
     
 
@@ -21596,7 +21878,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2014"><code>source&#x2F;stream-media.js:2014</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2056"><code>source&#x2F;stream-media.js:2056</code></a>
       </small>
     
 
@@ -22237,7 +22519,7 @@ You may set the current customer user data information for self in
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1414"><code>source&#x2F;stream-media.js:1414</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1450"><code>source&#x2F;stream-media.js:1450</code></a>
       </small>
     
 
@@ -25078,7 +25360,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1876"><code>source&#x2F;stream-media.js:1876</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1918"><code>source&#x2F;stream-media.js:1918</code></a>
       </small>
     
 
@@ -25247,7 +25529,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1412"><code>source&#x2F;skylink-events.js:1412</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1433"><code>source&#x2F;skylink-events.js:1433</code></a>
       </small>
     
 
@@ -25387,7 +25669,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1336"><code>source&#x2F;skylink-events.js:1336</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1357"><code>source&#x2F;skylink-events.js:1357</code></a>
       </small>
     
 
@@ -25538,7 +25820,7 @@ This event handler will always be triggered when the event name is triggered. If
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1363"><code>source&#x2F;skylink-events.js:1363</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1384"><code>source&#x2F;skylink-events.js:1384</code></a>
       </small>
     
 
@@ -25719,7 +26001,7 @@ This event handler will always be triggered when the event name is triggered. If
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l539"><code>source&#x2F;peer-connection.js:539</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l638"><code>source&#x2F;peer-connection.js:638</code></a>
       </small>
     
 
@@ -26772,7 +27054,7 @@ For Peers connecting from the Web platform, the DataChannel connection channel t
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1379"><code>source&#x2F;socket-message.js:1379</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1475"><code>source&#x2F;socket-message.js:1475</code></a>
       </small>
     
 
@@ -27074,7 +27356,7 @@ to send longer strings (for that instance base64 binary strings are long).</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1643"><code>source&#x2F;stream-media.js:1643</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1685"><code>source&#x2F;stream-media.js:1685</code></a>
       </small>
     
 
@@ -27493,7 +27775,7 @@ Reference <a href="../classes/Skylink.html#method_refreshConnection" class="cros
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l2163"><code>source&#x2F;data-transfer.js:2163</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l2168"><code>source&#x2F;data-transfer.js:2168</code></a>
       </small>
     
 
@@ -28523,7 +28805,7 @@ You may get the current customer user data information for self in
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2049"><code>source&#x2F;stream-media.js:2049</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2091"><code>source&#x2F;stream-media.js:2091</code></a>
       </small>
     
 
@@ -28715,7 +28997,7 @@ This does not replace the currently attached user media Stream object in Skylink
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2221"><code>source&#x2F;stream-media.js:2221</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2300"><code>source&#x2F;stream-media.js:2300</code></a>
       </small>
     
 
@@ -28805,7 +29087,7 @@ Reference <a href="../classes/Skylink.html#method_refreshConnection" class="cros
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1059"><code>source&#x2F;stream-media.js:1059</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1093"><code>source&#x2F;stream-media.js:1093</code></a>
       </small>
     
 
@@ -33103,7 +33385,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l117"><code>source&#x2F;socket-message.js:117</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l149"><code>source&#x2F;socket-message.js:149</code></a>
       </small>
     
 
@@ -33113,10 +33395,15 @@ This will configure TURN server connection using port <code>443</code> only and
   </div>
 
   <div class="code-item-description">
-    <p>The flag that indicates if MCU is enabled.</p>
+    <p>The flag that indicates if MCU is in the room and is enabled.</p>
 
   </div>
 
+  
+    <div class="code-item-section">
+      <h4>Default value:</h4>
+      <code class="prettyprint">false</code>
+    </div>
   
 
   
@@ -33179,7 +33466,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l149"><code>source&#x2F;socket-message.js:149</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l117"><code>source&#x2F;socket-message.js:117</code></a>
       </small>
     
 
@@ -33189,15 +33476,10 @@ This will configure TURN server connection using port <code>443</code> only and
   </div>
 
   <div class="code-item-description">
-    <p>The flag that indicates if MCU is in the room and is enabled.</p>
+    <p>The flag that indicates if MCU is enabled.</p>
 
   </div>
 
-  
-    <div class="code-item-section">
-      <h4>Default value:</h4>
-      <code class="prettyprint">false</code>
-    </div>
   
 
   
@@ -34335,7 +34617,7 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1240"><code>source&#x2F;skylink-events.js:1240</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1261"><code>source&#x2F;skylink-events.js:1261</code></a>
       </small>
     
 
@@ -35001,116 +35283,6 @@ If the current key is not alias, this is the same as _appKey</p>
   <hr>
 </div>
             
-              <div id="attr__peerHSPriorities" class="code-item attr item private-attr-item ">
-  <a name="config__peerHSPriorities"></a> 
-  <h3 class="code-item-name"><code>_peerHSPriorities</code></h3>
-  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>JSON<b>}</b></span>
-
-  <div class="code-item-properties">
-    <div class="properties-wrapper">
-      
-
-      
-
-      
-        <span class="label label-warning" title="This attribute is required for communication.">required</span>
-      
-
-      
-
-      
-        <span class="label label-default" title="This attribute is private.">private</span>
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-    </div>
-
-    <div class="code-item-information">
-      
-        
-          
-        
-      
-      
-      
-    </div>
-
-    
-      <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l140"><code>source&#x2F;peer-handshake.js:140</code></a>
-      </small>
-    
-
-    
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.0</span></small>
-    
-  </div>
-
-  <div class="code-item-description">
-    <p>Stores the list of Peer handshake connection weights.
-This is implemented to prevent the conflict of sending <code>WELCOME</code>
-  to peer and receiving <code>WELCOME</code> from peer at the same time.
-To handle this event, both self and the peer has to generate a weight initially.
-Then in the Skylink/_welcomeHandler:attr
-  when conflict <code>WELCOME</code> message is received, the handler woudl check
-  if there is already an existing Peer connection object with the peer (due
-  to the initialisation in the received <code>ENTER</code>). If so the handler would
-  then compare the received weight if it is higher than the weight generated for this peer.
-The one with the highest weight would have the "priority" to initiate the WebRTC layer of
-  handshake and start sending the <code>OFFER</code> session description.</p>
-
-  </div>
-
-  
-
-  
-
-  
-    <div class="code-item-section">
-      <h4>Keys:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">(#peerId)</code>
-            <span class="type"><b>{</b>Number<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-                <p>The generated weight for associated Peer peer.
-  The weight is generated with <code>Date.getTime()</code>.</p>
-
-            </div>
-
-            
-          </li>
-      
-      </ul>
-    </div>
-  
-
-  
-
-  
-  <hr>
-</div>
-            
               <div id="attr__peerIceTrickleDisabled" class="code-item attr item private-attr-item ">
   <a name="config__peerIceTrickleDisabled"></a> 
   <h3 class="code-item-name"><code>_peerIceTrickleDisabled</code></h3>
@@ -35712,10 +35884,10 @@ The one with the highest weight would have the "priority" to initiate the WebRTC
   <hr>
 </div>
             
-              <div id="attr__peerRestartPriorities" class="code-item attr item private-attr-item ">
-  <a name="config__peerRestartPriorities"></a> 
-  <h3 class="code-item-name"><code>_peerRestartPriorities</code></h3>
-  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>JSON<b>}</b></span>
+              <div id="attr__peerPriorityWeight" class="code-item attr item private-attr-item ">
+  <a name="config__peerPriorityWeight"></a> 
+  <h3 class="code-item-name"><code>_peerPriorityWeight</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>Number<b>}</b></span>
 
   <div class="code-item-properties">
     <div class="properties-wrapper">
@@ -35762,20 +35934,17 @@ The one with the highest weight would have the "priority" to initiate the WebRTC
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l93"><code>source&#x2F;peer-connection.js:93</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l140"><code>source&#x2F;peer-handshake.js:140</code></a>
       </small>
     
 
     
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.0</span></small>
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.0</span></small>
     
   </div>
 
   <div class="code-item-description">
-    <p>Stores the list of Peer connection restart weights received
-  that would be compared against to indicate if Peer connection
-  should initiates a restart from the other connection end should.
-The one that sends restart later is the one who initiates the restart.</p>
+    <p>Stores the peer connection priority weight.</p>
 
   </div>
 
@@ -35783,30 +35952,6 @@ The one that sends restart later is the one who initiates the restart.</p>
 
   
 
-  
-    <div class="code-item-section">
-      <h4>Keys:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">(#peerId)</code>
-            <span class="type"><b>{</b>Number<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-                <p>The Peer ID associated with the connection restart
-  handshake reconnection weights. The weight is generated with <code>Date.valueOf()</code>.</p>
-
-            </div>
-
-            
-          </li>
-      
-      </ul>
-    </div>
   
 
   
@@ -38977,7 +39122,7 @@ If the value is <code>0</code>, it will use the default timeout from
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1261"><code>source&#x2F;skylink-events.js:1261</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1282"><code>source&#x2F;skylink-events.js:1282</code></a>
       </small>
     
 
@@ -45117,7 +45262,7 @@ again and repeat the stage from there.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l919"><code>source&#x2F;skylink-events.js:919</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l940"><code>source&#x2F;skylink-events.js:940</code></a>
       </small>
     
 
@@ -45269,7 +45414,7 @@ settings</a>, this event will not be triggered at all.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l944"><code>source&#x2F;skylink-events.js:944</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l965"><code>source&#x2F;skylink-events.js:965</code></a>
       </small>
     
 
@@ -45560,7 +45705,7 @@ settings</a>, this event will not be triggered at all.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1203"><code>source&#x2F;skylink-events.js:1203</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1224"><code>source&#x2F;skylink-events.js:1224</code></a>
       </small>
     
 
@@ -45897,7 +46042,7 @@ DataChannel and media streaming connection.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l768"><code>source&#x2F;skylink-events.js:768</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l789"><code>source&#x2F;skylink-events.js:789</code></a>
       </small>
     
 
@@ -46132,7 +46277,7 @@ settings</a>, this event will not be triggered at all.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l803"><code>source&#x2F;skylink-events.js:803</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l824"><code>source&#x2F;skylink-events.js:824</code></a>
       </small>
     
 
@@ -46355,7 +46500,7 @@ settings</a>, this event will not be triggered at all.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l675"><code>source&#x2F;skylink-events.js:675</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l696"><code>source&#x2F;skylink-events.js:696</code></a>
       </small>
     
 
@@ -46908,7 +47053,7 @@ which indicates that self has sent the message data.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l592"><code>source&#x2F;skylink-events.js:592</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l613"><code>source&#x2F;skylink-events.js:613</code></a>
       </small>
     
 
@@ -47377,7 +47522,7 @@ and is sending this Stream object to other Peers connected in the room.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1219"><code>source&#x2F;skylink-events.js:1219</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1240"><code>source&#x2F;skylink-events.js:1240</code></a>
       </small>
     
 
@@ -47650,12 +47795,13 @@ a failed attempt to retrieve video and audio user media.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Event triggered when attempt to fallback to retrieve audio only user media stream
-  has been made.</p>
+    <p>Event triggered when media access fallback has been made.</p>
 <ul>
 <li>If <code>audioFallback</code> is enabled in <a href="#method_init">init()</a>,
 and if there is a failed attempt to retrieve video and audio user media,
 it will attempt to do the audio fallback.</li>
+<li>If MediaStream successfully received does not meet to expected tracks, this
+event would be triggered.</li>
 </ul>
 
   </div>
@@ -47668,14 +47814,178 @@ it will attempt to do the audio fallback.</li>
       
           <li class="param">
             <code class="param-name">error</code>
-            <span class="type"><b>{</b>Object | String<b>}</b></span>
+            <span class="type"><b>{</b>JSON<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>The error object thrown that caused the failure
-  from retrieve video and audio user media stream.</p>
+                <p>The error object information.</p>
+
+            </div>
+
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">error</code>
+                    <span class="type"><b>{</b>Object | String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The error object thrown that caused the failure
+  from retrieve video and audio user media stream.
+  is triggered because (video+audio) error is fallbacking to audio only.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">diff</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      <p>The list of expected audio and video tracks and received
+  tracks.<br>This is only defined when <code>state</code> payload is <code>1</code>.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">video</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The expected and received video tracks.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">video.expected</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The expected video tracks.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">video.received</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The received video tracks.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">audio</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The expected and received audio tracks.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">audio.expected</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The expected audio tracks.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">audio.received</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              THe received audio tracks.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">state</code>
+            <span class="type"><b>{</b>Number<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The access fallback state.
+<small><ul></p>
+<p><li><code>0</code>: Attempting to retrieve access for fallback state.</li></p>
+<p><li><code>1</code>: Fallback access has been completed successfully</li></p>
+<p><li><code>-1</code>: Failed retrieving fallback access</li>
+</ul></small></p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">isScreensharing</code>
+            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+                <p>The flag that indicates if this event ia an
+  fallback from failed screensharing retrieval or attaching of audio.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">isAudioFallback</code>
+            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+                <p>The flag that indicates if this event is an
+  audio fallbacking from failed attempt to retrieve video and audio user media.</p>
 
             </div>
 
@@ -47726,7 +48036,7 @@ it will attempt to do the audio fallback.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l250"><code>source&#x2F;skylink-events.js:250</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l271"><code>source&#x2F;skylink-events.js:271</code></a>
       </small>
     
 
@@ -47792,7 +48102,7 @@ automatically.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l267"><code>source&#x2F;skylink-events.js:267</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l288"><code>source&#x2F;skylink-events.js:288</code></a>
       </small>
     
 
@@ -47872,7 +48182,7 @@ automatically.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l235"><code>source&#x2F;skylink-events.js:235</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l256"><code>source&#x2F;skylink-events.js:256</code></a>
       </small>
     
 
@@ -48072,7 +48382,7 @@ to start ICE gathering for DataChannel and media streaming connection.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l278"><code>source&#x2F;skylink-events.js:278</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l299"><code>source&#x2F;skylink-events.js:299</code></a>
       </small>
     
 
@@ -48519,7 +48829,7 @@ to start ICE gathering for DataChannel and media streaming connection.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l515"><code>source&#x2F;skylink-events.js:515</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l536"><code>source&#x2F;skylink-events.js:536</code></a>
       </small>
     
 
@@ -48966,7 +49276,7 @@ to start ICE gathering for DataChannel and media streaming connection.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l355"><code>source&#x2F;skylink-events.js:355</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l376"><code>source&#x2F;skylink-events.js:376</code></a>
       </small>
     
 
@@ -49415,7 +49725,7 @@ to start ICE gathering for DataChannel and media streaming connection.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l434"><code>source&#x2F;skylink-events.js:434</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l455"><code>source&#x2F;skylink-events.js:455</code></a>
       </small>
     
 
@@ -50056,7 +50366,7 @@ not get triggered but stops at <u>readyStateChange</u> event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l839"><code>source&#x2F;skylink-events.js:839</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l860"><code>source&#x2F;skylink-events.js:860</code></a>
       </small>
     
 
@@ -50522,7 +50832,7 @@ may allow or prevent any other Peers from joining the room.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1004"><code>source&#x2F;skylink-events.js:1004</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1025"><code>source&#x2F;skylink-events.js:1025</code></a>
       </small>
     
 
@@ -50618,7 +50928,7 @@ may allow or prevent any other Peers from joining the room.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1017"><code>source&#x2F;skylink-events.js:1017</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1038"><code>source&#x2F;skylink-events.js:1038</code></a>
       </small>
     
 
@@ -50714,7 +51024,7 @@ may allow or prevent any other Peers from joining the room.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1030"><code>source&#x2F;skylink-events.js:1030</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1051"><code>source&#x2F;skylink-events.js:1051</code></a>
       </small>
     
 
@@ -50929,7 +51239,7 @@ repeat the stage from there.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1044"><code>source&#x2F;skylink-events.js:1044</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1065"><code>source&#x2F;skylink-events.js:1065</code></a>
       </small>
     
 
@@ -51392,7 +51702,7 @@ repeat the stage from there.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1123"><code>source&#x2F;skylink-events.js:1123</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1144"><code>source&#x2F;skylink-events.js:1144</code></a>
       </small>
     
 
@@ -51856,7 +52166,7 @@ repeat the stage from there.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l988"><code>source&#x2F;skylink-events.js:988</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1009"><code>source&#x2F;skylink-events.js:1009</code></a>
       </small>
     
 

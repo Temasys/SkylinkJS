@@ -1,21 +1,32 @@
 # ![SkylinkJS](http://temasys.github.io/resources/img/skylinkjs.svg)
-
 > SkylinkJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.
 
 We've gone to great length to make this library work in as many browsers as possible. SkylinkJS is build on top of [AdapterJS](http://github.com/Temasys/AdapterJS) and works with our [Temasys WebRTC Plugin](http://skylink.io/plugin/) even in Internet Explorer and Safari on Mac and PC.
 
-To install SkylinkJS with [npm](https://www.npmjs.com/):
+You'll need a Temasys Developer Account and an App key to use this. [Register here to get your App key](https://developer.temasys.com.sg).
+
+#### Supported Browsers
+- Chrome `47`. _Earlier versions `45+`_
+- Firefox `43`. _Earlier versions `40+`_
+- Opera `34`. _Earlier versions `32+`_
+- Plugin `v0.8.863+`
+  - Safari `9`. _Earlier versions `7+`_
+  - IE `11`. _Earlier versions `9+`_
+
+For Safari / IE support, please download our [Temasys WebRTC PLugin here](https://temasys.atlassian.net/wiki/display/TWPP/WebRTC+Plugins)
+
+##### Installation
+Install SkylinkJS with [npm](https://www.npmjs.com/):
 ```
 npm install skylinkjs
 ```
-To install SkylinkJS with [bower](http://bower.io/):
+Install SkylinkJS with [bower](http://bower.io/):
 ```
 bower install skylinkjs
 ```
 
-You'll need a Temasys Developer Account and an App key to use this. [Register here to get your App key](https://developer.temasys.com.sg).
 
-
+#### Read more
 - [Getting started](http://temasys.github.io/how-to/2014/08/08/Getting_started_with_WebRTC_and_SkylinkJS/)
 - [API Docs](http://cdn.temasys.com.sg/skylink/skylinkjs/latest/doc/classes/Skylink.html)
 - [Versions](http://github.com/Temasys/SkylinkJS/releases)
@@ -24,13 +35,16 @@ You'll need a Temasys Developer Account and an App key to use this. [Register he
 - [Run tests](https://github.com/Temasys/SkylinkJS/tree/master/tests)
 
 
+
 ##### Need help or want something changed?
 You can raise tickets on [http://support.temasys.com.sg) our support portal or on [our Github Page](https://developer.temasys.com.sg/support).
 
 ##### Current versions and stability
 Always use the latest versions of the SkylinkJS library as WebRTC is still evolving and we adapt to changes very frequently.
 
-[Latest version: 0.6.1](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.1).
+[Latest version: 0.6.5](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.5).
+
+#### Noted Issues and Solutions
 
 ##### Upgrading from 0.5.7 and below:
 It's now recommended to use the `init()` callback instead of using `readyStateChange` event state to go completed as this may result in an infinite loop.
@@ -79,7 +93,7 @@ npm install testling -g
 
 # 5. Run the start script to start a local webserver to be able access the demo and doc folders. This will popup Chrome (Mac). You can configure a different browsers in the start.sh file. Alternatively, you can run (sh start.sh)
 
-npm start
+npm start # note that this runs in Chrome currently..
 ```
 
 After making edits, here are some commands to run and build Skylink:

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.4</title>
+    <title>SkylinkJS 0.6.5</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.4</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.5</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -433,6 +433,90 @@ Skylink.prototype._removeSDPFirefoxH264Pref = function(sdpLines) {
     sdpLines.splice(invalidLineIndex, 1);
   }
   return sdpLines;
+};
+
+/**
+ * Modifies the session description received to append the correct ssrc lines for Firefox.
+ * @method _addSDPSsrcFirefoxAnswer
+ * @param {String} targetMid The peer connection ID.
+ * @param {String} answerSdp The answer session description.
+ * @return {String} The update answer session description with correct SSRC lines.
+ * @private
+ * @component SDP
+ * @for Skylink
+ * @since 0.6.6
+ */
+Skylink.prototype._addSDPSsrcFirefoxAnswer = function (targetMid, sdp) {
+  var self = this;
+  var agent = self.getPeerInfo(targetMid).agent;
+
+  var pc = self._peerConnections[targetMid];
+
+  if (!pc) {
+    log.error([targetMid, &#x27;RTCSessionDesription&#x27;, &#x27;answer&#x27;, &#x27;Peer connection object &#x27; +
+      &#x27;not found. Unable to parse answer session description for peer&#x27;]);
+    return;
+  }
+
+  var updatedSdp = sdp;
+
+  // for this case, this is because firefox uses Unified Plan and Chrome uses
+  // Plan B. we have to remodify this a bit to let the non-ff detect as new mediastream
+  // as chrome/opera/safari detects it as default due to missing ssrc specified as used in plan B.
+  if (window.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp; agent.name !== &#x27;firefox&#x27; &amp;&amp;
+    //pc.remoteDescription.sdp.indexOf(&#x27;a=msid-semantic: WMS *&#x27;) === -1 &amp;&amp;
+    updatedSdp.indexOf(&#x27;a=msid-semantic:WMS *&#x27;) &gt; 0) {
+    // start parsing
+    var sdpLines = updatedSdp.split(&#x27;\r\n&#x27;);
+    var streamId = &#x27;&#x27;;
+    var replaceSSRCSemantic = -1;
+    var i;
+    var trackId = &#x27;&#x27;;
+
+    var parseTracksSSRC = function (track) {
+      for (i = 0, trackId = &#x27;&#x27;; i &lt; sdpLines.length; i++) {
+        if (!!trackId) {
+          if (sdpLines[i].indexOf(&#x27;a=ssrc:&#x27;) === 0) {
+            var ssrcId = sdpLines[i].split(&#x27;:&#x27;)[1].split(&#x27; &#x27;)[0];
+            sdpLines.splice(i+1, 0, &#x27;a=ssrc:&#x27; + ssrcId +  &#x27; msid:&#x27; + streamId + &#x27; &#x27; + trackId,
+              &#x27;a=ssrc:&#x27; + ssrcId + &#x27; mslabel:default&#x27;,
+              &#x27;a=ssrc:&#x27; + ssrcId + &#x27; label:&#x27; + trackId);
+            break;
+          } else if (sdpLines[i].indexOf(&#x27;a=mid:&#x27;) === 0) {
+            break;
+          }
+        } else if (sdpLines[i].indexOf(&#x27;a=msid:&#x27;) === 0) {
+          if (i &gt; 0 &amp;&amp; sdpLines[i-1].indexOf(&#x27;a=mid:&#x27; + track) === 0) {
+            var parts = sdpLines[i].split(&#x27;:&#x27;)[1].split(&#x27; &#x27;);
+
+            streamId = parts[0];
+            trackId = parts[1];
+            replaceSSRCSemantic = true;
+          }
+        }
+      }
+    };
+
+    parseTracksSSRC(&#x27;video&#x27;);
+    parseTracksSSRC(&#x27;audio&#x27;);
+
+    /*if (replaceSSRCSemantic) {
+      for (i = 0; i &lt; sdpLines.length; i++) {
+        if (sdpLines[i].indexOf(&#x27;a=msid-semantic:WMS &#x27;) === 0) {
+          var parts = sdpLines[i].split(&#x27; &#x27;);
+          parts[parts.length - 1] = streamId;
+          sdpLines[i] = parts.join(&#x27; &#x27;);
+          break;
+        }
+      }
+
+    }*/
+    updatedSdp = sdpLines.join(&#x27;\r\n&#x27;);
+
+    log.debug([targetMid, &#x27;RTCSessionDesription&#x27;, &#x27;answer&#x27;, &#x27;Parsed remote description from firefox&#x27;], sdpLines);
+  }
+
+  return updatedSdp;
 };
     </pre>
 </div>
