@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.4 - Thu Dec 24 2015 04:54:29 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Thu Dec 24 2015 05:08:07 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8387,7 +8387,7 @@ if (navigator.mozGetUserMedia) {
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.4 - Thu Dec 24 2015 04:54:29 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Thu Dec 24 2015 05:08:07 GMT+0800 (SGT) */
 
 (function() {
 
@@ -16820,15 +16820,36 @@ Skylink.prototype._EVENTS = {
   mediaAccessError: [],
 
   /**
-   * Event triggered when attempt to fallback to retrieve audio only user media stream
-   *   has been made.
+   * Event triggered when media access fallback has been made.
    * - If <code>audioFallback</code> is enabled in <a href="#method_init">init()</a>,
    *   and if there is a failed attempt to retrieve video and audio user media,
    *   it will attempt to do the audio fallback.
+   * - If MediaStream successfully received does not meet to expected tracks, this
+   *   event would be triggered.
    * @event mediaAccessFallback
-   * @param {Object|String} error The error object thrown that caused the failure
+   * @param {JSON} error The error object information.
+   * @param {Object|String} error.error The error object thrown that caused the failure
    *   from retrieve video and audio user media stream.
+   *   is triggered because (video+audio) error is fallbacking to audio only.
+   * @param {JSON} [error.diff=null] The list of expected audio and video tracks and received
+   *   tracks.<br>This is only defined when <code>state</code> payload is <code>1</code>.
+   * @param {JSON} error.diff.video The expected and received video tracks.
+   * @param {Number} error.diff.video.expected The expected video tracks.
+   * @param {Number} error.diff.video.received The received video tracks.
+   * @param {JSON} error.diff.audio The expected and received audio tracks.
+   * @param {Number} error.diff.audio.expected The expected audio tracks.
+   * @param {Number} error.diff.audio.received THe received audio tracks.
+   * @param {Number} state The access fallback state.
+   * <small><ul>
+   * <li><code>0</code>: Attempting to retrieve access for fallback state.</li>
+   * <li><code>1</code>: Fallback access has been completed successfully</li>
+   * <li><code>-1</code>: Failed retrieving fallback access</li>
+   * </ul></small>
+   * @param {Boolean} [isScreensharing=false] The flag that indicates if this event ia an
+   *   fallback from failed screensharing retrieval or attaching of audio.
    * @component Events
+   * @param {Boolean} [isAudioFallback=false] The flag that indicates if this event is an
+   *   audio fallbacking from failed attempt to retrieve video and audio user media.
    * @for Skylink
    * @since 0.6.3
    */
@@ -20832,16 +20853,30 @@ Skylink.prototype._onUserMediaError = function(error, isScreenSharing, audioFall
 
     log.debug([null, 'MediaStream', null, 'Falling back to audio stream call']);
 
-    self._trigger('mediaAccessFallback', error);
+    self._trigger('mediaAccessFallback', {
+      error: error,
+      diff: null
+    }, 0, false, true);
 
     window.getUserMedia({
       audio: true
     }, function(stream) {
       self._onUserMediaSuccess(stream);
+      self._trigger('mediaAccessFallback', {
+        error: null,
+        diff: {
+          video: { expected: 1, received: stream.getVideoTracks().length },
+          audio: { expected: 1, received: stream.getAudioTracks().length }
+        }
+      }, 1, false, true);
     }, function(error) {
       log.error([null, 'MediaStream', null,
         'Failed retrieving audio in audio fallback:'], error);
       self._trigger('mediaAccessError', error, !!isScreenSharing, true);
+      self._trigger('mediaAccessFallback', {
+        error: error,
+        diff: null
+      }, -1, false, true);
     });
   } else {
     log.error([null, 'MediaStream', null, 'Failed retrieving stream:'], error);
@@ -21913,20 +21948,26 @@ Skylink.prototype.getUserMedia = function(options,callback) {
             if (requireVideo) {
               hasVideo =  stream.getVideoTracks().length > 0;
 
-              if (self._audioFallback && !hasVideo) {
+              /*if (self._audioFallback && !hasVideo) {
                 hasVideo = true; // to trick isSuccess to be true
                 self._trigger('mediaAccessFallback', notSameTracksError);
-              }
+              }*/
             }
             if (hasAudio && hasVideo) {
               isSuccess = true;
             }
 
-            if (isSuccess) {
-              self._onUserMediaSuccess(stream);
-            } else {
-              self._onUserMediaError(notSameTracksError, false, false);
+            if (!isSuccess) {
+              self._trigger('mediaAccessFallback', {
+                error: notSameTracksError,
+                diff: {
+                  video: { expected: requireAudio ? 1 : 0, received: stream.getVideoTracks().length },
+                  audio: { expected: requireVideo ? 1 : 0, received: stream.getAudioTracks().length }
+                }
+              }, 1, false, false);
             }
+
+            self._onUserMediaSuccess(stream);
           }
         }, function (error) {
           self._onUserMediaError(error, false, true);
@@ -22423,7 +22464,44 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
       log.warn('This screensharing session will not support audio streaming');
       self._screenSharingStreamSettings.audio = false;
     }
-    self._onUserMediaSuccess(sStream, true);
+
+    var requireAudio = enableAudio === true;
+    var requireVideo = true;
+    var checkAudio = !requireAudio;
+    var checkVideo = !requireVideo;
+    var notSameTracksError = new Error(
+      'Expected audio tracks length with ' +
+      (requireAudio ? '1' : '0') + ' and video tracks length with ' +
+      (requireVideo ? '1' : '0') + ' but received audio tracks length ' +
+      'with ' + sStream.getAudioTracks().length + ' and video ' +
+      'tracks length with ' + sStream.getVideoTracks().length);
+
+    // do the check
+    if (requireAudio) {
+      checkAudio = sStream.getAudioTracks().length > 0;
+    }
+    if (requireVideo) {
+      checkVideo =  sStream.getVideoTracks().length > 0;
+    }
+
+    if (checkVideo) {
+      // no audio but has video for screensharing
+      if (!checkAudio) {
+        self._trigger('mediaAccessFallback', {
+          error: notSameTracksError,
+          diff: {
+            video: { expected: 1, received: sStream.getVideoTracks().length },
+            audio: { expected: requireAudio ? 1 : 0, received: sStream.getAudioTracks().length }
+          }
+        }, 1, true, false);
+      }
+
+      self._onUserMediaSuccess(sStream, true);
+
+    } else {
+      self._onUserMediaError(notSameTracksError, true);
+    }
+
     self._timestamp.screen = true;
   };
 

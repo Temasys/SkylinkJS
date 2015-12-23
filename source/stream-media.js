@@ -554,16 +554,30 @@ Skylink.prototype._onUserMediaError = function(error, isScreenSharing, audioFall
 
     log.debug([null, 'MediaStream', null, 'Falling back to audio stream call']);
 
-    self._trigger('mediaAccessFallback', error);
+    self._trigger('mediaAccessFallback', {
+      error: error,
+      diff: null
+    }, 0, false, true);
 
     window.getUserMedia({
       audio: true
     }, function(stream) {
       self._onUserMediaSuccess(stream);
+      self._trigger('mediaAccessFallback', {
+        error: null,
+        diff: {
+          video: { expected: 1, received: stream.getVideoTracks().length },
+          audio: { expected: 1, received: stream.getAudioTracks().length }
+        }
+      }, 1, false, true);
     }, function(error) {
       log.error([null, 'MediaStream', null,
         'Failed retrieving audio in audio fallback:'], error);
       self._trigger('mediaAccessError', error, !!isScreenSharing, true);
+      self._trigger('mediaAccessFallback', {
+        error: error,
+        diff: null
+      }, -1, false, true);
     });
   } else {
     log.error([null, 'MediaStream', null, 'Failed retrieving stream:'], error);
@@ -1635,20 +1649,26 @@ Skylink.prototype.getUserMedia = function(options,callback) {
             if (requireVideo) {
               hasVideo =  stream.getVideoTracks().length > 0;
 
-              if (self._audioFallback && !hasVideo) {
+              /*if (self._audioFallback && !hasVideo) {
                 hasVideo = true; // to trick isSuccess to be true
                 self._trigger('mediaAccessFallback', notSameTracksError);
-              }
+              }*/
             }
             if (hasAudio && hasVideo) {
               isSuccess = true;
             }
 
-            if (isSuccess) {
-              self._onUserMediaSuccess(stream);
-            } else {
-              self._onUserMediaError(notSameTracksError, false, false);
+            if (!isSuccess) {
+              self._trigger('mediaAccessFallback', {
+                error: notSameTracksError,
+                diff: {
+                  video: { expected: requireAudio ? 1 : 0, received: stream.getVideoTracks().length },
+                  audio: { expected: requireVideo ? 1 : 0, received: stream.getAudioTracks().length }
+                }
+              }, 1, false, false);
             }
+
+            self._onUserMediaSuccess(stream);
           }
         }, function (error) {
           self._onUserMediaError(error, false, true);
@@ -2145,7 +2165,44 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
       log.warn('This screensharing session will not support audio streaming');
       self._screenSharingStreamSettings.audio = false;
     }
-    self._onUserMediaSuccess(sStream, true);
+
+    var requireAudio = enableAudio === true;
+    var requireVideo = true;
+    var checkAudio = !requireAudio;
+    var checkVideo = !requireVideo;
+    var notSameTracksError = new Error(
+      'Expected audio tracks length with ' +
+      (requireAudio ? '1' : '0') + ' and video tracks length with ' +
+      (requireVideo ? '1' : '0') + ' but received audio tracks length ' +
+      'with ' + sStream.getAudioTracks().length + ' and video ' +
+      'tracks length with ' + sStream.getVideoTracks().length);
+
+    // do the check
+    if (requireAudio) {
+      checkAudio = sStream.getAudioTracks().length > 0;
+    }
+    if (requireVideo) {
+      checkVideo =  sStream.getVideoTracks().length > 0;
+    }
+
+    if (checkVideo) {
+      // no audio but has video for screensharing
+      if (!checkAudio) {
+        self._trigger('mediaAccessFallback', {
+          error: notSameTracksError,
+          diff: {
+            video: { expected: 1, received: sStream.getVideoTracks().length },
+            audio: { expected: requireAudio ? 1 : 0, received: sStream.getAudioTracks().length }
+          }
+        }, 1, true, false);
+      }
+
+      self._onUserMediaSuccess(sStream, true);
+
+    } else {
+      self._onUserMediaError(notSameTracksError, true);
+    }
+
     self._timestamp.screen = true;
   };
 

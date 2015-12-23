@@ -218,15 +218,36 @@ Skylink.prototype._EVENTS = {
   mediaAccessError: [],
 
   /**
-   * Event triggered when attempt to fallback to retrieve audio only user media stream
-   *   has been made.
+   * Event triggered when media access fallback has been made.
    * - If <code>audioFallback</code> is enabled in <a href="#method_init">init()</a>,
    *   and if there is a failed attempt to retrieve video and audio user media,
    *   it will attempt to do the audio fallback.
+   * - If MediaStream successfully received does not meet to expected tracks, this
+   *   event would be triggered.
    * @event mediaAccessFallback
-   * @param {Object|String} error The error object thrown that caused the failure
+   * @param {JSON} error The error object information.
+   * @param {Object|String} error.error The error object thrown that caused the failure
    *   from retrieve video and audio user media stream.
+   *   is triggered because (video+audio) error is fallbacking to audio only.
+   * @param {JSON} [error.diff=null] The list of expected audio and video tracks and received
+   *   tracks.<br>This is only defined when <code>state</code> payload is <code>1</code>.
+   * @param {JSON} error.diff.video The expected and received video tracks.
+   * @param {Number} error.diff.video.expected The expected video tracks.
+   * @param {Number} error.diff.video.received The received video tracks.
+   * @param {JSON} error.diff.audio The expected and received audio tracks.
+   * @param {Number} error.diff.audio.expected The expected audio tracks.
+   * @param {Number} error.diff.audio.received THe received audio tracks.
+   * @param {Number} state The access fallback state.
+   * <small><ul>
+   * <li><code>0</code>: Attempting to retrieve access for fallback state.</li>
+   * <li><code>1</code>: Fallback access has been completed successfully</li>
+   * <li><code>-1</code>: Failed retrieving fallback access</li>
+   * </ul></small>
+   * @param {Boolean} [isScreensharing=false] The flag that indicates if this event ia an
+   *   fallback from failed screensharing retrieval or attaching of audio.
    * @component Events
+   * @param {Boolean} [isAudioFallback=false] The flag that indicates if this event is an
+   *   audio fallbacking from failed attempt to retrieve video and audio user media.
    * @for Skylink
    * @since 0.6.3
    */
