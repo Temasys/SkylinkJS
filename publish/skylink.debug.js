@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.4 - Thu Dec 24 2015 01:02:34 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Thu Dec 24 2015 01:04:30 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5543,22 +5543,6 @@ Skylink.prototype.introducePeer = function(sendingPeerId, receivingPeerId){
 };
 
 
-var Peer = function (options) {
-
-  this.id = '';
-
-  this.agent = {
-
-  };
-
-  this.userData = '';
-
-  this.settings = {};
-};
-
-Peer.prototype._doOffer = function () {
-
-};
 Skylink.prototype.SYSTEM_ACTION = {
   WARNING: 'warning',
   REJECT: 'reject'
