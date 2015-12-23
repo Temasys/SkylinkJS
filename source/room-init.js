@@ -743,16 +743,6 @@ Skylink.prototype._loadInfo = function() {
     }, self._selectedRoom);
     return;
   }
-  if (!window.RTCPeerConnection) {
-    log.error('WebRTC not supported. Please upgrade your browser');
-    self._readyState = -1;
-    self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-      status: null,
-      content: 'WebRTC not available',
-      errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
-    }, self._selectedRoom);
-    return;
-  }
   if (!self._path) {
     log.error('Skylink is not initialised. Please call init() first');
     self._readyState = -1;
@@ -764,6 +754,16 @@ Skylink.prototype._loadInfo = function() {
     return;
   }
   adapter.webRTCReady(function () {
+    if (!window.RTCPeerConnection) {
+      log.error('WebRTC not supported. Please upgrade your browser');
+      self._readyState = -1;
+      self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+        status: null,
+        content: 'WebRTC not available',
+        errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
+      }, self._selectedRoom);
+      return;
+    }
     self._readyState = 1;
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING, null, self._selectedRoom);
     self._requestServerInfo('GET', self._path, function(status, response) {
