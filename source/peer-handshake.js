@@ -517,7 +517,16 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     } else {
       pc.setOffer = 'local';
     }
-    if (self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid]) {
+    var shouldWaitForCandidates = false;
+
+    if (!(self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid])) {
+      shouldWaitForCandidates = true;
+      // there is no sessiondescription created at first go
+      if (pc.setOffer === 'remote' || pc.setAnswer === 'remote') {
+        shouldWaitForCandidates = false;
+      }
+    }
+    if (!shouldWaitForCandidates) {
       // make checks for firefox session description
       if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && window.webrtcDetectedBrowser === 'firefox') {
         sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);

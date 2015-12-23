@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.4 - Thu Dec 24 2015 04:17:18 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Thu Dec 24 2015 04:54:29 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3340,13 +3340,13 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
       var sessionDescription = self._peerConnections[targetMid].localDescription;
 
       // make checks for firefox session description
-      if (updatedSdp.type === self.HANDSHAKE_PROGRESS.ANSWER && window.webrtcDetectedBrowser === 'firefox') {
+      if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && window.webrtcDetectedBrowser === 'firefox') {
         sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
       }
 
       self._sendChannelMessage({
         type: sessionDescription.type,
-        sdp: self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription).sdp,
+        sdp: sessionDescription.sdp,
         mid: self._user.sid,
         agent: window.webrtcDetectedBrowser,
         target: targetMid,
@@ -5324,7 +5324,16 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     } else {
       pc.setOffer = 'local';
     }
-    if (self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid]) {
+    var shouldWaitForCandidates = false;
+
+    if (!(self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid])) {
+      shouldWaitForCandidates = true;
+      // there is no sessiondescription created at first go
+      if (pc.setOffer === 'remote' || pc.setAnswer === 'remote') {
+        shouldWaitForCandidates = false;
+      }
+    }
+    if (!shouldWaitForCandidates) {
       // make checks for firefox session description
       if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && window.webrtcDetectedBrowser === 'firefox') {
         sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
@@ -11596,6 +11605,21 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }
 
+  /*if (pc.localDescription ? !!pc.localDescription.sdp : false) {
+    log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
+      pc.localDescription);
+    return;
+  }*/
+
+  log.log([targetMid, null, message.type, 'Received offer from peer. ' +
+    'Session description:'], message.sdp);
+  var offer = new window.RTCSessionDescription({
+    type: message.type,
+    sdp: message.sdp
+  });
+  log.log([targetMid, 'RTCSessionDescription', message.type,
+    'Session description object created'], offer);
+
   // This is always the initial state. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
     log.warn([targetMid, null, message.type, 'Peer connection state is not in ' +
@@ -11606,25 +11630,10 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }
 
-  /*if (pc.localDescription ? !!pc.localDescription.sdp : false) {
-    log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
-      pc.localDescription);
-    return;
-  }*/
-
-  log.log([targetMid, null, message.type, 'Received offer from peer. ' +
-    'Session description:'], message.sdp);
-  self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
-  var offer = new window.RTCSessionDescription({
-    type: message.type,
-    sdp: message.sdp
-  });
-  log.log([targetMid, 'RTCSessionDescription', message.type,
-    'Session description object created'], offer);
-
   pc.setRemoteDescription(offer, function() {
     log.debug([targetMid, 'RTCSessionDescription', message.type, 'Remote description set']);
     pc.setOffer = 'remote';
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
     self._doAnswer(targetMid);
   }, function(error) {
@@ -11762,17 +11771,6 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }
 
-  // This should be the state after offer is received. or even after negotiation is successful
-  if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
-    log.warn([targetMid, null, message.type, 'Peer connection state is not in ' +
-      '"have-local-offer" state for re-negotiation. Dropping message.'], {
-        signalingState: pc.signalingState,
-        isRestart: !!message.restart
-      });
-    return;
-  }
-
-  self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
   var answer = new window.RTCSessionDescription({
     type: message.type,
     sdp: message.sdp
@@ -11799,14 +11797,28 @@ Skylink.prototype._answerHandler = function(message) {
     answer.sdp = answer.sdp.replace(/ udp /g, ' UDP ');
   }
 
+  // This should be the state after offer is received. or even after negotiation is successful
+  if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
+    log.warn([targetMid, null, message.type, 'Peer connection state is not in ' +
+      '"have-local-offer" state for re-negotiation. Dropping message.'], {
+        signalingState: pc.signalingState,
+        isRestart: !!message.restart
+      });
+    return;
+  }
+
   pc.setRemoteDescription(answer, function() {
     log.debug([targetMid, null, message.type, 'Remote description set']);
     pc.setAnswer = 'remote';
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
 
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-    log.error([targetMid, null, message.type, 'Failed setting remote description:'], error);
+    log.error([targetMid, null, message.type, 'Failed setting remote description:'], {
+      error: error,
+      state: pc.signalingState
+    });
   });
 };
 
