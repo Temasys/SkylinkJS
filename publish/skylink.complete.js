@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.4 - Wed Dec 23 2015 14:16:46 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Wed Dec 23 2015 21:27:21 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8399,7 +8399,7 @@ if (navigator.mozGetUserMedia) {
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.4 - Wed Dec 23 2015 14:16:46 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Wed Dec 23 2015 21:27:21 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11734,9 +11734,15 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
     // Disable Ice trickle option
     if (!self._enableIceTrickle || self._peerIceTrickleDisabled[targetMid]) {
       var sessionDescription = self._peerConnections[targetMid].localDescription;
+
+      // make checks for firefox session description
+      if (updatedSdp.type === self.HANDSHAKE_PROGRESS.ANSWER && window.webrtcDetectedBrowser === 'firefox') {
+        sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
+      }
+
       self._sendChannelMessage({
         type: sessionDescription.type,
-        sdp: sessionDescription.sdp,
+        sdp: self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription).sdp,
         mid: self._user.sid,
         agent: window.webrtcDetectedBrowser,
         target: targetMid,
@@ -12310,6 +12316,8 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
     enableDataChannel: self._enableDataChannel
   });
 
+  log.info('Adding peer', isSS);
+
   if (!restartConn) {
     self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS);
   }
@@ -12447,6 +12455,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         target: peerId,
         isConnectionRestart: !!isConnectionRestart,
         lastRestart: lastRestart,
+        // This will not be used based off the logic in _restartHandler
         weight: self._peerPriorityWeight,
         receiveOnly: self._peerConnections[peerId].receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
@@ -12487,7 +12496,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
           mid: self._user.sid,
           target: peerId,
           rid: self._room.id,
-          resend: true
+          restart: true
         });
       } else {
         var noLocalDescriptionError = 'Failed re-sending localDescription as there is ' +
@@ -12557,7 +12566,7 @@ Skylink.prototype._removePeer = function(peerId) {
 
     delete this._peerConnections[peerId];
   }
-  // remove the peer informations object for this peer
+  // remove peer informations session
   if (typeof this._peerInformations[peerId] !== 'undefined') {
     delete this._peerInformations[peerId];
   }
@@ -12612,7 +12621,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.hasStream = false;
   pc.hasScreen = !!isScreenSharing;
   pc.hasMainChannel = false;
-  pc.firefoxTriggeredStream = false;
   pc.firefoxStreamId = '';
 
   // datachannels
@@ -12652,8 +12660,18 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.onaddstream = function(event) {
     var stream = event.stream || event;
     pc.hasStream = true;
-    pc.firefoxTriggeredStream = true;
-    self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
+
+    var agent = (self.getPeerInfo(targetMid) || {}).agent;
+    var timeout = 0;
+
+    // NOTE: Add timeouts to the firefox stream received because it seems to have some sort of black stream rendering at first
+    // This may not be advisable but that it seems to work after 1500s. (tried with ICE established but it does not work and getStats)
+    if (agent.name === 'firefox' && window.webrtcDetectedBrowser !== 'firefox') {
+      timeout = 1500;
+    }
+    setTimeout(function () {
+      self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
+    }, timeout);
   };
   pc.onicecandidate = function(event) {
     log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'],
@@ -12993,8 +13011,6 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         target: peerId, //'MCU',
         isConnectionRestart: false,
         lastRestart: lastRestart,
-        // don't worry about the weight for MCU case, since it just ignores
-        // after triggering the peerRestart event on peer's end
         weight: self._peerPriorityWeight,
         receiveOnly: receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
@@ -13044,7 +13060,6 @@ Skylink.prototype._restartMCUConnection = function(callback) {
     }
   });
 };
-
 Skylink.prototype._peerInformations = {};
 
 /**
@@ -13279,14 +13294,13 @@ Skylink.prototype._peerConnectionHealthTimers = {};
 Skylink.prototype._peerConnectionHealth = {};
 
 /**
- * Stores the peer fixed priority weight.
- * Whoever is the smallest would be the offerer always
+ * Stores the peer connection priority weight.
  * @attribute _peerPriorityWeight
  * @type Number
  * @private
- * @component Peer
+ * @required
  * @for Skylink
- * @since 0.6.6
+ * @since 0.5.0
  */
 Skylink.prototype._peerPriorityWeight = 0;
 
@@ -13654,6 +13668,11 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       pc.setOffer = 'local';
     }
     if (self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid]) {
+      // make checks for firefox session description
+      if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && window.webrtcDetectedBrowser === 'firefox') {
+        sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
+      }
+
       self._sendChannelMessage({
         type: sessionDescription.type,
         sdp: sessionDescription.sdp,
@@ -19326,30 +19345,25 @@ Skylink.prototype._inRoomHandler = function(message) {
   self._room.connection.peerConfig = self._setIceServers(message.pc_config);
   self._inRoom = true;
   self._user.sid = message.sid;
+  self._peerPriorityWeight = (new Date()).getTime();
 
   self._trigger('peerJoined', self._user.sid, self.getPeerInfo(), true);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
+
+  if (typeof message.tieBreaker === 'number') {
+    self._peerPriorityWeight = message.tieBreaker;
+  }
 
   if (self._mediaScreen && self._mediaScreen !== null) {
     self._trigger('incomingStream', self._user.sid, self._mediaScreen, true, self.getPeerInfo());
   } else if (self._mediaStream && self._mediaStream !== null) {
     self._trigger('incomingStream', self._user.sid, self._mediaStream, true, self.getPeerInfo());
   }
-
-  // Define the peer priority weight
-  self._peerPriorityWeight = (new Date()).getTime();
-
-  if (typeof message.tieBreaker === 'number') {
-    self._peerPriorityWeight = message.tieBreaker;
-  }
-
   // NOTE ALEX: should we wait for local streams?
   // or just go with what we have (if no stream, then one way?)
   // do we hardcode the logic here, or give the flexibility?
   // It would be better to separate, do we could choose with whom
   // we want to communicate, instead of connecting automatically to all.
-
-  // NOTE: should we actually start sending weights in the ENTER messages instead?
   self._sendChannelMessage({
     type: self._SIG_MESSAGE_TYPE.ENTER,
     mid: self._user.sid,
@@ -19463,7 +19477,6 @@ Skylink.prototype._enterHandler = function(message) {
     version: message.version,
     os: message.os
   }, false, false, message.receiveOnly, message.sessionType === 'screensharing');
-  // add the peer information
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
     name: message.agent,
@@ -19647,7 +19660,7 @@ Skylink.prototype._restartHandler = function(message){
     os: message.os || ''
   };
 
-  var agent = self.getPeerInfo(targetMid).agent;
+  var agent = (self.getPeerInfo(targetMid) || {}).agent;
 
   // This variable is not used
   //var peerConnectionStateStable = false;
@@ -19670,7 +19683,7 @@ Skylink.prototype._restartHandler = function(message){
     beOfferer = true;
   } else {
     // Checks if weight is lesser than peer's weight
-    // If lesser, always do the restart mechanism (to follow welcome weight checking logic)
+    // If lesser, always do the restart mechanism
     if (self._peerPriorityWeight < message.weight) {
       beOfferer = true;
     }
@@ -19794,47 +19807,44 @@ Skylink.prototype._restartHandler = function(message){
 Skylink.prototype._welcomeHandler = function(message) {
   var targetMid = message.mid;
   var restartConn = false;
+  var beOfferer = this._peerPriorityWeight < message.weight;
 
   log.log([targetMid, null, message.type, 'Received peer\'s response ' +
     'to handshake initiation. Peer\'s information:'], message.userInfo);
 
-  // check if peer connection for this peer exists first
   if (this._peerConnections[targetMid]) {
-    // if this peer exists but does not have any offer present (conflict in weights)
-    // or weight is lesser than 0 (this means a hard restart)
     if (!this._peerConnections[targetMid].setOffer || message.weight < 0) {
-      // If weight is lesser than 0 (hard restart case)
       if (message.weight < 0) {
-        log.log([targetMid, null, message.type, 'Peer\'s configured weight is lower ' +
+        log.log([targetMid, null, message.type, 'Peer\'s weight is lower ' +
           'than 0. Proceeding with offer'], message.weight);
         restartConn = true;
+        beOfferer = true;
 
         // -2: hard restart of connection
         if (message.weight === -2) {
           this._restartHandler(message);
           return;
         }
-      // Else check if HS priority is bigger. If bigger, return and let the other peer
-      // do the offer
-      } else if (this._peerPriorityWeight > message.weight) {
-        log.log([targetMid, null, message.type, 'Peer\'s priority weight ' +
-          'is lesser than user\'s. Ignoring message'
-          ], this._peerPriorityWeight + ' > ' + message.weight);
-        return;
-      // Else we proceed to handshake
-      } else {
-        log.log([targetMid, null, message.type, 'Peer\'s priority weight ' +
+
+      } else if (beOfferer) {
+        log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
           'is higher than user\'s. Proceeding with offer'
           ], this._peerPriorityWeight + ' < ' + message.weight);
         restartConn = true;
+
+      } else {
+        log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
+          'is lesser than user\'s. Ignoring message'
+          ], this._peerPriorityWeight + ' > ' + message.weight);
+        return;
       }
-    // discard message
     } else {
       log.warn([targetMid, null, message.type,
         'Ignoring message as peer is already added']);
       return;
     }
   }
+
   message.agent = (!message.agent) ? 'chrome' : message.agent;
   this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
     message.enableIceTrickle : this._enableIceTrickle;
@@ -19849,7 +19859,13 @@ Skylink.prototype._welcomeHandler = function(message) {
       ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
     this._hasMCU = true;
     this._trigger('serverPeerJoined', targetMid, this.SERVER_PEER_TYPE.MCU);
+  } else {
+    // if it is not MCU and P2P make sure that beOfferer is false for firefox -> chrome/opera/ie/safari
+    if (window.webrtcDetectedBrowser === 'firefox' && message.agent !== 'firefox') {
+      beOfferer = false;
+    }
   }
+
   if (!this._peerInformations[targetMid]) {
     this._peerInformations[targetMid] = message.userInfo || {};
     this._peerInformations[targetMid].agent = {
@@ -19870,11 +19886,30 @@ Skylink.prototype._welcomeHandler = function(message) {
     this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
   }
 
+  log.debug([targetMid, 'RTCPeerConnection', null, 'Should peer start the connection'], beOfferer);
+
   this._addPeer(targetMid, {
     agent: message.agent,
 		version: message.version,
 		os: message.os
-  }, true, restartConn, message.receiveOnly, message.sessionType === 'screensharing');
+  }, beOfferer, restartConn, message.receiveOnly, message.sessionType === 'screensharing');
+
+  if (!beOfferer) {
+    log.debug([targetMid, 'RTCPeerConnection', null, 'Peer has to start the connection. Sending restart message'], beOfferer);
+
+    this._sendChannelMessage({
+      type: this._SIG_MESSAGE_TYPE.WELCOME,
+      mid: this._user.sid,
+      rid: this._room.id,
+      agent: window.webrtcDetectedBrowser,
+      version: window.webrtcDetectedVersion,
+      os: window.navigator.platform,
+      userInfo: this.getPeerInfo(),
+      target: targetMid,
+      weight: -1,
+      sessionType: !!this._mediaScreen ? 'screensharing' : 'stream'
+    });
+  }
 };
 
 /**
@@ -19907,7 +19942,10 @@ Skylink.prototype._offerHandler = function(message) {
   // This is always the initial state. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
     log.warn([targetMid, null, message.type, 'Peer connection state is not in ' +
-      '"stable" state for re-negotiation. Dropping message.'], pc.signalingState);
+      '"stable" state for re-negotiation. Dropping message.'], {
+        signalingState: pc.signalingState,
+        isRestart: !!message.resend
+      });
     return;
   }
 
@@ -20068,10 +20106,12 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   // This should be the state after offer is received. or even after negotiation is successful
-  if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER &&
-    pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
+  if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
     log.warn([targetMid, null, message.type, 'Peer connection state is not in ' +
-      '"have-local-offer" or "stable" state for re-negotiation. Dropping message.'], pc.signalingState);
+      '"have-local-offer" state for re-negotiation. Dropping message.'], {
+        signalingState: pc.signalingState,
+        isRestart: !!message.restart
+      });
     return;
   }
 
@@ -20100,64 +20140,6 @@ Skylink.prototype._answerHandler = function(message) {
   if (window.webrtcDetectedType === 'moz' && targetMid === 'MCU') {
     answer.sdp = answer.sdp.replace(/ generation 0/g, '');
     answer.sdp = answer.sdp.replace(/ udp /g, ' UDP ');
-  }
-
-  var agent = self.getPeerInfo(targetMid).agent;
-
-  // for this case, this is because firefox uses Unified Plan and Chrome uses
-  // Plan B. we have to remodify this a bit to let the non-ff detect as new mediastream
-  // as chrome/opera/safari detects it as default due to missing ssrc specified as used in plan B.
-  if (window.webrtcDetectedBrowser !== 'firefox' && agent.name === 'firefox' &&
-    pc.localDescription.sdp.indexOf('a=msid-semantic: WMS *') === -1 &&
-    answer.sdp.indexOf('a=msid-semantic:WMS *') > 0) {
-    // start parsing
-    var sdpLines = answer.sdp.split('\r\n');
-    var streamId = '';
-    var replaceSSRCSemantic = -1;
-    var i;
-    var trackId = '';
-
-    var parseTracksSSRC = function (track) {
-      for (i = 0, trackId = ''; i < sdpLines.length; i++) {
-        if (!!trackId) {
-          if (sdpLines[i].indexOf('a=ssrc:') === 0) {
-            var ssrcId = sdpLines[i].split(':')[1].split(' ')[0];
-            sdpLines.splice(i+1, 0, 'a=ssrc:' + ssrcId +  ' msid:' + streamId + ' ' + trackId,
-              'a=ssrc:' + ssrcId + ' mslabel:default',
-              'a=ssrc:' + ssrcId + ' label:' + trackId);
-            break;
-          } else if (sdpLines[i].indexOf('a=mid:') === 0) {
-            break;
-          }
-        } else if (sdpLines[i].indexOf('a=msid:') === 0) {
-          if (i > 0 && sdpLines[i-1].indexOf('a=mid:' + track) === 0) {
-            var parts = sdpLines[i].split(':')[1].split(' ');
-
-            streamId = parts[0];
-            trackId = parts[1];
-            replaceSSRCSemantic = true;
-          }
-        }
-      }
-    };
-
-    parseTracksSSRC('video');
-    parseTracksSSRC('audio');
-
-    if (replaceSSRCSemantic) {
-      for (i = 0; i < sdpLines.length; i++) {
-        if (sdpLines[i].indexOf('a=msid-semantic:WMS ') === 0) {
-          var parts = sdpLines[i].split(' ');
-          parts[parts.length - 1] = streamId;
-          sdpLines[i] = parts.join(' ');
-          break;
-        }
-      }
-
-    }
-    answer.sdp = sdpLines.join('\r\n');
-
-    log.debug([targetMid, null, message.type, 'Parsed remote description from firefox'], answer);
   }
 
   pc.setRemoteDescription(answer, function() {
@@ -22852,6 +22834,90 @@ Skylink.prototype._removeSDPFirefoxH264Pref = function(sdpLines) {
     sdpLines.splice(invalidLineIndex, 1);
   }
   return sdpLines;
+};
+
+/**
+ * Modifies the session description received to append the correct ssrc lines for Firefox.
+ * @method _addSDPSsrcFirefoxAnswer
+ * @param {String} targetMid The peer connection ID.
+ * @param {String} answerSdp The answer session description.
+ * @return {String} The update answer session description with correct SSRC lines.
+ * @private
+ * @component SDP
+ * @for Skylink
+ * @since 0.6.6
+ */
+Skylink.prototype._addSDPSsrcFirefoxAnswer = function (targetMid, sdp) {
+  var self = this;
+  var agent = self.getPeerInfo(targetMid).agent;
+
+  var pc = self._peerConnections[targetMid];
+
+  if (!pc) {
+    log.error([targetMid, 'RTCSessionDesription', 'answer', 'Peer connection object ' +
+      'not found. Unable to parse answer session description for peer']);
+    return;
+  }
+
+  var updatedSdp = sdp;
+
+  // for this case, this is because firefox uses Unified Plan and Chrome uses
+  // Plan B. we have to remodify this a bit to let the non-ff detect as new mediastream
+  // as chrome/opera/safari detects it as default due to missing ssrc specified as used in plan B.
+  if (window.webrtcDetectedBrowser === 'firefox' && agent.name !== 'firefox' &&
+    //pc.remoteDescription.sdp.indexOf('a=msid-semantic: WMS *') === -1 &&
+    updatedSdp.indexOf('a=msid-semantic:WMS *') > 0) {
+    // start parsing
+    var sdpLines = updatedSdp.split('\r\n');
+    var streamId = '';
+    var replaceSSRCSemantic = -1;
+    var i;
+    var trackId = '';
+
+    var parseTracksSSRC = function (track) {
+      for (i = 0, trackId = ''; i < sdpLines.length; i++) {
+        if (!!trackId) {
+          if (sdpLines[i].indexOf('a=ssrc:') === 0) {
+            var ssrcId = sdpLines[i].split(':')[1].split(' ')[0];
+            sdpLines.splice(i+1, 0, 'a=ssrc:' + ssrcId +  ' msid:' + streamId + ' ' + trackId,
+              'a=ssrc:' + ssrcId + ' mslabel:default',
+              'a=ssrc:' + ssrcId + ' label:' + trackId);
+            break;
+          } else if (sdpLines[i].indexOf('a=mid:') === 0) {
+            break;
+          }
+        } else if (sdpLines[i].indexOf('a=msid:') === 0) {
+          if (i > 0 && sdpLines[i-1].indexOf('a=mid:' + track) === 0) {
+            var parts = sdpLines[i].split(':')[1].split(' ');
+
+            streamId = parts[0];
+            trackId = parts[1];
+            replaceSSRCSemantic = true;
+          }
+        }
+      }
+    };
+
+    parseTracksSSRC('video');
+    parseTracksSSRC('audio');
+
+    /*if (replaceSSRCSemantic) {
+      for (i = 0; i < sdpLines.length; i++) {
+        if (sdpLines[i].indexOf('a=msid-semantic:WMS ') === 0) {
+          var parts = sdpLines[i].split(' ');
+          parts[parts.length - 1] = streamId;
+          sdpLines[i] = parts.join(' ');
+          break;
+        }
+      }
+
+    }*/
+    updatedSdp = sdpLines.join('\r\n');
+
+    log.debug([targetMid, 'RTCSessionDesription', 'answer', 'Parsed remote description from firefox'], sdpLines);
+  }
+
+  return updatedSdp;
 };
 window.Skylink = Skylink;
 }).call(this);

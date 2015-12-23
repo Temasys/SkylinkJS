@@ -351,3 +351,87 @@ Skylink.prototype._removeSDPFirefoxH264Pref = function(sdpLines) {
   }
   return sdpLines;
 };
+
+/**
+ * Modifies the session description received to append the correct ssrc lines for Firefox.
+ * @method _addSDPSsrcFirefoxAnswer
+ * @param {String} targetMid The peer connection ID.
+ * @param {String} answerSdp The answer session description.
+ * @return {String} The update answer session description with correct SSRC lines.
+ * @private
+ * @component SDP
+ * @for Skylink
+ * @since 0.6.6
+ */
+Skylink.prototype._addSDPSsrcFirefoxAnswer = function (targetMid, sdp) {
+  var self = this;
+  var agent = self.getPeerInfo(targetMid).agent;
+
+  var pc = self._peerConnections[targetMid];
+
+  if (!pc) {
+    log.error([targetMid, 'RTCSessionDesription', 'answer', 'Peer connection object ' +
+      'not found. Unable to parse answer session description for peer']);
+    return;
+  }
+
+  var updatedSdp = sdp;
+
+  // for this case, this is because firefox uses Unified Plan and Chrome uses
+  // Plan B. we have to remodify this a bit to let the non-ff detect as new mediastream
+  // as chrome/opera/safari detects it as default due to missing ssrc specified as used in plan B.
+  if (window.webrtcDetectedBrowser === 'firefox' && agent.name !== 'firefox' &&
+    //pc.remoteDescription.sdp.indexOf('a=msid-semantic: WMS *') === -1 &&
+    updatedSdp.indexOf('a=msid-semantic:WMS *') > 0) {
+    // start parsing
+    var sdpLines = updatedSdp.split('\r\n');
+    var streamId = '';
+    var replaceSSRCSemantic = -1;
+    var i;
+    var trackId = '';
+
+    var parseTracksSSRC = function (track) {
+      for (i = 0, trackId = ''; i < sdpLines.length; i++) {
+        if (!!trackId) {
+          if (sdpLines[i].indexOf('a=ssrc:') === 0) {
+            var ssrcId = sdpLines[i].split(':')[1].split(' ')[0];
+            sdpLines.splice(i+1, 0, 'a=ssrc:' + ssrcId +  ' msid:' + streamId + ' ' + trackId,
+              'a=ssrc:' + ssrcId + ' mslabel:default',
+              'a=ssrc:' + ssrcId + ' label:' + trackId);
+            break;
+          } else if (sdpLines[i].indexOf('a=mid:') === 0) {
+            break;
+          }
+        } else if (sdpLines[i].indexOf('a=msid:') === 0) {
+          if (i > 0 && sdpLines[i-1].indexOf('a=mid:' + track) === 0) {
+            var parts = sdpLines[i].split(':')[1].split(' ');
+
+            streamId = parts[0];
+            trackId = parts[1];
+            replaceSSRCSemantic = true;
+          }
+        }
+      }
+    };
+
+    parseTracksSSRC('video');
+    parseTracksSSRC('audio');
+
+    /*if (replaceSSRCSemantic) {
+      for (i = 0; i < sdpLines.length; i++) {
+        if (sdpLines[i].indexOf('a=msid-semantic:WMS ') === 0) {
+          var parts = sdpLines[i].split(' ');
+          parts[parts.length - 1] = streamId;
+          sdpLines[i] = parts.join(' ');
+          break;
+        }
+      }
+
+    }*/
+    updatedSdp = sdpLines.join('\r\n');
+
+    log.debug([targetMid, 'RTCSessionDesription', 'answer', 'Parsed remote description from firefox'], sdpLines);
+  }
+
+  return updatedSdp;
+};

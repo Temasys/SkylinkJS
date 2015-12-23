@@ -138,14 +138,13 @@ Skylink.prototype._peerConnectionHealthTimers = {};
 Skylink.prototype._peerConnectionHealth = {};
 
 /**
- * Stores the peer fixed priority weight.
- * Whoever is the smallest would be the offerer always
+ * Stores the peer connection priority weight.
  * @attribute _peerPriorityWeight
  * @type Number
  * @private
- * @component Peer
+ * @required
  * @for Skylink
- * @since 0.6.6
+ * @since 0.5.0
  */
 Skylink.prototype._peerPriorityWeight = 0;
 
@@ -513,6 +512,11 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       pc.setOffer = 'local';
     }
     if (self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid]) {
+      // make checks for firefox session description
+      if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && window.webrtcDetectedBrowser === 'firefox') {
+        sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
+      }
+
       self._sendChannelMessage({
         type: sessionDescription.type,
         sdp: sessionDescription.sdp,

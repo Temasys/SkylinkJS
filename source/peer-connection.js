@@ -124,6 +124,8 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
     enableDataChannel: self._enableDataChannel
   });
 
+  log.info('Adding peer', isSS);
+
   if (!restartConn) {
     self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS);
   }
@@ -261,6 +263,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         target: peerId,
         isConnectionRestart: !!isConnectionRestart,
         lastRestart: lastRestart,
+        // This will not be used based off the logic in _restartHandler
         weight: self._peerPriorityWeight,
         receiveOnly: self._peerConnections[peerId].receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
@@ -301,7 +304,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
           mid: self._user.sid,
           target: peerId,
           rid: self._room.id,
-          resend: true
+          restart: true
         });
       } else {
         var noLocalDescriptionError = 'Failed re-sending localDescription as there is ' +
@@ -371,7 +374,7 @@ Skylink.prototype._removePeer = function(peerId) {
 
     delete this._peerConnections[peerId];
   }
-  // remove the peer informations object for this peer
+  // remove peer informations session
   if (typeof this._peerInformations[peerId] !== 'undefined') {
     delete this._peerInformations[peerId];
   }
@@ -426,7 +429,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.hasStream = false;
   pc.hasScreen = !!isScreenSharing;
   pc.hasMainChannel = false;
-  pc.firefoxTriggeredStream = false;
   pc.firefoxStreamId = '';
 
   // datachannels
@@ -466,8 +468,18 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.onaddstream = function(event) {
     var stream = event.stream || event;
     pc.hasStream = true;
-    pc.firefoxTriggeredStream = true;
-    self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
+
+    var agent = (self.getPeerInfo(targetMid) || {}).agent;
+    var timeout = 0;
+
+    // NOTE: Add timeouts to the firefox stream received because it seems to have some sort of black stream rendering at first
+    // This may not be advisable but that it seems to work after 1500s. (tried with ICE established but it does not work and getStats)
+    if (agent.name === 'firefox' && window.webrtcDetectedBrowser !== 'firefox') {
+      timeout = 1500;
+    }
+    setTimeout(function () {
+      self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
+    }, timeout);
   };
   pc.onicecandidate = function(event) {
     log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'],
@@ -807,8 +819,6 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         target: peerId, //'MCU',
         isConnectionRestart: false,
         lastRestart: lastRestart,
-        // don't worry about the weight for MCU case, since it just ignores
-        // after triggering the peerRestart event on peer's end
         weight: self._peerPriorityWeight,
         receiveOnly: receiveOnly,
         enableIceTrickle: self._enableIceTrickle,

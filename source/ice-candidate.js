@@ -140,9 +140,15 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
     // Disable Ice trickle option
     if (!self._enableIceTrickle || self._peerIceTrickleDisabled[targetMid]) {
       var sessionDescription = self._peerConnections[targetMid].localDescription;
+
+      // make checks for firefox session description
+      if (updatedSdp.type === self.HANDSHAKE_PROGRESS.ANSWER && window.webrtcDetectedBrowser === 'firefox') {
+        sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
+      }
+
       self._sendChannelMessage({
         type: sessionDescription.type,
-        sdp: sessionDescription.sdp,
+        sdp: self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription).sdp,
         mid: self._user.sid,
         agent: window.webrtcDetectedBrowser,
         target: targetMid,

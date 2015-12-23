@@ -15,7 +15,6 @@ var selectedPeers = [];
 
 Demo.Skylink.setLogLevel(4);
 
-
 Demo.Methods.displayFileItemHTML = function (content) {
   return '<p>' + content.name + '<small style="float:right;color:#aaa;">' + content.size + ' B</small></p>' +
     ((content.isUpload) ? ('<table id="' + content.transferId + '" class="table upload-table">' +
@@ -344,7 +343,7 @@ Demo.Skylink.on('iceConnectionState', function (state, peerId) {
       }
     }, 30000);
   }
-  var printStream = function (method) {
+  /*var printStream = function (method) {
     var peer = Demo.Skylink._peerConnections[peerId];
     var array = peer[method]();
     if (array.length > 0) {
@@ -357,7 +356,7 @@ Demo.Skylink.on('iceConnectionState', function (state, peerId) {
       received: printStream('getRemoteStreams'),
       sending: printStream('getLocalStreams')
     });
-  }
+  }*/
 });
 //---------------------------------------------------
 Demo.Skylink.on('peerConnectionState', function (state, peerId) {
@@ -675,7 +674,7 @@ $(document).ready(function () {
 });
 
 
-(function(){
+/*(function(){
 
   var data = {};
   //window.candidatesCounter = {};
@@ -700,4 +699,4 @@ $(document).ready(function () {
     }
   });
 
-})();
+})();*/
