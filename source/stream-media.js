@@ -585,33 +585,33 @@ Skylink.prototype._onUserMediaError = function(error, isScreenSharing, audioFall
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._onRemoteStreamAdded = function(targetMid, event, isScreenSharing) {
+Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSharing) {
   var self = this;
 
   if(targetMid !== 'MCU') {
     if (!self._peerInformations[targetMid]) {
-      log.error([targetMid, 'MediaStream', event.stream.id,
+      log.error([targetMid, 'MediaStream', stream.id,
           'Received remote stream when peer is not connected. ' +
-          'Ignoring stream ->'], event.stream);
+          'Ignoring stream ->'], stream);
       return;
     }
 
     if (!self._peerInformations[targetMid].settings.audio &&
       !self._peerInformations[targetMid].settings.video && !isScreenSharing) {
-      log.log([targetMid, 'MediaStream', event.stream.id,
+      log.log([targetMid, 'MediaStream', stream.id,
         'Receive remote stream but ignoring stream as it is empty ->'
-        ], event.stream);
+        ], stream);
       return;
     }
-    log.log([targetMid, 'MediaStream', event.stream.id,
-      'Received remote stream ->'], event.stream);
+    log.log([targetMid, 'MediaStream', stream.id,
+      'Received remote stream ->'], stream);
 
     if (isScreenSharing) {
-      log.log([targetMid, 'MediaStream', event.stream.id,
+      log.log([targetMid, 'MediaStream', stream.id,
         'Peer is having a screensharing session with user']);
     }
 
-    self._trigger('incomingStream', targetMid, event.stream,
+    self._trigger('incomingStream', targetMid, stream,
       false, self.getPeerInfo(targetMid), !!isScreenSharing);
   } else {
     log.log([targetMid, null, null, 'MCU is listening']);
@@ -1030,16 +1030,32 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
 
     if (pc) {
       if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
+        var hasStream = false;
+        var hasScreen = false;
+
+        // remove streams
+        var streams = pc.getLocalStreams();
+        for (var i = 0; i < streams.length; i++) {
+          // try removeStream
+          pc.removeStream(streams[i]);
+        }
+
+        if (this._mediaStream && this._mediaStream !== null) {
+          hasStream = true;
+        }
+
         if (this._mediaScreen && this._mediaScreen !== null) {
+          hasScreen = true;
+        }
+
+        if (hasScreen) {
+          log.debug([peerId, 'MediaStream', null, 'Sending screen'], this._mediaScreen);
           pc.addStream(this._mediaScreen);
-          log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending screen']);
-
-        } else if (this._mediaStream && this._mediaStream !== null) {
+        } else if (hasStream) {
+          log.debug([peerId, 'MediaStream', null, 'Sending stream'], this._mediaStream);
           pc.addStream(this._mediaStream);
-          log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending stream']);
-
         } else {
-          log.warn([peerId, null, null, 'No media to send. Will be only receiving']);
+          log.warn([peerId, 'MediaStream', null, 'No media to send. Will be only receiving']);
         }
 
       } else {
