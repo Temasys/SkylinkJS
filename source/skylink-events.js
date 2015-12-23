@@ -236,7 +236,7 @@ Skylink.prototype._EVENTS = {
    * @param {Number} error.diff.video.received The received video tracks.
    * @param {JSON} error.diff.audio The expected and received audio tracks.
    * @param {Number} error.diff.audio.expected The expected audio tracks.
-   * @param {Number} error.diff.audio.received THe received audio tracks.
+   * @param {Number} error.diff.audio.received The received audio tracks.
    * @param {Number} state The access fallback state.
    * <small><ul>
    * <li><code>0</code>: Attempting to retrieve access for fallback state.</li>

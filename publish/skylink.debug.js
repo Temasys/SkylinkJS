@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.5 - Thu Dec 24 2015 05:15:23 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.6 - Thu Dec 24 2015 05:19:17 GMT+0800 (SGT) */
 
 (function() {
 
@@ -188,7 +188,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.1.0
    */
-  this.VERSION = '0.6.5';
+  this.VERSION = '0.6.6';
 
   /**
    * Helper function that generates an Unique ID (UUID) string.
@@ -8449,7 +8449,7 @@ Skylink.prototype._EVENTS = {
    * @param {Number} error.diff.video.received The received video tracks.
    * @param {JSON} error.diff.audio The expected and received audio tracks.
    * @param {Number} error.diff.audio.expected The expected audio tracks.
-   * @param {Number} error.diff.audio.received THe received audio tracks.
+   * @param {Number} error.diff.audio.received The received audio tracks.
    * @param {Number} state The access fallback state.
    * <small><ul>
    * <li><code>0</code>: Attempting to retrieve access for fallback state.</li>
