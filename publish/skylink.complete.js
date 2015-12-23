@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.4 - Thu Dec 24 2015 04:12:58 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Thu Dec 24 2015 04:17:18 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8387,7 +8387,7 @@ if (navigator.mozGetUserMedia) {
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.4 - Thu Dec 24 2015 04:12:58 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Thu Dec 24 2015 04:17:18 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9689,7 +9689,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
 
 
   var supportMulti = false;
-  var peerAgent = (self._peerInformations[targetPeerId] || {}).agent;
+  var peerAgent = (self._peerInformations[targetPeerId] || {}).agent || {};
 
   if (!peerAgent && !peerAgent.name) {
     log.error([targetPeerId, 'RTCDataChannel', targetChannel, 'Aborting transfer to peer ' +
@@ -12452,7 +12452,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
   var pc = self._peerConnections[peerId];
 
-  var agent = (self.getPeerInfo(peerId) || {}).agent;
+  var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // fallback to older versions for mobile users
   if (['Android', 'iOS'].indexOf(agent.name) > -1) {
@@ -12701,7 +12701,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     var stream = event.stream || event;
     pc.hasStream = true;
 
-    var agent = (self.getPeerInfo(targetMid) || {}).agent;
+    var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
     var timeout = 0;
 
     // NOTE: Add timeouts to the firefox stream received because it seems to have some sort of black stream rendering at first
@@ -19706,7 +19706,7 @@ Skylink.prototype._restartHandler = function(message){
     os: message.os || ''
   };
 
-  var agent = (self.getPeerInfo(targetMid) || {}).agent;
+  var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
 
   // This variable is not used
   //var peerConnectionStateStable = false;

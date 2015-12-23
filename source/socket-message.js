@@ -976,7 +976,7 @@ Skylink.prototype._restartHandler = function(message){
     os: message.os || ''
   };
 
-  var agent = (self.getPeerInfo(targetMid) || {}).agent;
+  var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
 
   // This variable is not used
   //var peerConnectionStateStable = false;

@@ -267,7 +267,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
   var pc = self._peerConnections[peerId];
 
-  var agent = (self.getPeerInfo(peerId) || {}).agent;
+  var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // fallback to older versions for mobile users
   if (['Android', 'iOS'].indexOf(agent.name) > -1) {
@@ -516,7 +516,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     var stream = event.stream || event;
     pc.hasStream = true;
 
-    var agent = (self.getPeerInfo(targetMid) || {}).agent;
+    var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
     var timeout = 0;
 
     // NOTE: Add timeouts to the firefox stream received because it seems to have some sort of black stream rendering at first

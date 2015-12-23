@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.4 - Thu Dec 24 2015 04:12:58 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Thu Dec 24 2015 04:17:18 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1300,7 +1300,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
 
 
   var supportMulti = false;
-  var peerAgent = (self._peerInformations[targetPeerId] || {}).agent;
+  var peerAgent = (self._peerInformations[targetPeerId] || {}).agent || {};
 
   if (!peerAgent && !peerAgent.name) {
     log.error([targetPeerId, 'RTCDataChannel', targetChannel, 'Aborting transfer to peer ' +
@@ -4063,7 +4063,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
   var pc = self._peerConnections[peerId];
 
-  var agent = (self.getPeerInfo(peerId) || {}).agent;
+  var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // fallback to older versions for mobile users
   if (['Android', 'iOS'].indexOf(agent.name) > -1) {
@@ -4312,7 +4312,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     var stream = event.stream || event;
     pc.hasStream = true;
 
-    var agent = (self.getPeerInfo(targetMid) || {}).agent;
+    var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
     var timeout = 0;
 
     // NOTE: Add timeouts to the firefox stream received because it seems to have some sort of black stream rendering at first
@@ -11317,7 +11317,7 @@ Skylink.prototype._restartHandler = function(message){
     os: message.os || ''
   };
 
-  var agent = (self.getPeerInfo(targetMid) || {}).agent;
+  var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
 
   // This variable is not used
   //var peerConnectionStateStable = false;
