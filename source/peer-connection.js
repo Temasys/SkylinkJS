@@ -200,7 +200,6 @@ Skylink.prototype._recreatePeerConnection = function (peerId) {
   var dataChannelStateClosed = !self._enableDataChannel;
 
   delete self._peerConnectionHealth[peerId];
-  delete self._peerRestartPriorities[peerId];
 
   self._stopPeerConnectionHealthCheck(peerId);
 

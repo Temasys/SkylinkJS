@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.4 - Thu Dec 24 2015 00:54:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Thu Dec 24 2015 01:02:34 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3996,7 +3996,6 @@ Skylink.prototype._recreatePeerConnection = function (peerId) {
   var dataChannelStateClosed = !self._enableDataChannel;
 
   delete self._peerConnectionHealth[peerId];
-  delete self._peerRestartPriorities[peerId];
 
   self._stopPeerConnectionHealthCheck(peerId);
 
