@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.4 - Thu Dec 24 2015 03:45:18 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Thu Dec 24 2015 03:50:10 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13341,8 +13341,8 @@ Skylink.prototype.getUserMedia = function(options,callback) {
               self._trigger('mediaAccessFallback', {
                 error: notSameTracksError,
                 diff: {
-                  video: { expected: 1, received: stream.getVideoTracks().length },
-                  audio: { expected: 1, received: stream.getAudioTracks().length }
+                  video: { expected: requireAudio ? 1 : 0, received: stream.getVideoTracks().length },
+                  audio: { expected: requireVideo ? 1 : 0, received: stream.getAudioTracks().length }
                 }
               }, 1, false, false);
             }
@@ -13871,7 +13871,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
           error: notSameTracksError,
           diff: {
             video: { expected: 1, received: sStream.getVideoTracks().length },
-            audio: { expected: 1, received: sStream.getAudioTracks().length }
+            audio: { expected: requireAudio ? 1 : 0, received: sStream.getAudioTracks().length }
           }
         }, 1, true, false);
       }
