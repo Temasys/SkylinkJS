@@ -140,6 +140,12 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
     // Disable Ice trickle option
     if (!self._enableIceTrickle || self._peerIceTrickleDisabled[targetMid]) {
       var sessionDescription = self._peerConnections[targetMid].localDescription;
+
+      // make checks for firefox session description
+      if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && window.webrtcDetectedBrowser === 'firefox') {
+        sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
+      }
+
       self._sendChannelMessage({
         type: sessionDescription.type,
         sdp: sessionDescription.sdp,
@@ -150,6 +156,8 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
       });
     }
 
+    // We should remove this.. this could be due to ICE failures
+    // Adding this fix is bad
     // Does the restart in the case when the candidates are extremely a lot
     /*var doACandidateRestart = self._addedCandidates[targetMid].relay.length > 20 &&
       (window.webrtcDetectedBrowser === 'chrome' || window.webrtcDetectedBrowser === 'opera');

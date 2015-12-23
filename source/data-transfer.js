@@ -490,7 +490,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
 
 
   var supportMulti = false;
-  var peerAgent = (self._peerInformations[targetPeerId] || {}).agent;
+  var peerAgent = (self._peerInformations[targetPeerId] || {}).agent || {};
 
   if (!peerAgent && !peerAgent.name) {
     log.error([targetPeerId, 'RTCDataChannel', targetChannel, 'Aborting transfer to peer ' +
