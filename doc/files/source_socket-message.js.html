@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.5</title>
+    <title>SkylinkJS 0.6.6</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.5</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.6</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -744,9 +744,14 @@ Skylink.prototype._inRoomHandler = function(message) {
   self._room.connection.peerConfig = self._setIceServers(message.pc_config);
   self._inRoom = true;
   self._user.sid = message.sid;
+  self._peerPriorityWeight = (new Date()).getTime();
 
   self._trigger(&#x27;peerJoined&#x27;, self._user.sid, self.getPeerInfo(), true);
   self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
+
+  if (typeof message.tieBreaker === &#x27;number&#x27;) {
+    self._peerPriorityWeight = message.tieBreaker;
+  }
 
   if (self._mediaScreen &amp;&amp; self._mediaScreen !== null) {
     self._trigger(&#x27;incomingStream&#x27;, self._user.sid, self._mediaScreen, true, self.getPeerInfo());
@@ -889,8 +894,6 @@ Skylink.prototype._enterHandler = function(message) {
 
   self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ENTER, targetMid);
 
-  var weight = (new Date()).valueOf();
-  self._peerHSPriorities[targetMid] = weight;
   self._sendChannelMessage({
     type: self._SIG_MESSAGE_TYPE.WELCOME,
     mid: self._user.sid,
@@ -904,7 +907,7 @@ Skylink.prototype._enterHandler = function(message) {
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     target: targetMid,
-    weight: weight,
+    weight: self._peerPriorityWeight,
     sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;
   });
 
@@ -1018,6 +1021,7 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
+  // NOTE: for now we ignore, but we should take-note to implement in the near future
   if (self._hasMCU) {
     self._trigger(&#x27;peerRestart&#x27;, targetMid, self.getPeerInfo(targetMid), false);
     return;
@@ -1031,17 +1035,21 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  //Only consider peer&#x27;s restart weight if self also sent a restart which cause a potential conflict
-  //Otherwise go ahead with peer&#x27;s restart
-  if (self._peerRestartPriorities.hasOwnProperty(targetMid)){
-    //Peer&#x27;s restart message was older --&gt; ignore
-    if (self._peerRestartPriorities[targetMid] &gt; message.weight){
-      log.log([targetMid, null, message.type, &#x27;Peer\&#x27;s generated restart weight &#x27; +
-          &#x27;is lesser than user\&#x27;s. Ignoring message&#x27;
-          ], this._peerRestartPriorities[targetMid] + &#x27; &gt; &#x27; + message.weight);
-      return;
-    }
+  // mcu has re-joined
+  // NOTE: logic trip since _hasMCU flags are ignored, this could result in failure perhaps?
+  if (targetMid === &#x27;MCU&#x27;) {
+    log.log([targetMid, null, message.type, &#x27;MCU has restarted its connection&#x27;]);
+    self._hasMCU = true;
   }
+
+  // Uncomment because we do not need this
+  //self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+
+  message.agent = (!message.agent) ? &#x27;chrome&#x27; : message.agent;
+  self._enableIceTrickle = (typeof message.enableIceTrickle === &#x27;boolean&#x27;) ?
+    message.enableIceTrickle : self._enableIceTrickle;
+  self._enableDataChannel = (typeof message.enableDataChannel === &#x27;boolean&#x27;) ?
+    message.enableDataChannel : self._enableDataChannel;
 
   // re-add information
   self._peerInformations[targetMid] = message.userInfo || {};
@@ -1051,35 +1059,63 @@ Skylink.prototype._restartHandler = function(message){
     os: message.os || &#x27;&#x27;
   };
 
-  // mcu has joined
-  if (targetMid === &#x27;MCU&#x27;) {
-    log.log([targetMid, null, message.type, &#x27;MCU has restarted its connection&#x27;]);
-    self._hasMCU = true;
+  var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
+
+  // This variable is not used
+  //var peerConnectionStateStable = false;
+
+  log.info([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Received restart request from peer&#x27;], message);
+  // we are no longer adding any peer
+  /*self._addPeer(targetMid, {
+    agent: message.agent,
+    version: message.version,
+    os: message.os
+  }, true, true, message.receiveOnly, message.sessionType === &#x27;screensharing&#x27;);*/
+
+  //Only consider peer&#x27;s restart weight if self also sent a restart which cause a potential conflict
+  //Otherwise go ahead with peer&#x27;s restart
+  var beOfferer = false;
+
+  // Works in this matter.. no idea why.
+  if (window.webrtcDetectedBrowser !== &#x27;firefox&#x27; &amp;&amp; message.agent === &#x27;firefox&#x27;) {
+    log.debug([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Restarting as offerer as peer cannot be offerer&#x27;], agent);
+    beOfferer = true;
+  } else {
+    // Checks if weight is lesser than peer&#x27;s weight
+    // If lesser, always do the restart mechanism
+    if (self._peerPriorityWeight &lt; message.weight) {
+      beOfferer = true;
+    }
   }
 
-  self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+  if (beOfferer) {
+    log.debug([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Restarting negotiation&#x27;], agent);
+    self._doOffer(targetMid, {
+      agent: agent.name,
+      version: agent.version,
+      os: agent.os
+    }, true);
 
-  message.agent = (!message.agent) ? &#x27;chrome&#x27; : message.agent;
-  self._enableIceTrickle = (typeof message.enableIceTrickle === &#x27;boolean&#x27;) ?
-    message.enableIceTrickle : self._enableIceTrickle;
-  self._enableDataChannel = (typeof message.enableDataChannel === &#x27;boolean&#x27;) ?
-    message.enableDataChannel : self._enableDataChannel;
+  } else {
+    log.debug([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Waiting for peer to start re-negotiation&#x27;], agent);
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.WELCOME,
+      mid: self._user.sid,
+      rid: self._room.id,
+      agent: window.webrtcDetectedBrowser,
+      version: window.webrtcDetectedVersion,
+      os: window.navigator.platform,
+      userInfo: self.getPeerInfo(),
+      target: targetMid,
+      weight: -1,
+      sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;
+    });
+  }
 
-  var peerConnectionStateStable = false;
+  self._trigger(&#x27;peerRestart&#x27;, targetMid, self.getPeerInfo(targetMid), false);
 
-  self._restartPeerConnection(targetMid, false, false, function () {
-    log.info(&#x27;Received message&#x27;, message);
-  	self._addPeer(targetMid, {
-	    agent: message.agent,
-	    version: message.version,
-	    os: message.os
-	  }, true, true, message.receiveOnly, message.sessionType === &#x27;screensharing&#x27;);
-
-    self._trigger(&#x27;peerRestart&#x27;, targetMid, self.getPeerInfo(targetMid), false);
-
-	  // do a peer connection health check
-  	self._startPeerConnectionHealthCheck(targetMid);
-  }, message.explicit);
+  // following the previous logic to do checker always
+  self._startPeerConnectionHealthCheck(targetMid, false);
 };
 
 /**
@@ -1170,6 +1206,7 @@ Skylink.prototype._restartHandler = function(message){
 Skylink.prototype._welcomeHandler = function(message) {
   var targetMid = message.mid;
   var restartConn = false;
+  var beOfferer = this._peerPriorityWeight &lt; message.weight;
 
   log.log([targetMid, null, message.type, &#x27;Received peer\&#x27;s response &#x27; +
     &#x27;to handshake initiation. Peer\&#x27;s information:&#x27;], message.userInfo);
@@ -1180,6 +1217,7 @@ Skylink.prototype._welcomeHandler = function(message) {
         log.log([targetMid, null, message.type, &#x27;Peer\&#x27;s weight is lower &#x27; +
           &#x27;than 0. Proceeding with offer&#x27;], message.weight);
         restartConn = true;
+        beOfferer = true;
 
         // -2: hard restart of connection
         if (message.weight === -2) {
@@ -1187,17 +1225,17 @@ Skylink.prototype._welcomeHandler = function(message) {
           return;
         }
 
-      } else if (this._peerHSPriorities[targetMid] &gt; message.weight) {
+      } else if (beOfferer) {
         log.log([targetMid, null, message.type, &#x27;Peer\&#x27;s generated weight &#x27; +
-          &#x27;is lesser than user\&#x27;s. Ignoring message&#x27;
-          ], this._peerHSPriorities[targetMid] + &#x27; &gt; &#x27; + message.weight);
-        return;
+          &#x27;is higher than user\&#x27;s. Proceeding with offer&#x27;
+          ], this._peerPriorityWeight + &#x27; &lt; &#x27; + message.weight);
+        restartConn = true;
 
       } else {
         log.log([targetMid, null, message.type, &#x27;Peer\&#x27;s generated weight &#x27; +
-          &#x27;is higher than user\&#x27;s. Proceeding with offer&#x27;
-          ], this._peerHSPriorities[targetMid] + &#x27; &lt; &#x27; + message.weight);
-        restartConn = true;
+          &#x27;is lesser than user\&#x27;s. Ignoring message&#x27;
+          ], this._peerPriorityWeight + &#x27; &gt; &#x27; + message.weight);
+        return;
       }
     } else {
       log.warn([targetMid, null, message.type,
@@ -1205,6 +1243,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       return;
     }
   }
+
   message.agent = (!message.agent) ? &#x27;chrome&#x27; : message.agent;
   this._enableIceTrickle = (typeof message.enableIceTrickle === &#x27;boolean&#x27;) ?
     message.enableIceTrickle : this._enableIceTrickle;
@@ -1219,7 +1258,13 @@ Skylink.prototype._welcomeHandler = function(message) {
       ((message.weight &gt; -1) ? &#x27;joined and &#x27; : &#x27;&#x27;) + &#x27; responded&#x27;]);
     this._hasMCU = true;
     this._trigger(&#x27;serverPeerJoined&#x27;, targetMid, this.SERVER_PEER_TYPE.MCU);
+  } else {
+    // if it is not MCU and P2P make sure that beOfferer is false for firefox -&gt; chrome/opera/ie/safari
+    if (window.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp; message.agent !== &#x27;firefox&#x27;) {
+      beOfferer = false;
+    }
   }
+
   if (!this._peerInformations[targetMid]) {
     this._peerInformations[targetMid] = message.userInfo || {};
     this._peerInformations[targetMid].agent = {
@@ -1240,11 +1285,30 @@ Skylink.prototype._welcomeHandler = function(message) {
     this._trigger(&#x27;handshakeProgress&#x27;, this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
   }
 
+  log.debug([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Should peer start the connection&#x27;], beOfferer);
+
   this._addPeer(targetMid, {
     agent: message.agent,
 		version: message.version,
 		os: message.os
-  }, true, restartConn, message.receiveOnly, message.sessionType === &#x27;screensharing&#x27;);
+  }, beOfferer, restartConn, message.receiveOnly, message.sessionType === &#x27;screensharing&#x27;);
+
+  if (!beOfferer) {
+    log.debug([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Peer has to start the connection. Sending restart message&#x27;], beOfferer);
+
+    this._sendChannelMessage({
+      type: this._SIG_MESSAGE_TYPE.WELCOME,
+      mid: this._user.sid,
+      rid: this._room.id,
+      agent: window.webrtcDetectedBrowser,
+      version: window.webrtcDetectedVersion,
+      os: window.navigator.platform,
+      userInfo: this.getPeerInfo(),
+      target: targetMid,
+      weight: -1,
+      sessionType: !!this._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;
+    });
+  }
 };
 
 /**
@@ -1274,22 +1338,35 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }
 
-  if (pc.localDescription ? !!pc.localDescription.sdp : false) {
-  	log.warn([targetMid, null, message.type, &#x27;Peer has an existing connection&#x27;],
-  		pc.localDescription);
+  /*if (pc.localDescription ? !!pc.localDescription.sdp : false) {
+    log.warn([targetMid, null, message.type, &#x27;Peer has an existing connection&#x27;],
+      pc.localDescription);
     return;
-  }
+  }*/
 
   log.log([targetMid, null, message.type, &#x27;Received offer from peer. &#x27; +
     &#x27;Session description:&#x27;], message.sdp);
-  self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.OFFER, targetMid);
-  var offer = new window.RTCSessionDescription(message);
+  var offer = new window.RTCSessionDescription({
+    type: message.type,
+    sdp: message.sdp
+  });
   log.log([targetMid, &#x27;RTCSessionDescription&#x27;, message.type,
     &#x27;Session description object created&#x27;], offer);
 
-  pc.setRemoteDescription(new window.RTCSessionDescription(offer), function() {
+  // This is always the initial state. or even after negotiation is successful
+  if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
+    log.warn([targetMid, null, message.type, &#x27;Peer connection state is not in &#x27; +
+      &#x27;&quot;stable&quot; state for re-negotiation. Dropping message.&#x27;], {
+        signalingState: pc.signalingState,
+        isRestart: !!message.resend
+      });
+    return;
+  }
+
+  pc.setRemoteDescription(offer, function() {
     log.debug([targetMid, &#x27;RTCSessionDescription&#x27;, message.type, &#x27;Remote description set&#x27;]);
     pc.setOffer = &#x27;remote&#x27;;
+    self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.OFFER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
     self._doAnswer(targetMid);
   }, function(error) {
@@ -1297,6 +1374,7 @@ Skylink.prototype._offerHandler = function(message) {
     log.error([targetMid, null, message.type, &#x27;Failed setting remote description:&#x27;], error);
   });
 };
+
 
 /**
  * Handles the CANDIDATE Protocol message event received from the platform signaling.
@@ -1418,23 +1496,25 @@ Skylink.prototype._answerHandler = function(message) {
   log.log([targetMid, null, message.type,
     &#x27;Received answer from peer. Session description:&#x27;], message.sdp);
 
-  self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
-  var answer = new window.RTCSessionDescription(message);
-
-  log.log([targetMid, &#x27;RTCSessionDescription&#x27;, message.type,
-    &#x27;Session description object created&#x27;], answer);
-
   var pc = self._peerConnections[targetMid];
 
   if (!pc) {
     log.error([targetMid, null, message.type, &#x27;Peer connection object &#x27; +
-      &#x27;not found. Unable to setRemoteDescription for offer&#x27;]);
+      &#x27;not found. Unable to setRemoteDescription for answer&#x27;]);
     return;
   }
 
-  if (pc.remoteDescription ? !!pc.remoteDescription.sdp : false) {
-  	log.warn([targetMid, null, message.type, &#x27;Peer has an existing connection&#x27;],
-  		pc.remoteDescription);
+  var answer = new window.RTCSessionDescription({
+    type: message.type,
+    sdp: message.sdp
+  });
+
+  log.log([targetMid, &#x27;RTCSessionDescription&#x27;, message.type,
+    &#x27;Session description object created&#x27;], answer);
+
+  /*if (pc.remoteDescription ? !!pc.remoteDescription.sdp : false) {
+    log.warn([targetMid, null, message.type, &#x27;Peer has an existing connection&#x27;],
+      pc.remoteDescription);
     return;
   }
 
@@ -1442,20 +1522,36 @@ Skylink.prototype._answerHandler = function(message) {
     log.error([targetMid, null, message.type, &#x27;Unable to set peer connection &#x27; +
       &#x27;at signalingState &quot;stable&quot;. Ignoring remote answer&#x27;], pc.signalingState);
     return;
-  }
+  }*/
 
   // if firefox and peer is mcu, replace the sdp to suit mcu needs
   if (window.webrtcDetectedType === &#x27;moz&#x27; &amp;&amp; targetMid === &#x27;MCU&#x27;) {
-    message.sdp = message.sdp.replace(/ generation 0/g, &#x27;&#x27;);
-    message.sdp = message.sdp.replace(/ udp /g, &#x27; UDP &#x27;);
+    answer.sdp = answer.sdp.replace(/ generation 0/g, &#x27;&#x27;);
+    answer.sdp = answer.sdp.replace(/ udp /g, &#x27; UDP &#x27;);
   }
-  pc.setRemoteDescription(new window.RTCSessionDescription(answer), function() {
+
+  // This should be the state after offer is received. or even after negotiation is successful
+  if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
+    log.warn([targetMid, null, message.type, &#x27;Peer connection state is not in &#x27; +
+      &#x27;&quot;have-local-offer&quot; state for re-negotiation. Dropping message.&#x27;], {
+        signalingState: pc.signalingState,
+        isRestart: !!message.restart
+      });
+    return;
+  }
+
+  pc.setRemoteDescription(answer, function() {
     log.debug([targetMid, null, message.type, &#x27;Remote description set&#x27;]);
     pc.setAnswer = &#x27;remote&#x27;;
+    self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
+
   }, function(error) {
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-    log.error([targetMid, null, message.type, &#x27;Failed setting remote description:&#x27;], error);
+    log.error([targetMid, null, message.type, &#x27;Failed setting remote description:&#x27;], {
+      error: error,
+      state: pc.signalingState
+    });
   });
 };
 

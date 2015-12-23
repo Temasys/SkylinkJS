@@ -2,19 +2,10 @@
     "project": {
         "name": "skylinkjs",
         "description": "SkylinkJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.5",
+        "version": "0.6.6",
         "url": "https://temasys.github.io/"
     },
     "files": {
-        "source/template/constants.js": {
-            "name": "source/template/constants.js",
-            "modules": {},
-            "classes": {},
-            "fors": {
-                "Skylink": 1
-            },
-            "namespaces": {}
-        },
         "source/template/header.js": {
             "name": "source/template/header.js",
             "modules": {},
@@ -201,206 +192,6 @@
         }
     },
     "classitems": [
-        {
-            "file": "source/template/constants.js",
-            "line": 1,
-            "description": "These are the list of available video codecs settings that Skylink would use\n  when streaming video stream with Peers.\n- The video codec would be used if the self and Peer's browser supports the selected codec.\n- This would default to the browser selected codec. In most cases, option <code>VP8</code> is\n  used by default.",
-            "itemtype": "attribute",
-            "name": "VIDEO_CODEC",
-            "params": [
-                {
-                    "name": "AUTO",
-                    "description": "<small><b>DEFAULT</b> | Value <code>\"auto\"</code></small>\n  The option to let Skylink use any video codec selected by the browser generated session description.",
-                    "type": "String"
-                },
-                {
-                    "name": "VP8",
-                    "description": "<small>Value <code>\"VP8\"</code></small>\n  The option to let Skylink use the [VP8](https://en.wikipedia.org/wiki/VP8) codec.<br>\n  This is the common and mandantory video codec used by most browsers.",
-                    "type": "String"
-                },
-                {
-                    "name": "H264",
-                    "description": "<small>Value <code>\"H264\"</code></small>\n  The option to let Skylink use the [H264](https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC) codec.<br>\n  This only works if the browser supports the H264 video codec.",
-                    "type": "String"
-                }
-            ],
-            "type": "JSON",
-            "readonly": "",
-            "component": "Stream",
-            "since": "0.5.10",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/template/constants.js",
-            "line": 28,
-            "description": "These are the list of available audio codecs settings that Skylink would use\n  when streaming audio stream with Peers.\n- The audio codec would be used if the self and Peer's browser supports the selected codec.\n- This would default to the browser selected codec. In most cases, option <code>OPUS</code> is\n  used by default.",
-            "itemtype": "attribute",
-            "name": "AUDIO_CODEC",
-            "params": [
-                {
-                    "name": "AUTO",
-                    "description": "<small><b>DEFAULT</b> | Value <code>\"auto\"</code></small>\n  The option to let Skylink use any audio codec selected by the browser generated session description.",
-                    "type": "String"
-                },
-                {
-                    "name": "OPUS",
-                    "description": "<small>Value <code>\"opus\"</code></small>\n  The option to let Skylink use the [OPUS](https://en.wikipedia.org/wiki/Opus_(audio_format)) codec.<br>\n  This is the common and mandantory audio codec used.",
-                    "type": "String"
-                },
-                {
-                    "name": "ISAC",
-                    "description": "<small>Value <code>\"ISAC\"</code></small>\n  The option to let Skylink use the [iSAC](https://en.wikipedia.org/wiki/Internet_Speech_Audio_Codec).<br>\n  This only works if the browser supports the iSAC video codec.",
-                    "type": "String"
-                }
-            ],
-            "type": "JSON",
-            "readonly": "",
-            "component": "Stream",
-            "since": "0.5.10",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/template/constants.js",
-            "line": 55,
-            "description": "Stores the preferred Peer connection streaming audio codec.",
-            "itemtype": "attribute",
-            "name": "_selectedAudioCodec",
-            "type": "String",
-            "default": "Skylink.AUDIO_CODEC.AUTO",
-            "access": "private",
-            "tagname": "",
-            "component": "Stream",
-            "since": "0.5.10",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/template/constants.js",
-            "line": 67,
-            "description": "Stores the preferred Peer connection streaming video codec.",
-            "itemtype": "attribute",
-            "name": "_selectedVideoCodec",
-            "type": "String",
-            "default": "Skylink.VIDEO_CODEC.AUTO",
-            "access": "private",
-            "tagname": "",
-            "component": "Stream",
-            "since": "0.5.10",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/template/constants.js",
-            "line": 80,
-            "description": "These are the list of suggested video resolutions that Skylink should configure\n  when retrieving self user media video stream.\n- Setting the resolution may not force set the resolution provided as it\n  depends on the how the browser handles the resolution.\n- It's recommended to use video resolution option to maximum <code>FHD</code>, as the other\n  resolution options may be unrealistic and create performance issues. However, we provide them\n  to allow developers to test with the browser capability, but do use it at your own risk.\n- The higher the resolution, the more CPU usage might be used, hence it's recommended to\n  use the default option <code>VGA</code>.\n- This follows the\n  [Wikipedia Graphics display resolution page](https://en.wikipedia.org/wiki/Graphics_display_resolution#Video_Graphics_Array)",
-            "params": [
-                {
-                    "name": "QQVGA",
-                    "description": "<small>Value <code>{ width: 160, height: 120 }</code> | Aspect Ratio <code>4:3</code></small>\n  The option to use QQVGA resolution.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "HQVGA",
-                    "description": "<small>Value <code>{ width: 240, height: 160 }</code> | Aspect Ratio <code>3:2</code></small>\n  The option to use HQVGA resolution.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "QVGA",
-                    "description": "<small>Value <code>{ width: 320, height: 240 }</code> | Aspect Ratio <code>4:3</code></small>\n  The option to use QVGA resolution.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "WQVGA",
-                    "description": "<small>Value <code>{ width: 384, height: 240 }</code> | Aspect Ratio <code>16:10</code></small>\n  The option to use WQVGA resolution.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "HVGA",
-                    "description": "<small>Value <code>{ width: 480, height: 320 }</code> | Aspect Ratio <code>3:2</code></small>\n  The option to use HVGA resolution.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "VGA",
-                    "description": "<small><b>DEFAULT</b> | Value <code>{ width: 640, height: 480 }</code> | Aspect Ratio <code>4:3</code></small>\n  The option to use VGA resolution.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "WVGA",
-                    "description": "<small>Value <code>{ width: 768, height: 480 }</code> | Aspect Ratio <code>16:10</code></small>\n  The option to use WVGA resolution.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "FWVGA",
-                    "description": "<small>Value <code>{ width: 854, height: 480 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use FWVGA resolution.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "SVGA",
-                    "description": "<small>Value <code>{ width: 800, height: 600 }</code> | Aspect Ratio <code>4:3</code></small>\n  The option to use SVGA resolution.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "DVGA",
-                    "description": "<small>Value <code>{ width: 960, height: 640 }</code> | Aspect Ratio <code>3:2</code></small>\n  The option to use DVGA resolution.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "WSVGA",
-                    "description": "<small>Value <code>{ width: 1024, height: 576 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use WSVGA resolution.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "HD",
-                    "description": "<small>Value <code>{ width: 1280, height: 720 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use HD resolution.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "HDPLUS",
-                    "description": "<small>Value <code>{ width: 1600, height: 900 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use HDPLUS resolution.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "FHD",
-                    "description": "<small>Value <code>{ width: 1920, height: 1080 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use FHD resolution.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "QHD",
-                    "description": "<small>Value <code>{ width: 2560, height: 1440 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use QHD resolution.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "WQXGAPLUS",
-                    "description": "<small>Value <code>{ width: 3200, height: 1800 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use WQXGAPLUS resolution.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "UHD",
-                    "description": "<small>Value <code>{ width: 3840, height: 2160 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use UHD resolution.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "UHDPLUS",
-                    "description": "<small>Value <code>{ width: 5120, height: 2880 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use UHDPLUS resolution.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "FUHD",
-                    "description": "<small>Value <code>{ width: 7680, height: 4320 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use FUHD resolution.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "QUHD",
-                    "description": "<small>Value <code>{ width: 15360, height: 8640 }</code> | Aspect Ratio <code>16:9</code></small>\n  The option to use QUHD resolution.",
-                    "type": "JSON"
-                }
-            ],
-            "itemtype": "attribute",
-            "name": "VIDEO_RESOLUTION",
-            "type": "JSON",
-            "readonly": "",
-            "component": "Stream",
-            "since": "0.5.6",
-            "class": "Skylink"
-        },
         {
             "file": "source/template/header.js",
             "line": 181,
@@ -2640,7 +2431,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 173,
+            "line": 181,
             "description": "Buffers an ICE candidate object associated with a Peer connection\n  to prevent disruption to ICE connection when ICE candidate\n  is received before <code>RTCPeerConnection.setRemoteDescription</code>\n  is called.",
             "itemtype": "method",
             "name": "_addIceCandidateToQueue",
@@ -2664,7 +2455,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 195,
+            "line": 203,
             "description": "Handles the event when adding an ICE candidate has been added\n  successfully. This is mainly to prevent JShint errors.",
             "itemtype": "method",
             "name": "_onAddIceCandidateSuccess",
@@ -2676,7 +2467,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 208,
+            "line": 216,
             "description": "Handles the event when adding an ICE candidate has failed.\nThis is mainly to prevent JShint errors.",
             "itemtype": "method",
             "name": "_onAddIceCandidateFailure",
@@ -2695,7 +2486,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 223,
+            "line": 231,
             "description": "Adds the list of ICE candidates bufferred before <code>RTCPeerConnection.setRemoteDescription\n  </code> is called associated with the Peer connection.",
             "itemtype": "method",
             "name": "_addIceCandidateFromQueue",
@@ -3029,26 +2820,6 @@
         {
             "file": "source/peer-connection.js",
             "line": 93,
-            "description": "Stores the list of Peer connection restart weights received\n  that would be compared against to indicate if Peer connection\n  should initiates a restart from the other connection end should.\nThe one that sends restart later is the one who initiates the restart.",
-            "itemtype": "attribute",
-            "name": "_peerRestartPriorities",
-            "params": [
-                {
-                    "name": "(#peerId)",
-                    "description": "The Peer ID associated with the connection restart\n  handshake reconnection weights. The weight is generated with <code>Date.valueOf()</code>.",
-                    "type": "Number"
-                }
-            ],
-            "type": "JSON",
-            "access": "private",
-            "tagname": "",
-            "required": 1,
-            "since": "0.6.0",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/peer-connection.js",
-            "line": 109,
             "description": "Connects to the Peer.",
             "itemtype": "method",
             "name": "_addPeer",
@@ -3117,7 +2888,26 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 185,
+            "line": 169,
+            "description": "Recreates a peer connection.\nThis is the fallback restart mechanism for other platforms.",
+            "itemtype": "method",
+            "name": "_restartPeerConnection",
+            "params": [
+                {
+                    "name": "peerId",
+                    "description": "The Peer ID to recreate the connection with.",
+                    "type": "String"
+                }
+            ],
+            "access": "private",
+            "tagname": "",
+            "component": "Peer",
+            "since": "0.6.6",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-connection.js",
+            "line": 230,
             "description": "Restarts a Peer connection in a P2P environment.\nThis is usually done for replacing the previous Stream attached and restarting\n  the connection with a new one, or when the ICE connection has issues\n  streaming video/audio stream in the remote Stream which requires\n  a refresh in the ICE connection.",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -3158,7 +2948,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 302,
+            "line": 380,
             "description": "Disconnects the Peer connection and remove object references associated.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -3178,7 +2968,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 368,
+            "line": 439,
             "description": "Creates a Peer connection. This does not start the handshake connection\n  but creates the Peer connection object ready for connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -3208,13 +2998,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 491,
+            "line": 575,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 539,
+            "line": 638,
             "description": "Refreshes a Peer connection.\n- This feature can be used to refresh a Peer connection when the\n  remote Stream received does not stream any audio/video stream.\n- If there are more than 1 refresh during 5 seconds\n  or refresh is less than 3 seconds since the last refresh\n  initiated by the other peer, it will be aborted.\n- As for MCU connection, the restart mechanism makes the self user\n   leave and join the currently connected room again.",
             "itemtype": "method",
             "name": "refreshConnection",
@@ -3278,7 +3068,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 698,
+            "line": 797,
             "description": "Restarts all Peers connection in a MCU connection environment.\nThis would require the current user to leave the room and restart all\n  current existing Peers connection.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -3704,17 +3494,10 @@
         {
             "file": "source/peer-handshake.js",
             "line": 140,
-            "description": "Stores the list of Peer handshake connection weights.\nThis is implemented to prevent the conflict of sending <code>WELCOME</code>\n  to peer and receiving <code>WELCOME</code> from peer at the same time.\nTo handle this event, both self and the peer has to generate a weight initially.\nThen in the {{#crossLink \"Skylink/_welcomeHandler:attr\"}}_welcomeHandler(){{/crossLink}}\n  when conflict <code>WELCOME</code> message is received, the handler woudl check\n  if there is already an existing Peer connection object with the peer (due\n  to the initialisation in the received <code>ENTER</code>). If so the handler would\n  then compare the received weight if it is higher than the weight generated for this peer.\nThe one with the highest weight would have the \"priority\" to initiate the WebRTC layer of\n  handshake and start sending the <code>OFFER</code> session description.",
+            "description": "Stores the peer connection priority weight.",
             "itemtype": "attribute",
-            "name": "_peerHSPriorities",
-            "params": [
-                {
-                    "name": "(#peerId)",
-                    "description": "The generated weight for associated Peer peer.\n  The weight is generated with <code>Date.getTime()</code>.",
-                    "type": "Number"
-                }
-            ],
-            "type": "JSON",
+            "name": "_peerPriorityWeight",
+            "type": "Number",
             "access": "private",
             "tagname": "",
             "required": 1,
@@ -3723,7 +3506,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 164,
+            "line": 151,
             "description": "Starts to initiate the WebRTC layer of handshake connection by\n  creating the <code>OFFER</code> session description and then\n  sending it to the associated Peer.\nThe offerer status may be shifted to the other peer depending on\n  when version of browser that is initiating the connection\n  to what version of browser to.",
             "itemtype": "method",
             "name": "_doOffer",
@@ -3754,6 +3537,11 @@
                             "type": "Number"
                         }
                     ]
+                },
+                {
+                    "name": "renegoCallback",
+                    "description": "The callback function that triggers after\n  the offer has been created or responsed.",
+                    "type": "Function"
                 }
             ],
             "access": "private",
@@ -3764,7 +3552,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 258,
+            "line": 255,
             "description": "Responses to the <code>OFFER</code> session description received and\n   creates an <code>ANSWER</code> session description to sent\n  to the associated Peer to complete the WebRTC handshake layer.",
             "itemtype": "method",
             "name": "_doAnswer",
@@ -3783,7 +3571,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 290,
+            "line": 289,
             "description": "Starts the waiting timeout for a \"healthy\" connection\n  with associated Peer connection.\nIt waits for any existing Peer \"healthy\" state in successful\n  {{#crossLink \"Skylink/_peerConnectionHealth:attr\"}}_peerConnectionHealth{{/crossLink}}.\nIf timeout has reached it's limit and does not have any \"healthy\" connection state\n  with Peer connection, it will restart the connection again with\n  {{#crossLink \"Skylink/_restartPeerConnection:method\"}}_restartPeerConnection(){{/crossLink}}.\nThis sets the timeout object associated with the Peer into\n  {{#crossLink \"Skylink/_peerConnectionHealthTimers\"}}_peerConnectionHealthTimers(){{/crossLink}}.",
             "itemtype": "method",
             "name": "_startPeerConnectionHealthCheck",
@@ -3809,7 +3597,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 377,
+            "line": 382,
             "description": "Stops the waiting timeout for a \"healthy\" connection associated\n  with the Peer.",
             "itemtype": "method",
             "name": "_stopPeerConnectionHealthCheck",
@@ -3828,7 +3616,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 404,
+            "line": 409,
             "description": "Sets the WebRTC handshake layer session description into the\n  Peer <code>RTCPeerConnection</code> object <i><code>\n  RTCPeerConnection.setLocalDescription()</code></i> associated\n  with the Peer connection.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -6742,14 +6530,79 @@
         {
             "file": "source/skylink-events.js",
             "line": 220,
-            "description": "Event triggered when attempt to fallback to retrieve audio only user media stream\n  has been made.\n- If <code>audioFallback</code> is enabled in <a href=\"#method_init\">init()</a>,\n  and if there is a failed attempt to retrieve video and audio user media,\n  it will attempt to do the audio fallback.",
+            "description": "Event triggered when media access fallback has been made.\n- If <code>audioFallback</code> is enabled in <a href=\"#method_init\">init()</a>,\n  and if there is a failed attempt to retrieve video and audio user media,\n  it will attempt to do the audio fallback.\n- If MediaStream successfully received does not meet to expected tracks, this\n  event would be triggered.",
             "itemtype": "event",
             "name": "mediaAccessFallback",
             "params": [
                 {
                     "name": "error",
-                    "description": "The error object thrown that caused the failure\n  from retrieve video and audio user media stream.",
-                    "type": "Object|String"
+                    "description": "The error object information.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "error",
+                            "description": "The error object thrown that caused the failure\n  from retrieve video and audio user media stream.\n  is triggered because (video+audio) error is fallbacking to audio only.",
+                            "type": "Object|String"
+                        },
+                        {
+                            "name": "diff",
+                            "description": "The list of expected audio and video tracks and received\n  tracks.<br>This is only defined when <code>state</code> payload is <code>1</code>.",
+                            "type": "JSON",
+                            "optional": true,
+                            "optdefault": "null",
+                            "props": [
+                                {
+                                    "name": "video",
+                                    "description": "The expected and received video tracks.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "video.expected",
+                                    "description": "The expected video tracks.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "video.received",
+                                    "description": "The received video tracks.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "audio",
+                                    "description": "The expected and received audio tracks.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "audio.expected",
+                                    "description": "The expected audio tracks.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "audio.received",
+                                    "description": "The received audio tracks.",
+                                    "type": "Number"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "state",
+                    "description": "The access fallback state.\n<small><ul>\n<li><code>0</code>: Attempting to retrieve access for fallback state.</li>\n<li><code>1</code>: Fallback access has been completed successfully</li>\n<li><code>-1</code>: Failed retrieving fallback access</li>\n</ul></small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "isScreensharing",
+                    "description": "The flag that indicates if this event ia an\n  fallback from failed screensharing retrieval or attaching of audio.",
+                    "type": "Boolean",
+                    "optional": true,
+                    "optdefault": "false"
+                },
+                {
+                    "name": "isAudioFallback",
+                    "description": "The flag that indicates if this event is an\n  audio fallbacking from failed attempt to retrieve video and audio user media.",
+                    "type": "Boolean",
+                    "optional": true,
+                    "optdefault": "false"
                 }
             ],
             "component": "Events",
@@ -6758,7 +6611,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 235,
+            "line": 256,
             "description": "Event triggered when access to self user media stream is successfully\n  attached to Skylink.",
             "itemtype": "event",
             "name": "mediaAccessSuccess",
@@ -6780,7 +6633,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 250,
+            "line": 271,
             "description": "Event triggered when the application requires to retrieve self\n  user media stream manually instead of doing it automatically in\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}.\n- This event triggers based on the configuration of <code>manualGetUserMedia</code>\n  in the <a href=\"#method_joinRoom\">joinRoom() configuration settings</a>.\n- Developers must manually invoke <a href=\"#method_getUserMedia\">getUserMedia()</a>\n  to retrieve the user media stream before self would join the room.\n  Once the user media stream is attached, self would proceed to join the room\n  automatically.",
             "itemtype": "event",
             "name": "mediaAccessRequired",
@@ -6790,7 +6643,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 267,
+            "line": 288,
             "description": "Event triggered when self user media stream attached to Skylink has been stopped.",
             "itemtype": "event",
             "name": "mediaAccessStopped",
@@ -6807,7 +6660,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 278,
+            "line": 299,
             "description": "Event triggered when a Peer joins the room.",
             "itemtype": "event",
             "name": "peerJoined",
@@ -6971,7 +6824,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 355,
+            "line": 376,
             "description": "Event triggered when a Peer connection has been restarted for\n  a reconnection.",
             "itemtype": "event",
             "name": "peerRestart",
@@ -7135,7 +6988,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 434,
+            "line": 455,
             "description": "Event triggered when a Peer information have been updated.\n- This event would only be triggered if self is in the room.\n- This event triggers when the <code>peerInfo</code> data is updated,\n  like <code>peerInfo.mediaStatus</code> or the <code>peerInfo.userData</code>,\n  which is invoked through <a href=\"#method_muteStream\">muteStream()</a> or\n  <a href=\"#method_setUserData\">setUserData()</a>.",
             "itemtype": "event",
             "name": "peerUpdated",
@@ -7299,7 +7152,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 515,
+            "line": 536,
             "description": "Event triggered when a Peer leaves the room.",
             "itemtype": "event",
             "name": "peerLeft",
@@ -7463,7 +7316,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 592,
+            "line": 613,
             "description": "Event triggered when a Stream is sent by Peer.\n- This event may trigger for self, which indicates that self has joined the room\n  and is sending this Stream object to other Peers connected in the room.",
             "itemtype": "event",
             "name": "incomingStream",
@@ -7632,7 +7485,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 675,
+            "line": 696,
             "description": "Event triggered when message data is received from Peer.\n- This event may trigger for self when sending message data to Peer,\n  which indicates that self has sent the message data.",
             "itemtype": "event",
             "name": "incomingMessage",
@@ -7830,7 +7683,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 768,
+            "line": 789,
             "description": "Event triggered when a data transfer is completed.\n- This event may trigger for self when transferring data to Peer,\n  which indicates that self has transferred the data successfully.\n- For more extensive states like the outgoing and incoming\n  data transfer progress and rejection of data transfer requests,\n  you may subscribe to the <a href=\"#event_dataTransferState\">dataTransferState</a> event.\n- If <code>enableDataChannel</code> disabled in <a href=\"#method_init\">init() configuration\n  settings</a>, this event will not be triggered at all.",
             "itemtype": "event",
             "name": "incomingData",
@@ -7896,7 +7749,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 803,
+            "line": 824,
             "description": "Event triggered when there is a request to start a data transfer.\n- This event may trigger for self when requesting a data transfer to Peer,\n  which indicates that self has sent the data transfer request.\n- For more extensive states like the outgoing and incoming\n  data transfer progress and rejection of data transfer requests,\n  you may subscribe to the <a href=\"#event_dataTransferState\">dataTransferState</a> event.\n- If <code>enableDataChannel</code> disabled in <a href=\"#method_init\">init() configuration\n  settings</a>, this event will not be triggered at all.\n- <sub>DATA TRANSFER STAGE</sub><br>\n  <small>\n  <a href=\"#event_dataTransferState\">dataTransferState</a> &#8594;\n  <b>incomingDataRequest</b> &#8594;\n  <a href=\"#event_incomingData\">incomingData</a>\n  </small>",
             "itemtype": "event",
             "name": "incomingDataRequest",
@@ -7957,7 +7810,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 839,
+            "line": 860,
             "description": "Event triggered when the currently connected room lock status have been updated.\n- If this event is triggered, this means that the room is locked / unlocked which\n  may allow or prevent any other Peers from joining the room.",
             "itemtype": "event",
             "name": "roomLock",
@@ -8126,7 +7979,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 919,
+            "line": 940,
             "description": "Event triggered when a Peer connection DataChannel connection state has changed.\n- This event is a debugging feature, and it's used to check the\n  Peer DataChannel connection, which is used for P2P messaging and transfers for\n  methods like <a href=\"#method_sendBlobData\">sendBlobData()</a>,\n  <a href=\"#method_sendURLData\">sendURLData()</a> and\n  <a href=\"#method_sendP2PMessage\">sendP2PMessage()</a>.\n- If <code>enableDataChannel</code> disabled in <a href=\"#method_init\">init() configuration\n  settings</a>, this event will not be triggered at all.",
             "itemtype": "event",
             "name": "dataChannelState",
@@ -8165,7 +8018,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 944,
+            "line": 965,
             "description": "Event triggered when a data transfer state has changed.\n- This event triggers more extensive states like the outgoing and incoming\n  data transfer progress and rejection of data transfer requests.\n  For simplified events, you may subscribe to the\n  <a href=\"#event_incomingDataRequest\">incomingDataRequest</a> and\n  <a href=\"#event_incomingData\">incomingData</a> events.\n- If <code>enableDataChannel</code> disabled in <a href=\"#method_init\">init() configuration\n  settings</a>, this event will not be triggered at all.",
             "itemtype": "event",
             "name": "dataTransferState",
@@ -8249,7 +8102,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 988,
+            "line": 1009,
             "description": "Event triggered when Skylink receives an system action from the platform signaling.",
             "itemtype": "event",
             "name": "systemAction",
@@ -8276,7 +8129,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1004,
+            "line": 1025,
             "description": "Event triggered when a server Peer joins the room.",
             "itemtype": "event",
             "name": "serverPeerJoined",
@@ -8298,7 +8151,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1017,
+            "line": 1038,
             "description": "Event triggered when a server Peer leaves the room.",
             "itemtype": "event",
             "name": "serverPeerLeft",
@@ -8320,7 +8173,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1030,
+            "line": 1051,
             "description": "Event triggered when a sever Peer connection has been restarted for\n  a reconnection.",
             "itemtype": "event",
             "name": "serverPeerRestart",
@@ -8342,7 +8195,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1044,
+            "line": 1065,
             "description": "Event triggered when a Peer connection Stream streaming has stopped.",
             "itemtype": "event",
             "name": "streamEnded",
@@ -8513,7 +8366,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1123,
+            "line": 1144,
             "description": "Event triggered when a Peer connection Stream streaming audio or video\n  stream muted status have been updated.",
             "itemtype": "event",
             "name": "streamMuted",
@@ -8682,7 +8535,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1203,
+            "line": 1224,
             "description": "Event triggered when the retrieval of the list of rooms and peers under the same realm based\n  on the Application Key configured in <a href=\"#method_init\">init()</a>\n  from the platform signaling state has changed.\n- This requires that the provided alias Application Key has privileged feature configured.",
             "itemtype": "event",
             "name": "getPeersStateChange",
@@ -8709,7 +8562,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1219,
+            "line": 1240,
             "description": "Event triggered when introductory state of two Peer peers to each other\n  selected by the privileged Peer state has changed.\n- This requires that the provided alias Application Key has privileged feature configured.",
             "itemtype": "event",
             "name": "introduceStateChange",
@@ -8746,7 +8599,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1240,
+            "line": 1261,
             "description": "Stores the list of {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}}\n  event subscription handlers.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -8774,7 +8627,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1261,
+            "line": 1282,
             "description": "The throttling function datetime stamp in\n  [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601).",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -8788,7 +8641,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1277,
+            "line": 1298,
             "description": "Triggers event subscription handlers that is associated with the event name.\n{{#crossLink \"Skylink/on:method\"}}on() event subscription handlers{{/crossLink}}\n  will be triggered always, but\n  {{#crossLink \"Skylink/once:method\"}}once() event subscription hadlers{{/crossLink}}\n  will only be triggered once the condition is met.",
             "itemtype": "method",
             "name": "_trigger",
@@ -8807,7 +8660,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1336,
+            "line": 1357,
             "description": "Subscribes an event handler associated to the event name.\nThis event handler will always be triggered when the event name is triggered. If you\n  are looking for subscription event handler to be triggered once, check out\n  {{#crossLink \"Skylink/once:method\"}}once() event subscription{{/crossLink}}.",
             "itemtype": "method",
             "name": "on",
@@ -8832,7 +8685,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1363,
+            "line": 1384,
             "description": "Subscribes an event handler associated to the event name that\n   would only be triggered once the provided condition function has been met.",
             "itemtype": "method",
             "name": "once",
@@ -8870,7 +8723,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1412,
+            "line": 1433,
             "description": "Unsubscribes an event handler associated to the event name.",
             "itemtype": "method",
             "name": "off",
@@ -8896,7 +8749,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1459,
+            "line": 1480,
             "description": "Checks if the first condition is already met before doing an event\n  handler subscription to wait for the second condition to be met.\nThis method will do a event subscription with\n  {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}} as this\n  <code>_condition()</code> would only trigger once, unless <code>fireAlways</code>\n  is set to <code>true</code>.",
             "itemtype": "method",
             "name": "_condition",
@@ -8939,7 +8792,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1510,
+            "line": 1531,
             "description": "Starts the interval check for the condition provided to meet before clearing\n  the interval and triggering the callback provided.\nThis utilises <code>setInterval()</code> function.",
             "itemtype": "method",
             "name": "_wait",
@@ -8970,7 +8823,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1560,
+            "line": 1581,
             "description": "Returns a wrapper of the original function, which fires only once during\n a specified amount of time.",
             "itemtype": "method",
             "name": "_throttle",
@@ -10095,7 +9948,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 691,
+            "line": 696,
             "description": "Handles the ENTER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -10270,7 +10123,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 831,
+            "line": 834,
             "description": "Handles the RESTART Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -10484,7 +10337,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1002,
+            "line": 1038,
             "description": "Handles the WELCOME Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -10681,7 +10534,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1167,
+            "line": 1231,
             "description": "Handles the OFFER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -10728,7 +10581,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1218,
+            "line": 1296,
             "description": "Handles the CANDIDATE Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -10784,7 +10637,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1315,
+            "line": 1393,
             "description": "Handles the ANSWER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -10831,7 +10684,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1379,
+            "line": 1475,
             "description": "Send a message object or string using the platform signaling socket connection\n  to the list of targeted PeerConnections.\nTo send message objects with DataChannel connections, see\n  {{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.",
             "itemtype": "method",
             "name": "sendMessage",
@@ -11533,7 +11386,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 574,
+            "line": 588,
             "description": "Handles the event when remote MediaStream is received from Peer connection.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -11565,7 +11418,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 621,
+            "line": 635,
             "description": "Parses the audio stream settings for self provided.",
             "itemtype": "method",
             "name": "_parseAudioStreamSettings",
@@ -11605,7 +11458,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 680,
+            "line": 694,
             "description": "Parses the video stream settings for self provided.",
             "itemtype": "method",
             "name": "_parseVideoStreamSettings",
@@ -11671,7 +11524,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 781,
+            "line": 795,
             "description": "Parses the streaming bandwidth settings for self provided.",
             "itemtype": "method",
             "name": "_parseBandwidthSettings",
@@ -11711,7 +11564,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 821,
+            "line": 835,
             "description": "Parses the <code>mediaStatus</code> settings for self provided.",
             "itemtype": "method",
             "name": "_parseMutedSettings",
@@ -11807,7 +11660,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 889,
+            "line": 903,
             "description": "Parses the default stream settings received from\n  the platform signaling.",
             "itemtype": "method",
             "name": "_parseDefaultMediaStreamSettings",
@@ -11840,7 +11693,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 923,
+            "line": 937,
             "description": "Parses the provided stream settings for self provided.",
             "itemtype": "method",
             "name": "_parseMediaStreamSettings",
@@ -11952,7 +11805,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1006,
+            "line": 1020,
             "description": "Sends self selected Stream object to current Peer connections.\nIf {{#crossLink \"Skylink/_mediaScreen:attribute\"}}_mediaScreen{{/crossLink}}\n  is not empty, it will send the screensharing stream, else it will\n  send the {{#crossLink \"Skylink/_mediaStream:attribute\"}}_mediaStream{{/crossLink}}\n  if is not empty.\nIf self does not have any Stream object to send, it will a connection without\n  any remote Stream sent to the Peer connection.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -11971,7 +11824,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1063,
+            "line": 1093,
             "description": "Stops self user media Stream object attached to Skylink.",
             "itemtype": "method",
             "name": "stopStream",
@@ -11984,7 +11837,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1079,
+            "line": 1109,
             "description": "Handles the muting of audio and video streams in\n  {{#crossLink \"Skylink/_mediaStream:attribute\"}}_mediaStream{{/crossLink}},\n  {{#crossLink \"Skylink/_mediaScreen:attribute\"}}_mediaScreen{{/crossLink}} and\n  {{#crossLink \"Skylink/_mediaScreenClone:attribute\"}}_mediaScreenClone{{/crossLink}},",
             "itemtype": "method",
             "name": "_muteLocalMediaStreams",
@@ -11999,7 +11852,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1191,
+            "line": 1221,
             "description": "Handles the stopping of audio and video streams.",
             "itemtype": "method",
             "name": "_stopLocalMediaStreams",
@@ -12033,7 +11886,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1281,
+            "line": 1313,
             "description": "Waits for self MediaStream object to be attached to Skylink based\n  on the options provided before firing the callback to indicate\n  that self Stream object is received.\nThis will stop any currently attached Stream object to Skylink.",
             "itemtype": "method",
             "name": "_waitForLocalMediaStream",
@@ -12172,7 +12025,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1418,
+            "line": 1450,
             "description": "Gets self user media Stream object to attach to Skylink.\nDo not invoke this function when user has already joined a room as\n  this may affect any currently attached stream. You may use\n {{#crossLink \"Skylink/sendStream:method\"}}sendStream(){{/crossLink}}\n instead if self is already in the room, and allows application to\n attach application own MediaStream object to Skylink.",
             "itemtype": "method",
             "name": "getUserMedia",
@@ -12290,7 +12143,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1647,
+            "line": 1685,
             "description": "Replaces the currently attached Stream object in Skylink and refreshes all\n  connection with Peer connections to send the updated Stream object.\nThe application may provide their own MediaStream object to send to\n  all PeerConnections connection.\nReference {{#crossLink \"Skylink/refreshConnection:method\"}}refreshConnection(){{/crossLink}}\n   on the events triggered and restart mechanism.",
             "itemtype": "method",
             "name": "sendStream",
@@ -12407,7 +12260,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1880,
+            "line": 1918,
             "description": "Mutes the currently attached Stream object in Skylink.",
             "itemtype": "method",
             "name": "muteStream",
@@ -12444,7 +12297,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1982,
+            "line": 2020,
             "description": "Unmutes the currently attached Stream object audio stream.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -12460,7 +12313,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2000,
+            "line": 2038,
             "description": "Mutes the currently attached Stream object audio stream.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -12476,7 +12329,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2018,
+            "line": 2056,
             "description": "Unmutes the currently attached Stream object video stream.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -12492,7 +12345,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2036,
+            "line": 2074,
             "description": "Mutes the currently attached Stream object video stream.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -12507,7 +12360,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2053,
+            "line": 2091,
             "description": "Shares the current screen with Peer connections and will refresh all\n   Peer connections to send the screensharing Stream object with\n   <code>HTTPS</code> protocol accessing application.\nReference {{#crossLink \"Skylink/refreshConnection:method\"}}refreshConnection(){{/crossLink}}\n   on the events triggered and restart mechanism.\nThis will require our own Temasys Skylink extension to do screensharing.\nFor screensharing feature in IE / Safari with our Temasys Plugin, please\n  [contact us](https://www.temasys.com.sg/contact-us).\nCurrently, Opera does not support screensharing feature.\nThis does not replace the currently attached user media Stream object in Skylink.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -12548,7 +12401,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2225,
+            "line": 2300,
             "description": "Stops self screensharing Stream object attached to Skylink.\nIf user media Stream object is available, Skylink will refresh all\n   Peer connections to send the user media Stream object.\nReference {{#crossLink \"Skylink/refreshConnection:method\"}}refreshConnection(){{/crossLink}}\n   on the events triggered and restart mechanism.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -12696,29 +12549,37 @@
             "component": "SDP",
             "since": "0.5.2",
             "class": "Skylink"
+        },
+        {
+            "file": "source/stream-sdp.js",
+            "line": 355,
+            "description": "Modifies the session description received to append the correct ssrc lines for Firefox.",
+            "itemtype": "method",
+            "name": "_addSDPSsrcFirefoxAnswer",
+            "params": [
+                {
+                    "name": "targetMid",
+                    "description": "The peer connection ID.",
+                    "type": "String"
+                },
+                {
+                    "name": "answerSdp",
+                    "description": "The answer session description.",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "The update answer session description with correct SSRC lines.",
+                "type": "String"
+            },
+            "access": "private",
+            "tagname": "",
+            "component": "SDP",
+            "since": "0.6.6",
+            "class": "Skylink"
         }
     ],
     "warnings": [
-        {
-            "message": "unknown tag: component",
-            "line": " source/template/constants.js:1"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/template/constants.js:28"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/template/constants.js:55"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/template/constants.js:67"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/template/constants.js:80"
-        },
         {
             "message": "unknown tag: component",
             "line": " source/data-channel.js:1"
@@ -12989,19 +12850,19 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:173"
+            "line": " source/ice-candidate.js:181"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:195"
+            "line": " source/ice-candidate.js:203"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:208"
+            "line": " source/ice-candidate.js:216"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:223"
+            "line": " source/ice-candidate.js:231"
         },
         {
             "message": "unknown tag: component",
@@ -13061,39 +12922,43 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:109"
+            "line": " source/peer-connection.js:93"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:185"
+            "line": " source/peer-connection.js:169"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/peer-connection.js:230"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:302"
+            "line": " source/peer-connection.js:380"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:302"
+            "line": " source/peer-connection.js:380"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:368"
+            "line": " source/peer-connection.js:439"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:539"
+            "line": " source/peer-connection.js:638"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:539"
+            "line": " source/peer-connection.js:638"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:698"
+            "line": " source/peer-connection.js:797"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:698"
+            "line": " source/peer-connection.js:797"
         },
         {
             "message": "unknown tag: component",
@@ -13140,32 +13005,28 @@
             "line": " source/peer-handshake.js:123"
         },
         {
-            "message": "param name/type/descript missing",
-            "line": " source/peer-handshake.js:140"
+            "message": "unknown tag: component",
+            "line": " source/peer-handshake.js:151"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:164"
+            "line": " source/peer-handshake.js:255"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:258"
+            "line": " source/peer-handshake.js:289"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:290"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:377"
+            "line": " source/peer-handshake.js:382"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-handshake.js:404"
+            "line": " source/peer-handshake.js:409"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:404"
+            "line": " source/peer-handshake.js:409"
         },
         {
             "message": "unknown tag: component",
@@ -13593,91 +13454,87 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:235"
+            "line": " source/skylink-events.js:256"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:250"
+            "line": " source/skylink-events.js:271"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:267"
+            "line": " source/skylink-events.js:288"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:278"
+            "line": " source/skylink-events.js:299"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:355"
+            "line": " source/skylink-events.js:376"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:434"
+            "line": " source/skylink-events.js:455"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:515"
+            "line": " source/skylink-events.js:536"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:592"
+            "line": " source/skylink-events.js:613"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:675"
+            "line": " source/skylink-events.js:696"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:768"
+            "line": " source/skylink-events.js:789"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:803"
+            "line": " source/skylink-events.js:824"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:839"
+            "line": " source/skylink-events.js:860"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:919"
+            "line": " source/skylink-events.js:940"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:944"
+            "line": " source/skylink-events.js:965"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:988"
+            "line": " source/skylink-events.js:1009"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1004"
+            "line": " source/skylink-events.js:1025"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1017"
+            "line": " source/skylink-events.js:1038"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1030"
+            "line": " source/skylink-events.js:1051"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1044"
+            "line": " source/skylink-events.js:1065"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1123"
+            "line": " source/skylink-events.js:1144"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1203"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1219"
+            "line": " source/skylink-events.js:1224"
         },
         {
             "message": "unknown tag: component",
@@ -13689,31 +13546,35 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1277"
+            "line": " source/skylink-events.js:1282"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1336"
+            "line": " source/skylink-events.js:1298"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1363"
+            "line": " source/skylink-events.js:1357"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1412"
+            "line": " source/skylink-events.js:1384"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1459"
+            "line": " source/skylink-events.js:1433"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1510"
+            "line": " source/skylink-events.js:1480"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1560"
+            "line": " source/skylink-events.js:1531"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/skylink-events.js:1581"
         },
         {
             "message": "unknown tag: component",
@@ -13917,55 +13778,55 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:691"
+            "line": " source/socket-message.js:696"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:691"
+            "line": " source/socket-message.js:696"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:831"
+            "line": " source/socket-message.js:834"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:831"
+            "line": " source/socket-message.js:834"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1002"
+            "line": " source/socket-message.js:1038"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1002"
+            "line": " source/socket-message.js:1038"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1167"
+            "line": " source/socket-message.js:1231"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1167"
+            "line": " source/socket-message.js:1231"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1218"
+            "line": " source/socket-message.js:1296"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1315"
+            "line": " source/socket-message.js:1393"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1315"
+            "line": " source/socket-message.js:1393"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1379"
+            "line": " source/socket-message.js:1475"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1379"
+            "line": " source/socket-message.js:1475"
         },
         {
             "message": "unknown tag: component",
@@ -14045,135 +13906,135 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:574"
+            "line": " source/stream-media.js:588"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:574"
+            "line": " source/stream-media.js:588"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:621"
+            "line": " source/stream-media.js:635"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:680"
+            "line": " source/stream-media.js:694"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:781"
+            "line": " source/stream-media.js:795"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:821"
+            "line": " source/stream-media.js:835"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:889"
+            "line": " source/stream-media.js:903"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:923"
+            "line": " source/stream-media.js:937"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1006"
+            "line": " source/stream-media.js:1020"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1063"
+            "line": " source/stream-media.js:1093"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1281"
+            "line": " source/stream-media.js:1313"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1281"
+            "line": " source/stream-media.js:1313"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1418"
+            "line": " source/stream-media.js:1450"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1418"
+            "line": " source/stream-media.js:1450"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1647"
+            "line": " source/stream-media.js:1685"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1647"
+            "line": " source/stream-media.js:1685"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1880"
+            "line": " source/stream-media.js:1918"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1880"
+            "line": " source/stream-media.js:1918"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1982"
+            "line": " source/stream-media.js:2020"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1982"
+            "line": " source/stream-media.js:2020"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1982"
+            "line": " source/stream-media.js:2020"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2000"
+            "line": " source/stream-media.js:2038"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2000"
+            "line": " source/stream-media.js:2038"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2000"
+            "line": " source/stream-media.js:2038"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2018"
+            "line": " source/stream-media.js:2056"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2018"
+            "line": " source/stream-media.js:2056"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2018"
+            "line": " source/stream-media.js:2056"
         },
         {
             "message": "unknown tag: depcreated",
-            "line": " source/stream-media.js:2036"
+            "line": " source/stream-media.js:2074"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2036"
+            "line": " source/stream-media.js:2074"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2036"
+            "line": " source/stream-media.js:2074"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2053"
+            "line": " source/stream-media.js:2091"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2053"
+            "line": " source/stream-media.js:2091"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2225"
+            "line": " source/stream-media.js:2300"
         },
         {
             "message": "unknown tag: component",
@@ -14200,8 +14061,12 @@
             "line": " source/stream-sdp.js:333"
         },
         {
+            "message": "unknown tag: component",
+            "line": " source/stream-sdp.js:355"
+        },
+        {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:491"
+            "line": " source/peer-connection.js:575"
         }
     ]
 }

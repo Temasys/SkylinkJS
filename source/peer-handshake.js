@@ -138,28 +138,15 @@ Skylink.prototype._peerConnectionHealthTimers = {};
 Skylink.prototype._peerConnectionHealth = {};
 
 /**
- * Stores the list of Peer handshake connection weights.
- * This is implemented to prevent the conflict of sending <code>WELCOME</code>
- *   to peer and receiving <code>WELCOME</code> from peer at the same time.
- * To handle this event, both self and the peer has to generate a weight initially.
- * Then in the {{#crossLink "Skylink/_welcomeHandler:attr"}}_welcomeHandler(){{/crossLink}}
- *   when conflict <code>WELCOME</code> message is received, the handler woudl check
- *   if there is already an existing Peer connection object with the peer (due
- *   to the initialisation in the received <code>ENTER</code>). If so the handler would
- *   then compare the received weight if it is higher than the weight generated for this peer.
- * The one with the highest weight would have the "priority" to initiate the WebRTC layer of
- *   handshake and start sending the <code>OFFER</code> session description.
- * @attribute _peerHSPriorities
- * @param {Number} (#peerId) The generated weight for associated Peer peer.
- *   The weight is generated with <code>Date.getTime()</code>.
- * @param
- * @type JSON
+ * Stores the peer connection priority weight.
+ * @attribute _peerPriorityWeight
+ * @type Number
  * @private
  * @required
  * @for Skylink
  * @since 0.5.0
  */
-Skylink.prototype._peerHSPriorities = {};
+Skylink.prototype._peerPriorityWeight = 0;
 
 /**
  * Starts to initiate the WebRTC layer of handshake connection by
@@ -174,6 +161,8 @@ Skylink.prototype._peerHSPriorities = {};
  * @param {String} peerBrowser.name The Peer platform browser or agent name.
  * @param {Number} peerBrowser.version The Peer platform browser or agent version.
  * @param {Number} peerBrowser.os The Peer platform name.
+ * @param {Function} renegoCallback The callback function that triggers after
+ *   the offer has been created or responsed.
  * @private
  * @for Skylink
  * @component Peer
@@ -202,15 +191,22 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       beOfferer = true;
     }
 
+    unifiedOfferConstraints.mandatory.iceRestart = true;
     peerBrowser.os = peerBrowser.os || '';
 
-    // for windows firefox to mac chrome interopability
-    if (window.webrtcDetectedBrowser === 'firefox' &&
-      window.navigator.platform.indexOf('Win') === 0 &&
-      peerBrowser.agent !== 'firefox' &&
-      peerBrowser.agent !== 'MCU' &&
-      peerBrowser.os.indexOf('Mac') === 0) {
-      beOfferer = false;
+    if (peerBrowser.agent !== 'MCU') {
+      /*
+       // for windows firefox to mac chrome interopability
+      if (window.webrtcDetectedBrowser === 'firefox' &&
+        window.navigator.platform.indexOf('Win') === 0 &&
+        peerBrowser.agent !== 'firefox' &&
+        peerBrowser.agent !== 'MCU' &&
+        peerBrowser.os.indexOf('Mac') === 0) {
+        beOfferer = false;
+      }*/
+      if (window.webrtcDetectedBrowser === 'firefox' && peerBrowser.agent !== 'firefox') {
+        beOfferer = false;
+      }
     }
 
     if (beOfferer) {
@@ -239,6 +235,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       log.debug([targetMid, null, null, 'User\'s browser is not eligible to create ' +
         'the offer to the other peer. Requesting other peer to create the offer instead'
         ], peerBrowser);
+
       self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.WELCOME,
         mid: self._user.sid,
@@ -272,6 +269,8 @@ Skylink.prototype._doAnswer = function(targetMid) {
     self._room.connection.sdpConstraints);
   var pc = self._peerConnections[targetMid];
   if (pc) {
+    // No ICE restart constraints for createAnswer as it fails in chrome 48
+    // { iceRestart: true }
     pc.createAnswer(function(answer) {
       log.debug([targetMid, null, null, 'Created answer'], answer);
       self._setLocalAndSendMessage(targetMid, answer);
@@ -311,6 +310,12 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var timer = (self._enableIceTrickle && !self._peerIceTrickleDisabled[peerId]) ?
     (toOffer ? 12500 : 10000) : 50000;
   timer = (self._hasMCU) ? 105000 : timer;
+
+  // increase timeout for android/ios
+  /*var agent = self.getPeerInfo(peerId).agent;
+  if (['Android', 'iOS'].indexOf(agent.name) > -1) {
+    timer = 105000;
+  }*/
 
   timer += self._retryCount*10000;
 
@@ -422,13 +427,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   var self = this;
   var pc = self._peerConnections[targetMid];
 
-  if (!sessionDescription) {
-    log.log([targetMid, 'RTCSessionDescription', null,
-      'Ignoring session description as it is empty'], sessionDescription);
-    return;
-  }
-
-  if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && pc.setAnswer) {
+  /*if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && pc.setAnswer) {
     log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
       'Ignoring session description. User has already set local answer'], sessionDescription);
     return;
@@ -437,7 +436,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
       'Ignoring session description. User has already set local offer'], sessionDescription);
     return;
-  }
+  }*/
 
   // NOTE ALEX: handle the pc = 0 case, just to be sure
   var sdpLines = sessionDescription.sdp.split('\r\n');
@@ -518,7 +517,21 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     } else {
       pc.setOffer = 'local';
     }
-    if (self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid]) {
+    var shouldWaitForCandidates = false;
+
+    if (!(self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid])) {
+      shouldWaitForCandidates = true;
+      // there is no sessiondescription created at first go
+      if (pc.setOffer === 'remote' || pc.setAnswer === 'remote') {
+        shouldWaitForCandidates = false;
+      }
+    }
+    if (!shouldWaitForCandidates) {
+      // make checks for firefox session description
+      if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && window.webrtcDetectedBrowser === 'firefox') {
+        sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
+      }
+
       self._sendChannelMessage({
         type: sessionDescription.type,
         sdp: sessionDescription.sdp,

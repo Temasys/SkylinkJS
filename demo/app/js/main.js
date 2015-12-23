@@ -13,8 +13,7 @@ var _peerId = null;
 
 var selectedPeers = [];
 
-//Demo.Skylink.setLogLevel(4);
-
+Demo.Skylink.setLogLevel(4);
 
 Demo.Methods.displayFileItemHTML = function (content) {
   return '<p>' + content.name + '<small style="float:right;color:#aaa;">' + content.size + ' B</small></p>' +
@@ -168,13 +167,13 @@ Demo.Skylink.on('incomingMessage', function (message, peerId, peerInfo, isSelf) 
 });
 //---------------------------------------------------
 Demo.Skylink.on('peerRestart', function (peerId, peerInfo, isSelf){
-  if (!isSelf) {
+  /*if (!isSelf) {
     $('#user' + peerId + ' .video').css('color',
       (peerInfo.mediaStatus.videoMuted) ? 'red' : 'green');
     $('#user' + peerId + ' .audio').css('color',
       (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
     $('#user' + peerId + ' .name').html(peerInfo.userData);
-  }
+  }*/
 });
 //---------------------------------------------------
 Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf){
@@ -456,8 +455,8 @@ Demo.Skylink.on('peerRestart', function (peerId, peerInfo, isSelf) {
   console.info('peerRestart', peerId, peerInfo, isSelf);
 });
 
-Demo.Skylink.on('incomingStream', function (peerId, peerInfo, isSelf) {
-  console.info('incomingStream', peerId, peerInfo, isSelf);
+Demo.Skylink.on('incomingStream', function (peerId, stream, peerInfo, isSelf) {
+  console.info('incomingStream', peerId, stream.id, isSelf);
 });
 
 Demo.Skylink.on('serverPeerRestart', function (serverPeerId, serverPeerType) {
@@ -679,10 +678,10 @@ $(document).ready(function () {
   });
 
   Demo.Skylink.on('iceConnectionState', function (state, peerId) {
-    if (state === 'completed') {
-      //setTimeout(function () {
+    if (state === 'connected') {
+      setTimeout(function () {
         Demo.Skylink._restartPeerConnection(peerId, true, false, null, true);
-      //}, 500);
+      }, 1);
     }
   });
 
