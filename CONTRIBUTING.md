@@ -10,6 +10,8 @@ Alternatively, you may just simply have your branch name `FEATURE_NAME` if this 
 
 All pull-requests requires a descripttion on what changes are made.
 
+Please pull-request to `0.6.x-development` branch as it will assist in easier development.
+
 ##### Commit message format
 
 Here's the format to push commits into Skylink:
