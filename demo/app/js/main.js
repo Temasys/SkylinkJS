@@ -343,20 +343,6 @@ Demo.Skylink.on('iceConnectionState', function (state, peerId) {
       }
     }, 30000);
   }
-  /*var printStream = function (method) {
-    var peer = Demo.Skylink._peerConnections[peerId];
-    var array = peer[method]();
-    if (array.length > 0) {
-      return array[0].id;
-    }
-  };
-
-  if (state === Demo.Skylink.ICE_CONNECTION_STATE.COMPLETED) {
-    console.info('receivedStream', peerId, {
-      received: printStream('getRemoteStreams'),
-      sending: printStream('getLocalStreams')
-    });
-  }*/
 });
 //---------------------------------------------------
 Demo.Skylink.on('peerConnectionState', function (state, peerId) {
