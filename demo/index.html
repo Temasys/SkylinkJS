@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>SkylinkJS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,22 +17,30 @@
     display: -ms-flexbox;
     display: flex;
   }
-    .table {
-      font-size:12px;
-    }
-    .table th {
-      font-size:14px;
-    }
+  .table {
+    font-size: 12px;
+  }
+  .table th {
+    font-size: 14px;
+  }
   </style>
 </head>
+
 <body>
-<div>
-  <div class="page">
-    <div class="container-fluid">
-      <div class="page-header">
-        <h2><a href="http://temasys.github.io/"><img class="img-responsive" src="skylinkjs.svg" alt="Skylink JS" height="120px"; width="135px"></a>
-         <small>Client API Documentation</small></h1>
+  <div>
+    <div class="page">
+      <!-- header -->
+      <div class="container-fluid">
+        <div class="page-header">
+          <h2>
+            <a href="http://temasys.github.io/">
+              <img class="img-responsive" src="skylinkjs.svg" alt="Skylink JS" height="120px"; width="135px">
+            </a>
+            <small>Client API Documentation</small>
+          </h2>
+        </div>
       </div>
+      <!-- banner -->
       <div class="panel panel-default">
         <div class="panel-heading">
           <h4>SkylinkJS Documentation</h4>
@@ -56,308 +65,358 @@
           </p>
         </div>
       </div>
+      <!-- row -->
       <div class="row row-eq-height">
-      <!-------------------------------------------------------------->
-      <div class="col-md-4 panel panel-default">
-        <div class="panel-heading">
-          <h4>Simple Conference room</h4>
-        </div>
-        <div class="panel-body">
-          <p>
-	        <em>This demo uses your API test account to create a video conference room. New users are displayed
-	          below your personnal video element.</em>
-	      </p>
-	      <hr>
-	      <ul>
-	        <li>Automatically fetch for video camera</li>
-          <li>Automatically connects to default Room</li>
-	        <li>Handle connection and disconnection of peers</li>
-	        <li>Unlimited number of stream</li>
-	        <li>No CSS</li>
-	      </ul>
-	      <div class="panel panel-info">
-            <div class="panel-heading">Difficulty</div>
-            <div class="progress" style="height:20px;margin:5px;">
-              <div class="progress-bar progress-bar-success"
-                role="progressbar" aria-valuenow="1" aria-valuemin="0" aria-valuemax="10" style="width:10%;">
-                Easy
-              </div>
-            </div>
+        <!-- column -->
+        <div class="col-md-4 panel panel-default">
+          <div class="panel-heading">
+            <h4>Simple Audio Conference room <br><small>(/audio-only-call)</small></h4>
           </div>
-	      
-	      <p>
-	        <a href="./simple-app/" class="btn btn-primary">View Demo</a>
-	      </p>
-	      
-        </div>
-      </div>
-      <!-------------------------------------------------------------->
-      
-      <!-------------------------------------------------------------->
-      <div class="col-md-4 panel panel-default">
-        <div class="panel-heading">
-          <h4>Connection Status</h4>
-        </div>
-        <div class="panel-body">
-          <p>
-          <em>This demo presents the different states a web real time communication can have.</em>
-        </p>
-        <hr>
-        <ul>
-          <li>Automatically connects to default Room</li>
-          <li>Handle connection and disconnection of peers</li>
-          <li>No CSS</li>
-        </ul>
-        <div class="panel panel-info">
-            <div class="panel-heading">Difficulty</div>
-            <div class="progress" style="height:20px;margin:5px;">
-              <div class="progress-bar progress-bar-success"
-                role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:20%;">
-                Easy
-              </div>
-            </div>
-          </div>
-        
-        <p>
-          <a href="./connection-status/index.html" class="btn btn-primary">View Demo</a>
-        </p>
-        </div>
-      </div>
-      <!-------------------------------------------------------------->
-      <!-------------------------------------------------------------->
-      <div class="col-md-4 panel panel-default">
-        <div class="panel-heading">
-          <h4>Messaging</h4>
-        </div>
-        <div class="panel-body">
-          <p>
-          <em>This demo presents the different possibilities to send messages with SkylinkJS.</em>
-        </p>
-        <hr>
-        <ul>
-          <li>Automatically connects to default Room</li>
-          <li>Handle connection and disconnection of peers</li>
-          <li>No CSS</li>
-        </ul>
-        <div class="panel panel-info">
-            <div class="panel-heading">Difficulty</div>
-            <div class="progress" style="height:20px;margin:5px;">
-              <div class="progress-bar progress-bar-success"
-                role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:20%;">
-                Easy
-              </div>
-            </div>
-          </div>
-        
-        <p>
-          <a href="./message-type/index.html" class="btn btn-primary">View Demo</a>
-        </p>
-        </div>
-      </div>
-      <!-------------------------------------------------------------->
-      </div>
-      <div class="row row-eq-height">
-      <!-------------------------------------------------------------->
-      <div class="col-md-4 panel panel-default">
-        <div class="panel-heading">
-          <h4>File Transfer</h4>
-        </div>
-        <div class="panel-body">
-          <p>
-          <em>This demo presents the different possibilities to send files with SkylinkJS.</em>
-        </p>
-        <hr>
-        <ul>
-          <li>Automatically connects to default Room</li>
-          <li>Handle connection and disconnection of peers</li>
-          <li>No CSS</li>
-        </ul>
-        <div class="panel panel-info">
-            <div class="panel-heading">Difficulty</div>
-            <div class="progress" style="height:20px;margin:5px;">
-              <div class="progress-bar progress-bar-success"
-                role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:20%;">
-                Easy
-              </div>
-            </div>
-          </div>
-        
-        <p>
-          <a href="./file-transfer/index.html" class="btn btn-primary">View Demo</a>
-        </p>
-        </div>
-      </div>
-      <!-------------------------------------------------------------->
-      
-      <!-------------------------------------------------------------->
-      <div class="col-md-4 panel panel-default">
-        <div class="panel-heading">
-          <h4>Chat room</h4>
-        </div>
-        <div class="panel-body">
-          <p>
-          <em>This demo presents an IRC like chat powered by SkylinkJS.</em>
-        </p>
-        <hr>
-        <ul>
-          <li>Automatically connects to default Room</li>
-          <li>Handle connection and disconnection of peers</li>
-        </ul>
-        <div class="panel panel-info">
-            <div class="panel-heading">Difficulty</div>
-            <div class="progress" style="height:20px;margin:5px;">
-              <div class="progress-bar progress-bar-success"
-                role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:30%;">
-                Easy
-              </div>
-            </div>
-          </div>
-        <p>
-          <a href="./chat-room/index.html" class="btn btn-primary">View Demo</a>
-        </p>
-        </div>
-      </div>
-      <!-------------------------------------------------------------->
-      <!-------------------------------------------------------------->
-      <div class="col-md-4 panel panel-default">
-        <div class="panel-heading">
-          <h4>Jumbotron Demo</h4>
-        </div>
-        <div class="panel-body">
-          <p>
-          <em>This demo shows how to focus on one video in a conference demo. It allows to send
-            private secure message and files.</em>
-        </p>
-        <hr>
-        <ul>
-          <li>Automatically fetch for audio and video</li>
-          <li>Automatically connects to default Room</li>
-          <li>Handle connection and disconnection of peers</li>
-          <li>Unlimited number of stream</li>
-          <li>Manage incoming and external flow</li>
-        </ul>
-        <div class="panel panel-info">
-          <div class="panel-heading">Difficulty</div>
-          <div class="progress" style="height:20px;margin:5px;">
-            <div class="progress-bar progress-bar-info"
-              role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:40%;">
-              Medium
-            </div>
-          </div>
-        </div>
-        
-        <p>
-          <a href="./datachannel/index.html" class="btn btn-primary">View Demo</a>
-        </p>
-        </div>
-      </div>
-      <!-------------------------------------------------------------->
-      </div>
-      <div class="row row-eq-height">
-      <!-------------------------------------------------------------->
-      <div class="col-md-4 panel panel-default">
-        <div class="panel-heading">
-          <h4>Gridster Webrtc</h4>
-        </div>
-        <div class="panel-body">
-          <p>
-          <em>This demo presents the possibilities using another third party library:
-            <a hrer="http://gridster.net/">Gridster</a>. 
-            It is an advanced version of the Jumbotron Demo.</em>
-        </p>
-        <hr>
-        <ul>
-          <li>Automatically fetch for audio and video</li>
-          <li>Automatically connects to default Room</li>
-          <li>Handle connection and disconnection of peers</li>
-          <li>Unlimited number of stream</li>
-          <li>Drag and Drop users</li>
-        </ul>
-        <div class="panel panel-info">
-          <div class="panel-heading">Difficulty</div>
-          <div class="progress" style="height:20px;margin:5px;">
-            <div class="progress-bar progress-bar-info"
-              role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:50%;">
-              Medium
-            </div>
-          </div>
-        </div>
-        
-        <p>
-          <a href="./gridster-integration/index.html" class="btn btn-primary">View Demo</a>
-        </p>
-        </div>
-      </div>
-      <!-------------------------------------------------------------->
-      <div class="col-md-4 panel panel-default">
-        <div class="panel-heading">
-          <h4>Privileged use case</h4>
-        </div>
-        <div class="panel-body">
-          <p>
-          <em>This demo presents the use of privileged concept</em>
-        </p>
-        <hr>
-        <ul>
-          <li>Retrieve list of unprivileged peers under the same realm</li>
-          <li>Retrieve list of all peers under the same realm</li>
-          <li>Introduce peers together</li>
-          <li>Customize whether peer is autoIntroduce / isPrivileged through dev console</li>
-        </ul>
-        <div class="panel panel-info">
-          <div class="panel-heading">Difficulty</div>
-          <div class="progress" style="height:20px;margin:5px;">
-            <div class="progress-bar progress-bar-warning"
-              role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:80%;">
-              Hard
-            </div>
-          </div>
-        </div>
-        
-        <p>
-          <a href="./privileged/index.html" class="btn btn-primary">View Demo</a>
-        </p>
-        </div>
-      </div>
-      <!-------------------------------------------------------------->
-      <div class="col-md-4 panel panel-default">
-        <div class="panel-heading">
-          <h4>Demo</h4>
-            </div>
-            <div class="panel-body">
-              <p>
-                <em>This demo shows you most of the functionality SkylinkJS can provide.</em>
-                All the states and information provided by the API are displayed.
-              </p>
-              <hr>
-              <ul>
-                <li>Automatically fetch for cam</li>
-                <li>Automatically connects to default Room</li>
-                <li>Handle connection and disconnection of peers</li>
-                <li>With list of users in room</li>
-                <li>Feedback on channel status</li>
-                <li>Feedback on handshake and Connection</li>
-                <li>File sharing features using DataChannel</li>
-                <li>Chat via Signaling or DataChannel</li>
-                <li>Users to update their own Display Name and add custom information</li>
-                <li>Muting of Audio/Video</li>
-                <li>Locking and Unlocking of Room</li>
-              </ul>
-              <div class="panel panel-info">
-                <div class="panel-heading">Difficulty</div>
-                <div class="progress" style="height:20px;margin:5px;">
-                  <div class="progress-bar progress-bar-warning"
-                    role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:80%;">
-                    Hard
-                  </div>
+          <div class="panel-body">
+            <p>
+              <em>This demo uses your API test account to create a audio conference room. New users are displayed
+                beside your personnal video element.</em>
+            </p>
+            <hr>
+            <ul>
+              <li>Automatically fetch for microphone</li>
+              <li>Automatically connects to default Room</li>
+              <li>Handle connection and disconnection of peers</li>
+              <li>Unlimited number of stream</li>
+              <li>No CSS</li>
+            </ul>
+            <div class="panel panel-info">
+              <div class="panel-heading">Difficulty</div>
+              <div class="progress" style="height:20px;margin:5px;">
+                <div class="progress-bar progress-bar-success"
+                  role="progressbar" aria-valuenow="1" aria-valuemin="0" aria-valuemax="10" style="width:10%;">
+                  Easy
                 </div>
               </div>
-              <p>
-                <a href="./app/" class="btn btn-primary">View Demo</a>
-              </p>
+            </div>
+            <p>
+              <a href="./audio-only-call/" class="btn btn-primary">View Demo</a>
+            </p>
           </div>
         </div>
-      <!-------------------------------------------------------------->
+        <!-- column -->
+        <div class="col-md-4 panel panel-default">
+          <div class="panel-heading">
+            <h4>Simple Video Conference room <br><small>(/video-call)</small></h4>
+          </div>
+          <div class="panel-body">
+            <p>
+              <em>This demo uses your API test account to create a video conference room. New users are displayed
+                below your personnal video element.</em>
+            </p>
+            <hr>
+            <ul>
+              <li>Automatically fetch for video camera</li>
+              <li>Automatically connects to default Room</li>
+              <li>Handle connection and disconnection of peers</li>
+              <li>Unlimited number of stream</li>
+              <li>No CSS</li>
+            </ul>
+            <div class="panel panel-info">
+              <div class="panel-heading">Difficulty</div>
+              <div class="progress" style="height:20px;margin:5px;">
+                <div class="progress-bar progress-bar-success"
+                  role="progressbar" aria-valuenow="1" aria-valuemin="0" aria-valuemax="10" style="width:15%;">
+                  Easy
+                </div>
+              </div>
+            </div>
+
+            <p>
+              <a href="./video-call/" class="btn btn-primary">View Demo</a>
+            </p>
+          </div>
+        </div>
+        <!-- column -->
+        <div class="col-md-4 panel panel-default">
+          <div class="panel-heading">
+            <h4>Messaging <br><small>(/messaging)</small></h4>
+          </div>
+          <div class="panel-body">
+            <p>
+              <em>This demo presents the different possibilities to send messages with SkylinkJS.</em>
+            </p>
+            <hr>
+            <ul>
+              <li>Automatically connects to default Room</li>
+              <li>Handle connection and disconnection of peers</li>
+              <li>No CSS</li>
+            </ul>
+            <div class="panel panel-info">
+              <div class="panel-heading">Difficulty</div>
+              <div class="progress" style="height:20px;margin:5px;">
+                <div class="progress-bar progress-bar-success"
+                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:20%;">
+                  Easy
+                </div>
+              </div>
+            </div>
+            <p>
+              <a href="./messaging" class="btn btn-primary">View Demo</a>
+            </p>
+          </div>
+        </div>
+      </div>
+      <!-- row -->
+      <div class="row row-eq-height">
+        <!-- column -->
+        <div class="col-md-4 panel panel-default">
+          <div class="panel-heading">
+            <h4>Streams <br><small>(/stream-settings)</small></h4>
+          </div>
+          <div class="panel-body">
+            <p>
+              <em>This demo presents the overview of all types of stream settings you can use to join a room.</em>
+            </p>
+            <hr>
+            <ul>
+              <li>Automatically connects to default Room</li>
+              <li>No CSS</li>
+            </ul>
+            <div class="panel panel-info">
+              <div class="panel-heading">Difficulty</div>
+              <div class="progress" style="height:20px;margin:5px;">
+                <div class="progress-bar progress-bar-success"
+                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:20%;">
+                  Easy
+                </div>
+              </div>
+            </div>
+            <p>
+              <a href="./connection-status" class="btn btn-primary">View Demo</a>
+            </p>
+          </div>
+        </div>
+        <!-- column -->
+        <div class="col-md-4 panel panel-default">
+          <div class="panel-heading">
+            <h4>Connection Status <br><small>(/connection-status)</small></h4>
+          </div>
+          <div class="panel-body">
+            <p>
+              <em>This demo presents the different states a web real time communication can have.</em>
+            </p>
+            <hr>
+            <ul>
+              <li>Automatically connects to default Room</li>
+              <li>Handle connection and disconnection of peers</li>
+              <li>No CSS</li>
+            </ul>
+            <div class="panel panel-info">
+              <div class="panel-heading">Difficulty</div>
+              <div class="progress" style="height:20px;margin:5px;">
+                <div class="progress-bar progress-bar-success"
+                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:20%;">
+                  Easy
+                </div>
+              </div>
+            </div>
+            <p>
+              <a href="./connection-status" class="btn btn-primary">View Demo</a>
+            </p>
+          </div>
+        </div>
+        <!-- column -->
+        <div class="col-md-4 panel panel-default">
+          <div class="panel-heading">
+            <h4>File Transfer <br><small>(/file-transfer)</small></h4>
+          </div>
+          <div class="panel-body">
+            <p>
+              <em>This demo presents the different possibilities to send files with SkylinkJS.</em>
+            </p>
+            <hr>
+            <ul>
+              <li>Automatically connects to default Room</li>
+              <li>Handle connection and disconnection of peers</li>
+              <li>No CSS</li>
+            </ul>
+            <div class="panel panel-info">
+              <div class="panel-heading">Difficulty</div>
+              <div class="progress" style="height:20px;margin:5px;">
+                <div class="progress-bar progress-bar-success"
+                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:20%;">
+                  Easy
+                </div>
+              </div>
+            </div>
+            <p>
+              <a href="./file-transfer" class="btn btn-primary">View Demo</a>
+            </p>
+          </div>
+        </div>
+      </div>
+      <!-- row -->
+      <div class="row row-eq-height">
+        <!-- column -->
+        <div class="col-md-4 panel panel-default">
+          <div class="panel-heading">
+            <h4>Chat room <br><small>(/chat-room)</small></h4>
+          </div>
+          <div class="panel-body">
+            <p>
+              <em>This demo presents an IRC like chat powered by SkylinkJS.</em>
+            </p>
+            <hr>
+            <ul>
+              <li>Automatically connects to default Room</li>
+              <li>Handle connection and disconnection of peers</li>
+            </ul>
+            <div class="panel panel-info">
+              <div class="panel-heading">Difficulty</div>
+              <div class="progress" style="height:20px;margin:5px;">
+                <div class="progress-bar progress-bar-success"
+                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:30%;">
+                  Easy
+                </div>
+              </div>
+            </div>
+            <p>
+              <a href="./chat-room" class="btn btn-primary">View Demo</a>
+            </p>
+          </div>
+        </div>
+        <!-- column -->
+        <div class="col-md-4 panel panel-default">
+          <div class="panel-heading">
+            <h4>Click-to-call Lobby <br><small>(/request-call)</small></h4>
+          </div>
+          <div class="panel-body">
+            <p>
+              <em>This demo presents the use-case to stimulate a call-like environment with SkylinkJS.</em>
+            </p>
+            <hr>
+            <ul>
+              <li>Automatically connects to default Room (lobby)</li>
+              <li>Handle connection and disconnection of peers</li>
+              <li>Connects user to the individual room when call is selected</li>
+              <li>No CSS</li>
+            </ul>
+            <div class="panel panel-info">
+              <div class="panel-heading">Difficulty</div>
+              <div class="progress" style="height:20px;margin:5px;">
+                <div class="progress-bar progress-bar-success"
+                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:35%;">
+                  Easy
+                </div>
+              </div>
+            </div>
+            <p>
+              <a href="./file-transfer" class="btn btn-primary">View Demo</a>
+            </p>
+          </div>
+        </div>
+        <!-- column -->
+        <div class="col-md-4 panel panel-default">
+          <div class="panel-heading">
+            <h4>Agent-client Call-center - Privileged use case <br><small>(/privileged)</small></h4>
+          </div>
+          <div class="panel-body">
+            <p>
+              <em>This demo presents the use of privileged concept</em>
+            </p>
+            <hr>
+            <ul>
+              <li>Retrieve list of unprivileged peers under the same realm</li>
+              <li>Retrieve list of all peers under the same realm</li>
+              <li>Introduce peers together</li>
+              <li>Customize whether peer is autoIntroduce / isPrivileged through dev console</li>
+            </ul>
+            <div class="panel panel-info">
+              <div class="panel-heading">Difficulty</div>
+              <div class="progress" style="height:20px;margin:5px;">
+                <div class="progress-bar progress-bar-warning"
+                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:80%;">
+                  Hard
+                </div>
+              </div>
+            </div>
+            <p>
+              <a href="./privileged/index.html" class="btn btn-primary">View Demo</a>
+            </p>
+          </div>
+        </div>
+      </div>
+      <!-- row -->
+      <div class="row row-eq-height">
+        <!-- column -->
+        <div class="col-md-5 panel panel-default">
+          <div class="panel-heading">
+            <h4>Gridster UI Integration <br><small>(/gridster-integration)</small></h4>
+          </div>
+          <div class="panel-body">
+            <p>
+              <em>
+                This demo presents the possibilities using another third party library:
+                <a hrer="http://gridster.net/">Gridster</a>.
+                It is an advanced version of the Jumbotron Demo.
+              </em>
+            </p>
+            <hr>
+            <ul>
+              <li>Automatically fetch for audio and video</li>
+              <li>Automatically connects to default Room</li>
+              <li>Handle connection and disconnection of peers</li>
+              <li>Unlimited number of stream</li>
+              <li>Drag and Drop users</li>
+            </ul>
+            <div class="panel panel-info">
+              <div class="panel-heading">Difficulty</div>
+              <div class="progress" style="height:20px;margin:5px;">
+                <div class="progress-bar progress-bar-info"
+                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:50%;">
+                  Medium
+                </div>
+              </div>
+            </div>
+            <p>
+              <a href="./gridster-integration" class="btn btn-primary">View Demo</a>
+            </p>
+          </div>
+        </div>
+        <!-- column -->
+        <div class="col-md-7 panel panel-default">
+          <div class="panel-heading">
+            <h4>Demo <br><small>(/app)</small></h4>
+          </div>
+          <div class="panel-body">
+            <p>
+              <em>This demo shows you most of the functionality SkylinkJS can provide.</em>
+              All the states and information provided by the API are displayed.
+            </p>
+            <hr>
+            <ul>
+              <li>Automatically fetch for cam</li>
+              <li>Automatically connects to default Room</li>
+              <li>Handle connection and disconnection of peers</li>
+              <li>With list of users in room</li>
+              <li>Feedback on channel status</li>
+              <li>Feedback on handshake and Connection</li>
+              <li>File sharing features using DataChannel</li>
+              <li>Chat via Signaling or DataChannel</li>
+              <li>Users to update their own Display Name and add custom information</li>
+              <li>Muting of Audio/Video</li>
+              <li>Locking and Unlocking of Room</li>
+            </ul>
+            <div class="panel panel-info">
+              <div class="panel-heading">Difficulty</div>
+              <div class="progress" style="height:20px;margin:5px;">
+                <div class="progress-bar progress-bar-warning"
+                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:80%;">
+                  Hard
+                </div>
+              </div>
+            </div>
+            <p>
+              <a href="./app" class="btn btn-primary">View Demo</a>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
