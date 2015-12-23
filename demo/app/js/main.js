@@ -675,7 +675,7 @@ $(document).ready(function () {
 });
 
 
-/*(function(){
+(function(){
 
   var data = {};
   //window.candidatesCounter = {};
@@ -693,11 +693,11 @@ $(document).ready(function () {
   });
 
   Demo.Skylink.on('iceConnectionState', function (state, peerId) {
-    if (state === 'completed') {
-      //setTimeout(function () {
+    if (state === 'connected') {
+      setTimeout(function () {
         Demo.Skylink._restartPeerConnection(peerId, true, false, null, true);
-      //}, 500);
+      }, 1);
     }
   });
 
-})();*/
+})();

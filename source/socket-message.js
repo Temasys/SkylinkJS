@@ -670,11 +670,21 @@ Skylink.prototype._inRoomHandler = function(message) {
   } else if (self._mediaStream && self._mediaStream !== null) {
     self._trigger('incomingStream', self._user.sid, self._mediaStream, true, self.getPeerInfo());
   }
+
+  // Define the peer priority weight
+  self._peerPriorityWeight = (new Date()).getTime();
+
+  if (typeof message.tieBreaker === 'number') {
+    self._peerPriorityWeight = message.tieBreaker;
+  }
+
   // NOTE ALEX: should we wait for local streams?
   // or just go with what we have (if no stream, then one way?)
   // do we hardcode the logic here, or give the flexibility?
   // It would be better to separate, do we could choose with whom
   // we want to communicate, instead of connecting automatically to all.
+
+  // NOTE: should we actually start sending weights in the ENTER messages instead?
   self._sendChannelMessage({
     type: self._SIG_MESSAGE_TYPE.ENTER,
     mid: self._user.sid,
@@ -788,6 +798,7 @@ Skylink.prototype._enterHandler = function(message) {
     version: message.version,
     os: message.os
   }, false, false, message.receiveOnly, message.sessionType === 'screensharing');
+  // add the peer information
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
     name: message.agent,
@@ -806,8 +817,6 @@ Skylink.prototype._enterHandler = function(message) {
 
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
 
-  var weight = (new Date()).valueOf();
-  self._peerHSPriorities[targetMid] = weight;
   self._sendChannelMessage({
     type: self._SIG_MESSAGE_TYPE.WELCOME,
     mid: self._user.sid,
@@ -821,7 +830,7 @@ Skylink.prototype._enterHandler = function(message) {
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     target: targetMid,
-    weight: weight,
+    weight: self._peerPriorityWeight,
     sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
   });
 
@@ -995,9 +1004,9 @@ Skylink.prototype._restartHandler = function(message){
     log.debug([targetMid, 'RTCPeerConnection', null, 'Restarting as offerer as peer cannot be offerer'], agent);
     beOfferer = true;
   } else {
-    // Checks if weight is higher than peer's weight
-    // If higher, always do the restart mechanism
-    if (self._peerRestartWeight > message.weight) {
+    // Checks if weight is lesser than peer's weight
+    // If lesser, always do the restart mechanism (to follow welcome weight checking logic)
+    if (self._peerPriorityWeight < message.weight) {
       beOfferer = true;
     }
   }
@@ -1124,10 +1133,14 @@ Skylink.prototype._welcomeHandler = function(message) {
   log.log([targetMid, null, message.type, 'Received peer\'s response ' +
     'to handshake initiation. Peer\'s information:'], message.userInfo);
 
+  // check if peer connection for this peer exists first
   if (this._peerConnections[targetMid]) {
+    // if this peer exists but does not have any offer present (conflict in weights)
+    // or weight is lesser than 0 (this means a hard restart)
     if (!this._peerConnections[targetMid].setOffer || message.weight < 0) {
+      // If weight is lesser than 0 (hard restart case)
       if (message.weight < 0) {
-        log.log([targetMid, null, message.type, 'Peer\'s weight is lower ' +
+        log.log([targetMid, null, message.type, 'Peer\'s configured weight is lower ' +
           'than 0. Proceeding with offer'], message.weight);
         restartConn = true;
 
@@ -1136,19 +1149,21 @@ Skylink.prototype._welcomeHandler = function(message) {
           this._restartHandler(message);
           return;
         }
-
-      } else if (this._peerHSPriorities[targetMid] > message.weight) {
-        log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
+      // Else check if HS priority is bigger. If bigger, return and let the other peer
+      // do the offer
+      } else if (this._peerPriorityWeight > message.weight) {
+        log.log([targetMid, null, message.type, 'Peer\'s priority weight ' +
           'is lesser than user\'s. Ignoring message'
-          ], this._peerHSPriorities[targetMid] + ' > ' + message.weight);
+          ], this._peerPriorityWeight + ' > ' + message.weight);
         return;
-
+      // Else we proceed to handshake
       } else {
-        log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
+        log.log([targetMid, null, message.type, 'Peer\'s priority weight ' +
           'is higher than user\'s. Proceeding with offer'
-          ], this._peerHSPriorities[targetMid] + ' < ' + message.weight);
+          ], this._peerPriorityWeight + ' < ' + message.weight);
         restartConn = true;
       }
+    // discard message
     } else {
       log.warn([targetMid, null, message.type,
         'Ignoring message as peer is already added']);
@@ -1388,9 +1403,10 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   // This should be the state after offer is received. or even after negotiation is successful
-  if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
+  if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER &&
+    pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
     log.warn([targetMid, null, message.type, 'Peer connection state is not in ' +
-      '"have-local-offer" state for re-negotiation. Dropping message.'], pc.signalingState);
+      '"have-local-offer" or "stable" state for re-negotiation. Dropping message.'], pc.signalingState);
     return;
   }
 

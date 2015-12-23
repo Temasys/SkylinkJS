@@ -91,17 +91,6 @@ Skylink.prototype._retryCount = 0;
 Skylink.prototype._peerConnections = {};
 
 /**
- * Stores the fixed weight for restart mechanism
- * @attribute _peerRestartWeight
- * @type Number
- * @private
- * @required
- * @for Skylink
- * @since 0.6.0
- */
-Skylink.prototype._peerRestartWeight = Date.now();
-
-/**
  * Connects to the Peer.
  * @method _addPeer
  * @param {String} targetMid The Peer ID to connect to.
@@ -134,8 +123,6 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
     receiveOnly: receiveOnly,
     enableDataChannel: self._enableDataChannel
   });
-
-  log.info('Adding peer', isSS);
 
   if (!restartConn) {
     self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS);
@@ -274,7 +261,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         target: peerId,
         isConnectionRestart: !!isConnectionRestart,
         lastRestart: lastRestart,
-        weight: self._peerRestartWeight,
+        weight: self._peerPriorityWeight,
         receiveOnly: self._peerConnections[peerId].receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
@@ -384,11 +371,7 @@ Skylink.prototype._removePeer = function(peerId) {
 
     delete this._peerConnections[peerId];
   }
-
-  // check the handshake priorities and remove them accordingly
-  if (typeof this._peerHSPriorities[peerId] !== 'undefined') {
-    delete this._peerHSPriorities[peerId];
-  }
+  // remove the peer informations object for this peer
   if (typeof this._peerInformations[peerId] !== 'undefined') {
     delete this._peerInformations[peerId];
   }
@@ -824,7 +807,9 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         target: peerId, //'MCU',
         isConnectionRestart: false,
         lastRestart: lastRestart,
-        weight: self._peerRestartWeight,
+        // don't worry about the weight for MCU case, since it just ignores
+        // after triggering the peerRestart event on peer's end
+        weight: self._peerPriorityWeight,
         receiveOnly: receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,

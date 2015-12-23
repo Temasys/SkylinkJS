@@ -138,28 +138,16 @@ Skylink.prototype._peerConnectionHealthTimers = {};
 Skylink.prototype._peerConnectionHealth = {};
 
 /**
- * Stores the list of Peer handshake connection weights.
- * This is implemented to prevent the conflict of sending <code>WELCOME</code>
- *   to peer and receiving <code>WELCOME</code> from peer at the same time.
- * To handle this event, both self and the peer has to generate a weight initially.
- * Then in the {{#crossLink "Skylink/_welcomeHandler:attr"}}_welcomeHandler(){{/crossLink}}
- *   when conflict <code>WELCOME</code> message is received, the handler woudl check
- *   if there is already an existing Peer connection object with the peer (due
- *   to the initialisation in the received <code>ENTER</code>). If so the handler would
- *   then compare the received weight if it is higher than the weight generated for this peer.
- * The one with the highest weight would have the "priority" to initiate the WebRTC layer of
- *   handshake and start sending the <code>OFFER</code> session description.
- * @attribute _peerHSPriorities
- * @param {Number} (#peerId) The generated weight for associated Peer peer.
- *   The weight is generated with <code>Date.getTime()</code>.
- * @param
- * @type JSON
+ * Stores the peer fixed priority weight.
+ * Whoever is the smallest would be the offerer always
+ * @attribute _peerPriorityWeight
+ * @type Number
  * @private
- * @required
+ * @component Peer
  * @for Skylink
- * @since 0.5.0
+ * @since 0.6.6
  */
-Skylink.prototype._peerHSPriorities = {};
+Skylink.prototype._peerPriorityWeight = 0;
 
 /**
  * Starts to initiate the WebRTC layer of handshake connection by
