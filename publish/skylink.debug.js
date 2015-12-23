@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.4 - Wed Dec 23 2015 21:42:10 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.4 - Thu Dec 24 2015 00:54:40 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3962,11 +3962,29 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
   }
 };
 
+/**
+ * Recreates a peer connection.
+ * This is the fallback restart mechanism for other platforms.
+ * @method _restartPeerConnection
+ * @param {String} peerId The Peer ID to recreate the connection with.
+ * @private
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.6
+ */
 Skylink.prototype._recreatePeerConnection = function (peerId) {
   var self = this;
-  // get the value of receiveOnly
-  log.log([peerId, null, null, 'Restarting a peer connection']);
 
+  if (!self._peerConnections[peerId]) {
+    log.error([peerId, null, null, 'Peer does not have an existing ' +
+      'connection. Unable to recreate connection']);
+    return;
+  }
+
+  // get the value of receiveOnly
+  log.log([peerId, null, null, 'Recreating a peer connection']);
+
+   // get the value of receiveOnly
   var receiveOnly = self._peerConnections[peerId] ?
     !!self._peerConnections[peerId].receiveOnly : false;
   var hasScreenSharing = self._peerConnections[peerId] ?
@@ -3977,6 +3995,11 @@ Skylink.prototype._recreatePeerConnection = function (peerId) {
   var peerConnectionStateClosed = false;
   var dataChannelStateClosed = !self._enableDataChannel;
 
+  delete self._peerConnectionHealth[peerId];
+  delete self._peerRestartPriorities[peerId];
+
+  self._stopPeerConnectionHealthCheck(peerId);
+
   if (self._peerConnections[peerId].signalingState !== 'closed') {
     self._peerConnections[peerId].close();
   }
@@ -3985,15 +4008,20 @@ Skylink.prototype._recreatePeerConnection = function (peerId) {
     self._trigger('streamEnded', peerId, self.getPeerInfo(peerId), false);
   }
 
-  //self._peerConnections[peerId].dataChannelClosed = true;
+  self._peerConnections[peerId].dataChannelClosed = true;
 
   delete self._peerConnections[peerId];
+
+  log.log([peerId, null, null, 'Re-creating peer connection']);
+
   self._peerConnections[peerId] = self._createPeerConnection(peerId, !!hasScreenSharing);
 
   if (self._peerConnections[peerId]){
     self._peerConnections[peerId].receiveOnly = receiveOnly;
     self._peerConnections[peerId].hasScreen = hasScreenSharing;
   }
+
+  return self._peerConnections[peerId];
 };
 
 /**
@@ -4035,6 +4063,26 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   self._stopPeerConnectionHealthCheck(peerId);
 
   var pc = self._peerConnections[peerId];
+
+  var agent = (self.getPeerInfo(peerId) || {}).agent;
+
+  // fallback to older versions for mobile users
+  if (['Android', 'iOS'].indexOf(agent.name) > -1) {
+    pc = self._recreatePeerConnection(peerId);
+
+    if (!pc) {
+      var noConnObjError = 'Failed restarting (fallback) with mobile SDKs as peer connection object is not defined';
+      log.error([peerId, 'RTCPeerConnection', null, noConnObjError], {
+          localDescription: pc.localDescription,
+          remoteDescription: pc.remoteDescription
+      });
+      if (typeof callback === 'function') {
+        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart failure callback']);
+        callback(null, new Error(noConnObjError));
+      }
+      return;
+    }
+  }
 
   // This is when the state is stable and re-handshaking is possible
   // This could be due to previous connection handshaking that is already done
@@ -5071,6 +5119,12 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
     (toOffer ? 12500 : 10000) : 50000;
   timer = (self._hasMCU) ? 105000 : timer;
 
+  // increase timeout for android/ios
+  /*var agent = self.getPeerInfo(peerId).agent;
+  if (['Android', 'iOS'].indexOf(agent.name) > -1) {
+    timer = 105000;
+  }*/
+
   timer += self._retryCount*10000;
 
   log.log([peerId, 'PeerConnectionHealth', null,
@@ -5490,6 +5544,22 @@ Skylink.prototype.introducePeer = function(sendingPeerId, receivingPeerId){
 };
 
 
+var Peer = function (options) {
+
+  this.id = '';
+
+  this.agent = {
+
+  };
+
+  this.userData = '';
+
+  this.settings = {};
+};
+
+Peer.prototype._doOffer = function () {
+
+};
 Skylink.prototype.SYSTEM_ACTION = {
   WARNING: 'warning',
   REJECT: 'reject'

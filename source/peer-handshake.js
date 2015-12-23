@@ -311,6 +311,12 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
     (toOffer ? 12500 : 10000) : 50000;
   timer = (self._hasMCU) ? 105000 : timer;
 
+  // increase timeout for android/ios
+  /*var agent = self.getPeerInfo(peerId).agent;
+  if (['Android', 'iOS'].indexOf(agent.name) > -1) {
+    timer = 105000;
+  }*/
+
   timer += self._retryCount*10000;
 
   log.log([peerId, 'PeerConnectionHealth', null,
