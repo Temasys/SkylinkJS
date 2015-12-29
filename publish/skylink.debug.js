@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.6 - Tue Dec 29 2015 16:24:15 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.6 - Tue Dec 29 2015 17:19:06 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13506,7 +13506,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     return;
   }
 
-  if (window.location.protocol !== 'https:' && window.webrtcDetectedBrowser === 'chrome' &&
+  /*if (window.location.protocol !== 'https:' && window.webrtcDetectedBrowser === 'chrome' &&
     window.webrtcDetectedVersion > 46) {
     errorMsg = 'getUserMedia() has to be called in https:// application';
     log.error(errorMsg, options);
@@ -13514,7 +13514,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
       callback(new Error(errorMsg), null);
     }
     return;
-  }
+  }*/
 
   // parse stream settings
   self._parseMediaStreamSettings(options);
