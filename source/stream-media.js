@@ -1590,7 +1590,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     return;
   }
 
-  if (window.location.protocol !== 'https:' && window.webrtcDetectedBrowser === 'chrome' &&
+  /*if (window.location.protocol !== 'https:' && window.webrtcDetectedBrowser === 'chrome' &&
     window.webrtcDetectedVersion > 46) {
     errorMsg = 'getUserMedia() has to be called in https:// application';
     log.error(errorMsg, options);
@@ -1598,7 +1598,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
       callback(new Error(errorMsg), null);
     }
     return;
-  }
+  }*/
 
   // parse stream settings
   self._parseMediaStreamSettings(options);

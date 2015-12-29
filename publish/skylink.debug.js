@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.6 - Thu Dec 24 2015 05:19:17 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.7 - Tue Dec 29 2015 17:43:23 GMT+0800 (SGT) */
 
 (function() {
 
@@ -188,7 +188,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.1.0
    */
-  this.VERSION = '0.6.6';
+  this.VERSION = '0.6.7';
 
   /**
    * Helper function that generates an Unique ID (UUID) string.
@@ -11546,11 +11546,18 @@ Skylink.prototype._welcomeHandler = function(message) {
       ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
     this._hasMCU = true;
     this._trigger('serverPeerJoined', targetMid, this.SERVER_PEER_TYPE.MCU);
+    log.log([targetMid, null, message.type, 'Always setting as offerer because peer is MCU']);
+    beOfferer = true;
   } else {
     // if it is not MCU and P2P make sure that beOfferer is false for firefox -> chrome/opera/ie/safari
     if (window.webrtcDetectedBrowser === 'firefox' && message.agent !== 'firefox') {
       beOfferer = false;
     }
+  }
+
+  if (this._hasMCU) {
+    log.log([targetMid, null, message.type, 'Always setting as offerer because MCU is present']);
+    beOfferer = true;
   }
 
   if (!this._peerInformations[targetMid]) {
@@ -13500,7 +13507,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     return;
   }
 
-  if (window.location.protocol !== 'https:' && window.webrtcDetectedBrowser === 'chrome' &&
+  /*if (window.location.protocol !== 'https:' && window.webrtcDetectedBrowser === 'chrome' &&
     window.webrtcDetectedVersion > 46) {
     errorMsg = 'getUserMedia() has to be called in https:// application';
     log.error(errorMsg, options);
@@ -13508,7 +13515,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
       callback(new Error(errorMsg), null);
     }
     return;
-  }
+  }*/
 
   // parse stream settings
   self._parseMediaStreamSettings(options);

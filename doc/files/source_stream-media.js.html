@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.6</title>
+    <title>SkylinkJS 0.6.7</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.6</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.7</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -1673,7 +1673,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     return;
   }
 
-  if (window.location.protocol !== &#x27;https:&#x27; &amp;&amp; window.webrtcDetectedBrowser === &#x27;chrome&#x27; &amp;&amp;
+  /*if (window.location.protocol !== &#x27;https:&#x27; &amp;&amp; window.webrtcDetectedBrowser === &#x27;chrome&#x27; &amp;&amp;
     window.webrtcDetectedVersion &gt; 46) {
     errorMsg = &#x27;getUserMedia() has to be called in https:// application&#x27;;
     log.error(errorMsg, options);
@@ -1681,7 +1681,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
       callback(new Error(errorMsg), null);
     }
     return;
-  }
+  }*/
 
   // parse stream settings
   self._parseMediaStreamSettings(options);
