@@ -42,7 +42,7 @@ You can raise tickets on [http://support.temasys.com.sg) our support portal or o
 ##### Current versions and stability
 Always use the latest versions of the SkylinkJS library as WebRTC is still evolving and we adapt to changes very frequently.
 
-[Latest version: 0.6.6](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.6).
+[Latest version: 0.6.7](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.7).
 
 #### Noted Issues and Solutions
 
@@ -62,12 +62,6 @@ sw.on('readyStateChange', function (state) {
      sw.joinRoom('name');
   }
 });
-```
-
-##### Issues faced with script encoding
-If you are facing any encoding issues, it is recommended for you to add the `charset` property to the `<script>` element referencing our code. The encoding to use is `UTF-8`.
-```
-<script src="//cdn.temasys.com.sg/skylink/skylinkjs/latest/skylink.complete.min.js" charset="UTF-8"></script>
 ```
 
 ## How to build your own SkylinkJS
