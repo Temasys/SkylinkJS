@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.7 - Tue Dec 29 2015 17:34:29 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.7 - Tue Dec 29 2015 17:38:22 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11546,17 +11546,11 @@ Skylink.prototype._welcomeHandler = function(message) {
       ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
     this._hasMCU = true;
     this._trigger('serverPeerJoined', targetMid, this.SERVER_PEER_TYPE.MCU);
-    beOfferer = true;
   } else {
     // if it is not MCU and P2P make sure that beOfferer is false for firefox -> chrome/opera/ie/safari
     if (window.webrtcDetectedBrowser === 'firefox' && message.agent !== 'firefox') {
       beOfferer = false;
     }
-  }
-
-  if (this._hasMCU) {
-    log.log([targetMid, null, message.type, 'Always setting as offerer because MCU is present']);
-    beOfferer = true;
   }
 
   if (!this._peerInformations[targetMid]) {
