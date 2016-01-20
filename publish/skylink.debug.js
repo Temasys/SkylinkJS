@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.8 - Wed Jan 20 2016 16:51:53 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.8 - Wed Jan 20 2016 16:59:58 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11546,6 +11546,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
     this._hasMCU = true;
     this._trigger('serverPeerJoined', targetMid, this.SERVER_PEER_TYPE.MCU);
+    log.log([targetMid, null, message.type, 'Always setting as offerer because peer is MCU']);
     beOfferer = true;
   } else {
     // if it is not MCU and P2P make sure that beOfferer is false for firefox -> chrome/opera/ie/safari
