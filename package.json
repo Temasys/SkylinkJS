@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "socket.io-client": "1.3.7",
-    "adapterjs": "0.12.3"
+    "adapterjs": "0.13.0"
   },
   "devDependencies": {
     "connect": "2.x.x",
