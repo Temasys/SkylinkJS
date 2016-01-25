@@ -32,7 +32,7 @@ SkylinkDemo.on('dataTransferState', function(state, transferId, peerId, transfer
     case SkylinkDemo.DATA_TRANSFER_STATE.UPLOAD_REQUEST:
       var result = confirm('Incoming transfer request!\n\nFile: ' + transferInfo.name +
         '\n\nSize: ' + transferInfo.size + '\n\nAccept?');
-      SkylinkDemo.respondBlobRequest(peerId, transferId, result);
+      SkylinkDemo.acceptDataTransfer(peerId, transferId, result);
       break;
     case SkylinkDemo.DATA_TRANSFER_STATE.UPLOAD_STARTED:
       addMessage('You\'ve sent a file: ' + transferInfo.name);
