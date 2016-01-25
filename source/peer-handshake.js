@@ -194,7 +194,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
     unifiedOfferConstraints.mandatory.iceRestart = true;
     peerBrowser.os = peerBrowser.os || '';
 
-    if (peerBrowser.agent !== 'MCU') {
+    if (!(peerBrowser.agent === 'MCU' || self._hasMCU)) {
       /*
        // for windows firefox to mac chrome interopability
       if (window.webrtcDetectedBrowser === 'firefox' &&
@@ -207,6 +207,8 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       if (window.webrtcDetectedBrowser === 'firefox' && peerBrowser.agent !== 'firefox') {
         beOfferer = false;
       }
+    } else {
+      beOfferer = true;
     }
 
     if (beOfferer) {
