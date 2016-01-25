@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "SkylinkJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.8",
+        "version": "0.6.9",
         "url": "https://temasys.github.io/"
     },
     "files": {
@@ -3552,7 +3552,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 255,
+            "line": 257,
             "description": "Responses to the <code>OFFER</code> session description received and\n   creates an <code>ANSWER</code> session description to sent\n  to the associated Peer to complete the WebRTC handshake layer.",
             "itemtype": "method",
             "name": "_doAnswer",
@@ -3571,7 +3571,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 289,
+            "line": 291,
             "description": "Starts the waiting timeout for a \"healthy\" connection\n  with associated Peer connection.\nIt waits for any existing Peer \"healthy\" state in successful\n  {{#crossLink \"Skylink/_peerConnectionHealth:attr\"}}_peerConnectionHealth{{/crossLink}}.\nIf timeout has reached it's limit and does not have any \"healthy\" connection state\n  with Peer connection, it will restart the connection again with\n  {{#crossLink \"Skylink/_restartPeerConnection:method\"}}_restartPeerConnection(){{/crossLink}}.\nThis sets the timeout object associated with the Peer into\n  {{#crossLink \"Skylink/_peerConnectionHealthTimers\"}}_peerConnectionHealthTimers(){{/crossLink}}.",
             "itemtype": "method",
             "name": "_startPeerConnectionHealthCheck",
@@ -3597,7 +3597,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 382,
+            "line": 384,
             "description": "Stops the waiting timeout for a \"healthy\" connection associated\n  with the Peer.",
             "itemtype": "method",
             "name": "_stopPeerConnectionHealthCheck",
@@ -3616,7 +3616,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 409,
+            "line": 411,
             "description": "Sets the WebRTC handshake layer session description into the\n  Peer <code>RTCPeerConnection</code> object <i><code>\n  RTCPeerConnection.setLocalDescription()</code></i> associated\n  with the Peer connection.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -10534,7 +10534,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1237,
+            "line": 1238,
             "description": "Handles the OFFER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -10581,7 +10581,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1302,
+            "line": 1303,
             "description": "Handles the CANDIDATE Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -10637,7 +10637,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1399,
+            "line": 1400,
             "description": "Handles the ANSWER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -10684,7 +10684,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1481,
+            "line": 1482,
             "description": "Send a message object or string using the platform signaling socket connection\n  to the list of targeted PeerConnections.\nTo send message objects with DataChannel connections, see\n  {{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.",
             "itemtype": "method",
             "name": "sendMessage",
@@ -13010,23 +13010,23 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:255"
+            "line": " source/peer-handshake.js:257"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:289"
+            "line": " source/peer-handshake.js:291"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:382"
+            "line": " source/peer-handshake.js:384"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-handshake.js:409"
+            "line": " source/peer-handshake.js:411"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:409"
+            "line": " source/peer-handshake.js:411"
         },
         {
             "message": "unknown tag: component",
@@ -13802,31 +13802,31 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1237"
+            "line": " source/socket-message.js:1238"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1237"
+            "line": " source/socket-message.js:1238"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1302"
+            "line": " source/socket-message.js:1303"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1399"
+            "line": " source/socket-message.js:1400"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1399"
+            "line": " source/socket-message.js:1400"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1481"
+            "line": " source/socket-message.js:1482"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1481"
+            "line": " source/socket-message.js:1482"
         },
         {
             "message": "unknown tag: component",

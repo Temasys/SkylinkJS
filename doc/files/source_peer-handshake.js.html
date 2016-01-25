@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.8</title>
+    <title>SkylinkJS 0.6.9</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.8</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.9</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -277,7 +277,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
     unifiedOfferConstraints.mandatory.iceRestart = true;
     peerBrowser.os = peerBrowser.os || &#x27;&#x27;;
 
-    if (peerBrowser.agent !== &#x27;MCU&#x27;) {
+    if (!(peerBrowser.agent === &#x27;MCU&#x27; || self._hasMCU)) {
       /*
        // for windows firefox to mac chrome interopability
       if (window.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp;
@@ -290,6 +290,8 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       if (window.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp; peerBrowser.agent !== &#x27;firefox&#x27;) {
         beOfferer = false;
       }
+    } else {
+      beOfferer = true;
     }
 
     if (beOfferer) {

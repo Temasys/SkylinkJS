@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.8 - Wed Jan 20 2016 16:59:58 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.9 - Mon Jan 25 2016 16:34:38 GMT+0800 (SGT) */
 
 (function() {
 
@@ -188,7 +188,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.1.0
    */
-  this.VERSION = '0.6.8';
+  this.VERSION = '0.6.9';
 
   /**
    * Helper function that generates an Unique ID (UUID) string.
@@ -5001,7 +5001,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
     unifiedOfferConstraints.mandatory.iceRestart = true;
     peerBrowser.os = peerBrowser.os || '';
 
-    if (peerBrowser.agent !== 'MCU') {
+    if (!(peerBrowser.agent === 'MCU' || self._hasMCU)) {
       /*
        // for windows firefox to mac chrome interopability
       if (window.webrtcDetectedBrowser === 'firefox' &&
@@ -5014,6 +5014,8 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       if (window.webrtcDetectedBrowser === 'firefox' && peerBrowser.agent !== 'firefox') {
         beOfferer = false;
       }
+    } else {
+      beOfferer = true;
     }
 
     if (beOfferer) {

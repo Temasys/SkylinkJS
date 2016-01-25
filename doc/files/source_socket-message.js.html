@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.8</title>
+    <title>SkylinkJS 0.6.9</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.8</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.9</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -1258,6 +1258,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       ((message.weight &gt; -1) ? &#x27;joined and &#x27; : &#x27;&#x27;) + &#x27; responded&#x27;]);
     this._hasMCU = true;
     this._trigger(&#x27;serverPeerJoined&#x27;, targetMid, this.SERVER_PEER_TYPE.MCU);
+    log.log([targetMid, null, message.type, &#x27;Always setting as offerer because peer is MCU&#x27;]);
     beOfferer = true;
   } else {
     // if it is not MCU and P2P make sure that beOfferer is false for firefox -&gt; chrome/opera/ie/safari

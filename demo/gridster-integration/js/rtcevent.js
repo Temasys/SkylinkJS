@@ -62,7 +62,7 @@ Demo.Skylink.on('dataTransferState', function(state, transferId, peerId, transfe
     case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_REQUEST:
       var result = confirm('Accept file "' + transferInfo.name +
         '" from ' + peerId + '?\n\n[size: ' + transferInfo.size + ']');
-      Demo.Skylink.respondBlobRequest(peerId, transferId, result);
+      Demo.Skylink.acceptDataTransfer(peerId, transferId, result);
       break;
     case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_STARTED:
       var displayName = Demo.Skylink.getUserData();
