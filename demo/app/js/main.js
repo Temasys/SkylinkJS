@@ -84,7 +84,7 @@ Demo.Skylink.on('incomingData', function (data, transferId, peerId, transferInfo
 });
 Demo.Skylink.on('incomingDataRequest', function (transferId, peerId, transferInfo, isSelf) {
   if (!isSelf && transferInfo.dataType !== 'blob') {
-    Demo.Skylink.respondBlobRequest(peerId, transferId, true);
+    Demo.Skylink.acceptDataTransfer(peerId, transferId, true);
   }
 })
 Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transferInfo, error){
@@ -98,7 +98,7 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
   case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_REQUEST :
     var result = confirm('Accept file "' + transferInfo.name +
       '" from ' + peerId + '?\n\n[size: ' + transferInfo.size + ']');
-    Demo.Skylink.respondBlobRequest(peerId, transferId, result);
+    Demo.Skylink.acceptDataTransfer(peerId, transferId, result);
     break;
   case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_STARTED :
     var displayName = Demo.Skylink.getUserData();
