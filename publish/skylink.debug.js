@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.9 - Thu Jan 28 2016 17:18:55 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.9 - Thu Jan 28 2016 17:52:51 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13141,11 +13141,11 @@ Skylink.prototype._muteLocalMediaStreams = function () {
 
   // update accordingly if failed
   if (!hasAudioTracks) {
-    this._mediaStreamsStatus.audioMuted = true;
+    //this._mediaStreamsStatus.audioMuted = true;
     this._streamSettings.audio = false;
   }
   if (!hasVideoTracks) {
-    this._mediaStreamsStatus.videoMuted = true;
+    //this._mediaStreamsStatus.videoMuted = true;
     this._streamSettings.video = false;
   }
 
@@ -13173,6 +13173,7 @@ Skylink.prototype._muteLocalMediaStreams = function () {
  * @since 0.6.3
  */
 Skylink.prototype._stopLocalMediaStreams = function (options) {
+  var self = this;
   var stopUserMedia = false;
   var stopScreenshare = false;
   var triggerStopped = false;

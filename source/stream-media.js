@@ -1301,6 +1301,7 @@ Skylink.prototype._stopLocalMediaStreams = function (options) {
     if (triggerStopped) {
       this._trigger('mediaAccessStopped', true);
     }
+
   } else {
     log.log([null, 'MediaStream', self._selectedRoom, 'Screensharing MediaStream will not be stopped']);
   }
@@ -1320,6 +1321,8 @@ Skylink.prototype._stopLocalMediaStreams = function (options) {
   } else {
     log.log([null, 'MediaStream', self._selectedRoom, 'User\'s MediaStream will not be stopped']);
   }
+
+  this._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 };
 
 /**
