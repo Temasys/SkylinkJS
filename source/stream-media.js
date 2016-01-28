@@ -1213,11 +1213,11 @@ Skylink.prototype._muteLocalMediaStreams = function () {
 
   // update accordingly if failed
   if (!hasAudioTracks) {
-    this._mediaStreamsStatus.audioMuted = true;
+    //this._mediaStreamsStatus.audioMuted = true;
     this._streamSettings.audio = false;
   }
   if (!hasVideoTracks) {
-    this._mediaStreamsStatus.videoMuted = true;
+    //this._mediaStreamsStatus.videoMuted = true;
     this._streamSettings.video = false;
   }
 
@@ -1245,6 +1245,7 @@ Skylink.prototype._muteLocalMediaStreams = function () {
  * @since 0.6.3
  */
 Skylink.prototype._stopLocalMediaStreams = function (options) {
+  var self = this;
   var stopUserMedia = false;
   var stopScreenshare = false;
   var triggerStopped = false;
