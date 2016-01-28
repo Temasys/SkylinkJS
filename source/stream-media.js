@@ -1299,6 +1299,8 @@ Skylink.prototype._stopLocalMediaStreams = function (options) {
     }
 
     if (triggerStopped) {
+      this._screenSharingStreamSettings.audio = false;
+      this._screenSharingStreamSettings.video = false;
       this._trigger('mediaAccessStopped', true);
     }
 
@@ -1316,6 +1318,8 @@ Skylink.prototype._stopLocalMediaStreams = function (options) {
     }
 
     if (triggerStopped) {
+      this._streamSettings.audio = false;
+      this._streamSettings.video = false;
       this._trigger('mediaAccessStopped', false);
     }
   } else {

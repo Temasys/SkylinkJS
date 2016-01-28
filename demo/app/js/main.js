@@ -167,13 +167,26 @@ Demo.Skylink.on('incomingMessage', function (message, peerId, peerInfo, isSelf) 
 });
 //---------------------------------------------------
 Demo.Skylink.on('peerRestart', function (peerId, peerInfo, isSelf){
-  /*if (!isSelf) {
+  if (isSelf) {
+    $('#isAudioMuted').css('color',
+      (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
+    $('#isVideoMuted').css('color',
+      (peerInfo.mediaStatus.videoMuted) ? 'red' : 'green');
+  } else {
     $('#user' + peerId + ' .video').css('color',
       (peerInfo.mediaStatus.videoMuted) ? 'red' : 'green');
     $('#user' + peerId + ' .audio').css('color',
       (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
     $('#user' + peerId + ' .name').html(peerInfo.userData);
-  }*/
+  }
+
+  if ($('#video' + peerId).find('video').length > 0) {
+    if (peerInfo.mediaStatus.videoMuted) {
+      $('#video' + peerId)[0].src = '';
+    } else {
+      $('#video' + peerId)[0].src = Demo.Streams[peerId];
+    }
+  }
 });
 //---------------------------------------------------
 Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf){
@@ -638,7 +651,7 @@ $(document).ready(function () {
     }
   });
   $('#share_screen_btn').click(function () {
-    Demo.Skylink.shareScreen(function (data, error) {
+    Demo.Skylink.shareScreen(false, function (data, error) {
       console.info(data, error);
     });
   });

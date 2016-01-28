@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.9 - Thu Jan 28 2016 17:52:51 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.9 - Thu Jan 28 2016 17:59:00 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13227,8 +13227,11 @@ Skylink.prototype._stopLocalMediaStreams = function (options) {
     }
 
     if (triggerStopped) {
+      this._screenSharingStreamSettings.audio = false;
+      this._screenSharingStreamSettings.video = false;
       this._trigger('mediaAccessStopped', true);
     }
+
   } else {
     log.log([null, 'MediaStream', self._selectedRoom, 'Screensharing MediaStream will not be stopped']);
   }
@@ -13243,11 +13246,15 @@ Skylink.prototype._stopLocalMediaStreams = function (options) {
     }
 
     if (triggerStopped) {
+      this._streamSettings.audio = false;
+      this._streamSettings.video = false;
       this._trigger('mediaAccessStopped', false);
     }
   } else {
     log.log([null, 'MediaStream', self._selectedRoom, 'User\'s MediaStream will not be stopped']);
   }
+
+  this._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 };
 
 /**
