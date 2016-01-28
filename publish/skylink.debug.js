@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.9 - Mon Jan 25 2016 16:34:38 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.9 - Thu Jan 28 2016 10:52:16 GMT+0800 (SGT) */
 
 (function() {
 
@@ -12417,6 +12417,17 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
     self._mediaStream = stream;
   } else {
     self._mediaScreen = stream;
+
+    // for the case where local user media (audio) is not available for screensharing audio is, do not mute it
+    if (!self._streamSettings.audio) {
+      self._mediaStreamsStatus.audioMuted = !self._screenSharingStreamSettings.audio;
+    }
+
+    // for the case where local user media (video) is not available for screensharing video is, do not mute it
+    // logically, this should always pass because screensharing will always require video
+    if (!self._streamSettings.video) {
+      self._mediaStreamsStatus.videoMuted = !self._screenSharingStreamSettings.video;
+    }
   }
 
   self._muteLocalMediaStreams();
@@ -14114,6 +14125,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
             audio: { expected: requireAudio ? 1 : 0, received: sStream.getAudioTracks().length }
           }
         }, 1, true, false);
+        self._screenSharingStreamSettings.audio = false;
       }
 
       self._onUserMediaSuccess(sStream, true);
