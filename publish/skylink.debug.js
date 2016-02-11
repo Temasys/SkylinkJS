@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.9 - Thu Feb 11 2016 10:40:42 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.9 - Thu Feb 11 2016 12:29:40 GMT+0800 (SGT) */
 
 (function() {
 
@@ -10379,7 +10379,7 @@ Skylink.prototype._createSocket = function (type) {
     log.log([null, 'Socket', null, 'Channel closed']);
 
     if (self._inRoom) {
-      self.leaveRoom();
+      self.leaveRoom(false);
       self._trigger('peerDisconnect', self._user.sid, self.getPeerInfo());
     }
   });

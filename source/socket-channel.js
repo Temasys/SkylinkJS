@@ -510,7 +510,7 @@ Skylink.prototype._createSocket = function (type) {
     log.log([null, 'Socket', null, 'Channel closed']);
 
     if (self._inRoom) {
-      self.leaveRoom();
+      self.leaveRoom(false);
       self._trigger('peerDisconnect', self._user.sid, self.getPeerInfo());
     }
   });
