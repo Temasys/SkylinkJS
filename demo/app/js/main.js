@@ -290,6 +290,7 @@ Demo.Skylink.on('peerLeft', function (peerId, peerInfo, isSelf){
 
 Demo.Skylink.on('peerDisconnect', function (peerId, peerInfo){
   console.info('peerDisconnect', peerId, peerInfo);
+  Demo.Skylink.joinRoom();
 });
 //---------------------------------------------------
 Demo.Skylink.on('handshakeProgress', function (state, peerId) {
