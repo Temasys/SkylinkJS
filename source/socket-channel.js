@@ -508,6 +508,11 @@ Skylink.prototype._createSocket = function (type) {
     self._channelOpen = false;
     self._trigger('channelClose');
     log.log([null, 'Socket', null, 'Channel closed']);
+
+    if (self._inRoom) {
+      self.leaveRoom();
+      self._trigger('peerDisconnect', self._user.sid, self.getPeerInfo());
+    }
   });
 
   self._socket.on('message', function(message) {

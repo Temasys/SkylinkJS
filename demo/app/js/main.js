@@ -287,6 +287,10 @@ Demo.Skylink.on('peerLeft', function (peerId, peerInfo, isSelf){
     selectedPeers.splice(index, 1);
   }
 });
+
+Demo.Skylink.on('peerDisconnect', function (peerId, peerInfo){
+  console.info('peerDisconnect', peerId, peerInfo);
+});
 //---------------------------------------------------
 Demo.Skylink.on('handshakeProgress', function (state, peerId) {
   var stage = 0;
