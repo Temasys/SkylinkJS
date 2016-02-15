@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.9 - Mon Feb 15 2016 15:03:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.9 - Mon Feb 15 2016 15:12:25 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4882,6 +4882,12 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     if (!!this._mediaScreen && this._mediaScreen !== null) {
       mediaSettings = clone(this._screenSharingStreamSettings);
       mediaSettings.bandwidth = clone(this._streamSettings.bandwidth);
+
+      if (mediaSettings.video) {
+        mediaSettings.video = {
+          screenshare: true
+        };
+      }
     } else {
       mediaSettings = clone(this._streamSettings);
     }
@@ -12273,9 +12279,7 @@ Skylink.prototype._streamSettings = {};
  * @since 0.6.1
  */
 Skylink.prototype._screenSharingStreamSettings = {
-  video: {
-    screenshare: true
-  }
+  video: true
 };
 
 /**

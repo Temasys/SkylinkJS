@@ -238,6 +238,12 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     if (!!this._mediaScreen && this._mediaScreen !== null) {
       mediaSettings = clone(this._screenSharingStreamSettings);
       mediaSettings.bandwidth = clone(this._streamSettings.bandwidth);
+
+      if (mediaSettings.video) {
+        mediaSettings.video = {
+          screenshare: true
+        };
+      }
     } else {
       mediaSettings = clone(this._streamSettings);
     }

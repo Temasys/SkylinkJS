@@ -345,9 +345,7 @@ Skylink.prototype._streamSettings = {};
  * @since 0.6.1
  */
 Skylink.prototype._screenSharingStreamSettings = {
-  video: {
-    screenshare: true
-  }
+  video: true
 };
 
 /**
