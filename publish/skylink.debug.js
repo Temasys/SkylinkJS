@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.9 - Thu Jan 28 2016 17:59:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.9 - Mon Feb 15 2016 15:03:00 GMT+0800 (SGT) */
 
 (function() {
 
@@ -14133,6 +14133,8 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     }
 
     if (checkVideo) {
+      self._screenSharingStreamSettings.video = true;
+
       // no audio but has video for screensharing
       if (!checkAudio) {
         self._trigger('mediaAccessFallback', {

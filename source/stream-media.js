@@ -2205,6 +2205,8 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     }
 
     if (checkVideo) {
+      self._screenSharingStreamSettings.video = true;
+
       // no audio but has video for screensharing
       if (!checkAudio) {
         self._trigger('mediaAccessFallback', {
