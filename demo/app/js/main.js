@@ -505,7 +505,7 @@ Demo.Skylink.init(config, function (error, success) {
     Demo.Skylink.joinRoom({
       userData: displayName,
       audio: { stereo: true },
-      //video: true
+      video: true
     });
   }
 });
