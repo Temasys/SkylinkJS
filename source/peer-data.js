@@ -232,19 +232,34 @@ Skylink.prototype.getPeerInfo = function(peerId) {
   } else {
 
     var mediaSettings = {};
+    var mediaStatus = clone(this._mediaStreamsStatus) || {};
 
     // add screensharing information
     if (!!this._mediaScreen && this._mediaScreen !== null) {
       mediaSettings = clone(this._screenSharingStreamSettings);
       mediaSettings.bandwidth = clone(this._streamSettings.bandwidth);
+
+      if (mediaSettings.video) {
+        mediaSettings.video = {
+          screenshare: true
+        };
+      }
     } else {
       mediaSettings = clone(this._streamSettings);
+    }
+
+    if (!mediaSettings.audio) {
+      mediaStatus.audioMuted = true;
+    }
+
+    if (!mediaSettings.video) {
+      mediaStatus.videoMuted = true;
     }
 
     return {
       userData: clone(this._userData) || '',
       settings: mediaSettings || {},
-      mediaStatus: clone(this._mediaStreamsStatus) || {},
+      mediaStatus: mediaStatus,
       agent: {
         name: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion
