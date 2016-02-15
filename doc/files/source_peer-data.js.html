@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.9</title>
+    <title>SkylinkJS 0.6.10</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.9</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.10</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -315,19 +315,34 @@ Skylink.prototype.getPeerInfo = function(peerId) {
   } else {
 
     var mediaSettings = {};
+    var mediaStatus = clone(this._mediaStreamsStatus) || {};
 
     // add screensharing information
     if (!!this._mediaScreen &amp;&amp; this._mediaScreen !== null) {
       mediaSettings = clone(this._screenSharingStreamSettings);
       mediaSettings.bandwidth = clone(this._streamSettings.bandwidth);
+
+      if (mediaSettings.video) {
+        mediaSettings.video = {
+          screenshare: true
+        };
+      }
     } else {
       mediaSettings = clone(this._streamSettings);
+    }
+
+    if (!mediaSettings.audio) {
+      mediaStatus.audioMuted = true;
+    }
+
+    if (!mediaSettings.video) {
+      mediaStatus.videoMuted = true;
     }
 
     return {
       userData: clone(this._userData) || &#x27;&#x27;,
       settings: mediaSettings || {},
-      mediaStatus: clone(this._mediaStreamsStatus) || {},
+      mediaStatus: mediaStatus,
       agent: {
         name: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion
