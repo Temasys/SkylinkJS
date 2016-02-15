@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "SkylinkJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.9",
+        "version": "0.6.10",
         "url": "https://temasys.github.io/"
     },
     "files": {
@@ -11204,7 +11204,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 353,
+            "line": 351,
             "description": "The flag that indicates if self browser supports the screensharing feature.\nCurrently, Opera does not support screensharing and only premium\n  Temasys plugins support this screensharing feature.",
             "itemtype": "attribute",
             "name": "_screenSharingAvailable",
@@ -11218,7 +11218,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 367,
+            "line": 365,
             "description": "Stores the\n  [getUserMedia MediaStreamConstraints](https://w3c.github.io/mediacapture-main/getusermedia.html#idl-def-MediaStreamConstraints)\n  parsed from {{#crossLink \"Skylink/_streamSettings:attribute\"}}_streamSettings{{/crossLink}}\n  for user media Stream object.",
             "itemtype": "attribute",
             "name": "_getUserMediaSettings",
@@ -11281,7 +11281,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 399,
+            "line": 397,
             "description": "Stores self Stream mute settings for both audio and video streamings.",
             "itemtype": "attribute",
             "name": "_mediaStreamsStatus",
@@ -11310,7 +11310,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 418,
+            "line": 416,
             "description": "The flag indicates that when Skylink tries to get both audio and video stream\n  but Skylink fails to retrieve the user media stream, it should fallback\n  to retrieve audio streaming for the user media stream only.",
             "itemtype": "attribute",
             "name": "_audioFallback",
@@ -11325,7 +11325,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 433,
+            "line": 431,
             "description": "Handles the event when access to self user media MediaStream is successful.",
             "itemtype": "method",
             "name": "_onUserMediaSuccess",
@@ -11352,7 +11352,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 532,
+            "line": 541,
             "description": "Handles the event when access to self user media MediaStream has failed.",
             "itemtype": "method",
             "name": "_onUserMediaError",
@@ -11386,7 +11386,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 588,
+            "line": 597,
             "description": "Handles the event when remote MediaStream is received from Peer connection.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -11418,7 +11418,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 635,
+            "line": 644,
             "description": "Parses the audio stream settings for self provided.",
             "itemtype": "method",
             "name": "_parseAudioStreamSettings",
@@ -11458,7 +11458,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 694,
+            "line": 703,
             "description": "Parses the video stream settings for self provided.",
             "itemtype": "method",
             "name": "_parseVideoStreamSettings",
@@ -11524,7 +11524,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 795,
+            "line": 804,
             "description": "Parses the streaming bandwidth settings for self provided.",
             "itemtype": "method",
             "name": "_parseBandwidthSettings",
@@ -11564,7 +11564,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 835,
+            "line": 844,
             "description": "Parses the <code>mediaStatus</code> settings for self provided.",
             "itemtype": "method",
             "name": "_parseMutedSettings",
@@ -11660,7 +11660,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 903,
+            "line": 912,
             "description": "Parses the default stream settings received from\n  the platform signaling.",
             "itemtype": "method",
             "name": "_parseDefaultMediaStreamSettings",
@@ -11693,7 +11693,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 937,
+            "line": 946,
             "description": "Parses the provided stream settings for self provided.",
             "itemtype": "method",
             "name": "_parseMediaStreamSettings",
@@ -11805,7 +11805,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1020,
+            "line": 1029,
             "description": "Sends self selected Stream object to current Peer connections.\nIf {{#crossLink \"Skylink/_mediaScreen:attribute\"}}_mediaScreen{{/crossLink}}\n  is not empty, it will send the screensharing stream, else it will\n  send the {{#crossLink \"Skylink/_mediaStream:attribute\"}}_mediaStream{{/crossLink}}\n  if is not empty.\nIf self does not have any Stream object to send, it will a connection without\n  any remote Stream sent to the Peer connection.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -11824,7 +11824,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1093,
+            "line": 1102,
             "description": "Stops self user media Stream object attached to Skylink.",
             "itemtype": "method",
             "name": "stopStream",
@@ -11837,7 +11837,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1109,
+            "line": 1118,
             "description": "Handles the muting of audio and video streams in\n  {{#crossLink \"Skylink/_mediaStream:attribute\"}}_mediaStream{{/crossLink}},\n  {{#crossLink \"Skylink/_mediaScreen:attribute\"}}_mediaScreen{{/crossLink}} and\n  {{#crossLink \"Skylink/_mediaScreenClone:attribute\"}}_mediaScreenClone{{/crossLink}},",
             "itemtype": "method",
             "name": "_muteLocalMediaStreams",
@@ -11852,7 +11852,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1221,
+            "line": 1230,
             "description": "Handles the stopping of audio and video streams.",
             "itemtype": "method",
             "name": "_stopLocalMediaStreams",
@@ -11886,7 +11886,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1313,
+            "line": 1330,
             "description": "Waits for self MediaStream object to be attached to Skylink based\n  on the options provided before firing the callback to indicate\n  that self Stream object is received.\nThis will stop any currently attached Stream object to Skylink.",
             "itemtype": "method",
             "name": "_waitForLocalMediaStream",
@@ -12025,7 +12025,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1450,
+            "line": 1467,
             "description": "Gets self user media Stream object to attach to Skylink.\nDo not invoke this function when user has already joined a room as\n  this may affect any currently attached stream. You may use\n {{#crossLink \"Skylink/sendStream:method\"}}sendStream(){{/crossLink}}\n instead if self is already in the room, and allows application to\n attach application own MediaStream object to Skylink.",
             "itemtype": "method",
             "name": "getUserMedia",
@@ -12143,7 +12143,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1685,
+            "line": 1702,
             "description": "Replaces the currently attached Stream object in Skylink and refreshes all\n  connection with Peer connections to send the updated Stream object.\nThe application may provide their own MediaStream object to send to\n  all PeerConnections connection.\nReference {{#crossLink \"Skylink/refreshConnection:method\"}}refreshConnection(){{/crossLink}}\n   on the events triggered and restart mechanism.",
             "itemtype": "method",
             "name": "sendStream",
@@ -12260,7 +12260,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1918,
+            "line": 1935,
             "description": "Mutes the currently attached Stream object in Skylink.",
             "itemtype": "method",
             "name": "muteStream",
@@ -12297,7 +12297,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2020,
+            "line": 2037,
             "description": "Unmutes the currently attached Stream object audio stream.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -12313,7 +12313,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2038,
+            "line": 2055,
             "description": "Mutes the currently attached Stream object audio stream.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -12329,7 +12329,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2056,
+            "line": 2073,
             "description": "Unmutes the currently attached Stream object video stream.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -12345,7 +12345,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2074,
+            "line": 2091,
             "description": "Mutes the currently attached Stream object video stream.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -12360,7 +12360,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2091,
+            "line": 2108,
             "description": "Shares the current screen with Peer connections and will refresh all\n   Peer connections to send the screensharing Stream object with\n   <code>HTTPS</code> protocol accessing application.\nReference {{#crossLink \"Skylink/refreshConnection:method\"}}refreshConnection(){{/crossLink}}\n   on the events triggered and restart mechanism.\nThis will require our own Temasys Skylink extension to do screensharing.\nFor screensharing feature in IE / Safari with our Temasys Plugin, please\n  [contact us](https://www.temasys.com.sg/contact-us).\nCurrently, Opera does not support screensharing feature.\nThis does not replace the currently attached user media Stream object in Skylink.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -12401,7 +12401,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2300,
+            "line": 2320,
             "description": "Stops self screensharing Stream object attached to Skylink.\nIf user media Stream object is available, Skylink will refresh all\n   Peer connections to send the user media Stream object.\nReference {{#crossLink \"Skylink/refreshConnection:method\"}}refreshConnection(){{/crossLink}}\n   on the events triggered and restart mechanism.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -13874,155 +13874,147 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:353"
+            "line": " source/stream-media.js:351"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:367"
+            "line": " source/stream-media.js:365"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:399"
+            "line": " source/stream-media.js:397"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:418"
+            "line": " source/stream-media.js:416"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:433"
+            "line": " source/stream-media.js:431"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:433"
+            "line": " source/stream-media.js:431"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:532"
+            "line": " source/stream-media.js:541"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:532"
+            "line": " source/stream-media.js:541"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:588"
+            "line": " source/stream-media.js:597"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:588"
+            "line": " source/stream-media.js:597"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:635"
+            "line": " source/stream-media.js:644"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:694"
+            "line": " source/stream-media.js:703"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:795"
+            "line": " source/stream-media.js:804"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:835"
+            "line": " source/stream-media.js:844"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:903"
+            "line": " source/stream-media.js:912"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:937"
+            "line": " source/stream-media.js:946"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1020"
+            "line": " source/stream-media.js:1029"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1093"
+            "line": " source/stream-media.js:1102"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1313"
+            "line": " source/stream-media.js:1330"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1313"
+            "line": " source/stream-media.js:1330"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1450"
+            "line": " source/stream-media.js:1467"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1450"
+            "line": " source/stream-media.js:1467"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1685"
+            "line": " source/stream-media.js:1702"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1685"
+            "line": " source/stream-media.js:1702"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1918"
+            "line": " source/stream-media.js:1935"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1918"
+            "line": " source/stream-media.js:1935"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2020"
+            "line": " source/stream-media.js:2037"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2020"
+            "line": " source/stream-media.js:2037"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2020"
+            "line": " source/stream-media.js:2037"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2038"
+            "line": " source/stream-media.js:2055"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2038"
+            "line": " source/stream-media.js:2055"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2038"
+            "line": " source/stream-media.js:2055"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2056"
+            "line": " source/stream-media.js:2073"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2056"
+            "line": " source/stream-media.js:2073"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2056"
+            "line": " source/stream-media.js:2073"
         },
         {
             "message": "unknown tag: depcreated",
-            "line": " source/stream-media.js:2074"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2074"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/stream-media.js:2074"
+            "line": " source/stream-media.js:2091"
         },
         {
             "message": "unknown tag: trigger",
@@ -14034,7 +14026,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2300"
+            "line": " source/stream-media.js:2108"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/stream-media.js:2108"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/stream-media.js:2320"
         },
         {
             "message": "unknown tag: component",
