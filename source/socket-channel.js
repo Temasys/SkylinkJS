@@ -511,7 +511,7 @@ Skylink.prototype._createSocket = function (type) {
 
     if (self._inRoom) {
       self.leaveRoom(false);
-      self._trigger('peerDisconnect', self._user.sid, self.getPeerInfo());
+      self._trigger('sessionDisconnect', self._user.sid, self.getPeerInfo());
     }
   });
 

@@ -612,7 +612,7 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when self is disconnected from room.
-   * @event peerDisconnect
+   * @event sessionDisconnect
    * @param {String} peerId The Peer ID of the peer
    *   that had left the room.
    * @param {Object} peerInfo The peer information associated
@@ -684,7 +684,7 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.10
    */
-  peerDisconnect: [],
+  sessionDisconnect: [],
 
   /**
    * Event triggered when a Stream is sent by Peer.

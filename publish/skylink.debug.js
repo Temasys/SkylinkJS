@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.9 - Thu Feb 11 2016 12:29:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.9 - Wed Feb 17 2016 18:42:05 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8827,7 +8827,7 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when self is disconnected from room.
-   * @event peerDisconnect
+   * @event sessionDisconnect
    * @param {String} peerId The Peer ID of the peer
    *   that had left the room.
    * @param {Object} peerInfo The peer information associated
@@ -8899,7 +8899,7 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.10
    */
-  peerDisconnect: [],
+  sessionDisconnect: [],
 
   /**
    * Event triggered when a Stream is sent by Peer.
@@ -10380,7 +10380,7 @@ Skylink.prototype._createSocket = function (type) {
 
     if (self._inRoom) {
       self.leaveRoom(false);
-      self._trigger('peerDisconnect', self._user.sid, self.getPeerInfo());
+      self._trigger('sessionDisconnect', self._user.sid, self.getPeerInfo());
     }
   });
 

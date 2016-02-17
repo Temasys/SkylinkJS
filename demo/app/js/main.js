@@ -288,8 +288,8 @@ Demo.Skylink.on('peerLeft', function (peerId, peerInfo, isSelf){
   }
 });
 
-Demo.Skylink.on('peerDisconnect', function (peerId, peerInfo){
-  console.info('peerDisconnect', peerId, peerInfo);
+Demo.Skylink.on('sessionDisconnect', function (peerId, peerInfo){
+  console.info('sessionDisconnect', peerId, peerInfo);
   Demo.Skylink.joinRoom();
 });
 //---------------------------------------------------

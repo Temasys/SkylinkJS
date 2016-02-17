@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.9 - Thu Feb 11 2016 12:29:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.9 - Wed Feb 17 2016 18:42:05 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8936,7 +8936,7 @@ if ( navigator.mozGetUserMedia
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.9 - Thu Feb 11 2016 12:29:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.9 - Wed Feb 17 2016 18:42:05 GMT+0800 (SGT) */
 
 (function() {
 
@@ -17765,7 +17765,7 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when self is disconnected from room.
-   * @event peerDisconnect
+   * @event sessionDisconnect
    * @param {String} peerId The Peer ID of the peer
    *   that had left the room.
    * @param {Object} peerInfo The peer information associated
@@ -17837,7 +17837,7 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.10
    */
-  peerDisconnect: [],
+  sessionDisconnect: [],
 
   /**
    * Event triggered when a Stream is sent by Peer.
@@ -19318,7 +19318,7 @@ Skylink.prototype._createSocket = function (type) {
 
     if (self._inRoom) {
       self.leaveRoom(false);
-      self._trigger('peerDisconnect', self._user.sid, self.getPeerInfo());
+      self._trigger('sessionDisconnect', self._user.sid, self.getPeerInfo());
     }
   });
 
