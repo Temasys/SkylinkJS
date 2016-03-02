@@ -180,6 +180,22 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       inputConstraints.mandatory[name] = sc.mandatory[name];
     }
   }
+
+  // Added checks to ensure that connection object is defined first
+  if (!pc) {
+    log.warn([targetMid, 'RTCSessionDescription', 'offer', 'Dropping of creating of offer ' +
+      'as connection does not exists']);
+    return;
+  }
+
+  // Added checks to ensure that state is "stable" if setting local "offer"
+  if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
+    log.warn([targetMid, 'RTCSessionDescription', 'offer',
+      'Dropping of creating of offer as signalingState is not "' +
+      self.PEER_CONNECTION_STATE.STABLE + '" ->'], pc.signalingState);
+    return;
+  }
+
   inputConstraints.optional.concat(sc.optional);
   checkMediaDataChannelSettings(peerBrowser.agent, peerBrowser.version,
     function(beOfferer, unifiedOfferConstraints) {
