@@ -63,19 +63,6 @@ Skylink.prototype._autoIntroduce = true;
 Skylink.prototype._isPrivileged = false;
 
 /**
- * Parent key in case the current key is alias.
- * If the current key is not alias, this is the same as _appKey
- * @attribute _parentKey
- * @type String
- * @default null
- * @private
- * @component Peer
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._parentKey = null;
-
-/**
  * List of peers retrieved from signaling
  * @attribute _peerList
  * @type Object
@@ -160,10 +147,9 @@ Skylink.prototype.getPeers = function(showAll, callback){
 
 	self._sendChannelMessage({
 		type: self._SIG_MESSAGE_TYPE.GET_PEERS,
-		privilegedKey: self._appKey,
-		parentKey: self._parentKey,
 		showAll: showAll || false
 	});
+	
 	self._trigger('getPeersStateChange',self.GET_PEERS_STATE.ENQUIRED, self._user.sid, null);
 
 	log.log('Enquired server for peers within the realm');
