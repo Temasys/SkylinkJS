@@ -134,10 +134,6 @@ Skylink.prototype.getPeers = function(showAll, callback){
 		log.warn('App key is not defined. Please authenticate again.');
 		return;
 	}
-	if (!self._parentKey){
-		log.warn('Parent key is not defined. Please authenticate again.');
-		return;
-	}
 
 	// Only callback is provided
 	if (typeof showAll === 'function'){
