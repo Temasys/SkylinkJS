@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.9 - Wed Mar 02 2016 15:06:16 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.9 - Wed Mar 02 2016 15:33:26 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5093,22 +5093,31 @@ Skylink.prototype._doAnswer = function(targetMid) {
   log.log([targetMid, null, null, 'Creating answer with config:'],
     self._room.connection.sdpConstraints);
   var pc = self._peerConnections[targetMid];
-  if (pc) {
-    // No ICE restart constraints for createAnswer as it fails in chrome 48
-    // { iceRestart: true }
-    pc.createAnswer(function(answer) {
-      log.debug([targetMid, null, null, 'Created answer'], answer);
-      self._setLocalAndSendMessage(targetMid, answer);
-    }, function(error) {
-      log.error([targetMid, null, null, 'Failed creating an answer:'], error);
-      self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-    });//, self._room.connection.sdpConstraints);
-  } else {
-    /* Houston ..*/
-    log.error([targetMid, null, null, 'Requested to create an answer but user ' +
-      'does not have any existing connection to peer']);
+
+  // Added checks to ensure that connection object is defined first
+  if (!pc) {
+    log.warn([targetMid, 'RTCSessionDescription', 'answer', 'Dropping of creating of answer ' +
+      'as connection does not exists']);
     return;
   }
+
+  // Added checks to ensure that state is "have-remote-offer" if setting local "answer"
+  if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
+    log.warn([targetMid, 'RTCSessionDescription', 'answer',
+      'Dropping of creating of answer as signalingState is not "' +
+      self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER + '" ->'], pc.signalingState);
+    return;
+  }
+
+  // No ICE restart constraints for createAnswer as it fails in chrome 48
+  // { iceRestart: true }
+  pc.createAnswer(function(answer) {
+    log.debug([targetMid, null, null, 'Created answer'], answer);
+    self._setLocalAndSendMessage(targetMid, answer);
+  }, function(error) {
+    log.error([targetMid, null, null, 'Failed creating an answer:'], error);
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+  });//, self._room.connection.sdpConstraints);
 };
 
 /**
