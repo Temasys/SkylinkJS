@@ -113,8 +113,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
      * @since 0.6.x
      */
     this._candidates = {
-      queued: [],
       incoming: {
+        queued: [],
         success: [],
         failure: []
       },
@@ -160,12 +160,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         this._connectionStatus.enableIceTrickle;
     }
 
-    // Configure for stereo setting
-    if (typeof peerData.settings.audio === 'object') {
-      this._connectionSettings.stereo = peerData.settings.audio.stereo === true &&
-        this._connectionStatus.stereo;
-    }
-
     // Configure the agent name information
     if (typeof peerData.agent === 'string') {
       this.agent.name = peerData.agent;
@@ -194,6 +188,12 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       // Configure the streamingInfo.settings information
       if (typeof peerData.userInfo.settings === 'object' && peerData.userInfo.settings !== null) {
         this.streamingInfo.settings = peerData.userInfo.settings;
+
+        // Configure for stereo setting
+        if (typeof peerData.userInfo.settings.audio === 'object') {
+          this._connectionSettings.stereo = peerData.userInfo.settings.audio.stereo === true &&
+            this._connectionStatus.stereo;
+        }
       }
     }
 
@@ -221,15 +221,15 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       }]
     };
 
-    if (Array.isArray(self._room.connection.peerConfig.iceServers)) {
-      configuration.iceServers = self._room.connection.peerConfig.iceServers;
+    if (Array.isArray(superRef._room.connection.peerConfig.iceServers)) {
+      configuration.iceServers = superRef._room.connection.peerConfig.iceServers;
     }
 
     ref._RTCPeerConnection = new RTCPeerConnection(configuration, optional);
 
     // Reset the stored RTCIceCandidates
     ref._candidates.outgoing =
-    ref._candidates.queued =
+    ref._candidates.incoming.queued =
     ref._candidates.incoming.success =
     ref._candidates.incoming.failure = [];
 
@@ -240,7 +240,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       var candidate = evt.candidate || evt;
 
       // If RTCIceCandidate.candidate returns null, it means that is has been gathered completely
-      if (candidate.candidate) {
+      if (!candidate.candidate) {
         log.log([ref.id, 'Peer', 'RTCIceCandidate', 'Local candidates have been gathered completely']);
 
         /* TODO: Send the local SDP if trickle ICE is disabled */
@@ -277,7 +277,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       /* TODO: Should we do integration checks to wait for magical timeout */
       /* TODO: Should we check if it's an empty stream first before triggering this */
 
-      superRef._trigger('incomingStream', ref.id, stream, ref.getInfo(), false);
+      superRef._trigger('incomingStream', ref.id, stream, false, ref.getInfo());
     };
 
     /**
@@ -332,6 +332,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
    */
   SkylinkPeer.prototype.addLocalMediaStream = function () {
     var ref = this;
+
+    /* TODO: Handle MCU case where "Peers" are not supposed to receive stream */
 
     var removeStreamFn = function (rStream) {
       // Fallback polyfill for Firefox
@@ -429,6 +431,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
       /* TODO: Implement ICE restart ? */
     }
+
+    /* TODO: Create DataChannel here? */
 
     log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Creating local offer with options ->'], options);
 
@@ -551,6 +555,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         rid: superRef._room.id
       });
 
+      superRef._trigger('handshakeProgress', sessionDescription.type, ref.id);
+
       log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Sending local ' + sessionDescription.type + ' ->'], sessionDescription);
 
     //- Failure case
@@ -598,7 +604,19 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     ref._RTCPeerConnection.setRemoteDescription(sessionDescription, function () {
       log.log([ref.id, 'Peer', 'RTCSessionDescription', 'Set remote ' + sessionDescription.type + ' success ->'], sessionDescription);
 
+      superRef._trigger('handshakeProgress', sessionDescription.type, ref.id);
+
       callback();
+
+      for (var i = 0; i < ref._candidates.incoming.queued.length; i++) {
+        var candidate = ref._candidates.incoming.queued[i];
+
+        log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Adding remote candidate (queued) ->'], candidate);
+
+        ref.addRemoteCandidate(candidate);
+      }
+
+      ref._candidates.incoming.queued = [];
 
     //- Failure case
     }, function (error) {
@@ -622,7 +640,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     if (!(!!ref._RTCPeerConnection.remoteDescription && !!ref._RTCPeerConnection.remoteDescription.sdp)) {
       log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Queuing remote candidate as connection is not ready yet ->'], candidate);
 
-      ref._candidates.queued.push(candidate);
+      ref._candidates.incoming.queued.push(candidate);
       return;
     }
 
