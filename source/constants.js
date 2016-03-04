@@ -413,3 +413,33 @@ Skylink.prototype.DATA_CHANNEL_TYPE = {
   MESSAGING: 'messaging',
   DATA: 'data'
 };
+
+/**
+ * These are the list of available transfer encodings that would be used by Skylink during a data transfer.
+ * - The currently supported data type is <code>BINARY_STRING</code>.
+ * - Support for data types <code>BLOB</code> and <code>ARRAY_BUFFER</code> is still in implementation.
+ * @attribute DATA_TRANSFER_DATA_TYPE
+ * @type JSON
+ * @param {String} BINARY_STRING <small><b>DEFAULT</b> | Value <code>"binaryString"</code></small>
+ *   The option to let Skylink encode data packets using
+ *   [binary converted strings](https://developer.mozilla.org/en-US/docs/Web/HTTP/data_URIs)
+ *   when sending the data packets through the DataChannel connection during data transfers.
+ * @param {String} ARRAY_BUFFER <small><em>IN IMPLEMENTATION</em> | Value <code>"arrayBuffer"</code></small>
+ *   The option to let Skylink encode data packets using
+ *   [ArrayBuffers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
+ *   when sending the data packets through the DataChannel connection during data transfers.
+ * @param {String} BLOB <small><em>IN IMPLEMENTATION</em> | Value <code>"blob"</code></small>
+ *   The option to let Skylink encode data packets using
+ *   [Blobs](https://developer.mozilla.org/en/docs/Web/API/Blob)
+ *   when sending the data packets through the DataChannel connection during data transfers.
+ * @readOnly
+ * @component DataProcess
+ * @partof DATA TRANSFER FUNCTIONALITY
+ * @for Skylink
+ * @since 0.1.0
+ */
+Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
+  BINARY_STRING: 'binaryString',
+  ARRAY_BUFFER: 'arrayBuffer',
+  BLOB: 'blob'
+};
