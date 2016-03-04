@@ -220,3 +220,29 @@ Skylink.prototype.TURN_TRANSPORT = {
   NONE: 'none',
   ALL: 'all'
 };
+
+/**
+ * The list of Peer connection ICE candidate generation states that Skylink would trigger.
+ * - These states references the [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState).
+ * @attribute CANDIDATE_GENERATION_STATE
+ * @type JSON
+ * @param {String} NEW <small>Value <code>"new"</code></small>
+ *   The state when the object was just created, and no networking has occurred yet.<br>
+ * This state occurs when Peer connection has just been initialised.
+ * @param {String} GATHERING <small>Value <code>"gathering"</code></small>
+ *   The state when the ICE engine is in the process of gathering candidates for connection.<br>
+ * This state occurs after <code>NEW</code> state.
+ * @param {String} COMPLETED <small>Value <code>"completed"</code></small>
+ *   The ICE engine has completed gathering. Events such as adding a
+ *   new interface or a new TURN server will cause the state to go back to gathering.<br>
+ * This state occurs after <code>GATHERING</code> state and means ICE gathering has been done.
+ * @readOnly
+ * @since 0.4.1
+ * @component ICE
+ * @for Skylink
+ */
+Skylink.prototype.CANDIDATE_GENERATION_STATE = {
+  NEW: 'new',
+  GATHERING: 'gathering',
+  COMPLETED: 'completed'
+};
