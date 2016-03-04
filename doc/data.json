@@ -17,6 +17,15 @@
             },
             "namespaces": {}
         },
+        "source/constants.js": {
+            "name": "source/constants.js",
+            "modules": {},
+            "classes": {},
+            "fors": {
+                "Skylink": 1
+            },
+            "namespaces": {}
+        },
         "source/data-channel.js": {
             "name": "source/data-channel.js",
             "modules": {},
@@ -195,17 +204,6 @@
         {
             "file": "source/template/header.js",
             "line": 181,
-            "description": "The current version of Skylink Web SDK.",
-            "itemtype": "attribute",
-            "name": "VERSION",
-            "type": "String",
-            "readonly": "",
-            "since": "0.1.0",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/template/header.js",
-            "line": 191,
             "description": "Helper function that generates an Unique ID (UUID) string.",
             "itemtype": "method",
             "name": "generateUUID",
@@ -217,6 +215,17 @@
                 "\n   // Get Unique ID (UUID)\n   var uuid = SkylinkDemo.generateUUID();"
             ],
             "since": "0.5.9",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/constants.js",
+            "line": 1,
+            "description": "The current version of Skylink Web SDK.",
+            "itemtype": "attribute",
+            "name": "VERSION",
+            "type": "String",
+            "readonly": "",
+            "since": "0.1.0",
             "class": "Skylink"
         },
         {

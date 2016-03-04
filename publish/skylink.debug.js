@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Mon Feb 15 2016 18:50:47 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Fri Mar 04 2016 16:07:21 GMT+0800 (SGT) */
 
 (function() {
 
@@ -181,16 +181,6 @@ function Skylink() {
   }
 
   /**
-   * The current version of Skylink Web SDK.
-   * @attribute VERSION
-   * @type String
-   * @readOnly
-   * @for Skylink
-   * @since 0.1.0
-   */
-  this.VERSION = '0.6.10';
-
-  /**
    * Helper function that generates an Unique ID (UUID) string.
    * @method generateUUID
    * @return {String} Generated Unique ID (UUID) string.
@@ -212,6 +202,7 @@ function Skylink() {
 }
 this.Skylink = Skylink;
 
+Skylink.prototype.VERSION = '0.6.10';
 Skylink.prototype.DATA_CHANNEL_STATE = {
   CONNECTING: 'connecting',
   OPEN: 'open',
