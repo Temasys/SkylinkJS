@@ -246,3 +246,102 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
   GATHERING: 'gathering',
   COMPLETED: 'completed'
 };
+
+/**
+ * The current version of the internal <u>Data Transfer (DT)</u> Protocol that Skylink is using.<br>
+ * - This is not a feature for developers to use but rather for SDK developers to
+ *   see the Protocol version used in this Skylink version.
+ * - In some cases, this information may be used for reporting issues with Skylink.
+ * - DT_PROTOCOL VERSION: <code>0.1.0</code>.
+ * @attribute DT_PROTOCOL_VERSION
+ * @type String
+ * @readOnly
+ * @component DataTransfer
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype.DT_PROTOCOL_VERSION = '0.1.0';
+
+/**
+ * These are the types of data transfers that indicates if transfer is an
+ *   outgoing <small><em>(uploading)</em></small> or incoming <small><em>(downloding)</em></small> transfers.
+ * @attribute DATA_TRANSFER_TYPE
+ * @type JSON
+ * @param {String} UPLOAD <small>Value <code>"upload"</code></small>
+ *   This data transfer is an outgoing <em>(uploading)</em> transfer.<br>
+ *   Data is sent to the receiving Peer using the associated DataChannel connection.
+ * @param {String} DOWNLOAD <small>Value <code>"download"</code></small>
+ *   The data transfer is an incoming <em>(downloading)</em> transfer.<br>
+ *   Data is received from the sending Peer using the associated DataChannel connection.
+ * @readOnly
+ * @component DataTransfer
+ * @for Skylink
+ * @since 0.1.0
+ */
+Skylink.prototype.DATA_TRANSFER_TYPE = {
+  UPLOAD: 'upload',
+  DOWNLOAD: 'download'
+};
+
+/**
+ * These are the list of data transfer states that Skylink would trigger.
+ * @attribute DATA_TRANSFER_STATE
+ * @type JSON
+ * @param {String} UPLOAD_REQUEST <small>Value <code>"request"</code></small>
+ *   The state when a data transfer request has been received from Peer.
+ * This happens after Peer starts a data transfer using
+ *   {{#crossLink "Skylink/sendBlobData:method"}}sendBlobData(){{/crossLink}} or
+ *   {{#crossLink "Skylink/sendURLData:method"}}sendURLData(){{/crossLink}}.
+ * @param {String} UPLOAD_STARTED <small>Value <code>"uploadStarted"</code></small>
+ *   The state when the data transfer will begin and start to upload the first data
+ *   packets to receiving Peer.<br>
+ * This happens after receiving Peer accepts a data transfer using
+ *   {{#crossLink "Skylink/acceptDataTransfer:method"}}acceptDataTransfer(){{/crossLink}}.
+ * @param {String} DOWNLOAD_STARTED <small>Value <code>"downloadStarted"</code></small>
+ *   The state when the data transfer has begin and associated DataChannel connection is
+ *   expected to receive the first data packet from sending Peer.<br>
+ * This happens after self accepts a data transfer using
+ *   {{#crossLink "Skylink/acceptDataTransfer:method"}}acceptDataTransfer(){{/crossLink}} upon
+ *   the triggered state of <code>UPLOAD_REQUEST</code>.
+ * @param {String} REJECTED <small>Value <code>"rejected"</code></small>
+ *   The state when the data transfer has been rejected by receiving Peer and data transfer is
+ *   terminated.<br>
+ * This happens after Peer rejects a data transfer using
+ *   {{#crossLink "Skylink/acceptDataTransfer:method"}}acceptDataTransfer(){{/crossLink}}.
+ * @param {String} UPLOADING <small>Value <code>"uploading"</code></small>
+ *   The state when the data transfer is still being transferred to receiving Peer.<br>
+ * This happens after state <code>UPLOAD_STARTED</code>.
+ * @param {String} DOWNLOADING <small>Value <code>"downloading"</code></small>
+ *   The state when the data transfer is still being transferred from sending Peer.<br>
+ * This happens after state <code>DOWNLOAD_STARTED</code>.
+ * @param {String} UPLOAD_COMPLETED <small>Value <code>"uploadCompleted"</code></small>
+ *   The state when the data transfer has been transferred to receiving Peer successfully.<br>
+ * This happens after state <code>UPLOADING</code> or <code>UPLOAD_STARTED</code>, depending
+ *   on how huge the data being transferred is.
+ * @param {String} DOWNLOAD_COMPLETED <small>Value <code>"downloadCompleted"</code></small>
+ *   The state when the data transfer has been transferred from sending Peer successfully.<br>
+ * This happens after state <code>DOWNLOADING</code> or <code>DOWNLOAD_STARTED</code>, depending
+ *   on how huge the data being transferred is.
+ * @param {String} CANCEL <small>Value <code>"cancel"</code></small>
+ *   The state when the data transfer has been terminated by Peer.<br>
+ * This happens after state <code>DOWNLOAD_STARTED</code> or <code>UPLOAD_STARTED</code>.
+ * @param {String} ERROR <small>Value <code>"error"</code></small>
+ *   The state when the data transfer has occurred an exception.<br>
+ * At this stage, the data transfer would usually be terminated and may lead to state <code>CANCEL</code>.
+ * @readOnly
+ * @component DataTransfer
+ * @for Skylink
+ * @since 0.4.0
+ */
+Skylink.prototype.DATA_TRANSFER_STATE = {
+  UPLOAD_REQUEST: 'request',
+  UPLOAD_STARTED: 'uploadStarted',
+  DOWNLOAD_STARTED: 'downloadStarted',
+  REJECTED: 'rejected',
+  CANCEL: 'cancel',
+  ERROR: 'error',
+  UPLOADING: 'uploading',
+  DOWNLOADING: 'downloading',
+  UPLOAD_COMPLETED: 'uploadCompleted',
+  DOWNLOAD_COMPLETED: 'downloadCompleted'
+};
