@@ -1,19 +1,4 @@
 /**
- * The current version of the internal <u>Signaling Message (SM)</u> Protocol that Skylink is using.<br>
- * - This is not a feature for developers to use but rather for SDK developers to
- *   see the Protocol version used in this Skylink version.
- * - In some cases, this information may be used for reporting issues with Skylink.
- * - SM_PROTOCOL VERSION: <code>0.1.</code>.
- * @attribute SM_PROTOCOL_VERSION
- * @type String
- * @required
- * @component Socket
- * @for Skylink
- * @since 0.6.0
- */
-Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
-
-/**
  * The list of Protocol types that is used for messaging using
  *   the platform signaling socket connection.
  * @attribute _SIG_MESSAGE_TYPE
