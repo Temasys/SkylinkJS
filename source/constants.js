@@ -516,3 +516,33 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
   ROOM_CLOSED: 'roomclose',
   ROOM_CLOSING: 'toclose'
 };
+
+/**
+ * These are the logging levels that Skylink provides.
+ * - This manipulates the debugging messages sent to <code>console</code> object.
+ * - Refer to [Javascript Web Console](https://developer.mozilla.org/en/docs/Web/API/console).
+ * @attribute LOG_LEVEL
+ * @type JSON
+ * @param {Number} DEBUG <small>Value <code>4</code> | Level higher than <code>LOG</code></small>
+ *   Displays debugging logs from <code>LOG</code> level onwards with <code>DEBUG</code> logs.
+ * @param {Number} LOG <small>Value <code>3</code> | Level higher than <code>INFO</code></small>
+ *   Displays debugging logs from <code>INFO</code> level onwards with <code>LOG</code> logs.
+ * @param {Number} INFO <small>Value <code>2</code> | Level higher than <code>WARN</code></small>
+ *   Displays debugging logs from <code>WARN</code> level onwards with <code>INFO</code> logs.
+ * @param {Number} WARN <small>Value <code>1</code> | Level higher than <code>ERROR</code></small>
+ *   Displays debugging logs of <code>ERROR</code> level with <code>WARN</code> logs.
+ * @param {Number} ERROR <small><b>DEFAULT</b> | Value <code>0</code> | Lowest level</small>
+ *   Displays only <code>ERROR</code> logs.
+ * @readOnly
+ * @component Log
+ * @for Skylink
+ * @since 0.5.4
+ */
+Skylink.prototype.LOG_LEVEL = {
+  DEBUG: 4,
+  LOG: 3,
+  INFO: 2,
+  WARN: 1,
+  ERROR: 0
+};
+
