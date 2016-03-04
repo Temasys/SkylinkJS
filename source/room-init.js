@@ -1201,7 +1201,22 @@ Skylink.prototype.init = function(options, callback) {
   self._loadInfo();
 };
 
-
-
-
-
+/**
+ * Helper function that generates an Unique ID (UUID) string.
+ * @method generateUUID
+ * @return {String} Generated Unique ID (UUID) string.
+ * @example
+ *    // Get Unique ID (UUID)
+ *    var uuid = SkylinkDemo.generateUUID();
+ * @for Skylink
+ * @since 0.5.9
+ */
+Skylink.prototype.generateUUID = function() {
+  var d = new Date().getTime();
+  var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = (d + Math.random() * 16) % 16 | 0;
+    d = Math.floor(d / 16);
+    return (c == 'x' ? r : (r & 0x7 | 0x8)).toString(16);
+  });
+  return uuid;
+};
