@@ -179,16 +179,6 @@ function Skylink() {
   }
 
   /**
-   * The current version of Skylink Web SDK.
-   * @attribute VERSION
-   * @type String
-   * @readOnly
-   * @for Skylink
-   * @since 0.1.0
-   */
-  this.VERSION = '@@version';
-
-  /**
    * Helper function that generates an Unique ID (UUID) string.
    * @method generateUUID
    * @return {String} Generated Unique ID (UUID) string.
