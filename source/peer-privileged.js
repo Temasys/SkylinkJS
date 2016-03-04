@@ -1,44 +1,4 @@
 /**
- * These are the list of Peer list retrieval states that Skylink would trigger.
- * - This relates to and requires the Privileged Key feature where Peers using
- *   that Privileged alias Key becomes a privileged Peer with privileged functionalities.
- * @attribute GET_PEERS_STATE
- * @type JSON
- * @param {String} ENQUIRED <small>Value <code>"enquired"</code></small>
- *   The state when the privileged Peer already enquired signaling for list of peers.
- * @param {String} RECEIVED <small>Value <code>"received"</code></small>
- *   The state when the privileged Peer received list of peers from signaling.
- * @readOnly
- * @component Peer
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype.GET_PEERS_STATE = {
-	ENQUIRED: 'enquired',
-	RECEIVED: 'received'
-};
-
-/**
- * These are the list of Peer introduction states that Skylink would trigger.
- * - This relates to and requires the Privileged Key feature where Peers using
- *   that Privileged alias Key becomes a privileged Peer with privileged functionalities.
- * @attribute INTRODUCE_STATE
- * @type JSON
- * @param {String} INTRODUCING <small>Value <code>"enquired"</code></small>
- *   The state when the privileged Peer have sent the introduction signal.
- * @param {String} ERROR <small>Value <code>"error"</code></small>
- *   The state when the Peer introduction has occurred an exception.
- * @readOnly
- * @component Peer
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype.INTRODUCE_STATE = {
-	INTRODUCING: 'introducing',
-	ERROR: 'error'
-};
-
-/**
  * Whether this user automatically introduce to other peers.
  * @attribute _autoIntroduce
  * @type Boolean
