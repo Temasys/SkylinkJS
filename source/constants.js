@@ -546,3 +546,89 @@ Skylink.prototype.LOG_LEVEL = {
   ERROR: 0
 };
 
+/**
+ * These are the list of socket connection error states that Skylink would trigger.
+ * - These error states references the [socket.io-client events](http://socket.io/docs/client-api/).
+ * @attribute SOCKET_ERROR
+ * @type JSON
+ * @param {Number} CONNECTION_FAILED <small>Value <code>0</code></small>
+ *   The error state when Skylink have failed to establish a socket connection with
+ *   platform signaling in the first attempt.
+ * @param {String} RECONNECTION_FAILED <small>Value <code>-1</code></small>
+ *   The error state when Skylink have failed to
+ *   reestablish a socket connection with platform signaling after the first attempt
+ *   <code>CONNECTION_FAILED</code>.
+ * @param {String} CONNECTION_ABORTED <small>Value <code>-2</code></small>
+ *   The error state when attempt to reestablish socket connection
+ *   with platform signaling has been aborted after the failed first attempt
+ *   <code>CONNECTION_FAILED</code>.
+ * @param {String} RECONNECTION_ABORTED <small>Value <code>-3</code></small>
+ *   The error state when attempt to reestablish socket connection
+ *   with platform signaling has been aborted after several failed reattempts
+ *   <code>RECONNECTION_FAILED</code>.
+ * @param {String} RECONNECTION_ATTEMPT <small>Value <code>-4</code></small>
+ *   The error state when Skylink is attempting to reestablish
+ *   a socket connection with platform signaling after a failed attempt
+ *   <code>CONNECTION_FAILED</code> or <code>RECONNECTION_FAILED</code>.
+ * @readOnly
+ * @component Socket
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype.SOCKET_ERROR = {
+  CONNECTION_FAILED: 0,
+  RECONNECTION_FAILED: -1,
+  CONNECTION_ABORTED: -2,
+  RECONNECTION_ABORTED: -3,
+  RECONNECTION_ATTEMPT: -4
+};
+
+/**
+ * These are the list of fallback attempt types that Skylink would attempt with.
+ * @attribute SOCKET_FALLBACK
+ * @type JSON
+ * @param {String} NON_FALLBACK <small>Value <code>"nonfallback"</code> | Protocol <code>"http:"</code>,
+ * <code>"https:"</code> | Transports <code>"WebSocket"</code>, <code>"Polling"</code></small>
+ *   The current socket connection attempt
+ *   is using the first selected socket connection port for
+ *   the current selected transport <code>"Polling"</code> or <code>"WebSocket"</code>.
+ * @param {String} FALLBACK_PORT <small>Value <code>"fallbackPortNonSSL"</code> | Protocol <code>"http:"</code>
+ *  | Transports <code>"WebSocket"</code></small>
+ *   The current socket connection reattempt
+ *   is using the next selected socket connection port for
+ *   <code>HTTP</code> protocol connection with the current selected transport
+ *   <code>"Polling"</code> or <code>"WebSocket"</code>.
+ * @param {String} FALLBACK_PORT_SSL <small>Value <code>"fallbackPortSSL"</code> | Protocol <code>"https:"</code>
+ *  | Transports <code>"WebSocket"</code></small>
+ *   The current socket connection reattempt
+ *   is using the next selected socket connection port for
+ *   <code>HTTPS</code> protocol connection with the current selected transport
+ *   <code>"Polling"</code> or <code>"WebSocket"</code>.
+ * @param {String} LONG_POLLING <small>Value <code>"fallbackLongPollingNonSSL"</code> | Protocol <code>"http:"</code>
+ *  | Transports <code>"Polling"</code></small>
+ *   The current socket connection reattempt
+ *   is using the next selected socket connection port for
+ *   <code>HTTP</code> protocol connection with <code>"Polling"</code> after
+ *   many attempts of <code>"WebSocket"</code> has failed.
+ *   This occurs only for socket connection that is originally using
+ *   <code>"WebSocket"</code> transports.
+ * @param {String} LONG_POLLING_SSL <small>Value <code>"fallbackLongPollingSSL"</code> | Protocol <code>"https:"</code>
+ *  | Transports <code>"Polling"</code></small>
+ *   The current socket connection reattempt
+ *   is using the next selected socket connection port for
+ *   <code>HTTPS</code> protocol connection with <code>"Polling"</code> after
+ *   many attempts of <code>"WebSocket"</code> has failed.
+ *   This occurs only for socket connection that is originally using
+ *   <code>"WebSocket"</code> transports.
+ * @readOnly
+ * @component Socket
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype.SOCKET_FALLBACK = {
+  NON_FALLBACK: 'nonfallback',
+  FALLBACK_PORT: 'fallbackPortNonSSL',
+  FALLBACK_SSL_PORT: 'fallbackPortSSL',
+  LONG_POLLING: 'fallbackLongPollingNonSSL',
+  LONG_POLLING_SSL: 'fallbackLongPollingSSL'
+};
