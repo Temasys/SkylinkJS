@@ -243,6 +243,14 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       if (!candidate.candidate) {
         log.log([ref.id, 'Peer', 'RTCIceCandidate', 'Local candidates have been gathered completely']);
 
+        // "Spoof" the .onicegatheringstatechange event to "completed". It seems like
+        // .onicegatheringstatechange is never triggered and not event used in apprtc.appspot.com now
+        log.log([ref.id, 'Peer', 'RTCIceGatheringState', 'Current ICE gathering state ->'],
+          superRef.CANDIDATE_GENERATION_STATE.COMPLETED);
+
+        /* TODO: Should we spoof the other states as well? Like "gathering" */
+        superRef._trigger('candidateGenerationState', superRef.CANDIDATE_GENERATION_STATE.COMPLETED, ref.id);
+
         /* TODO: Send the local SDP if trickle ICE is disabled */
 
       // Else RTCIceCandidate.candidate gathering is still on-going
@@ -310,13 +318,13 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     /**
      * Handles the .onicegatheringstatechange event.
      */
-    ref._RTCPeerConnection.onicegatheringstatechange = function () {
+    /*ref._RTCPeerConnection.onicegatheringstatechange = function () {
       var state = ref._RTCPeerConnection.iceGatheringState;
 
       log.log([ref.id, 'Peer', 'RTCIceGatheringState', 'Current ICE gathering state ->'], state);
 
       superRef._trigger('candidateGenerationState', state, ref.id);
-    };
+    };*/
 
     /* TODO: Should we listen to .ondatachannel event */
 
