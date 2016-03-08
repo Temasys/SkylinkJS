@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.9 - Wed Mar 02 2016 15:33:26 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Tue Mar 08 2016 18:26:56 GMT+0800 (SGT) */
 
 (function() {
 
@@ -188,7 +188,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.1.0
    */
-  this.VERSION = '0.6.9';
+  this.VERSION = '0.6.10';
 
   /**
    * Helper function that generates an Unique ID (UUID) string.
@@ -4876,19 +4876,34 @@ Skylink.prototype.getPeerInfo = function(peerId) {
   } else {
 
     var mediaSettings = {};
+    var mediaStatus = clone(this._mediaStreamsStatus) || {};
 
     // add screensharing information
     if (!!this._mediaScreen && this._mediaScreen !== null) {
       mediaSettings = clone(this._screenSharingStreamSettings);
       mediaSettings.bandwidth = clone(this._streamSettings.bandwidth);
+
+      if (mediaSettings.video) {
+        mediaSettings.video = {
+          screenshare: true
+        };
+      }
     } else {
       mediaSettings = clone(this._streamSettings);
+    }
+
+    if (!mediaSettings.audio) {
+      mediaStatus.audioMuted = true;
+    }
+
+    if (!mediaSettings.video) {
+      mediaStatus.videoMuted = true;
     }
 
     return {
       userData: clone(this._userData) || '',
       settings: mediaSettings || {},
-      mediaStatus: clone(this._mediaStreamsStatus) || {},
+      mediaStatus: mediaStatus,
       agent: {
         name: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion
@@ -5466,19 +5481,6 @@ Skylink.prototype._autoIntroduce = true;
 Skylink.prototype._isPrivileged = false;
 
 /**
- * Parent key in case the current key is alias.
- * If the current key is not alias, this is the same as _appKey
- * @attribute _parentKey
- * @type String
- * @default null
- * @private
- * @component Peer
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._parentKey = null;
-
-/**
  * List of peers retrieved from signaling
  * @attribute _peerList
  * @type Object
@@ -5550,10 +5552,6 @@ Skylink.prototype.getPeers = function(showAll, callback){
 		log.warn('App key is not defined. Please authenticate again.');
 		return;
 	}
-	if (!self._parentKey){
-		log.warn('Parent key is not defined. Please authenticate again.');
-		return;
-	}
 
 	// Only callback is provided
 	if (typeof showAll === 'function'){
@@ -5563,10 +5561,9 @@ Skylink.prototype.getPeers = function(showAll, callback){
 
 	self._sendChannelMessage({
 		type: self._SIG_MESSAGE_TYPE.GET_PEERS,
-		privilegedKey: self._appKey,
-		parentKey: self._parentKey,
 		showAll: showAll || false
 	});
+	
 	self._trigger('getPeersStateChange',self.GET_PEERS_STATE.ENQUIRED, self._user.sid, null);
 
 	log.log('Enquired server for peers within the realm');
@@ -7050,7 +7047,6 @@ Skylink.prototype._parseInfo = function(info) {
 
   this._isPrivileged = info.isPrivileged;
   this._autoIntroduce = info.autoIntroduce;
-  this._parentKey = info.room_key.substring(0,36);
 
   this._user = {
     uid: info.username,
@@ -12402,9 +12398,7 @@ Skylink.prototype._streamSettings = {};
  * @since 0.6.1
  */
 Skylink.prototype._screenSharingStreamSettings = {
-  video: {
-    screenshare: true
-  }
+  video: true
 };
 
 /**
@@ -12555,6 +12549,17 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
     self._mediaStream = stream;
   } else {
     self._mediaScreen = stream;
+
+    /*// for the case where local user media (audio) is not available for screensharing audio is, do not mute it
+    if (!self._streamSettings.audio) {
+      self._mediaStreamsStatus.audioMuted = !self._screenSharingStreamSettings.audio;
+    }
+
+    // for the case where local user media (video) is not available for screensharing video is, do not mute it
+    // logically, this should always pass because screensharing will always require video
+    if (!self._streamSettings.video) {
+      self._mediaStreamsStatus.videoMuted = !self._screenSharingStreamSettings.video;
+    }*/
   }
 
   self._muteLocalMediaStreams();
@@ -12947,9 +12952,9 @@ Skylink.prototype._parseMutedSettings = function (options) {
     options : { audio: false, video: false };
 
   var updateAudioMuted = (typeof options.audio === 'object') ?
-    !!options.audio.mute : !options.audio;
+    !!options.audio.mute : false;//!options.audio;
   var updateVideoMuted = (typeof options.video === 'object') ?
-    !!options.video.mute : !options.video;
+    !!options.video.mute : false;//!options.video;
 
   return {
     audioMuted: updateAudioMuted,
@@ -13259,11 +13264,11 @@ Skylink.prototype._muteLocalMediaStreams = function () {
 
   // update accordingly if failed
   if (!hasAudioTracks) {
-    this._mediaStreamsStatus.audioMuted = true;
+    //this._mediaStreamsStatus.audioMuted = true;
     this._streamSettings.audio = false;
   }
   if (!hasVideoTracks) {
-    this._mediaStreamsStatus.videoMuted = true;
+    //this._mediaStreamsStatus.videoMuted = true;
     this._streamSettings.video = false;
   }
 
@@ -13291,6 +13296,7 @@ Skylink.prototype._muteLocalMediaStreams = function () {
  * @since 0.6.3
  */
 Skylink.prototype._stopLocalMediaStreams = function (options) {
+  var self = this;
   var stopUserMedia = false;
   var stopScreenshare = false;
   var triggerStopped = false;
@@ -13344,8 +13350,11 @@ Skylink.prototype._stopLocalMediaStreams = function (options) {
     }
 
     if (triggerStopped) {
+      this._screenSharingStreamSettings.audio = false;
+      this._screenSharingStreamSettings.video = false;
       this._trigger('mediaAccessStopped', true);
     }
+
   } else {
     log.log([null, 'MediaStream', self._selectedRoom, 'Screensharing MediaStream will not be stopped']);
   }
@@ -13360,11 +13369,15 @@ Skylink.prototype._stopLocalMediaStreams = function (options) {
     }
 
     if (triggerStopped) {
+      this._streamSettings.audio = false;
+      this._streamSettings.video = false;
       this._trigger('mediaAccessStopped', false);
     }
   } else {
     log.log([null, 'MediaStream', self._selectedRoom, 'User\'s MediaStream will not be stopped']);
   }
+
+  this._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 };
 
 /**
@@ -13871,8 +13884,8 @@ Skylink.prototype.sendStream = function(stream, callback) {
     self._streamSettings.audio = stream.getAudioTracks().length > 0;
     self._streamSettings.video = stream.getVideoTracks().length > 0;
 
-    self._mediaStreamsStatus.audioMuted = self._streamSettings.audio === false;
-    self._mediaStreamsStatus.videoMuted = self._streamSettings.video === false;
+    //self._mediaStreamsStatus.audioMuted = self._streamSettings.audio === false;
+    //self._mediaStreamsStatus.videoMuted = self._streamSettings.video === false;
 
     if (self._inRoom) {
       self.once('mediaAccessSuccess', function (stream) {
@@ -14243,6 +14256,8 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     }
 
     if (checkVideo) {
+      self._screenSharingStreamSettings.video = true;
+
       // no audio but has video for screensharing
       if (!checkAudio) {
         self._trigger('mediaAccessFallback', {
@@ -14252,6 +14267,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
             audio: { expected: requireAudio ? 1 : 0, received: sStream.getAudioTracks().length }
           }
         }, 1, true, false);
+        self._screenSharingStreamSettings.audio = false;
       }
 
       self._onUserMediaSuccess(sStream, true);
@@ -14372,6 +14388,16 @@ Skylink.prototype.stopScreen = function () {
     this._stopLocalMediaStreams({
       screenshare: true
     });
+
+    /*// for changes where the audio is not muted in here but the original mediastream has no audio
+    if (!this._mediaStreamsStatus.audioMuted && !this._streamSettings.audio) {
+      this._mediaStreamsStatus.audioMuted = true;
+    }
+
+    // for changes where the video is not muted in here but the original mediastream has no video
+    if (!this._mediaStreamsStatus.videoMuted && !this._streamSettings.video) {
+      this._mediaStreamsStatus.videoMuted = true;
+    }*/
 
     if (this._inRoom) {
       if (this._hasMCU) {
