@@ -6,14 +6,22 @@ We've gone to great length to make this library work in as many browsers as poss
 You'll need a Temasys Developer Account and an App key to use this. [Register here to get your App key](https://developer.temasys.com.sg).
 
 #### Supported Browsers
-- Chrome `47`. _Earlier versions `45+`_
-- Firefox `43`. _Earlier versions `40+`_
-- Opera `34`. _Earlier versions `32+`_
-- Plugin `v0.8.863+`
-  - Safari `9`. _Earlier versions `7+`_
-  - IE `11`. _Earlier versions `9+`_
+__Legend:__
+- `(p)` for [Temasys Plugin](http://skylink.io/plugin/),
+- `(p+)` for [Commercial Temasys Plugin](https://temasys.com.sg/plugin/#commercial-licensing),
+- `(e)` for Skylink Extensions ([contact us for extension code](http://support.temasys.com.sg))
+  - [Download Chrome Extension](https://chrome.google.com/webstore/detail/skylink-webrtc-tools/ljckddiekopnnjoeaiofddfhgnbdoafc).
+  - Download Firefox add-on (copy this format and paste in browser URL): `http://skylink.io/screensharing/ff_addon.php?domain=(accessingdomain.com)`
 
-For Safari / IE support, please download our [Temasys WebRTC PLugin here](https://temasys.atlassian.net/wiki/display/TWPP/WebRTC+Plugins)
+| Features       | Chrome 45+ | Firefox 40+ | Opera 32+ | IE 9+      | Safari 7+  |
+| -------------- | ---------- | ----------- | --------- | ---------- | ---------- |
+| Screensharing  | Yes ( e )  |  Yes ( e )  |     -     | Yes ( p+ ) | Yes ( p+ ) |
+| Video Call     | Yes        | Yes         | Yes       | Yes ( p )  | Yes ( p )  |
+| Audio Call     | Yes        | Yes         | Yes       | Yes ( p )  | Yes ( p )  |
+| File Transfers | Yes        | Yes         | Yes       | Yes ( p )  | Yes ( p )  |
+| Chat Messaging | Yes        | Yes         | Yes       | Yes ( p )  | Yes ( p )  |
+
+For Safari / IE support, please download our [Temasys WebRTC Plugin here](https://temasys.atlassian.net/wiki/display/TWPP/WebRTC+Plugins)
 
 ##### Installation
 Install SkylinkJS with [npm](https://www.npmjs.com/):
@@ -37,7 +45,7 @@ bower install skylinkjs
 
 
 ##### Need help or want something changed?
-You can raise tickets on [http://support.temasys.com.sg) our support portal or on [our Github Page](https://developer.temasys.com.sg/support).
+You can raise tickets on [our support portal](http://support.temasys.com.sg) or on [our Github Page](https://developer.temasys.com.sg/support).
 
 ##### Current versions and stability
 Always use the latest versions of the SkylinkJS library as WebRTC is still evolving and we adapt to changes very frequently.
