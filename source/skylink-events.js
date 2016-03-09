@@ -621,6 +621,7 @@ Skylink.prototype._EVENTS = {
    *   object that is sent in this connection.
    *   To display the MediaStream object to a <code>video</code> or <code>audio</code>, simply invoke:<br>
    *   <code>attachMediaStream(domElement, stream);</code>.
+   * @param {Boolean} isSelf The flag that indicates if self is the Peer.
    * @param {Object} peerInfo The peer information associated
    *   with the Peer Connection.
    * @param {String|JSON} peerInfo.userData The custom user data
@@ -686,7 +687,6 @@ Skylink.prototype._EVENTS = {
    * @param {Number} peerInfo.agent.version The Peer platform browser or agent version.
    * @param {Number} peerInfo.agent.os The Peer platform name.
    * @param {String} peerInfo.room The current room that the Peer is in.
-   * @param {Boolean} isSelf The flag that indicates if self is the Peer.
    * @component Events
    * @for Skylink
    * @since 0.5.5

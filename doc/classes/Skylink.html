@@ -1631,14 +1631,6 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
                     </span>
                   </a>
                 
-                  <a href="#attr__parentKey" class="list-group-item code-menu-item  private-attr-item ">
-                    &nbsp;&nbsp;_parentKey
-                    <span class="settings">
-                      
-                      
-                    </span>
-                  </a>
-                
                   <a href="#attr__path" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_path
                     <span class="settings">
@@ -8190,7 +8182,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l789"><code>source&#x2F;room-init.js:789</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l788"><code>source&#x2F;room-init.js:788</code></a>
       </small>
     
 
@@ -8718,7 +8710,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l694"><code>source&#x2F;room-init.js:694</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l693"><code>source&#x2F;room-init.js:693</code></a>
       </small>
     
 
@@ -22211,7 +22203,7 @@ If an invalid Peer ID is provided, or no Peer ID is provided,
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-privileged.js.html#l90"><code>source&#x2F;peer-privileged.js:90</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-privileged.js.html#l77"><code>source&#x2F;peer-privileged.js:77</code></a>
       </small>
     
 
@@ -22935,7 +22927,7 @@ Do not invoke this function when user has already joined a room as
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l840"><code>source&#x2F;room-init.js:840</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l839"><code>source&#x2F;room-init.js:839</code></a>
       </small>
     
 
@@ -23889,7 +23881,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-privileged.js.html#l181"><code>source&#x2F;peer-privileged.js:181</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-privileged.js.html#l163"><code>source&#x2F;peer-privileged.js:163</code></a>
       </small>
     
 
@@ -34692,86 +34684,6 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
   <hr>
 </div>
             
-              <div id="attr__parentKey" class="code-item attr item private-attr-item ">
-  <a name="config__parentKey"></a> 
-  <h3 class="code-item-name"><code>_parentKey</code></h3>
-  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>String<b>}</b></span>
-
-  <div class="code-item-properties">
-    <div class="properties-wrapper">
-      
-
-      
-
-      
-
-      
-
-      
-        <span class="label label-default" title="This attribute is private.">private</span>
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-    </div>
-
-    <div class="code-item-information">
-      
-        
-          
-        
-      
-      
-      
-    </div>
-
-    
-      <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-privileged.js.html#l65"><code>source&#x2F;peer-privileged.js:65</code></a>
-      </small>
-    
-
-    
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.1</span></small>
-    
-  </div>
-
-  <div class="code-item-description">
-    <p>Parent key in case the current key is alias.
-If the current key is not alias, this is the same as _appKey</p>
-
-  </div>
-
-  
-    <div class="code-item-section">
-      <h4>Default value:</h4>
-      <code class="prettyprint">null</code>
-    </div>
-  
-
-  
-
-  
-
-  
-
-  
-  <hr>
-</div>
-            
               <div id="attr__path" class="code-item attr item private-attr-item ">
   <a name="config__path"></a> 
   <h3 class="code-item-name"><code>_path</code></h3>
@@ -35853,7 +35765,7 @@ If the current key is not alias, this is the same as _appKey</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-privileged.js.html#l78"><code>source&#x2F;peer-privileged.js:78</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-privileged.js.html#l65"><code>source&#x2F;peer-privileged.js:65</code></a>
       </small>
     
 
@@ -47112,6 +47024,21 @@ and is sending this Stream object to other Peers connected in the room.</li>
           </li>
       
           <li class="param">
+            <code class="param-name">isSelf</code>
+            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The flag that indicates if self is the Peer.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
             <code class="param-name">peerInfo</code>
             <span class="type"><b>{</b>Object<b>}</b></span>
 
@@ -47460,21 +47387,6 @@ and is sending this Stream object to other Peers connected in the room.</li>
                   </li>
                 
               </ul>
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">isSelf</code>
-            <span class="type"><b>{</b>Boolean<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-                <p>The flag that indicates if self is the Peer.</p>
-
-            </div>
-
             
           </li>
       

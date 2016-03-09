@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Mon Feb 15 2016 18:50:47 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Wed Mar 09 2016 20:40:27 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5424,19 +5424,6 @@ Skylink.prototype._autoIntroduce = true;
 Skylink.prototype._isPrivileged = false;
 
 /**
- * Parent key in case the current key is alias.
- * If the current key is not alias, this is the same as _appKey
- * @attribute _parentKey
- * @type String
- * @default null
- * @private
- * @component Peer
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._parentKey = null;
-
-/**
  * List of peers retrieved from signaling
  * @attribute _peerList
  * @type Object
@@ -5508,10 +5495,6 @@ Skylink.prototype.getPeers = function(showAll, callback){
 		log.warn('App key is not defined. Please authenticate again.');
 		return;
 	}
-	if (!self._parentKey){
-		log.warn('Parent key is not defined. Please authenticate again.');
-		return;
-	}
 
 	// Only callback is provided
 	if (typeof showAll === 'function'){
@@ -5521,10 +5504,9 @@ Skylink.prototype.getPeers = function(showAll, callback){
 
 	self._sendChannelMessage({
 		type: self._SIG_MESSAGE_TYPE.GET_PEERS,
-		privilegedKey: self._appKey,
-		parentKey: self._parentKey,
 		showAll: showAll || false
 	});
+	
 	self._trigger('getPeersStateChange',self.GET_PEERS_STATE.ENQUIRED, self._user.sid, null);
 
 	log.log('Enquired server for peers within the realm');
@@ -7008,7 +6990,6 @@ Skylink.prototype._parseInfo = function(info) {
 
   this._isPrivileged = info.isPrivileged;
   this._autoIntroduce = info.autoIntroduce;
-  this._parentKey = info.room_key.substring(0,36);
 
   this._user = {
     uid: info.username,
@@ -8851,6 +8832,7 @@ Skylink.prototype._EVENTS = {
    *   object that is sent in this connection.
    *   To display the MediaStream object to a <code>video</code> or <code>audio</code>, simply invoke:<br>
    *   <code>attachMediaStream(domElement, stream);</code>.
+   * @param {Boolean} isSelf The flag that indicates if self is the Peer.
    * @param {Object} peerInfo The peer information associated
    *   with the Peer Connection.
    * @param {String|JSON} peerInfo.userData The custom user data
@@ -8916,7 +8898,6 @@ Skylink.prototype._EVENTS = {
    * @param {Number} peerInfo.agent.version The Peer platform browser or agent version.
    * @param {Number} peerInfo.agent.os The Peer platform name.
    * @param {String} peerInfo.room The current room that the Peer is in.
-   * @param {Boolean} isSelf The flag that indicates if self is the Peer.
    * @component Events
    * @for Skylink
    * @since 0.5.5
