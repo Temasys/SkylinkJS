@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Mon Mar 14 2016 00:29:37 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Mon Mar 14 2016 00:43:15 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -9189,7 +9189,7 @@ if ( navigator.mozGetUserMedia
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.10 - Mon Mar 14 2016 00:29:37 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Mon Mar 14 2016 00:43:15 GMT+0800 (SGT) */
 
 (function() {
 
@@ -15604,13 +15604,42 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         log.log([ref.id, 'Peer', 'RTCIceGatheringState', 'Current ICE gathering state ->'],
           superRef.CANDIDATE_GENERATION_STATE.COMPLETED);
 
+        ref._connectionStatus.candidatesGathered = true;
+
         superRef._trigger('candidateGenerationState', superRef.CANDIDATE_GENERATION_STATE.COMPLETED, ref.id);
 
-        /* TODO: Send the local SDP if trickle ICE is disabled */
+        // Check if trickle ICE is disabled, and send the local RTCSessionDescriptin if true
+        if (!ref._connectionSettings.enableIceTrickle) {
+          var sessionDescription = ref._RTCPeerConnection.localDescription;
+
+          // Check if local RTCSessionDescription is defined first before sending a corrupted RTCSessionDescription
+          if (!(!!sessionDescription && !!sessionDescription.sdp)) {
+            log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Local sessionDescription is not ready ' +
+              'after all local candidates has been gathered']);
+            return;
+          }
+
+          log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Sending delayed local ' + sessionDescription.type + ' ->'], sessionDescription);
+
+          superRef._sendChannelMessage({
+            type: sessionDescription.type,
+            sdp: sessionDescription.sdp,
+            mid: superRef._user.sid,
+            target: ref.id,
+            rid: superRef._room.id
+          });
+        }
 
       // Else RTCIceCandidate.candidate gathering is still on-going
       } else {
         log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Generated local candidate ->'], candidate);
+
+        // Check if trickle ICE is enabled or else there is no need to add the RTCIceCandidate
+        // as it will be present in the local RTCSessionDescription
+        if (!ref._connectionSettings.enableIceTrickle) {
+          log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Not sending local candidate as trickle ICE is disabled ->'], candidate);
+          return;
+        }
 
         /* TODO: Should we not send the RTCIceCandidate if it's not a TURN candidate under the forceTURN circumstance */
         superRef._sendChannelMessage({
@@ -15897,6 +15926,18 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       /* TODO: Implement trickle ICE disabled case to not send local RTCSessionDescription until gathering has completed */
       /* TODO: Fix the firefox local answer first before sending to Chrome/Opera/IE/Safari */
 
+      superRef._trigger('handshakeProgress', sessionDescription.type, ref.id);
+
+      // Check if trickle ICE is enabled first before sending the local RTCSessionDescription
+      // Or if trickle ICE is disabled, check if the candidate generation has been completed first
+      if (!ref._connectionSettings.enableIceTrickle && !ref._connectionStatus.candidatesGathered) {
+        log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Halting sending of local ' + sessionDescription.type +
+          ' until local candidates have all been gathered ->'], sessionDescription);
+        return;
+      }
+
+      log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Sending local ' + sessionDescription.type + ' ->'], sessionDescription);
+
       superRef._sendChannelMessage({
         type: sessionDescription.type,
         sdp: sessionDescription.sdp,
@@ -15904,10 +15945,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         target: ref.id,
         rid: superRef._room.id
       });
-
-      superRef._trigger('handshakeProgress', sessionDescription.type, ref.id);
-
-      log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Sending local ' + sessionDescription.type + ' ->'], sessionDescription);
 
     //- Failure case
     }, function (error) {
@@ -15990,6 +16027,13 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
    */
   SkylinkPeer.prototype.addCandidate = function (candidate) {
     var ref = this;
+
+    // Check if trickle ICE is enabled or else there is no need to add the RTCIceCandidate
+    // as it will be present in the local RTCSessionDescription
+    if (!ref._connectionSettings.enableIceTrickle) {
+      log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Not adding remote candidate as trickle ICE is disabled ->'], candidate);
+      return;
+    }
 
     // Add checks if RTCPeerConnection signalingState is "stable" first if RTCSessionDescription.type is "offer"
     if (!(!!ref._RTCPeerConnection.remoteDescription && !!ref._RTCPeerConnection.remoteDescription.sdp)) {
