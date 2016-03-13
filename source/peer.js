@@ -350,6 +350,11 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     var ref = this;
 
     /* TODO: Handle MCU case where "Peers" are not supposed to receive stream */
+    if (superRef._hasMCU && ref.id !== 'MCU') {
+      log.debug([ref.id, 'Peer', 'MediaStream', 'Dropping of sending any local stream as ' +
+        'we are receiving only']);
+      return;
+    }
 
     var removeStreamFn = function (rStream) {
       // Fallback polyfill for Firefox
