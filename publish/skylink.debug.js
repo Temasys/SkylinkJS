@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Sun Mar 13 2016 22:22:15 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sun Mar 13 2016 22:24:35 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6428,7 +6428,9 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       /* TODO: Should we check if it's an empty stream first before triggering this */
 
       // Check if received remote MediaStream is empty first before triggering event
-      if (!(!!ref.streamingInfo.settings.audio || !!ref.streamingInfo.settings.video)) {
+      // Or ignore if it's from MCU directly since it doesn't send any remote MediaStream from this RTCPeerConnection object
+      if (!(!!ref.streamingInfo.settings.audio || !!ref.streamingInfo.settings.video) ||
+        ref.id === 'MCU') {
         log.warn([ref.id, 'Peer', 'MediaStream', 'Dropping of received remote stream as it is empty ->'], stream);
         return;
       }
