@@ -54,7 +54,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
      * @since 0.6.x
      */
     this.agent = {
-      agent: 'Unknown',
+      name: 'Unknown',
       version: 0,
       os: ''
     };
