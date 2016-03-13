@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Sun Mar 13 2016 22:37:07 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sun Mar 13 2016 22:40:35 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6581,7 +6581,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     };
 
     // Safari / IE does not support the new format yet
-    if (['firefox', 'chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) === -1) {
+    if (['firefox', 'chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1) {
       options = {
         offerToReceiveAudio: true,
         offerToReceiveVideo: true

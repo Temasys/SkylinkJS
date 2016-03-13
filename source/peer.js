@@ -439,7 +439,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     };
 
     // Safari / IE does not support the new format yet
-    if (['firefox', 'chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) === -1) {
+    if (['firefox', 'chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1) {
       options = {
         offerToReceiveAudio: true,
         offerToReceiveVideo: true
