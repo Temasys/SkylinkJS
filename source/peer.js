@@ -228,9 +228,9 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     ref._RTCPeerConnection = new RTCPeerConnection(configuration, optional);
 
     // Reset the stored RTCIceCandidates
-    ref._candidates.outgoing =
-    ref._candidates.incoming.queued =
-    ref._candidates.incoming.success =
+    ref._candidates.outgoing = [];
+    ref._candidates.incoming.queued = [];
+    ref._candidates.incoming.success = [];
     ref._candidates.incoming.failure = [];
 
     /**

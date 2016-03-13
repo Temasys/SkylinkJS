@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Sun Mar 13 2016 22:40:35 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sun Mar 13 2016 23:00:51 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6370,9 +6370,9 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     ref._RTCPeerConnection = new RTCPeerConnection(configuration, optional);
 
     // Reset the stored RTCIceCandidates
-    ref._candidates.outgoing =
-    ref._candidates.incoming.queued =
-    ref._candidates.incoming.success =
+    ref._candidates.outgoing = [];
+    ref._candidates.incoming.queued = [];
+    ref._candidates.incoming.success = [];
     ref._candidates.incoming.failure = [];
 
     /**
