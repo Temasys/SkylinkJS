@@ -1134,7 +1134,7 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   // If User's weight is higher than Peer's or that it is "MCU"
   if (self._peerPriorityWeight > message.weight || peerId === 'MCU') {
-    self._peers[peerId].createOffer();
+    self._peers[peerId].handshakeOffer();
 
   } else {
     log.debug([peerId, 'Peer', null, 'Peer\'s priority weight is higher than User\'s, relying on User to initiate handshaking']);
@@ -1187,7 +1187,7 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }
 
-  self._peers[peerId].createAnswer(offer);
+  self._peers[peerId].handshakeAnswer(offer);
 };
 
 
@@ -1228,7 +1228,7 @@ Skylink.prototype._candidateHandler = function(message) {
     return;
   }
 
-  self._peers[peerId].addRemoteCandidate(candidate);
+  self._peers[peerId].addCandidate(candidate);
 };
 
 /**
@@ -1261,7 +1261,7 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }
 
-  self._peers[peerId].createComplete(answer);
+  self._peers[peerId].handshakeComplete(answer);
 };
 
 /**

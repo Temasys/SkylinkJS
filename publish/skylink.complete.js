@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Sun Mar 13 2016 23:42:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Mon Mar 14 2016 00:14:21 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -9189,7 +9189,7 @@ if ( navigator.mozGetUserMedia
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.10 - Sun Mar 13 2016 23:42:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Mon Mar 14 2016 00:14:21 GMT+0800 (SGT) */
 
 (function() {
 
@@ -15361,126 +15361,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
    * @since 0.6.x
    */
   var SkylinkPeer = function () {
-    /**
-     * Stores the Peer ID.
-     * @attribute id
-     * @type String
-     * @for SkylinkPeer
-     * @since 0.6.x
-     */
-    this.id = peerId;
-
-    /**
-     * Stores the Peer custom user data.
-     * @attribute data
-     * @type Any
-     * @for SkylinkPeer
-     * @since 0.6.x
-     */
-    this.data = null;
-
-    /**
-     * Stores the Peer connecting agent information.
-     * @attribute agent
-     * @type JSON
-     * @for SkylinkPeer
-     * @since 0.6.x
-     */
-    this.agent = {
-      name: 'Unknown',
-      version: 0,
-      os: ''
-    };
-
-    /**
-     * Stores the Peer priority weight for handshaking offerer.
-     * @attribute weight
-     * @type Number
-     * @for SkylinkPeer
-     * @since 0.6.x
-     */
-    this.weight = peerData.weight;
-
-    /**
-     * Stores the Peer streaming information.
-     * @attribute streamingInfo
-     * @type JSON
-     * @for SkylinKPeer
-     * @since 0.6.x
-     */
-    this.streamingInfo = {
-      settings: {},
-      mediaStatus: {}
-    };
-
-    /**
-     * Stores the list of DataChannels.
-     * @attribute _channels
-     * @type JSON
-     * @private
-     * @for SkylinkPeer
-     * @since 0.6.x
-     */
-    this._channels = {};
-
-    /**
-     * Stores the Peer connection settings.
-     * @attribute _connectionSettings
-     * @type JSON
-     * @private
-     * @for SkylinkPeer
-     * @since 0.6.x
-     */
-    this._connectionSettings = {
-      enableDataChannel: superRef._enableDataChannel === true,
-      enableIceTrickle: superRef._enableIcetrickle === true,
-      stereo: superRef._streamSettings.audio && superRef._streamSettings.audio.stereo === true
-    };
-
-    /**
-     * Stores the Peer connection RTCIceCandidate.
-     * @attribute _candidates
-     * @type JSON
-     * @private
-     * @for SkylinkPeer
-     * @since 0.6.x
-     */
-    this._candidates = {
-      incoming: {
-        queued: [],
-        success: [],
-        failure: []
-      },
-      outgoing: []
-    };
-
-    /**
-     * Stores the Peer connection status.
-     * @attribute _connectionStatus
-     * @type JSON
-     * @private
-     * @for SkylinkPeer
-     * @since 0.6.x
-     */
-    this._connectionStatus = {
-      candidatesGathered: false,
-      established: false,
-      checker: null,
-      retries: 0,
-      iceFailures: 0
-    };
-
-    /**
-     * Stores the Peer connection RTCPeerConnection reference.
-     * @attribute _RTCPeerConnection
-     * @type RTCPeerConnection
-     * @private
-     * @for SkylinkPeer
-     * @since 0.6.x
-     */
-    this._RTCPeerConnection = null;
-
-
     // Configure for enableDataChannel setting
     if (typeof peerData.enableDataChannel === 'boolean') {
       this._connectionSettings.enableDataChannel = peerData.enableDataChannel === true &&
@@ -15530,17 +15410,160 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       }
     }
 
-    // Start RTCPeerConnection object connection
-    this.createRTCPeerConnection();
+    // Starts the RTCPeerConnection
+    this._construct();
+  };
+
+  /**
+   * Stores the Peer ID.
+   * @attribute id
+   * @type String
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.id = peerId;
+
+  /**
+   * Stores the Peer custom user data.
+   * @attribute data
+   * @type Any
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.data = null;
+
+  /**
+   * Stores the Peer connecting agent information.
+   * @attribute agent
+   * @type JSON
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.agent = {
+    name: 'Unknown',
+    version: 0,
+    os: ''
+  };
+
+  /**
+   * Stores the Peer priority weight for handshaking offerer.
+   * @attribute weight
+   * @type Number
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.weight = peerData.weight;
+
+  /**
+   * Stores the Peer streaming information.
+   * @attribute streamingInfo
+   * @type JSON
+   * @for SkylinKPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.streamingInfo = {
+    settings: {},
+    mediaStatus: {}
+  };
+
+  /**
+   * Stores the list of DataChannels.
+   * @attribute _channels
+   * @type JSON
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._channels = {};
+
+  /**
+   * Stores the Peer connection settings.
+   * @attribute _connectionSettings
+   * @type JSON
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._connectionSettings = {
+    enableDataChannel: superRef._enableDataChannel === true,
+    enableIceTrickle: superRef._enableIcetrickle === true,
+    stereo: superRef._streamSettings.audio && superRef._streamSettings.audio.stereo === true
+  };
+
+  /**
+   * Stores the Peer connection RTCIceCandidate.
+   * @attribute _candidates
+   * @type JSON
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._candidates = {
+    incoming: {
+      queued: [],
+      success: [],
+      failure: []
+    },
+    outgoing: []
+  };
+
+  /**
+   * Stores the Peer connection status.
+   * @attribute _connectionStatus
+   * @type JSON
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._connectionStatus = {
+    candidatesGathered: false,
+    established: false,
+    checker: null,
+    retries: 0,
+    iceFailures: 0
+  };
+
+  /**
+   * Stores the Peer connection RTCPeerConnection reference.
+   * @attribute _RTCPeerConnection
+   * @type RTCPeerConnection
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._RTCPeerConnection = null;
+
+  /**
+   * Gets the Peer information.
+   * @method getInfo
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.getInfo = function () {
+    var ref = this;
+    var returnData = {
+      userData: clone(ref.data),
+      settings: clone(ref.streamingInfo.settings),
+      mediaStatus: clone(ref.streamingInfo.mediaStatus),
+      agent: clone(ref.agent),
+      room: clone(superRef._selectedRoom)
+    };
+
+    // Prevent (false) being returned as ''
+    if (typeof returnData.userData === 'undefined') {
+      returnData.userData = '';
+    }
+
+    return returnData;
   };
 
   /**
    * Creates the RTCPeerConnection object.
-   * @method createRTCPeerConnection
+   * @method _construct
    * @for SkylinkPeer
    * @since 0.6.x
    */
-  SkylinkPeer.prototype.createRTCPeerConnection = function () {
+  SkylinkPeer.prototype._construct = function () {
     var ref = this;
 
     // RTCPeerConnection configuration
@@ -15559,12 +15582,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     }
 
     ref._RTCPeerConnection = new RTCPeerConnection(configuration, optional);
-
-    // Reset the stored RTCIceCandidates
-    ref._candidates.outgoing = [];
-    ref._candidates.incoming.queued = [];
-    ref._candidates.incoming.success = [];
-    ref._candidates.incoming.failure = [];
 
     /**
      * Handles the .onicecandidate event.
@@ -15670,16 +15687,16 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     /* TODO: Should we listen to .ondatachannel event */
 
     // Add local MediaStream object
-    ref.addLocalMediaStream();
+    ref.addStream();
   };
 
   /**
    * Adds the local MediaStream object.
-   * @method addLocalMediaStream
+   * @method addStream
    * @for SkylinkPeer
    * @since 0.6.x
    */
-  SkylinkPeer.prototype.addLocalMediaStream = function () {
+  SkylinkPeer.prototype.addStream = function () {
     var ref = this;
 
     /* TODO: Handle MCU case where "Peers" are not supposed to receive stream */
@@ -15736,29 +15753,12 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
   };
 
   /**
-   * Destroys the RTCPeerConnection object.
-   * @method destroyRTCPeerConnection
-   * @for SkylinkPeer
-   * @since 0.6.x
-   */
-  SkylinkPeer.prototype.destroyRTCPeerConnection = function () {
-    var ref = this;
-
-    ref._RTCPeerConnection.close();
-
-    /* TODO: Close all DataChannels connection */
-    /* TODO: Clear all timers */
-
-    log.log([ref.id, 'Peer', null, 'Closed connection']);
-  };
-
-  /**
    * Creates the offer for the RTCPeerConnection object.
-   * @method createOffer
+   * @method handshakeOffer
    * @for SkylinkPeer
    * @since 0.6.x
    */
-  SkylinkPeer.prototype.createOffer = function () {
+  SkylinkPeer.prototype.handshakeOffer = function () {
     var ref = this;
 
     // Add checks if RTCPeerConnection signalingState is "stable" first
@@ -15796,7 +15796,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Created local offer ->'], offer);
 
       // Set the local offer
-      ref._setLocalDescription(offer);
+      ref._handshakeSetLocal(offer);
 
     //- Failure case
     }, function (error) {
@@ -15810,12 +15810,12 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
   /**
    * Creates the answer for the RTCPeerConnection object.
-   * @method createAnswer
+   * @method handshakeAnswer
    * @param {RTCSessionDescription} offer The remote offer received.
    * @for SkylinkPeer
    * @since 0.6.x
    */
-  SkylinkPeer.prototype.createAnswer = function (offer) {
+  SkylinkPeer.prototype.handshakeAnswer = function (offer) {
     var ref = this;
 
     // Add checks if RTCPeerConnection signalingState is "stable" first
@@ -15826,7 +15826,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     }
 
     // Setting remote offer first
-    ref._setRemoteDescription(offer, function () {
+    ref._handshakeSetRemote(offer, function () {
       log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Creating local answer']);
 
       // Start creating the local answer
@@ -15835,7 +15835,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Created local answer ->'], answer);
 
         // Set the local answer
-        ref._setLocalDescription(answer);
+        ref._handshakeSetLocal(answer);
 
       //- Failure case
       }, function (error) {
@@ -15848,29 +15848,29 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
   /**
    * Completes the handshaking for the RTCPeerConnection object.
-   * @method createComplete
+   * @method handshakeComplete
    * @param {RTCSessionDescription} answer The remote answer received.
    * @for SkylinkPeer
    * @since 0.6.x
    */
-  SkylinkPeer.prototype.createComplete = function (answer) {
+  SkylinkPeer.prototype.handshakeComplete = function (answer) {
     var ref = this;
 
     // Setting remote answer first
-    ref._setRemoteDescription(answer, function () {
+    ref._handshakeSetRemote(answer, function () {
       log.log([ref.id, 'Peer', 'RTCSessionDescription', 'Handshaking has completed']);
     });
   };
 
   /**
    * Sets the local RTCSessionDescription object.
-   * @method _setLocalDescription
+   * @method _handshakeSetLocal
    * @param {RTCSessionDescription} sessionDescription The local sessionDescription created.
    * @private
    * @for SkylinkPeer
    * @since 0.6.x
    */
-  SkylinkPeer.prototype._setLocalDescription = function (sessionDescription) {
+  SkylinkPeer.prototype._handshakeSetLocal = function (sessionDescription) {
     var ref = this;
 
     // Add checks if RTCPeerConnection signalingState is "stable" first if RTCSessionDescription.type is "offer"
@@ -15923,14 +15923,14 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
   /**
    * Sets the remote RTCSessionDescription object.
-   * @method _setRemoteDescription
+   * @method _handshakeSetRemote
    * @param {RTCSessionDescription} sessionDescription The remote sessionDescription received.
    * @param {Function} callback The callback function triggered when setting the remote sessionDescription is succesful.
    * @private
    * @for SkylinkPeer
    * @since 0.6.x
    */
-  SkylinkPeer.prototype._setRemoteDescription = function (sessionDescription, callback) {
+  SkylinkPeer.prototype._handshakeSetRemote = function (sessionDescription, callback) {
     var ref = this;
 
     // Add checks if RTCPeerConnection signalingState is "stable" first if RTCSessionDescription.type is "offer"
@@ -15972,7 +15972,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
         log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Adding remote candidate (queued) ->'], candidate);
 
-        ref.addRemoteCandidate(candidate);
+        ref.addCandidate(candidate);
       }
 
       ref._candidates.incoming.queued = [];
@@ -15987,12 +15987,12 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
   /**
    * Sets the remote RTCIceCandidate object.
-   * @method addRemoteCandidate
+   * @method addCandidate
    * @param {RTCIceCandidate} candidate The remote candidate received.
    * @for SkylinkPeer
    * @since 0.6.x
    */
-  SkylinkPeer.prototype.addRemoteCandidate = function (candidate) {
+  SkylinkPeer.prototype.addCandidate = function (candidate) {
     var ref = this;
 
     // Add checks if RTCPeerConnection signalingState is "stable" first if RTCSessionDescription.type is "offer"
@@ -16023,27 +16023,20 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
   };
 
   /**
-   * Gets the Peer information.
-   * @method getInfo
+   * Destroys the RTCPeerConnection object.
+   * @method disconnect
    * @for SkylinkPeer
    * @since 0.6.x
    */
-  SkylinkPeer.prototype.getInfo = function () {
+  SkylinkPeer.prototype.disconnect = function () {
     var ref = this;
-    var returnData = {
-      userData: clone(ref.data),
-      settings: clone(ref.streamingInfo.settings),
-      mediaStatus: clone(ref.streamingInfo.mediaStatus),
-      agent: clone(ref.agent),
-      room: clone(superRef._selectedRoom)
-    };
 
-    // Prevent (false) being returned as ''
-    if (typeof returnData.userData === 'undefined') {
-      returnData.userData = '';
-    }
+    ref._RTCPeerConnection.close();
 
-    return returnData;
+    /* TODO: Close all DataChannels connection */
+    /* TODO: Clear all timers */
+
+    log.log([ref.id, 'Peer', null, 'Closed connection']);
   };
 
   /* TODO: Add timers */
@@ -16063,7 +16056,7 @@ Skylink.prototype._destroyPeer = function (peerId) {
   var superRef = this;
 
   if (superRef._peers[peerId]) {
-    superRef._peers[peerId].destroyRTCPeerConnection();
+    superRef._peers[peerId].disconnect();
     delete superRef._peers[peerId];
   }
 };
@@ -21729,7 +21722,7 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   // If User's weight is higher than Peer's or that it is "MCU"
   if (self._peerPriorityWeight > message.weight || peerId === 'MCU') {
-    self._peers[peerId].createOffer();
+    self._peers[peerId].handshakeOffer();
 
   } else {
     log.debug([peerId, 'Peer', null, 'Peer\'s priority weight is higher than User\'s, relying on User to initiate handshaking']);
@@ -21782,7 +21775,7 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }
 
-  self._peers[peerId].createAnswer(offer);
+  self._peers[peerId].handshakeAnswer(offer);
 };
 
 
@@ -21823,7 +21816,7 @@ Skylink.prototype._candidateHandler = function(message) {
     return;
   }
 
-  self._peers[peerId].addRemoteCandidate(candidate);
+  self._peers[peerId].addCandidate(candidate);
 };
 
 /**
@@ -21856,7 +21849,7 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }
 
-  self._peers[peerId].createComplete(answer);
+  self._peers[peerId].handshakeComplete(answer);
 };
 
 /**
