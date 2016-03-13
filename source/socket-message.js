@@ -910,109 +910,52 @@ Skylink.prototype._enterHandler = function(message) {
  */
 Skylink.prototype._restartHandler = function(message){
   var self = this;
-  var targetMid = message.mid;
+  var peerId = message.mid;
+  var receiveOnly = false;
 
-  if (!self._peerInformations[targetMid]) {
-    log.error([targetMid, null, null, 'Peer does not have an existing ' +
-      'session. Ignoring restart process.']);
+  if (!self._peers[peerId]) {
+    log.warn([peerId, 'Peer', null, 'Dropping restart request as there is no session with peer']);
     return;
   }
 
-  // NOTE: for now we ignore, but we should take-note to implement in the near future
+  /* TODO: Configure with new data in restart message */
+
+  self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), false);
+
   if (self._hasMCU) {
-    self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false);
+    log.debug([peerId, 'Peer', null, 'Dropping restart request as MCU is present']);
     return;
   }
 
+  // Setting for throttling
   self.lastRestart = message.lastRestart || Date.now() || function() { return +new Date(); };
 
-  if (!self._peerConnections[targetMid]) {
-    log.error([targetMid, null, null, 'Peer does not have an existing ' +
-      'connection. Unable to restart']);
-    return;
-  }
-
-  // mcu has re-joined
-  // NOTE: logic trip since _hasMCU flags are ignored, this could result in failure perhaps?
-  if (targetMid === 'MCU') {
-    log.log([targetMid, null, message.type, 'MCU has restarted its connection']);
-    self._hasMCU = true;
-  }
-
-  // Uncomment because we do not need this
-  //self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-
-  message.agent = (!message.agent) ? 'chrome' : message.agent;
-  self._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
-    message.enableIceTrickle : self._enableIceTrickle;
-  self._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
-    message.enableDataChannel : self._enableDataChannel;
-
-  // re-add information
-  self._peerInformations[targetMid] = message.userInfo || {};
-  self._peerInformations[targetMid].agent = {
-    name: message.agent,
-    version: message.version,
-    os: message.os || ''
-  };
-
-  var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
-
-  // This variable is not used
-  //var peerConnectionStateStable = false;
-
-  log.info([targetMid, 'RTCPeerConnection', null, 'Received restart request from peer'], message);
-  // we are no longer adding any peer
-  /*self._addPeer(targetMid, {
-    agent: message.agent,
-    version: message.version,
-    os: message.os
-  }, true, true, message.receiveOnly, message.sessionType === 'screensharing');*/
-
-  //Only consider peer's restart weight if self also sent a restart which cause a potential conflict
-  //Otherwise go ahead with peer's restart
-  var beOfferer = false;
-
-  // Works in this matter.. no idea why.
-  if (window.webrtcDetectedBrowser !== 'firefox' && message.agent === 'firefox') {
-    log.debug([targetMid, 'RTCPeerConnection', null, 'Restarting as offerer as peer cannot be offerer'], agent);
-    beOfferer = true;
-  } else {
-    // Checks if weight is lesser than peer's weight
-    // If lesser, always do the restart mechanism
-    if (self._peerPriorityWeight < message.weight) {
-      beOfferer = true;
-    }
-  }
-
-  if (beOfferer) {
-    log.debug([targetMid, 'RTCPeerConnection', null, 'Restarting negotiation'], agent);
-    self._doOffer(targetMid, {
-      agent: agent.name,
-      version: agent.version,
-      os: agent.os
-    }, true);
+  // If User's weight is higher than Peer's or that it is "MCU"
+  if (self._peerPriorityWeight > message.weight) {
+    self._peers[peerId].handshakeOffer();
 
   } else {
-    log.debug([targetMid, 'RTCPeerConnection', null, 'Waiting for peer to start re-negotiation'], agent);
+    log.debug([peerId, 'Peer', null, 'Peer\'s priority weight is higher than User\'s, relying on User to initiate handshaking']);
+
     self._sendChannelMessage({
-      type: self._SIG_MESSAGE_TYPE.WELCOME,
+      type: self._SIG_MESSAGE_TYPE.RESTART,
       mid: self._user.sid,
       rid: self._room.id,
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion,
       os: window.navigator.platform,
       userInfo: self.getPeerInfo(),
-      target: targetMid,
-      weight: -1,
-      sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+      target: peerId, //'MCU',
+      isConnectionRestart: false,
+      lastRestart: message.lastRestart,
+      weight: self._peerPriorityWeight,
+      receiveOnly: self._hasMCU && peerId !== 'MCU',
+      enableIceTrickle: self._enableIceTrickle,
+      enableDataChannel: self._enableDataChannel,
+      sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+      explicit: true
     });
   }
-
-  self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false);
-
-  // following the previous logic to do checker always
-  self._startPeerConnectionHealthCheck(targetMid, false);
 };
 
 /**
