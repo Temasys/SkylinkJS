@@ -285,6 +285,12 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       /* TODO: Should we do integration checks to wait for magical timeout */
       /* TODO: Should we check if it's an empty stream first before triggering this */
 
+      // Check if received remote MediaStream is empty first before triggering event
+      if (!(!!ref.streamingInfo.settings.audio || !!ref.streamingInfo.settings.video)) {
+        log.warn([ref.id, 'Peer', 'MediaStream', 'Dropping of received remote stream as it is empty ->'], stream);
+        return;
+      }
+
       superRef._trigger('incomingStream', ref.id, stream, false, ref.getInfo());
     };
 
