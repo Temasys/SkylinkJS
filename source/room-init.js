@@ -1211,6 +1211,7 @@ Skylink.prototype.init = function(options, callback) {
  * @for Skylink
  * @since 0.5.9
  */
+/* jshint ignore:start */
 Skylink.prototype.generateUUID = function() {
   var d = new Date().getTime();
   var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -1220,3 +1221,4 @@ Skylink.prototype.generateUUID = function() {
   });
   return uuid;
 };
+/* jshint ignore:end */
