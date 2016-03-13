@@ -271,7 +271,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         log.log([ref.id, 'Peer', 'RTCIceGatheringState', 'Current ICE gathering state ->'],
           superRef.CANDIDATE_GENERATION_STATE.COMPLETED);
 
-        /* TODO: Should we spoof the other states as well? Like "gathering" */
         superRef._trigger('candidateGenerationState', superRef.CANDIDATE_GENERATION_STATE.COMPLETED, ref.id);
 
         /* TODO: Send the local SDP if trickle ICE is disabled */
@@ -346,16 +345,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       /* TODO: Fix when "closed" and attempt to reconnect if object is not meant to be closed */
     };
 
-    /**
-     * Handles the .onicegatheringstatechange event.
-     */
-    /*ref._RTCPeerConnection.onicegatheringstatechange = function () {
-      var state = ref._RTCPeerConnection.iceGatheringState;
-
-      log.log([ref.id, 'Peer', 'RTCIceGatheringState', 'Current ICE gathering state ->'], state);
-
-      superRef._trigger('candidateGenerationState', state, ref.id);
-    };*/
+    /* We are not listening to .onicegatheringstatechange event since it's never triggered */
 
     /* TODO: Should we listen to .ondatachannel event */
 

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Mon Mar 14 2016 00:14:21 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Mon Mar 14 2016 00:29:37 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6170,14 +6170,17 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
    * @since 0.6.x
    */
   var SkylinkPeer = function () {
+    // peerData is basically the data received in the message object in "welcome" / "enter"
     // Configure for enableDataChannel setting
     if (typeof peerData.enableDataChannel === 'boolean') {
+      // Both the Peer and the User has to have datachannel option enabled
       this._connectionSettings.enableDataChannel = peerData.enableDataChannel === true &&
         this._connectionStatus.enableDataChannel;
     }
 
     // Configure for enableIceTrickle setting
     if (typeof peerData.enableIceTrickle === 'boolean') {
+      // Both the Peer and the User has to have trickle ICE enabled
       this._connectionSettings.enableIceTrickle = peerData.enableIceTrickle === true &&
         this._connectionStatus.enableIceTrickle;
     }
@@ -6213,6 +6216,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
         // Configure for stereo setting
         if (typeof peerData.userInfo.settings.audio === 'object') {
+          // Both the Peer and the User has to have OPUS codec stereo option enabled
           this._connectionSettings.stereo = peerData.userInfo.settings.audio.stereo === true &&
             this._connectionStatus.stereo;
         }
@@ -6350,6 +6354,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
    */
   SkylinkPeer.prototype.getInfo = function () {
     var ref = this;
+
     var returnData = {
       userData: clone(ref.data),
       settings: clone(ref.streamingInfo.settings),
@@ -6369,6 +6374,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
   /**
    * Creates the RTCPeerConnection object.
    * @method _construct
+   * @private
    * @for SkylinkPeer
    * @since 0.6.x
    */
@@ -6407,7 +6413,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         log.log([ref.id, 'Peer', 'RTCIceGatheringState', 'Current ICE gathering state ->'],
           superRef.CANDIDATE_GENERATION_STATE.COMPLETED);
 
-        /* TODO: Should we spoof the other states as well? Like "gathering" */
         superRef._trigger('candidateGenerationState', superRef.CANDIDATE_GENERATION_STATE.COMPLETED, ref.id);
 
         /* TODO: Send the local SDP if trickle ICE is disabled */
@@ -6482,16 +6487,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       /* TODO: Fix when "closed" and attempt to reconnect if object is not meant to be closed */
     };
 
-    /**
-     * Handles the .onicegatheringstatechange event.
-     */
-    /*ref._RTCPeerConnection.onicegatheringstatechange = function () {
-      var state = ref._RTCPeerConnection.iceGatheringState;
-
-      log.log([ref.id, 'Peer', 'RTCIceGatheringState', 'Current ICE gathering state ->'], state);
-
-      superRef._trigger('candidateGenerationState', state, ref.id);
-    };*/
+    /* We are not listening to .onicegatheringstatechange event since it's never triggered */
 
     /* TODO: Should we listen to .ondatachannel event */
 
