@@ -28,14 +28,17 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
    * @since 0.6.x
    */
   var SkylinkPeer = function () {
+    // peerData is basically the data received in the message object in "welcome" / "enter"
     // Configure for enableDataChannel setting
     if (typeof peerData.enableDataChannel === 'boolean') {
+      // Both the Peer and the User has to have datachannel option enabled
       this._connectionSettings.enableDataChannel = peerData.enableDataChannel === true &&
         this._connectionStatus.enableDataChannel;
     }
 
     // Configure for enableIceTrickle setting
     if (typeof peerData.enableIceTrickle === 'boolean') {
+      // Both the Peer and the User has to have trickle ICE enabled
       this._connectionSettings.enableIceTrickle = peerData.enableIceTrickle === true &&
         this._connectionStatus.enableIceTrickle;
     }
@@ -71,6 +74,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
         // Configure for stereo setting
         if (typeof peerData.userInfo.settings.audio === 'object') {
+          // Both the Peer and the User has to have OPUS codec stereo option enabled
           this._connectionSettings.stereo = peerData.userInfo.settings.audio.stereo === true &&
             this._connectionStatus.stereo;
         }
