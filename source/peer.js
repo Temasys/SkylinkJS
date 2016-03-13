@@ -613,6 +613,11 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
     /* TODO: SDP modifications */
 
+    // If user is using Firefox and this is MCU, replace the RTCSessionDescription.sdp to suit MCU needs
+    if (window.webrtcDetectedBrowser === 'firefox' && ref.id === 'MCU') {
+      sessionDescription.sdp = superRef._parseSDP.MCUFirefoxAnswer(sessionDescription.sdp);
+    }
+
     log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting remote ' + sessionDescription.type + ' ->'], sessionDescription);
 
     // Set the remote RTCSessionDescription

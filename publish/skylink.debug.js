@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Sun Mar 13 2016 22:24:35 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sun Mar 13 2016 22:37:07 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6755,6 +6755,11 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
     /* TODO: SDP modifications */
 
+    // If user is using Firefox and this is MCU, replace the RTCSessionDescription.sdp to suit MCU needs
+    if (window.webrtcDetectedBrowser === 'firefox' && ref.id === 'MCU') {
+      sessionDescription.sdp = superRef._parseSDP.MCUFirefoxAnswer(sessionDescription.sdp);
+    }
+
     log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting remote ' + sessionDescription.type + ' ->'], sessionDescription);
 
     // Set the remote RTCSessionDescription
@@ -8829,6 +8834,22 @@ Skylink.prototype.generateUUID = function() {
 };
 /* jshint ignore:end */
 
+Skylink.prototype._parseSDP = {
+
+  /**
+   * Handles the Firefox MCU answer mangling.
+   * @method MCUFirefoxAnswer
+   * @param {String} sdpString The sessionDescription.sdp string.
+   */
+  MCUFirefoxAnswer: function (sdpString) {
+    var newSdpString = '';
+
+    newSdpString = sdpString.replace(/ generation 0/g, '');
+    newSdpString = newSdpString.replace(/ udp /g, ' UDP ');
+
+    return newSdpString;
+  }
+};
 var _LOG_KEY = 'SkylinkJS';
 
 
