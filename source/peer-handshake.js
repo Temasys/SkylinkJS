@@ -171,15 +171,8 @@ Skylink.prototype._peerPriorityWeight = 0;
 Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
   var self = this;
   var pc = self._peerConnections[targetMid] || self._addPeer(targetMid, peerBrowser);
+
   log.log([targetMid, null, null, 'Checking caller status'], peerBrowser);
-  // NOTE ALEX: handle the pc = 0 case, just to be sure
-  var inputConstraints = self._room.connection.offerConstraints;
-  var sc = self._room.connection.sdpConstraints;
-  for (var name in sc.mandatory) {
-    if (sc.mandatory.hasOwnProperty(name)) {
-      inputConstraints.mandatory[name] = sc.mandatory[name];
-    }
-  }
 
   // Added checks to ensure that connection object is defined first
   if (!pc) {
@@ -196,78 +189,59 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
     return;
   }
 
-  inputConstraints.optional.concat(sc.optional);
-  checkMediaDataChannelSettings(peerBrowser.agent, peerBrowser.version,
-    function(beOfferer, unifiedOfferConstraints) {
-    // attempt to force make firefox not to offer datachannel.
-    // we will not be using datachannel in MCU
+  var offerConstraints = {
+    offerToReceiveAudio: true,
+    offerToReceiveVideo: true
+  };
+
+  // NOTE: Removing ICE restart functionality as of now since Firefox does not support it yet
+  // Check if ICE connection failed or disconnected, and if so, do an ICE restart
+  /*if ([self.ICE_CONNECTION_STATE.DISCONNECTED, self.ICE_CONNECTION_STATE.FAILED].indexOf(pc.iceConnectionState) > -1) {
+    offerConstraints.iceRestart = true;
+  }*/
+
+  // Prevent undefined OS errors
+  peerBrowser.os = peerBrowser.os || '';
+
+  /*
+    Ignoring these old codes as Firefox 39 and below is no longer supported
     if (window.webrtcDetectedType === 'moz' && peerBrowser.agent === 'MCU') {
       unifiedOfferConstraints.mandatory = unifiedOfferConstraints.mandatory || {};
       unifiedOfferConstraints.mandatory.MozDontOfferDataChannel = true;
       beOfferer = true;
     }
 
-    unifiedOfferConstraints.mandatory.iceRestart = true;
-    peerBrowser.os = peerBrowser.os || '';
-
-    if (!(peerBrowser.agent === 'MCU' || self._hasMCU)) {
-      /*
-       // for windows firefox to mac chrome interopability
-      if (window.webrtcDetectedBrowser === 'firefox' &&
-        window.navigator.platform.indexOf('Win') === 0 &&
-        peerBrowser.agent !== 'firefox' &&
-        peerBrowser.agent !== 'MCU' &&
-        peerBrowser.os.indexOf('Mac') === 0) {
-        beOfferer = false;
-      }*/
-      if (window.webrtcDetectedBrowser === 'firefox' && peerBrowser.agent !== 'firefox') {
-        beOfferer = false;
-      }
-    } else {
-      beOfferer = true;
+    if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion >= 32) {
+      unifiedOfferConstraints = {
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: true
+      };
     }
+  */
 
-    if (beOfferer) {
-      if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion >= 32) {
-        unifiedOfferConstraints = {
-          offerToReceiveAudio: true,
-          offerToReceiveVideo: true
-        };
-
-        /*if (window.webrtcDetectedVersion > 37) {
-          unifiedOfferConstraints = {};
-        }*/
+  // Fallback to use mandatory constraints for plugin based browsers
+  if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1) {
+    offerConstraints = {
+      mandatory: {
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: true
       }
+    };
+  }
 
-      log.debug([targetMid, null, null, 'Creating offer with config:'], unifiedOfferConstraints);
+  log.debug([targetMid, null, null, 'Creating offer with config:'], offerConstraints);
 
-      pc.createOffer(function(offer) {
-        log.debug([targetMid, null, null, 'Created offer'], offer);
-        self._setLocalAndSendMessage(targetMid, offer);
-      }, function(error) {
-        self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR,
-          targetMid, error);
-        log.error([targetMid, null, null, 'Failed creating an offer:'], error);
-      }, unifiedOfferConstraints);
-    } else {
-      log.debug([targetMid, null, null, 'User\'s browser is not eligible to create ' +
-        'the offer to the other peer. Requesting other peer to create the offer instead'
-        ], peerBrowser);
+  pc.createOffer(function(offer) {
+    log.debug([targetMid, null, null, 'Created offer'], offer);
 
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.WELCOME,
-        mid: self._user.sid,
-        rid: self._room.id,
-        agent: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
-        os: window.navigator.platform,
-        userInfo: self.getPeerInfo(),
-        target: targetMid,
-        weight: -1,
-        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
-      });
-    }
-  }, inputConstraints);
+    self._setLocalAndSendMessage(targetMid, offer);
+
+  }, function(error) {
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+
+    log.error([targetMid, null, null, 'Failed creating an offer:'], error);
+
+  }, offerConstraints);
 };
 
 /**
