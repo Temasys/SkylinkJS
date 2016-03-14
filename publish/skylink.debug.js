@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Tue Mar 08 2016 18:26:56 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Mon Mar 14 2016 17:45:05 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6083,7 +6083,8 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
         start: self._room.startDateTime,
         len: self._room.duration,
         isPrivileged: self._isPrivileged === true, // Default to false if undefined
-        autoIntroduce: self._autoIntroduce!== false // Default to true if undefined
+        autoIntroduce: self._autoIntroduce!== false, // Default to true if undefined
+        key: self._appKey
       });
     }
   };
@@ -8965,6 +8966,7 @@ Skylink.prototype._EVENTS = {
    *   object that is sent in this connection.
    *   To display the MediaStream object to a <code>video</code> or <code>audio</code>, simply invoke:<br>
    *   <code>attachMediaStream(domElement, stream);</code>.
+   * @param {Boolean} isSelf The flag that indicates if self is the Peer.
    * @param {Object} peerInfo The peer information associated
    *   with the Peer Connection.
    * @param {String|JSON} peerInfo.userData The custom user data
@@ -9030,7 +9032,6 @@ Skylink.prototype._EVENTS = {
    * @param {Number} peerInfo.agent.version The Peer platform browser or agent version.
    * @param {Number} peerInfo.agent.os The Peer platform name.
    * @param {String} peerInfo.room The current room that the Peer is in.
-   * @param {Boolean} isSelf The flag that indicates if self is the Peer.
    * @component Events
    * @for Skylink
    * @since 0.5.5

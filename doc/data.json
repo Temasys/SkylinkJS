@@ -3718,20 +3718,6 @@
         {
             "file": "source/peer-privileged.js",
             "line": 65,
-            "description": "Parent key in case the current key is alias.\nIf the current key is not alias, this is the same as _appKey",
-            "itemtype": "attribute",
-            "name": "_parentKey",
-            "type": "String",
-            "default": "null",
-            "access": "private",
-            "tagname": "",
-            "component": "Peer",
-            "since": "0.6.1",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/peer-privileged.js",
-            "line": 78,
             "description": "List of peers retrieved from signaling",
             "itemtype": "attribute",
             "name": "_peerList",
@@ -3745,7 +3731,7 @@
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 90,
+            "line": 77,
             "description": "Retrieves the list of rooms and peers under the same realm based\n  on the Application Key configured in {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  from the platform signaling.\nThis will only work if self is a privileged Peer.",
             "itemtype": "method",
             "name": "getPeers",
@@ -3786,7 +3772,7 @@
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 181,
+            "line": 163,
             "description": "Introduces two Peers to each other to start a connection with each other.\nThis will only work if self is a privileged Peer.",
             "itemtype": "method",
             "name": "introducePeer",
@@ -5178,7 +5164,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 694,
+            "line": 693,
             "description": "Starts loading the required dependencies and then retrieve the required\n  connection information from the platform server.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -5192,7 +5178,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 789,
+            "line": 788,
             "description": "Starts loading the required connection information to start connection\n  based on the selected room in {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -5225,7 +5211,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 840,
+            "line": 839,
             "description": "Initialises and configures Skylink to begin any connection.\n<b>NOTE</b> that this is the first method that has to be called before\n  using any other functionalities other than debugging features like\n  {{#crossLink \"Skylink/setLogLevel:method\"}}setLogLevel(){{/crossLink}} and\n  {{#crossLink \"Skylink/setDebugMode:method\"}}setDebugMode(){{/crossLink}} and\n  after all event subscriptions like {{#crossLink \"Skylink/on:method\"}}on(){{/crossLink}}\n  or {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}} has been made.\nThis is where the Application Key is configured and attached to Skylink for usage.",
             "itemtype": "method",
             "name": "init",
@@ -7332,6 +7318,11 @@
                     "type": "Object"
                 },
                 {
+                    "name": "isSelf",
+                    "description": "The flag that indicates if self is the Peer.",
+                    "type": "Boolean"
+                },
+                {
                     "name": "peerInfo",
                     "description": "The peer information associated\n  with the Peer Connection.",
                     "type": "Object",
@@ -7472,11 +7463,6 @@
                             "type": "String"
                         }
                     ]
-                },
-                {
-                    "name": "isSelf",
-                    "description": "The flag that indicates if self is the Peer.",
-                    "type": "Boolean"
                 }
             ],
             "component": "Events",
@@ -13049,24 +13035,20 @@
             "line": " source/peer-privileged.js:65"
         },
         {
+            "message": "unknown tag: trigger",
+            "line": " source/peer-privileged.js:77"
+        },
+        {
             "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:78"
+            "line": " source/peer-privileged.js:77"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-privileged.js:90"
+            "line": " source/peer-privileged.js:163"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:90"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/peer-privileged.js:181"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:181"
+            "line": " source/peer-privileged.js:163"
         },
         {
             "message": "unknown tag: component",
@@ -13214,27 +13196,27 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:694"
+            "line": " source/room-init.js:693"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:694"
+            "line": " source/room-init.js:693"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:789"
+            "line": " source/room-init.js:788"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:789"
+            "line": " source/room-init.js:788"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:840"
+            "line": " source/room-init.js:839"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:840"
+            "line": " source/room-init.js:839"
         },
         {
             "message": "unknown tag: component",

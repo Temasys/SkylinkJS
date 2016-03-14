@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Tue Mar 08 2016 18:26:56 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Mon Mar 14 2016 17:45:05 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8936,7 +8936,7 @@ if ( navigator.mozGetUserMedia
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.10 - Tue Mar 08 2016 18:26:56 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Mon Mar 14 2016 17:45:05 GMT+0800 (SGT) */
 
 (function() {
 
@@ -15021,7 +15021,8 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
         start: self._room.startDateTime,
         len: self._room.duration,
         isPrivileged: self._isPrivileged === true, // Default to false if undefined
-        autoIntroduce: self._autoIntroduce!== false // Default to true if undefined
+        autoIntroduce: self._autoIntroduce!== false, // Default to true if undefined
+        key: self._appKey
       });
     }
   };
@@ -17903,6 +17904,7 @@ Skylink.prototype._EVENTS = {
    *   object that is sent in this connection.
    *   To display the MediaStream object to a <code>video</code> or <code>audio</code>, simply invoke:<br>
    *   <code>attachMediaStream(domElement, stream);</code>.
+   * @param {Boolean} isSelf The flag that indicates if self is the Peer.
    * @param {Object} peerInfo The peer information associated
    *   with the Peer Connection.
    * @param {String|JSON} peerInfo.userData The custom user data
@@ -17968,7 +17970,6 @@ Skylink.prototype._EVENTS = {
    * @param {Number} peerInfo.agent.version The Peer platform browser or agent version.
    * @param {Number} peerInfo.agent.os The Peer platform name.
    * @param {String} peerInfo.room The current room that the Peer is in.
-   * @param {Boolean} isSelf The flag that indicates if self is the Peer.
    * @component Events
    * @for Skylink
    * @since 0.5.5

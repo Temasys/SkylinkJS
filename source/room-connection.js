@@ -493,7 +493,8 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
         start: self._room.startDateTime,
         len: self._room.duration,
         isPrivileged: self._isPrivileged === true, // Default to false if undefined
-        autoIntroduce: self._autoIntroduce!== false // Default to true if undefined
+        autoIntroduce: self._autoIntroduce!== false, // Default to true if undefined
+        key: self._appKey
       });
     }
   };
