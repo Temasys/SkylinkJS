@@ -1287,14 +1287,28 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }
 
+  // Added checks if there is a current remote sessionDescription being processing before processing this one
+  if (pc.processingRemoteSDP) {
+    log.warn([targetMid, 'RTCSessionDescription', 'offer',
+      'Dropping of setting local offer as there is another ' +
+      'sessionDescription being processed ->'], offer);
+    return;
+  }
+
+  pc.processingRemoteSDP = true;
+
   pc.setRemoteDescription(offer, function() {
     log.debug([targetMid, 'RTCSessionDescription', message.type, 'Remote description set']);
     pc.setOffer = 'remote';
+    pc.processingRemoteSDP = false;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
     self._doAnswer(targetMid);
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+
+    pc.processingRemoteSDP = false;
+
     log.error([targetMid, null, message.type, 'Failed setting remote description:'], error);
   });
 };
@@ -1464,14 +1478,28 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }
 
+  // Added checks if there is a current remote sessionDescription being processing before processing this one
+  if (pc.processingRemoteSDP) {
+    log.warn([targetMid, 'RTCSessionDescription', 'answer',
+      'Dropping of setting local answer as there is another ' +
+      'sessionDescription being processed ->'], answer);
+    return;
+  }
+
+  pc.processingRemoteSDP = true;
+
   pc.setRemoteDescription(answer, function() {
     log.debug([targetMid, null, message.type, 'Remote description set']);
     pc.setAnswer = 'remote';
+    pc.processingRemoteSDP = false;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
 
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+
+    pc.processingRemoteSDP = false;
+
     log.error([targetMid, null, message.type, 'Failed setting remote description:'], {
       error: error,
       state: pc.signalingState

@@ -180,6 +180,22 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       inputConstraints.mandatory[name] = sc.mandatory[name];
     }
   }
+
+  // Added checks to ensure that connection object is defined first
+  if (!pc) {
+    log.warn([targetMid, 'RTCSessionDescription', 'offer', 'Dropping of creating of offer ' +
+      'as connection does not exists']);
+    return;
+  }
+
+  // Added checks to ensure that state is "stable" if setting local "offer"
+  if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
+    log.warn([targetMid, 'RTCSessionDescription', 'offer',
+      'Dropping of creating of offer as signalingState is not "' +
+      self.PEER_CONNECTION_STATE.STABLE + '" ->'], pc.signalingState);
+    return;
+  }
+
   inputConstraints.optional.concat(sc.optional);
   checkMediaDataChannelSettings(peerBrowser.agent, peerBrowser.version,
     function(beOfferer, unifiedOfferConstraints) {
@@ -270,22 +286,31 @@ Skylink.prototype._doAnswer = function(targetMid) {
   log.log([targetMid, null, null, 'Creating answer with config:'],
     self._room.connection.sdpConstraints);
   var pc = self._peerConnections[targetMid];
-  if (pc) {
-    // No ICE restart constraints for createAnswer as it fails in chrome 48
-    // { iceRestart: true }
-    pc.createAnswer(function(answer) {
-      log.debug([targetMid, null, null, 'Created answer'], answer);
-      self._setLocalAndSendMessage(targetMid, answer);
-    }, function(error) {
-      log.error([targetMid, null, null, 'Failed creating an answer:'], error);
-      self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-    });//, self._room.connection.sdpConstraints);
-  } else {
-    /* Houston ..*/
-    log.error([targetMid, null, null, 'Requested to create an answer but user ' +
-      'does not have any existing connection to peer']);
+
+  // Added checks to ensure that connection object is defined first
+  if (!pc) {
+    log.warn([targetMid, 'RTCSessionDescription', 'answer', 'Dropping of creating of answer ' +
+      'as connection does not exists']);
     return;
   }
+
+  // Added checks to ensure that state is "have-remote-offer" if setting local "answer"
+  if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
+    log.warn([targetMid, 'RTCSessionDescription', 'answer',
+      'Dropping of creating of answer as signalingState is not "' +
+      self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER + '" ->'], pc.signalingState);
+    return;
+  }
+
+  // No ICE restart constraints for createAnswer as it fails in chrome 48
+  // { iceRestart: true }
+  pc.createAnswer(function(answer) {
+    log.debug([targetMid, null, null, 'Created answer'], answer);
+    self._setLocalAndSendMessage(targetMid, answer);
+  }, function(error) {
+    log.error([targetMid, null, null, 'Failed creating an answer:'], error);
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+  });//, self._room.connection.sdpConstraints);
 };
 
 /**
@@ -440,6 +465,38 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     return;
   }*/
 
+  // Added checks to ensure that sessionDescription is defined first
+  if (!(!!sessionDescription && !!sessionDescription.sdp)) {
+    log.warn([targetMid, 'RTCSessionDescription', null, 'Dropping of setting local unknown sessionDescription ' +
+      'as received sessionDescription is empty ->'], sessionDescription);
+    return;
+  }
+
+  // Added checks to ensure that connection object is defined first
+  if (!pc) {
+    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Dropping of setting local "' +
+      sessionDescription.type + '" as connection does not exists']);
+    return;
+  }
+
+  // Added checks to ensure that state is "stable" if setting local "offer"
+  if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &&
+    pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
+    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type,
+      'Dropping of setting local "offer" as signalingState is not "' +
+      self.PEER_CONNECTION_STATE.STABLE + '" ->'], pc.signalingState);
+    return;
+
+  // Added checks to ensure that state is "have-remote-offer" if setting local "answer"
+  } else if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &&
+    pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
+    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type,
+      'Dropping of setting local "answer" as signalingState is not "' +
+      self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER + '" ->'], pc.signalingState);
+    return;
+  }
+
+
   // NOTE ALEX: handle the pc = 0 case, just to be sure
   var sdpLines = sessionDescription.sdp.split('\r\n');
 
@@ -511,8 +568,21 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
     'Updated session description:'], sessionDescription);
 
+  // Added checks if there is a current local sessionDescription being processing before processing this one
+  if (pc.processingLocalSDP) {
+    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type,
+      'Dropping of setting local ' + sessionDescription.type + ' as there is another ' +
+      'sessionDescription being processed ->'], sessionDescription);
+    return;
+  }
+
+  pc.processingLocalSDP = true;
+
   pc.setLocalDescription(sessionDescription, function() {
     log.debug([targetMid, sessionDescription.type, 'Local description set']);
+
+    pc.processingLocalSDP = false;
+
     self._trigger('handshakeProgress', sessionDescription.type, targetMid);
     if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
       pc.setAnswer = 'local';
@@ -547,6 +617,9 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     }
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+
+    pc.processingLocalSDP = false;
+
     log.error([targetMid, 'RTCSessionDescription', sessionDescription.type,
       'Failed setting local description: '], error);
   });

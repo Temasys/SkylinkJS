@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Thu Mar 10 2016 10:17:38 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Mon Mar 14 2016 17:52:21 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4273,6 +4273,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.hasScreen = !!isScreenSharing;
   pc.hasMainChannel = false;
   pc.firefoxStreamId = '';
+  pc.processingLocalSDP = false;
+  pc.processingRemoteSDP = false;
 
   // datachannels
   self._dataChannels[targetMid] = {};
@@ -5002,6 +5004,22 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       inputConstraints.mandatory[name] = sc.mandatory[name];
     }
   }
+
+  // Added checks to ensure that connection object is defined first
+  if (!pc) {
+    log.warn([targetMid, 'RTCSessionDescription', 'offer', 'Dropping of creating of offer ' +
+      'as connection does not exists']);
+    return;
+  }
+
+  // Added checks to ensure that state is "stable" if setting local "offer"
+  if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
+    log.warn([targetMid, 'RTCSessionDescription', 'offer',
+      'Dropping of creating of offer as signalingState is not "' +
+      self.PEER_CONNECTION_STATE.STABLE + '" ->'], pc.signalingState);
+    return;
+  }
+
   inputConstraints.optional.concat(sc.optional);
   checkMediaDataChannelSettings(peerBrowser.agent, peerBrowser.version,
     function(beOfferer, unifiedOfferConstraints) {
@@ -5092,22 +5110,31 @@ Skylink.prototype._doAnswer = function(targetMid) {
   log.log([targetMid, null, null, 'Creating answer with config:'],
     self._room.connection.sdpConstraints);
   var pc = self._peerConnections[targetMid];
-  if (pc) {
-    // No ICE restart constraints for createAnswer as it fails in chrome 48
-    // { iceRestart: true }
-    pc.createAnswer(function(answer) {
-      log.debug([targetMid, null, null, 'Created answer'], answer);
-      self._setLocalAndSendMessage(targetMid, answer);
-    }, function(error) {
-      log.error([targetMid, null, null, 'Failed creating an answer:'], error);
-      self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-    });//, self._room.connection.sdpConstraints);
-  } else {
-    /* Houston ..*/
-    log.error([targetMid, null, null, 'Requested to create an answer but user ' +
-      'does not have any existing connection to peer']);
+
+  // Added checks to ensure that connection object is defined first
+  if (!pc) {
+    log.warn([targetMid, 'RTCSessionDescription', 'answer', 'Dropping of creating of answer ' +
+      'as connection does not exists']);
     return;
   }
+
+  // Added checks to ensure that state is "have-remote-offer" if setting local "answer"
+  if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
+    log.warn([targetMid, 'RTCSessionDescription', 'answer',
+      'Dropping of creating of answer as signalingState is not "' +
+      self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER + '" ->'], pc.signalingState);
+    return;
+  }
+
+  // No ICE restart constraints for createAnswer as it fails in chrome 48
+  // { iceRestart: true }
+  pc.createAnswer(function(answer) {
+    log.debug([targetMid, null, null, 'Created answer'], answer);
+    self._setLocalAndSendMessage(targetMid, answer);
+  }, function(error) {
+    log.error([targetMid, null, null, 'Failed creating an answer:'], error);
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+  });//, self._room.connection.sdpConstraints);
 };
 
 /**
@@ -5262,6 +5289,38 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     return;
   }*/
 
+  // Added checks to ensure that sessionDescription is defined first
+  if (!(!!sessionDescription && !!sessionDescription.sdp)) {
+    log.warn([targetMid, 'RTCSessionDescription', null, 'Dropping of setting local unknown sessionDescription ' +
+      'as received sessionDescription is empty ->'], sessionDescription);
+    return;
+  }
+
+  // Added checks to ensure that connection object is defined first
+  if (!pc) {
+    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Dropping of setting local "' +
+      sessionDescription.type + '" as connection does not exists']);
+    return;
+  }
+
+  // Added checks to ensure that state is "stable" if setting local "offer"
+  if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &&
+    pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
+    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type,
+      'Dropping of setting local "offer" as signalingState is not "' +
+      self.PEER_CONNECTION_STATE.STABLE + '" ->'], pc.signalingState);
+    return;
+
+  // Added checks to ensure that state is "have-remote-offer" if setting local "answer"
+  } else if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &&
+    pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
+    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type,
+      'Dropping of setting local "answer" as signalingState is not "' +
+      self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER + '" ->'], pc.signalingState);
+    return;
+  }
+
+
   // NOTE ALEX: handle the pc = 0 case, just to be sure
   var sdpLines = sessionDescription.sdp.split('\r\n');
 
@@ -5333,8 +5392,21 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
     'Updated session description:'], sessionDescription);
 
+  // Added checks if there is a current local sessionDescription being processing before processing this one
+  if (pc.processingLocalSDP) {
+    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type,
+      'Dropping of setting local ' + sessionDescription.type + ' as there is another ' +
+      'sessionDescription being processed ->'], sessionDescription);
+    return;
+  }
+
+  pc.processingLocalSDP = true;
+
   pc.setLocalDescription(sessionDescription, function() {
     log.debug([targetMid, sessionDescription.type, 'Local description set']);
+
+    pc.processingLocalSDP = false;
+
     self._trigger('handshakeProgress', sessionDescription.type, targetMid);
     if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
       pc.setAnswer = 'local';
@@ -5369,6 +5441,9 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     }
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+
+    pc.processingLocalSDP = false;
+
     log.error([targetMid, 'RTCSessionDescription', sessionDescription.type,
       'Failed setting local description: '], error);
   });
@@ -8823,6 +8898,82 @@ Skylink.prototype._EVENTS = {
   peerLeft: [],
 
   /**
+   * Event triggered when self is disconnected from room.
+   * @event sessionDisconnect
+   * @param {String} peerId The Peer ID of the peer
+   *   that had left the room.
+   * @param {Object} peerInfo The peer information associated
+   *   with the Peer Connection.
+   * @param {String|JSON} peerInfo.userData The custom user data
+   *   information set by developer. This custom user data can also
+   *   be set in <a href="#method_setUserData">setUserData()</a>.
+   * @param {JSON} peerInfo.settings The Peer Stream
+   *   streaming settings information. If both audio and video
+   *   option is <code>false</code>, there should be no
+   *   receiving remote Stream object from this associated Peer.
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] The
+   *   Peer Stream streaming audio settings. If
+   *   <code>false</code>, it means that audio streaming is disabled in
+   *   the remote Stream of the Peer.
+   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
+   *   stereo option should be explictly enabled to an OPUS enabled audio stream.
+   *   Check the <code>audioCodec</code> configuration settings in
+   *   <a href="#method_init">init()</a>
+   *   to enable OPUS as the audio codec. Note that stereo is already enabled
+   *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
+   *   enable stereo in the audio streaming.
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] The Peer
+   *   Stream streaming video settings. If <code>false</code>, it means that
+   *   video streaming is disabled in the remote Stream of the Peer.
+   * @param {JSON} [peerInfo.settings.video.resolution] The Peer
+   *   Stream streaming video resolution settings. Setting the resolution may
+   *   not force set the resolution provided as it depends on the how the
+   *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+   * @param {Number} [peerInfo.settings.video.resolution.width] The Peer
+   *   Stream streaming video resolution width.
+   * @param {Number} [peerInfo.settings.video.resolution.height] The Peer
+   *   Stream streaming video resolution height.
+   * @param {Number} [peerInfo.settings.video.frameRate] The Peer
+   *   Stream streaming video maximum frameRate.
+   * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
+   *   that indicates if the Peer connection Stream object sent
+   *   is a screensharing stream or not.
+   * @param {String} [peerInfo.settings.bandwidth] The Peer
+   *   streaming bandwidth settings. Setting the bandwidth flags may not
+   *   force set the bandwidth for each connection stream channels as it depends
+   *   on how the browser handles the bandwidth bitrate. Values are configured
+   *   in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.audio] The configured
+   *   audio stream channel for the remote Stream object bandwidth
+   *   that audio streaming should use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.video] The configured
+   *   video stream channel for the remote Stream object bandwidth
+   *   that video streaming should use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.data] The configured
+   *   datachannel channel for the DataChannel connection bandwidth
+   *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+   * @param {JSON} peerInfo.mediaStatus The Peer Stream mute
+   *   settings for both audio and video streamings.
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
+   *   indicates if the remote Stream object audio streaming is muted. If
+   *   there is no audio streaming enabled for the Peer, by default,
+   *   it is set to <code>true</code>.
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] The flag that
+   *   indicates if the remote Stream object video streaming is muted. If
+   *   there is no video streaming enabled for the Peer, by default,
+   *   it is set to <code>true</code>.
+   * @param {JSON} peerInfo.agent The Peer platform agent information.
+   * @param {String} peerInfo.agent.name The Peer platform browser or agent name.
+   * @param {Number} peerInfo.agent.version The Peer platform browser or agent version.
+   * @param {Number} peerInfo.agent.os The Peer platform name.
+   * @param {String} peerInfo.room The current room that the Peer is in.
+   * @component Events
+   * @for Skylink
+   * @since 0.6.10
+   */
+  sessionDisconnect: [],
+
+  /**
    * Event triggered when a Stream is sent by Peer.
    * - This event may trigger for self, which indicates that self has joined the room
    *   and is sending this Stream object to other Peers connected in the room.
@@ -10298,6 +10449,11 @@ Skylink.prototype._createSocket = function (type) {
     self._channelOpen = false;
     self._trigger('channelClose');
     log.log([null, 'Socket', null, 'Channel closed']);
+
+    if (self._inRoom) {
+      self.leaveRoom(false);
+      self._trigger('sessionDisconnect', self._user.sid, self.getPeerInfo());
+    }
   });
 
   self._socket.on('message', function(message) {
@@ -11657,14 +11813,28 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }
 
+  // Added checks if there is a current remote sessionDescription being processing before processing this one
+  if (pc.processingRemoteSDP) {
+    log.warn([targetMid, 'RTCSessionDescription', 'offer',
+      'Dropping of setting local offer as there is another ' +
+      'sessionDescription being processed ->'], offer);
+    return;
+  }
+
+  pc.processingRemoteSDP = true;
+
   pc.setRemoteDescription(offer, function() {
     log.debug([targetMid, 'RTCSessionDescription', message.type, 'Remote description set']);
     pc.setOffer = 'remote';
+    pc.processingRemoteSDP = false;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
     self._doAnswer(targetMid);
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+
+    pc.processingRemoteSDP = false;
+
     log.error([targetMid, null, message.type, 'Failed setting remote description:'], error);
   });
 };
@@ -11834,14 +12004,28 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }
 
+  // Added checks if there is a current remote sessionDescription being processing before processing this one
+  if (pc.processingRemoteSDP) {
+    log.warn([targetMid, 'RTCSessionDescription', 'answer',
+      'Dropping of setting local answer as there is another ' +
+      'sessionDescription being processed ->'], answer);
+    return;
+  }
+
+  pc.processingRemoteSDP = true;
+
   pc.setRemoteDescription(answer, function() {
     log.debug([targetMid, null, message.type, 'Remote description set']);
     pc.setAnswer = 'remote';
+    pc.processingRemoteSDP = false;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
 
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+
+    pc.processingRemoteSDP = false;
+
     log.error([targetMid, null, message.type, 'Failed setting remote description:'], {
       error: error,
       state: pc.signalingState
