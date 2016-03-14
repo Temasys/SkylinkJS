@@ -191,7 +191,9 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     established: false,
     checker: null,
     retries: 0,
-    iceFailures: 0
+    iceFailures: 0,
+    processingLocalSDP: false,
+    processingRemoteSDP: false
   };
 
   /**
@@ -275,7 +277,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
         superRef._trigger('candidateGenerationState', superRef.CANDIDATE_GENERATION_STATE.COMPLETED, ref.id);
 
-        // Check if trickle ICE is disabled, and send the local RTCSessionDescriptin if true
+        // Check if trickle ICE is disabled, and send the local RTCSessionDescription if true
         if (!ref._connectionSettings.enableIceTrickle) {
           var sessionDescription = ref._RTCPeerConnection.localDescription;
 
@@ -585,10 +587,21 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
     log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting local ' + sessionDescription.type + ' ->'], sessionDescription);
 
+    // Add checks if RTCPeerConnection is processing a local RTCSessionDescription before processing a new one
+    if (ref._connectionStatus.processingLocalSDP) {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of setting local ' + sessionDescription.type +
+        ' as another local description is being processed ->'], sessionDescription);
+      return;
+    }
+
+    ref._connectionStatus.processingLocalSDP = true;
+
     // Set the local RTCSessionDescription
     //- Success case
     ref._RTCPeerConnection.setLocalDescription(sessionDescription, function () {
       log.log([ref.id, 'Peer', 'RTCSessionDescription', 'Set local ' + sessionDescription.type + ' success ->'], sessionDescription);
+
+      ref._connectionStatus.processingLocalSDP = false;
 
       /* TODO: Fix the firefox local answer first before sending to Chrome/Opera/IE/Safari */
 
@@ -615,6 +628,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     //- Failure case
     }, function (error) {
       log.error([ref.id, 'Peer', 'RTCSessionDescription', 'Failed setting local ' + sessionDescription.type + ' ->'], error);
+
+      ref._connectionStatus.processingLocalSDP = false;
 
       superRef._trigger('handshakeProgress', superRef.HANDSHAKE_PROGRESS.ERROR, ref.id, error);
     });
@@ -657,10 +672,21 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
     log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting remote ' + sessionDescription.type + ' ->'], sessionDescription);
 
+    // Add checks if RTCPeerConnection is processing a local RTCSessionDescription before processing a new one
+    if (ref._connectionStatus.processingRemoteSDP) {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of setting remote ' + sessionDescription.type +
+        ' as another remote description is being processed ->'], sessionDescription);
+      return;
+    }
+
+    ref._connectionStatus.processingRemoteSDP = true;
+
     // Set the remote RTCSessionDescription
     //- Success case
     ref._RTCPeerConnection.setRemoteDescription(sessionDescription, function () {
       log.log([ref.id, 'Peer', 'RTCSessionDescription', 'Set remote ' + sessionDescription.type + ' success ->'], sessionDescription);
+
+      ref._connectionStatus.processingRemoteSDP = false;
 
       superRef._trigger('handshakeProgress', sessionDescription.type, ref.id);
 
@@ -679,6 +705,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     //- Failure case
     }, function (error) {
       log.error([ref.id, 'Peer', 'RTCSessionDescription', 'Failed setting remote ' + sessionDescription.type + ' ->'], error);
+
+      ref._connectionStatus.processingRemoteSDP = false;
 
       superRef._trigger('handshakeProgress', superRef.HANDSHAKE_PROGRESS.ERROR, ref.id, error);
     });
