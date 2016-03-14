@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Mon Mar 14 2016 17:45:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Mon Mar 14 2016 17:52:21 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8936,7 +8936,7 @@ if ( navigator.mozGetUserMedia
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.10 - Mon Mar 14 2016 17:45:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Mon Mar 14 2016 17:52:21 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13211,6 +13211,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.hasScreen = !!isScreenSharing;
   pc.hasMainChannel = false;
   pc.firefoxStreamId = '';
+  pc.processingLocalSDP = false;
+  pc.processingRemoteSDP = false;
 
   // datachannels
   self._dataChannels[targetMid] = {};
@@ -14328,8 +14330,21 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
     'Updated session description:'], sessionDescription);
 
+  // Added checks if there is a current local sessionDescription being processing before processing this one
+  if (pc.processingLocalSDP) {
+    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type,
+      'Dropping of setting local ' + sessionDescription.type + ' as there is another ' +
+      'sessionDescription being processed ->'], sessionDescription);
+    return;
+  }
+
+  pc.processingLocalSDP = true;
+
   pc.setLocalDescription(sessionDescription, function() {
     log.debug([targetMid, sessionDescription.type, 'Local description set']);
+
+    pc.processingLocalSDP = false;
+
     self._trigger('handshakeProgress', sessionDescription.type, targetMid);
     if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
       pc.setAnswer = 'local';
@@ -14364,6 +14379,9 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     }
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+
+    pc.processingLocalSDP = false;
+
     log.error([targetMid, 'RTCSessionDescription', sessionDescription.type,
       'Failed setting local description: '], error);
   });
@@ -20733,14 +20751,28 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }
 
+  // Added checks if there is a current remote sessionDescription being processing before processing this one
+  if (pc.processingRemoteSDP) {
+    log.warn([targetMid, 'RTCSessionDescription', 'offer',
+      'Dropping of setting local offer as there is another ' +
+      'sessionDescription being processed ->'], offer);
+    return;
+  }
+
+  pc.processingRemoteSDP = true;
+
   pc.setRemoteDescription(offer, function() {
     log.debug([targetMid, 'RTCSessionDescription', message.type, 'Remote description set']);
     pc.setOffer = 'remote';
+    pc.processingRemoteSDP = false;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
     self._doAnswer(targetMid);
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+
+    pc.processingRemoteSDP = false;
+
     log.error([targetMid, null, message.type, 'Failed setting remote description:'], error);
   });
 };
@@ -20910,14 +20942,28 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }
 
+  // Added checks if there is a current remote sessionDescription being processing before processing this one
+  if (pc.processingRemoteSDP) {
+    log.warn([targetMid, 'RTCSessionDescription', 'answer',
+      'Dropping of setting local answer as there is another ' +
+      'sessionDescription being processed ->'], answer);
+    return;
+  }
+
+  pc.processingRemoteSDP = true;
+
   pc.setRemoteDescription(answer, function() {
     log.debug([targetMid, null, message.type, 'Remote description set']);
     pc.setAnswer = 'remote';
+    pc.processingRemoteSDP = false;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
 
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+
+    pc.processingRemoteSDP = false;
+
     log.error([targetMid, null, message.type, 'Failed setting remote description:'], {
       error: error,
       state: pc.signalingState

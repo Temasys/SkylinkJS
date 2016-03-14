@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Mon Mar 14 2016 17:45:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Mon Mar 14 2016 17:52:21 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4273,6 +4273,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.hasScreen = !!isScreenSharing;
   pc.hasMainChannel = false;
   pc.firefoxStreamId = '';
+  pc.processingLocalSDP = false;
+  pc.processingRemoteSDP = false;
 
   // datachannels
   self._dataChannels[targetMid] = {};
@@ -5390,8 +5392,21 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
     'Updated session description:'], sessionDescription);
 
+  // Added checks if there is a current local sessionDescription being processing before processing this one
+  if (pc.processingLocalSDP) {
+    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type,
+      'Dropping of setting local ' + sessionDescription.type + ' as there is another ' +
+      'sessionDescription being processed ->'], sessionDescription);
+    return;
+  }
+
+  pc.processingLocalSDP = true;
+
   pc.setLocalDescription(sessionDescription, function() {
     log.debug([targetMid, sessionDescription.type, 'Local description set']);
+
+    pc.processingLocalSDP = false;
+
     self._trigger('handshakeProgress', sessionDescription.type, targetMid);
     if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
       pc.setAnswer = 'local';
@@ -5426,6 +5441,9 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     }
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+
+    pc.processingLocalSDP = false;
+
     log.error([targetMid, 'RTCSessionDescription', sessionDescription.type,
       'Failed setting local description: '], error);
   });
@@ -11795,14 +11813,28 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }
 
+  // Added checks if there is a current remote sessionDescription being processing before processing this one
+  if (pc.processingRemoteSDP) {
+    log.warn([targetMid, 'RTCSessionDescription', 'offer',
+      'Dropping of setting local offer as there is another ' +
+      'sessionDescription being processed ->'], offer);
+    return;
+  }
+
+  pc.processingRemoteSDP = true;
+
   pc.setRemoteDescription(offer, function() {
     log.debug([targetMid, 'RTCSessionDescription', message.type, 'Remote description set']);
     pc.setOffer = 'remote';
+    pc.processingRemoteSDP = false;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
     self._doAnswer(targetMid);
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+
+    pc.processingRemoteSDP = false;
+
     log.error([targetMid, null, message.type, 'Failed setting remote description:'], error);
   });
 };
@@ -11972,14 +12004,28 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }
 
+  // Added checks if there is a current remote sessionDescription being processing before processing this one
+  if (pc.processingRemoteSDP) {
+    log.warn([targetMid, 'RTCSessionDescription', 'answer',
+      'Dropping of setting local answer as there is another ' +
+      'sessionDescription being processed ->'], answer);
+    return;
+  }
+
+  pc.processingRemoteSDP = true;
+
   pc.setRemoteDescription(answer, function() {
     log.debug([targetMid, null, message.type, 'Remote description set']);
     pc.setAnswer = 'remote';
+    pc.processingRemoteSDP = false;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
 
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+
+    pc.processingRemoteSDP = false;
+
     log.error([targetMid, null, message.type, 'Failed setting remote description:'], {
       error: error,
       state: pc.signalingState
