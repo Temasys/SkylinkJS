@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Tue Mar 15 2016 22:40:54 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Wed Mar 16 2016 00:21:30 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -9189,7 +9189,7 @@ if ( navigator.mozGetUserMedia
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.10 - Tue Mar 15 2016 22:40:54 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Wed Mar 16 2016 00:21:30 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9231,6 +9231,71 @@ if (!Object.keys) {
       return result;
     }
   })()
+}
+
+// Array.forEach polyfill
+// Production steps of ECMA-262, Edition 5, 15.4.4.18
+// Reference: http://es5.github.io/#x15.4.4.18
+if (!Array.prototype.forEach) {
+
+  Array.prototype.forEach = function(callback, thisArg) {
+
+    var T, k;
+
+    if (this == null) {
+      throw new TypeError(' this is null or not defined');
+    }
+
+    // 1. Let O be the result of calling toObject() passing the
+    // |this| value as the argument.
+    var O = Object(this);
+
+    // 2. Let lenValue be the result of calling the Get() internal
+    // method of O with the argument "length".
+    // 3. Let len be toUint32(lenValue).
+    var len = O.length >>> 0;
+
+    // 4. If isCallable(callback) is false, throw a TypeError exception.
+    // See: http://es5.github.com/#x9.11
+    if (typeof callback !== "function") {
+      throw new TypeError(callback + ' is not a function');
+    }
+
+    // 5. If thisArg was supplied, let T be thisArg; else let
+    // T be undefined.
+    if (arguments.length > 1) {
+      T = thisArg;
+    }
+
+    // 6. Let k be 0
+    k = 0;
+
+    // 7. Repeat, while k < len
+    while (k < len) {
+
+      var kValue;
+
+      // a. Let Pk be ToString(k).
+      //    This is implicit for LHS operands of the in operator
+      // b. Let kPresent be the result of calling the HasProperty
+      //    internal method of O with argument Pk.
+      //    This step can be combined with c
+      // c. If kPresent is true, then
+      if (k in O) {
+
+        // i. Let kValue be the result of calling the Get internal
+        // method of O with argument Pk.
+        kValue = O[k];
+
+        // ii. Call the Call internal method of callback with T as
+        // the this value and argument list containing kValue, k, and O.
+        callback.call(T, kValue, k, O);
+      }
+      // d. Increase k by 1.
+      k++;
+    }
+    // 8. return undefined
+  };
 }
 
 // Mozilla provided polyfill for Date.getISOString()
@@ -15265,17 +15330,16 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
    * @since 0.6.x
    */
   var SkylinkPeer = function () {
-    // peerData is basically the data received in the message object in "welcome" / "enter"
     // Configure for enableDataChannel setting
     if (typeof peerData.enableDataChannel === 'boolean') {
-      // Both the Peer and the User has to have datachannel option enabled
+      // Both Peers has to have datachannel option enabled
       this._connectionSettings.enableDataChannel = peerData.enableDataChannel === true &&
         this._connectionSettings.enableDataChannel === true;
     }
 
     // Configure for enableIceTrickle setting
     if (typeof peerData.enableIceTrickle === 'boolean') {
-      // Both the Peer and the User has to have trickle ICE enabled
+      // Both Peers has to have trickle ICE option enabled
       this._connectionSettings.enableIceTrickle = peerData.enableIceTrickle === true &&
         this._connectionSettings.enableIceTrickle === true;
     }
@@ -15300,25 +15364,25 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       // Configure the custom data information
       this.data = peerData.userInfo.userData;
 
-      // Configure the streamingInfo.mediaStatus information
+      // Configure the streaming muted status information
       if (typeof peerData.userInfo.mediaStatus === 'object' && peerData.userInfo.mediaStatus !== null) {
         this.streamingInfo.mediaStatus = peerData.userInfo.mediaStatus;
       }
 
-      // Configure the streamingInfo.settings information
+      // Configure the streaming settings information
       if (typeof peerData.userInfo.settings === 'object' && peerData.userInfo.settings !== null) {
         this.streamingInfo.settings = peerData.userInfo.settings;
 
-        // Configure for stereo setting
+        // Configure for streaming settings audio stereo (for OPUS codec connection) setting
         if (typeof peerData.userInfo.settings.audio === 'object') {
-          // Both the Peer and the User has to have OPUS codec stereo option enabled
+          // Both Peers has to have audio.stereo option enabled
           this._connectionSettings.stereo = peerData.userInfo.settings.audio.stereo === true &&
             this._connectionSettings.stereo === true;
         }
       }
     }
 
-    // Starts the RTCPeerConnection
+    // Construct the RTCPeerConnection object reference
     this._construct();
   };
 
@@ -15399,7 +15463,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
   };
 
   /**
-   * Stores the Peer connection RTCIceCandidate.
+   * Stores the Peer connection RTCIceCandidates.
    * @attribute _candidates
    * @type JSON
    * @private
@@ -15444,7 +15508,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
   SkylinkPeer.prototype._RTCPeerConnection = null;
 
   /**
-   * Gets the Peer information.
+   * Gets the Peer information for <code>getPeerInfo()</code>.
    * @method getInfo
    * @for SkylinkPeer
    * @since 0.6.x
@@ -15460,7 +15524,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       room: clone(superRef._selectedRoom)
     };
 
-    // Prevent (false) being returned as ''
+    // Prevent typeof "boolean" (false) or (null) being returned as an empty string
     if (typeof returnData.userData === 'undefined') {
       returnData.userData = '';
     }
@@ -15469,160 +15533,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
   };
 
   /**
-   * Creates the RTCPeerConnection object.
-   * @method _construct
-   * @private
-   * @for SkylinkPeer
-   * @since 0.6.x
-   */
-  SkylinkPeer.prototype._construct = function () {
-    var ref = this;
-
-    // RTCPeerConnection configuration
-    var configuration = {
-      iceServers: []
-    };
-    // RTCPeerConnection optional configuration
-    var optional = {
-      optional: [{
-        DtlsSrtpKeyAgreement: true
-      }]
-    };
-
-    if (Array.isArray(superRef._room.connection.peerConfig.iceServers)) {
-      configuration.iceServers = superRef._room.connection.peerConfig.iceServers;
-    }
-
-    ref._RTCPeerConnection = new RTCPeerConnection(configuration, optional);
-
-    /**
-     * Handles the .onicecandidate event.
-     */
-    ref._RTCPeerConnection.onicecandidate = function (evt) {
-      var candidate = evt.candidate || evt;
-
-      // If RTCIceCandidate.candidate returns null, it means that is has been gathered completely
-      if (!candidate.candidate) {
-        log.log([ref.id, 'Peer', 'RTCIceCandidate', 'Local candidates have been gathered completely']);
-
-        // "Spoof" the .onicegatheringstatechange event to "completed". It seems like
-        // .onicegatheringstatechange is never triggered and not event used in apprtc.appspot.com now
-        log.log([ref.id, 'Peer', 'RTCIceGatheringState', 'Current ICE gathering state ->'],
-          superRef.CANDIDATE_GENERATION_STATE.COMPLETED);
-
-        ref._connectionStatus.candidatesGathered = true;
-
-        superRef._trigger('candidateGenerationState', superRef.CANDIDATE_GENERATION_STATE.COMPLETED, ref.id);
-
-        // Check if trickle ICE is disabled, and send the local RTCSessionDescription if true
-        if (!ref._connectionSettings.enableIceTrickle) {
-          var sessionDescription = ref._RTCPeerConnection.localDescription;
-
-          // Check if local RTCSessionDescription is defined first before sending a corrupted RTCSessionDescription
-          if (!(!!sessionDescription && !!sessionDescription.sdp)) {
-            log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Local sessionDescription is not ready ' +
-              'after all local candidates has been gathered']);
-            return;
-          }
-
-          log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Sending delayed local ' + sessionDescription.type + ' ->'], sessionDescription);
-
-          superRef._sendChannelMessage({
-            type: sessionDescription.type,
-            sdp: sessionDescription.sdp,
-            mid: superRef._user.sid,
-            target: ref.id,
-            rid: superRef._room.id
-          });
-        }
-
-      // Else RTCIceCandidate.candidate gathering is still on-going
-      } else {
-        log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Generated local candidate ->'], candidate);
-
-        // Check if trickle ICE is enabled or else there is no need to add the RTCIceCandidate
-        // as it will be present in the local RTCSessionDescription
-        if (!ref._connectionSettings.enableIceTrickle) {
-          log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Not sending local candidate as trickle ICE is disabled ->'], candidate);
-          return;
-        }
-
-        /* TODO: Should we not send the RTCIceCandidate if it's not a TURN candidate under the forceTURN circumstance */
-        superRef._sendChannelMessage({
-          type: superRef._SIG_MESSAGE_TYPE.CANDIDATE,
-          label: candidate.sdpMLineIndex,
-          id: candidate.sdpMid,
-          candidate: candidate.candidate,
-          mid: superRef._user.sid,
-          target: ref.id,
-          rid: superRef._room.id
-        });
-
-        log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Sending generated local candidate ->'], candidate);
-
-        ref._candidates.outgoing.push(candidate);
-      }
-    };
-
-    /**
-     * Handles the .onaddstream event.
-     */
-    ref._RTCPeerConnection.onaddstream = function (evt) {
-      var stream = evt.stream || evt;
-
-      log.log([ref.id, 'Peer', 'MediaStream', 'Received remote stream ->'], stream);
-
-      /* TODO: Should we do integration checks to wait for magical timeout */
-      /* TODO: Should we check if it's an empty stream first before triggering this */
-
-      // Check if received remote MediaStream is empty first before triggering event
-      // Or ignore if it's from MCU directly since it doesn't send any remote MediaStream from this RTCPeerConnection object
-      if (!(!!ref.streamingInfo.settings.audio || !!ref.streamingInfo.settings.video) ||
-        ref.id === 'MCU') {
-        log.warn([ref.id, 'Peer', 'MediaStream', 'Dropping of received remote stream as it is empty ->'], stream);
-        return;
-      }
-
-      superRef._trigger('incomingStream', ref.id, stream, false, ref.getInfo());
-    };
-
-    /**
-     * Handles the .oniceconnectionstatechange event.
-     */
-    ref._RTCPeerConnection.oniceconnectionstatechange = function () {
-      var state = ref._RTCPeerConnection.iceConnectionState;
-
-      log.log([ref.id, 'Peer', 'RTCIceConnectionState', 'Current ICE connection state ->'], state);
-
-      superRef._trigger('iceConnectionState', state, ref.id);
-
-      /* TODO: Trigger "trickleFailed" */
-      /* TODO: Reconnect when "failed" or "disconnected" */
-    };
-
-    /**
-     * Handles the .onsignalingstatechange event.
-     */
-    ref._RTCPeerConnection.onsignalingstatechange = function () {
-      var state = ref._RTCPeerConnection.signalingState;
-
-      log.log([ref.id, 'Peer', 'RTCSignalingState', 'Current signaling state ->'], state);
-
-      superRef._trigger('peerConnectionState', state, ref.id);
-
-      /* TODO: Fix when "closed" and attempt to reconnect if object is not meant to be closed */
-    };
-
-    /* We are not listening to .onicegatheringstatechange event since it's never triggered */
-
-    /* TODO: Should we listen to .ondatachannel event */
-
-    // Add local MediaStream object
-    ref.addStream();
-  };
-
-  /**
-   * Adds the local MediaStream object.
+   * Updates with the currently selected local MediaStream object.
+   * Screensharing MediaStream gets the priority first before user media MediaStream.
    * @method addStream
    * @for SkylinkPeer
    * @since 0.6.x
@@ -15630,40 +15542,36 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
   SkylinkPeer.prototype.addStream = function () {
     var ref = this;
 
-    /* TODO: Handle MCU case where "Peers" are not supposed to receive stream */
+    // Prevent sending of local MediaStream to P2P Peers in MCU environment
+    // We only send the local MediaStream to the Peer with "MCU" as the ID
     if (superRef._hasMCU && ref.id !== 'MCU') {
       log.debug([ref.id, 'Peer', 'MediaStream', 'Dropping of sending any local stream as ' +
         'we are receiving only']);
       return;
     }
 
-    var removeStreamFn = function (rStream) {
-      // Fallback polyfill for Firefox
+    // Remove the currently added local MediaStreams in the RTCPeerConnection object reference
+    ref._RTCPeerConnection.getLocalStreams().forEach(function (stream) {
+      log.debug([ref.id, 'Peer', 'MediaStream', 'Removing local stream ->'], stream);
+
+      // Polyfill for removeStream() function as it is currently not implemented in Firefox 40+
       if (window.webrtcDetectedBrowser === 'firefox') {
-        var senders = ref._RTCPeerConnection.getSenders();
-
-        for (var s = 0; s < senders.length; s++) {
-          var tracks = rStream.getTracks();
-
-          for (var t = 0; t < tracks.length; t++) {
-            if (tracks[t] === senders[s].track) {
-              ref._RTCPeerConnection.removeTrack(senders[s]);
+        // Fetch the list of RTPSenders
+        ref._RTCPeerConnection.getSenders().forEach(function (sender) {
+          // Fetch the list of MediaStreamTracks in the stream
+          stream.forEach(function (track) {
+            // If MediaStreamTrack matches, remove the RTPSender in removeTrack() function
+            if (track === sender.track) {
+              ref._RTCPeerConnection.removeTrack(sender);
             }
-          }
-        }
+          });
+        });
+
+      // Use the removeStream() function
       } else {
-        ref._RTCPeerConnection.removeStream(rStream);
+        ref._RTCPeerConnection.removeStream(stream);
       }
-    };
-
-    // Remove all the currently added MediaStreams
-    var alStreams = ref._RTCPeerConnection.getLocalStreams();
-
-    for (var s = 0; s < alStreams.length; s++) {
-      log.debug([ref.id, 'Peer', 'MediaStream', 'Removing local stream ->'], alStreams[s]);
-
-      removeStreamFn(alStreams[s]);
-    }
+    });
 
     // If there is screensharing local MediaStream and send this first
     if (superRef._mediaScreen) {
@@ -15684,7 +15592,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
   };
 
   /**
-   * Creates the offer for the RTCPeerConnection object.
+   * Creates the offer RTCSessionDescription for the RTCPeerConnection object.
    * @method handshakeOffer
    * @for SkylinkPeer
    * @since 0.6.x
@@ -15692,14 +15600,17 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
   SkylinkPeer.prototype.handshakeOffer = function () {
     var ref = this;
 
-    // Add checks if RTCPeerConnection signalingState is "stable" first
+    // Prevent creating the local offer RTCSessionDescription if RTCPeerConnection.signalingState is not "stable"
     if (ref._RTCPeerConnection.signalingState !== 'stable') {
       log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of creating local offer ' +
         'as signalingState is not "stable" ->'], ref._RTCPeerConnection.signalingState);
       return;
     }
 
-    // Handle the RTCOfferOptions
+    /* ETA: Implement ICE restart when RTCPeerConnection.iceConnectionState is "disconnected" or "failed".
+       Will implement when Firefox supports ICE restart first */
+
+    // RTCPeerConnection.createOffer() RTCOfferOptions
     var options = {
       mandatory: {
         OfferToReceiveAudio: true,
@@ -15707,68 +15618,67 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       }
     };
 
-    // Safari / IE does not support the new format yet
+    // Fallback to the older mandatory format as Safari / IE does not support the new format yet
     if (['firefox', 'chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1) {
       options = {
         offerToReceiveAudio: true,
         offerToReceiveVideo: true
       };
-
-      /* TODO: Implement ICE restart ? */
     }
 
     /* TODO: Create DataChannel here? */
 
     log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Creating local offer with options ->'], options);
 
-    // Start creating the local offer
-    //- Success case
+    // Start creating the local offer RTCSessionDescription
+    // RTCPeerConnection.createOffer() success
     ref._RTCPeerConnection.createOffer(function (offer) {
       log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Created local offer ->'], offer);
 
-      // Set the local offer
+      // Sets the local offer RTCSessionDescription
       ref._handshakeSetLocal(offer);
 
-    //- Failure case
+    // RTCPeerConnection.createOffer() failure
     }, function (error) {
       log.error([ref.id, 'Peer', 'RTCSessionDescription', 'Failed creating local offer ->'], error);
 
       superRef._trigger('handshakeProgress', superRef.HANDSHAKE_PROGRESS.ERROR, ref.id, error);
 
-    //- The options
+    // RTCPeerConnection.createOffer() RTCOfferOptions parameter
     }, options);
   };
 
   /**
-   * Creates the answer for the RTCPeerConnection object.
+   * Creates the answer RTCSessionDescription for the RTCPeerConnection object
+   *   based on the offer RTCSessionDescription received.
    * @method handshakeAnswer
-   * @param {RTCSessionDescription} offer The remote offer received.
+   * @param {RTCSessionDescription} offer The remote offer RTCSessionDescription received.
    * @for SkylinkPeer
    * @since 0.6.x
    */
   SkylinkPeer.prototype.handshakeAnswer = function (offer) {
     var ref = this;
 
-    // Add checks if RTCPeerConnection signalingState is "stable" first
+    // Prevent creating the local answer RTCSessionDescription if RTCPeerConnection.signalingState is not "stable"
     if (ref._RTCPeerConnection.signalingState !== 'stable') {
       log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of creating local answer ' +
         'as signalingState is not "stable" ->'], ref._RTCPeerConnection.signalingState);
       return;
     }
 
-    // Setting remote offer first
+    // Sets the remote offer RTCSessionDescription
     ref._handshakeSetRemote(offer, function () {
       log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Creating local answer']);
 
-      // Start creating the local answer
-      //- Success case
+      // Start creating the local answer RTCSessionDescription
+      // RTCPeerConnection.createAnswer() success
       ref._RTCPeerConnection.createAnswer(function (answer) {
         log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Created local answer ->'], answer);
 
         // Set the local answer
         ref._handshakeSetLocal(answer);
 
-      //- Failure case
+      // RTCPeerConnection.createAnswer() failure
       }, function (error) {
         log.error([ref.id, 'Peer', 'RTCSessionDescription', 'Failed creating local answer ->'], error);
 
@@ -15778,198 +15688,46 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
   };
 
   /**
-   * Completes the handshaking for the RTCPeerConnection object.
+   * Completes the handshaking of local/remote RTCSessionDescription for the RTCPeerConnection object.
    * @method handshakeComplete
-   * @param {RTCSessionDescription} answer The remote answer received.
+   * @param {RTCSessionDescription} answer The remote answer RTCSessionDescription received.
    * @for SkylinkPeer
    * @since 0.6.x
    */
   SkylinkPeer.prototype.handshakeComplete = function (answer) {
     var ref = this;
 
-    // Setting remote answer first
+    // Sets the remote answer RTCSessionDescription
     ref._handshakeSetRemote(answer, function () {
       log.log([ref.id, 'Peer', 'RTCSessionDescription', 'Handshaking has completed']);
     });
   };
 
   /**
-   * Sets the local RTCSessionDescription object.
-   * @method _handshakeSetLocal
-   * @param {RTCSessionDescription} sessionDescription The local sessionDescription created.
-   * @private
-   * @for SkylinkPeer
-   * @since 0.6.x
-   */
-  SkylinkPeer.prototype._handshakeSetLocal = function (sessionDescription) {
-    var ref = this;
-
-    // Add checks if RTCPeerConnection signalingState is "stable" first if RTCSessionDescription.type is "offer"
-    if (sessionDescription.type === 'offer') {
-      if (ref._RTCPeerConnection.signalingState !== 'stable') {
-        log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of setting local offer ' +
-          'as signalingState is not "stable" ->'], ref._RTCPeerConnection.signalingState);
-        return;
-      }
-    // Add checks if RTCPeerConnection signalingState is "have-remote-offer" first if RTCSessionDescription.type is "answer"
-    } else {
-      if (ref._RTCPeerConnection.signalingState !== 'have-remote-offer') {
-        log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of setting local answer ' +
-          'as signalingState is not "have-remote-offer" ->'], ref._RTCPeerConnection.signalingState);
-        return;
-      }
-    }
-
-    /* TODO: SDP modifications */
-
-    log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting local ' + sessionDescription.type + ' ->'], sessionDescription);
-
-    // Add checks if RTCPeerConnection is processing a local RTCSessionDescription before processing a new one
-    if (ref._connectionStatus.processingLocalSDP) {
-      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of setting local ' + sessionDescription.type +
-        ' as another local description is being processed ->'], sessionDescription);
-      return;
-    }
-
-    ref._connectionStatus.processingLocalSDP = true;
-
-    // Set the local RTCSessionDescription
-    //- Success case
-    ref._RTCPeerConnection.setLocalDescription(sessionDescription, function () {
-      log.log([ref.id, 'Peer', 'RTCSessionDescription', 'Set local ' + sessionDescription.type + ' success ->'], sessionDescription);
-
-      ref._connectionStatus.processingLocalSDP = false;
-
-      /* TODO: Fix the firefox local answer first before sending to Chrome/Opera/IE/Safari */
-
-      superRef._trigger('handshakeProgress', sessionDescription.type, ref.id);
-
-      // Check if trickle ICE is enabled first before sending the local RTCSessionDescription
-      // Or if trickle ICE is disabled, check if the candidate generation has been completed first
-      if (!ref._connectionSettings.enableIceTrickle && !ref._connectionStatus.candidatesGathered) {
-        log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Halting sending of local ' + sessionDescription.type +
-          ' until local candidates have all been gathered ->'], sessionDescription);
-        return;
-      }
-
-      log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Sending local ' + sessionDescription.type + ' ->'], sessionDescription);
-
-      superRef._sendChannelMessage({
-        type: sessionDescription.type,
-        sdp: sessionDescription.sdp,
-        mid: superRef._user.sid,
-        target: ref.id,
-        rid: superRef._room.id
-      });
-
-    //- Failure case
-    }, function (error) {
-      log.error([ref.id, 'Peer', 'RTCSessionDescription', 'Failed setting local ' + sessionDescription.type + ' ->'], error);
-
-      ref._connectionStatus.processingLocalSDP = false;
-
-      superRef._trigger('handshakeProgress', superRef.HANDSHAKE_PROGRESS.ERROR, ref.id, error);
-    });
-  };
-
-  /**
-   * Sets the remote RTCSessionDescription object.
-   * @method _handshakeSetRemote
-   * @param {RTCSessionDescription} sessionDescription The remote sessionDescription received.
-   * @param {Function} callback The callback function triggered when setting the remote sessionDescription is succesful.
-   * @private
-   * @for SkylinkPeer
-   * @since 0.6.x
-   */
-  SkylinkPeer.prototype._handshakeSetRemote = function (sessionDescription, callback) {
-    var ref = this;
-
-    // Add checks if RTCPeerConnection signalingState is "stable" first if RTCSessionDescription.type is "offer"
-    if (sessionDescription.type === 'offer') {
-      if (ref._RTCPeerConnection.signalingState !== 'stable') {
-        log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of setting remote offer ' +
-          'as signalingState is not "stable" ->'], ref._RTCPeerConnection.signalingState);
-        return;
-      }
-    // Add checks if RTCPeerConnection signalingState is "have-remote-offer" first if RTCSessionDescription.type is "answer"
-    } else {
-      if (ref._RTCPeerConnection.signalingState !== 'have-local-offer') {
-        log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of setting remote answer ' +
-          'as signalingState is not "have-local-offer" ->'], ref._RTCPeerConnection.signalingState);
-        return;
-      }
-    }
-
-    /* TODO: SDP modifications */
-
-    // If user is using Firefox and this is MCU, replace the RTCSessionDescription.sdp to suit MCU needs
-    if (window.webrtcDetectedBrowser === 'firefox' && ref.id === 'MCU') {
-      sessionDescription.sdp = superRef._parseSDP.MCUFirefoxAnswer(sessionDescription.sdp);
-    }
-
-    log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting remote ' + sessionDescription.type + ' ->'], sessionDescription);
-
-    // Add checks if RTCPeerConnection is processing a local RTCSessionDescription before processing a new one
-    if (ref._connectionStatus.processingRemoteSDP) {
-      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of setting remote ' + sessionDescription.type +
-        ' as another remote description is being processed ->'], sessionDescription);
-      return;
-    }
-
-    ref._connectionStatus.processingRemoteSDP = true;
-
-    // Set the remote RTCSessionDescription
-    //- Success case
-    ref._RTCPeerConnection.setRemoteDescription(sessionDescription, function () {
-      log.log([ref.id, 'Peer', 'RTCSessionDescription', 'Set remote ' + sessionDescription.type + ' success ->'], sessionDescription);
-
-      ref._connectionStatus.processingRemoteSDP = false;
-
-      superRef._trigger('handshakeProgress', sessionDescription.type, ref.id);
-
-      callback();
-
-      for (var i = 0; i < ref._candidates.incoming.queued.length; i++) {
-        var candidate = ref._candidates.incoming.queued[i];
-
-        log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Adding remote candidate (queued) ->'], candidate);
-
-        ref.addCandidate(candidate);
-      }
-
-      ref._candidates.incoming.queued = [];
-
-    //- Failure case
-    }, function (error) {
-      log.error([ref.id, 'Peer', 'RTCSessionDescription', 'Failed setting remote ' + sessionDescription.type + ' ->'], error);
-
-      ref._connectionStatus.processingRemoteSDP = false;
-
-      superRef._trigger('handshakeProgress', superRef.HANDSHAKE_PROGRESS.ERROR, ref.id, error);
-    });
-  };
-
-  /**
-   * Sets the remote RTCIceCandidate object.
+   * Sets the remote RTCIceCandidate for the RTCPeerConnection object.
    * @method addCandidate
-   * @param {RTCIceCandidate} candidate The remote candidate received.
+   * @param {RTCIceCandidate} candidate The remote RTCIceCandidate received.
    * @for SkylinkPeer
    * @since 0.6.x
    */
   SkylinkPeer.prototype.addCandidate = function (candidate) {
     var ref = this;
 
-    // Check if trickle ICE is enabled or else there is no need to add the RTCIceCandidate
-    // as it will be present in the local RTCSessionDescription
+    // Check if trickle ICE is disabled, which in that case we do no need to send the RTCIceCandidate
+    // as it will be present in the remote RTCSessionDescription
     if (!ref._connectionSettings.enableIceTrickle) {
-      log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Not adding remote candidate as trickle ICE is disabled ->'], candidate);
+      log.debug([ref.id, 'Peer', 'RTCIceCandidate',
+        'Not adding remote candidate as trickle ICE is disabled ->'], candidate);
       return;
     }
 
-    // Add checks if RTCPeerConnection signalingState is "stable" first if RTCSessionDescription.type is "offer"
+    // Prevent adding remote RTCIceCandidate if RTCPeerConnection object does not have remote RTCSessionDescription
     if (!(!!ref._RTCPeerConnection.remoteDescription && !!ref._RTCPeerConnection.remoteDescription.sdp)) {
-      log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Queuing remote candidate as connection is not ready yet ->'], candidate);
+      log.debug([ref.id, 'Peer', 'RTCIceCandidate',
+        'Queuing remote candidate as connection is not ready yet ->'], candidate);
 
+      // Queues the remote RTCIceCandidate received,
+      // which is to be added after remote RTCSessionDescription is received
       ref._candidates.incoming.queued.push(candidate);
       return;
     }
@@ -15977,19 +15735,19 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Adding remote candidate ->'], candidate);
 
     // Adds the remote RTCIceCandidate
-    //- Success case
+    // RTCPeerConnection.addIceCandidate() success
     ref._RTCPeerConnection.addIceCandidate(candidate, function () {
       log.log([ref.id, 'Peer', 'RTCIceCandidate', 'Added remote candidate successfully ->'], candidate);
 
       ref._candidates.incoming.success.push(candidate);
 
-    //- Failure case
+    // RTCPeerConnection.addIceCandidate() failure
     }, function (error) {
       log.error([ref.id, 'Peer', 'RTCSessionDescription', 'Failed adding remote candidate ->'], error);
 
       /* NOTE: Should we have a clearer log to point which error to which candidate? */
 
-      ref._candidates.incoming.failure.push(candidate);
+      ref._candidates.incoming.failure.push([candidate, error]);
     });
   };
 
@@ -16008,6 +15766,406 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     /* TODO: Clear all timers */
 
     log.log([ref.id, 'Peer', null, 'Closed connection']);
+  };
+
+  /**
+   * Creates the RTCPeerConnection object.
+   * @method _construct
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._construct = function () {
+    var ref = this;
+
+    // RTCPeerConnection configuration
+    var configuration = {
+      iceServers: []
+    };
+
+    // RTCPeerConnection optional configuration
+    var optional = {
+      optional: [{
+        DtlsSrtpKeyAgreement: true
+      }]
+    };
+
+    if (Array.isArray(superRef._room.connection.peerConfig.iceServers)) {
+      configuration.iceServers = superRef._room.connection.peerConfig.iceServers;
+    }
+
+    // Construct the RTCPeerConnection object
+    ref._RTCPeerConnection = new RTCPeerConnection(configuration, optional);
+
+    // Handles the .onicecandidate event.
+    ref._handleOnIceCandidateEvent();
+
+    // Handles the .onaddstream event.
+    ref._handleOnAddStreamEvent();
+
+    // Handles the .oniceconnectionstatechange event.
+    ref._handleOnIceConnectionStateChangeEvent();
+
+    // Handles the .onsignalingstatechange event.
+    ref._handleOnSignalingStateChangeEvent();
+
+    // Handles the .ondatachannel event.
+    ref._handleOnDataChannelEvent();
+
+    /* Dropping of listening to .onicegatheringstatechange event as it's never triggered */
+
+    // Stream the local MediaStream object in connection
+    ref.addStream();
+  };
+
+  /**
+   * Handles the RTCPeerConnection.onicecandidate event.
+   * @method _handleOnIceCandidateEvent
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._handleOnIceCandidateEvent = function () {
+    var ref = this;
+
+    ref._RTCPeerConnection.onicecandidate = function (evt) {
+      var candidate = evt.candidate || evt;
+
+      // Check if ICE gathering has completed, which happens when RTCIceCandidate.candidate returns null.
+      if (!candidate.candidate) {
+        log.log([ref.id, 'Peer', 'RTCIceCandidate', 'Local candidates have been gathered completely']);
+
+        // Polyfill the .onicegatheringstatechange event to "completed".
+        // It seems like .onicegatheringstatechange event is never triggered and not event used in appRTC now
+        log.log([ref.id, 'Peer', 'RTCIceGatheringState', 'Current ICE gathering state ->'],
+          superRef.CANDIDATE_GENERATION_STATE.COMPLETED);
+
+        ref._connectionStatus.candidatesGathered = true;
+
+        superRef._trigger('candidateGenerationState', superRef.CANDIDATE_GENERATION_STATE.COMPLETED, ref.id);
+
+        // Check if trickle ICE is disabled, which we have to send the local RTCSessionDescription
+        // after ICE gathering has completed
+        if (!ref._connectionSettings.enableIceTrickle) {
+          var sessionDescription = ref._RTCPeerConnection.localDescription;
+
+          // Prevent sending a corrupted local RTCSessionDescription
+          if (!(!!sessionDescription && !!sessionDescription.sdp)) {
+            log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Local sessionDescription is not ready ' +
+              'after all local candidates has been gathered']);
+            return;
+          }
+
+          log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Sending delayed local ' +
+            sessionDescription.type + ' ->'], sessionDescription);
+
+          // Send the delayed local RTCSessionDescription (with all RTCIceCandidates present)
+          superRef._sendChannelMessage({
+            type: sessionDescription.type,
+            sdp: sessionDescription.sdp,
+            mid: superRef._user.sid,
+            target: ref.id,
+            rid: superRef._room.id
+          });
+        }
+
+      // Or RTCIceCandidate.candidate is still gathering
+      } else {
+        log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Generated local candidate ->'], candidate);
+
+        // Check if trickle ICE is disabled, which in that case we do no need to send the RTCIceCandidate
+        // as it will be present in the local RTCSessionDescription
+        if (!ref._connectionSettings.enableIceTrickle) {
+          log.debug([ref.id, 'Peer', 'RTCIceCandidate',
+            'Not sending local candidate as trickle ICE is disabled ->'], candidate);
+          return;
+        }
+
+        /* TODO: Should we not send the RTCIceCandidate if it's not a TURN candidate under the forceTURN circumstance */
+
+        // Send the local RTCIceCandidate
+        superRef._sendChannelMessage({
+          type: superRef._SIG_MESSAGE_TYPE.CANDIDATE,
+          label: candidate.sdpMLineIndex,
+          id: candidate.sdpMid,
+          candidate: candidate.candidate,
+          mid: superRef._user.sid,
+          target: ref.id,
+          rid: superRef._room.id
+        });
+
+        log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Sending generated local candidate ->'], candidate);
+
+        // Log the local RTCIceCandidate sent
+        ref._candidates.outgoing.push(candidate);
+      }
+    };
+  };
+
+  /**
+   * Handles the RTCPeerConnection.onaddstream event.
+   * @method _handleOnAddStreamEvent
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._handleOnAddStreamEvent = function () {
+    var ref = this;
+
+    ref._RTCPeerConnection.onaddstream = function (evt) {
+      var stream = evt.stream || evt;
+
+      log.log([ref.id, 'Peer', 'MediaStream', 'Received remote stream ->'], stream);
+
+      /* TODO: Should we do integration checks to wait for magical timeout */
+
+      /* TODO: Should we check if it's an empty stream first before triggering this */
+
+      // Prevent triggering of empty remote MediaStream by checking the streaming information
+      // or if Peer ID is "MCU" since MCU does not send any remote MediaStream from this Peer but from the P2P Peers
+      if (!(!!ref.streamingInfo.settings.audio || !!ref.streamingInfo.settings.video) || ref.id === 'MCU') {
+        log.warn([ref.id, 'Peer', 'MediaStream', 'Dropping of received remote stream as it is empty ->'], stream);
+        return;
+      }
+
+      superRef._trigger('incomingStream', ref.id, stream, false, ref.getInfo());
+    };
+  };
+
+  /**
+   * Handles the RTCPeerConnection.oniceconnectionstatechange event.
+   * @method _handleOnIceConnectionStateChangeEvent
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._handleOnIceConnectionStateChangeEvent = function () {
+    var ref = this;
+
+    ref._RTCPeerConnection.oniceconnectionstatechange = function () {
+      var state = ref._RTCPeerConnection.iceConnectionState;
+
+      log.log([ref.id, 'Peer', 'RTCIceConnectionState', 'Current ICE connection state ->'], state);
+
+      superRef._trigger('iceConnectionState', state, ref.id);
+
+      /* TODO: Trigger "trickleFailed" */
+
+      /* TODO: Reconnect when "failed" or "disconnected" */
+    };
+  };
+
+  /**
+   * Handles the RTCPeerConnection.onsignalingstatechange event.
+   * @method _handleOnSignalingStateChangeEvent
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._handleOnSignalingStateChangeEvent = function () {
+    var ref = this;
+
+    ref._RTCPeerConnection.onsignalingstatechange = function () {
+      var state = ref._RTCPeerConnection.signalingState;
+
+      log.log([ref.id, 'Peer', 'RTCSignalingState', 'Current signaling state ->'], state);
+
+      superRef._trigger('peerConnectionState', state, ref.id);
+
+      /* TODO: Fix when "closed" and attempt to reconnect if object is not meant to be closed */
+    };
+  };
+
+  /**
+   * Handles the RTCPeerConnection.ondatachannel event.
+   * @method _handleOnDataChannelEvent
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._handleOnDataChannelEvent = function () {
+    var ref = this;
+
+    ref._RTCPeerConnection.ondatachannel = function (evt) {
+      var channel = evt.channel || evt;
+
+      log.log([ref.id, 'Peer', 'RTCDataChannel', 'Received datachannel ->'], channel);
+    };
+  };
+
+  /**
+   * Sets the local RTCSessionDescription object.
+   * @method _handshakeSetLocal
+   * @param {RTCSessionDescription} sessionDescription The local RTCSessionDescription.
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._handshakeSetLocal = function (sessionDescription) {
+    var ref = this;
+
+    // Prevent setting the local offer RTCSessionDescription if RTCPeerConnection.signalingState is not "stable"
+    if (sessionDescription.type === 'offer') {
+      if (ref._RTCPeerConnection.signalingState !== 'stable') {
+        log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of setting local offer ' +
+          'as signalingState is not "stable" ->'], ref._RTCPeerConnection.signalingState);
+        return;
+      }
+    // Prevent setting the local answer RTCSessionDescription if
+    // RTCPeerConnection.signalingState is not "have-remote-offer"
+    } else {
+      if (ref._RTCPeerConnection.signalingState !== 'have-remote-offer') {
+        log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of setting local answer ' +
+          'as signalingState is not "have-remote-offer" ->'], ref._RTCPeerConnection.signalingState);
+        return;
+      }
+    }
+
+    /* TODO: SDP modifications */
+
+    log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting local ' +
+      sessionDescription.type + ' ->'], sessionDescription);
+
+    // Prevent setting the local RTCSessionDescription if the
+    // RTCPeerConnection object is currently processing another local RTCSessionDescription
+    if (ref._connectionStatus.processingLocalSDP) {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of setting local ' + sessionDescription.type +
+        ' as another local description is being processed ->'], sessionDescription);
+      return;
+    }
+
+    // Set the processing local RTCSessionDescription flag to true
+    ref._connectionStatus.processingLocalSDP = true;
+
+    // Sets the local RTCSessionDescription
+    // RTCPeerConnection.setLocalDescription() success
+    ref._RTCPeerConnection.setLocalDescription(sessionDescription, function () {
+      log.log([ref.id, 'Peer', 'RTCSessionDescription', 'Set local ' +
+        sessionDescription.type + ' success ->'], sessionDescription);
+
+      // Set the processing local RTCSessionDescription flag to false
+      ref._connectionStatus.processingLocalSDP = false;
+
+      /* TODO: Fix the firefox local answer first before sending to Chrome/Opera/IE/Safari */
+
+      superRef._trigger('handshakeProgress', sessionDescription.type, ref.id);
+
+      // Check if trickle ICE is disabled or if the candidate generation has been completed as in
+      // the use-case of trickle ICE disabled, it sends the local RTCSessionDescription with all the RTCIceCandidates
+      if (!ref._connectionSettings.enableIceTrickle && !ref._connectionStatus.candidatesGathered) {
+        log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Halting sending of local ' + sessionDescription.type +
+          ' until local candidates have all been gathered ->'], sessionDescription);
+        return;
+      }
+
+      log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Sending local ' +
+        sessionDescription.type + ' ->'], sessionDescription);
+
+      // Send the local RTCSessionDescription
+      superRef._sendChannelMessage({
+        type: sessionDescription.type,
+        sdp: sessionDescription.sdp,
+        mid: superRef._user.sid,
+        target: ref.id,
+        rid: superRef._room.id
+      });
+
+    // RTCPeerConnection.setLocalDescription() failure
+    }, function (error) {
+      log.error([ref.id, 'Peer', 'RTCSessionDescription', 'Failed setting local ' +
+        sessionDescription.type + ' ->'], error);
+
+      // Set the processing local RTCSessionDescription flag to false
+      ref._connectionStatus.processingLocalSDP = false;
+
+      superRef._trigger('handshakeProgress', superRef.HANDSHAKE_PROGRESS.ERROR, ref.id, error);
+    });
+  };
+
+  /**
+   * Sets the remote RTCSessionDescription object.
+   * @method _handshakeSetRemote
+   * @param {RTCSessionDescription} sessionDescription The remote RTCSessionDescription received.
+   * @param {Function} callback The callback function triggered when
+   *   setting the remote RTCSessionDescription is succesful.
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._handshakeSetRemote = function (sessionDescription, callback) {
+    var ref = this;
+
+    // Prevent setting the remote offer RTCSessionDescription if RTCPeerConnection.signalingState is not "stable"
+    if (sessionDescription.type === 'offer') {
+      if (ref._RTCPeerConnection.signalingState !== 'stable') {
+        log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of setting remote offer ' +
+          'as signalingState is not "stable" ->'], ref._RTCPeerConnection.signalingState);
+        return;
+      }
+    // Prevent setting the local offer RTCSessionDescription if
+    // RTCPeerConnection.signalingState is not "have-local-offer"
+    } else {
+      if (ref._RTCPeerConnection.signalingState !== 'have-local-offer') {
+        log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of setting remote answer ' +
+          'as signalingState is not "have-local-offer" ->'], ref._RTCPeerConnection.signalingState);
+        return;
+      }
+    }
+
+    /* TODO: SDP modifications */
+
+    // Parse SDP for the use-case where self Peer is Firefox and Peer ID is "MCU" to suit MCU environment needs
+    if (window.webrtcDetectedBrowser === 'firefox' && ref.id === 'MCU') {
+      sessionDescription.sdp = superRef._parseSDP.MCUFirefoxAnswer(sessionDescription.sdp);
+    }
+
+    log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting remote ' +
+      sessionDescription.type + ' ->'], sessionDescription);
+
+    // Prevent setting the remote RTCSessionDescription if the
+    // RTCPeerConnection object is currently processing another remote RTCSessionDescription
+    if (ref._connectionStatus.processingRemoteSDP) {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of setting remote ' + sessionDescription.type +
+        ' as another remote description is being processed ->'], sessionDescription);
+      return;
+    }
+
+    // Set the processing remote RTCSessionDescription flag to true
+    ref._connectionStatus.processingRemoteSDP = true;
+
+    // Set the remote RTCSessionDescription
+    // RTCPeerConnection.setRemoteDescription() success
+    ref._RTCPeerConnection.setRemoteDescription(sessionDescription, function () {
+      log.log([ref.id, 'Peer', 'RTCSessionDescription', 'Set remote ' +
+        sessionDescription.type + ' success ->'], sessionDescription);
+
+      // Set the processing remote RTCSessionDescription flag to false
+      ref._connectionStatus.processingRemoteSDP = false;
+
+      superRef._trigger('handshakeProgress', sessionDescription.type, ref.id);
+
+      callback();
+
+      for (var i = 0; i < ref._candidates.incoming.queued.length; i++) {
+        var candidate = ref._candidates.incoming.queued[i];
+
+        log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Adding remote candidate (queued) ->'], candidate);
+
+        ref.addCandidate(candidate);
+      }
+
+      ref._candidates.incoming.queued = [];
+
+    // RTCPeerConnection.setRemoteDescription() failure
+    }, function (error) {
+      log.error([ref.id, 'Peer', 'RTCSessionDescription', 'Failed setting remote ' +
+        sessionDescription.type + ' ->'], error);
+
+      // Set the processing remote RTCSessionDescription flag to false
+      ref._connectionStatus.processingRemoteSDP = false;
+
+      superRef._trigger('handshakeProgress', superRef.HANDSHAKE_PROGRESS.ERROR, ref.id, error);
+    });
   };
 
   /* TODO: Add timers */
