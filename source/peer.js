@@ -33,14 +33,14 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     if (typeof peerData.enableDataChannel === 'boolean') {
       // Both the Peer and the User has to have datachannel option enabled
       this._connectionSettings.enableDataChannel = peerData.enableDataChannel === true &&
-        this._connectionStatus.enableDataChannel;
+        this._connectionSettings.enableDataChannel === true;
     }
 
     // Configure for enableIceTrickle setting
     if (typeof peerData.enableIceTrickle === 'boolean') {
       // Both the Peer and the User has to have trickle ICE enabled
       this._connectionSettings.enableIceTrickle = peerData.enableIceTrickle === true &&
-        this._connectionStatus.enableIceTrickle;
+        this._connectionSettings.enableIceTrickle === true;
     }
 
     // Configure the agent name information
@@ -76,7 +76,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         if (typeof peerData.userInfo.settings.audio === 'object') {
           // Both the Peer and the User has to have OPUS codec stereo option enabled
           this._connectionSettings.stereo = peerData.userInfo.settings.audio.stereo === true &&
-            this._connectionStatus.stereo;
+            this._connectionSettings.stereo === true;
         }
       }
     }
@@ -157,7 +157,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
    */
   SkylinkPeer.prototype._connectionSettings = {
     enableDataChannel: superRef._enableDataChannel === true,
-    enableIceTrickle: superRef._enableIcetrickle === true,
+    enableIceTrickle: superRef._enableIceTrickle === true,
     stereo: superRef._streamSettings.audio && superRef._streamSettings.audio.stereo === true
   };
 

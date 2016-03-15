@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Mon Mar 14 2016 16:00:04 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Tue Mar 15 2016 22:40:54 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6079,14 +6079,14 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     if (typeof peerData.enableDataChannel === 'boolean') {
       // Both the Peer and the User has to have datachannel option enabled
       this._connectionSettings.enableDataChannel = peerData.enableDataChannel === true &&
-        this._connectionStatus.enableDataChannel;
+        this._connectionSettings.enableDataChannel === true;
     }
 
     // Configure for enableIceTrickle setting
     if (typeof peerData.enableIceTrickle === 'boolean') {
       // Both the Peer and the User has to have trickle ICE enabled
       this._connectionSettings.enableIceTrickle = peerData.enableIceTrickle === true &&
-        this._connectionStatus.enableIceTrickle;
+        this._connectionSettings.enableIceTrickle === true;
     }
 
     // Configure the agent name information
@@ -6122,7 +6122,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         if (typeof peerData.userInfo.settings.audio === 'object') {
           // Both the Peer and the User has to have OPUS codec stereo option enabled
           this._connectionSettings.stereo = peerData.userInfo.settings.audio.stereo === true &&
-            this._connectionStatus.stereo;
+            this._connectionSettings.stereo === true;
         }
       }
     }
@@ -6203,7 +6203,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
    */
   SkylinkPeer.prototype._connectionSettings = {
     enableDataChannel: superRef._enableDataChannel === true,
-    enableIceTrickle: superRef._enableIcetrickle === true,
+    enableIceTrickle: superRef._enableIceTrickle === true,
     stereo: superRef._streamSettings.audio && superRef._streamSettings.audio.stereo === true
   };
 
@@ -11708,6 +11708,8 @@ Skylink.prototype._approachEventHandler = function(message){
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     receiveOnly: self._receiveOnly,
+    enableIceTrickle: self._enableIceTrickle,
+    enableDataChannel: self._enableDataChannel,
     sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
     target: message.target
   });
@@ -12047,6 +12049,8 @@ Skylink.prototype._inRoomHandler = function(message) {
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     receiveOnly: self._receiveOnly,
+    enableIceTrickle: self._enableIceTrickle,
+    enableDataChannel: self._enableDataChannel,
     sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
   });
 };
