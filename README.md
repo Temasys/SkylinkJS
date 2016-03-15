@@ -50,17 +50,17 @@ You can raise tickets on [our support portal](http://support.temasys.com.sg) or 
 ##### Current versions and stability
 Always use the latest versions of the SkylinkJS library as WebRTC is still evolving and we adapt to changes very frequently.
 
-[Latest version: 0.6.10](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.10).
+[Latest version: `0.6.10`](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.10).
 
 #### Noted Issues and Solutions
-##### Installing 0.6.3 - 0.6.10 versions in NPM
-Due to corrupted files being uploaded for 0.6.3 - 0.6.10 versions, we have removed these versions from the NPM repository.
+##### Installing `0.6.3` - `0.6.10` versions in NPM
+Due to corrupted files being uploaded for `0.6.3` - `0.6.10` versions, we have removed these versions from the NPM repository.
 You may still install these versions using this command:
 ```
 npm install git://github.com/Temasys/SkylinkJS#<version_tag>
 ```
 
-##### Upgrading from 0.5.7 and below:
+##### Upgrading from `0.5.7` and below:
 It's now recommended to use the `init()` callback instead of using `readyStateChange` event state to go completed as this may result in an infinite loop.
 
 Ready state change triggers whenever the current room information is retrieved,  and joining another room instead of the default room will result in a re-retrieval to the API server, causing readyStateChange to trigger again and making SkylinkJS to re-join the room over and over again.
