@@ -53,6 +53,12 @@ Always use the latest versions of the SkylinkJS library as WebRTC is still evolv
 [Latest version: 0.6.10](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.10).
 
 #### Noted Issues and Solutions
+##### Installing 0.6.3 - 0.6.10 versions in NPM
+Due to corrupted files being uploaded for 0.6.3 - 0.6.10 versions, we have removed these versions from the NPM repository.
+You may still install these versions using this command:
+```
+npm install git://github.com/Temasys/SkylinkJS#<version_tag>
+```
 
 ##### Upgrading from 0.5.7 and below:
 It's now recommended to use the `init()` callback instead of using `readyStateChange` event state to go completed as this may result in an infinite loop.
