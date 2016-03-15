@@ -6,22 +6,17 @@ We've gone to great length to make this library work in as many browsers as poss
 You'll need a Temasys Developer Account and an App key to use this. [Register here to get your App key](https://developer.temasys.com.sg).
 
 #### Supported Browsers
-__Legend:__
-- `(p)` for [Temasys Plugin](http://skylink.io/plugin/),
-- `(p+)` for [Commercial Temasys Plugin](https://temasys.com.sg/plugin/#commercial-licensing),
-- `(e)` for Skylink Extensions ([contact us for extension code](http://support.temasys.com.sg))
-  - [Download Chrome Extension](https://chrome.google.com/webstore/detail/skylink-webrtc-tools/ljckddiekopnnjoeaiofddfhgnbdoafc).
-  - Download Firefox add-on (copy this format and paste in browser URL): `http://skylink.io/screensharing/ff_addon.php?domain=(accessingdomain.com)`
 
 | Features       | Chrome 45+ | Firefox 40+ | Opera 32+ | IE 9+      | Safari 7+  |
 | -------------- | ---------- | ----------- | --------- | ---------- | ---------- |
-| Screensharing  | Yes ( e )  |  Yes ( e )  |     -     | Yes ( p+ ) | Yes ( p+ ) |
-| Video Call     | Yes        | Yes         | Yes       | Yes ( p )  | Yes ( p )  |
-| Audio Call     | Yes        | Yes         | Yes       | Yes ( p )  | Yes ( p )  |
-| File Transfers | Yes        | Yes         | Yes       | Yes ( p )  | Yes ( p )  |
-| Chat Messaging | Yes        | Yes         | Yes       | Yes ( p )  | Yes ( p )  |
+| Screensharing  | Yes with [Chrome Extension**](https://chrome.google.com/webstore/detail/skylink-webrtc-tools/ljckddiekopnnjoeaiofddfhgnbdoafc)  |  Yes with [Firefox Extension**](https://addons.mozilla.org/en-US/firefox/addon/skylink-webrtc-tools/) |     -     | Yes with [Commercial Temasys Plugin*](https://temasys.com.sg/plugin/#commercial-licensing)  | Yes with [Commercial Temasys Plugin*](https://temasys.com.sg/plugin/#commercial-licensing) |
+| Video Call     | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes [Temasys Plugin](http://skylink.io/plugin/)  |
+| Audio Call     | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/) | Yes with [Temasys Plugin](http://skylink.io/plugin/)  |
+| File Transfers | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes with [Temasys Plugin](http://skylink.io/plugin/)  |
+| Chat Messaging | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes with [Temasys Plugin](http://skylink.io/plugin/)  |
 
-For Safari / IE support, please download our [Temasys WebRTC Plugin here](https://temasys.atlassian.net/wiki/display/TWPP/WebRTC+Plugins)
+- (*) Commerical Temasys Plugin incorporates additional features from Temasys Free Plugin.
+- (**) Our extensions works with Temasys demos and localhost demos. You will have to modify the extension to work on your hosted Web Applications. For Chrome extensions source code, [contact us](http://support.temasys.com.sg)). For Firefox extensions source code, [you may download from your Application Key in developer.temasys.com.sg](https://developer.temasys.com.sg).
 
 ##### Installation
 Install SkylinkJS with [npm](https://www.npmjs.com/):
