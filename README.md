@@ -30,7 +30,7 @@ bower install skylinkjs
 
 
 #### Read more
-- [Getting started](http://temasys.github.io/how-to/2014/08/08/Getting_started_with_WebRTC_and_SkylinkJS/)
+- [Getting started](https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/)
 - [API Docs](http://cdn.temasys.com.sg/skylink/skylinkjs/latest/doc/classes/Skylink.html)
 - [Versions](http://github.com/Temasys/SkylinkJS/releases)
 - [Developer Console  - Get your App key](https://developer.temasys.com.sg)
