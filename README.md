@@ -16,7 +16,7 @@ You'll need a Temasys Developer Account and an App key to use this. [Register he
 | Chat Messaging | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes with [Temasys Plugin](http://skylink.io/plugin/)  |
 
 - (*) Commerical Temasys Plugin incorporates additional features from Temasys Free Plugin.
-- (**) Our extensions works with Temasys demos and localhost demos. You will have to modify the extension to work on your hosted Web Applications. For Chrome extensions source code, [contact us](http://support.temasys.com.sg)). For Firefox extensions source code, [you may download from your Application Key in developer.temasys.com.sg](https://developer.temasys.com.sg).
+- (**) Our extensions works with Temasys demos and localhost demos. You will have to modify the extension to work on your hosted Web Applications. For Chrome extensions source code, [contact us](http://support.temasys.com.sg). For Firefox extensions source code, [you may download from your Application Key in developer.temasys.com.sg](https://developer.temasys.com.sg).
 
 ##### Installation
 Install SkylinkJS with [npm](https://www.npmjs.com/):
