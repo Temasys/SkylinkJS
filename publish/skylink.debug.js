@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Wed Mar 16 2016 01:23:44 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Wed Mar 16 2016 01:37:03 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6644,7 +6644,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     /* TODO: Close all DataChannels connection */
     /* TODO: Clear all timers */
 
-    log.log([ref.id, 'Peer', null, 'Closed connection']);
+    log.log([ref.id, 'Peer', 'RTCPeerConnection', 'Closing connection']);
   };
 
   /**
@@ -6695,6 +6695,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
     // Stream the local MediaStream object in connection
     ref.addStream();
+
+    log.log([ref.id, 'Peer', 'RTCPeerConnection', 'Connection has started']);
   };
 
   /**
@@ -7077,8 +7079,13 @@ Skylink.prototype._destroyPeer = function (peerId) {
 
   if (superRef._peers[peerId]) {
     superRef._peers[peerId].disconnect();
+
+    superRef._trigger('peerLeft', peerId, superRef._peers[peerId].getInfo(), false);
+
     delete superRef._peers[peerId];
   }
+
+  log.log([peerId, 'Peer', 'RTCPeerConnection', 'Session and connection has ended']);
 };
 Skylink.prototype._selectedRoom = null;
 
@@ -12223,15 +12230,18 @@ Skylink.prototype._streamEventHandler = function(message) {
  * @since 0.1.0
  */
 Skylink.prototype._byeHandler = function(message) {
-  var targetMid = message.mid;
-  var selfId = (this._user || {}).sid;
+  var peerId = message.mid;
 
+  this._destroyPeer(peerId);
+
+  /*
+  var selfId = (this._user || {}).sid;
   if (selfId !== targetMid){
     log.log([targetMid, null, message.type, 'Peer has left the room']);
     this._removePeer(targetMid);
   } else {
     log.log([targetMid, null, message.type, 'Self has left the room']);
-  }
+  }*/
 };
 
 /**

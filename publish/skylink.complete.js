@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Wed Mar 16 2016 01:23:44 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Wed Mar 16 2016 01:37:03 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -9189,7 +9189,7 @@ if ( navigator.mozGetUserMedia
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.10 - Wed Mar 16 2016 01:23:44 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Wed Mar 16 2016 01:37:03 GMT+0800 (SGT) */
 
 (function() {
 
@@ -15835,7 +15835,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     /* TODO: Close all DataChannels connection */
     /* TODO: Clear all timers */
 
-    log.log([ref.id, 'Peer', null, 'Closed connection']);
+    log.log([ref.id, 'Peer', 'RTCPeerConnection', 'Closing connection']);
   };
 
   /**
@@ -15886,6 +15886,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
     // Stream the local MediaStream object in connection
     ref.addStream();
+
+    log.log([ref.id, 'Peer', 'RTCPeerConnection', 'Connection has started']);
   };
 
   /**
@@ -16268,8 +16270,13 @@ Skylink.prototype._destroyPeer = function (peerId) {
 
   if (superRef._peers[peerId]) {
     superRef._peers[peerId].disconnect();
+
+    superRef._trigger('peerLeft', peerId, superRef._peers[peerId].getInfo(), false);
+
     delete superRef._peers[peerId];
   }
+
+  log.log([peerId, 'Peer', 'RTCPeerConnection', 'Session and connection has ended']);
 };
 Skylink.prototype._selectedRoom = null;
 
@@ -21414,15 +21421,18 @@ Skylink.prototype._streamEventHandler = function(message) {
  * @since 0.1.0
  */
 Skylink.prototype._byeHandler = function(message) {
-  var targetMid = message.mid;
-  var selfId = (this._user || {}).sid;
+  var peerId = message.mid;
 
+  this._destroyPeer(peerId);
+
+  /*
+  var selfId = (this._user || {}).sid;
   if (selfId !== targetMid){
     log.log([targetMid, null, message.type, 'Peer has left the room']);
     this._removePeer(targetMid);
   } else {
     log.log([targetMid, null, message.type, 'Self has left the room']);
-  }
+  }*/
 };
 
 /**

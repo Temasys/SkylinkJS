@@ -533,7 +533,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     /* TODO: Close all DataChannels connection */
     /* TODO: Clear all timers */
 
-    log.log([ref.id, 'Peer', null, 'Closed connection']);
+    log.log([ref.id, 'Peer', 'RTCPeerConnection', 'Closing connection']);
   };
 
   /**
@@ -584,6 +584,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
     // Stream the local MediaStream object in connection
     ref.addStream();
+
+    log.log([ref.id, 'Peer', 'RTCPeerConnection', 'Connection has started']);
   };
 
   /**
@@ -966,6 +968,11 @@ Skylink.prototype._destroyPeer = function (peerId) {
 
   if (superRef._peers[peerId]) {
     superRef._peers[peerId].disconnect();
+
+    superRef._trigger('peerLeft', peerId, superRef._peers[peerId].getInfo(), false);
+
     delete superRef._peers[peerId];
   }
+
+  log.log([peerId, 'Peer', 'RTCPeerConnection', 'Session and connection has ended']);
 };
