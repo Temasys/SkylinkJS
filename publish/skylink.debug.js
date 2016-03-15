@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Wed Mar 16 2016 00:21:30 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Wed Mar 16 2016 00:58:46 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6367,8 +6367,9 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       if (window.webrtcDetectedBrowser === 'firefox') {
         // Fetch the list of RTPSenders
         ref._RTCPeerConnection.getSenders().forEach(function (sender) {
+          var tracks = stream.getAudioTracks().concat(stream.getVideoTracks());
           // Fetch the list of MediaStreamTracks in the stream
-          stream.forEach(function (track) {
+          tracks.forEach(function (track) {
             // If MediaStreamTrack matches, remove the RTPSender in removeTrack() function
             if (track === sender.track) {
               ref._RTCPeerConnection.removeTrack(sender);
@@ -6665,6 +6666,12 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
             return;
           }
 
+          // Parse SDP for the use-case of switching of streams for the Firefox local RTCSessionDescription
+          // during re-negotiation
+          if (window.webrtcDetectedBrowser === 'firefox' && ref.agent.name !== 'firefox') {
+            sessionDescription.sdp = superRef._parseSDP.firefoxAnswerSSRC(sessionDescription.sdp);
+          }
+
           log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Sending delayed local ' +
             sessionDescription.type + ' ->'], sessionDescription);
 
@@ -6869,6 +6876,12 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
       log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Sending local ' +
         sessionDescription.type + ' ->'], sessionDescription);
+
+      // Parse SDP for the use-case of switching of streams for the Firefox local RTCSessionDescription
+      // during re-negotiation
+      if (window.webrtcDetectedBrowser === 'firefox' && ref.agent.name !== 'firefox') {
+        sessionDescription.sdp = superRef._parseSDP.firefoxAnswerSSRC(sessionDescription.sdp);
+      }
 
       // Send the local RTCSessionDescription
       superRef._sendChannelMessage({
@@ -8975,6 +8988,69 @@ Skylink.prototype._parseSDP = {
     newSdpString = newSdpString.replace(/ udp /g, ' UDP ');
 
     return newSdpString;
+  },
+
+  /**
+   * Handles the Firefox to other browsers SSRC lines received
+   *   that instead of interpretating as "default" for MediaStream.id,
+   *   interpret as the original id given.
+   * @method firefoxAnswerSSRC
+   * @param {String} sdpString The sessionDescription.sdp string.
+   */
+  firefoxAnswerSSRC: function (sdpString) {
+    if (sdpString.indexOf('a=msid-semantic:WMS *') > 0) {
+      var sdpLines = sdpString.split('\r\n'),
+          streamId = '',
+          shouldReplaceSSRCSemantic = -1;
+
+      /*
+       * Loops and checks if there is any stream ID or track ID to replace based on the type provided
+       */
+      var parseTracksSSRCFn = function (track) {
+        var trackId = '';
+
+        for (var i = 0; i < sdpLines.length; i++) {
+          if (!!trackId) {
+            if (sdpLines[i].indexOf('a=ssrc:') === 0) {
+              var ssrcId = sdpLines[i].split(':')[1].split(' ')[0];
+
+              sdpLines.splice(i+1, 0, 'a=ssrc:' + ssrcId +  ' msid:' + streamId + ' ' + trackId,
+                'a=ssrc:' + ssrcId + ' mslabel:default',
+                'a=ssrc:' + ssrcId + ' label:' + trackId);
+              break;
+
+            } else if (sdpLines[i].indexOf('a=mid:') === 0) {
+              break;
+            }
+
+          } else if (sdpLines[i].indexOf('a=msid:') === 0) {
+            if (i > 0 && sdpLines[i-1].indexOf('a=mid:' + track) === 0) {
+              var parts = sdpLines[i].split(':')[1].split(' ');
+
+              streamId = parts[0];
+              trackId = parts[1];
+              shouldReplaceSSRCSemantic = true;
+            }
+          }
+        }
+      };
+
+      parseTracksSSRCFn('video');
+      parseTracksSSRCFn('audio');
+
+      /*if (shouldReplaceSSRCSemantic) {
+        for (var i = 0; i < sdpLines.length; i++) {
+          if (sdpLines[i].indexOf('a=msid-semantic:WMS ') === 0) {
+            var parts = sdpLines[i].split(' ');
+            parts[parts.length - 1] = streamId;
+            sdpLines[i] = parts.join(' ');
+            break;
+          }
+        }
+
+      }*/
+      return sdpLines.join('\r\n');
+    }
   }
 };
 var _LOG_KEY = 'SkylinkJS';

@@ -256,8 +256,9 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       if (window.webrtcDetectedBrowser === 'firefox') {
         // Fetch the list of RTPSenders
         ref._RTCPeerConnection.getSenders().forEach(function (sender) {
+          var tracks = stream.getAudioTracks().concat(stream.getVideoTracks());
           // Fetch the list of MediaStreamTracks in the stream
-          stream.forEach(function (track) {
+          tracks.forEach(function (track) {
             // If MediaStreamTrack matches, remove the RTPSender in removeTrack() function
             if (track === sender.track) {
               ref._RTCPeerConnection.removeTrack(sender);
@@ -554,6 +555,12 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
             return;
           }
 
+          // Parse SDP for the use-case of switching of streams for the Firefox local RTCSessionDescription
+          // during re-negotiation
+          if (window.webrtcDetectedBrowser === 'firefox' && ref.agent.name !== 'firefox') {
+            sessionDescription.sdp = superRef._parseSDP.firefoxAnswerSSRC(sessionDescription.sdp);
+          }
+
           log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Sending delayed local ' +
             sessionDescription.type + ' ->'], sessionDescription);
 
@@ -758,6 +765,12 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
       log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Sending local ' +
         sessionDescription.type + ' ->'], sessionDescription);
+
+      // Parse SDP for the use-case of switching of streams for the Firefox local RTCSessionDescription
+      // during re-negotiation
+      if (window.webrtcDetectedBrowser === 'firefox' && ref.agent.name !== 'firefox') {
+        sessionDescription.sdp = superRef._parseSDP.firefoxAnswerSSRC(sessionDescription.sdp);
+      }
 
       // Send the local RTCSessionDescription
       superRef._sendChannelMessage({
