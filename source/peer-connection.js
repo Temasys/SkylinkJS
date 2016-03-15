@@ -419,7 +419,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
         }
         // refresh when failed. ignore for MCU case since restart is handled by MCU in this case
         if (!self._hasMCU) {
-          self._restartPeerConnection(targetMid, true, true, null, false);
+          self._peers[targetMid].handshakeRestart();
         }
       }
 
@@ -608,7 +608,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
     log.log([peerId, 'PeerConnection', null, 'Restarting peer connection']);
 
     // do a hard reset on variable object
-    self._restartPeerConnection(peerId, true, false, peerCallback, true);
+    self._peers[peerId].handshakeRestart();
   };
 
   var toRefresh = function() {

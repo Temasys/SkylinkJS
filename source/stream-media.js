@@ -1706,8 +1706,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
             true, self.getPeerInfo(), false);
           for (var peer in self._peers) {
             if (self._peers.hasOwnProperty(peer)) {
-              self._peers[peer].addStream();
-              self._restartPeerConnection(peer, true, false, null, true);
+              self._peers[peer].handshakeRestart();
             }
           }
         }
@@ -1773,8 +1772,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
             true, self.getPeerInfo(), false);
           for (var peer in self._peers) {
             if (self._peers.hasOwnProperty(peer)) {
-              self._peers[peer].addStream();
-              self._restartPeerConnection(peer, true, false, null, true);
+              self._peers[peer].handshakeRestart();
             }
           }
         }
@@ -2124,8 +2122,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
                 true, self.getPeerInfo(), false);
               for (var peer in self._peers) {
                 if (self._peers.hasOwnProperty(peer)) {
-                  self._peers[peer].addStream();
-                  self._restartPeerConnection(peer, true, false, null, true);
+                  self._peers[peer].handshakeRestart();
                 }
               }
             }
@@ -2222,8 +2219,7 @@ Skylink.prototype.stopScreen = function () {
         }
         for (var peer in this._peers) {
           if (this._peers.hasOwnProperty(peer)) {
-            this._peers[peer].addStream();
-            this._restartPeerConnection(peer, true, false, null, true);
+            this._peers[peer].handshakeRestart();
           }
         }
       }

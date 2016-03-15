@@ -403,6 +403,75 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
   };
 
   /**
+   * Restarts the handshaking of local/remote RTCSessionDescription for the RTCPeerConnection object.
+   * @method handshakeRestart
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.handshakeRestart = function () {
+    var ref = this;
+
+    // Check if RTCPeerConnection.signalingState is at "have-local-offer",
+    // which we resend the local offer RTCSessionDescription
+    if (ref._RTCPeerConnection.signalingState === 'have-local-offer') {
+      log.log([ref.id, 'Peer', 'RTCSessionDescription', 'Resending of local offer ' +
+        'as signalingState is at "have-local-offer" ->'], ref._RTCPeerConnection.signalingState);
+
+      var sessionDescription = ref._RTCPeerConnection.localDescription;
+
+      // Prevent sending a corrupted local RTCSessionDescription
+      if (!(!!sessionDescription && !!sessionDescription.sdp)) {
+        log.error([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of sending local sessionDescription ' +
+          'as it is missing']);
+        return;
+      }
+
+      // Check if trickle ICE is disabled or if the candidate generation has been completed as in
+      // the use-case of trickle ICE disabled, it sends the local RTCSessionDescription with all the RTCIceCandidates
+      if (!ref._connectionSettings.enableIceTrickle && !ref._connectionStatus.candidatesGathered) {
+        log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Halting resending of local ' + sessionDescription.type +
+          ' until local candidates have all been gathered ->'], sessionDescription);
+        return;
+      }
+
+      log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Resending local ' +
+        sessionDescription.type + ' ->'], sessionDescription);
+
+      // Resend the local RTCSessionDescription
+      superRef._sendChannelMessage({
+        type: sessionDescription.type,
+        sdp: sessionDescription.sdp,
+        mid: superRef._user.sid,
+        target: ref.id,
+        rid: superRef._room.id
+      });
+
+    // Restart negotiation
+    } else {
+      // Update to the latest local MediaStream
+      ref.addStream();
+
+      // Send the restart message to start re-negotiation (another handshaking of local/remote RTCSessionDescription)
+      superRef._sendChannelMessage({
+        type: superRef._SIG_MESSAGE_TYPE.RESTART,
+        mid: superRef._user.sid,
+        rid: superRef._room.id,
+        agent: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion,
+        os: window.navigator.platform,
+        userInfo: superRef.getPeerInfo(),
+        target: ref.id,
+        // This will not be used based off the logic in _restartHandler
+        weight: superRef._peerPriorityWeight,
+        receiveOnly: superRef._hasMCU && ref.id !== 'MCU',
+        enableIceTrickle: superRef._enableIceTrickle,
+        enableDataChannel: superRef._enableDataChannel,
+        sessionType: !!superRef._mediaScreen ? 'screensharing' : 'stream'
+      });
+    }
+  };
+
+  /**
    * Sets the remote RTCIceCandidate for the RTCPeerConnection object.
    * @method addCandidate
    * @param {RTCIceCandidate} candidate The remote RTCIceCandidate received.
@@ -550,8 +619,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
           // Prevent sending a corrupted local RTCSessionDescription
           if (!(!!sessionDescription && !!sessionDescription.sdp)) {
-            log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Local sessionDescription is not ready ' +
-              'after all local candidates has been gathered']);
+            log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of sending local sessionDescription ' +
+              'as it is not ready yet']);
             return;
           }
 
