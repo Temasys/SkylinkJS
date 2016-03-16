@@ -103,10 +103,10 @@ Skylink.prototype.refreshConnection = function(passedTargetPeerId, passedCallbac
     }
 
     if (superRef._peers.hasOwnProperty(peerId) && superRef._peers[peerId]) {
+      superRef._peers[peerId].handshakeRestart();
+    } else {
       listOfPeersErrors[peerId] = new Error('Failed refreshing connection "' + peerId +
         '" as there is no connection with this Peer to refresh');
-    } else {
-      superRef._peers[peerId].handshakeRestart();
     }
   });
 
