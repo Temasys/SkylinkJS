@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Thu Mar 17 2016 01:51:45 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Thu Mar 17 2016 02:02:51 GMT+0800 (SGT) */
 
 (function() {
 
@@ -7801,9 +7801,7 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
   // which may result in peerLeft not triggered..
   // WHY? but to ensure clear all
   Object.keys(self._peers).forEach(function (peerId) {
-    if (self._peers[peerId]) {
-      self._peers[peerId].disconnect();
-    }
+    self._destroyPeer(peerId);
   });
 
   self._peers = {};

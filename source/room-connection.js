@@ -686,9 +686,7 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
   // which may result in peerLeft not triggered..
   // WHY? but to ensure clear all
   Object.keys(self._peers).forEach(function (peerId) {
-    if (self._peers[peerId]) {
-      self._peers[peerId].disconnect();
-    }
+    self._destroyPeer(peerId);
   });
 
   self._peers = {};
