@@ -1304,6 +1304,7 @@ Skylink.prototype._EVENTS = {
    * - This requires that the provided alias Application Key has privileged feature configured.
    * @event getPeersStateChange
    * @param {String} state The retrieval current status.
+   *   [Rel: Skylink.GET_PEERS_STATE]
    * @param {String} privilegedPeerId The Peer ID of the privileged Peer.
    * @param {JSON} peerList The retrieved list of rooms and peers under the same realm based on
    *   the Application Key configured in <code>init()</code>.
@@ -1319,6 +1320,7 @@ Skylink.prototype._EVENTS = {
    * - This requires that the provided alias Application Key has privileged feature configured.
    * @event introduceStateChange
    * @param {String} state The Peer introduction state.
+   *   [Rel: Skylink.INTRODUCE_STATE]
    * @param {String} privilegedPeerId The Peer ID of the privileged Peer.
    * @param {String} sendingPeerId The Peer ID of the peer
    *   that initiates the connection with the introduced Peer.
@@ -1331,7 +1333,40 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.1
    */
-  introduceStateChange: []
+  introduceStateChange: [],
+
+  /**
+   * Event triggered when the retrieval of the Peer connection status state has changed.
+   * @event getConnectionStatusStateChange
+   * @param {Number} state The retrieval state of the Peer connection status.
+   *   [Rel: Skylink.GET_CONNECTION_STATUS_STATE]
+   * @param {String} peerId The Peer ID of the peer connection status.
+   * @param {JSON} status The Peer connection status information.
+   *   Returned as <code>null</code> unless <code>RETRIEVE_SUCCESS</code> state.
+   * @param {String} status.iceConnectionState The Peer connection ICE connection state.
+   * @param {String} status.peerConnectionState The Peer connection signaling state.
+   * @param {String} status.iceGatheringState The Peer connection ICE gathering state.
+   * @param {String} status.receivedRemoteSDPType The type of remote SDP received for Peer connection.<br>
+   *   <small>Types are <code>"offer"</code> or <code>"answer"</code>.
+   * @param {String} status.receivedLocalSDPType The type of local SDP received for Peer connection.<br>
+   *   <small>Types are <code>"offer"</code> or <code>"answer"</code>.
+   * @param {JSON} status.candidates The Peer connection candidates exchanged.
+   * @param {Array} status.candidates.outgoing The Peer connection candidates sent.
+   * @param {JSON} status.candidates.incoming The Peer connection candidates received.
+   * @param {Array} status.candidates.incoming.success The Peer connection candidates that has been processed successfuly.
+   * @param {Array} status.candidates.incoming.queued The Peer connection candidates that has been queued to be added.
+   * @param {Array} status.candidates.incoming.failure The Peer connection candidates that has failed processing.
+   *   Each item has <code>error</code> that contains the Error object and <code>candidate</code> that contains the
+   *   candidate object.
+   * @param {JSON} status.stats The browser WebRTC connection stats object. The object signature may differ
+   *   for different browsers depending on the browser implementation.
+   * @param {Error} error The Error object received when failed retrieving the
+   *   Peer connection status.
+   * @component Events
+   * @for Skylink
+   * @since 0.6.12
+   */
+  getConnectionStatusStateChange: []
 };
 
 /**

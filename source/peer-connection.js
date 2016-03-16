@@ -31,6 +31,29 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 };
 
 /**
+ * These are the list of Peer connection status retrieval ready states that Skylink would trigger.
+ * - These states are triggered when
+ *   {{#crossLink "Skylink/getConnectionStatus:method"}}getConnectionStatus(){{/crossLink}} is invoked.
+ * @attribute GET_CONNECTION_STATUS_STATE
+ * @type JSON
+ * @param {Number} RETRIEVING <small>Value <code>0</code></small>
+ *   The state when Skylink is retrieving the Peer connection status.
+ * @param {Number} RETRIEVE_SUCCESS <small>Value <code>1</code></small>
+ *   The state when Skylink has retrieved the Peer connection status succesfully.
+ * @param {Number} RETRIEVE_ERROR <small>Value <code>-1</code></small>
+ *   The state when Skylink has failed retrieving the Peer connection status.
+ * @readOnly
+ * @component Room
+ * @for Skylink
+ * @since 0.1.0
+ */
+Skylink.prototype.GET_CONNECTION_STATUS_STATE = {
+  RETRIEVING: 0,
+  RETRIEVE_SUCCESS: 1,
+  RETRIEVE_ERROR: -1
+};
+
+/**
  * These are the types of server Peers that Skylink would connect with.
  * - Different server Peers that serves different functionalities.
  * - The server Peers functionalities are only available depending on the
@@ -914,4 +937,156 @@ Skylink.prototype._restartMCUConnection = function(callback) {
       self.joinRoom(self._selectedRoom);
     }
   });
+};
+
+/**
+ * Gets the Peer connection status.
+ * @method getConnectionStatus
+ * @param {String|Array} [targetPeerId] The array of targeted Peers connection to refresh
+ *   the connection with.
+ * @param {Function} [callback] The callback fired after all targeted Peers connection has
+ *   connection status retrieved or have met with an exception.
+ *   The callback signature is <code>function (error, success)</code>.
+ * @param {JSON} callback.error The error object received in the callback.
+ *   If received as <code>null</code>, it means that there is no errors.
+ * @param {Array} callback.error.listOfPeers The list of Peers which connection statuses
+ *   to retrieve.
+ * @param {JSON} callback.error.retrievalErrors The list of errors occurred
+ *   based on per Peer basis. It returns the Error to an ID of <code>"self"</code> if there is no Peers.
+ * @param {Object|String} callback.error.retrievalErrors.(#peerId) The Peer ID that
+ *   is associated with the error that occurred when retrieving the connection status.
+ * @param {JSON} callback.error.connectionStats The list of Peers connection statuses.
+ * @param {JSON} callback.error.connectionStats.(#peerId) The Peer ID that
+ *   is associated with the connection status retrieved data.
+ * @param {JSON} callback.success The success object received in the callback.
+ *   If received as <code>null</code>, it means that there are errors.
+ * @param {Array} callback.success.listOfPeers The list of Peers which connection statuses
+ *   to retrieve.
+ * @param {JSON} callback.success.connectionStats The list of Peers connection statuses.
+ * @param {JSON} callback.success.connectionStats.(#peerId) The Peer ID that
+ *   is associated with the connection status retrieved data.
+ * @example
+ *   SkylinkDemo.getConnectionStatus(peerId, function (error, success) {
+ *      if (error) {
+ *        console.error("Failed retrieving connection status for peer ", peerId);
+ *      } else {
+ *        print(success.connectionStats);
+ *      }
+ *   });
+ * @trigger get
+ * @component Peer
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
+  var self = this;
+  var listOfPeers = Object.keys(self._peerConnections);
+  var listOfPeerStats = {};
+  var listOfPeerErrors = {};
+
+  // getConnectionStatus([])
+  if (Array.isArray(targetPeerId)) {
+    listOfPeers = targetPeerId;
+
+  // getConnectionStatus('...')
+  } else if (typeof targetPeerId === 'string' && !!targetPeerId) {
+    listOfPeers = [targetPeerId];
+
+  // getConnectionStatus(function () {})
+  } else if (typeof targetPeerId === 'function') {
+    callback = targetPeerId;
+    targetPeerId = undefined;
+  }
+
+  // Check if Peers list is empty, in which we throw an Error if there isn't any
+  if (listOfPeers.length === 0) {
+    listOfPeerErrors.self = new Error('There is currently no peer connections to retrieve connection status');
+
+    log.error([null, 'RTCStatsReport', null, 'Retrieving request failure ->'], listOfPeerErrors.self);
+
+    if (typeof callback === 'function') {
+      callback({
+        listOfPeers: listOfPeers,
+        retrievalErrors: listOfPeerErrors,
+        connectionStats: listOfPeerStats
+      }, null);
+    }
+    return;
+  }
+
+  var completedTaskCounter = [];
+
+  var checkCompletedFn = function (peerId) {
+    if (completedTaskCounter.indexOf(peerId) === -1) {
+      completedTaskCounter.push(peerId);
+    }
+
+    if (completedTaskCounter.length === listOfPeers.length) {
+      if (typeof callback === 'function') {
+        if (Object.keys(listOfPeerErrors).length > 0) {
+          callback({
+            listOfPeers: listOfPeers,
+            retrievalErrors: listOfPeerErrors,
+            connectionStats: listOfPeerStats
+          }, null);
+
+        } else {
+          callback(null, {
+            listOfPeers: listOfPeers,
+            connectionStats: listOfPeerStats
+          });
+        }
+      }
+    }
+  };
+
+  var statsFn = function (peerId) {
+    log.debug([peerId, 'RTCStatsReport', null, 'Retrieivng connection status']);
+
+    self._peerConnections[peerId].getStats(null, function (stats) {
+      log.debug([peerId, 'RTCStatsReport', null, 'Retrieval success ->'], stats);
+
+      listOfPeerStats[peerId] = {
+        stats: stats
+      };
+
+      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,
+        peerId, listOfPeerStats[peerId], null);
+
+      checkCompletedFn(peerId);
+
+    }, function (error) {
+      log.error([peerId, 'RTCStatsReport', null, 'Retrieval failure ->'], error);
+
+      listOfPeerErrors[peerId] = error;
+
+      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,
+        peerId, null, error);
+
+      checkCompletedFn(peerId);
+    });
+  };
+
+  // Loop through all the list of Peers selected to retrieve connection status
+  for (var i = 0; i < listOfPeers.length; i++) {
+    var peerId = listOfPeers[i];
+
+    self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVING,
+      peerId, null, null);
+
+    // Check if the Peer connection exists first
+    if (self._peerConnections.hasOwnProperty(peerId) && self._peerConnections[peerId]) {
+      statsFn(peerId);
+
+    } else {
+      listOfPeerErrors[peerId] = new Error('The peer connection object does not exists');
+
+      log.error([peerId, 'RTCStatsReport', null, 'Retrieval failure ->'], listOfPeerErrors[peerId]);
+
+      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,
+        peerId, null, listOfPeerErrors[peerId]);
+
+      checkCompletedFn(peerId);
+    }
+  }
 };

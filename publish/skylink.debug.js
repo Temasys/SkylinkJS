@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Wed Mar 16 2016 17:37:20 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Wed Mar 16 2016 20:40:51 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3827,6 +3827,29 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 };
 
 /**
+ * These are the list of Peer connection status retrieval ready states that Skylink would trigger.
+ * - These states are triggered when
+ *   {{#crossLink "Skylink/getConnectionStatus:method"}}getConnectionStatus(){{/crossLink}} is invoked.
+ * @attribute GET_CONNECTION_STATUS_STATE
+ * @type JSON
+ * @param {Number} RETRIEVING <small>Value <code>0</code></small>
+ *   The state when Skylink is retrieving the Peer connection status.
+ * @param {Number} RETRIEVE_SUCCESS <small>Value <code>1</code></small>
+ *   The state when Skylink has retrieved the Peer connection status succesfully.
+ * @param {Number} RETRIEVE_ERROR <small>Value <code>-1</code></small>
+ *   The state when Skylink has failed retrieving the Peer connection status.
+ * @readOnly
+ * @component Room
+ * @for Skylink
+ * @since 0.1.0
+ */
+Skylink.prototype.GET_CONNECTION_STATUS_STATE = {
+  RETRIEVING: 0,
+  RETRIEVE_SUCCESS: 1,
+  RETRIEVE_ERROR: -1
+};
+
+/**
  * These are the types of server Peers that Skylink would connect with.
  * - Different server Peers that serves different functionalities.
  * - The server Peers functionalities are only available depending on the
@@ -4711,6 +4734,159 @@ Skylink.prototype._restartMCUConnection = function(callback) {
     }
   });
 };
+
+/**
+ * Gets the Peer connection status.
+ * @method getConnectionStatus
+ * @param {String|Array} [targetPeerId] The array of targeted Peers connection to refresh
+ *   the connection with.
+ * @param {Function} [callback] The callback fired after all targeted Peers connection has
+ *   connection status retrieved or have met with an exception.
+ *   The callback signature is <code>function (error, success)</code>.
+ * @param {JSON} callback.error The error object received in the callback.
+ *   If received as <code>null</code>, it means that there is no errors.
+ * @param {Array} callback.error.listOfPeers The list of Peers which connection statuses
+ *   to retrieve.
+ * @param {JSON} callback.error.retrievalErrors The list of errors occurred
+ *   based on per Peer basis. It returns the Error to an ID of <code>"self"</code> if there is no Peers.
+ * @param {Object|String} callback.error.retrievalErrors.(#peerId) The Peer ID that
+ *   is associated with the error that occurred when retrieving the connection status.
+ * @param {JSON} callback.error.connectionStats The list of Peers connection statuses.
+ * @param {JSON} callback.error.connectionStats.(#peerId) The Peer ID that
+ *   is associated with the connection status retrieved data.
+ * @param {JSON} callback.success The success object received in the callback.
+ *   If received as <code>null</code>, it means that there are errors.
+ * @param {Array} callback.success.listOfPeers The list of Peers which connection statuses
+ *   to retrieve.
+ * @param {JSON} callback.success.connectionStats The list of Peers connection statuses.
+ * @param {JSON} callback.success.connectionStats.(#peerId) The Peer ID that
+ *   is associated with the connection status retrieved data.
+ * @example
+ *   SkylinkDemo.getConnectionStatus(peerId, function (error, success) {
+ *      if (error) {
+ *        console.error("Failed retrieving connection status for peer ", peerId);
+ *      } else {
+ *        print(success.connectionStats);
+ *      }
+ *   });
+ * @trigger get
+ * @component Peer
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
+  var self = this;
+  var listOfPeers = Object.keys(self._peerConnections);
+  var listOfPeerStats = {};
+  var listOfPeerErrors = {};
+
+  // getConnectionStatus([])
+  if (Array.isArray(targetPeerId)) {
+    listOfPeers = targetPeerId;
+
+  // getConnectionStatus('...')
+  } else if (typeof targetPeerId === 'string' && !!targetPeerId) {
+    listOfPeers = [targetPeerId];
+
+  // getConnectionStatus(function () {})
+  } else if (typeof targetPeerId === 'function') {
+    callback = targetPeerId;
+    targetPeerId = undefined;
+  }
+
+  // Check if Peers list is empty, in which we throw an Error if there isn't any
+  if (listOfPeers.length === 0) {
+    listOfPeerErrors.self = new Error('There is currently no peer connections to retrieve connection status');
+
+    log.error([null, 'RTCStatsReport', null, 'Retrieving request failure ->'], listOfPeerErrors.self);
+
+    if (typeof callback === 'function') {
+      callback({
+        listOfPeers: listOfPeers,
+        retrievalErrors: listOfPeerErrors,
+        connectionStats: listOfPeerStats
+      }, null);
+    }
+    return;
+  }
+
+  var completedTaskCounter = [];
+
+  var checkCompletedFn = function (peerId) {
+    if (completedTaskCounter.indexOf(peerId) === -1) {
+      completedTaskCounter.push(peerId);
+    }
+
+    if (completedTaskCounter.length === listOfPeers.length) {
+      if (typeof callback === 'function') {
+        if (Object.keys(listOfPeerErrors).length > 0) {
+          callback({
+            listOfPeers: listOfPeers,
+            retrievalErrors: listOfPeerErrors,
+            connectionStats: listOfPeerStats
+          }, null);
+
+        } else {
+          callback(null, {
+            listOfPeers: listOfPeers,
+            connectionStats: listOfPeerStats
+          });
+        }
+      }
+    }
+  };
+
+  var statsFn = function (peerId) {
+    log.debug([peerId, 'RTCStatsReport', null, 'Retrieivng connection status']);
+
+    self._peerConnections[peerId].getStats(null, function (stats) {
+      log.debug([peerId, 'RTCStatsReport', null, 'Retrieval success ->'], stats);
+
+      listOfPeerStats[peerId] = {
+        stats: stats
+      };
+
+      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,
+        peerId, listOfPeerStats[peerId], null);
+
+      checkCompletedFn(peerId);
+
+    }, function (error) {
+      log.error([peerId, 'RTCStatsReport', null, 'Retrieval failure ->'], error);
+
+      listOfPeerErrors[peerId] = error;
+
+      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,
+        peerId, null, error);
+
+      checkCompletedFn(peerId);
+    });
+  };
+
+  // Loop through all the list of Peers selected to retrieve connection status
+  for (var i = 0; i < listOfPeers.length; i++) {
+    var peerId = listOfPeers[i];
+
+    self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVING,
+      peerId, null, null);
+
+    // Check if the Peer connection exists first
+    if (self._peerConnections.hasOwnProperty(peerId) && self._peerConnections[peerId]) {
+      statsFn(peerId);
+
+    } else {
+      listOfPeerErrors[peerId] = new Error('The peer connection object does not exists');
+
+      log.error([peerId, 'RTCStatsReport', null, 'Retrieval failure ->'], listOfPeerErrors[peerId]);
+
+      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,
+        peerId, null, listOfPeerErrors[peerId]);
+
+      checkCompletedFn(peerId);
+    }
+  }
+};
+
 Skylink.prototype._peerInformations = {};
 
 /**
@@ -9563,6 +9739,7 @@ Skylink.prototype._EVENTS = {
    * - This requires that the provided alias Application Key has privileged feature configured.
    * @event getPeersStateChange
    * @param {String} state The retrieval current status.
+   *   [Rel: Skylink.GET_PEERS_STATE]
    * @param {String} privilegedPeerId The Peer ID of the privileged Peer.
    * @param {JSON} peerList The retrieved list of rooms and peers under the same realm based on
    *   the Application Key configured in <code>init()</code>.
@@ -9578,6 +9755,7 @@ Skylink.prototype._EVENTS = {
    * - This requires that the provided alias Application Key has privileged feature configured.
    * @event introduceStateChange
    * @param {String} state The Peer introduction state.
+   *   [Rel: Skylink.INTRODUCE_STATE]
    * @param {String} privilegedPeerId The Peer ID of the privileged Peer.
    * @param {String} sendingPeerId The Peer ID of the peer
    *   that initiates the connection with the introduced Peer.
@@ -9590,7 +9768,40 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.1
    */
-  introduceStateChange: []
+  introduceStateChange: [],
+
+  /**
+   * Event triggered when the retrieval of the Peer connection status state has changed.
+   * @event getConnectionStatusStateChange
+   * @param {Number} state The retrieval state of the Peer connection status.
+   *   [Rel: Skylink.GET_CONNECTION_STATUS_STATE]
+   * @param {String} peerId The Peer ID of the peer connection status.
+   * @param {JSON} status The Peer connection status information.
+   *   Returned as <code>null</code> unless <code>RETRIEVE_SUCCESS</code> state.
+   * @param {String} status.iceConnectionState The Peer connection ICE connection state.
+   * @param {String} status.peerConnectionState The Peer connection signaling state.
+   * @param {String} status.iceGatheringState The Peer connection ICE gathering state.
+   * @param {String} status.receivedRemoteSDPType The type of remote SDP received for Peer connection.<br>
+   *   <small>Types are <code>"offer"</code> or <code>"answer"</code>.
+   * @param {String} status.receivedLocalSDPType The type of local SDP received for Peer connection.<br>
+   *   <small>Types are <code>"offer"</code> or <code>"answer"</code>.
+   * @param {JSON} status.candidates The Peer connection candidates exchanged.
+   * @param {Array} status.candidates.outgoing The Peer connection candidates sent.
+   * @param {JSON} status.candidates.incoming The Peer connection candidates received.
+   * @param {Array} status.candidates.incoming.success The Peer connection candidates that has been processed successfuly.
+   * @param {Array} status.candidates.incoming.queued The Peer connection candidates that has been queued to be added.
+   * @param {Array} status.candidates.incoming.failure The Peer connection candidates that has failed processing.
+   *   Each item has <code>error</code> that contains the Error object and <code>candidate</code> that contains the
+   *   candidate object.
+   * @param {JSON} status.stats The browser WebRTC connection stats object. The object signature may differ
+   *   for different browsers depending on the browser implementation.
+   * @param {Error} error The Error object received when failed retrieving the
+   *   Peer connection status.
+   * @component Events
+   * @for Skylink
+   * @since 0.6.12
+   */
+  getConnectionStatusStateChange: []
 };
 
 /**
