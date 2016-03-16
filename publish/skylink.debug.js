@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Thu Mar 17 2016 01:43:42 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Thu Mar 17 2016 01:51:45 GMT+0800 (SGT) */
 
 (function() {
 
@@ -7783,7 +7783,9 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
     stopScreenshare = false;
   }
 
-  /*if (!self._inRoom) {
+  /* NOTE: Still allow disconnection of channel perhaps? */
+
+  if (!self._inRoom) {
     error = 'Unable to leave room as user is not in any room';
     log.error(error);
     if (typeof callback === 'function') {
@@ -7793,22 +7795,19 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
       callback(new Error(error), null);
     }
     return;
-  }*/
+  }
 
   // NOTE: ENTER/WELCOME made but no peerconnection...
   // which may result in peerLeft not triggered..
   // WHY? but to ensure clear all
-  var peers = Object.keys(self._peerInformations);
-  var conns = Object.keys(self._peerConnections);
-  var i;
-  for (i = 0; i < conns.length; i++) {
-    if (peers.indexOf(conns[i]) === -1) {
-      peers.push(conns[i]);
+  Object.keys(self._peers).forEach(function (peerId) {
+    if (self._peers[peerId]) {
+      self._peers[peerId].disconnect();
     }
-  }
-  for (i = 0; i < peers.length; i++) {
-    self._removePeer(peers[i]);
-  }
+  });
+
+  self._peers = {};
+
   self._inRoom = false;
   self._closeChannel();
 

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Thu Mar 17 2016 01:43:42 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Thu Mar 17 2016 01:51:45 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -9189,7 +9189,7 @@ if ( navigator.mozGetUserMedia
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.10 - Thu Mar 17 2016 01:43:42 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Thu Mar 17 2016 01:51:45 GMT+0800 (SGT) */
 
 (function() {
 
@@ -16974,7 +16974,9 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
     stopScreenshare = false;
   }
 
-  /*if (!self._inRoom) {
+  /* NOTE: Still allow disconnection of channel perhaps? */
+
+  if (!self._inRoom) {
     error = 'Unable to leave room as user is not in any room';
     log.error(error);
     if (typeof callback === 'function') {
@@ -16984,22 +16986,19 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
       callback(new Error(error), null);
     }
     return;
-  }*/
+  }
 
   // NOTE: ENTER/WELCOME made but no peerconnection...
   // which may result in peerLeft not triggered..
   // WHY? but to ensure clear all
-  var peers = Object.keys(self._peerInformations);
-  var conns = Object.keys(self._peerConnections);
-  var i;
-  for (i = 0; i < conns.length; i++) {
-    if (peers.indexOf(conns[i]) === -1) {
-      peers.push(conns[i]);
+  Object.keys(self._peers).forEach(function (peerId) {
+    if (self._peers[peerId]) {
+      self._peers[peerId].disconnect();
     }
-  }
-  for (i = 0; i < peers.length; i++) {
-    self._removePeer(peers[i]);
-  }
+  });
+
+  self._peers = {};
+
   self._inRoom = false;
   self._closeChannel();
 
