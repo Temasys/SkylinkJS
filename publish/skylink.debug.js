@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Tue Mar 15 2016 14:26:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Wed Mar 16 2016 17:37:20 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4251,10 +4251,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   var pc, self = this;
   // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
   // using .urls feature
-  var newRTCPeerConnection = window.webkitRTCPeerConnection || window.mozRTCPeerConnection ||
-    window.RTCPeerConnection;
   try {
-    pc = new newRTCPeerConnection(
+    pc = new window.RTCPeerConnection(
       self._room.connection.peerConfig,
       self._room.connection.peerConstraints);
     log.info([targetMid, null, null, 'Created peer connection']);
