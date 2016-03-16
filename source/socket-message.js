@@ -963,6 +963,9 @@ Skylink.prototype._restartHandler = function(message){
       explicit: true
     });
   }
+
+  // Monitor the Peer connection
+  self._peers[peerId].monitorConnection();
 };
 
 /**

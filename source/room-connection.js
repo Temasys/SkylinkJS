@@ -668,7 +668,7 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
     stopScreenshare = false;
   }
 
-  if (!self._inRoom) {
+  /*if (!self._inRoom) {
     error = 'Unable to leave room as user is not in any room';
     log.error(error);
     if (typeof callback === 'function') {
@@ -678,7 +678,7 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
       callback(new Error(error), null);
     }
     return;
-  }
+  }*/
 
   // NOTE: ENTER/WELCOME made but no peerconnection...
   // which may result in peerLeft not triggered..

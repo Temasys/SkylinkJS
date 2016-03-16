@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Thu Mar 17 2016 00:47:27 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Thu Mar 17 2016 01:43:42 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -9189,7 +9189,7 @@ if ( navigator.mozGetUserMedia
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.10 - Thu Mar 17 2016 00:47:27 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Thu Mar 17 2016 01:43:42 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13827,10 +13827,10 @@ Skylink.prototype.refreshConnection = function(passedTargetPeerId, passedCallbac
     }
 
     if (superRef._peers.hasOwnProperty(peerId) && superRef._peers[peerId]) {
+      superRef._peers[peerId].handshakeRestart();
+    } else {
       listOfPeersErrors[peerId] = new Error('Failed refreshing connection "' + peerId +
         '" as there is no connection with this Peer to refresh');
-    } else {
-      superRef._peers[peerId].handshakeRestart();
     }
   });
 
@@ -15292,6 +15292,11 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       this.agent.os = peerData.os;
     }
 
+    // Configure the weight setting
+    if (typeof peerData.weight === 'number') {
+      this.weight = peerData.weight;
+    }
+
     // Configure the Peer session information
     if (typeof peerData.userInfo === 'object' && peerData.userInfo !== null) {
       // Configure the custom data information
@@ -15357,7 +15362,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
    * @for SkylinkPeer
    * @since 0.6.x
    */
-  SkylinkPeer.prototype.weight = peerData.weight;
+  SkylinkPeer.prototype.weight = 0;
 
   /**
    * Stores the Peer streaming information.
@@ -15425,6 +15430,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     established: false,
     checker: null,
     retries: 0,
+    timeout: 0,
     iceFailures: 0,
     processingLocalSDP: false,
     processingRemoteSDP: false
@@ -15704,8 +15710,104 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         sessionType: !!superRef._mediaScreen ? 'screensharing' : 'stream'
       });
 
-      self._trigger('peerRestart', ref.id, ref.getInfo(), true);
+      superRef._trigger('peerRestart', ref.id, ref.getInfo(), true);
     }
+
+    // Start a connection monitor checker
+    ref.monitorConnection();
+  };
+
+  /**
+   * Monitors the RTCPeerConnection connection object and the main RTCDataChannel connection.
+   * This restarts the RTCPeerConnection connection object if connection is bad.
+   * @method monitorConnection
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.monitorConnection = function () {
+    var ref = this;
+
+    // Configure the waiting timeout for trickle ICE
+    if (ref._connectionSettings.enableIceTrickle) {
+      // Offerer connection should take longer
+      if (ref.weight > superRef._peerPriorityWeight) {
+        ref._connectionStatus.timeout = 12500;
+      } else {
+        ref._connectionStatus.timeout = 10000;
+      }
+    // Configure the waiting timeout for trickle ICE disabled. It should take longer
+    } else {
+      ref._connectionStatus.timeout = 50000;
+    }
+
+    // NOTE: Unknown reason why it was added like that in the past
+    // Configure additional waiting timeout for MCU environment
+    if (superRef._hasMCU) {
+      ref._connectionStatus.timeout = 105000;
+    }
+
+    // Increment the waiting timeout based off the retries counter
+    ref._connectionStatus.timeout += ref._connectionStatus.retries * 10000;
+
+    // Clear any existing checker
+    if (ref._connectionStatus.checker) {
+      clearTimeout(ref._connectionStatus.checker);
+    }
+
+    // Start a connection status checker
+    ref._connectionStatus.checker = setTimeout(function () {
+      var isDataChannelConnectionHealthy = false;
+      var isConnectionHealthy = false;
+
+      // Prevent restarting the Peer if the connection has ended
+      if (!superRef._peers[ref.id]) {
+        log.warn([ref.id, 'RTCPeerConnection', null, 'Dropping of restarting connection as connection has ended']);
+        return;
+      }
+
+      // Prevent restarting a "closed" RTCPeerConnection
+      if (ref._RTCPeerConnection.signalingState === 'closed') {
+        log.warn([ref.id, 'RTCPeerConnection', null, 'Dropping of restarting connection as signalingState ' +
+          'is "closed" ->'], ref._RTCPeerConnection.signalingState);
+        return;
+      }
+
+      /* TODO: Implement main DataChannels connection checker */
+      if (ref._connectionSettings.enableDataChannel) {
+        if (ref._channels.main) {
+          isDataChannelConnectionHealthy = true;
+        }
+
+      // Setting the datachannel connection healthy flag as "true" because there's not a need
+      } else {
+        isDataChannelConnectionHealthy = true;
+      }
+
+      if (['connected', 'completed'].indexOf(ref._RTCPeerConnection.iceConnectionState) > -1 &&
+        ref._RTCPeerConnection.signalingState === 'stable') {
+        isConnectionHealthy = true;
+      }
+
+      if (isDataChannelConnectionHealthy && isConnectionHealthy) {
+        log.debug([ref.id, 'RTCPeerConnection', null, 'Dropping of restarting connection as connection ' +
+          'is healthy']);
+        return;
+      }
+
+      log.debug([ref.id, 'RTCPeerConnection', null, 'Restarting connection again ->'], {
+        channel: isDataChannelConnectionHealthy,
+        connection: isConnectionHealthy
+      });
+
+      // Limit the maximum increment to 5 minutes
+      if (ref._connectionStatus.retries < 30){
+        ref._connectionStatus.retries++;
+      }
+
+      ref.handshakeRestart();
+
+    }, ref._connectionStatus.timeout);
   };
 
   /**
@@ -15825,6 +15927,9 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     ref.addStream();
 
     log.log([ref.id, 'Peer', 'RTCPeerConnection', 'Connection has started']);
+
+    // Start a connection monitor checker
+    ref.monitorConnection();
   };
 
   /**
@@ -16188,8 +16293,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       superRef._trigger('handshakeProgress', superRef.HANDSHAKE_PROGRESS.ERROR, ref.id, error);
     });
   };
-
-  /* TODO: Add timers */
 
   superRef._peers[peerId] = new SkylinkPeer();
 };
@@ -16871,7 +16974,7 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
     stopScreenshare = false;
   }
 
-  if (!self._inRoom) {
+  /*if (!self._inRoom) {
     error = 'Unable to leave room as user is not in any room';
     log.error(error);
     if (typeof callback === 'function') {
@@ -16881,7 +16984,7 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
       callback(new Error(error), null);
     }
     return;
-  }
+  }*/
 
   // NOTE: ENTER/WELCOME made but no peerconnection...
   // which may result in peerLeft not triggered..
@@ -21769,6 +21872,9 @@ Skylink.prototype._restartHandler = function(message){
       explicit: true
     });
   }
+
+  // Monitor the Peer connection
+  self._peers[peerId].monitorConnection();
 };
 
 /**
