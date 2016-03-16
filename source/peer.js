@@ -468,6 +468,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         enableDataChannel: superRef._enableDataChannel,
         sessionType: !!superRef._mediaScreen ? 'screensharing' : 'stream'
       });
+
+      self._trigger('peerRestart', ref.id, ref.getInfo(), true);
     }
   };
 
@@ -518,6 +520,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       ref._candidates.incoming.failure.push([candidate, error]);
     });
   };
+
+  /* TODO: Update peer information */
 
   /**
    * Destroys the RTCPeerConnection object.
