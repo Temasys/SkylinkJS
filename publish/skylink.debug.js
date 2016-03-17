@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Thu Mar 17 2016 11:07:03 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Thu Mar 17 2016 11:13:43 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4858,7 +4858,10 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
       listOfPeerStats[peerId] = {
         stats: stats,
         receivedRemoteSDPType: receivedRemoteSDPType,
-        receivedLocalSDPType: receivedLocalSDPType
+        receivedLocalSDPType: receivedLocalSDPType,
+        iceConnectionState: self._peerConnections[peerId].iceConnectionState,
+        candidateGenerationState: self._peerConnections[peerId].iceGatheringState,
+        peerConnectionState: self._peerConnections[peerId].signalingState
       };
 
       self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,

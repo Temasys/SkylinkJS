@@ -1062,7 +1062,10 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
       listOfPeerStats[peerId] = {
         stats: stats,
         receivedRemoteSDPType: receivedRemoteSDPType,
-        receivedLocalSDPType: receivedLocalSDPType
+        receivedLocalSDPType: receivedLocalSDPType,
+        iceConnectionState: self._peerConnections[peerId].iceConnectionState,
+        candidateGenerationState: self._peerConnections[peerId].iceGatheringState,
+        peerConnectionState: self._peerConnections[peerId].signalingState
       };
 
       self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,
