@@ -538,6 +538,11 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         return;
       }
 
+      if (superRef._hasMCU) {
+        log.warn([ref.id, 'RTCPeerConnection', null, 'Dropping of restart connection it is in MCU environment']);
+        return;
+      }
+
       /* TODO: Implement main DataChannels connection checker */
       if (ref._connectionSettings.enableDataChannel) {
         if (ref._channels.main) {

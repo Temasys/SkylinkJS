@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Thu Mar 17 2016 02:02:51 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Thu Mar 17 2016 12:48:18 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6579,6 +6579,11 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       if (ref._RTCPeerConnection.signalingState === 'closed') {
         log.warn([ref.id, 'RTCPeerConnection', null, 'Dropping of restarting connection as signalingState ' +
           'is "closed" ->'], ref._RTCPeerConnection.signalingState);
+        return;
+      }
+
+      if (superRef._hasMCU) {
+        log.warn([ref.id, 'RTCPeerConnection', null, 'Dropping of restart connection it is in MCU environment']);
         return;
       }
 
