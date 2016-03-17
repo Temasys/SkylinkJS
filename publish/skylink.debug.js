@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Thu Mar 17 2016 10:56:30 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Thu Mar 17 2016 11:07:03 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4842,8 +4842,23 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
     self._peerConnections[peerId].getStats(null, function (stats) {
       log.debug([peerId, 'RTCStatsReport', null, 'Retrieval success ->'], stats);
 
+      var receivedRemoteSDPType = null,
+          receivedLocalSDPType = null,
+          localDescription = self._peerConnections[peerId].localDescription,
+          remoteDescription = self._peerConnections[peerId].remoteDescription;
+
+      if (!!localDescription && !!localDescription.sdp) {
+        receivedLocalSDPType = localDescription.type;
+      }
+
+      if (!!remoteDescription && !!remoteDescription.sdp) {
+        receivedRemoteSDPType = remoteDescription.type;
+      }
+
       listOfPeerStats[peerId] = {
-        stats: stats
+        stats: stats,
+        receivedRemoteSDPType: receivedRemoteSDPType,
+        receivedLocalSDPType: receivedLocalSDPType
       };
 
       self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,
