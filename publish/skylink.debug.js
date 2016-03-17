@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Wed Mar 16 2016 20:40:51 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Thu Mar 17 2016 10:56:30 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4856,7 +4856,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
 
       listOfPeerErrors[peerId] = error;
 
-      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,
+      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR,
         peerId, null, error);
 
       checkCompletedFn(peerId);
@@ -4879,7 +4879,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
 
       log.error([peerId, 'RTCStatsReport', null, 'Retrieval failure ->'], listOfPeerErrors[peerId]);
 
-      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,
+      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR,
         peerId, null, listOfPeerErrors[peerId]);
 
       checkCompletedFn(peerId);

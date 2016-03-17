@@ -13,7 +13,7 @@ var _peerId = null;
 
 var selectedPeers = [];
 
-Demo.Skylink.setLogLevel(4);
+//Demo.Skylink.setLogLevel(4);
 
 Demo.Methods.displayFileItemHTML = function (content) {
   return '<p>' + content.name + '<small style="float:right;color:#aaa;">' + content.size + ' B</small></p>' +
@@ -496,6 +496,14 @@ Demo.Skylink.on('peerRestart', function (peerId, peerInfo, isSelf) {
 
 Demo.Skylink.on('incomingStream', function (peerId, stream, peerInfo, isSelf) {
   console.info('incomingStream', peerId, stream.id, isSelf);
+});
+
+Demo.Skylink.on('serverPeerRestart', function (serverPeerId, serverPeerType) {
+  console.info('serverPeerRestart', serverPeerId, serverPeerType);
+});
+
+Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats, error) {
+  console.info('getConnectionStatusStateChange', state, peerId, stats, error);
 });
 
 Demo.Skylink.on('serverPeerRestart', function (serverPeerId, serverPeerType) {

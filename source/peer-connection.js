@@ -1060,7 +1060,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
 
       listOfPeerErrors[peerId] = error;
 
-      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,
+      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR,
         peerId, null, error);
 
       checkCompletedFn(peerId);
@@ -1083,7 +1083,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
 
       log.error([peerId, 'RTCStatsReport', null, 'Retrieval failure ->'], listOfPeerErrors[peerId]);
 
-      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,
+      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR,
         peerId, null, listOfPeerErrors[peerId]);
 
       checkCompletedFn(peerId);
