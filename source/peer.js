@@ -639,7 +639,18 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
   SkylinkPeer.prototype.disconnect = function () {
     var ref = this;
 
-    ref._RTCPeerConnection.close();
+    // Prevent closing a RTCPeerConnection object at signalingState that is "closed",
+    // as it might throw an Error
+    if (ref._RTCPeerConnection.signalingState !== 'closed') {
+      ref._RTCPeerConnection.close();
+    }
+
+    if (ref.id === 'MCU') {
+      superRef._trigger('serverPeerLeft', peerId, superRef.SERVER_PEER_TYPE.MCU);
+
+    } else {
+      superRef._trigger('peerLeft', peerId, superRef._peers[peerId].getInfo(), false);
+    }
 
     /* TODO: Close all DataChannels connection */
     /* TODO: Clear all timers */
@@ -700,6 +711,13 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
     // Start a connection monitor checker
     ref.monitorConnection();
+
+    if (ref.id === 'MCU') {
+      superRef._trigger('serverPeerJoined', peerId, superRef.SERVER_PEER_TYPE.MCU);
+
+    } else {
+      superRef._trigger('peerJoined', ref.id, ref.getInfo(), false);
+    }
   };
 
   /**
@@ -1080,8 +1098,6 @@ Skylink.prototype._destroyPeer = function (peerId) {
 
   if (superRef._peers[peerId]) {
     superRef._peers[peerId].disconnect();
-
-    superRef._trigger('peerLeft', peerId, superRef._peers[peerId].getInfo(), false);
 
     delete superRef._peers[peerId];
   }

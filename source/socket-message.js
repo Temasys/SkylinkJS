@@ -784,12 +784,6 @@ Skylink.prototype._enterHandler = function(message) {
       self._hasMCU = true;
 
       log.info('MCU has joined the room');
-
-      self._trigger('serverPeerJoined', peerId, self.SERVER_PEER_TYPE.MCU);
-
-    // For P2P case
-    } else {
-      self._trigger('peerJoined', peerId, self._peers[peerId].getInfo(), false);
     }
 
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, peerId);
@@ -1068,12 +1062,6 @@ Skylink.prototype._welcomeHandler = function(message) {
       self._hasMCU = true;
 
       log.info('MCU has joined the room');
-
-      self._trigger('serverPeerJoined', peerId, self.SERVER_PEER_TYPE.MCU);
-
-    // For P2P case
-    } else {
-      self._trigger('peerJoined', peerId, self._peers[peerId].getInfo(), false);
     }
 
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, peerId);

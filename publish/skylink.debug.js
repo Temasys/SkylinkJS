@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Thu Mar 17 2016 12:48:18 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Thu Mar 17 2016 12:55:20 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6683,7 +6683,18 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
   SkylinkPeer.prototype.disconnect = function () {
     var ref = this;
 
-    ref._RTCPeerConnection.close();
+    // Prevent closing a RTCPeerConnection object at signalingState that is "closed",
+    // as it might throw an Error
+    if (ref._RTCPeerConnection.signalingState !== 'closed') {
+      ref._RTCPeerConnection.close();
+    }
+
+    if (ref.id === 'MCU') {
+      superRef._trigger('serverPeerLeft', peerId, superRef.SERVER_PEER_TYPE.MCU);
+
+    } else {
+      superRef._trigger('peerLeft', peerId, superRef._peers[peerId].getInfo(), false);
+    }
 
     /* TODO: Close all DataChannels connection */
     /* TODO: Clear all timers */
@@ -6744,6 +6755,13 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
     // Start a connection monitor checker
     ref.monitorConnection();
+
+    if (ref.id === 'MCU') {
+      superRef._trigger('serverPeerJoined', peerId, superRef.SERVER_PEER_TYPE.MCU);
+
+    } else {
+      superRef._trigger('peerJoined', ref.id, ref.getInfo(), false);
+    }
   };
 
   /**
@@ -7124,8 +7142,6 @@ Skylink.prototype._destroyPeer = function (peerId) {
 
   if (superRef._peers[peerId]) {
     superRef._peers[peerId].disconnect();
-
-    superRef._trigger('peerLeft', peerId, superRef._peers[peerId].getInfo(), false);
 
     delete superRef._peers[peerId];
   }
@@ -12504,12 +12520,6 @@ Skylink.prototype._enterHandler = function(message) {
       self._hasMCU = true;
 
       log.info('MCU has joined the room');
-
-      self._trigger('serverPeerJoined', peerId, self.SERVER_PEER_TYPE.MCU);
-
-    // For P2P case
-    } else {
-      self._trigger('peerJoined', peerId, self._peers[peerId].getInfo(), false);
     }
 
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, peerId);
@@ -12788,12 +12798,6 @@ Skylink.prototype._welcomeHandler = function(message) {
       self._hasMCU = true;
 
       log.info('MCU has joined the room');
-
-      self._trigger('serverPeerJoined', peerId, self.SERVER_PEER_TYPE.MCU);
-
-    // For P2P case
-    } else {
-      self._trigger('peerJoined', peerId, self._peers[peerId].getInfo(), false);
     }
 
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, peerId);
