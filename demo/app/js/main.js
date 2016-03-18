@@ -520,9 +520,6 @@ Demo.Skylink.init(config, function (error, success) {
   if (success) {
     Demo.Skylink.joinRoom({
       userData: displayName,
-      bandwidth: {
-        video: 50
-      },
       audio: { stereo: true },
       video: true
     });
