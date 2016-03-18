@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Thu Mar 17 2016 12:55:20 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Fri Mar 18 2016 21:19:12 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6566,7 +6566,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
     // Start a connection status checker
     ref._connectionStatus.checker = setTimeout(function () {
-      var isDataChannelConnectionHealthy = false;
+      var isDataChannelConnectionHealthy = true; //false;
       var isConnectionHealthy = false;
 
       // Prevent restarting the Peer if the connection has ended
@@ -6588,7 +6588,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       }
 
       /* TODO: Implement main DataChannels connection checker */
-      if (ref._connectionSettings.enableDataChannel) {
+      /*if (ref._connectionSettings.enableDataChannel) {
         if (ref._channels.main) {
           isDataChannelConnectionHealthy = true;
         }
@@ -6596,7 +6596,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       // Setting the datachannel connection healthy flag as "true" because there's not a need
       } else {
         isDataChannelConnectionHealthy = true;
-      }
+      }*/
 
       if (['connected', 'completed'].indexOf(ref._RTCPeerConnection.iceConnectionState) > -1 &&
         ref._RTCPeerConnection.signalingState === 'stable') {
