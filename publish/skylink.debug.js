@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Fri Mar 18 2016 22:18:11 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Fri Mar 18 2016 22:21:51 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6908,7 +6908,15 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
       superRef._trigger('iceConnectionState', state, ref.id);
 
-      /* TODO: Trigger "trickleFailed" */
+      // Increment every ICE failures
+      if (state === 'failed') {
+        ref._connectionStatus.iceFailures++;
+      }
+
+      // Trigger "trickleFailed" state if trickle ICE is enabled and failed for the 3rd time
+      if (ref._connectionSettings.enableIceTrickle && ref._connectionStatus.iceFailures === 3) {
+        superRef._trigger('iceConnectionState', superRef.ICE_CONNECTION_STATE.TRICKLE_FAILED);
+      }
 
       /* TODO: Reconnect when "failed" or "disconnected" */
     };
