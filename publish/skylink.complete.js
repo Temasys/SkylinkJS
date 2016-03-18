@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Fri Mar 18 2016 12:30:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Fri Mar 18 2016 16:50:19 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10455,7 +10455,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.11 - Fri Mar 18 2016 12:30:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Fri Mar 18 2016 16:50:19 GMT+0800 (SGT) */
 
 (function() {
 
@@ -23355,21 +23355,25 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
  * @since 0.5.5
  */
 Skylink.prototype._parseBandwidthSettings = function (bwOptions) {
+  this._streamSettings.bandwidth = {};
+
   bwOptions = (typeof bwOptions === 'object') ?
     bwOptions : {};
 
-  // set audio bandwidth
-  bwOptions.audio = (typeof bwOptions.audio === 'number') ?
-    bwOptions.audio : 50;
-  // set video bandwidth
-  bwOptions.video = (typeof bwOptions.video === 'number') ?
-    bwOptions.video : 256;
-  // set data bandwidth
-  bwOptions.data = (typeof bwOptions.data === 'number') ?
-    bwOptions.data : 1638400;
+  // Configure the audio bandwidth. Recommended = 50
+  if (typeof bwOptions.audio === 'number') {
+    this._streamSettings.bandwidth.audio = bwOptions.audio;
+  }
 
-  // set the settings
-  this._streamSettings.bandwidth = bwOptions;
+  // Configure the video bandwidth. Recommended = 256
+  if (typeof bwOptions.video === 'number') {
+    this._streamSettings.bandwidth.video = bwOptions.video;
+  }
+
+  // Configure the data bandwidth. Recommended = 1638400
+  if (typeof bwOptions.data === 'number') {
+    this._streamSettings.bandwidth.data = bwOptions.data;
+  }
 };
 
 /**
@@ -25063,39 +25067,51 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
   var videoLineFound = false;
   var dataLineFound = false;
 
-  for (i = 0; i < sdpLines.length; i += 1) {
-    // set the audio bandwidth
-    if (sdpLines[i].indexOf('a=audio') === 0 || sdpLines[i].indexOf('m=audio') === 0) {
+  // Prevent setting of bandwidth audio if not configured
+  if (typeof bandwidth.audio === 'number' && bandwidth.audio > 0) {
+    for (i = 0; i < sdpLines.length; i += 1) {
+      // set the audio bandwidth
+      if (sdpLines[i].indexOf('a=audio') === 0 || sdpLines[i].indexOf('m=audio') === 0) {
+        sdpLines.splice(i + 1, 0, 'b=AS:' + bandwidth.audio);
 
-      sdpLines.splice(i + 1, 0, 'b=AS:' + bandwidth.audio);
-
-      log.debug([null, 'SDP', null, 'Setting audio bitrate (' +
-        bandwidth.audio + ')'], i);
-      break;
+        log.info([null, 'SDP', null, 'Setting maximum audio bitrate @(index:' + i + ') -> ', bandwidth.audio]);
+        break;
+      }
     }
+  } else {
+    log.warn([null, 'SDP', null, 'Not setting maximum audio bitrate and leaving to browser\'s defaults']);
   }
 
-  for (j = 0; j < sdpLines.length; j += 1) {
-    // set the video bandwidth
-    if (sdpLines[j].indexOf('a=video') === 0 || sdpLines[j].indexOf('m=video') === 0) {
-      sdpLines.splice(j + 1, 0, 'b=AS:' + bandwidth.video);
+  // Prevent setting of bandwidth video if not configured
+  if (typeof bandwidth.video === 'number' && bandwidth.audio > 0) {
+    for (j = 0; j < sdpLines.length; j += 1) {
+      // set the video bandwidth
+      if (sdpLines[j].indexOf('a=video') === 0 || sdpLines[j].indexOf('m=video') === 0) {
+        sdpLines.splice(j + 1, 0, 'b=AS:' + bandwidth.video);
 
-      log.debug([null, 'SDP', null, 'Setting video bitrate (' +
-        bandwidth.video + ')'], j);
-      break;
+        log.info([null, 'SDP', null, 'Setting maximum video bitrate @(index:' + j + ') -> ', bandwidth.video]);
+        break;
+      }
     }
+  } else {
+    log.warn([null, 'SDP', null, 'Not setting maximum video bitrate and leaving to browser\'s defaults']);
   }
 
-  for (k = 0; k < sdpLines.length; k += 1) {
-    // set the data bandwidth
-    if (sdpLines[k].indexOf('a=application') === 0 || sdpLines[k].indexOf('m=application') === 0) {
-      sdpLines.splice(k + 1, 0, 'b=AS:' + bandwidth.data);
+  // Prevent setting of bandwidth data if not configured
+  if (typeof bandwidth.video === 'number' && bandwidth.audio > 0) {
+    for (k = 0; k < sdpLines.length; k += 1) {
+      // set the data bandwidth
+      if (sdpLines[k].indexOf('a=application') === 0 || sdpLines[k].indexOf('m=application') === 0) {
+        sdpLines.splice(k + 1, 0, 'b=AS:' + bandwidth.data);
 
-      log.debug([null, 'SDP', null, 'Setting data bitrate (' +
-        bandwidth.data + ')'], k);
-      break;
+        log.info([null, 'SDP', null, 'Setting maximum data bitrate @(index:' + k + ') -> ', bandwidth.data]);
+        break;
+      }
     }
+  } else {
+    log.warn([null, 'SDP', null, 'Not setting maximum data bitrate and leaving to browser\'s defaults']);
   }
+
   return sdpLines;
 };
 
