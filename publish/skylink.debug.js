@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Fri Mar 18 2016 17:35:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Fri Mar 18 2016 17:37:38 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5058,7 +5058,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
   pc.createOffer(function(offer) {
     log.debug([targetMid, null, null, 'Created offer'], offer);
 
-    self._setLocalAndSendMessage(targetMid, offer);
+    self._Message(targetMid, offer);
 
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
@@ -5327,20 +5327,20 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
   self._streamSettings.video = self._streamSettings.video || false;
 
-  log.info([targetMid, null, null, 'Custom bandwidth settings:'], {
+  /*log.info([targetMid, null, null, 'Custom bandwidth settings:'], {
     audio: (self._streamSettings.bandwidth.audio || 'Not set') + ' kB/s',
     video: (self._streamSettings.bandwidth.video || 'Not set') + ' kB/s',
     data: (self._streamSettings.bandwidth.data || 'Not set') + ' kB/s'
-  });
+  });*/
 
-  if (self._streamSettings.video.hasOwnProperty('frameRate') &&
+  /*if (self._streamSettings.video.hasOwnProperty('frameRate') &&
     self._streamSettings.video.hasOwnProperty('resolution')){
     log.info([targetMid, null, null, 'Custom resolution settings:'], {
       frameRate: (self._streamSettings.video.frameRate || 'Not set') + ' fps',
       width: (self._streamSettings.video.resolution.width || 'Not set') + ' px',
       height: (self._streamSettings.video.resolution.height || 'Not set') + ' px'
     });
-  }
+  }*/
 
   // set video codec
   if (self._selectedVideoCodec !== self.VIDEO_CODEC.AUTO) {
