@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Fri Mar 18 2016 17:30:20 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Fri Mar 18 2016 17:31:59 GMT+0800 (SGT) */
 
 (function() {
 
@@ -14597,16 +14597,6 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
 Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
   // Find if user has audioStream
   var bandwidth = this._streamSettings.bandwidth;
-  var hasAudio = !!(settings || {}).audio;
-  var hasVideo = !!(settings || {}).video;
-
-  var audioIndex = 0;
-  var videoIndex = 0;
-  var dataIndex = 0;
-
-  var audioLineFound = false;
-  var videoLineFound = false;
-  var dataLineFound = false;
 
   // Prevent setting of bandwidth audio if not configured
   if (typeof bandwidth.audio === 'number' && bandwidth.audio > 0) {
