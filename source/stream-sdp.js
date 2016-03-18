@@ -195,7 +195,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
   }
 
   // Prevent setting of bandwidth video if not configured
-  if (typeof bandwidth.video === 'number' && bandwidth.audio > 0) {
+  if (typeof bandwidth.video === 'number' && bandwidth.video > 0) {
     for (j = 0; j < sdpLines.length; j += 1) {
       // set the video bandwidth
       if (sdpLines[j].indexOf('a=video') === 0 || sdpLines[j].indexOf('m=video') === 0) {
@@ -210,7 +210,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
   }
 
   // Prevent setting of bandwidth data if not configured
-  if (typeof bandwidth.video === 'number' && bandwidth.audio > 0) {
+  if (typeof bandwidth.data === 'number' && bandwidth.data > 0) {
     for (k = 0; k < sdpLines.length; k += 1) {
       // set the data bandwidth
       if (sdpLines[k].indexOf('a=application') === 0 || sdpLines[k].indexOf('m=application') === 0) {

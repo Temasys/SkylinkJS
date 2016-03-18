@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Fri Mar 18 2016 16:50:19 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Fri Mar 18 2016 17:20:30 GMT+0800 (SGT) */
 
 (function() {
 
@@ -14617,16 +14617,16 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
       if (sdpLines[i].indexOf('a=audio') === 0 || sdpLines[i].indexOf('m=audio') === 0) {
         sdpLines.splice(i + 1, 0, 'b=AS:' + bandwidth.audio);
 
-        log.info([null, 'SDP', null, 'Setting maximum audio bitrate @(index:' + i + ') -> ', bandwidth.audio]);
+        log.info([null, 'SDP', null, 'Setting maximum sending audio bitrate @(index:' + i + ') -> ', bandwidth.audio]);
         break;
       }
     }
   } else {
-    log.warn([null, 'SDP', null, 'Not setting maximum audio bitrate and leaving to browser\'s defaults']);
+    log.warn([null, 'SDP', null, 'Not setting maximum sending audio bitrate and leaving to browser\'s defaults']);
   }
 
   // Prevent setting of bandwidth video if not configured
-  if (typeof bandwidth.video === 'number' && bandwidth.audio > 0) {
+  if (typeof bandwidth.video === 'number' && bandwidth.video > 0) {
     for (j = 0; j < sdpLines.length; j += 1) {
       // set the video bandwidth
       if (sdpLines[j].indexOf('a=video') === 0 || sdpLines[j].indexOf('m=video') === 0) {
@@ -14637,22 +14637,22 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
       }
     }
   } else {
-    log.warn([null, 'SDP', null, 'Not setting maximum video bitrate and leaving to browser\'s defaults']);
+    log.warn([null, 'SDP', null, 'Not setting maximum sending video bitrate and leaving to browser\'s defaults']);
   }
 
   // Prevent setting of bandwidth data if not configured
-  if (typeof bandwidth.video === 'number' && bandwidth.audio > 0) {
+  if (typeof bandwidth.data === 'number' && bandwidth.data > 0) {
     for (k = 0; k < sdpLines.length; k += 1) {
       // set the data bandwidth
       if (sdpLines[k].indexOf('a=application') === 0 || sdpLines[k].indexOf('m=application') === 0) {
         sdpLines.splice(k + 1, 0, 'b=AS:' + bandwidth.data);
 
-        log.info([null, 'SDP', null, 'Setting maximum data bitrate @(index:' + k + ') -> ', bandwidth.data]);
+        log.info([null, 'SDP', null, 'Setting maximum sending data bitrate @(index:' + k + ') -> ', bandwidth.data]);
         break;
       }
     }
   } else {
-    log.warn([null, 'SDP', null, 'Not setting maximum data bitrate and leaving to browser\'s defaults']);
+    log.warn([null, 'SDP', null, 'Not setting maximum sending data bitrate and leaving to browser\'s defaults']);
   }
 
   return sdpLines;
