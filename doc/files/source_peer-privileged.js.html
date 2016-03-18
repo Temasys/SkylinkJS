@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.10</title>
+    <title>SkylinkJS 0.6.11</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,12 +32,19 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.10</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.11</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
         <ul id="api-list" class="nav navbar-nav navbar-right">
-  <li><a href="https://temasys.github.io">Getting Started</a></li>
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started Examples <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      <li><a href="https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/">Setting up a Video Call</a></li>
+      <li><a href="https://temasys.com.sg/screensharing-with-skylinkjs/">Setting up Screensharing</a></li>
+      <li><a href="https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/">Setting up a Chatroom</a></li>
+    </ul>
+  </li>
   
     <li><a href="../classes/Skylink.html">Documentation</a></li>
   
@@ -146,19 +153,6 @@ Skylink.prototype._autoIntroduce = true;
 Skylink.prototype._isPrivileged = false;
 
 /**
- * Parent key in case the current key is alias.
- * If the current key is not alias, this is the same as _appKey
- * @attribute _parentKey
- * @type String
- * @default null
- * @private
- * @component Peer
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._parentKey = null;
-
-/**
  * List of peers retrieved from signaling
  * @attribute _peerList
  * @type Object
@@ -230,10 +224,6 @@ Skylink.prototype.getPeers = function(showAll, callback){
 		log.warn(&#x27;App key is not defined. Please authenticate again.&#x27;);
 		return;
 	}
-	if (!self._parentKey){
-		log.warn(&#x27;Parent key is not defined. Please authenticate again.&#x27;);
-		return;
-	}
 
 	// Only callback is provided
 	if (typeof showAll === &#x27;function&#x27;){
@@ -243,10 +233,9 @@ Skylink.prototype.getPeers = function(showAll, callback){
 
 	self._sendChannelMessage({
 		type: self._SIG_MESSAGE_TYPE.GET_PEERS,
-		privilegedKey: self._appKey,
-		parentKey: self._parentKey,
 		showAll: showAll || false
 	});
+	
 	self._trigger(&#x27;getPeersStateChange&#x27;,self.GET_PEERS_STATE.ENQUIRED, self._user.sid, null);
 
 	log.log(&#x27;Enquired server for peers within the realm&#x27;);

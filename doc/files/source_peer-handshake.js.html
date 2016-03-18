@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.10</title>
+    <title>SkylinkJS 0.6.11</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,12 +32,19 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.10</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.11</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
         <ul id="api-list" class="nav navbar-nav navbar-right">
-  <li><a href="https://temasys.github.io">Getting Started</a></li>
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started Examples <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      <li><a href="https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/">Setting up a Video Call</a></li>
+      <li><a href="https://temasys.com.sg/screensharing-with-skylinkjs/">Setting up Screensharing</a></li>
+      <li><a href="https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/">Setting up a Chatroom</a></li>
+    </ul>
+  </li>
   
     <li><a href="../classes/Skylink.html">Documentation</a></li>
   
@@ -254,87 +261,77 @@ Skylink.prototype._peerPriorityWeight = 0;
 Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
   var self = this;
   var pc = self._peerConnections[targetMid] || self._addPeer(targetMid, peerBrowser);
+
   log.log([targetMid, null, null, &#x27;Checking caller status&#x27;], peerBrowser);
-  // NOTE ALEX: handle the pc = 0 case, just to be sure
-  var inputConstraints = self._room.connection.offerConstraints;
-  var sc = self._room.connection.sdpConstraints;
-  for (var name in sc.mandatory) {
-    if (sc.mandatory.hasOwnProperty(name)) {
-      inputConstraints.mandatory[name] = sc.mandatory[name];
-    }
+
+  // Added checks to ensure that connection object is defined first
+  if (!pc) {
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, &#x27;offer&#x27;, &#x27;Dropping of creating of offer &#x27; +
+      &#x27;as connection does not exists&#x27;]);
+    return;
   }
-  inputConstraints.optional.concat(sc.optional);
-  checkMediaDataChannelSettings(peerBrowser.agent, peerBrowser.version,
-    function(beOfferer, unifiedOfferConstraints) {
-    // attempt to force make firefox not to offer datachannel.
-    // we will not be using datachannel in MCU
+
+  // Added checks to ensure that state is &quot;stable&quot; if setting local &quot;offer&quot;
+  if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, &#x27;offer&#x27;,
+      &#x27;Dropping of creating of offer as signalingState is not &quot;&#x27; +
+      self.PEER_CONNECTION_STATE.STABLE + &#x27;&quot; -&gt;&#x27;], pc.signalingState);
+    return;
+  }
+
+  var offerConstraints = {
+    offerToReceiveAudio: true,
+    offerToReceiveVideo: true
+  };
+
+  // NOTE: Removing ICE restart functionality as of now since Firefox does not support it yet
+  // Check if ICE connection failed or disconnected, and if so, do an ICE restart
+  /*if ([self.ICE_CONNECTION_STATE.DISCONNECTED, self.ICE_CONNECTION_STATE.FAILED].indexOf(pc.iceConnectionState) &gt; -1) {
+    offerConstraints.iceRestart = true;
+  }*/
+
+  // Prevent undefined OS errors
+  peerBrowser.os = peerBrowser.os || &#x27;&#x27;;
+
+  /*
+    Ignoring these old codes as Firefox 39 and below is no longer supported
     if (window.webrtcDetectedType === &#x27;moz&#x27; &amp;&amp; peerBrowser.agent === &#x27;MCU&#x27;) {
       unifiedOfferConstraints.mandatory = unifiedOfferConstraints.mandatory || {};
       unifiedOfferConstraints.mandatory.MozDontOfferDataChannel = true;
       beOfferer = true;
     }
 
-    unifiedOfferConstraints.mandatory.iceRestart = true;
-    peerBrowser.os = peerBrowser.os || &#x27;&#x27;;
-
-    if (!(peerBrowser.agent === &#x27;MCU&#x27; || self._hasMCU)) {
-      /*
-       // for windows firefox to mac chrome interopability
-      if (window.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp;
-        window.navigator.platform.indexOf(&#x27;Win&#x27;) === 0 &amp;&amp;
-        peerBrowser.agent !== &#x27;firefox&#x27; &amp;&amp;
-        peerBrowser.agent !== &#x27;MCU&#x27; &amp;&amp;
-        peerBrowser.os.indexOf(&#x27;Mac&#x27;) === 0) {
-        beOfferer = false;
-      }*/
-      if (window.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp; peerBrowser.agent !== &#x27;firefox&#x27;) {
-        beOfferer = false;
-      }
-    } else {
-      beOfferer = true;
+    if (window.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp; window.webrtcDetectedVersion &gt;= 32) {
+      unifiedOfferConstraints = {
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: true
+      };
     }
+  */
 
-    if (beOfferer) {
-      if (window.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp; window.webrtcDetectedVersion &gt;= 32) {
-        unifiedOfferConstraints = {
-          offerToReceiveAudio: true,
-          offerToReceiveVideo: true
-        };
-
-        /*if (window.webrtcDetectedVersion &gt; 37) {
-          unifiedOfferConstraints = {};
-        }*/
+  // Fallback to use mandatory constraints for plugin based browsers
+  if ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1) {
+    offerConstraints = {
+      mandatory: {
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: true
       }
+    };
+  }
 
-      log.debug([targetMid, null, null, &#x27;Creating offer with config:&#x27;], unifiedOfferConstraints);
+  log.debug([targetMid, null, null, &#x27;Creating offer with config:&#x27;], offerConstraints);
 
-      pc.createOffer(function(offer) {
-        log.debug([targetMid, null, null, &#x27;Created offer&#x27;], offer);
-        self._setLocalAndSendMessage(targetMid, offer);
-      }, function(error) {
-        self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR,
-          targetMid, error);
-        log.error([targetMid, null, null, &#x27;Failed creating an offer:&#x27;], error);
-      }, unifiedOfferConstraints);
-    } else {
-      log.debug([targetMid, null, null, &#x27;User\&#x27;s browser is not eligible to create &#x27; +
-        &#x27;the offer to the other peer. Requesting other peer to create the offer instead&#x27;
-        ], peerBrowser);
+  pc.createOffer(function(offer) {
+    log.debug([targetMid, null, null, &#x27;Created offer&#x27;], offer);
 
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.WELCOME,
-        mid: self._user.sid,
-        rid: self._room.id,
-        agent: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
-        os: window.navigator.platform,
-        userInfo: self.getPeerInfo(),
-        target: targetMid,
-        weight: -1,
-        sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;
-      });
-    }
-  }, inputConstraints);
+    self._setLocalAndSendMessage(targetMid, offer);
+
+  }, function(error) {
+    self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+
+    log.error([targetMid, null, null, &#x27;Failed creating an offer:&#x27;], error);
+
+  }, offerConstraints);
 };
 
 /**
@@ -353,22 +350,31 @@ Skylink.prototype._doAnswer = function(targetMid) {
   log.log([targetMid, null, null, &#x27;Creating answer with config:&#x27;],
     self._room.connection.sdpConstraints);
   var pc = self._peerConnections[targetMid];
-  if (pc) {
-    // No ICE restart constraints for createAnswer as it fails in chrome 48
-    // { iceRestart: true }
-    pc.createAnswer(function(answer) {
-      log.debug([targetMid, null, null, &#x27;Created answer&#x27;], answer);
-      self._setLocalAndSendMessage(targetMid, answer);
-    }, function(error) {
-      log.error([targetMid, null, null, &#x27;Failed creating an answer:&#x27;], error);
-      self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-    });//, self._room.connection.sdpConstraints);
-  } else {
-    /* Houston ..*/
-    log.error([targetMid, null, null, &#x27;Requested to create an answer but user &#x27; +
-      &#x27;does not have any existing connection to peer&#x27;]);
+
+  // Added checks to ensure that connection object is defined first
+  if (!pc) {
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, &#x27;answer&#x27;, &#x27;Dropping of creating of answer &#x27; +
+      &#x27;as connection does not exists&#x27;]);
     return;
   }
+
+  // Added checks to ensure that state is &quot;have-remote-offer&quot; if setting local &quot;answer&quot;
+  if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, &#x27;answer&#x27;,
+      &#x27;Dropping of creating of answer as signalingState is not &quot;&#x27; +
+      self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER + &#x27;&quot; -&gt;&#x27;], pc.signalingState);
+    return;
+  }
+
+  // No ICE restart constraints for createAnswer as it fails in chrome 48
+  // { iceRestart: true }
+  pc.createAnswer(function(answer) {
+    log.debug([targetMid, null, null, &#x27;Created answer&#x27;], answer);
+    self._setLocalAndSendMessage(targetMid, answer);
+  }, function(error) {
+    log.error([targetMid, null, null, &#x27;Failed creating an answer:&#x27;], error);
+    self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+  });//, self._room.connection.sdpConstraints);
 };
 
 /**
@@ -523,6 +529,38 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     return;
   }*/
 
+  // Added checks to ensure that sessionDescription is defined first
+  if (!(!!sessionDescription &amp;&amp; !!sessionDescription.sdp)) {
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, null, &#x27;Dropping of setting local unknown sessionDescription &#x27; +
+      &#x27;as received sessionDescription is empty -&gt;&#x27;], sessionDescription);
+    return;
+  }
+
+  // Added checks to ensure that connection object is defined first
+  if (!pc) {
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Dropping of setting local &quot;&#x27; +
+      sessionDescription.type + &#x27;&quot; as connection does not exists&#x27;]);
+    return;
+  }
+
+  // Added checks to ensure that state is &quot;stable&quot; if setting local &quot;offer&quot;
+  if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &amp;&amp;
+    pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
+      &#x27;Dropping of setting local &quot;offer&quot; as signalingState is not &quot;&#x27; +
+      self.PEER_CONNECTION_STATE.STABLE + &#x27;&quot; -&gt;&#x27;], pc.signalingState);
+    return;
+
+  // Added checks to ensure that state is &quot;have-remote-offer&quot; if setting local &quot;answer&quot;
+  } else if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &amp;&amp;
+    pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
+      &#x27;Dropping of setting local &quot;answer&quot; as signalingState is not &quot;&#x27; +
+      self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER + &#x27;&quot; -&gt;&#x27;], pc.signalingState);
+    return;
+  }
+
+
   // NOTE ALEX: handle the pc = 0 case, just to be sure
   var sdpLines = sessionDescription.sdp.split(&#x27;\r\n&#x27;);
 
@@ -594,8 +632,21 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
     &#x27;Updated session description:&#x27;], sessionDescription);
 
+  // Added checks if there is a current local sessionDescription being processing before processing this one
+  if (pc.processingLocalSDP) {
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
+      &#x27;Dropping of setting local &#x27; + sessionDescription.type + &#x27; as there is another &#x27; +
+      &#x27;sessionDescription being processed -&gt;&#x27;], sessionDescription);
+    return;
+  }
+
+  pc.processingLocalSDP = true;
+
   pc.setLocalDescription(sessionDescription, function() {
     log.debug([targetMid, sessionDescription.type, &#x27;Local description set&#x27;]);
+
+    pc.processingLocalSDP = false;
+
     self._trigger(&#x27;handshakeProgress&#x27;, sessionDescription.type, targetMid);
     if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
       pc.setAnswer = &#x27;local&#x27;;
@@ -630,6 +681,9 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     }
   }, function(error) {
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+
+    pc.processingLocalSDP = false;
+
     log.error([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
       &#x27;Failed setting local description: &#x27;], error);
   });
