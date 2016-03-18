@@ -186,7 +186,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
       if (sdpLines[i].indexOf('a=audio') === 0 || sdpLines[i].indexOf('m=audio') === 0) {
         sdpLines.splice(i + 1, 0, 'b=AS:' + bandwidth.audio);
 
-        log.info([null, 'SDP', null, 'Setting maximum sending audio bitrate @(index:' + i + ') -> ', bandwidth.audio]);
+        log.info([null, 'SDP', null, 'Setting maximum sending audio bitrate @(index:' + i + ') -> '], bandwidth.audio);
         break;
       }
     }
@@ -201,7 +201,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
       if (sdpLines[j].indexOf('a=video') === 0 || sdpLines[j].indexOf('m=video') === 0) {
         sdpLines.splice(j + 1, 0, 'b=AS:' + bandwidth.video);
 
-        log.info([null, 'SDP', null, 'Setting maximum video bitrate @(index:' + j + ') -> ', bandwidth.video]);
+        log.info([null, 'SDP', null, 'Setting maximum sending video bitrate @(index:' + j + ') -> '], bandwidth.video);
         break;
       }
     }
@@ -216,7 +216,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
       if (sdpLines[k].indexOf('a=application') === 0 || sdpLines[k].indexOf('m=application') === 0) {
         sdpLines.splice(k + 1, 0, 'b=AS:' + bandwidth.data);
 
-        log.info([null, 'SDP', null, 'Setting maximum sending data bitrate @(index:' + k + ') -> ', bandwidth.data]);
+        log.info([null, 'SDP', null, 'Setting maximum sending data bitrate @(index:' + k + ') -> '], bandwidth.data);
         break;
       }
     }
