@@ -87,6 +87,14 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
     // Construct the RTCPeerConnection object reference
     this._construct();
+
+    // Trigger that the Peer has joined the Room
+    if (this.id === 'MCU') {
+      superRef._trigger('serverPeerJoined', 'MCU', superRef.SERVER_PEER_TYPE.MCU);
+
+    } else {
+      superRef._trigger('peerJoined', this.id, this.getInfo(), false);
+    }
   };
 
   /**
@@ -475,7 +483,12 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         sessionType: !!superRef._mediaScreen ? 'screensharing' : 'stream'
       });
 
-      superRef._trigger('peerRestart', ref.id, ref.getInfo(), true);
+      if (ref.id === 'MCU') {
+        superRef._trigger('serverPeerRestart', 'MCU', superRef.SERVER_PEER_TYPE.MCU);
+
+      } else {
+        superRef._trigger('peerRestart', ref.id, ref.getInfo(), true);
+      }
     }
 
     // Start a connection monitor checker
@@ -645,11 +658,12 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       ref._RTCPeerConnection.close();
     }
 
+    // Trigger that the Peer has left the Room (or is disconnected)
     if (ref.id === 'MCU') {
-      superRef._trigger('serverPeerLeft', peerId, superRef.SERVER_PEER_TYPE.MCU);
+      superRef._trigger('serverPeerLeft', 'MCU', superRef.SERVER_PEER_TYPE.MCU);
 
     } else {
-      superRef._trigger('peerLeft', peerId, superRef._peers[peerId].getInfo(), false);
+      superRef._trigger('peerLeft', ref.id, superRef._peers[peerId].getInfo(), false);
     }
 
     /* TODO: Close all DataChannels connection */
@@ -711,13 +725,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
     // Start a connection monitor checker
     ref.monitorConnection();
-
-    if (ref.id === 'MCU') {
-      superRef._trigger('serverPeerJoined', peerId, superRef.SERVER_PEER_TYPE.MCU);
-
-    } else {
-      superRef._trigger('peerJoined', ref.id, ref.getInfo(), false);
-    }
   };
 
   /**
