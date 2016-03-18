@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Fri Mar 18 2016 22:21:51 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Fri Mar 18 2016 22:28:52 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -9189,7 +9189,7 @@ if ( navigator.mozGetUserMedia
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.10 - Fri Mar 18 2016 22:21:51 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Fri Mar 18 2016 22:28:52 GMT+0800 (SGT) */
 
 (function() {
 
@@ -15480,66 +15480,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
   };
 
   /**
-   * Updates with the currently selected local MediaStream object.
-   * Screensharing MediaStream gets the priority first before user media MediaStream.
-   * @method addStream
-   * @for SkylinkPeer
-   * @since 0.6.x
-   */
-  SkylinkPeer.prototype.addStream = function () {
-    var ref = this;
-
-    // Prevent sending of local MediaStream to P2P Peers in MCU environment
-    // We only send the local MediaStream to the Peer with "MCU" as the ID
-    if (superRef._hasMCU && ref.id !== 'MCU') {
-      log.debug([ref.id, 'Peer', 'MediaStream', 'Dropping of sending any local stream as ' +
-        'we are receiving only']);
-      return;
-    }
-
-    // Remove the currently added local MediaStreams in the RTCPeerConnection object reference
-    ref._RTCPeerConnection.getLocalStreams().forEach(function (stream) {
-      log.debug([ref.id, 'Peer', 'MediaStream', 'Removing local stream ->'], stream);
-
-      // Polyfill for removeStream() function as it is currently not implemented in Firefox 40+
-      if (window.webrtcDetectedBrowser === 'firefox') {
-        // Fetch the list of RTPSenders
-        ref._RTCPeerConnection.getSenders().forEach(function (sender) {
-          var tracks = stream.getAudioTracks().concat(stream.getVideoTracks());
-          // Fetch the list of MediaStreamTracks in the stream
-          tracks.forEach(function (track) {
-            // If MediaStreamTrack matches, remove the RTPSender in removeTrack() function
-            if (track === sender.track) {
-              ref._RTCPeerConnection.removeTrack(sender);
-            }
-          });
-        });
-
-      // Use the removeStream() function
-      } else {
-        ref._RTCPeerConnection.removeStream(stream);
-      }
-    });
-
-    // If there is screensharing local MediaStream and send this first
-    if (superRef._mediaScreen) {
-      log.log([ref.id, 'Peer', 'MediaStream', 'Sending local stream (screensharing) ->'], superRef._mediaScreen);
-
-      ref._RTCPeerConnection.addStream(superRef._mediaScreen);
-
-    // Else if there is userMedia local MediaStream and send this
-    } else if (superRef._mediaStream) {
-      log.log([ref.id, 'Peer', 'MediaStream', 'Sending local stream (userMedia) ->'], superRef._mediaStream);
-
-      ref._RTCPeerConnection.addStream(superRef._mediaStream);
-
-    // Else we will be sending no local MediaStream
-    } else {
-      log.warn([ref.id, 'Peer', 'MediaStream', 'Sending no stream']);
-    }
-  };
-
-  /**
    * Creates the offer RTCSessionDescription for the RTCPeerConnection object.
    * @method handshakeOffer
    * @for SkylinkPeer
@@ -15698,7 +15638,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     // Restart negotiation
     } else {
       // Update to the latest local MediaStream
-      ref.addStream();
+      ref._addStream();
 
       // Send the restart message to start re-negotiation (another handshaking of local/remote RTCSessionDescription)
       superRef._sendChannelMessage({
@@ -15954,12 +15894,73 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     /* Dropping of listening to .onicegatheringstatechange event as it's never triggered */
 
     // Stream the local MediaStream object in connection
-    ref.addStream();
+    ref._addStream();
 
     log.log([ref.id, 'Peer', 'RTCPeerConnection', 'Connection has started']);
 
     // Start a connection monitor checker
     ref.monitorConnection();
+  };
+
+  /**
+   * Updates with the currently selected local MediaStream object.
+   * Screensharing MediaStream gets the priority first before user media MediaStream.
+   * @method _addStream
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._addStream = function () {
+    var ref = this;
+
+    // Prevent sending of local MediaStream to P2P Peers in MCU environment
+    // We only send the local MediaStream to the Peer with "MCU" as the ID
+    if (superRef._hasMCU && ref.id !== 'MCU') {
+      log.debug([ref.id, 'Peer', 'MediaStream', 'Dropping of sending any local stream as ' +
+        'we are receiving only']);
+      return;
+    }
+
+    // Remove the currently added local MediaStreams in the RTCPeerConnection object reference
+    ref._RTCPeerConnection.getLocalStreams().forEach(function (stream) {
+      log.debug([ref.id, 'Peer', 'MediaStream', 'Removing local stream ->'], stream);
+
+      // Polyfill for removeStream() function as it is currently not implemented in Firefox 40+
+      if (window.webrtcDetectedBrowser === 'firefox') {
+        // Fetch the list of RTPSenders
+        ref._RTCPeerConnection.getSenders().forEach(function (sender) {
+          var tracks = stream.getAudioTracks().concat(stream.getVideoTracks());
+          // Fetch the list of MediaStreamTracks in the stream
+          tracks.forEach(function (track) {
+            // If MediaStreamTrack matches, remove the RTPSender in removeTrack() function
+            if (track === sender.track) {
+              ref._RTCPeerConnection.removeTrack(sender);
+            }
+          });
+        });
+
+      // Use the removeStream() function
+      } else {
+        ref._RTCPeerConnection.removeStream(stream);
+      }
+    });
+
+    // If there is screensharing local MediaStream and send this first
+    if (superRef._mediaScreen) {
+      log.log([ref.id, 'Peer', 'MediaStream', 'Sending local stream (screensharing) ->'], superRef._mediaScreen);
+
+      ref._RTCPeerConnection.addStream(superRef._mediaScreen);
+
+    // Else if there is userMedia local MediaStream and send this
+    } else if (superRef._mediaStream) {
+      log.log([ref.id, 'Peer', 'MediaStream', 'Sending local stream (userMedia) ->'], superRef._mediaStream);
+
+      ref._RTCPeerConnection.addStream(superRef._mediaStream);
+
+    // Else we will be sending no local MediaStream
+    } else {
+      log.warn([ref.id, 'Peer', 'MediaStream', 'Sending no stream']);
+    }
   };
 
   /**
