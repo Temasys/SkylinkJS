@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Fri Mar 18 2016 22:53:12 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Fri Mar 18 2016 23:21:34 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -9189,7 +9189,7 @@ if ( navigator.mozGetUserMedia
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.10 - Fri Mar 18 2016 22:53:12 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Fri Mar 18 2016 23:21:34 GMT+0800 (SGT) */
 
 (function() {
 
@@ -16084,24 +16084,46 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
   SkylinkPeer.prototype._handleOnAddStreamEvent = function () {
     var ref = this;
 
-    ref._RTCPeerConnection.onaddstream = function (evt) {
-      var stream = evt.stream || evt;
+    // Handle Firefox 46 and above using .ontrack and deprecating .onaddstream
+    if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion > 45) {
+      var stream = new MediaStream();
+      var hasTriggeredStreamEvent = false;
 
-      log.log([ref.id, 'Peer', 'MediaStream', 'Received remote stream ->'], stream);
+      ref._RTCPeerConnection.ontrack = function (evt) {
+        var track = evt.track || evt;
 
-      /* TODO: Should we do integration checks to wait for magical timeout */
+        log.log([ref.id, 'Peer', 'MediaStreamTrack', 'Received remote track ->'], track);
 
-      /* TODO: Should we check if it's an empty stream first before triggering this */
+        stream.addTrack(track);
 
-      // Prevent triggering of empty remote MediaStream by checking the streaming information
-      // or if Peer ID is "MCU" since MCU does not send any remote MediaStream from this Peer but from the P2P Peers
-      if (!(!!ref.streamingInfo.settings.audio || !!ref.streamingInfo.settings.video) || ref.id === 'MCU') {
-        log.warn([ref.id, 'Peer', 'MediaStream', 'Dropping of received remote stream as it is empty ->'], stream);
-        return;
-      }
+        if (!hasTriggeredStreamEvent) {
+          log.log([ref.id, 'Peer', 'MediaStream', 'Constructing remote stream ->'], stream);
 
-      superRef._trigger('incomingStream', ref.id, stream, false, ref.getInfo());
-    };
+          superRef._trigger('incomingStream', ref.id, stream, false, ref.getInfo());
+          hasTriggeredStreamEvent = true;
+        }
+      };
+
+    } else {
+      ref._RTCPeerConnection.onaddstream = function (evt) {
+        var stream = evt.stream || evt;
+
+        log.log([ref.id, 'Peer', 'MediaStream', 'Received remote stream ->'], stream);
+
+        /* TODO: Should we do integration checks to wait for magical timeout */
+
+        /* TODO: Should we check if it's an empty stream first before triggering this */
+
+        // Prevent triggering of empty remote MediaStream by checking the streaming information
+        // or if Peer ID is "MCU" since MCU does not send any remote MediaStream from this Peer but from the P2P Peers
+        if (!(!!ref.streamingInfo.settings.audio || !!ref.streamingInfo.settings.video) || ref.id === 'MCU') {
+          log.warn([ref.id, 'Peer', 'MediaStream', 'Dropping of received remote stream as it is empty ->'], stream);
+          return;
+        }
+
+        superRef._trigger('incomingStream', ref.id, stream, false, ref.getInfo());
+      };
+    }
   };
 
   /**

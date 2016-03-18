@@ -849,24 +849,46 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
   SkylinkPeer.prototype._handleOnAddStreamEvent = function () {
     var ref = this;
 
-    ref._RTCPeerConnection.onaddstream = function (evt) {
-      var stream = evt.stream || evt;
+    // Handle Firefox 46 and above using .ontrack and deprecating .onaddstream
+    if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion > 45) {
+      var stream = new MediaStream();
+      var hasTriggeredStreamEvent = false;
 
-      log.log([ref.id, 'Peer', 'MediaStream', 'Received remote stream ->'], stream);
+      ref._RTCPeerConnection.ontrack = function (evt) {
+        var track = evt.track || evt;
 
-      /* TODO: Should we do integration checks to wait for magical timeout */
+        log.log([ref.id, 'Peer', 'MediaStreamTrack', 'Received remote track ->'], track);
 
-      /* TODO: Should we check if it's an empty stream first before triggering this */
+        stream.addTrack(track);
 
-      // Prevent triggering of empty remote MediaStream by checking the streaming information
-      // or if Peer ID is "MCU" since MCU does not send any remote MediaStream from this Peer but from the P2P Peers
-      if (!(!!ref.streamingInfo.settings.audio || !!ref.streamingInfo.settings.video) || ref.id === 'MCU') {
-        log.warn([ref.id, 'Peer', 'MediaStream', 'Dropping of received remote stream as it is empty ->'], stream);
-        return;
-      }
+        if (!hasTriggeredStreamEvent) {
+          log.log([ref.id, 'Peer', 'MediaStream', 'Constructing remote stream ->'], stream);
 
-      superRef._trigger('incomingStream', ref.id, stream, false, ref.getInfo());
-    };
+          superRef._trigger('incomingStream', ref.id, stream, false, ref.getInfo());
+          hasTriggeredStreamEvent = true;
+        }
+      };
+
+    } else {
+      ref._RTCPeerConnection.onaddstream = function (evt) {
+        var stream = evt.stream || evt;
+
+        log.log([ref.id, 'Peer', 'MediaStream', 'Received remote stream ->'], stream);
+
+        /* TODO: Should we do integration checks to wait for magical timeout */
+
+        /* TODO: Should we check if it's an empty stream first before triggering this */
+
+        // Prevent triggering of empty remote MediaStream by checking the streaming information
+        // or if Peer ID is "MCU" since MCU does not send any remote MediaStream from this Peer but from the P2P Peers
+        if (!(!!ref.streamingInfo.settings.audio || !!ref.streamingInfo.settings.video) || ref.id === 'MCU') {
+          log.warn([ref.id, 'Peer', 'MediaStream', 'Dropping of received remote stream as it is empty ->'], stream);
+          return;
+        }
+
+        superRef._trigger('incomingStream', ref.id, stream, false, ref.getInfo());
+      };
+    }
   };
 
   /**
