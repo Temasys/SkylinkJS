@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Tue Mar 15 2016 14:26:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Fri Mar 18 2016 12:30:40 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7248,7 +7248,7 @@ function toArray(list, index) {
 },{}]},{},[31])(31)
 });
 
-/*! adapterjs - v0.13.1 - 2016-03-15 */
+/*! adapterjs - v0.13.2 - 2016-03-18 */
 
 // Adapter's interface.
 var AdapterJS = AdapterJS || {};
@@ -7267,7 +7267,7 @@ AdapterJS.options = AdapterJS.options || {};
 // AdapterJS.options.hidePluginInstallPrompt = true;
 
 // AdapterJS version
-AdapterJS.VERSION = '0.13.1';
+AdapterJS.VERSION = '0.13.2';
 
 // This function will be called when the WebRTC API is ready to be used
 // Whether it is the native implementation (Chrome, Firefox, Opera) or
@@ -10417,7 +10417,10 @@ if ( navigator.mozGetUserMedia ||
 
     AdapterJS.getUserMedia = getUserMedia = 
        window.getUserMedia = navigator.getUserMedia;
-    navigator.mediaDevices.getUserMedia = requestUserMedia;
+    if ( navigator.mediaDevices &&
+      typeof Promise !== 'undefined') {
+      navigator.mediaDevices.getUserMedia = requestUserMedia;
+    }
   }
 
   // For chrome, use an iframe to load the screensharing extension
@@ -10452,7 +10455,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.11 - Tue Mar 15 2016 14:26:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Fri Mar 18 2016 12:30:40 GMT+0800 (SGT) */
 
 (function() {
 
