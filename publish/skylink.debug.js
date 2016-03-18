@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Fri Mar 18 2016 23:21:34 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sat Mar 19 2016 00:36:18 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6463,8 +6463,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         weight: superRef._peerPriorityWeight,
         receiveOnly: superRef._hasMCU && ref.id !== 'MCU',
         enableIceTrickle: superRef._enableIceTrickle,
-        enableDataChannel: superRef._enableDataChannel,
-        sessionType: !!superRef._mediaScreen ? 'screensharing' : 'stream'
+        enableDataChannel: superRef._enableDataChannel
       });
 
       if (ref.id === 'MCU') {
@@ -12137,7 +12136,6 @@ Skylink.prototype._approachEventHandler = function(message){
     receiveOnly: self._receiveOnly,
     enableIceTrickle: self._enableIceTrickle,
     enableDataChannel: self._enableDataChannel,
-    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
     target: message.target
   });
 };
@@ -12480,8 +12478,7 @@ Skylink.prototype._inRoomHandler = function(message) {
     userInfo: self.getPeerInfo(),
     receiveOnly: self._receiveOnly,
     enableIceTrickle: self._enableIceTrickle,
-    enableDataChannel: self._enableDataChannel,
-    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+    enableDataChannel: self._enableDataChannel
   });
 };
 
@@ -12602,8 +12599,7 @@ Skylink.prototype._enterHandler = function(message) {
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     target: peerId,
-    weight: self._peerPriorityWeight,
-    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+    weight: self._peerPriorityWeight
   });
 };
 
@@ -12723,9 +12719,6 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  // Setting for throttling
-  self.lastRestart = message.lastRestart || Date.now() || function() { return +new Date(); };
-
   // If User's weight is higher than Peer's or that it is "MCU"
   if (self._peerPriorityWeight > message.weight) {
     self._peers[peerId].handshakeOffer();
@@ -12742,14 +12735,10 @@ Skylink.prototype._restartHandler = function(message){
       os: window.navigator.platform,
       userInfo: self.getPeerInfo(),
       target: peerId, //'MCU',
-      isConnectionRestart: false,
-      lastRestart: message.lastRestart,
       weight: self._peerPriorityWeight,
       receiveOnly: self._hasMCU && peerId !== 'MCU',
       enableIceTrickle: self._enableIceTrickle,
-      enableDataChannel: self._enableDataChannel,
-      sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-      explicit: true
+      enableDataChannel: self._enableDataChannel
     });
   }
 
@@ -12887,8 +12876,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       os: window.navigator.platform,
       userInfo: self.getPeerInfo(),
       target: peerId,
-      weight: self._peerPriorityWeight,
-      sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+      weight: self._peerPriorityWeight
     });
   }
 };

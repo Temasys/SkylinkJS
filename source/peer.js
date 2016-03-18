@@ -419,8 +419,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         weight: superRef._peerPriorityWeight,
         receiveOnly: superRef._hasMCU && ref.id !== 'MCU',
         enableIceTrickle: superRef._enableIceTrickle,
-        enableDataChannel: superRef._enableDataChannel,
-        sessionType: !!superRef._mediaScreen ? 'screensharing' : 'stream'
+        enableDataChannel: superRef._enableDataChannel
       });
 
       if (ref.id === 'MCU') {

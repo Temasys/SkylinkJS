@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Fri Mar 18 2016 23:21:34 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sat Mar 19 2016 00:36:18 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -9189,7 +9189,7 @@ if ( navigator.mozGetUserMedia
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.10 - Fri Mar 18 2016 23:21:34 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sat Mar 19 2016 00:36:18 GMT+0800 (SGT) */
 
 (function() {
 
@@ -15654,8 +15654,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         weight: superRef._peerPriorityWeight,
         receiveOnly: superRef._hasMCU && ref.id !== 'MCU',
         enableIceTrickle: superRef._enableIceTrickle,
-        enableDataChannel: superRef._enableDataChannel,
-        sessionType: !!superRef._mediaScreen ? 'screensharing' : 'stream'
+        enableDataChannel: superRef._enableDataChannel
       });
 
       if (ref.id === 'MCU') {
@@ -21328,7 +21327,6 @@ Skylink.prototype._approachEventHandler = function(message){
     receiveOnly: self._receiveOnly,
     enableIceTrickle: self._enableIceTrickle,
     enableDataChannel: self._enableDataChannel,
-    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
     target: message.target
   });
 };
@@ -21671,8 +21669,7 @@ Skylink.prototype._inRoomHandler = function(message) {
     userInfo: self.getPeerInfo(),
     receiveOnly: self._receiveOnly,
     enableIceTrickle: self._enableIceTrickle,
-    enableDataChannel: self._enableDataChannel,
-    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+    enableDataChannel: self._enableDataChannel
   });
 };
 
@@ -21793,8 +21790,7 @@ Skylink.prototype._enterHandler = function(message) {
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     target: peerId,
-    weight: self._peerPriorityWeight,
-    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+    weight: self._peerPriorityWeight
   });
 };
 
@@ -21914,9 +21910,6 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  // Setting for throttling
-  self.lastRestart = message.lastRestart || Date.now() || function() { return +new Date(); };
-
   // If User's weight is higher than Peer's or that it is "MCU"
   if (self._peerPriorityWeight > message.weight) {
     self._peers[peerId].handshakeOffer();
@@ -21933,14 +21926,10 @@ Skylink.prototype._restartHandler = function(message){
       os: window.navigator.platform,
       userInfo: self.getPeerInfo(),
       target: peerId, //'MCU',
-      isConnectionRestart: false,
-      lastRestart: message.lastRestart,
       weight: self._peerPriorityWeight,
       receiveOnly: self._hasMCU && peerId !== 'MCU',
       enableIceTrickle: self._enableIceTrickle,
-      enableDataChannel: self._enableDataChannel,
-      sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-      explicit: true
+      enableDataChannel: self._enableDataChannel
     });
   }
 
@@ -22078,8 +22067,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       os: window.navigator.platform,
       userInfo: self.getPeerInfo(),
       target: peerId,
-      weight: self._peerPriorityWeight,
-      sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+      weight: self._peerPriorityWeight
     });
   }
 };
