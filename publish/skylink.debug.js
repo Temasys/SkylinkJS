@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Fri Mar 18 2016 17:37:38 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Fri Mar 18 2016 17:56:39 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5058,7 +5058,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
   pc.createOffer(function(offer) {
     log.debug([targetMid, null, null, 'Created offer'], offer);
 
-    self._Message(targetMid, offer);
+    self._setLocalAndSendMessage(targetMid, offer);
 
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);

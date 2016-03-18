@@ -234,7 +234,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
   pc.createOffer(function(offer) {
     log.debug([targetMid, null, null, 'Created offer'], offer);
 
-    self._Message(targetMid, offer);
+    self._setLocalAndSendMessage(targetMid, offer);
 
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
