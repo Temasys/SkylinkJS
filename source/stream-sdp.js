@@ -169,8 +169,6 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
   var hasAudio = !!(settings || {}).audio;
   var hasVideo = !!(settings || {}).video;
 
-  var i, j, k;
-
   var audioIndex = 0;
   var videoIndex = 0;
   var dataIndex = 0;
@@ -181,14 +179,22 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
 
   // Prevent setting of bandwidth audio if not configured
   if (typeof bandwidth.audio === 'number' && bandwidth.audio > 0) {
-    for (i = 0; i < sdpLines.length; i += 1) {
+    var hasSetAudio = false;
+
+    for (var i = 0; i < sdpLines.length; i += 1) {
       // set the audio bandwidth
-      if (sdpLines[i].indexOf('a=audio') === 0 || sdpLines[i].indexOf('m=audio') === 0) {
+      if (sdpLines[i].indexOf('m=audio') === 0) {
+      //if (sdpLines[i].indexOf('a=audio') === 0 || sdpLines[i].indexOf('m=audio') === 0) {
         sdpLines.splice(i + 1, 0, 'b=AS:' + bandwidth.audio);
 
         log.info([null, 'SDP', null, 'Setting maximum sending audio bitrate @(index:' + i + ') -> '], bandwidth.audio);
+        hasSetAudio = true;
         break;
       }
+    }
+
+    if (!hasSetAudio) {
+      log.warn([null, 'SDP', null, 'Not setting maximum sending audio bitrate as m=audio line is not found']);
     }
   } else {
     log.warn([null, 'SDP', null, 'Not setting maximum sending audio bitrate and leaving to browser\'s defaults']);
@@ -196,14 +202,22 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
 
   // Prevent setting of bandwidth video if not configured
   if (typeof bandwidth.video === 'number' && bandwidth.video > 0) {
-    for (j = 0; j < sdpLines.length; j += 1) {
+    var hasSetVideo = false;
+
+    for (var j = 0; j < sdpLines.length; j += 1) {
       // set the video bandwidth
-      if (sdpLines[j].indexOf('a=video') === 0 || sdpLines[j].indexOf('m=video') === 0) {
+      if (sdpLines[j].indexOf('m=video') === 0) {
+      //if (sdpLines[j].indexOf('a=video') === 0 || sdpLines[j].indexOf('m=video') === 0) {
         sdpLines.splice(j + 1, 0, 'b=AS:' + bandwidth.video);
 
         log.info([null, 'SDP', null, 'Setting maximum sending video bitrate @(index:' + j + ') -> '], bandwidth.video);
+        hasSetVideo = true;
         break;
       }
+    }
+
+    if (!hasSetVideo) {
+      log.warn([null, 'SDP', null, 'Not setting maximum sending video bitrate as m=video line is not found']);
     }
   } else {
     log.warn([null, 'SDP', null, 'Not setting maximum sending video bitrate and leaving to browser\'s defaults']);
@@ -211,14 +225,22 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
 
   // Prevent setting of bandwidth data if not configured
   if (typeof bandwidth.data === 'number' && bandwidth.data > 0) {
-    for (k = 0; k < sdpLines.length; k += 1) {
+    var hasSetData = false;
+
+    for (var k = 0; k < sdpLines.length; k += 1) {
       // set the data bandwidth
-      if (sdpLines[k].indexOf('a=application') === 0 || sdpLines[k].indexOf('m=application') === 0) {
+      if (sdpLines[k].indexOf('m=application') === 0) {
+      //if (sdpLines[k].indexOf('a=application') === 0 || sdpLines[k].indexOf('m=application') === 0) {
         sdpLines.splice(k + 1, 0, 'b=AS:' + bandwidth.data);
 
         log.info([null, 'SDP', null, 'Setting maximum sending data bitrate @(index:' + k + ') -> '], bandwidth.data);
+        hasSetData = true;
         break;
       }
+    }
+
+    if (!hasSetData) {
+      log.warn([null, 'SDP', null, 'Not setting maximum sending data bitrate as m=application line is not found']);
     }
   } else {
     log.warn([null, 'SDP', null, 'Not setting maximum sending data bitrate and leaving to browser\'s defaults']);
