@@ -988,6 +988,9 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     }
 
     /* TODO: SDP modifications */
+    // Configure OPUS codec stereo modification
+    sessionDescription.sdp = superRef._parseSDP.configureOPUSStereo(sessionDescription.sdp,
+      ref._connectionSettings.stereo);
 
     log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting local ' +
       sessionDescription.type + ' ->'], sessionDescription);
