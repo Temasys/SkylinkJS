@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Sat Mar 19 2016 12:14:19 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sat Mar 19 2016 13:19:33 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -9189,7 +9189,7 @@ if ( navigator.mozGetUserMedia
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.10 - Sat Mar 19 2016 12:14:19 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sat Mar 19 2016 13:19:33 GMT+0800 (SGT) */
 
 (function() {
 
@@ -18461,79 +18461,48 @@ Skylink.prototype._parseSDP = {
       }
     }
 
+    /**
+     * Loops and parses the payload based on the config line given
+     */
+    var parsePayloadFn = function (line, flag) {
+      var lineParts = line.split(' '),
+        hasFlag = false;
+
+      // Remove the fmtp:payload line
+      lineParts.splice(0, 1);
+
+      // Split the lines into ";"
+      lineParts = (lineParts.join(' ')).split(';');
+
+      // Loop out and search if stereo= flag exists already
+      for (var k = 0; k < lineParts.length; k++) {
+        // Check for the stereo=1 flag
+        if (lineParts[k].indexOf(flag + '=') === 0) {
+          if (!enableStereo) {
+            lineParts.splice(k, 1);
+            break;
+          }
+
+          lineParts[k] = flag + '=1';
+          hasFlag = true;
+        }
+      }
+
+      if (enableStereo && !hasFlag) {
+        lineParts.push(flag + '=1');
+      }
+
+      return line.split(' ')[0] + ' ' + lineParts.join(';');
+    };
+
     // Check if OPUS codec fmtp line exists
     if (opusFmtpLine) {
       for (var j = 0; j < sdpLines.length; j++) {
         // Check if this line is the OPUS fmtp line payload
         if (sdpLines[j].indexOf('a=fmtp:' + opusFmtpLine) === 0) {
-          var lineParts = sdpLines[j].split(' '),
-              hasStereoFlag = false,
-              hasSpropStereoFlag = false;
-
-          // Loop out and search if stereo= flag exists already
-          for (var k = 0; k < lineParts.length; k++) {
-            // Check for the stereo=1 flag
-            if (lineParts[k].indexOf('stereo=') === 0) {
-              // Remove the stereo flag if stereo is not enabled for OPUS codec connection
-              if (!enableStereo) {
-                lineParts[k] = '';
-                return;
-              }
-
-              lineParts[k] = 'stereo=1;';
-              hasStereoFlag = true;
-
-            // Check for the sprop-stereo=1 flag
-            } else if (lineParts[k].indexOf('sprop-stereo=') === 0) {
-              // Remove the stereo flag if stereo is not enabled for OPUS codec connection
-              if (!enableStereo) {
-                lineParts[k] = '';
-              }
-
-              lineParts[k] = 'sprop-stereo=1;';
-              hasSpropStereoFlag = true;
-            }
-          }
-
-          if (enableStereo) {
-            var lastLine = null;
-
-            // Check if stereo=1 line exists and set if it doesn't
-            if (!hasStereoFlag) {
-              var stereoLine = 'stereo=1;';
-              lastLine = lineParts[lineParts.length - 1];
-
-              // Prevent not setting ";" before the appending the stereo line
-              if (lastLine[lastLine.length - 1] !== ';') {
-                stereoLine = '; ' + stereoLine;
-              }
-
-              lineParts.push(stereoLine);
-            }
-
-            // Check if sprop-stereo=1 line exists and set if it doesn't
-            if (!hasSpropStereoFlag) {
-              var spropStereoLine = 'sprop-stereo=1;';
-              lastLine = lineParts[lineParts.length - 1];
-
-              // Prevent not setting ";" before the appending the sprop-stereo line
-              if (lastLine[lastLine.length - 1] !== ';') {
-                spropStereoLine = '; ' + spropStereoLine;
-              }
-
-              lineParts.push(spropStereoLine);
-            }
-          }
-
-          sdpLines[j] = lineParts.join(' ');
-
-          // Prevent setting last character as ";"
-          if (sdpLines[j][sdpLines[j].length - 1] === ';') {
-            sdpLines[j] = sdpLines[j].slice(0, -1);
-          }
-
-          // Prevent any "config=1 ;" kind of payload configuration
-          sdpLines[j] = sdpLines[j].replace(/ ;/g, ';');
+          sdpLines[j] = parsePayloadFn(sdpLines[j], 'stereo');
+          sdpLines[j] = parsePayloadFn(sdpLines[j], 'sprop-stereo');
+          break;
         }
       }
     }

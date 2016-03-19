@@ -106,79 +106,48 @@ Skylink.prototype._parseSDP = {
       }
     }
 
+    /**
+     * Loops and parses the payload based on the config line given
+     */
+    var parsePayloadFn = function (line, flag) {
+      var lineParts = line.split(' '),
+        hasFlag = false;
+
+      // Remove the fmtp:payload line
+      lineParts.splice(0, 1);
+
+      // Split the lines into ";"
+      lineParts = (lineParts.join(' ')).split(';');
+
+      // Loop out and search if stereo= flag exists already
+      for (var k = 0; k < lineParts.length; k++) {
+        // Check for the stereo=1 flag
+        if (lineParts[k].indexOf(flag + '=') === 0) {
+          if (!enableStereo) {
+            lineParts.splice(k, 1);
+            break;
+          }
+
+          lineParts[k] = flag + '=1';
+          hasFlag = true;
+        }
+      }
+
+      if (enableStereo && !hasFlag) {
+        lineParts.push(flag + '=1');
+      }
+
+      return line.split(' ')[0] + ' ' + lineParts.join(';');
+    };
+
     // Check if OPUS codec fmtp line exists
     if (opusFmtpLine) {
       for (var j = 0; j < sdpLines.length; j++) {
         // Check if this line is the OPUS fmtp line payload
         if (sdpLines[j].indexOf('a=fmtp:' + opusFmtpLine) === 0) {
-          var lineParts = sdpLines[j].split(' '),
-              hasStereoFlag = false,
-              hasSpropStereoFlag = false;
-
-          // Loop out and search if stereo= flag exists already
-          for (var k = 0; k < lineParts.length; k++) {
-            // Check for the stereo=1 flag
-            if (lineParts[k].indexOf('stereo=') === 0) {
-              // Remove the stereo flag if stereo is not enabled for OPUS codec connection
-              if (!enableStereo) {
-                lineParts[k] = '';
-                return;
-              }
-
-              lineParts[k] = 'stereo=1;';
-              hasStereoFlag = true;
-
-            // Check for the sprop-stereo=1 flag
-            } else if (lineParts[k].indexOf('sprop-stereo=') === 0) {
-              // Remove the stereo flag if stereo is not enabled for OPUS codec connection
-              if (!enableStereo) {
-                lineParts[k] = '';
-              }
-
-              lineParts[k] = 'sprop-stereo=1;';
-              hasSpropStereoFlag = true;
-            }
-          }
-
-          if (enableStereo) {
-            var lastLine = null;
-
-            // Check if stereo=1 line exists and set if it doesn't
-            if (!hasStereoFlag) {
-              var stereoLine = 'stereo=1;';
-              lastLine = lineParts[lineParts.length - 1];
-
-              // Prevent not setting ";" before the appending the stereo line
-              if (lastLine[lastLine.length - 1] !== ';') {
-                stereoLine = '; ' + stereoLine;
-              }
-
-              lineParts.push(stereoLine);
-            }
-
-            // Check if sprop-stereo=1 line exists and set if it doesn't
-            if (!hasSpropStereoFlag) {
-              var spropStereoLine = 'sprop-stereo=1;';
-              lastLine = lineParts[lineParts.length - 1];
-
-              // Prevent not setting ";" before the appending the sprop-stereo line
-              if (lastLine[lastLine.length - 1] !== ';') {
-                spropStereoLine = '; ' + spropStereoLine;
-              }
-
-              lineParts.push(spropStereoLine);
-            }
-          }
-
-          sdpLines[j] = lineParts.join(' ');
-
-          // Prevent setting last character as ";"
-          if (sdpLines[j][sdpLines[j].length - 1] === ';') {
-            sdpLines[j] = sdpLines[j].slice(0, -1);
-          }
-
-          // Prevent any "config=1 ;" kind of payload configuration
-          sdpLines[j] = sdpLines[j].replace(/ ;/g, ';');
+          sdpLines[j] = parsePayloadFn(sdpLines[j], 'stereo');
+          sdpLines[j] = parsePayloadFn(sdpLines[j], 'sprop-stereo');
+          break;
         }
       }
     }
