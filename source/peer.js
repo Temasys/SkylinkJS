@@ -92,7 +92,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         if (typeof peerData.userInfo.settings.audio === 'object') {
           // Both Peers has to have audio.stereo option enabled
           this._connectionSettings.stereo = peerData.userInfo.settings.audio.stereo === true &&
-            this._connectionSettings.stereo === true;
+            (superRef._streamSettings.audio && superRef._streamSettings.audio.stereo === true);
         }
       }
     }
@@ -183,7 +183,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     enableDataChannel: superRef._enableDataChannel === true,
     enableIceTrickle: superRef._enableIceTrickle === true,
     enableIceRestart: false,
-    stereo: superRef._streamSettings.audio && superRef._streamSettings.audio.stereo === true
+    stereo: false
   };
 
   /**
