@@ -1,22 +1,24 @@
 /**
  * Handles the SDP parsing functionalities.
- * @attribute _parseSDP
+ * @attribute _SDPParser
  * @type JSON
  * @private
  * @for Skylink
  * @since 0.6.x
  */
-Skylink.prototype._parseSDP = {
+Skylink.prototype._SDPParser = {
 
   /**
    * Handles the Firefox MCU answer mangling.
-   * @method MCUFirefoxAnswer
-   * @param {String} sdpString The RTCSessionDescription.sdp.
+   * @method configureMCUFirefoxAnswer
+   * @param {String} sdpString The local answer RTCSessionDescription.sdp.
+   * @return {String} updatedSdpString The modified local answer RTCSessionDescription.sdp
+   *   for Firefox connection with MCU Peer.
    * @private
    * @for Skylink
    * @since 0.6.x
    */
-  MCUFirefoxAnswer: function (sdpString) {
+  configureMCUFirefoxAnswer: function (sdpString) {
     var newSdpString = '';
 
     /* NOTE: Do we still need these fixes? There is no clear reason for this (undocumented sorry) */
@@ -29,18 +31,19 @@ Skylink.prototype._parseSDP = {
   },
 
   /**
-   * Handles the Firefox to other browsers SSRC lines received
-   *   that instead of interpretating as "default" for MediaStream.id,
-   *   interpret as the original id given.
+   * Handles the Firefox to other browsers SSRC lines received that instead of interpretating
+   *   as "default" for MediaStream.id, interpret as the original id given.
    * Check if sender of local answer RTCSessionDescription is Firefox and
    *   receiver is other browsers before parsing it.
-   * @method firefoxAnswerSSRC
-   * @param {String} sdpString The RTCSessionDescription.sdp.
+   * @method configureFirefoxAnswerSSRC
+   * @param {String} sdpString The local answer RTCSessionDescription.sdp.
+   * @return {String} updatedSdpString The modified local answer RTCSessionDescription.sdp
+   *   for Firefox connection with Peers connecting with other agents.
    * @private
    * @for Skylink
    * @since 0.6.x
    */
-  firefoxAnswerSSRC: function (sdpString) {
+  configureFirefoxAnswerSSRC: function (sdpString) {
     // Check if there is a line to point to a specific MediaStream ID
     if (sdpString.indexOf('a=msid-semantic:WMS *') > 0) {
       var sdpLines = sdpString.split('\r\n'),
@@ -108,7 +111,9 @@ Skylink.prototype._parseSDP = {
   /**
    * Handles the OPUS stereo flag configuration.
    * @method configureOPUSStereo
-   * @param {String} sdpString The RTCSessionDescription.sdp.
+   * @param {String} sdpString The local RTCSessionDescription.sdp.
+   * @return {String} updatedSdpString The modification local RTCSessionDescription.sdp
+   *   for connection using OPUS audio codec to have stereo enabled.
    * @private
    * @for Skylink
    * @since 0.6.x

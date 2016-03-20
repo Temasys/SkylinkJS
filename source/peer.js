@@ -807,7 +807,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
           // Parse SDP for the use-case of switching of streams for the Firefox local RTCSessionDescription
           // during re-negotiation
           if (window.webrtcDetectedBrowser === 'firefox' && ref.agent.name !== 'firefox') {
-            sessionDescription.sdp = superRef._parseSDP.firefoxAnswerSSRC(sessionDescription.sdp);
+            sessionDescription.sdp = superRef._SDPParser.configureFirefoxAnswerSSRC(sessionDescription.sdp);
           }
 
           log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Sending delayed local ' +
@@ -1010,7 +1010,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
     /* TODO: SDP modifications */
     // Configure OPUS codec stereo modification
-    sessionDescription.sdp = superRef._parseSDP.configureOPUSStereo(sessionDescription.sdp,
+    sessionDescription.sdp = superRef._SDPParser.configureOPUSStereo(sessionDescription.sdp,
       ref._connectionSettings.stereo);
 
     log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting local ' +
@@ -1054,7 +1054,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       // Parse SDP for the use-case of switching of streams for the Firefox local RTCSessionDescription
       // during re-negotiation
       if (window.webrtcDetectedBrowser === 'firefox' && ref.agent.name !== 'firefox') {
-        sessionDescription.sdp = superRef._parseSDP.firefoxAnswerSSRC(sessionDescription.sdp);
+        sessionDescription.sdp = superRef._SDPParser.configureFirefoxAnswerSSRC(sessionDescription.sdp);
       }
 
       // Send the local RTCSessionDescription
@@ -1112,7 +1112,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
     // Parse SDP for the use-case where self Peer is Firefox and Peer ID is "MCU" to suit MCU environment needs
     if (window.webrtcDetectedBrowser === 'firefox' && ref.id === 'MCU') {
-      sessionDescription.sdp = superRef._parseSDP.MCUFirefoxAnswer(sessionDescription.sdp);
+      sessionDescription.sdp = superRef._SDPParser.configureMCUFirefoxAnswer(sessionDescription.sdp);
     }
 
     log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting remote ' +
