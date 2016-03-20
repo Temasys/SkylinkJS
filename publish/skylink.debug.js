@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Sun Mar 20 2016 21:52:29 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sun Mar 20 2016 21:58:50 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6937,7 +6937,9 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
         stream.addTrack(track);
 
-        if (!hasTriggeredStreamEvent) {
+        // Prevent triggering of empty remote MediaStream if Peer ID is "MCU" since MCU does not
+        // send any remote MediaStream from this Peer but from the P2P Peers
+        if (ref.id !== 'MCU' && !hasTriggeredStreamEvent) {
           log.log([ref.id, 'Peer', 'MediaStream', 'Constructing remote stream ->'], stream);
 
           superRef._trigger('incomingStream', ref.id, stream, false, ref.getInfo());
