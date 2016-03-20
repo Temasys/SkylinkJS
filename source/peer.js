@@ -497,19 +497,19 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
       // Prevent restarting the Peer if the connection has ended
       if (!superRef._peers[ref.id]) {
-        log.warn([ref.id, 'RTCPeerConnection', null, 'Dropping of restarting connection as connection has ended']);
+        log.warn([ref.id, 'Peer', 'RTCPeerConnection', 'Dropping of restarting connection as connection has ended']);
         return;
       }
 
       // Prevent restarting a "closed" RTCPeerConnection
       if (ref._RTCPeerConnection.signalingState === 'closed') {
-        log.warn([ref.id, 'RTCPeerConnection', null, 'Dropping of restarting connection as signalingState ' +
+        log.warn([ref.id, 'Peer', 'RTCPeerConnection', 'Dropping of restarting connection as signalingState ' +
           'is "closed" ->'], ref._RTCPeerConnection.signalingState);
         return;
       }
 
       if (superRef._hasMCU) {
-        log.warn([ref.id, 'RTCPeerConnection', null, 'Dropping of restart connection it is in MCU environment']);
+        log.warn([ref.id, 'Peer', 'RTCPeerConnection', 'Dropping of restart connection it is in MCU environment']);
         return;
       }
 
@@ -530,12 +530,12 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       }
 
       if (isDataChannelConnectionHealthy && isConnectionHealthy) {
-        log.debug([ref.id, 'RTCPeerConnection', null, 'Dropping of restarting connection as connection ' +
+        log.debug([ref.id, 'Peer', 'RTCPeerConnection', 'Dropping of restarting connection as connection ' +
           'is healthy']);
         return;
       }
 
-      log.debug([ref.id, 'RTCPeerConnection', null, 'Restarting connection again ->'], {
+      log.debug([ref.id, 'Peer', 'RTCPeerConnection', 'Restarting connection again ->'], {
         channel: isDataChannelConnectionHealthy,
         connection: isConnectionHealthy
       });
