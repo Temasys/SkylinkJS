@@ -548,6 +548,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       ref.handshakeRestart();
 
     }, ref._connectionStatus.timeout);
+
+    log.log([ref.id, 'Peer', 'RTCPeerConnection', 'Monitoring connection status']);
   };
 
   /**
@@ -612,7 +614,16 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     // Prevent closing a RTCPeerConnection object at signalingState that is "closed",
     // as it might throw an Error
     if (ref._RTCPeerConnection.signalingState !== 'closed') {
+      log.debug([ref.id, 'Peer', 'RTCPeerConnection', 'Closing connection']);
+
       ref._RTCPeerConnection.close();
+    }
+
+    // Clear the connection health timer if there is one existing
+    if (ref._connectionStatus.checker) {
+      log.debug([ref.id, 'Peer', 'RTCPeerConnection', 'Removing monitoring connection status checker']);
+
+      clearTimeout(ref._connectionStatus.checker);
     }
 
     // Trigger that the Peer has left the Room (or is disconnected)
@@ -626,7 +637,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     /* TODO: Close all DataChannels connection */
     /* TODO: Clear all timers */
 
-    log.log([ref.id, 'Peer', 'RTCPeerConnection', 'Closing connection']);
+    log.info([ref.id, 'Peer', 'RTCPeerConnection', 'Connection session has ended']);
   };
 
   /**

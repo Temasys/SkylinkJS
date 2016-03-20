@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Sun Mar 20 2016 22:49:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sun Mar 20 2016 23:01:01 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6607,6 +6607,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       ref.handshakeRestart();
 
     }, ref._connectionStatus.timeout);
+
+    log.log([ref.id, 'Peer', 'RTCPeerConnection', 'Monitoring connection status']);
   };
 
   /**
@@ -6671,7 +6673,16 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     // Prevent closing a RTCPeerConnection object at signalingState that is "closed",
     // as it might throw an Error
     if (ref._RTCPeerConnection.signalingState !== 'closed') {
+      log.debug([ref.id, 'Peer', 'RTCPeerConnection', 'Closing connection']);
+
       ref._RTCPeerConnection.close();
+    }
+
+    // Clear the connection health timer if there is one existing
+    if (ref._connectionStatus.checker) {
+      log.debug([ref.id, 'Peer', 'RTCPeerConnection', 'Removing monitoring connection status checker']);
+
+      clearTimeout(ref._connectionStatus.checker);
     }
 
     // Trigger that the Peer has left the Room (or is disconnected)
@@ -6685,7 +6696,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     /* TODO: Close all DataChannels connection */
     /* TODO: Clear all timers */
 
-    log.log([ref.id, 'Peer', 'RTCPeerConnection', 'Closing connection']);
+    log.info([ref.id, 'Peer', 'RTCPeerConnection', 'Connection session has ended']);
   };
 
   /**
@@ -9363,6 +9374,8 @@ Skylink.prototype._SDPParser = {
    * Handles the OPUS stereo flag configuration.
    * @method configureOPUSStereo
    * @param {String} sdpString The local RTCSessionDescription.sdp.
+   * @param {Boolean} [enableStereo=false] The flag that indicates if stereo should
+   *   be enabled for using OPUS audio codec.
    * @return {String} updatedSdpString The modification local RTCSessionDescription.sdp
    *   for connection using OPUS audio codec to have stereo enabled.
    * @private
