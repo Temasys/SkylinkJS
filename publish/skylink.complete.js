@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Sun Mar 20 2016 21:10:06 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sun Mar 20 2016 21:41:09 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -9189,7 +9189,7 @@ if ( navigator.mozGetUserMedia
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.10 - Sun Mar 20 2016 21:10:06 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sun Mar 20 2016 21:41:09 GMT+0800 (SGT) */
 
 (function() {
 
@@ -18409,9 +18409,12 @@ Skylink.prototype._parseSDP = {
   MCUFirefoxAnswer: function (sdpString) {
     var newSdpString = '';
 
+    /* NOTE: Do we still need these fixes? There is no clear reason for this (undocumented sorry) */
+    // Remove all "generation 0"
     newSdpString = sdpString.replace(/ generation 0/g, '');
     newSdpString = newSdpString.replace(/ udp /g, ' UDP ');
 
+    // Return modified RTCSessionDescription.sdp
     return newSdpString;
   },
 
@@ -18419,6 +18422,8 @@ Skylink.prototype._parseSDP = {
    * Handles the Firefox to other browsers SSRC lines received
    *   that instead of interpretating as "default" for MediaStream.id,
    *   interpret as the original id given.
+   * Check if sender of local answer RTCSessionDescription is Firefox and
+   *   receiver is other browsers before parsing it.
    * @method firefoxAnswerSSRC
    * @param {String} sdpString The RTCSessionDescription.sdp.
    * @private
@@ -18426,19 +18431,24 @@ Skylink.prototype._parseSDP = {
    * @since 0.6.x
    */
   firefoxAnswerSSRC: function (sdpString) {
+    // Check if there is a line to point to a specific MediaStream ID
     if (sdpString.indexOf('a=msid-semantic:WMS *') > 0) {
       var sdpLines = sdpString.split('\r\n'),
           streamId = '',
           shouldReplaceSSRCSemantic = -1;
 
-      /*
+      /**
        * Loops and checks if there is any MediaStream ID or MediaStreamTrack ID to replace based on the type provided
        */
       var parseTracksSSRCFn = function (track) {
         var trackId = '';
 
+        // Loop out for the a=msid: line that contains the {MediaStream ID} {MediaStreamTrack ID} based on
+        // track type provided - "audio" / "video"
         for (var i = 0; i < sdpLines.length; i++) {
+          // Check if there is a MediaStreamTrack ID that exists, start appending the tracks
           if (!!trackId) {
+            // Check if there is a=ssrc: lines to pass in the extra ssrc lines with the label and MediaStream ID.
             if (sdpLines[i].indexOf('a=ssrc:') === 0) {
               var ssrcId = sdpLines[i].split(':')[1].split(' ')[0];
 
@@ -18447,6 +18457,7 @@ Skylink.prototype._parseSDP = {
                 'a=ssrc:' + ssrcId + ' label:' + trackId);
               break;
 
+            // Prevent going to the next track type or track
             } else if (sdpLines[i].indexOf('a=mid:') === 0) {
               break;
             }
@@ -18466,6 +18477,7 @@ Skylink.prototype._parseSDP = {
       parseTracksSSRCFn('video');
       parseTracksSSRCFn('audio');
 
+      // Commenting out for now as this lines seems to not affect functionality
       /*if (shouldReplaceSSRCSemantic) {
         for (var i = 0; i < sdpLines.length; i++) {
           if (sdpLines[i].indexOf('a=msid-semantic:WMS ') === 0) {
@@ -18477,6 +18489,8 @@ Skylink.prototype._parseSDP = {
         }
 
       }*/
+
+      // Return modified RTCSessionDescription.sdp
       return sdpLines.join('\r\n');
     }
   },
