@@ -1012,8 +1012,56 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
     /* TODO: SDP modifications */
     // Configure OPUS codec stereo modification
+    log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating OPUS stereo enabled option ->'],
+      ref._connectionSettings.stereo);
+
     sessionDescription.sdp = superRef._SDPParser.configureOPUSStereo(sessionDescription.sdp,
       ref._connectionSettings.stereo);
+
+    // Configure the maximum audio bitrate to send
+    // Prevent retrieving values when .bandwidth is not defined.
+    if (superRef._streamSettings.bandwidth && typeof superRef._streamSettings.bandwidth.audio === 'number' &&
+      superRef._streamSettings.bandwidth.audio > 0) {
+      log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating maximum sending audio bitrate ->'],
+        superRef._streamSettings.bandwidth.audio);
+
+      sessionDescription.sdp = superRef._SDPParser.configureMaxSendingBandwidth(sessionDescription.sdp,
+        'audio', superRef._streamSettings.bandwidth.audio);
+
+    } else {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Not configuration maximum sending audio bitrate ' +
+        'and leaving to browser\'s defaults']);
+    }
+
+    // Configure the maximum video bitrate to send
+    // Prevent retrieving values when .bandwidth is not defined.
+    if (superRef._streamSettings.bandwidth && typeof superRef._streamSettings.bandwidth.video === 'number' &&
+      superRef._streamSettings.bandwidth.video > 0) {
+      log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating maximum sending video bitrate ->'],
+        superRef._streamSettings.bandwidth.video);
+
+      sessionDescription.sdp = superRef._SDPParser.configureMaxSendingBandwidth(sessionDescription.sdp,
+        'video', superRef._streamSettings.bandwidth.video);
+
+    } else {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Not configuration maximum sending video bitrate ' +
+        'and leaving to browser\'s defaults']);
+    }
+
+    // Configure the maximum data bitrate to send
+    // Prevent retrieving values when .bandwidth is not defined.
+    if (superRef._streamSettings.bandwidth && typeof superRef._streamSettings.bandwidth.data === 'number' &&
+      superRef._streamSettings.bandwidth.data > 0) {
+      log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating maximum sending data bitrate ->'],
+        superRef._streamSettings.bandwidth.data);
+
+      sessionDescription.sdp = superRef._SDPParser.configureMaxSendingBandwidth(sessionDescription.sdp,
+        'data', superRef._streamSettings.bandwidth.data);
+
+    } else {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Not configuration maximum sending data bitrate ' +
+        'and leaving to browser\'s defaults']);
+    }
 
     log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting local ' +
       sessionDescription.type + ' ->'], sessionDescription);

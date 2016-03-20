@@ -185,5 +185,49 @@ Skylink.prototype._SDPParser = {
 
     // Return modified RTCSessionDescription.sdp
     return sdpLines.join('\r\n');
+  },
+
+  /**
+   * Handles the maximum sending bandwidth configuration.
+   * @method configureMCUFirefoxAnswer
+   * @param {String} sdpString The local answer RTCSessionDescription.sdp.
+   * @param {String} mediaType The media type to configure.
+   *   Types are <code>"audio"</code>, <code>"video"</code> and <code>"data"</code>.
+   * @param {Number} maxBitrate The maximum sending bitrate value.
+   *   This value cannot be <code>0</code> or less.
+   * @return {String} updatedSdpString The modified local RTCSessionDescription.sdp
+   *   with maximum sending bandwidth configuration based on the media type and bitrate value provided.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  configureMaxSendingBandwidth: function (sdpString, mediaType, maxBitrate) {
+    var sdpLines = sdpString.split('\r\n'),
+        sdpMediaType = '';
+
+    if (mediaType === 'audio') {
+      sdpMediaType = 'audio';
+
+    } else if (mediaType === 'video') {
+      sdpMediaType = 'video';
+
+    } else if (mediaType === 'data') {
+      sdpMediaType = 'application';
+
+    // Prevent setting any unknown types
+    } else {
+      log.error('Dropping of configurating maximum sending bandwidth as unknown mediaType is provided ->', mediaType);
+      return sdpString;
+    }
+
+    for (var i = 0; i < sdpLines.length; i += 1) {
+      // Configure the maximum sending bitrate for the selected media type
+      if (sdpLines[i].indexOf('m=' + sdpMediaType) === 0) {
+        sdpLines.splice(i + 1, 0, 'b=AS:' + maxBitrate);
+        break;
+      }
+    }
+
+    return sdpLines.join('\r\n');
   }
 };

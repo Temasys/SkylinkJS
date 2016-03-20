@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Sun Mar 20 2016 21:58:50 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sun Mar 20 2016 22:49:00 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -9189,7 +9189,7 @@ if ( navigator.mozGetUserMedia
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.10 - Sun Mar 20 2016 21:58:50 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sun Mar 20 2016 22:49:00 GMT+0800 (SGT) */
 
 (function() {
 
@@ -16262,8 +16262,56 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
     /* TODO: SDP modifications */
     // Configure OPUS codec stereo modification
+    log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating OPUS stereo enabled option ->'],
+      ref._connectionSettings.stereo);
+
     sessionDescription.sdp = superRef._SDPParser.configureOPUSStereo(sessionDescription.sdp,
       ref._connectionSettings.stereo);
+
+    // Configure the maximum audio bitrate to send
+    // Prevent retrieving values when .bandwidth is not defined.
+    if (superRef._streamSettings.bandwidth && typeof superRef._streamSettings.bandwidth.audio === 'number' &&
+      superRef._streamSettings.bandwidth.audio > 0) {
+      log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating maximum sending audio bitrate ->'],
+        superRef._streamSettings.bandwidth.audio);
+
+      sessionDescription.sdp = superRef._SDPParser.configureMaxSendingBandwidth(sessionDescription.sdp,
+        'audio', superRef._streamSettings.bandwidth.audio);
+
+    } else {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Not configuration maximum sending audio bitrate ' +
+        'and leaving to browser\'s defaults']);
+    }
+
+    // Configure the maximum video bitrate to send
+    // Prevent retrieving values when .bandwidth is not defined.
+    if (superRef._streamSettings.bandwidth && typeof superRef._streamSettings.bandwidth.video === 'number' &&
+      superRef._streamSettings.bandwidth.video > 0) {
+      log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating maximum sending video bitrate ->'],
+        superRef._streamSettings.bandwidth.video);
+
+      sessionDescription.sdp = superRef._SDPParser.configureMaxSendingBandwidth(sessionDescription.sdp,
+        'video', superRef._streamSettings.bandwidth.video);
+
+    } else {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Not configuration maximum sending video bitrate ' +
+        'and leaving to browser\'s defaults']);
+    }
+
+    // Configure the maximum data bitrate to send
+    // Prevent retrieving values when .bandwidth is not defined.
+    if (superRef._streamSettings.bandwidth && typeof superRef._streamSettings.bandwidth.data === 'number' &&
+      superRef._streamSettings.bandwidth.data > 0) {
+      log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating maximum sending data bitrate ->'],
+        superRef._streamSettings.bandwidth.data);
+
+      sessionDescription.sdp = superRef._SDPParser.configureMaxSendingBandwidth(sessionDescription.sdp,
+        'data', superRef._streamSettings.bandwidth.data);
+
+    } else {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Not configuration maximum sending data bitrate ' +
+        'and leaving to browser\'s defaults']);
+    }
 
     log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting local ' +
       sessionDescription.type + ' ->'], sessionDescription);
@@ -18576,6 +18624,50 @@ Skylink.prototype._SDPParser = {
     }
 
     // Return modified RTCSessionDescription.sdp
+    return sdpLines.join('\r\n');
+  },
+
+  /**
+   * Handles the maximum sending bandwidth configuration.
+   * @method configureMCUFirefoxAnswer
+   * @param {String} sdpString The local answer RTCSessionDescription.sdp.
+   * @param {String} mediaType The media type to configure.
+   *   Types are <code>"audio"</code>, <code>"video"</code> and <code>"data"</code>.
+   * @param {Number} maxBitrate The maximum sending bitrate value.
+   *   This value cannot be <code>0</code> or less.
+   * @return {String} updatedSdpString The modified local RTCSessionDescription.sdp
+   *   with maximum sending bandwidth configuration based on the media type and bitrate value provided.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  configureMaxSendingBandwidth: function (sdpString, mediaType, maxBitrate) {
+    var sdpLines = sdpString.split('\r\n'),
+        sdpMediaType = '';
+
+    if (mediaType === 'audio') {
+      sdpMediaType = 'audio';
+
+    } else if (mediaType === 'video') {
+      sdpMediaType = 'video';
+
+    } else if (mediaType === 'data') {
+      sdpMediaType = 'application';
+
+    // Prevent setting any unknown types
+    } else {
+      log.error('Dropping of configurating maximum sending bandwidth as unknown mediaType is provided ->', mediaType);
+      return sdpString;
+    }
+
+    for (var i = 0; i < sdpLines.length; i += 1) {
+      // Configure the maximum sending bitrate for the selected media type
+      if (sdpLines[i].indexOf('m=' + sdpMediaType) === 0) {
+        sdpLines.splice(i + 1, 0, 'b=AS:' + maxBitrate);
+        break;
+      }
+    }
+
     return sdpLines.join('\r\n');
   }
 };
