@@ -114,6 +114,8 @@ Skylink.prototype._SDPParser = {
    * Handles the OPUS stereo flag configuration.
    * @method configureOPUSStereo
    * @param {String} sdpString The local RTCSessionDescription.sdp.
+   * @param {Boolean} [enableStereo=false] The flag that indicates if stereo should
+   *   be enabled for using OPUS audio codec.
    * @return {String} updatedSdpString The modification local RTCSessionDescription.sdp
    *   for connection using OPUS audio codec to have stereo enabled.
    * @private
