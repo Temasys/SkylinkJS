@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Sat Mar 19 2016 13:19:33 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sun Mar 20 2016 19:18:18 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -9189,7 +9189,7 @@ if ( navigator.mozGetUserMedia
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.10 - Sat Mar 19 2016 13:19:33 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sun Mar 20 2016 19:18:18 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13475,6 +13475,21 @@ Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
 Skylink.prototype._enableIceTrickle = true;
 
 /**
+ * The flag that indicates if PeerConnections should enable
+ *    restarting of ICE to reconnect the failed ICE connection.
+ * @attribute _enableIceRestart
+ * @type Boolean
+ * @default true
+ * @private
+ * @required
+ * @since 0.6.x
+ * @component ICE
+ * @for Skylink
+ */
+Skylink.prototype._enableIceRestart = window.webrtcDetectedBrowser !== 'firefox';
+
+
+/**
  * The flag that indicates if PeerConnections ICE gathering
  *   should use STUN server connection.
  * @attribute _enableSTUN
@@ -15277,6 +15292,13 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         this._connectionSettings.enableIceTrickle === true;
     }
 
+    // Configure for enableIceRestart setting
+    if (typeof peerData.enableIceRestart === 'boolean') {
+      // Both Peers has to have trickle ICE option enabled
+      this._connectionSettings.enableIceRestart = peerData.enableIceRestart === true &&
+        this._connectionSettings.enableIceRestart === true;
+    }
+
     // Configure the agent name information
     if (typeof peerData.agent === 'string') {
       this.agent.name = peerData.agent;
@@ -15405,6 +15427,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
   SkylinkPeer.prototype._connectionSettings = {
     enableDataChannel: superRef._enableDataChannel === true,
     enableIceTrickle: superRef._enableIceTrickle === true,
+    enableIceRestart: superRef._enableIceRestart === true,
     stereo: superRef._streamSettings.audio && superRef._streamSettings.audio.stereo === true
   };
 
@@ -15497,12 +15520,15 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
     /* ETA: Implement ICE restart when RTCPeerConnection.iceConnectionState is "disconnected" or "failed".
        Will implement when Firefox supports ICE restart first */
+    var restartICE = ref._connectionSettings.enableIceRestart &&
+      ['disconnected', 'failed'].indexOf(ref._RTCPeerConnection.iceConnectionState) > -1;
 
     // RTCPeerConnection.createOffer() RTCOfferOptions
     var options = {
       mandatory: {
         OfferToReceiveAudio: true,
-        OfferToReceiveVideo: true
+        OfferToReceiveVideo: true,
+        iceRestart: restartICE
       }
     };
 
@@ -15510,7 +15536,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     if (['firefox', 'chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1) {
       options = {
         offerToReceiveAudio: true,
-        offerToReceiveVideo: true
+        offerToReceiveVideo: true,
+        iceRestart: restartICE
       };
     }
 
@@ -15654,7 +15681,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         weight: superRef._peerPriorityWeight,
         receiveOnly: superRef._hasMCU && ref.id !== 'MCU',
         enableIceTrickle: superRef._enableIceTrickle,
-        enableDataChannel: superRef._enableDataChannel
+        enableDataChannel: superRef._enableDataChannel,
+        enableIceRestart: superRef._enableIceRestart
       });
 
       if (ref.id === 'MCU') {
@@ -16153,6 +16181,9 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       }
 
       /* TODO: Reconnect when "failed" or "disconnected" */
+      if (['failed', 'disconnected'].indexOf(state) > -1) {
+        ref.handshakeRestart();
+      }
     };
   };
 
@@ -18365,7 +18396,10 @@ Skylink.prototype._parseSDP = {
   /**
    * Handles the Firefox MCU answer mangling.
    * @method MCUFirefoxAnswer
-   * @param {String} sdpString The sessionDescription.sdp string.
+   * @param {String} sdpString The RTCSessionDescription.sdp.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
    */
   MCUFirefoxAnswer: function (sdpString) {
     var newSdpString = '';
@@ -18381,7 +18415,10 @@ Skylink.prototype._parseSDP = {
    *   that instead of interpretating as "default" for MediaStream.id,
    *   interpret as the original id given.
    * @method firefoxAnswerSSRC
-   * @param {String} sdpString The sessionDescription.sdp string.
+   * @param {String} sdpString The RTCSessionDescription.sdp.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
    */
   firefoxAnswerSSRC: function (sdpString) {
     if (sdpString.indexOf('a=msid-semantic:WMS *') > 0) {
@@ -18390,7 +18427,7 @@ Skylink.prototype._parseSDP = {
           shouldReplaceSSRCSemantic = -1;
 
       /*
-       * Loops and checks if there is any stream ID or track ID to replace based on the type provided
+       * Loops and checks if there is any MediaStream ID or MediaStreamTrack ID to replace based on the type provided
        */
       var parseTracksSSRCFn = function (track) {
         var trackId = '';
@@ -18442,7 +18479,10 @@ Skylink.prototype._parseSDP = {
   /**
    * Handles the OPUS stereo flag configuration.
    * @method configureOPUSStereo
-   * @param {String} sdpString The sessionDescription.sdp string.
+   * @param {String} sdpString The RTCSessionDescription.sdp.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
    */
   configureOPUSStereo: function (sdpString, enableStereo) {
     var sdpLines = sdpString.split('\r\n'),
@@ -21402,6 +21442,7 @@ Skylink.prototype._approachEventHandler = function(message){
     receiveOnly: self._receiveOnly,
     enableIceTrickle: self._enableIceTrickle,
     enableDataChannel: self._enableDataChannel,
+    enableIceRestart: self._enableIceRestart,
     target: message.target
   });
 };
@@ -21744,7 +21785,8 @@ Skylink.prototype._inRoomHandler = function(message) {
     userInfo: self.getPeerInfo(),
     receiveOnly: self._receiveOnly,
     enableIceTrickle: self._enableIceTrickle,
-    enableDataChannel: self._enableDataChannel
+    enableDataChannel: self._enableDataChannel,
+    enableIceRestart: self._enableIceRestart
   });
 };
 
@@ -21860,6 +21902,7 @@ Skylink.prototype._enterHandler = function(message) {
     receiveOnly: receiveOnly,
     enableIceTrickle: self._enableIceTrickle,
     enableDataChannel: self._enableDataChannel,
+    enableIceRestart: self._enableIceRestart,
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
@@ -22004,7 +22047,8 @@ Skylink.prototype._restartHandler = function(message){
       weight: self._peerPriorityWeight,
       receiveOnly: self._hasMCU && peerId !== 'MCU',
       enableIceTrickle: self._enableIceTrickle,
-      enableDataChannel: self._enableDataChannel
+      enableDataChannel: self._enableDataChannel,
+      enableIceRestart: self._enableIceRestart
     });
   }
 
@@ -22137,6 +22181,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       receiveOnly: receiveOnly,
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
+      enableIceRestart: self._enableIceRestart,
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion,
       os: window.navigator.platform,

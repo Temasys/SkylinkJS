@@ -342,6 +342,7 @@ Skylink.prototype._approachEventHandler = function(message){
     receiveOnly: self._receiveOnly,
     enableIceTrickle: self._enableIceTrickle,
     enableDataChannel: self._enableDataChannel,
+    enableIceRestart: self._enableIceRestart,
     target: message.target
   });
 };
@@ -684,7 +685,8 @@ Skylink.prototype._inRoomHandler = function(message) {
     userInfo: self.getPeerInfo(),
     receiveOnly: self._receiveOnly,
     enableIceTrickle: self._enableIceTrickle,
-    enableDataChannel: self._enableDataChannel
+    enableDataChannel: self._enableDataChannel,
+    enableIceRestart: self._enableIceRestart
   });
 };
 
@@ -800,6 +802,7 @@ Skylink.prototype._enterHandler = function(message) {
     receiveOnly: receiveOnly,
     enableIceTrickle: self._enableIceTrickle,
     enableDataChannel: self._enableDataChannel,
+    enableIceRestart: self._enableIceRestart,
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
@@ -944,7 +947,8 @@ Skylink.prototype._restartHandler = function(message){
       weight: self._peerPriorityWeight,
       receiveOnly: self._hasMCU && peerId !== 'MCU',
       enableIceTrickle: self._enableIceTrickle,
-      enableDataChannel: self._enableDataChannel
+      enableDataChannel: self._enableDataChannel,
+      enableIceRestart: self._enableIceRestart
     });
   }
 
@@ -1077,6 +1081,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       receiveOnly: receiveOnly,
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
+      enableIceRestart: self._enableIceRestart,
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion,
       os: window.navigator.platform,

@@ -42,6 +42,13 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         this._connectionSettings.enableIceTrickle === true;
     }
 
+    // Configure for enableIceRestart setting
+    if (typeof peerData.enableIceRestart === 'boolean') {
+      // Both Peers has to have trickle ICE option enabled
+      this._connectionSettings.enableIceRestart = peerData.enableIceRestart === true &&
+        this._connectionSettings.enableIceRestart === true;
+    }
+
     // Configure the agent name information
     if (typeof peerData.agent === 'string') {
       this.agent.name = peerData.agent;
@@ -170,6 +177,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
   SkylinkPeer.prototype._connectionSettings = {
     enableDataChannel: superRef._enableDataChannel === true,
     enableIceTrickle: superRef._enableIceTrickle === true,
+    enableIceRestart: superRef._enableIceRestart === true,
     stereo: superRef._streamSettings.audio && superRef._streamSettings.audio.stereo === true
   };
 
@@ -262,12 +270,15 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
     /* ETA: Implement ICE restart when RTCPeerConnection.iceConnectionState is "disconnected" or "failed".
        Will implement when Firefox supports ICE restart first */
+    var restartICE = ref._connectionSettings.enableIceRestart &&
+      ['disconnected', 'failed'].indexOf(ref._RTCPeerConnection.iceConnectionState) > -1;
 
     // RTCPeerConnection.createOffer() RTCOfferOptions
     var options = {
       mandatory: {
         OfferToReceiveAudio: true,
-        OfferToReceiveVideo: true
+        OfferToReceiveVideo: true,
+        iceRestart: restartICE
       }
     };
 
@@ -275,7 +286,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     if (['firefox', 'chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1) {
       options = {
         offerToReceiveAudio: true,
-        offerToReceiveVideo: true
+        offerToReceiveVideo: true,
+        iceRestart: restartICE
       };
     }
 
@@ -419,7 +431,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         weight: superRef._peerPriorityWeight,
         receiveOnly: superRef._hasMCU && ref.id !== 'MCU',
         enableIceTrickle: superRef._enableIceTrickle,
-        enableDataChannel: superRef._enableDataChannel
+        enableDataChannel: superRef._enableDataChannel,
+        enableIceRestart: superRef._enableIceRestart
       });
 
       if (ref.id === 'MCU') {
@@ -918,6 +931,9 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       }
 
       /* TODO: Reconnect when "failed" or "disconnected" */
+      if (['failed', 'disconnected'].indexOf(state) > -1) {
+        ref.handshakeRestart();
+      }
     };
   };
 
