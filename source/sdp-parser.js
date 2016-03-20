@@ -10,7 +10,10 @@ Skylink.prototype._parseSDP = {
   /**
    * Handles the Firefox MCU answer mangling.
    * @method MCUFirefoxAnswer
-   * @param {String} sdpString The sessionDescription.sdp string.
+   * @param {String} sdpString The RTCSessionDescription.sdp.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
    */
   MCUFirefoxAnswer: function (sdpString) {
     var newSdpString = '';
@@ -26,7 +29,10 @@ Skylink.prototype._parseSDP = {
    *   that instead of interpretating as "default" for MediaStream.id,
    *   interpret as the original id given.
    * @method firefoxAnswerSSRC
-   * @param {String} sdpString The sessionDescription.sdp string.
+   * @param {String} sdpString The RTCSessionDescription.sdp.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
    */
   firefoxAnswerSSRC: function (sdpString) {
     if (sdpString.indexOf('a=msid-semantic:WMS *') > 0) {
@@ -35,7 +41,7 @@ Skylink.prototype._parseSDP = {
           shouldReplaceSSRCSemantic = -1;
 
       /*
-       * Loops and checks if there is any stream ID or track ID to replace based on the type provided
+       * Loops and checks if there is any MediaStream ID or MediaStreamTrack ID to replace based on the type provided
        */
       var parseTracksSSRCFn = function (track) {
         var trackId = '';
@@ -87,7 +93,10 @@ Skylink.prototype._parseSDP = {
   /**
    * Handles the OPUS stereo flag configuration.
    * @method configureOPUSStereo
-   * @param {String} sdpString The sessionDescription.sdp string.
+   * @param {String} sdpString The RTCSessionDescription.sdp.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
    */
   configureOPUSStereo: function (sdpString, enableStereo) {
     var sdpLines = sdpString.split('\r\n'),
