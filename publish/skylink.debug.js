@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Sun Mar 20 2016 19:18:18 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sun Mar 20 2016 20:51:21 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6105,7 +6105,12 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     if (typeof peerData.enableIceRestart === 'boolean') {
       // Both Peers has to have trickle ICE option enabled
       this._connectionSettings.enableIceRestart = peerData.enableIceRestart === true &&
-        this._connectionSettings.enableIceRestart === true;
+        superRef._enableIceRestart === true;
+
+    // Fallback for implementations without enableIceRestart setting.
+    // It will be taken as false for compatibility
+    } else {
+      this._connectionSettings.enableIceRestart = false;
     }
 
     // Configure the agent name information
@@ -6236,7 +6241,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
   SkylinkPeer.prototype._connectionSettings = {
     enableDataChannel: superRef._enableDataChannel === true,
     enableIceTrickle: superRef._enableIceTrickle === true,
-    enableIceRestart: superRef._enableIceRestart === true,
+    enableIceRestart: false,
     stereo: superRef._streamSettings.audio && superRef._streamSettings.audio.stereo === true
   };
 
