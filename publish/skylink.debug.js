@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Sun Mar 20 2016 21:48:20 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sun Mar 20 2016 21:52:29 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9305,6 +9305,8 @@ Skylink.prototype._SDPParser = {
       // Return modified RTCSessionDescription.sdp
       return sdpLines.join('\r\n');
     }
+
+    return sdpString;
   },
 
   /**

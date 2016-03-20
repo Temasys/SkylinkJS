@@ -106,6 +106,8 @@ Skylink.prototype._SDPParser = {
       // Return modified RTCSessionDescription.sdp
       return sdpLines.join('\r\n');
     }
+
+    return sdpString;
   },
 
   /**
