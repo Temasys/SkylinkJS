@@ -570,6 +570,13 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       return;
     }
 
+    // Prevent sending other types of candidates if it's not a "relay" (TURN) candidate
+    if (superRef._forceTURN && candidate.candidate.indexOf('relay') === -1) {
+      log.warn([ref.id, 'Peer', 'RTCIceCandidate', 'Dropping of adding remote candidate ' +
+        'as it is not a "relay" candidate in forced TURN case ->'], candidate);
+      return;
+    }
+
     // Prevent adding remote RTCIceCandidate if RTCPeerConnection object does not have remote RTCSessionDescription
     if (!(!!ref._RTCPeerConnection.remoteDescription && !!ref._RTCPeerConnection.remoteDescription.sdp)) {
       log.debug([ref.id, 'Peer', 'RTCIceCandidate',
@@ -845,7 +852,12 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
           return;
         }
 
-        /* TODO: Should we not send the RTCIceCandidate if it's not a TURN candidate under the forceTURN circumstance */
+        // Prevent sending other types of candidates if it's not a "relay" (TURN) candidate
+        if (superRef._forceTURN && candidate.candidate.indexOf('relay') === -1) {
+          log.warn([ref.id, 'Peer', 'RTCIceCandidate', 'Dropping of sending local candidate ' +
+            'as it is not a "relay" candidate in forced TURN case ->'], candidate);
+          return;
+        }
 
         // Send the local RTCIceCandidate
         superRef._sendChannelMessage({

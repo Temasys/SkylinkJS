@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Tue Mar 22 2016 00:56:11 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Tue Mar 22 2016 01:02:16 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10455,7 +10455,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.10 - Tue Mar 22 2016 00:56:11 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Tue Mar 22 2016 01:02:16 GMT+0800 (SGT) */
 
 (function() {
 
@@ -16054,6 +16054,13 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       return;
     }
 
+    // Prevent sending other types of candidates if it's not a "relay" (TURN) candidate
+    if (superRef._forceTURN && candidate.candidate.indexOf('relay') === -1) {
+      log.warn([ref.id, 'Peer', 'RTCIceCandidate', 'Dropping of adding remote candidate ' +
+        'as it is not a "relay" candidate in forced TURN case ->'], candidate);
+      return;
+    }
+
     // Prevent adding remote RTCIceCandidate if RTCPeerConnection object does not have remote RTCSessionDescription
     if (!(!!ref._RTCPeerConnection.remoteDescription && !!ref._RTCPeerConnection.remoteDescription.sdp)) {
       log.debug([ref.id, 'Peer', 'RTCIceCandidate',
@@ -16329,7 +16336,12 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
           return;
         }
 
-        /* TODO: Should we not send the RTCIceCandidate if it's not a TURN candidate under the forceTURN circumstance */
+        // Prevent sending other types of candidates if it's not a "relay" (TURN) candidate
+        if (superRef._forceTURN && candidate.candidate.indexOf('relay') === -1) {
+          log.warn([ref.id, 'Peer', 'RTCIceCandidate', 'Dropping of sending local candidate ' +
+            'as it is not a "relay" candidate in forced TURN case ->'], candidate);
+          return;
+        }
 
         // Send the local RTCIceCandidate
         superRef._sendChannelMessage({
