@@ -914,21 +914,25 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
  * @since 0.5.5
  */
 Skylink.prototype._parseBandwidthSettings = function (bwOptions) {
+  this._streamSettings.bandwidth = {};
+
   bwOptions = (typeof bwOptions === &#x27;object&#x27;) ?
     bwOptions : {};
 
-  // set audio bandwidth
-  bwOptions.audio = (typeof bwOptions.audio === &#x27;number&#x27;) ?
-    bwOptions.audio : 50;
-  // set video bandwidth
-  bwOptions.video = (typeof bwOptions.video === &#x27;number&#x27;) ?
-    bwOptions.video : 256;
-  // set data bandwidth
-  bwOptions.data = (typeof bwOptions.data === &#x27;number&#x27;) ?
-    bwOptions.data : 1638400;
+  // Configure the audio bandwidth. Recommended = 50
+  if (typeof bwOptions.audio === &#x27;number&#x27;) {
+    this._streamSettings.bandwidth.audio = bwOptions.audio;
+  }
 
-  // set the settings
-  this._streamSettings.bandwidth = bwOptions;
+  // Configure the video bandwidth. Recommended = 256
+  if (typeof bwOptions.video === &#x27;number&#x27;) {
+    this._streamSettings.bandwidth.video = bwOptions.video;
+  }
+
+  // Configure the data bandwidth. Recommended = 1638400
+  if (typeof bwOptions.data === &#x27;number&#x27;) {
+    this._streamSettings.bandwidth.data = bwOptions.data;
+  }
 };
 
 /**
@@ -1143,37 +1147,45 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
 
     if (pc) {
       if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
-        var hasStream = false;
-        var hasScreen = false;
+        // Updates the streams accordingly
+        var updateStreamFn = function (updatedStream) {
+          var hasStream = false;
 
-        // remove streams
-        var streams = pc.getLocalStreams();
-        for (var i = 0; i &lt; streams.length; i++) {
-          // try removeStream
-          pc.removeStream(streams[i]);
-        }
+          // remove streams
+          var streams = pc.getLocalStreams();
+          for (var i = 0; i &lt; streams.length; i++) {
+            if (updatedStream !== null &amp;&amp; streams[i].id === updatedStream.id) {
+              hasStream = true;
+              continue;
+            }
+            // try removeStream
+            pc.removeStream(streams[i]);
+          }
 
-        if (this._mediaStream &amp;&amp; this._mediaStream !== null) {
-          hasStream = true;
-        }
+          if (updatedStream !== null &amp;&amp; !hasStream) {
+            pc.addStream(updatedStream);
+          }
+        };
 
         if (this._mediaScreen &amp;&amp; this._mediaScreen !== null) {
-          hasScreen = true;
-        }
-
-        if (hasScreen) {
           log.debug([peerId, &#x27;MediaStream&#x27;, null, &#x27;Sending screen&#x27;], this._mediaScreen);
-          pc.addStream(this._mediaScreen);
-        } else if (hasStream) {
+
+          updateStreamFn(this._mediaScreen);
+
+        } else if (this._mediaStream &amp;&amp; this._mediaStream !== null) {
           log.debug([peerId, &#x27;MediaStream&#x27;, null, &#x27;Sending stream&#x27;], this._mediaStream);
-          pc.addStream(this._mediaStream);
+
+          updateStreamFn(this._mediaStream);
+
         } else {
           log.warn([peerId, &#x27;MediaStream&#x27;, null, &#x27;No media to send. Will be only receiving&#x27;]);
+
+          updateStreamFn(null);
         }
 
       } else {
-        log.warn([peerId, &#x27;MediaStream&#x27;, this._mediaStream,
-          &#x27;Not adding stream as signalingState is closed&#x27;]);
+        log.warn([peerId, &#x27;MediaStream&#x27;, null,
+          &#x27;Not adding any stream as signalingState is closed&#x27;]);
       }
     } else {
       log.warn([peerId, &#x27;MediaStream&#x27;, this._mediaStream,

@@ -593,20 +593,20 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
   self._streamSettings.video = self._streamSettings.video || false;
 
-  log.info([targetMid, null, null, &#x27;Custom bandwidth settings:&#x27;], {
+  /*log.info([targetMid, null, null, &#x27;Custom bandwidth settings:&#x27;], {
     audio: (self._streamSettings.bandwidth.audio || &#x27;Not set&#x27;) + &#x27; kB/s&#x27;,
     video: (self._streamSettings.bandwidth.video || &#x27;Not set&#x27;) + &#x27; kB/s&#x27;,
     data: (self._streamSettings.bandwidth.data || &#x27;Not set&#x27;) + &#x27; kB/s&#x27;
-  });
+  });*/
 
-  if (self._streamSettings.video.hasOwnProperty(&#x27;frameRate&#x27;) &amp;&amp;
+  /*if (self._streamSettings.video.hasOwnProperty(&#x27;frameRate&#x27;) &amp;&amp;
     self._streamSettings.video.hasOwnProperty(&#x27;resolution&#x27;)){
     log.info([targetMid, null, null, &#x27;Custom resolution settings:&#x27;], {
       frameRate: (self._streamSettings.video.frameRate || &#x27;Not set&#x27;) + &#x27; fps&#x27;,
       width: (self._streamSettings.video.resolution.width || &#x27;Not set&#x27;) + &#x27; px&#x27;,
       height: (self._streamSettings.video.resolution.height || &#x27;Not set&#x27;) + &#x27; px&#x27;
     });
-  }
+  }*/
 
   // set video codec
   if (self._selectedVideoCodec !== self.VIDEO_CODEC.AUTO) {
