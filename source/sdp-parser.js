@@ -107,6 +107,7 @@ Skylink.prototype._SDPParser = {
       return sdpLines.join('\r\n');
     }
 
+    // Return unmodified RTCSessionDescription.sdp
     return sdpString;
   },
 
@@ -191,8 +192,8 @@ Skylink.prototype._SDPParser = {
 
   /**
    * Handles the maximum sending bandwidth configuration.
-   * @method configureMCUFirefoxAnswer
-   * @param {String} sdpString The local answer RTCSessionDescription.sdp.
+   * @method configureMaxSendingBandwidth
+   * @param {String} sdpString The local RTCSessionDescription.sdp.
    * @param {String} mediaType The media type to configure.
    *   Types are <code>"audio"</code>, <code>"video"</code> and <code>"data"</code>.
    * @param {Number} maxBitrate The maximum sending bitrate value.
@@ -230,6 +231,7 @@ Skylink.prototype._SDPParser = {
       }
     }
 
+    // Return modified RTCSessionDescription.sdp
     return sdpLines.join('\r\n');
   },
 
@@ -258,6 +260,72 @@ Skylink.prototype._SDPParser = {
 
     // Return modified RTCSessionDescription.sdp
     return sdpLines.join('\r\n');
-  }
+  },
 
+  /**
+   * Handles the selected codec based on the media type provided.
+   * @method configureCodec
+   * @param {String} sdpString The local RTCSessionDescription.sdp.
+   * @param {String} mediaType The media type to configure.
+   *   Types are <code>"audio"</code> and <code>"video"</code>.
+   * @param {String} codec The codec to use when available.
+   * @return {String} updatedSdpString The modified local RTCSessionDescription.sdp
+   *   with the selected codec when available.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  configureCodec: function (sdpString, sdpMediaType, codec) {
+    var sdpLines = sdpString.split('\r\n');
+    var codecFound = false;
+    var codecPayload = null;
+
+    // Loop to find the codec payload codec line
+    for (var i = 0; i < sdpLines.length; i += 1) {
+      var rtpmapLine = sdpLines[i];
+
+      if (rtpmapLine.indexOf('a=rtpmap:') === 0) {
+        if (rtpmapLine.indexOf(codec) > 0) {
+          codecFound = true;
+          codecPayload = rtpmapLine.split(':')[1].split(' ')[0];
+        }
+      }
+    }
+
+    if (codecFound) {
+      // Loop out for our line
+      for (var j = 0; j < sdpLines.length; j += 1) {
+        var payloadsLine = sdpLines[j];
+
+        if (payloadsLine.indexOf('m=' + sdpMediaType) === 0) {
+          var parts = payloadsLine.split(' ');
+          var payloads = payloadsLine.split(' ');
+
+          // Remove unwanted parts of the lines
+          // Example line: m=video 59533 UDP/TLS/RTP/SAVPF [100 101 116 117 96 97 98] <-- Codecs selection order here
+          payloads.splice(0, 3);
+
+          var selectedPayloadIndex = payloads.indexOf(codecPayload);
+
+          // Check if the payload is in the selected order.
+          // Just add it as the first if it is not in the selected order
+          if (selectedPayloadIndex === -1) {
+            payloads.splice(0, 0, codecPayload);
+
+          // Move the current first selected codec to our preferred codec index
+          // Replace the current first selected codec with our preferred codec
+          } else {
+            var first = payloads[0];
+            payloads[0] = codecPayload;
+            payloads[selectedPayloadIndex] = first;
+          }
+
+          sdpLines[j] = parts[0] + ' ' + parts[1] + ' ' + parts[2] + ' ' + payloads.join(' ');
+          break;
+        }
+      }
+    }
+
+    return sdpLines.join('\r\n');
+  }
 };

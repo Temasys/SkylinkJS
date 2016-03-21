@@ -1092,6 +1092,34 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
     sessionDescription.sdp = superRef._SDPParser.removeFirefoxH264Pref(sessionDescription.sdp);
 
+    /**
+     * Configure the audio codec to use in connection when available
+     */
+    if (superRef._selectedAudioCodec !== superRef.AUDIO_CODEC.AUTO) {
+      log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating to select audio codec if available ->'],
+        superRef._selectedAudioCodec);
+
+      sessionDescription.sdp = superRef._SDPParser.configureCodec(sessionDescription.sdp, 'audio',
+        superRef._selectedAudioCodec);
+
+    } else {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Using browser\'s selected default audio codec']);
+    }
+
+    /**
+     * Configure the video codec to use in connection when available
+     */
+    if (superRef._selectedVideoCodec !== superRef.VIDEO_CODEC.AUTO) {
+      log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating to select video codec if available ->'],
+        superRef._selectedVideoCodec);
+
+      sessionDescription.sdp = superRef._SDPParser.configureCodec(sessionDescription.sdp, 'video',
+        superRef._selectedVideoCodec);
+
+    } else {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Using browser\'s selected default video codec']);
+    }
+
 
     log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting local ' +
       sessionDescription.type + ' ->'], sessionDescription);

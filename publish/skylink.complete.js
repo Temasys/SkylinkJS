@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Tue Mar 22 2016 00:12:23 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Tue Mar 22 2016 00:44:37 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10455,7 +10455,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.10 - Tue Mar 22 2016 00:12:23 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Tue Mar 22 2016 00:44:37 GMT+0800 (SGT) */
 
 (function() {
 
@@ -17608,6 +17608,34 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
     sessionDescription.sdp = superRef._SDPParser.removeFirefoxH264Pref(sessionDescription.sdp);
 
+    /**
+     * Configure the audio codec to use in connection when available
+     */
+    if (superRef._selectedAudioCodec !== superRef.AUDIO_CODEC.AUTO) {
+      log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating to select audio codec if available ->'],
+        superRef._selectedAudioCodec);
+
+      sessionDescription.sdp = superRef._SDPParser.configureCodec(sessionDescription.sdp, 'audio',
+        superRef._selectedAudioCodec);
+
+    } else {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Using browser\'s selected default audio codec']);
+    }
+
+    /**
+     * Configure the video codec to use in connection when available
+     */
+    if (superRef._selectedVideoCodec !== superRef.VIDEO_CODEC.AUTO) {
+      log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating to select video codec if available ->'],
+        superRef._selectedVideoCodec);
+
+      sessionDescription.sdp = superRef._SDPParser.configureCodec(sessionDescription.sdp, 'video',
+        superRef._selectedVideoCodec);
+
+    } else {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Using browser\'s selected default video codec']);
+    }
+
 
     log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting local ' +
       sessionDescription.type + ' ->'], sessionDescription);
@@ -19843,6 +19871,7 @@ Skylink.prototype._SDPParser = {
       return sdpLines.join('\r\n');
     }
 
+    // Return unmodified RTCSessionDescription.sdp
     return sdpString;
   },
 
@@ -19927,8 +19956,8 @@ Skylink.prototype._SDPParser = {
 
   /**
    * Handles the maximum sending bandwidth configuration.
-   * @method configureMCUFirefoxAnswer
-   * @param {String} sdpString The local answer RTCSessionDescription.sdp.
+   * @method configureMaxSendingBandwidth
+   * @param {String} sdpString The local RTCSessionDescription.sdp.
    * @param {String} mediaType The media type to configure.
    *   Types are <code>"audio"</code>, <code>"video"</code> and <code>"data"</code>.
    * @param {Number} maxBitrate The maximum sending bitrate value.
@@ -19966,6 +19995,7 @@ Skylink.prototype._SDPParser = {
       }
     }
 
+    // Return modified RTCSessionDescription.sdp
     return sdpLines.join('\r\n');
   },
 
@@ -19994,8 +20024,74 @@ Skylink.prototype._SDPParser = {
 
     // Return modified RTCSessionDescription.sdp
     return sdpLines.join('\r\n');
-  }
+  },
 
+  /**
+   * Handles the selected codec based on the media type provided.
+   * @method configureCodec
+   * @param {String} sdpString The local RTCSessionDescription.sdp.
+   * @param {String} mediaType The media type to configure.
+   *   Types are <code>"audio"</code> and <code>"video"</code>.
+   * @param {String} codec The codec to use when available.
+   * @return {String} updatedSdpString The modified local RTCSessionDescription.sdp
+   *   with the selected codec when available.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  configureCodec: function (sdpString, sdpMediaType, codec) {
+    var sdpLines = sdpString.split('\r\n');
+    var codecFound = false;
+    var codecPayload = null;
+
+    // Loop to find the codec payload codec line
+    for (var i = 0; i < sdpLines.length; i += 1) {
+      var rtpmapLine = sdpLines[i];
+
+      if (rtpmapLine.indexOf('a=rtpmap:') === 0) {
+        if (rtpmapLine.indexOf(codec) > 0) {
+          codecFound = true;
+          codecPayload = rtpmapLine.split(':')[1].split(' ')[0];
+        }
+      }
+    }
+
+    if (codecFound) {
+      // Loop out for our line
+      for (var j = 0; j < sdpLines.length; j += 1) {
+        var payloadsLine = sdpLines[j];
+
+        if (payloadsLine.indexOf('m=' + sdpMediaType) === 0) {
+          var parts = payloadsLine.split(' ');
+          var payloads = payloadsLine.split(' ');
+
+          // Remove unwanted parts of the lines
+          // Example line: m=video 59533 UDP/TLS/RTP/SAVPF [100 101 116 117 96 97 98] <-- Codecs selection order here
+          payloads.splice(0, 3);
+
+          var selectedPayloadIndex = payloads.indexOf(codecPayload);
+
+          // Check if the payload is in the selected order.
+          // Just add it as the first if it is not in the selected order
+          if (selectedPayloadIndex === -1) {
+            payloads.splice(0, 0, codecPayload);
+
+          // Move the current first selected codec to our preferred codec index
+          // Replace the current first selected codec with our preferred codec
+          } else {
+            var first = payloads[0];
+            payloads[0] = codecPayload;
+            payloads[selectedPayloadIndex] = first;
+          }
+
+          sdpLines[j] = parts[0] + ' ' + parts[1] + ' ' + parts[2] + ' ' + payloads.join(' ');
+          break;
+        }
+      }
+    }
+
+    return sdpLines.join('\r\n');
+  }
 };
 var _LOG_KEY = 'SkylinkJS';
 
