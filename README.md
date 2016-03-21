@@ -21,7 +21,7 @@ You'll need a Temasys Developer Account and an App key to use this. [Register he
 ##### Installation
 Install SkylinkJS with [npm](https://www.npmjs.com/):
 ```
-npm install skylinkjs
+npm install skylinkjs@0.6.x
 ```
 Install SkylinkJS with [bower](http://bower.io/):
 ```
