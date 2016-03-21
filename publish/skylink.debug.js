@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Tue Mar 22 2016 01:02:16 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Tue Mar 22 2016 01:22:17 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6356,6 +6356,17 @@ Skylink.prototype._roomLocked = false;
  * @since 0.4.0
  */
 Skylink.prototype._inRoom = false;
+
+/**
+ * Stores the peer connection priority weight.
+ * @attribute _peerPriorityWeight
+ * @type Number
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.0
+ */
+Skylink.prototype._peerPriorityWeight = 0;
 
 /**
  * Connects self to the selected room.

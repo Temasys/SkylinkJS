@@ -37,6 +37,17 @@ Skylink.prototype._roomLocked = false;
 Skylink.prototype._inRoom = false;
 
 /**
+ * Stores the peer connection priority weight.
+ * @attribute _peerPriorityWeight
+ * @type Number
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.0
+ */
+Skylink.prototype._peerPriorityWeight = 0;
+
+/**
  * Connects self to the selected room.
  * By default, if room parameter is not provided, it will
  *   connect to the default room provided in
