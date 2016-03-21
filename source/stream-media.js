@@ -1057,37 +1057,45 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
 
     if (pc) {
       if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
-        var hasStream = false;
-        var hasScreen = false;
+        // Updates the streams accordingly
+        var updateStreamFn = function (updatedStream) {
+          var hasStream = false;
 
-        // remove streams
-        var streams = pc.getLocalStreams();
-        for (var i = 0; i < streams.length; i++) {
-          // try removeStream
-          pc.removeStream(streams[i]);
-        }
+          // remove streams
+          var streams = pc.getLocalStreams();
+          for (var i = 0; i < streams.length; i++) {
+            if (updatedStream !== null && streams[i].id === updatedStream.id) {
+              hasStream = true;
+              continue;
+            }
+            // try removeStream
+            pc.removeStream(streams[i]);
+          }
 
-        if (this._mediaStream && this._mediaStream !== null) {
-          hasStream = true;
-        }
+          if (updatedStream !== null && !hasStream) {
+            pc.addStream(updatedStream);
+          }
+        };
 
         if (this._mediaScreen && this._mediaScreen !== null) {
-          hasScreen = true;
-        }
-
-        if (hasScreen) {
           log.debug([peerId, 'MediaStream', null, 'Sending screen'], this._mediaScreen);
-          pc.addStream(this._mediaScreen);
-        } else if (hasStream) {
+
+          updateStreamFn(this._mediaScreen);
+
+        } else if (this._mediaStream && this._mediaStream !== null) {
           log.debug([peerId, 'MediaStream', null, 'Sending stream'], this._mediaStream);
-          pc.addStream(this._mediaStream);
+
+          updateStreamFn(this._mediaStream);
+
         } else {
           log.warn([peerId, 'MediaStream', null, 'No media to send. Will be only receiving']);
+
+          updateStreamFn(null);
         }
 
       } else {
-        log.warn([peerId, 'MediaStream', this._mediaStream,
-          'Not adding stream as signalingState is closed']);
+        log.warn([peerId, 'MediaStream', null,
+          'Not adding any stream as signalingState is closed']);
       }
     } else {
       log.warn([peerId, 'MediaStream', this._mediaStream,
