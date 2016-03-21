@@ -635,7 +635,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     }
 
     /* TODO: Close all DataChannels connection */
-    /* TODO: Clear all timers */
 
     log.info([ref.id, 'Peer', 'RTCPeerConnection', 'Connection session has ended']);
   };
@@ -907,8 +906,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
         /* TODO: Should we do integration checks to wait for magical timeout */
 
-        /* TODO: Should we check if it's an empty stream first before triggering this */
-
         // Prevent triggering of empty remote MediaStream by checking the streaming information
         // or if Peer ID is "MCU" since MCU does not send any remote MediaStream from this Peer but from the P2P Peers
         if (!(!!ref.streamingInfo.settings.audio || !!ref.streamingInfo.settings.video) || ref.id === 'MCU') {
@@ -948,7 +945,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         superRef._trigger('iceConnectionState', superRef.ICE_CONNECTION_STATE.TRICKLE_FAILED);
       }
 
-      /* TODO: Reconnect when "failed" or "disconnected" */
       if (['failed', 'disconnected'].indexOf(state) > -1) {
         ref.handshakeRestart();
       }
@@ -972,7 +968,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
       superRef._trigger('peerConnectionState', state, ref.id);
 
-      /* TODO: Fix when "closed" and attempt to reconnect if object is not meant to be closed */
+      /* NOTE: We will not fix when "closed" and attempt to reconnect if object is not meant to be closed */
     };
   };
 
@@ -1021,9 +1017,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       }
     }
 
-    /* TODO: SDP modifications */
     /**
-     * Configure OPUS codec stereo modification
+     * Parse SDP: Configure OPUS codec stereo modification
      */
     log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating OPUS stereo enabled option ->'],
       ref._connectionSettings.stereo);
@@ -1032,7 +1027,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       ref._connectionSettings.stereo);
 
     /**
-     * Configure the maximum audio bitrate to send
+     * Parse SDP: Configure the maximum audio bitrate to send
      */
     // Prevent retrieving values when .bandwidth is not defined.
     if (superRef._streamSettings.bandwidth && typeof superRef._streamSettings.bandwidth.audio === 'number' &&
@@ -1050,7 +1045,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     }
 
     /**
-     * Configure the maximum video bitrate to send
+     * Parse SDP: Configure the maximum video bitrate to send
      */
     // Prevent retrieving values when .bandwidth is not defined.
     if (superRef._streamSettings.bandwidth && typeof superRef._streamSettings.bandwidth.video === 'number' &&
@@ -1068,7 +1063,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     }
 
     /**
-     * Configure the maximum data bitrate to send
+     * Parse SDP: Configure the maximum data bitrate to send
      */
     // Prevent retrieving values when .bandwidth is not defined.
     if (superRef._streamSettings.bandwidth && typeof superRef._streamSettings.bandwidth.data === 'number' &&
@@ -1086,7 +1081,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     }
 
     /**
-     * Remove the H264 preference from Firefox 32 (Ubuntu) browsers that was causing connection issues previously
+     * Parse SDP: Remove the H264 preference from Firefox 32 (Ubuntu) browsers that was
+     *   causing connection issues previously
      */
     log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Removing any Firefox H264 profile experimental feature']);
 
@@ -1107,7 +1103,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     }
 
     /**
-     * Configure the video codec to use in connection when available
+     * Parse SDP: Configure the video codec to use in connection when available
      */
     if (superRef._selectedVideoCodec !== superRef.VIDEO_CODEC.AUTO) {
       log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating to select video codec if available ->'],
@@ -1144,8 +1140,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       // Set the processing local RTCSessionDescription flag to false
       ref._connectionStatus.processingLocalSDP = false;
 
-      /* TODO: Fix the firefox local answer first before sending to Chrome/Opera/IE/Safari */
-
       superRef._trigger('handshakeProgress', sessionDescription.type, ref.id);
 
       // Check if trickle ICE is disabled or if the candidate generation has been completed as in
@@ -1159,9 +1153,13 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Sending local ' +
         sessionDescription.type + ' ->'], sessionDescription);
 
-      // Parse SDP for the use-case of switching of streams for the Firefox local RTCSessionDescription
+      /**
+       * Parse SDP: Configure for the use-case of switching of streams for the Firefox local RTCSessionDescription
+       */
       // during re-negotiation
       if (window.webrtcDetectedBrowser === 'firefox' && ref.agent.name !== 'firefox') {
+        log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating Firefox local answer with SSRC lines ' +
+          'to interop with other browsers']);
         sessionDescription.sdp = superRef._SDPParser.configureFirefoxAnswerSSRC(sessionDescription.sdp);
       }
 
@@ -1216,10 +1214,12 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       }
     }
 
-    /* TODO: SDP modifications */
-
-    // Parse SDP for the use-case where self Peer is Firefox and Peer ID is "MCU" to suit MCU environment needs
+    /**
+     * Parse SDP: Configure for the use-case where self Peer is Firefox and Peer ID is "MCU"
+     *   to suit MCU environment needs
+     */
     if (window.webrtcDetectedBrowser === 'firefox' && ref.id === 'MCU') {
+      log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating local answer for Firefox interop with MCU']);
       sessionDescription.sdp = superRef._SDPParser.configureMCUFirefoxAnswer(sessionDescription.sdp);
     }
 
