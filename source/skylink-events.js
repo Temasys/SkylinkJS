@@ -337,20 +337,18 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
    *   that indicates if the Peer connection Stream object sent
    *   is a screensharing stream or not.
-   * @param {String} [peerInfo.settings.bandwidth] The Peer
-   *   streaming bandwidth settings. Setting the bandwidth flags may not
-   *   force set the bandwidth for each connection stream channels as it depends
-   *   on how the browser handles the bandwidth bitrate. Values are configured
-   *   in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.audio] The configured
-   *   audio stream channel for the remote Stream object bandwidth
-   *   that audio streaming should use in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.video] The configured
-   *   video stream channel for the remote Stream object bandwidth
-   *   that video streaming should use in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.data] The configured
-   *   datachannel channel for the DataChannel connection bandwidth
-   *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
+   *   the maximum sending bandwidth. The flags set may or may not work depending
+   *   on the browser implementations and how it handles it.
+   * @param {String} [peerInfo.settings.bandwidth.audio] The maximum
+   *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the audio bitrate to the browser defaults.
+   * @param {String} [peerInfo.settings.bandwidth.video] The maximum
+   *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the video bitrate to the browser defaults.
+   * @param {String} [peerInfo.settings.bandwidth.data] The maximum
+   *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the data bitrate to the browser defaults.
    * @param {JSON} peerInfo.mediaStatus The Peer Stream mute
    *   settings for both audio and video streamings.
    * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
@@ -415,20 +413,18 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
    *   that indicates if the Peer connection Stream object sent
    *   is a screensharing stream or not.
-   * @param {String} [peerInfo.settings.bandwidth] The Peer
-   *   streaming bandwidth settings. Setting the bandwidth flags may not
-   *   force set the bandwidth for each connection stream channels as it depends
-   *   on how the browser handles the bandwidth bitrate. Values are configured
-   *   in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.audio] The configured
-   *   audio stream channel for the remote Stream object bandwidth
-   *   that audio streaming should use in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.video] The configured
-   *   video stream channel for the remote Stream object bandwidth
-   *   that video streaming should use in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.data] The configured
-   *   datachannel channel for the DataChannel connection bandwidth
-   *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
+   *   the maximum sending bandwidth. The flags set may or may not work depending
+   *   on the browser implementations and how it handles it.
+   * @param {String} [peerInfo.settings.bandwidth.audio] The maximum
+   *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the audio bitrate to the browser defaults.
+   * @param {String} [peerInfo.settings.bandwidth.video] The maximum
+   *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the video bitrate to the browser defaults.
+   * @param {String} [peerInfo.settings.bandwidth.data] The maximum
+   *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the data bitrate to the browser defaults.
    * @param {JSON} peerInfo.mediaStatus The Peer Stream mute
    *   settings for both audio and video streamings.
    * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
@@ -497,20 +493,21 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
    *   that indicates if the Peer connection Stream object sent
    *   is a screensharing stream or not.
-   * @param {String} [peerInfo.settings.bandwidth] The Peer
-   *   streaming bandwidth settings. Setting the bandwidth flags may not
-   *   force set the bandwidth for each connection stream channels as it depends
-   *   on how the browser handles the bandwidth bitrate. Values are configured
-   *   in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.audio] The configured
-   *   audio stream channel for the remote Stream object bandwidth
-   *   that audio streaming should use in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.video] The configured
-   *   video stream channel for the remote Stream object bandwidth
-   *   that video streaming should use in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.data] The configured
-   *   datachannel channel for the DataChannel connection bandwidth
-   *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
+   *   the maximum sending bandwidth. The flags set may or may not work depending
+   *   on the browser implementations.
+   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
+   *   the maximum sending bandwidth. The flags set may or may not work depending
+   *   on the browser implementations and how it handles it.
+   * @param {String} [peerInfo.settings.bandwidth.audio] The maximum
+   *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the audio bitrate to the browser defaults.
+   * @param {String} [peerInfo.settings.bandwidth.video] The maximum
+   *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the video bitrate to the browser defaults.
+   * @param {String} [peerInfo.settings.bandwidth.data] The maximum
+   *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the data bitrate to the browser defaults.
    * @param {JSON} peerInfo.mediaStatus The Peer Stream mute
    *   settings for both audio and video streamings.
    * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
@@ -574,20 +571,18 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
    *   that indicates if the Peer connection Stream object sent
    *   is a screensharing stream or not.
-   * @param {String} [peerInfo.settings.bandwidth] The Peer
-   *   streaming bandwidth settings. Setting the bandwidth flags may not
-   *   force set the bandwidth for each connection stream channels as it depends
-   *   on how the browser handles the bandwidth bitrate. Values are configured
-   *   in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.audio] The configured
-   *   audio stream channel for the remote Stream object bandwidth
-   *   that audio streaming should use in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.video] The configured
-   *   video stream channel for the remote Stream object bandwidth
-   *   that video streaming should use in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.data] The configured
-   *   datachannel channel for the DataChannel connection bandwidth
-   *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
+   *   the maximum sending bandwidth. The flags set may or may not work depending
+   *   on the browser implementations and how it handles it.
+   * @param {String} [peerInfo.settings.bandwidth.audio] The maximum
+   *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the audio bitrate to the browser defaults.
+   * @param {String} [peerInfo.settings.bandwidth.video] The maximum
+   *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the video bitrate to the browser defaults.
+   * @param {String} [peerInfo.settings.bandwidth.data] The maximum
+   *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the data bitrate to the browser defaults.
    * @param {JSON} peerInfo.mediaStatus The Peer Stream mute
    *   settings for both audio and video streamings.
    * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
@@ -651,20 +646,18 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
    *   that indicates if the Peer connection Stream object sent
    *   is a screensharing stream or not.
-   * @param {String} [peerInfo.settings.bandwidth] The Peer
-   *   streaming bandwidth settings. Setting the bandwidth flags may not
-   *   force set the bandwidth for each connection stream channels as it depends
-   *   on how the browser handles the bandwidth bitrate. Values are configured
-   *   in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.audio] The configured
-   *   audio stream channel for the remote Stream object bandwidth
-   *   that audio streaming should use in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.video] The configured
-   *   video stream channel for the remote Stream object bandwidth
-   *   that video streaming should use in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.data] The configured
-   *   datachannel channel for the DataChannel connection bandwidth
-   *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
+   *   the maximum sending bandwidth. The flags set may or may not work depending
+   *   on the browser implementations and how it handles it.
+   * @param {String} [peerInfo.settings.bandwidth.audio] The maximum
+   *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the audio bitrate to the browser defaults.
+   * @param {String} [peerInfo.settings.bandwidth.video] The maximum
+   *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the video bitrate to the browser defaults.
+   * @param {String} [peerInfo.settings.bandwidth.data] The maximum
+   *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the data bitrate to the browser defaults.
    * @param {JSON} peerInfo.mediaStatus The Peer Stream mute
    *   settings for both audio and video streamings.
    * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
@@ -734,20 +727,18 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
    *   that indicates if the Peer connection Stream object sent
    *   is a screensharing stream or not.
-   * @param {String} [peerInfo.settings.bandwidth] The Peer
-   *   streaming bandwidth settings. Setting the bandwidth flags may not
-   *   force set the bandwidth for each connection stream channels as it depends
-   *   on how the browser handles the bandwidth bitrate. Values are configured
-   *   in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.audio] The configured
-   *   audio stream channel for the remote Stream object bandwidth
-   *   that audio streaming should use in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.video] The configured
-   *   video stream channel for the remote Stream object bandwidth
-   *   that video streaming should use in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.data] The configured
-   *   datachannel channel for the DataChannel connection bandwidth
-   *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
+   *   the maximum sending bandwidth. The flags set may or may not work depending
+   *   on the browser implementations and how it handles it.
+   * @param {String} [peerInfo.settings.bandwidth.audio] The maximum
+   *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the audio bitrate to the browser defaults.
+   * @param {String} [peerInfo.settings.bandwidth.video] The maximum
+   *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the video bitrate to the browser defaults.
+   * @param {String} [peerInfo.settings.bandwidth.data] The maximum
+   *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the data bitrate to the browser defaults.
    * @param {JSON} peerInfo.mediaStatus The Peer Stream mute
    *   settings for both audio and video streamings.
    * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
@@ -826,20 +817,18 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
    *   that indicates if the Peer connection Stream object sent
    *   is a screensharing stream or not.
-   * @param {String} [peerInfo.settings.bandwidth] The Peer
-   *   streaming bandwidth settings. Setting the bandwidth flags may not
-   *   force set the bandwidth for each connection stream channels as it depends
-   *   on how the browser handles the bandwidth bitrate. Values are configured
-   *   in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.audio] The configured
-   *   audio stream channel for the remote Stream object bandwidth
-   *   that audio streaming should use in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.video] The configured
-   *   video stream channel for the remote Stream object bandwidth
-   *   that video streaming should use in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.data] The configured
-   *   datachannel channel for the DataChannel connection bandwidth
-   *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
+   *   the maximum sending bandwidth. The flags set may or may not work depending
+   *   on the browser implementations and how it handles it.
+   * @param {String} [peerInfo.settings.bandwidth.audio] The maximum
+   *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the audio bitrate to the browser defaults.
+   * @param {String} [peerInfo.settings.bandwidth.video] The maximum
+   *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the video bitrate to the browser defaults.
+   * @param {String} [peerInfo.settings.bandwidth.data] The maximum
+   *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the data bitrate to the browser defaults.
    * @param {JSON} peerInfo.mediaStatus The Peer Stream mute
    *   settings for both audio and video streamings.
    * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
@@ -977,20 +966,18 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
    *   that indicates if the Peer connection Stream object sent
    *   is a screensharing stream or not.
-   * @param {String} [peerInfo.settings.bandwidth] The Peer
-   *   streaming bandwidth settings. Setting the bandwidth flags may not
-   *   force set the bandwidth for each connection stream channels as it depends
-   *   on how the browser handles the bandwidth bitrate. Values are configured
-   *   in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.audio] The configured
-   *   audio stream channel for the remote Stream object bandwidth
-   *   that audio streaming should use in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.video] The configured
-   *   video stream channel for the remote Stream object bandwidth
-   *   that video streaming should use in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.data] The configured
-   *   datachannel channel for the DataChannel connection bandwidth
-   *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
+   *   the maximum sending bandwidth. The flags set may or may not work depending
+   *   on the browser implementations and how it handles it.
+   * @param {String} [peerInfo.settings.bandwidth.audio] The maximum
+   *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the audio bitrate to the browser defaults.
+   * @param {String} [peerInfo.settings.bandwidth.video] The maximum
+   *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the video bitrate to the browser defaults.
+   * @param {String} [peerInfo.settings.bandwidth.data] The maximum
+   *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the data bitrate to the browser defaults.
    * @param {JSON} peerInfo.mediaStatus The Peer Stream mute
    *   settings for both audio and video streamings.
    * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
@@ -1179,20 +1166,18 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
    *   that indicates if the Peer connection Stream object sent
    *   is a screensharing stream or not.
-   * @param {String} [peerInfo.settings.bandwidth] The Peer
-   *   streaming bandwidth settings. Setting the bandwidth flags may not
-   *   force set the bandwidth for each connection stream channels as it depends
-   *   on how the browser handles the bandwidth bitrate. Values are configured
-   *   in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.audio] The configured
-   *   audio stream channel for the remote Stream object bandwidth
-   *   that audio streaming should use in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.video] The configured
-   *   video stream channel for the remote Stream object bandwidth
-   *   that video streaming should use in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.data] The configured
-   *   datachannel channel for the DataChannel connection bandwidth
-   *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
+   *   the maximum sending bandwidth. The flags set may or may not work depending
+   *   on the browser implementations and how it handles it.
+   * @param {String} [peerInfo.settings.bandwidth.audio] The maximum
+   *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the audio bitrate to the browser defaults.
+   * @param {String} [peerInfo.settings.bandwidth.video] The maximum
+   *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the video bitrate to the browser defaults.
+   * @param {String} [peerInfo.settings.bandwidth.data] The maximum
+   *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the data bitrate to the browser defaults.
    * @param {JSON} peerInfo.mediaStatus The Peer Stream mute
    *   settings for both audio and video streamings.
    * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
@@ -1259,20 +1244,18 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
    *   that indicates if the Peer connection Stream object sent
    *   is a screensharing stream or not.
-   * @param {String} [peerInfo.settings.bandwidth] The Peer
-   *   streaming bandwidth settings. Setting the bandwidth flags may not
-   *   force set the bandwidth for each connection stream channels as it depends
-   *   on how the browser handles the bandwidth bitrate. Values are configured
-   *   in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.audio] The configured
-   *   audio stream channel for the remote Stream object bandwidth
-   *   that audio streaming should use in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.video] The configured
-   *   video stream channel for the remote Stream object bandwidth
-   *   that video streaming should use in <var>kb/s</var>.
-   * @param {String} [peerInfo.settings.bandwidth.data] The configured
-   *   datachannel channel for the DataChannel connection bandwidth
-   *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
+   *   the maximum sending bandwidth. The flags set may or may not work depending
+   *   on the browser implementations and how it handles it.
+   * @param {String} [peerInfo.settings.bandwidth.audio] The maximum
+   *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the audio bitrate to the browser defaults.
+   * @param {String} [peerInfo.settings.bandwidth.video] The maximum
+   *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the video bitrate to the browser defaults.
+   * @param {String} [peerInfo.settings.bandwidth.data] The maximum
+   *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+   *   it will leave the data bitrate to the browser defaults.
    * @param {JSON} peerInfo.mediaStatus The Peer Stream mute
    *   settings for both audio and video streamings.
    * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that

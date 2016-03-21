@@ -3198,25 +3198,25 @@
                                 },
                                 {
                                     "name": "bandwidth",
-                                    "description": "The Peer\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "description": "The Peer configuration for\n  the maximum sending bandwidth. The flags set may or may not work depending\n  on the browser implementations and how it handles it.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.audio",
-                                    "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the audio bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.video",
-                                    "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the video bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.data",
-                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the data bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 }
@@ -3278,7 +3278,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 72,
+            "line": 70,
             "description": "Stores the self credentials that is required to connect to\n  Skylink platform signalling and identification in the\n  signalling socket connection.",
             "itemtype": "attribute",
             "name": "_user",
@@ -3314,7 +3314,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 92,
+            "line": 90,
             "description": "Stores the custom user data information set by developer for self.\nBy default, if no custom user data is set, it is an empty string <code>\"\"</code>.",
             "itemtype": "attribute",
             "name": "_userData",
@@ -3329,7 +3329,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 106,
+            "line": 104,
             "description": "Sets the current custom user data information for self.\nThis sets and overwrites the <code>peerInfo.userData</code> value for self.\nIf self is in the room and connected with other peers, the peers will be notified\n  with the {{#crossLink \"Skylink/peerUpdated:event\"}}peerUpdated{{/crossLink}} event.\nYou may get the current customer user data information for self in\n  {{#crossLink \"Skylink/getUserData:method\"}}getUserData(){{/crossLink}}.",
             "itemtype": "method",
             "name": "setUserData",
@@ -3350,7 +3350,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 152,
+            "line": 150,
             "description": "Gets the current custom user data information for self.\nYou may set the current customer user data information for self in\n  {{#crossLink \"Skylink/setUserData:method\"}}setUserData(){{/crossLink}}.",
             "itemtype": "method",
             "name": "getUserData",
@@ -3367,7 +3367,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 183,
+            "line": 181,
             "description": "Parses the custom user data information for self provided.",
             "itemtype": "method",
             "name": "_parseUserData",
@@ -3387,7 +3387,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 199,
+            "line": 197,
             "description": "Gets the Peer information.\nIf an invalid Peer ID is provided, or no Peer ID is provided,\n  the method will return the self peer information.",
             "itemtype": "method",
             "name": "getPeerInfo",
@@ -4003,30 +4003,27 @@
                         },
                         {
                             "name": "bandwidth",
-                            "description": "The self\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                            "description": "The configuration for\n  the maximum sending bandwidth. Setting the flags may or may not work depending\n  on the browser implementations and how it handles it.",
                             "type": "String",
                             "optional": true,
                             "props": [
                                 {
                                     "name": "audio",
-                                    "description": "The configured\n  audio stream channel for the self Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the audio bitrate to the browser defaults.",
                                     "type": "String",
-                                    "optional": true,
-                                    "optdefault": "50"
+                                    "optional": true
                                 },
                                 {
                                     "name": "video",
-                                    "description": "The configured\n  video stream channel for the self Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the video bitrate to the browser defaults.",
                                     "type": "String",
-                                    "optional": true,
-                                    "optdefault": "256"
+                                    "optional": true
                                 },
                                 {
                                     "name": "data",
-                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the data bitrate to the browser defaults.",
                                     "type": "String",
-                                    "optional": true,
-                                    "optdefault": "1638400"
+                                    "optional": true
                                 }
                             ]
                         },
@@ -4145,30 +4142,27 @@
                                 },
                                 {
                                     "name": "peerInfo.bandwidth",
-                                    "description": "The self\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "description": "The configuration for\n  the maximum sending bandwidth. Setting the flags may or may not work depending\n  on the browser implementations and how it handles it.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "peerInfo.bandwidth.audio",
-                                    "description": "The configured\n  audio stream channel for the self Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the audio bitrate to the browser defaults.",
                                     "type": "String",
-                                    "optional": true,
-                                    "optdefault": "50"
+                                    "optional": true
                                 },
                                 {
                                     "name": "peerInfo.bandwidth.video",
-                                    "description": "The configured\n  video stream channel for the self Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the video bitrate to the browser defaults.",
                                     "type": "String",
-                                    "optional": true,
-                                    "optdefault": "256"
+                                    "optional": true
                                 },
                                 {
                                     "name": "peerInfo.bandwidth.data",
-                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the data bitrate to the browser defaults.",
                                     "type": "String",
-                                    "optional": true,
-                                    "optdefault": "1638400"
+                                    "optional": true
                                 },
                                 {
                                     "name": "peerInfo.mediaStatus",
@@ -4229,7 +4223,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 564,
+            "line": 560,
             "description": "Waits for the signaling socket channel connection to be ready before\n  starting the room connection with the Skylink signaling platform.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -4311,30 +4305,27 @@
                         },
                         {
                             "name": "bandwidth",
-                            "description": "The self\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                            "description": "The configuration for\n  the maximum sending bandwidth. Setting the flags may or may not work depending\n  on the browser implementations and how it handles it.",
                             "type": "String",
                             "optional": true,
                             "props": [
                                 {
                                     "name": "audio",
-                                    "description": "The configured\n  audio stream channel for the self Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the audio bitrate to the browser defaults.",
                                     "type": "String",
-                                    "optional": true,
-                                    "optdefault": "50"
+                                    "optional": true
                                 },
                                 {
                                     "name": "video",
-                                    "description": "The configured\n  video stream channel for the self Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the video bitrate to the browser defaults.",
                                     "type": "String",
-                                    "optional": true,
-                                    "optdefault": "256"
+                                    "optional": true
                                 },
                                 {
                                     "name": "data",
-                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the data bitrate to the browser defaults.",
                                     "type": "String",
-                                    "optional": true,
-                                    "optdefault": "1638400"
+                                    "optional": true
                                 }
                             ]
                         },
@@ -4368,7 +4359,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 668,
+            "line": 662,
             "description": "Disconnects self from current connected room.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -4437,7 +4428,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 796,
+            "line": 790,
             "description": "Locks the currently connected room to prevent other peers\n  from joining the room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -4451,7 +4442,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 820,
+            "line": 814,
             "description": "Unlocks the currently connected room to allow other peers\n  to join the room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -6724,25 +6715,25 @@
                                 },
                                 {
                                     "name": "bandwidth",
-                                    "description": "The Peer\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "description": "The Peer configuration for\n  the maximum sending bandwidth. The flags set may or may not work depending\n  on the browser implementations and how it handles it.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.audio",
-                                    "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the audio bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.video",
-                                    "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the video bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.data",
-                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the data bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 }
@@ -6810,7 +6801,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 376,
+            "line": 374,
             "description": "Event triggered when a Peer connection has been restarted for\n  a reconnection.",
             "itemtype": "event",
             "name": "peerRestart",
@@ -6888,25 +6879,25 @@
                                 },
                                 {
                                     "name": "bandwidth",
-                                    "description": "The Peer\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "description": "The Peer configuration for\n  the maximum sending bandwidth. The flags set may or may not work depending\n  on the browser implementations and how it handles it.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.audio",
-                                    "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the audio bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.video",
-                                    "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the video bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.data",
-                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the data bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 }
@@ -6974,7 +6965,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 455,
+            "line": 451,
             "description": "Event triggered when a Peer information have been updated.\n- This event would only be triggered if self is in the room.\n- This event triggers when the <code>peerInfo</code> data is updated,\n  like <code>peerInfo.mediaStatus</code> or the <code>peerInfo.userData</code>,\n  which is invoked through <a href=\"#method_muteStream\">muteStream()</a> or\n  <a href=\"#method_setUserData\">setUserData()</a>.",
             "itemtype": "event",
             "name": "peerUpdated",
@@ -7052,25 +7043,31 @@
                                 },
                                 {
                                     "name": "bandwidth",
-                                    "description": "The Peer\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "description": "The Peer configuration for\n  the maximum sending bandwidth. The flags set may or may not work depending\n  on the browser implementations.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth",
+                                    "description": "The Peer configuration for\n  the maximum sending bandwidth. The flags set may or may not work depending\n  on the browser implementations and how it handles it.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.audio",
-                                    "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the audio bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.video",
-                                    "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the video bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.data",
-                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the data bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 }
@@ -7138,7 +7135,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 536,
+            "line": 533,
             "description": "Event triggered when a Peer leaves the room.",
             "itemtype": "event",
             "name": "peerLeft",
@@ -7216,25 +7213,25 @@
                                 },
                                 {
                                     "name": "bandwidth",
-                                    "description": "The Peer\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "description": "The Peer configuration for\n  the maximum sending bandwidth. The flags set may or may not work depending\n  on the browser implementations and how it handles it.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.audio",
-                                    "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the audio bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.video",
-                                    "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the video bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.data",
-                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the data bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 }
@@ -7302,7 +7299,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 613,
+            "line": 608,
             "description": "Event triggered when self is disconnected from room.",
             "itemtype": "event",
             "name": "sessionDisconnect",
@@ -7380,25 +7377,25 @@
                                 },
                                 {
                                     "name": "bandwidth",
-                                    "description": "The Peer\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "description": "The Peer configuration for\n  the maximum sending bandwidth. The flags set may or may not work depending\n  on the browser implementations and how it handles it.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.audio",
-                                    "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the audio bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.video",
-                                    "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the video bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.data",
-                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the data bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 }
@@ -7461,7 +7458,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 689,
+            "line": 682,
             "description": "Event triggered when a Stream is sent by Peer.\n- This event may trigger for self, which indicates that self has joined the room\n  and is sending this Stream object to other Peers connected in the room.",
             "itemtype": "event",
             "name": "incomingStream",
@@ -7549,25 +7546,25 @@
                                 },
                                 {
                                     "name": "bandwidth",
-                                    "description": "The Peer\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "description": "The Peer configuration for\n  the maximum sending bandwidth. The flags set may or may not work depending\n  on the browser implementations and how it handles it.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.audio",
-                                    "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the audio bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.video",
-                                    "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the video bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.data",
-                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the data bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 }
@@ -7630,7 +7627,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 772,
+            "line": 763,
             "description": "Event triggered when message data is received from Peer.\n- This event may trigger for self when sending message data to Peer,\n  which indicates that self has sent the message data.",
             "itemtype": "event",
             "name": "incomingMessage",
@@ -7742,25 +7739,25 @@
                                 },
                                 {
                                     "name": "bandwidth",
-                                    "description": "The Peer\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "description": "The Peer configuration for\n  the maximum sending bandwidth. The flags set may or may not work depending\n  on the browser implementations and how it handles it.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.audio",
-                                    "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the audio bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.video",
-                                    "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the video bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.data",
-                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the data bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 }
@@ -7828,7 +7825,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 865,
+            "line": 854,
             "description": "Event triggered when a data transfer is completed.\n- This event may trigger for self when transferring data to Peer,\n  which indicates that self has transferred the data successfully.\n- For more extensive states like the outgoing and incoming\n  data transfer progress and rejection of data transfer requests,\n  you may subscribe to the <a href=\"#event_dataTransferState\">dataTransferState</a> event.\n- If <code>enableDataChannel</code> disabled in <a href=\"#method_init\">init() configuration\n  settings</a>, this event will not be triggered at all.",
             "itemtype": "event",
             "name": "incomingData",
@@ -7894,7 +7891,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 900,
+            "line": 889,
             "description": "Event triggered when there is a request to start a data transfer.\n- This event may trigger for self when requesting a data transfer to Peer,\n  which indicates that self has sent the data transfer request.\n- For more extensive states like the outgoing and incoming\n  data transfer progress and rejection of data transfer requests,\n  you may subscribe to the <a href=\"#event_dataTransferState\">dataTransferState</a> event.\n- If <code>enableDataChannel</code> disabled in <a href=\"#method_init\">init() configuration\n  settings</a>, this event will not be triggered at all.\n- <sub>DATA TRANSFER STAGE</sub><br>\n  <small>\n  <a href=\"#event_dataTransferState\">dataTransferState</a> &#8594;\n  <b>incomingDataRequest</b> &#8594;\n  <a href=\"#event_incomingData\">incomingData</a>\n  </small>",
             "itemtype": "event",
             "name": "incomingDataRequest",
@@ -7955,7 +7952,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 936,
+            "line": 925,
             "description": "Event triggered when the currently connected room lock status have been updated.\n- If this event is triggered, this means that the room is locked / unlocked which\n  may allow or prevent any other Peers from joining the room.",
             "itemtype": "event",
             "name": "roomLock",
@@ -8038,25 +8035,25 @@
                                 },
                                 {
                                     "name": "bandwidth",
-                                    "description": "The Peer\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "description": "The Peer configuration for\n  the maximum sending bandwidth. The flags set may or may not work depending\n  on the browser implementations and how it handles it.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.audio",
-                                    "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the audio bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.video",
-                                    "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the video bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.data",
-                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the data bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 }
@@ -8124,7 +8121,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1016,
+            "line": 1003,
             "description": "Event triggered when a Peer connection DataChannel connection state has changed.\n- This event is a debugging feature, and it's used to check the\n  Peer DataChannel connection, which is used for P2P messaging and transfers for\n  methods like <a href=\"#method_sendBlobData\">sendBlobData()</a>,\n  <a href=\"#method_sendURLData\">sendURLData()</a> and\n  <a href=\"#method_sendP2PMessage\">sendP2PMessage()</a>.\n- If <code>enableDataChannel</code> disabled in <a href=\"#method_init\">init() configuration\n  settings</a>, this event will not be triggered at all.",
             "itemtype": "event",
             "name": "dataChannelState",
@@ -8163,7 +8160,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1041,
+            "line": 1028,
             "description": "Event triggered when a data transfer state has changed.\n- This event triggers more extensive states like the outgoing and incoming\n  data transfer progress and rejection of data transfer requests.\n  For simplified events, you may subscribe to the\n  <a href=\"#event_incomingDataRequest\">incomingDataRequest</a> and\n  <a href=\"#event_incomingData\">incomingData</a> events.\n- If <code>enableDataChannel</code> disabled in <a href=\"#method_init\">init() configuration\n  settings</a>, this event will not be triggered at all.",
             "itemtype": "event",
             "name": "dataTransferState",
@@ -8247,7 +8244,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1085,
+            "line": 1072,
             "description": "Event triggered when Skylink receives an system action from the platform signaling.",
             "itemtype": "event",
             "name": "systemAction",
@@ -8274,7 +8271,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1101,
+            "line": 1088,
             "description": "Event triggered when a server Peer joins the room.",
             "itemtype": "event",
             "name": "serverPeerJoined",
@@ -8296,7 +8293,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1114,
+            "line": 1101,
             "description": "Event triggered when a server Peer leaves the room.",
             "itemtype": "event",
             "name": "serverPeerLeft",
@@ -8318,7 +8315,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1127,
+            "line": 1114,
             "description": "Event triggered when a sever Peer connection has been restarted for\n  a reconnection.",
             "itemtype": "event",
             "name": "serverPeerRestart",
@@ -8340,7 +8337,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1141,
+            "line": 1128,
             "description": "Event triggered when a Peer connection Stream streaming has stopped.",
             "itemtype": "event",
             "name": "streamEnded",
@@ -8420,25 +8417,25 @@
                                 },
                                 {
                                     "name": "bandwidth",
-                                    "description": "The Peer\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "description": "The Peer configuration for\n  the maximum sending bandwidth. The flags set may or may not work depending\n  on the browser implementations and how it handles it.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.audio",
-                                    "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the audio bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.video",
-                                    "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the video bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.data",
-                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the data bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 }
@@ -8511,7 +8508,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1220,
+            "line": 1205,
             "description": "Event triggered when a Peer connection Stream streaming audio or video\n  stream muted status have been updated.",
             "itemtype": "event",
             "name": "streamMuted",
@@ -8589,25 +8586,25 @@
                                 },
                                 {
                                     "name": "bandwidth",
-                                    "description": "The Peer\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "description": "The Peer configuration for\n  the maximum sending bandwidth. The flags set may or may not work depending\n  on the browser implementations and how it handles it.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.audio",
-                                    "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the audio bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.video",
-                                    "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the video bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "bandwidth.data",
-                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the data bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 }
@@ -8680,7 +8677,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1300,
+            "line": 1283,
             "description": "Event triggered when the retrieval of the list of rooms and peers under the same realm based\n  on the Application Key configured in <a href=\"#method_init\">init()</a>\n  from the platform signaling state has changed.\n- This requires that the provided alias Application Key has privileged feature configured.",
             "itemtype": "event",
             "name": "getPeersStateChange",
@@ -8707,7 +8704,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1316,
+            "line": 1299,
             "description": "Event triggered when introductory state of two Peer peers to each other\n  selected by the privileged Peer state has changed.\n- This requires that the provided alias Application Key has privileged feature configured.",
             "itemtype": "event",
             "name": "introduceStateChange",
@@ -8744,7 +8741,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1337,
+            "line": 1320,
             "description": "Stores the list of {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}}\n  event subscription handlers.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -8772,7 +8769,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1358,
+            "line": 1341,
             "description": "The throttling function datetime stamp in\n  [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601).",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -8786,7 +8783,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1374,
+            "line": 1357,
             "description": "Triggers event subscription handlers that is associated with the event name.\n{{#crossLink \"Skylink/on:method\"}}on() event subscription handlers{{/crossLink}}\n  will be triggered always, but\n  {{#crossLink \"Skylink/once:method\"}}once() event subscription hadlers{{/crossLink}}\n  will only be triggered once the condition is met.",
             "itemtype": "method",
             "name": "_trigger",
@@ -8805,7 +8802,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1433,
+            "line": 1416,
             "description": "Subscribes an event handler associated to the event name.\nThis event handler will always be triggered when the event name is triggered. If you\n  are looking for subscription event handler to be triggered once, check out\n  {{#crossLink \"Skylink/once:method\"}}once() event subscription{{/crossLink}}.",
             "itemtype": "method",
             "name": "on",
@@ -8830,7 +8827,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1460,
+            "line": 1443,
             "description": "Subscribes an event handler associated to the event name that\n   would only be triggered once the provided condition function has been met.",
             "itemtype": "method",
             "name": "once",
@@ -8868,7 +8865,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1509,
+            "line": 1492,
             "description": "Unsubscribes an event handler associated to the event name.",
             "itemtype": "method",
             "name": "off",
@@ -8894,7 +8891,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1556,
+            "line": 1539,
             "description": "Checks if the first condition is already met before doing an event\n  handler subscription to wait for the second condition to be met.\nThis method will do a event subscription with\n  {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}} as this\n  <code>_condition()</code> would only trigger once, unless <code>fireAlways</code>\n  is set to <code>true</code>.",
             "itemtype": "method",
             "name": "_condition",
@@ -8937,7 +8934,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1607,
+            "line": 1590,
             "description": "Starts the interval check for the condition provided to meet before clearing\n  the interval and triggering the callback provided.\nThis utilises <code>setInterval()</code> function.",
             "itemtype": "method",
             "name": "_wait",
@@ -8968,7 +8965,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1657,
+            "line": 1640,
             "description": "Returns a wrapper of the original function, which fires only once during\n a specified amount of time.",
             "itemtype": "method",
             "name": "_throttle",
@@ -10188,25 +10185,25 @@
                                 },
                                 {
                                     "name": "settings.bandwidth",
-                                    "description": "The Peer\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "description": "The Peer configuration for\n  the maximum sending bandwidth. The flags set may or may not work depending\n  on the browser implementations and how it handles it.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "settings.bandwidth.audio",
-                                    "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the audio bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "settings.bandwidth.video",
-                                    "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the video bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "settings.bandwidth.data",
-                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the data bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
@@ -10268,7 +10265,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 834,
+            "line": 832,
             "description": "Handles the RESTART Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -10377,25 +10374,25 @@
                                 },
                                 {
                                     "name": "settings.bandwidth",
-                                    "description": "The Peer\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "description": "The Peer configuration for\n  the maximum sending bandwidth. The flags set may or may not work depending\n  on the browser implementations and how it handles it.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "settings.bandwidth.audio",
-                                    "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the audio bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "settings.bandwidth.video",
-                                    "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the video bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "settings.bandwidth.data",
-                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the data bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
@@ -10482,7 +10479,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1038,
+            "line": 1034,
             "description": "Handles the WELCOME Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -10586,25 +10583,25 @@
                         },
                         {
                             "name": "userInfo.settings.bandwidth",
-                            "description": "The Peer\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                            "description": "The Peer configuration for\n  the maximum sending bandwidth. The flags set may or may not work depending\n  on the browser implementations and how it handles it.",
                             "type": "String",
                             "optional": true
                         },
                         {
                             "name": "userInfo.settings.bandwidth.audio",
-                            "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                            "description": "The maximum\n  sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the audio bitrate to the browser defaults.",
                             "type": "String",
                             "optional": true
                         },
                         {
                             "name": "userInfo.settings.bandwidth.video",
-                            "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                            "description": "The maximum\n  sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the video bitrate to the browser defaults.",
                             "type": "String",
                             "optional": true
                         },
                         {
                             "name": "userInfo.settings.bandwidth.data",
-                            "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                            "description": "The maximum\n  sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the data bitrate to the browser defaults.",
                             "type": "String",
                             "optional": true
                         },
@@ -10679,7 +10676,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1238,
+            "line": 1232,
             "description": "Handles the OFFER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -10726,7 +10723,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1317,
+            "line": 1311,
             "description": "Handles the CANDIDATE Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -10782,7 +10779,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1414,
+            "line": 1408,
             "description": "Handles the ANSWER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -10829,7 +10826,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1510,
+            "line": 1504,
             "description": "Send a message object or string using the platform signaling socket connection\n  to the list of targeted PeerConnections.\nTo send message objects with DataChannel connections, see\n  {{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.",
             "itemtype": "method",
             "name": "sendMessage",
@@ -11154,29 +11151,9 @@
                 },
                 {
                     "name": "bandwidth",
-                    "description": "The default\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                    "description": "The configuration for\n  the maximum sending bandwidth. Setting the flags may or may not work depending\n  on the browser implementations and how it handles it. By default, this is empty.",
                     "type": "String",
-                    "optional": true,
-                    "props": [
-                        {
-                            "name": "audio",
-                            "description": "The default\n  audio stream channel for self Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
-                            "type": "String",
-                            "optional": true
-                        },
-                        {
-                            "name": "video",
-                            "description": "The default\n  video stream channel for self Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
-                            "type": "String",
-                            "optional": true
-                        },
-                        {
-                            "name": "data",
-                            "description": "The default\n  datachannel channel for self DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
-                            "type": "String",
-                            "optional": true
-                        }
-                    ]
+                    "optional": true
                 }
             ],
             "access": "private",
@@ -11187,7 +11164,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 261,
+            "line": 250,
             "description": "Stores self user media Stream streaming settings. If both audio and video\n  option is <code>false</code>, there should be no\n  receiving remote Stream object from self connection.",
             "itemtype": "attribute",
             "name": "_streamSettings",
@@ -11265,25 +11242,25 @@
                 },
                 {
                     "name": "bandwidth",
-                    "description": "The self\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                    "description": "The configuration for\n  the maximum sending bandwidth. The flags set may or may not work depending\n  on the browser implementations and how it handles it.",
                     "type": "String",
                     "optional": true,
                     "props": [
                         {
                             "name": "audio",
-                            "description": "The configured\n  audio stream channel for self connection Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                            "description": "The maximum\n  sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the audio bitrate to the browser defaults.",
                             "type": "String",
                             "optional": true
                         },
                         {
                             "name": "video",
-                            "description": "The configured\n  video stream channel for the self connection Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                            "description": "The maximum\n  sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the video bitrate to the browser defaults.",
                             "type": "String",
                             "optional": true
                         },
                         {
                             "name": "data",
-                            "description": "The configured\n  datachannel channel for self DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                            "description": "The maximum\n  sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the data bitrate to the browser defaults.",
                             "type": "String",
                             "optional": true
                         }
@@ -11298,7 +11275,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 320,
+            "line": 307,
             "description": "Stores self screensharing Stream streaming settings.",
             "itemtype": "attribute",
             "name": "_screenSharingStreamSettings",
@@ -11349,7 +11326,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 351,
+            "line": 338,
             "description": "The flag that indicates if self browser supports the screensharing feature.\nCurrently, Opera does not support screensharing and only premium\n  Temasys plugins support this screensharing feature.",
             "itemtype": "attribute",
             "name": "_screenSharingAvailable",
@@ -11363,7 +11340,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 365,
+            "line": 352,
             "description": "Stores the\n  [getUserMedia MediaStreamConstraints](https://w3c.github.io/mediacapture-main/getusermedia.html#idl-def-MediaStreamConstraints)\n  parsed from {{#crossLink \"Skylink/_streamSettings:attribute\"}}_streamSettings{{/crossLink}}\n  for user media Stream object.",
             "itemtype": "attribute",
             "name": "_getUserMediaSettings",
@@ -11426,7 +11403,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 397,
+            "line": 384,
             "description": "Stores self Stream mute settings for both audio and video streamings.",
             "itemtype": "attribute",
             "name": "_mediaStreamsStatus",
@@ -11455,7 +11432,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 416,
+            "line": 403,
             "description": "The flag indicates that when Skylink tries to get both audio and video stream\n  but Skylink fails to retrieve the user media stream, it should fallback\n  to retrieve audio streaming for the user media stream only.",
             "itemtype": "attribute",
             "name": "_audioFallback",
@@ -11470,7 +11447,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 431,
+            "line": 418,
             "description": "Handles the event when access to self user media MediaStream is successful.",
             "itemtype": "method",
             "name": "_onUserMediaSuccess",
@@ -11497,7 +11474,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 541,
+            "line": 528,
             "description": "Handles the event when access to self user media MediaStream has failed.",
             "itemtype": "method",
             "name": "_onUserMediaError",
@@ -11531,7 +11508,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 597,
+            "line": 584,
             "description": "Handles the event when remote MediaStream is received from Peer connection.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -11563,7 +11540,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 644,
+            "line": 631,
             "description": "Parses the audio stream settings for self provided.",
             "itemtype": "method",
             "name": "_parseAudioStreamSettings",
@@ -11603,7 +11580,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 703,
+            "line": 690,
             "description": "Parses the video stream settings for self provided.",
             "itemtype": "method",
             "name": "_parseVideoStreamSettings",
@@ -11669,7 +11646,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 804,
+            "line": 791,
             "description": "Parses the streaming bandwidth settings for self provided.",
             "itemtype": "method",
             "name": "_parseBandwidthSettings",
@@ -11709,7 +11686,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 848,
+            "line": 835,
             "description": "Parses the <code>mediaStatus</code> settings for self provided.",
             "itemtype": "method",
             "name": "_parseMutedSettings",
@@ -11805,7 +11782,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 916,
+            "line": 903,
             "description": "Parses the default stream settings received from\n  the platform signaling.",
             "itemtype": "method",
             "name": "_parseDefaultMediaStreamSettings",
@@ -11838,7 +11815,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 950,
+            "line": 937,
             "description": "Parses the provided stream settings for self provided.",
             "itemtype": "method",
             "name": "_parseMediaStreamSettings",
@@ -11915,26 +11892,26 @@
                         },
                         {
                             "name": "bandwidth",
-                            "description": "The self\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
-                            "type": "JSON",
+                            "description": "The configuration for\n  the maximum sending bandwidth. Setting the flags may or may not work depending\n  on the browser implementations and how it handles it.",
+                            "type": "String",
                             "optional": true,
                             "props": [
                                 {
                                     "name": "audio",
-                                    "description": "The configured\n  audio stream channel for the self Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
-                                    "type": "Number",
+                                    "description": "The maximum\n  sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the audio bitrate to the browser defaults.",
+                                    "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "video",
-                                    "description": "The configured\n  video stream channel for the self Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
-                                    "type": "Number",
+                                    "description": "The maximum\n  sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the video bitrate to the browser defaults.",
+                                    "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "data",
-                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
-                                    "type": "Number",
+                                    "description": "The maximum\n  sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the data bitrate to the browser defaults.",
+                                    "type": "String",
                                     "optional": true
                                 }
                             ]
@@ -11950,7 +11927,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1033,
+            "line": 1018,
             "description": "Sends self selected Stream object to current Peer connections.\nIf {{#crossLink \"Skylink/_mediaScreen:attribute\"}}_mediaScreen{{/crossLink}}\n  is not empty, it will send the screensharing stream, else it will\n  send the {{#crossLink \"Skylink/_mediaStream:attribute\"}}_mediaStream{{/crossLink}}\n  if is not empty.\nIf self does not have any Stream object to send, it will a connection without\n  any remote Stream sent to the Peer connection.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -11969,7 +11946,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1114,
+            "line": 1099,
             "description": "Stops self user media Stream object attached to Skylink.",
             "itemtype": "method",
             "name": "stopStream",
@@ -11982,7 +11959,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1130,
+            "line": 1115,
             "description": "Handles the muting of audio and video streams in\n  {{#crossLink \"Skylink/_mediaStream:attribute\"}}_mediaStream{{/crossLink}},\n  {{#crossLink \"Skylink/_mediaScreen:attribute\"}}_mediaScreen{{/crossLink}} and\n  {{#crossLink \"Skylink/_mediaScreenClone:attribute\"}}_mediaScreenClone{{/crossLink}},",
             "itemtype": "method",
             "name": "_muteLocalMediaStreams",
@@ -11997,7 +11974,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1242,
+            "line": 1227,
             "description": "Handles the stopping of audio and video streams.",
             "itemtype": "method",
             "name": "_stopLocalMediaStreams",
@@ -12031,7 +12008,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1342,
+            "line": 1327,
             "description": "Waits for self MediaStream object to be attached to Skylink based\n  on the options provided before firing the callback to indicate\n  that self Stream object is received.\nThis will stop any currently attached Stream object to Skylink.",
             "itemtype": "method",
             "name": "_waitForLocalMediaStream",
@@ -12134,25 +12111,25 @@
                         },
                         {
                             "name": "bandwidth",
-                            "description": "The self\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                            "description": "The configuration for\n  the maximum sending bandwidth. Setting the flags may or may not work depending\n  on the browser implementations and how it handles it.",
                             "type": "String",
                             "optional": true,
                             "props": [
                                 {
                                     "name": "audio",
-                                    "description": "The configured\n  audio stream channel for the self Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the audio bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "video",
-                                    "description": "The configured\n  video stream channel for the self Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the video bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 },
                                 {
                                     "name": "data",
-                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "description": "The maximum\n  sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,\n  it will leave the data bitrate to the browser defaults.",
                                     "type": "String",
                                     "optional": true
                                 }
@@ -12170,7 +12147,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1479,
+            "line": 1462,
             "description": "Gets self user media Stream object to attach to Skylink.\nDo not invoke this function when user has already joined a room as\n  this may affect any currently attached stream. You may use\n {{#crossLink \"Skylink/sendStream:method\"}}sendStream(){{/crossLink}}\n instead if self is already in the room, and allows application to\n attach application own MediaStream object to Skylink.",
             "itemtype": "method",
             "name": "getUserMedia",
@@ -12288,7 +12265,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1714,
+            "line": 1697,
             "description": "Replaces the currently attached Stream object in Skylink and refreshes all\n  connection with Peer connections to send the updated Stream object.\nThe application may provide their own MediaStream object to send to\n  all PeerConnections connection.\nReference {{#crossLink \"Skylink/refreshConnection:method\"}}refreshConnection(){{/crossLink}}\n   on the events triggered and restart mechanism.",
             "itemtype": "method",
             "name": "sendStream",
@@ -12405,7 +12382,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1947,
+            "line": 1930,
             "description": "Mutes the currently attached Stream object in Skylink.",
             "itemtype": "method",
             "name": "muteStream",
@@ -12442,7 +12419,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2049,
+            "line": 2032,
             "description": "Unmutes the currently attached Stream object audio stream.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -12458,7 +12435,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2067,
+            "line": 2050,
             "description": "Mutes the currently attached Stream object audio stream.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -12474,7 +12451,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2085,
+            "line": 2068,
             "description": "Unmutes the currently attached Stream object video stream.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -12490,7 +12467,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2103,
+            "line": 2086,
             "description": "Mutes the currently attached Stream object video stream.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -12505,7 +12482,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2120,
+            "line": 2103,
             "description": "Shares the current screen with Peer connections and will refresh all\n   Peer connections to send the screensharing Stream object with\n   <code>HTTPS</code> protocol accessing application.\nReference {{#crossLink \"Skylink/refreshConnection:method\"}}refreshConnection(){{/crossLink}}\n   on the events triggered and restart mechanism.\nThis will require our own Temasys Skylink extension to do screensharing.\nFor screensharing feature in IE / Safari with our Temasys Plugin, please\n  [contact us](https://www.temasys.com.sg/contact-us).\nCurrently, Opera does not support screensharing feature.\nThis does not replace the currently attached user media Stream object in Skylink.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -12546,7 +12523,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2332,
+            "line": 2315,
             "description": "Stops self screensharing Stream object attached to Skylink.\nIf user media Stream object is available, Skylink will refresh all\n   Peer connections to send the user media Stream object.\nReference {{#crossLink \"Skylink/refreshConnection:method\"}}refreshConnection(){{/crossLink}}\n   on the events triggered and restart mechanism.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -13111,31 +13088,31 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-data.js:72"
+            "line": " source/peer-data.js:70"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-data.js:92"
+            "line": " source/peer-data.js:90"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-data.js:106"
+            "line": " source/peer-data.js:104"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-data.js:106"
+            "line": " source/peer-data.js:104"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-data.js:152"
+            "line": " source/peer-data.js:150"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-data.js:183"
+            "line": " source/peer-data.js:181"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-data.js:199"
+            "line": " source/peer-data.js:197"
         },
         {
             "message": "unknown tag: component",
@@ -13239,35 +13216,35 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:564"
+            "line": " source/room-connection.js:560"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:564"
+            "line": " source/room-connection.js:560"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:668"
+            "line": " source/room-connection.js:662"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:668"
+            "line": " source/room-connection.js:662"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:796"
+            "line": " source/room-connection.js:790"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:796"
+            "line": " source/room-connection.js:790"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:820"
+            "line": " source/room-connection.js:814"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:820"
+            "line": " source/room-connection.js:814"
         },
         {
             "message": "unknown tag: component",
@@ -13611,51 +13588,55 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:376"
+            "line": " source/skylink-events.js:374"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:455"
+            "line": " source/skylink-events.js:451"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:536"
+            "line": " source/skylink-events.js:533"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:613"
+            "line": " source/skylink-events.js:608"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:689"
+            "line": " source/skylink-events.js:682"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:772"
+            "line": " source/skylink-events.js:763"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:865"
+            "line": " source/skylink-events.js:854"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:900"
+            "line": " source/skylink-events.js:889"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:936"
+            "line": " source/skylink-events.js:925"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1016"
+            "line": " source/skylink-events.js:1003"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1041"
+            "line": " source/skylink-events.js:1028"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1085"
+            "line": " source/skylink-events.js:1072"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/skylink-events.js:1088"
         },
         {
             "message": "unknown tag: component",
@@ -13667,59 +13648,55 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1127"
+            "line": " source/skylink-events.js:1128"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1141"
+            "line": " source/skylink-events.js:1205"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1220"
+            "line": " source/skylink-events.js:1283"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1300"
+            "line": " source/skylink-events.js:1299"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1316"
+            "line": " source/skylink-events.js:1320"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1337"
+            "line": " source/skylink-events.js:1341"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1358"
+            "line": " source/skylink-events.js:1357"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1374"
+            "line": " source/skylink-events.js:1416"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1433"
+            "line": " source/skylink-events.js:1443"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1460"
+            "line": " source/skylink-events.js:1492"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1509"
+            "line": " source/skylink-events.js:1539"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1556"
+            "line": " source/skylink-events.js:1590"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1607"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1657"
+            "line": " source/skylink-events.js:1640"
         },
         {
             "message": "unknown tag: component",
@@ -13931,47 +13908,47 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:834"
+            "line": " source/socket-message.js:832"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:834"
+            "line": " source/socket-message.js:832"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1038"
+            "line": " source/socket-message.js:1034"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1038"
+            "line": " source/socket-message.js:1034"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1238"
+            "line": " source/socket-message.js:1232"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1238"
+            "line": " source/socket-message.js:1232"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1317"
+            "line": " source/socket-message.js:1311"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1414"
+            "line": " source/socket-message.js:1408"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1414"
+            "line": " source/socket-message.js:1408"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1510"
+            "line": " source/socket-message.js:1504"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1510"
+            "line": " source/socket-message.js:1504"
         },
         {
             "message": "unknown tag: component",
@@ -14011,155 +13988,163 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:261"
+            "line": " source/stream-media.js:250"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:320"
+            "line": " source/stream-media.js:307"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:351"
+            "line": " source/stream-media.js:338"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:365"
+            "line": " source/stream-media.js:352"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:397"
+            "line": " source/stream-media.js:384"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:416"
+            "line": " source/stream-media.js:403"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:431"
+            "line": " source/stream-media.js:418"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:431"
+            "line": " source/stream-media.js:418"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:541"
+            "line": " source/stream-media.js:528"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:541"
+            "line": " source/stream-media.js:528"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:597"
+            "line": " source/stream-media.js:584"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:597"
+            "line": " source/stream-media.js:584"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:644"
+            "line": " source/stream-media.js:631"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:703"
+            "line": " source/stream-media.js:690"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:804"
+            "line": " source/stream-media.js:791"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:848"
+            "line": " source/stream-media.js:835"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:916"
+            "line": " source/stream-media.js:903"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:950"
+            "line": " source/stream-media.js:937"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1033"
+            "line": " source/stream-media.js:1018"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1114"
+            "line": " source/stream-media.js:1099"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1342"
+            "line": " source/stream-media.js:1327"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1342"
+            "line": " source/stream-media.js:1327"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1479"
+            "line": " source/stream-media.js:1462"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1479"
+            "line": " source/stream-media.js:1462"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1714"
+            "line": " source/stream-media.js:1697"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1714"
+            "line": " source/stream-media.js:1697"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1947"
+            "line": " source/stream-media.js:1930"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1947"
+            "line": " source/stream-media.js:1930"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2049"
+            "line": " source/stream-media.js:2032"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2049"
+            "line": " source/stream-media.js:2032"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2049"
+            "line": " source/stream-media.js:2032"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2067"
+            "line": " source/stream-media.js:2050"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2067"
+            "line": " source/stream-media.js:2050"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2067"
+            "line": " source/stream-media.js:2050"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2085"
+            "line": " source/stream-media.js:2068"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2085"
+            "line": " source/stream-media.js:2068"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2085"
+            "line": " source/stream-media.js:2068"
         },
         {
             "message": "unknown tag: depcreated",
-            "line": " source/stream-media.js:2103"
+            "line": " source/stream-media.js:2086"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/stream-media.js:2086"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/stream-media.js:2086"
         },
         {
             "message": "unknown tag: trigger",
@@ -14171,15 +14156,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2120"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/stream-media.js:2120"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2332"
+            "line": " source/stream-media.js:2315"
         },
         {
             "message": "unknown tag: component",
