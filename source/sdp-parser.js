@@ -231,5 +231,33 @@ Skylink.prototype._SDPParser = {
     }
 
     return sdpLines.join('\r\n');
+  },
+
+  /**
+   * Removes the H264 preference from that started originally from
+   *   Firefox 32 (Ubuntu) browsers to prevent breaking connection
+   *   with browsers that do not support it.
+   * @method removeFirefoxH264Pref
+   * @param {String} sdpString The local RTCSessionDescription.sdp.
+   * @return {String} updatedSdpString The modification local RTCSessionDescription.sdp
+   *   that has the H264 preference removed.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  removeFirefoxH264Pref: function (sdpString) {
+    var sdpLines = sdpString.split('\r\n');
+
+    // Remove line that causes issue in Firefox 32 (Ubuntu) experimental feature.
+    var invalidLineIndex = sdpLines.indexOf(
+      'a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1');
+
+    if (invalidLineIndex > -1) {
+      sdpLines.splice(invalidLineIndex, 1);
+    }
+
+    // Return modified RTCSessionDescription.sdp
+    return sdpLines.join('\r\n');
   }
+
 };

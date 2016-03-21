@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Sun Mar 20 2016 23:04:16 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Tue Mar 22 2016 00:12:23 GMT+0800 (SGT) */
 
 (function() {
 
@@ -7081,17 +7081,22 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     }
 
     /* TODO: SDP modifications */
-    // Configure OPUS codec stereo modification
+    /**
+     * Configure OPUS codec stereo modification
+     */
     log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating OPUS stereo enabled option ->'],
       ref._connectionSettings.stereo);
 
     sessionDescription.sdp = superRef._SDPParser.configureOPUSStereo(sessionDescription.sdp,
       ref._connectionSettings.stereo);
 
-    // Configure the maximum audio bitrate to send
+    /**
+     * Configure the maximum audio bitrate to send
+     */
     // Prevent retrieving values when .bandwidth is not defined.
     if (superRef._streamSettings.bandwidth && typeof superRef._streamSettings.bandwidth.audio === 'number' &&
       superRef._streamSettings.bandwidth.audio > 0) {
+
       log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating maximum sending audio bitrate ->'],
         superRef._streamSettings.bandwidth.audio);
 
@@ -7103,10 +7108,13 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         'and leaving to browser\'s defaults']);
     }
 
-    // Configure the maximum video bitrate to send
+    /**
+     * Configure the maximum video bitrate to send
+     */
     // Prevent retrieving values when .bandwidth is not defined.
     if (superRef._streamSettings.bandwidth && typeof superRef._streamSettings.bandwidth.video === 'number' &&
       superRef._streamSettings.bandwidth.video > 0) {
+
       log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating maximum sending video bitrate ->'],
         superRef._streamSettings.bandwidth.video);
 
@@ -7118,10 +7126,13 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         'and leaving to browser\'s defaults']);
     }
 
-    // Configure the maximum data bitrate to send
+    /**
+     * Configure the maximum data bitrate to send
+     */
     // Prevent retrieving values when .bandwidth is not defined.
     if (superRef._streamSettings.bandwidth && typeof superRef._streamSettings.bandwidth.data === 'number' &&
       superRef._streamSettings.bandwidth.data > 0) {
+
       log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating maximum sending data bitrate ->'],
         superRef._streamSettings.bandwidth.data);
 
@@ -7132,6 +7143,14 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Not configuration maximum sending data bitrate ' +
         'and leaving to browser\'s defaults']);
     }
+
+    /**
+     * Remove the H264 preference from Firefox 32 (Ubuntu) browsers that was causing connection issues previously
+     */
+    log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Removing any Firefox H264 profile experimental feature']);
+
+    sessionDescription.sdp = superRef._SDPParser.removeFirefoxH264Pref(sessionDescription.sdp);
+
 
     log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting local ' +
       sessionDescription.type + ' ->'], sessionDescription);
@@ -9491,7 +9510,35 @@ Skylink.prototype._SDPParser = {
     }
 
     return sdpLines.join('\r\n');
+  },
+
+  /**
+   * Removes the H264 preference from that started originally from
+   *   Firefox 32 (Ubuntu) browsers to prevent breaking connection
+   *   with browsers that do not support it.
+   * @method removeFirefoxH264Pref
+   * @param {String} sdpString The local RTCSessionDescription.sdp.
+   * @return {String} updatedSdpString The modification local RTCSessionDescription.sdp
+   *   that has the H264 preference removed.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  removeFirefoxH264Pref: function (sdpString) {
+    var sdpLines = sdpString.split('\r\n');
+
+    // Remove line that causes issue in Firefox 32 (Ubuntu) experimental feature.
+    var invalidLineIndex = sdpLines.indexOf(
+      'a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1');
+
+    if (invalidLineIndex > -1) {
+      sdpLines.splice(invalidLineIndex, 1);
+    }
+
+    // Return modified RTCSessionDescription.sdp
+    return sdpLines.join('\r\n');
   }
+
 };
 var _LOG_KEY = 'SkylinkJS';
 
