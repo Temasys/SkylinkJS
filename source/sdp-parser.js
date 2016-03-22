@@ -51,13 +51,14 @@ Skylink.prototype._SDPParser = {
           shouldReplaceSSRCSemantic = -1;
 
       /**
-       * Loops and checks if there is any MediaStream ID or MediaStreamTrack ID to replace based on the type provided
+       * Function that loops and checks if there is any MediaStream ID or MediaStreamTrack ID to
+       *   replace based on the type provided
        */
       var parseTracksSSRCFn = function (track) {
         var trackId = '';
 
-        // Loop out for the a=msid: line that contains the {MediaStream ID} {MediaStreamTrack ID} based on
-        // track type provided - "audio" / "video"
+        // Loop out for the a=msid: line that contains the {MediaStream ID} {MediaStreamTrack ID}
+        //   based on track type provided - "audio" / "video"
         for (var i = 0; i < sdpLines.length; i++) {
           // Check if there is a MediaStreamTrack ID that exists, start appending the tracks
           if (!!trackId) {
@@ -141,7 +142,7 @@ Skylink.prototype._SDPParser = {
     }
 
     /**
-     * Loops and parses the payload based on the config line given
+     * Function that loops and parses the payload based on the config line given
      */
     var parsePayloadFn = function (line, flag) {
       var lineParts = line.split(' '),
@@ -302,18 +303,18 @@ Skylink.prototype._SDPParser = {
           var payloads = payloadsLine.split(' ');
 
           // Remove unwanted parts of the lines
-          // Example line: m=video 59533 UDP/TLS/RTP/SAVPF [100 101 116 117 96 97 98] <-- Codecs selection order here
+          //   Example line: m=video 59533 UDP/TLS/RTP/SAVPF [100 101 116 117 96 97 98] <-- Codecs selection order here
           payloads.splice(0, 3);
 
           var selectedPayloadIndex = payloads.indexOf(codecPayload);
 
           // Check if the payload is in the selected order.
-          // Just add it as the first if it is not in the selected order
+          //   Just add it as the first if it is not in the selected order
           if (selectedPayloadIndex === -1) {
             payloads.splice(0, 0, codecPayload);
 
           // Move the current first selected codec to our preferred codec index
-          // Replace the current first selected codec with our preferred codec
+          //   Replace the current first selected codec with our preferred codec
           } else {
             var first = payloads[0];
             payloads[0] = codecPayload;
