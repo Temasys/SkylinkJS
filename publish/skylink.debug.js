@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Wed Mar 23 2016 01:21:07 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Wed Mar 23 2016 01:25:30 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6097,9 +6097,9 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     }
 
     /**
-     * Parse SDP: Configure to remove non-relay (TURN) candidates
+     * Parse SDP: Configure to remove non-relay (TURN) candidates when trickle ICE is disabled
      */
-    if (superRef._forceTURN) {
+    if (superRef._forceTURN && !ref._connectionSettings.enableIceTrickle) {
       log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating to receive only "relay" remote candidates']);
       sessionDescription.sdp = superRef._SDPParser.removeNonRelayCandidates(sessionDescription.sdp);
     }
