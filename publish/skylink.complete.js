@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Wed Mar 23 2016 00:41:20 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Wed Mar 23 2016 01:21:07 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10455,7 +10455,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.10 - Wed Mar 23 2016 00:41:20 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Wed Mar 23 2016 01:21:07 GMT+0800 (SGT) */
 
 (function() {
 
@@ -16443,7 +16443,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Using browser\'s selected default video codec']);
     }
 
-
     log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting local ' +
       sessionDescription.type + ' ->'], sessionDescription);
 
@@ -16552,6 +16551,14 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     if (window.webrtcDetectedBrowser === 'firefox' && ref.id === 'MCU') {
       log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating local answer for Firefox interop with MCU']);
       sessionDescription.sdp = superRef._SDPParser.configureMCUFirefoxAnswer(sessionDescription.sdp);
+    }
+
+    /**
+     * Parse SDP: Configure to remove non-relay (TURN) candidates
+     */
+    if (superRef._forceTURN) {
+      log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating to receive only "relay" remote candidates']);
+      sessionDescription.sdp = superRef._SDPParser.removeNonRelayCandidates(sessionDescription.sdp);
     }
 
     log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting remote ' +
@@ -18921,6 +18928,41 @@ Skylink.prototype._SDPParser = {
       }
     }
 
+    return sdpLines.join('\r\n');
+  },
+
+  /**
+   * Removes candidates that are not "relay" type in the remote RTCSessionDescription.
+   * @method removeNonRelayCandidates
+   * @param {String} sdpString The remote RTCSessionDescription.sdp.
+   * @return {String} updatedSdpString The modification remote RTCSessionDescription.sdp
+   *   that has candidates that are not "relay" type removed.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  removeNonRelayCandidates: function (sdpString) {
+    var sdpLines = sdpString.split('\r\n'),
+        hasOnlyRelayCandidates = false;
+
+    // Loop and remove candidates
+    while (!hasOnlyRelayCandidates) {
+      var doNotLoopCheckAgain = true;
+
+      for (var i = 0; i < sdpLines.length; i++) {
+        if (sdpLines[i].indexOf('a=candidate') === 0 && sdpLines[i].indexOf('relay') === -1) {
+          sdpLines.splice(i, 1);
+          doNotLoopCheckAgain = false;
+          break;
+        }
+      }
+
+      if (doNotLoopCheckAgain) {
+        hasOnlyRelayCandidates = true;
+      }
+    }
+
+    // Return modified RTCSessionDescription.sdp
     return sdpLines.join('\r\n');
   }
 };

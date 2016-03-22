@@ -1171,7 +1171,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Using browser\'s selected default video codec']);
     }
 
-
     log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting local ' +
       sessionDescription.type + ' ->'], sessionDescription);
 
@@ -1280,6 +1279,14 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     if (window.webrtcDetectedBrowser === 'firefox' && ref.id === 'MCU') {
       log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating local answer for Firefox interop with MCU']);
       sessionDescription.sdp = superRef._SDPParser.configureMCUFirefoxAnswer(sessionDescription.sdp);
+    }
+
+    /**
+     * Parse SDP: Configure to remove non-relay (TURN) candidates
+     */
+    if (superRef._forceTURN) {
+      log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating to receive only "relay" remote candidates']);
+      sessionDescription.sdp = superRef._SDPParser.removeNonRelayCandidates(sessionDescription.sdp);
     }
 
     log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting remote ' +

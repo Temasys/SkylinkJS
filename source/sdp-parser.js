@@ -328,5 +328,40 @@ Skylink.prototype._SDPParser = {
     }
 
     return sdpLines.join('\r\n');
+  },
+
+  /**
+   * Removes candidates that are not "relay" type in the remote RTCSessionDescription.
+   * @method removeNonRelayCandidates
+   * @param {String} sdpString The remote RTCSessionDescription.sdp.
+   * @return {String} updatedSdpString The modification remote RTCSessionDescription.sdp
+   *   that has candidates that are not "relay" type removed.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  removeNonRelayCandidates: function (sdpString) {
+    var sdpLines = sdpString.split('\r\n'),
+        hasOnlyRelayCandidates = false;
+
+    // Loop and remove candidates
+    while (!hasOnlyRelayCandidates) {
+      var doNotLoopCheckAgain = true;
+
+      for (var i = 0; i < sdpLines.length; i++) {
+        if (sdpLines[i].indexOf('a=candidate') === 0 && sdpLines[i].indexOf('relay') === -1) {
+          sdpLines.splice(i, 1);
+          doNotLoopCheckAgain = false;
+          break;
+        }
+      }
+
+      if (doNotLoopCheckAgain) {
+        hasOnlyRelayCandidates = true;
+      }
+    }
+
+    // Return modified RTCSessionDescription.sdp
+    return sdpLines.join('\r\n');
   }
 };
