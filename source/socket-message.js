@@ -400,14 +400,15 @@ Skylink.prototype._redirectHandler = function(message) {
  * @since 0.2.0
  */
 Skylink.prototype._updateUserEventHandler = function(message) {
-  var targetMid = message.mid;
-  log.log([targetMid, null, message.type, 'Peer updated userData:'], message.userData);
-  if (this._peerInformations[targetMid]) {
-    this._peerInformations[targetMid].userData = message.userData || {};
-    this._trigger('peerUpdated', targetMid,
-      this.getPeerInfo(targetMid), false);
-  } else {
-    log.log([targetMid, null, message.type, 'Peer does not have any user information']);
+  var self = this;
+  var peerId = message.mid;
+
+  if (self._peers[peerId]) {
+    self._peers[peerId].update({
+      userInfo: {
+        userData: message.userData
+      }
+    });
   }
 };
 
@@ -450,14 +451,22 @@ Skylink.prototype._roomLockEventHandler = function(message) {
  * @since 0.2.0
  */
 Skylink.prototype._muteAudioEventHandler = function(message) {
-  var targetMid = message.mid;
-  log.log([targetMid, null, message.type, 'Peer\'s audio muted:'], message.muted);
-  if (this._peerInformations[targetMid]) {
-    this._peerInformations[targetMid].mediaStatus.audioMuted = message.muted;
-    this._trigger('peerUpdated', targetMid,
-      this.getPeerInfo(targetMid), false);
-  } else {
-    log.log([targetMid, message.type, 'Peer does not have any user information']);
+  var self = this;
+  var peerId = message.mid;
+
+  if (self._peers[peerId]) {
+    var mediaStatus = (self._peers[peerId].getInfo() || {}).mediaStatus || {
+      audioMuted: true,
+      videoMuted: true
+    };
+
+    mediaStatus.audioMuted = message.muted === true;
+
+    self._peers[peerId].update({
+      userInfo: {
+        mediaStatus: mediaStatus
+      }
+    });
   }
 };
 
@@ -478,14 +487,22 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
  * @since 0.2.0
  */
 Skylink.prototype._muteVideoEventHandler = function(message) {
-  var targetMid = message.mid;
-  log.log([targetMid, null, message.type, 'Peer\'s video muted:'], message.muted);
-  if (this._peerInformations[targetMid]) {
-    this._peerInformations[targetMid].mediaStatus.videoMuted = message.muted;
-    this._trigger('peerUpdated', targetMid,
-      this.getPeerInfo(targetMid), false);
-  } else {
-    log.log([targetMid, null, message.type, 'Peer does not have any user information']);
+  var self = this;
+  var peerId = message.mid;
+
+  if (self._peers[peerId]) {
+    var mediaStatus = (self._peers[peerId].getInfo() || {}).mediaStatus || {
+      audioMuted: true,
+      videoMuted: true
+    };
+
+    mediaStatus.videoMuted = message.muted === true;
+
+    self._peers[peerId].update({
+      userInfo: {
+        mediaStatus: mediaStatus
+      }
+    });
   }
 };
 
@@ -919,9 +936,10 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  /* TODO: Configure with new data in restart message */
-
   self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), false);
+
+  // Update with latest Peer streaming information during the restart
+  self._peers[peerId].update(message);
 
   if (self._hasMCU) {
     log.debug([peerId, 'Peer', null, 'Dropping restart request as MCU is present']);

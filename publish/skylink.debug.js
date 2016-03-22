@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Wed Mar 23 2016 01:57:11 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Wed Mar 23 2016 02:24:32 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4900,31 +4900,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       this.weight = peerData.weight;
     }
 
-    /* TODO: Move the changable information like userInfo to .update() function */
-    // Configure the Peer session information
-    if (typeof peerData.userInfo === 'object' && peerData.userInfo !== null) {
-      // Configure the custom data information
-      this.data = peerData.userInfo.userData;
-
-      // Configure the streaming muted status information
-      if (typeof peerData.userInfo.mediaStatus === 'object' && peerData.userInfo.mediaStatus !== null) {
-        this.streamingInfo.mediaStatus = peerData.userInfo.mediaStatus;
-      }
-
-      // Configure the streaming settings information
-      if (typeof peerData.userInfo.settings === 'object' && peerData.userInfo.settings !== null) {
-        this.streamingInfo.settings = peerData.userInfo.settings;
-
-        // Configure for streaming settings audio stereo (for OPUS codec connection) setting
-        if (typeof peerData.userInfo.settings.audio === 'object') {
-          /* NOTE: Perhaps we actually need not to have both Peers connected to have OPUS streaming since
-             it is not the decoding part for the self Peer only? */
-          // Both Peers has to have audio.stereo option enabled
-          this._connectionSettings.stereo = peerData.userInfo.settings.audio.stereo === true &&
-            (superRef._streamSettings.audio && superRef._streamSettings.audio.stereo === true);
-        }
-      }
-    }
+    // Update the new streaming information
+    this.update(peerData);
 
     // Construct the RTCPeerConnection object reference
     this._construct();
@@ -5048,7 +5025,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     timeout: 0,
     iceFailures: 0,
     processingLocalSDP: false,
-    processingRemoteSDP: false
+    processingRemoteSDP: false,
+    updateCounter: 0
   };
 
   /**
@@ -5489,6 +5467,51 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
   };
 
   /**
+   * Updates the Peer information.
+   * @method update
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.update = function (peerData) {
+    var ref = this;
+
+    // Configure the Peer session information
+    if (typeof peerData.userInfo === 'object' && peerData.userInfo !== null) {
+      // Configure the custom data information
+      if (peerData.userInfo.hasOwnProperty('userData')) {
+        ref.data = peerData.userInfo.userData;
+      }
+
+      // Configure the streaming muted status information
+      if (typeof peerData.userInfo.mediaStatus === 'object' && peerData.userInfo.mediaStatus !== null) {
+        ref.streamingInfo.mediaStatus = peerData.userInfo.mediaStatus;
+      }
+
+      // Configure the streaming settings information
+      if (typeof peerData.userInfo.settings === 'object' && peerData.userInfo.settings !== null) {
+        ref.streamingInfo.settings = peerData.userInfo.settings;
+
+        // Configure for streaming settings audio stereo (for OPUS codec connection) setting
+        if (typeof peerData.userInfo.settings.audio === 'object') {
+          /* NOTE: Perhaps we actually need not to have both Peers connected to have OPUS streaming since
+             it is not the decoding part for the self Peer only? */
+          // Both Peers has to have audio.stereo option enabled
+          ref._connectionSettings.stereo = peerData.userInfo.settings.audio.stereo === true &&
+            (superRef._streamSettings.audio && superRef._streamSettings.audio.stereo === true);
+        }
+      }
+    }
+
+    if (ref._connectionStatus.updateCounter > 0) {
+      superRef._trigger('peerUpdated', ref.id, ref.getInfo(), false);
+    }
+
+    ref._connectionStatus.updateCounter++;
+
+    log.log([ref.id, 'Peer', null, 'Session streaming information has been updated ->'], ref.getInfo());
+  };
+
+  /**
    * Creates the RTCPeerConnection object.
    * @method _construct
    * @private
@@ -5908,7 +5931,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
       sessionDescription.sdp = superRef._SDPParser.configureChrome50OfferToPluginBrowsers(sessionDescription.sdp);
     }
-
 
     /**
      * Parse SDP: Configure the maximum audio bitrate to send
@@ -11495,14 +11517,15 @@ Skylink.prototype._redirectHandler = function(message) {
  * @since 0.2.0
  */
 Skylink.prototype._updateUserEventHandler = function(message) {
-  var targetMid = message.mid;
-  log.log([targetMid, null, message.type, 'Peer updated userData:'], message.userData);
-  if (this._peerInformations[targetMid]) {
-    this._peerInformations[targetMid].userData = message.userData || {};
-    this._trigger('peerUpdated', targetMid,
-      this.getPeerInfo(targetMid), false);
-  } else {
-    log.log([targetMid, null, message.type, 'Peer does not have any user information']);
+  var self = this;
+  var peerId = message.mid;
+
+  if (self._peers[peerId]) {
+    self._peers[peerId].update({
+      userInfo: {
+        userData: message.userData
+      }
+    });
   }
 };
 
@@ -11545,14 +11568,22 @@ Skylink.prototype._roomLockEventHandler = function(message) {
  * @since 0.2.0
  */
 Skylink.prototype._muteAudioEventHandler = function(message) {
-  var targetMid = message.mid;
-  log.log([targetMid, null, message.type, 'Peer\'s audio muted:'], message.muted);
-  if (this._peerInformations[targetMid]) {
-    this._peerInformations[targetMid].mediaStatus.audioMuted = message.muted;
-    this._trigger('peerUpdated', targetMid,
-      this.getPeerInfo(targetMid), false);
-  } else {
-    log.log([targetMid, message.type, 'Peer does not have any user information']);
+  var self = this;
+  var peerId = message.mid;
+
+  if (self._peers[peerId]) {
+    var mediaStatus = (self._peers[peerId].getInfo() || {}).mediaStatus || {
+      audioMuted: true,
+      videoMuted: true
+    };
+
+    mediaStatus.audioMuted = message.muted === true;
+
+    self._peers[peerId].update({
+      userInfo: {
+        mediaStatus: mediaStatus
+      }
+    });
   }
 };
 
@@ -11573,14 +11604,22 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
  * @since 0.2.0
  */
 Skylink.prototype._muteVideoEventHandler = function(message) {
-  var targetMid = message.mid;
-  log.log([targetMid, null, message.type, 'Peer\'s video muted:'], message.muted);
-  if (this._peerInformations[targetMid]) {
-    this._peerInformations[targetMid].mediaStatus.videoMuted = message.muted;
-    this._trigger('peerUpdated', targetMid,
-      this.getPeerInfo(targetMid), false);
-  } else {
-    log.log([targetMid, null, message.type, 'Peer does not have any user information']);
+  var self = this;
+  var peerId = message.mid;
+
+  if (self._peers[peerId]) {
+    var mediaStatus = (self._peers[peerId].getInfo() || {}).mediaStatus || {
+      audioMuted: true,
+      videoMuted: true
+    };
+
+    mediaStatus.videoMuted = message.muted === true;
+
+    self._peers[peerId].update({
+      userInfo: {
+        mediaStatus: mediaStatus
+      }
+    });
   }
 };
 
@@ -12014,9 +12053,10 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  /* TODO: Configure with new data in restart message */
-
   self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), false);
+
+  // Update with latest Peer streaming information during the restart
+  self._peers[peerId].update(message);
 
   if (self._hasMCU) {
     log.debug([peerId, 'Peer', null, 'Dropping restart request as MCU is present']);
