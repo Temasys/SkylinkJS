@@ -1082,6 +1082,20 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       ref._connectionSettings.stereo);
 
     /**
+     * Parse SDP: Configure the connection issues with Chrome 50 to Safari/IE browsers
+     *   when Chrome is offerer
+     */
+    if (['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1 &&
+      ['IE', 'safari'].indexOf(ref.agent.name) > -1 && sessionDescription.type === 'offer') {
+
+      log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating local offer for connection from ' +
+        'Chrome/Opera browsers to Safari/IE browsers']);
+
+      sessionDescription.sdp = superRef._SDPParser.configureChrome50OfferToPluginBrowsers(sessionDescription.sdp);
+    }
+
+
+    /**
      * Parse SDP: Configure the maximum audio bitrate to send
      */
     // Prevent retrieving values when .bandwidth is not defined.

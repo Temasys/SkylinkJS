@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Wed Mar 23 2016 01:25:30 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Wed Mar 23 2016 01:57:11 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5897,6 +5897,20 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       ref._connectionSettings.stereo);
 
     /**
+     * Parse SDP: Configure the connection issues with Chrome 50 to Safari/IE browsers
+     *   when Chrome is offerer
+     */
+    if (['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1 &&
+      ['IE', 'safari'].indexOf(ref.agent.name) > -1 && sessionDescription.type === 'offer') {
+
+      log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating local offer for connection from ' +
+        'Chrome/Opera browsers to Safari/IE browsers']);
+
+      sessionDescription.sdp = superRef._SDPParser.configureChrome50OfferToPluginBrowsers(sessionDescription.sdp);
+    }
+
+
+    /**
      * Parse SDP: Configure the maximum audio bitrate to send
      */
     // Prevent retrieving values when .bandwidth is not defined.
@@ -8507,6 +8521,29 @@ Skylink.prototype._SDPParser = {
 
     // Return modified RTCSessionDescription.sdp
     return sdpLines.join('\r\n');
+  },
+
+  /**
+   * Handles the connection issues with Chrome 50 browsers with Safari / IE browsers.
+   * @method configureChrome50OfferToPluginBrowsers
+   * @param {String} sdpString The local offer RTCSessionDescription.sdp.
+   * @return {String} updatedSdpString The modified local offer RTCSessionDescription.sdp
+   *   with connection interopability from Chrome 50 with Safari / IE browsers.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  configureChrome50OfferToPluginBrowsers: function (sdpString) {
+    var newSdpString = '';
+
+    // See https://bugs.chromium.org/p/webrtc/issues/detail?id=3962 for the fix
+    //   and https://github.com/Temasys/AdapterJS/issues/151 from a guy in AdapterJS who raised the patch
+
+    newSdpString = sdpString.replace(/a=rtpmap:\d+ rtx\/\d+\r\n/g, '');
+    newSdpString = newSdpString.replace(/a=fmtp:\d+ apt=\d+\r\n/g, '');
+
+    // Return modified RTCSessionDescription.sdp
+    return newSdpString;
   }
 };
 var _LOG_KEY = 'SkylinkJS';

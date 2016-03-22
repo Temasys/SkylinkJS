@@ -363,5 +363,28 @@ Skylink.prototype._SDPParser = {
 
     // Return modified RTCSessionDescription.sdp
     return sdpLines.join('\r\n');
+  },
+
+  /**
+   * Handles the connection issues with Chrome 50 browsers with Safari / IE browsers.
+   * @method configureChrome50OfferToPluginBrowsers
+   * @param {String} sdpString The local offer RTCSessionDescription.sdp.
+   * @return {String} updatedSdpString The modified local offer RTCSessionDescription.sdp
+   *   with connection interopability from Chrome 50 with Safari / IE browsers.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  configureChrome50OfferToPluginBrowsers: function (sdpString) {
+    var newSdpString = '';
+
+    // See https://bugs.chromium.org/p/webrtc/issues/detail?id=3962 for the fix
+    //   and https://github.com/Temasys/AdapterJS/issues/151 from a guy in AdapterJS who raised the patch
+
+    newSdpString = sdpString.replace(/a=rtpmap:\d+ rtx\/\d+\r\n/g, '');
+    newSdpString = newSdpString.replace(/a=fmtp:\d+ apt=\d+\r\n/g, '');
+
+    // Return modified RTCSessionDescription.sdp
+    return newSdpString;
   }
 };
