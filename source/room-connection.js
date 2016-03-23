@@ -37,6 +37,17 @@ Skylink.prototype._roomLocked = false;
 Skylink.prototype._inRoom = false;
 
 /**
+ * Stores the peer connection priority weight.
+ * @attribute _peerPriorityWeight
+ * @type Number
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.0
+ */
+Skylink.prototype._peerPriorityWeight = 0;
+
+/**
  * Connects self to the selected room.
  * By default, if room parameter is not provided, it will
  *   connect to the default room provided in
@@ -668,6 +679,8 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
     stopScreenshare = false;
   }
 
+  /* NOTE: Still allow disconnection of channel perhaps? */
+
   if (!self._inRoom) {
     error = 'Unable to leave room as user is not in any room';
     log.error(error);
@@ -683,17 +696,12 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
   // NOTE: ENTER/WELCOME made but no peerconnection...
   // which may result in peerLeft not triggered..
   // WHY? but to ensure clear all
-  var peers = Object.keys(self._peerInformations);
-  var conns = Object.keys(self._peerConnections);
-  var i;
-  for (i = 0; i < conns.length; i++) {
-    if (peers.indexOf(conns[i]) === -1) {
-      peers.push(conns[i]);
-    }
-  }
-  for (i = 0; i < peers.length; i++) {
-    self._removePeer(peers[i]);
-  }
+  Object.keys(self._peers).forEach(function (peerId) {
+    self._destroyPeer(peerId);
+  });
+
+  self._peers = {};
+
   self._inRoom = false;
   self._closeChannel();
 

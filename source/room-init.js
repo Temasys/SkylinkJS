@@ -765,7 +765,9 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   The flag that indicates if PeerConnections connection should use any STUN server connection.
  *   Tampering this flag may cause issues to connections, so set this value at your own risk.
  * @param {Boolean} [options.forceTURN=false] The flag that indicates if PeerConnections connection
- *   should only use TURN server connection which enables a quicker connectivity.
+ *   should only use TURN server connection which enables a quicker connectivity. This forces
+ *   connection through TURN server and use TURN server connection only. If TURN is not enabled for
+ *   the Application Key, connection may not work with this flag enabled.
  *   This configuration will override the settings for <code>enableTURNServer</code>
  *   and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and
  *   <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.
@@ -1211,6 +1213,7 @@ Skylink.prototype.init = function(options, callback) {
  * @for Skylink
  * @since 0.5.9
  */
+/* jshint ignore:start */
 Skylink.prototype.generateUUID = function() {
   var d = new Date().getTime();
   var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -1220,3 +1223,4 @@ Skylink.prototype.generateUUID = function() {
   });
   return uuid;
 };
+/* jshint ignore:end */

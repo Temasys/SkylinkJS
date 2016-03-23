@@ -221,11 +221,8 @@ Skylink.prototype.getPeerInfo = function(peerId) {
   var isNotSelf = this._user && this._user.sid ? peerId !== this._user.sid : false;
 
   if (typeof peerId === 'string' && isNotSelf) {
-    // peer info
-    var peerInfo = this._peerInformations[peerId];
-
-    if (typeof peerInfo === 'object') {
-      return peerInfo;
+    if (this._peers[peerId]) {
+      return this._peers[peerId].getInfo();
     }
 
     return null;

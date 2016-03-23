@@ -912,7 +912,7 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
   try {
     log.log([peerId, null, null, 'Adding local stream']);
 
-    var pc = this._peerConnections[peerId];
+    var pc = this._peers[peerId];
 
     if (pc) {
       if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
@@ -1667,7 +1667,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
 Skylink.prototype.sendStream = function(stream, callback) {
   var self = this;
   var restartCount = 0;
-  var peerCount = Object.keys(self._peerConnections).length;
+  var peerCount = Object.keys(self._peers).length;
 
   if (typeof stream !== 'object' || stream === null) {
     var error = 'Provided stream settings is invalid';
@@ -1678,7 +1678,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
     return;
   }
 
-  var hasNoPeers = Object.keys(self._peerConnections).length === 0;
+  var hasNoPeers = Object.keys(self._peers).length === 0;
 
   // Stream object
   // getAudioTracks or getVideoTracks first because adapterjs
@@ -1704,9 +1704,9 @@ Skylink.prototype.sendStream = function(stream, callback) {
         } else {
           self._trigger('incomingStream', self._user.sid, self._mediaStream,
             true, self.getPeerInfo(), false);
-          for (var peer in self._peerConnections) {
-            if (self._peerConnections.hasOwnProperty(peer)) {
-              self._restartPeerConnection(peer, true, false, null, true);
+          for (var peer in self._peers) {
+            if (self._peers.hasOwnProperty(peer)) {
+              self._peers[peer].handshakeRestart();
             }
           }
         }
@@ -1770,9 +1770,9 @@ Skylink.prototype.sendStream = function(stream, callback) {
         } else {
           self._trigger('incomingStream', self._user.sid, self._mediaStream,
             true, self.getPeerInfo(), false);
-          for (var peer in self._peerConnections) {
-            if (self._peerConnections.hasOwnProperty(peer)) {
-              self._restartPeerConnection(peer, true, false, null, true);
+          for (var peer in self._peers) {
+            if (self._peers.hasOwnProperty(peer)) {
+              self._peers[peer].handshakeRestart();
             }
           }
         }
@@ -2120,9 +2120,9 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
             } else {
               self._trigger('incomingStream', self._user.sid, stream,
                 true, self.getPeerInfo(), false);
-              for (var peer in self._peerConnections) {
-                if (self._peerConnections.hasOwnProperty(peer)) {
-                  self._restartPeerConnection(peer, true, false, null, true);
+              for (var peer in self._peers) {
+                if (self._peers.hasOwnProperty(peer)) {
+                  self._peers[peer].handshakeRestart();
                 }
               }
             }
@@ -2217,9 +2217,9 @@ Skylink.prototype.stopScreen = function () {
           this._trigger('incomingStream', this._user.sid, this._mediaStream, true,
             this.getPeerInfo(), false);
         }
-        for (var peer in this._peerConnections) {
-          if (this._peerConnections.hasOwnProperty(peer)) {
-            this._restartPeerConnection(peer, true, false, null, true);
+        for (var peer in this._peers) {
+          if (this._peers.hasOwnProperty(peer)) {
+            this._peers[peer].handshakeRestart();
           }
         }
       }

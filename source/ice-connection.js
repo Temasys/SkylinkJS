@@ -13,6 +13,21 @@
 Skylink.prototype._enableIceTrickle = true;
 
 /**
+ * The flag that indicates if PeerConnections should enable
+ *    restarting of ICE to reconnect the failed ICE connection.
+ * @attribute _enableIceRestart
+ * @type Boolean
+ * @default true
+ * @private
+ * @required
+ * @since 0.6.x
+ * @component ICE
+ * @for Skylink
+ */
+Skylink.prototype._enableIceRestart = window.webrtcDetectedBrowser !== 'firefox';
+
+
+/**
  * The flag that indicates if PeerConnections ICE gathering
  *   should use STUN server connection.
  * @attribute _enableSTUN

@@ -1,1521 +1,10 @@
-/*! skylinkjs - v0.6.10 - Fri Mar 04 2016 16:07:21 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Wed Mar 23 2016 22:59:14 GMT+0800 (SGT) */
 
-!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-
-module.exports = _dereq_('./lib/');
-
-},{"./lib/":2}],2:[function(_dereq_,module,exports){
-
-/**
- * Module dependencies.
- */
-
-var url = _dereq_('./url');
-var parser = _dereq_('socket.io-parser');
-var Manager = _dereq_('./manager');
-var debug = _dereq_('debug')('socket.io-client');
-
-/**
- * Module exports.
- */
-
-module.exports = exports = lookup;
-
-/**
- * Managers cache.
- */
-
-var cache = exports.managers = {};
-
-/**
- * Looks up an existing `Manager` for multiplexing.
- * If the user summons:
- *
- *   `io('http://localhost/a');`
- *   `io('http://localhost/b');`
- *
- * We reuse the existing instance based on same scheme/port/host,
- * and we initialize sockets for each namespace.
- *
- * @api public
- */
-
-function lookup(uri, opts) {
-  if (typeof uri == 'object') {
-    opts = uri;
-    uri = undefined;
-  }
-
-  opts = opts || {};
-
-  var parsed = url(uri);
-  var source = parsed.source;
-  var id = parsed.id;
-  var path = parsed.path;
-  var sameNamespace = (cache[id] && cache[id].nsps[path] &&
-                       path == cache[id].nsps[path].nsp);
-  var newConnection = opts.forceNew || opts['force new connection'] ||
-                      false === opts.multiplex || sameNamespace;
-
-  var io;
-
-  if (newConnection) {
-    debug('ignoring socket cache for %s', source);
-    io = Manager(source, opts);
-  } else {
-    if (!cache[id]) {
-      debug('new io instance for %s', source);
-      cache[id] = Manager(source, opts);
-    }
-    io = cache[id];
-  }
-
-  return io.socket(parsed.path);
-}
-
-/**
- * Protocol version.
- *
- * @api public
- */
-
-exports.protocol = parser.protocol;
-
-/**
- * `connect`.
- *
- * @param {String} uri
- * @api public
- */
-
-exports.connect = lookup;
-
-/**
- * Expose constructors for standalone build.
- *
- * @api public
- */
-
-exports.Manager = _dereq_('./manager');
-exports.Socket = _dereq_('./socket');
-
-},{"./manager":3,"./socket":5,"./url":6,"debug":10,"socket.io-parser":44}],3:[function(_dereq_,module,exports){
-
-/**
- * Module dependencies.
- */
-
-var url = _dereq_('./url');
-var eio = _dereq_('engine.io-client');
-var Socket = _dereq_('./socket');
-var Emitter = _dereq_('component-emitter');
-var parser = _dereq_('socket.io-parser');
-var on = _dereq_('./on');
-var bind = _dereq_('component-bind');
-var object = _dereq_('object-component');
-var debug = _dereq_('debug')('socket.io-client:manager');
-var indexOf = _dereq_('indexof');
-var Backoff = _dereq_('backo2');
-
-/**
- * Module exports
- */
-
-module.exports = Manager;
-
-/**
- * `Manager` constructor.
- *
- * @param {String} engine instance or engine uri/opts
- * @param {Object} options
- * @api public
- */
-
-function Manager(uri, opts){
-  if (!(this instanceof Manager)) return new Manager(uri, opts);
-  if (uri && ('object' == typeof uri)) {
-    opts = uri;
-    uri = undefined;
-  }
-  opts = opts || {};
-
-  opts.path = opts.path || '/socket.io';
-  this.nsps = {};
-  this.subs = [];
-  this.opts = opts;
-  this.reconnection(opts.reconnection !== false);
-  this.reconnectionAttempts(opts.reconnectionAttempts || Infinity);
-  this.reconnectionDelay(opts.reconnectionDelay || 1000);
-  this.reconnectionDelayMax(opts.reconnectionDelayMax || 5000);
-  this.randomizationFactor(opts.randomizationFactor || 0.5);
-  this.backoff = new Backoff({
-    min: this.reconnectionDelay(),
-    max: this.reconnectionDelayMax(),
-    jitter: this.randomizationFactor()
-  });
-  this.timeout(null == opts.timeout ? 20000 : opts.timeout);
-  this.readyState = 'closed';
-  this.uri = uri;
-  this.connected = [];
-  this.encoding = false;
-  this.packetBuffer = [];
-  this.encoder = new parser.Encoder();
-  this.decoder = new parser.Decoder();
-  this.autoConnect = opts.autoConnect !== false;
-  if (this.autoConnect) this.open();
-}
-
-/**
- * Propagate given event to sockets and emit on `this`
- *
- * @api private
- */
-
-Manager.prototype.emitAll = function() {
-  this.emit.apply(this, arguments);
-  for (var nsp in this.nsps) {
-    this.nsps[nsp].emit.apply(this.nsps[nsp], arguments);
-  }
-};
-
-/**
- * Update `socket.id` of all sockets
- *
- * @api private
- */
-
-Manager.prototype.updateSocketIds = function(){
-  for (var nsp in this.nsps) {
-    this.nsps[nsp].id = this.engine.id;
-  }
-};
-
-/**
- * Mix in `Emitter`.
- */
-
-Emitter(Manager.prototype);
-
-/**
- * Sets the `reconnection` config.
- *
- * @param {Boolean} true/false if it should automatically reconnect
- * @return {Manager} self or value
- * @api public
- */
-
-Manager.prototype.reconnection = function(v){
-  if (!arguments.length) return this._reconnection;
-  this._reconnection = !!v;
-  return this;
-};
-
-/**
- * Sets the reconnection attempts config.
- *
- * @param {Number} max reconnection attempts before giving up
- * @return {Manager} self or value
- * @api public
- */
-
-Manager.prototype.reconnectionAttempts = function(v){
-  if (!arguments.length) return this._reconnectionAttempts;
-  this._reconnectionAttempts = v;
-  return this;
-};
-
-/**
- * Sets the delay between reconnections.
- *
- * @param {Number} delay
- * @return {Manager} self or value
- * @api public
- */
-
-Manager.prototype.reconnectionDelay = function(v){
-  if (!arguments.length) return this._reconnectionDelay;
-  this._reconnectionDelay = v;
-  this.backoff && this.backoff.setMin(v);
-  return this;
-};
-
-Manager.prototype.randomizationFactor = function(v){
-  if (!arguments.length) return this._randomizationFactor;
-  this._randomizationFactor = v;
-  this.backoff && this.backoff.setJitter(v);
-  return this;
-};
-
-/**
- * Sets the maximum delay between reconnections.
- *
- * @param {Number} delay
- * @return {Manager} self or value
- * @api public
- */
-
-Manager.prototype.reconnectionDelayMax = function(v){
-  if (!arguments.length) return this._reconnectionDelayMax;
-  this._reconnectionDelayMax = v;
-  this.backoff && this.backoff.setMax(v);
-  return this;
-};
-
-/**
- * Sets the connection timeout. `false` to disable
- *
- * @return {Manager} self or value
- * @api public
- */
-
-Manager.prototype.timeout = function(v){
-  if (!arguments.length) return this._timeout;
-  this._timeout = v;
-  return this;
-};
-
-/**
- * Starts trying to reconnect if reconnection is enabled and we have not
- * started reconnecting yet
- *
- * @api private
- */
-
-Manager.prototype.maybeReconnectOnOpen = function() {
-  // Only try to reconnect if it's the first time we're connecting
-  if (!this.reconnecting && this._reconnection && this.backoff.attempts === 0) {
-    // keeps reconnection from firing twice for the same reconnection loop
-    this.reconnect();
-  }
-};
-
-
-/**
- * Sets the current transport `socket`.
- *
- * @param {Function} optional, callback
- * @return {Manager} self
- * @api public
- */
-
-Manager.prototype.open =
-Manager.prototype.connect = function(fn){
-  debug('readyState %s', this.readyState);
-  if (~this.readyState.indexOf('open')) return this;
-
-  debug('opening %s', this.uri);
-  this.engine = eio(this.uri, this.opts);
-  var socket = this.engine;
-  var self = this;
-  this.readyState = 'opening';
-  this.skipReconnect = false;
-
-  // emit `open`
-  var openSub = on(socket, 'open', function() {
-    self.onopen();
-    fn && fn();
-  });
-
-  // emit `connect_error`
-  var errorSub = on(socket, 'error', function(data){
-    debug('connect_error');
-    self.cleanup();
-    self.readyState = 'closed';
-    self.emitAll('connect_error', data);
-    if (fn) {
-      var err = new Error('Connection error');
-      err.data = data;
-      fn(err);
-    } else {
-      // Only do this if there is no fn to handle the error
-      self.maybeReconnectOnOpen();
-    }
-  });
-
-  // emit `connect_timeout`
-  if (false !== this._timeout) {
-    var timeout = this._timeout;
-    debug('connect attempt will timeout after %d', timeout);
-
-    // set timer
-    var timer = setTimeout(function(){
-      debug('connect attempt timed out after %d', timeout);
-      openSub.destroy();
-      socket.close();
-      socket.emit('error', 'timeout');
-      self.emitAll('connect_timeout', timeout);
-    }, timeout);
-
-    this.subs.push({
-      destroy: function(){
-        clearTimeout(timer);
-      }
-    });
-  }
-
-  this.subs.push(openSub);
-  this.subs.push(errorSub);
-
-  return this;
-};
-
-/**
- * Called upon transport open.
- *
- * @api private
- */
-
-Manager.prototype.onopen = function(){
-  debug('open');
-
-  // clear old subs
-  this.cleanup();
-
-  // mark as open
-  this.readyState = 'open';
-  this.emit('open');
-
-  // add new subs
-  var socket = this.engine;
-  this.subs.push(on(socket, 'data', bind(this, 'ondata')));
-  this.subs.push(on(this.decoder, 'decoded', bind(this, 'ondecoded')));
-  this.subs.push(on(socket, 'error', bind(this, 'onerror')));
-  this.subs.push(on(socket, 'close', bind(this, 'onclose')));
-};
-
-/**
- * Called with data.
- *
- * @api private
- */
-
-Manager.prototype.ondata = function(data){
-  this.decoder.add(data);
-};
-
-/**
- * Called when parser fully decodes a packet.
- *
- * @api private
- */
-
-Manager.prototype.ondecoded = function(packet) {
-  this.emit('packet', packet);
-};
-
-/**
- * Called upon socket error.
- *
- * @api private
- */
-
-Manager.prototype.onerror = function(err){
-  debug('error', err);
-  this.emitAll('error', err);
-};
-
-/**
- * Creates a new socket for the given `nsp`.
- *
- * @return {Socket}
- * @api public
- */
-
-Manager.prototype.socket = function(nsp){
-  var socket = this.nsps[nsp];
-  if (!socket) {
-    socket = new Socket(this, nsp);
-    this.nsps[nsp] = socket;
-    var self = this;
-    socket.on('connect', function(){
-      socket.id = self.engine.id;
-      if (!~indexOf(self.connected, socket)) {
-        self.connected.push(socket);
-      }
-    });
-  }
-  return socket;
-};
-
-/**
- * Called upon a socket close.
- *
- * @param {Socket} socket
- */
-
-Manager.prototype.destroy = function(socket){
-  var index = indexOf(this.connected, socket);
-  if (~index) this.connected.splice(index, 1);
-  if (this.connected.length) return;
-
-  this.close();
-};
-
-/**
- * Writes a packet.
- *
- * @param {Object} packet
- * @api private
- */
-
-Manager.prototype.packet = function(packet){
-  debug('writing packet %j', packet);
-  var self = this;
-
-  if (!self.encoding) {
-    // encode, then write to engine with result
-    self.encoding = true;
-    this.encoder.encode(packet, function(encodedPackets) {
-      for (var i = 0; i < encodedPackets.length; i++) {
-        self.engine.write(encodedPackets[i]);
-      }
-      self.encoding = false;
-      self.processPacketQueue();
-    });
-  } else { // add packet to the queue
-    self.packetBuffer.push(packet);
-  }
-};
-
-/**
- * If packet buffer is non-empty, begins encoding the
- * next packet in line.
- *
- * @api private
- */
-
-Manager.prototype.processPacketQueue = function() {
-  if (this.packetBuffer.length > 0 && !this.encoding) {
-    var pack = this.packetBuffer.shift();
-    this.packet(pack);
-  }
-};
-
-/**
- * Clean up transport subscriptions and packet buffer.
- *
- * @api private
- */
-
-Manager.prototype.cleanup = function(){
-  var sub;
-  while (sub = this.subs.shift()) sub.destroy();
-
-  this.packetBuffer = [];
-  this.encoding = false;
-
-  this.decoder.destroy();
-};
-
-/**
- * Close the current socket.
- *
- * @api private
- */
-
-Manager.prototype.close =
-Manager.prototype.disconnect = function(){
-  this.skipReconnect = true;
-  this.backoff.reset();
-  this.readyState = 'closed';
-  this.engine && this.engine.close();
-};
-
-/**
- * Called upon engine close.
- *
- * @api private
- */
-
-Manager.prototype.onclose = function(reason){
-  debug('close');
-  this.cleanup();
-  this.backoff.reset();
-  this.readyState = 'closed';
-  this.emit('close', reason);
-  if (this._reconnection && !this.skipReconnect) {
-    this.reconnect();
-  }
-};
-
-/**
- * Attempt a reconnection.
- *
- * @api private
- */
-
-Manager.prototype.reconnect = function(){
-  if (this.reconnecting || this.skipReconnect) return this;
-
-  var self = this;
-
-  if (this.backoff.attempts >= this._reconnectionAttempts) {
-    debug('reconnect failed');
-    this.backoff.reset();
-    this.emitAll('reconnect_failed');
-    this.reconnecting = false;
-  } else {
-    var delay = this.backoff.duration();
-    debug('will wait %dms before reconnect attempt', delay);
-
-    this.reconnecting = true;
-    var timer = setTimeout(function(){
-      if (self.skipReconnect) return;
-
-      debug('attempting reconnect');
-      self.emitAll('reconnect_attempt', self.backoff.attempts);
-      self.emitAll('reconnecting', self.backoff.attempts);
-
-      // check again for the case socket closed in above events
-      if (self.skipReconnect) return;
-
-      self.open(function(err){
-        if (err) {
-          debug('reconnect attempt error');
-          self.reconnecting = false;
-          self.reconnect();
-          self.emitAll('reconnect_error', err.data);
-        } else {
-          debug('reconnect success');
-          self.onreconnect();
-        }
-      });
-    }, delay);
-
-    this.subs.push({
-      destroy: function(){
-        clearTimeout(timer);
-      }
-    });
-  }
-};
-
-/**
- * Called upon successful reconnect.
- *
- * @api private
- */
-
-Manager.prototype.onreconnect = function(){
-  var attempt = this.backoff.attempts;
-  this.reconnecting = false;
-  this.backoff.reset();
-  this.updateSocketIds();
-  this.emitAll('reconnect', attempt);
-};
-
-},{"./on":4,"./socket":5,"./url":6,"backo2":7,"component-bind":8,"component-emitter":9,"debug":10,"engine.io-client":11,"indexof":40,"object-component":41,"socket.io-parser":44}],4:[function(_dereq_,module,exports){
-
-/**
- * Module exports.
- */
-
-module.exports = on;
-
-/**
- * Helper for subscriptions.
- *
- * @param {Object|EventEmitter} obj with `Emitter` mixin or `EventEmitter`
- * @param {String} event name
- * @param {Function} callback
- * @api public
- */
-
-function on(obj, ev, fn) {
-  obj.on(ev, fn);
-  return {
-    destroy: function(){
-      obj.removeListener(ev, fn);
-    }
-  };
-}
-
-},{}],5:[function(_dereq_,module,exports){
-
-/**
- * Module dependencies.
- */
-
-var parser = _dereq_('socket.io-parser');
-var Emitter = _dereq_('component-emitter');
-var toArray = _dereq_('to-array');
-var on = _dereq_('./on');
-var bind = _dereq_('component-bind');
-var debug = _dereq_('debug')('socket.io-client:socket');
-var hasBin = _dereq_('has-binary');
-
-/**
- * Module exports.
- */
-
-module.exports = exports = Socket;
-
-/**
- * Internal events (blacklisted).
- * These events can't be emitted by the user.
- *
- * @api private
- */
-
-var events = {
-  connect: 1,
-  connect_error: 1,
-  connect_timeout: 1,
-  disconnect: 1,
-  error: 1,
-  reconnect: 1,
-  reconnect_attempt: 1,
-  reconnect_failed: 1,
-  reconnect_error: 1,
-  reconnecting: 1
-};
-
-/**
- * Shortcut to `Emitter#emit`.
- */
-
-var emit = Emitter.prototype.emit;
-
-/**
- * `Socket` constructor.
- *
- * @api public
- */
-
-function Socket(io, nsp){
-  this.io = io;
-  this.nsp = nsp;
-  this.json = this; // compat
-  this.ids = 0;
-  this.acks = {};
-  if (this.io.autoConnect) this.open();
-  this.receiveBuffer = [];
-  this.sendBuffer = [];
-  this.connected = false;
-  this.disconnected = true;
-}
-
-/**
- * Mix in `Emitter`.
- */
-
-Emitter(Socket.prototype);
-
-/**
- * Subscribe to open, close and packet events
- *
- * @api private
- */
-
-Socket.prototype.subEvents = function() {
-  if (this.subs) return;
-
-  var io = this.io;
-  this.subs = [
-    on(io, 'open', bind(this, 'onopen')),
-    on(io, 'packet', bind(this, 'onpacket')),
-    on(io, 'close', bind(this, 'onclose'))
-  ];
-};
-
-/**
- * "Opens" the socket.
- *
- * @api public
- */
-
-Socket.prototype.open =
-Socket.prototype.connect = function(){
-  if (this.connected) return this;
-
-  this.subEvents();
-  this.io.open(); // ensure open
-  if ('open' == this.io.readyState) this.onopen();
-  return this;
-};
-
-/**
- * Sends a `message` event.
- *
- * @return {Socket} self
- * @api public
- */
-
-Socket.prototype.send = function(){
-  var args = toArray(arguments);
-  args.unshift('message');
-  this.emit.apply(this, args);
-  return this;
-};
-
-/**
- * Override `emit`.
- * If the event is in `events`, it's emitted normally.
- *
- * @param {String} event name
- * @return {Socket} self
- * @api public
- */
-
-Socket.prototype.emit = function(ev){
-  if (events.hasOwnProperty(ev)) {
-    emit.apply(this, arguments);
-    return this;
-  }
-
-  var args = toArray(arguments);
-  var parserType = parser.EVENT; // default
-  if (hasBin(args)) { parserType = parser.BINARY_EVENT; } // binary
-  var packet = { type: parserType, data: args };
-
-  // event ack callback
-  if ('function' == typeof args[args.length - 1]) {
-    debug('emitting packet with ack id %d', this.ids);
-    this.acks[this.ids] = args.pop();
-    packet.id = this.ids++;
-  }
-
-  if (this.connected) {
-    this.packet(packet);
-  } else {
-    this.sendBuffer.push(packet);
-  }
-
-  return this;
-};
-
-/**
- * Sends a packet.
- *
- * @param {Object} packet
- * @api private
- */
-
-Socket.prototype.packet = function(packet){
-  packet.nsp = this.nsp;
-  this.io.packet(packet);
-};
-
-/**
- * Called upon engine `open`.
- *
- * @api private
- */
-
-Socket.prototype.onopen = function(){
-  debug('transport is open - connecting');
-
-  // write connect packet if necessary
-  if ('/' != this.nsp) {
-    this.packet({ type: parser.CONNECT });
-  }
-};
-
-/**
- * Called upon engine `close`.
- *
- * @param {String} reason
- * @api private
- */
-
-Socket.prototype.onclose = function(reason){
-  debug('close (%s)', reason);
-  this.connected = false;
-  this.disconnected = true;
-  delete this.id;
-  this.emit('disconnect', reason);
-};
-
-/**
- * Called with socket packet.
- *
- * @param {Object} packet
- * @api private
- */
-
-Socket.prototype.onpacket = function(packet){
-  if (packet.nsp != this.nsp) return;
-
-  switch (packet.type) {
-    case parser.CONNECT:
-      this.onconnect();
-      break;
-
-    case parser.EVENT:
-      this.onevent(packet);
-      break;
-
-    case parser.BINARY_EVENT:
-      this.onevent(packet);
-      break;
-
-    case parser.ACK:
-      this.onack(packet);
-      break;
-
-    case parser.BINARY_ACK:
-      this.onack(packet);
-      break;
-
-    case parser.DISCONNECT:
-      this.ondisconnect();
-      break;
-
-    case parser.ERROR:
-      this.emit('error', packet.data);
-      break;
-  }
-};
-
-/**
- * Called upon a server event.
- *
- * @param {Object} packet
- * @api private
- */
-
-Socket.prototype.onevent = function(packet){
-  var args = packet.data || [];
-  debug('emitting event %j', args);
-
-  if (null != packet.id) {
-    debug('attaching ack callback to event');
-    args.push(this.ack(packet.id));
-  }
-
-  if (this.connected) {
-    emit.apply(this, args);
-  } else {
-    this.receiveBuffer.push(args);
-  }
-};
-
-/**
- * Produces an ack callback to emit with an event.
- *
- * @api private
- */
-
-Socket.prototype.ack = function(id){
-  var self = this;
-  var sent = false;
-  return function(){
-    // prevent double callbacks
-    if (sent) return;
-    sent = true;
-    var args = toArray(arguments);
-    debug('sending ack %j', args);
-
-    var type = hasBin(args) ? parser.BINARY_ACK : parser.ACK;
-    self.packet({
-      type: type,
-      id: id,
-      data: args
-    });
-  };
-};
-
-/**
- * Called upon a server acknowlegement.
- *
- * @param {Object} packet
- * @api private
- */
-
-Socket.prototype.onack = function(packet){
-  debug('calling ack %s with %j', packet.id, packet.data);
-  var fn = this.acks[packet.id];
-  fn.apply(this, packet.data);
-  delete this.acks[packet.id];
-};
-
-/**
- * Called upon server connect.
- *
- * @api private
- */
-
-Socket.prototype.onconnect = function(){
-  this.connected = true;
-  this.disconnected = false;
-  this.emit('connect');
-  this.emitBuffered();
-};
-
-/**
- * Emit buffered events (received and emitted).
- *
- * @api private
- */
-
-Socket.prototype.emitBuffered = function(){
-  var i;
-  for (i = 0; i < this.receiveBuffer.length; i++) {
-    emit.apply(this, this.receiveBuffer[i]);
-  }
-  this.receiveBuffer = [];
-
-  for (i = 0; i < this.sendBuffer.length; i++) {
-    this.packet(this.sendBuffer[i]);
-  }
-  this.sendBuffer = [];
-};
-
-/**
- * Called upon server disconnect.
- *
- * @api private
- */
-
-Socket.prototype.ondisconnect = function(){
-  debug('server disconnect (%s)', this.nsp);
-  this.destroy();
-  this.onclose('io server disconnect');
-};
-
-/**
- * Called upon forced client/server side disconnections,
- * this method ensures the manager stops tracking us and
- * that reconnections don't get triggered for this.
- *
- * @api private.
- */
-
-Socket.prototype.destroy = function(){
-  if (this.subs) {
-    // clean subscriptions to avoid reconnections
-    for (var i = 0; i < this.subs.length; i++) {
-      this.subs[i].destroy();
-    }
-    this.subs = null;
-  }
-
-  this.io.destroy(this);
-};
-
-/**
- * Disconnects the socket manually.
- *
- * @return {Socket} self
- * @api public
- */
-
-Socket.prototype.close =
-Socket.prototype.disconnect = function(){
-  if (this.connected) {
-    debug('performing disconnect (%s)', this.nsp);
-    this.packet({ type: parser.DISCONNECT });
-  }
-
-  // remove socket from pool
-  this.destroy();
-
-  if (this.connected) {
-    // fire events
-    this.onclose('io client disconnect');
-  }
-  return this;
-};
-
-},{"./on":4,"component-bind":8,"component-emitter":9,"debug":10,"has-binary":36,"socket.io-parser":44,"to-array":48}],6:[function(_dereq_,module,exports){
-(function (global){
-
-/**
- * Module dependencies.
- */
-
-var parseuri = _dereq_('parseuri');
-var debug = _dereq_('debug')('socket.io-client:url');
-
-/**
- * Module exports.
- */
-
-module.exports = url;
-
-/**
- * URL parser.
- *
- * @param {String} url
- * @param {Object} An object meant to mimic window.location.
- *                 Defaults to window.location.
- * @api public
- */
-
-function url(uri, loc){
-  var obj = uri;
-
-  // default to window.location
-  var loc = loc || global.location;
-  if (null == uri) uri = loc.protocol + '//' + loc.host;
-
-  // relative path support
-  if ('string' == typeof uri) {
-    if ('/' == uri.charAt(0)) {
-      if ('/' == uri.charAt(1)) {
-        uri = loc.protocol + uri;
-      } else {
-        uri = loc.hostname + uri;
-      }
-    }
-
-    if (!/^(https?|wss?):\/\//.test(uri)) {
-      debug('protocol-less url %s', uri);
-      if ('undefined' != typeof loc) {
-        uri = loc.protocol + '//' + uri;
-      } else {
-        uri = 'https://' + uri;
-      }
-    }
-
-    // parse
-    debug('parse %s', uri);
-    obj = parseuri(uri);
-  }
-
-  // make sure we treat `localhost:80` and `localhost` equally
-  if (!obj.port) {
-    if (/^(http|ws)$/.test(obj.protocol)) {
-      obj.port = '80';
-    }
-    else if (/^(http|ws)s$/.test(obj.protocol)) {
-      obj.port = '443';
-    }
-  }
-
-  obj.path = obj.path || '/';
-
-  // define unique id
-  obj.id = obj.protocol + '://' + obj.host + ':' + obj.port;
-  // define href
-  obj.href = obj.protocol + '://' + obj.host + (loc && loc.port == obj.port ? '' : (':' + obj.port));
-
-  return obj;
-}
-
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"debug":10,"parseuri":42}],7:[function(_dereq_,module,exports){
-
-/**
- * Expose `Backoff`.
- */
-
-module.exports = Backoff;
-
-/**
- * Initialize backoff timer with `opts`.
- *
- * - `min` initial timeout in milliseconds [100]
- * - `max` max timeout [10000]
- * - `jitter` [0]
- * - `factor` [2]
- *
- * @param {Object} opts
- * @api public
- */
-
-function Backoff(opts) {
-  opts = opts || {};
-  this.ms = opts.min || 100;
-  this.max = opts.max || 10000;
-  this.factor = opts.factor || 2;
-  this.jitter = opts.jitter > 0 && opts.jitter <= 1 ? opts.jitter : 0;
-  this.attempts = 0;
-}
-
-/**
- * Return the backoff duration.
- *
- * @return {Number}
- * @api public
- */
-
-Backoff.prototype.duration = function(){
-  var ms = this.ms * Math.pow(this.factor, this.attempts++);
-  if (this.jitter) {
-    var rand =  Math.random();
-    var deviation = Math.floor(rand * this.jitter * ms);
-    ms = (Math.floor(rand * 10) & 1) == 0  ? ms - deviation : ms + deviation;
-  }
-  return Math.min(ms, this.max) | 0;
-};
-
-/**
- * Reset the number of attempts.
- *
- * @api public
- */
-
-Backoff.prototype.reset = function(){
-  this.attempts = 0;
-};
-
-/**
- * Set the minimum duration
- *
- * @api public
- */
-
-Backoff.prototype.setMin = function(min){
-  this.ms = min;
-};
-
-/**
- * Set the maximum duration
- *
- * @api public
- */
-
-Backoff.prototype.setMax = function(max){
-  this.max = max;
-};
-
-/**
- * Set the jitter
- *
- * @api public
- */
-
-Backoff.prototype.setJitter = function(jitter){
-  this.jitter = jitter;
-};
-
-
-},{}],8:[function(_dereq_,module,exports){
-/**
- * Slice reference.
- */
-
-var slice = [].slice;
-
-/**
- * Bind `obj` to `fn`.
- *
- * @param {Object} obj
- * @param {Function|String} fn or string
- * @return {Function}
- * @api public
- */
-
-module.exports = function(obj, fn){
-  if ('string' == typeof fn) fn = obj[fn];
-  if ('function' != typeof fn) throw new Error('bind() requires a function');
-  var args = slice.call(arguments, 2);
-  return function(){
-    return fn.apply(obj, args.concat(slice.call(arguments)));
-  }
-};
-
-},{}],9:[function(_dereq_,module,exports){
-
-/**
- * Expose `Emitter`.
- */
-
-module.exports = Emitter;
-
-/**
- * Initialize a new `Emitter`.
- *
- * @api public
- */
-
-function Emitter(obj) {
-  if (obj) return mixin(obj);
-};
-
-/**
- * Mixin the emitter properties.
- *
- * @param {Object} obj
- * @return {Object}
- * @api private
- */
-
-function mixin(obj) {
-  for (var key in Emitter.prototype) {
-    obj[key] = Emitter.prototype[key];
-  }
-  return obj;
-}
-
-/**
- * Listen on the given `event` with `fn`.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.on =
-Emitter.prototype.addEventListener = function(event, fn){
-  this._callbacks = this._callbacks || {};
-  (this._callbacks[event] = this._callbacks[event] || [])
-    .push(fn);
-  return this;
-};
-
-/**
- * Adds an `event` listener that will be invoked a single
- * time then automatically removed.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.once = function(event, fn){
-  var self = this;
-  this._callbacks = this._callbacks || {};
-
-  function on() {
-    self.off(event, on);
-    fn.apply(this, arguments);
-  }
-
-  on.fn = fn;
-  this.on(event, on);
-  return this;
-};
-
-/**
- * Remove the given callback for `event` or all
- * registered callbacks.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.off =
-Emitter.prototype.removeListener =
-Emitter.prototype.removeAllListeners =
-Emitter.prototype.removeEventListener = function(event, fn){
-  this._callbacks = this._callbacks || {};
-
-  // all
-  if (0 == arguments.length) {
-    this._callbacks = {};
-    return this;
-  }
-
-  // specific event
-  var callbacks = this._callbacks[event];
-  if (!callbacks) return this;
-
-  // remove all handlers
-  if (1 == arguments.length) {
-    delete this._callbacks[event];
-    return this;
-  }
-
-  // remove specific handler
-  var cb;
-  for (var i = 0; i < callbacks.length; i++) {
-    cb = callbacks[i];
-    if (cb === fn || cb.fn === fn) {
-      callbacks.splice(i, 1);
-      break;
-    }
-  }
-  return this;
-};
-
-/**
- * Emit `event` with the given args.
- *
- * @param {String} event
- * @param {Mixed} ...
- * @return {Emitter}
- */
-
-Emitter.prototype.emit = function(event){
-  this._callbacks = this._callbacks || {};
-  var args = [].slice.call(arguments, 1)
-    , callbacks = this._callbacks[event];
-
-  if (callbacks) {
-    callbacks = callbacks.slice(0);
-    for (var i = 0, len = callbacks.length; i < len; ++i) {
-      callbacks[i].apply(this, args);
-    }
-  }
-
-  return this;
-};
-
-/**
- * Return array of callbacks for `event`.
- *
- * @param {String} event
- * @return {Array}
- * @api public
- */
-
-Emitter.prototype.listeners = function(event){
-  this._callbacks = this._callbacks || {};
-  return this._callbacks[event] || [];
-};
-
-/**
- * Check if this emitter has `event` handlers.
- *
- * @param {String} event
- * @return {Boolean}
- * @api public
- */
-
-Emitter.prototype.hasListeners = function(event){
-  return !! this.listeners(event).length;
-};
-
-},{}],10:[function(_dereq_,module,exports){
-
-/**
- * Expose `debug()` as the module.
- */
-
-module.exports = debug;
-
-/**
- * Create a debugger with the given `name`.
- *
- * @param {String} name
- * @return {Type}
- * @api public
- */
-
-function debug(name) {
-  if (!debug.enabled(name)) return function(){};
-
-  return function(fmt){
-    fmt = coerce(fmt);
-
-    var curr = new Date;
-    var ms = curr - (debug[name] || curr);
-    debug[name] = curr;
-
-    fmt = name
-      + ' '
-      + fmt
-      + ' +' + debug.humanize(ms);
-
-    // This hackery is required for IE8
-    // where `console.log` doesn't have 'apply'
-    window.console
-      && console.log
-      && Function.prototype.apply.call(console.log, console, arguments);
-  }
-}
-
-/**
- * The currently active debug mode names.
- */
-
-debug.names = [];
-debug.skips = [];
-
-/**
- * Enables a debug mode by name. This can include modes
- * separated by a colon and wildcards.
- *
- * @param {String} name
- * @api public
- */
-
-debug.enable = function(name) {
-  try {
-    localStorage.debug = name;
-  } catch(e){}
-
-  var split = (name || '').split(/[\s,]+/)
-    , len = split.length;
-
-  for (var i = 0; i < len; i++) {
-    name = split[i].replace('*', '.*?');
-    if (name[0] === '-') {
-      debug.skips.push(new RegExp('^' + name.substr(1) + '$'));
-    }
-    else {
-      debug.names.push(new RegExp('^' + name + '$'));
-    }
-  }
-};
-
-/**
- * Disable debug output.
- *
- * @api public
- */
-
-debug.disable = function(){
-  debug.enable('');
-};
-
-/**
- * Humanize the given `ms`.
- *
- * @param {Number} m
- * @return {String}
- * @api private
- */
-
-debug.humanize = function(ms) {
-  var sec = 1000
-    , min = 60 * 1000
-    , hour = 60 * min;
-
-  if (ms >= hour) return (ms / hour).toFixed(1) + 'h';
-  if (ms >= min) return (ms / min).toFixed(1) + 'm';
-  if (ms >= sec) return (ms / sec | 0) + 's';
-  return ms + 'ms';
-};
-
-/**
- * Returns true if the given mode name is enabled, false otherwise.
- *
- * @param {String} name
- * @return {Boolean}
- * @api public
- */
-
-debug.enabled = function(name) {
-  for (var i = 0, len = debug.skips.length; i < len; i++) {
-    if (debug.skips[i].test(name)) {
-      return false;
-    }
-  }
-  for (var i = 0, len = debug.names.length; i < len; i++) {
-    if (debug.names[i].test(name)) {
-      return true;
-    }
-  }
-  return false;
-};
-
-/**
- * Coerce `val`.
- */
-
-function coerce(val) {
-  if (val instanceof Error) return val.stack || val.message;
-  return val;
-}
-
-// persist
-
-try {
-  if (window.localStorage) debug.enable(localStorage.debug);
-} catch(e){}
-
-},{}],11:[function(_dereq_,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
 module.exports =  _dereq_('./lib/');
 
-},{"./lib/":12}],12:[function(_dereq_,module,exports){
+},{"./lib/":2}],2:[function(_dereq_,module,exports){
 
 module.exports = _dereq_('./socket');
 
@@ -1527,7 +16,7 @@ module.exports = _dereq_('./socket');
  */
 module.exports.parser = _dereq_('engine.io-parser');
 
-},{"./socket":13,"engine.io-parser":25}],13:[function(_dereq_,module,exports){
+},{"./socket":3,"engine.io-parser":19}],3:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -1576,24 +65,20 @@ function Socket(uri, opts){
 
   if (uri) {
     uri = parseuri(uri);
-    opts.host = uri.host;
+    opts.hostname = uri.host;
     opts.secure = uri.protocol == 'https' || uri.protocol == 'wss';
     opts.port = uri.port;
     if (uri.query) opts.query = uri.query;
+  } else if (opts.host) {
+    opts.hostname = parseuri(opts.host).host;
   }
 
   this.secure = null != opts.secure ? opts.secure :
     (global.location && 'https:' == location.protocol);
 
-  if (opts.host) {
-    var pieces = opts.host.split(':');
-    opts.hostname = pieces.shift();
-    if (pieces.length) {
-      opts.port = pieces.pop();
-    } else if (!opts.port) {
-      // if no port is specified manually, use the protocol default
-      opts.port = this.secure ? '443' : '80';
-    }
+  if (opts.hostname && !opts.port) {
+    // if no port is specified manually, use the protocol default
+    opts.port = this.secure ? '443' : '80';
   }
 
   this.agent = opts.agent || false;
@@ -1615,11 +100,16 @@ function Socket(uri, opts){
   this.transports = opts.transports || ['polling', 'websocket'];
   this.readyState = '';
   this.writeBuffer = [];
-  this.callbackBuffer = [];
   this.policyPort = opts.policyPort || 843;
   this.rememberUpgrade = opts.rememberUpgrade || false;
   this.binaryType = null;
   this.onlyBinaryUpgrades = opts.onlyBinaryUpgrades;
+  this.perMessageDeflate = false !== opts.perMessageDeflate ? (opts.perMessageDeflate || {}) : false;
+
+  if (true === this.perMessageDeflate) this.perMessageDeflate = {};
+  if (this.perMessageDeflate && null == this.perMessageDeflate.threshold) {
+    this.perMessageDeflate.threshold = 1024;
+  }
 
   // SSL options for Node.js client
   this.pfx = opts.pfx || null;
@@ -1628,7 +118,15 @@ function Socket(uri, opts){
   this.cert = opts.cert || null;
   this.ca = opts.ca || null;
   this.ciphers = opts.ciphers || null;
-  this.rejectUnauthorized = opts.rejectUnauthorized || null;
+  this.rejectUnauthorized = opts.rejectUnauthorized === undefined ? null : opts.rejectUnauthorized;
+
+  // other options for Node.js client
+  var freeGlobal = typeof global == 'object' && global;
+  if (freeGlobal.global === freeGlobal) {
+    if (opts.extraHeaders && Object.keys(opts.extraHeaders).length > 0) {
+      this.extraHeaders = opts.extraHeaders;
+    }
+  }
 
   this.open();
 }
@@ -1701,7 +199,9 @@ Socket.prototype.createTransport = function (name) {
     cert: this.cert,
     ca: this.ca,
     ciphers: this.ciphers,
-    rejectUnauthorized: this.rejectUnauthorized
+    rejectUnauthorized: this.rejectUnauthorized,
+    perMessageDeflate: this.perMessageDeflate,
+    extraHeaders: this.extraHeaders
   });
 
   return transport;
@@ -1726,7 +226,7 @@ Socket.prototype.open = function () {
   var transport;
   if (this.rememberUpgrade && Socket.priorWebsocketSuccess && this.transports.indexOf('websocket') != -1) {
     transport = 'websocket';
-  } else if (0 == this.transports.length) {
+  } else if (0 === this.transports.length) {
     // Emit error on next tick so it can be listened to
     var self = this;
     setTimeout(function() {
@@ -1739,7 +239,6 @@ Socket.prototype.open = function () {
   this.readyState = 'opening';
 
   // Retry with the next transport if the transport is disabled (jsonp: false)
-  var transport;
   try {
     transport = this.createTransport(transport);
   } catch (e) {
@@ -1949,12 +448,13 @@ Socket.prototype.onPacket = function (packet) {
 
       case 'pong':
         this.setPing();
+        this.emit('pong');
         break;
 
       case 'error':
         var err = new Error('server error');
         err.code = packet.data;
-        this.emit('error', err);
+        this.onError(err);
         break;
 
       case 'message':
@@ -2026,11 +526,14 @@ Socket.prototype.setPing = function () {
 /**
 * Sends a ping packet.
 *
-* @api public
+* @api private
 */
 
 Socket.prototype.ping = function () {
-  this.sendPacket('ping');
+  var self = this;
+  this.sendPacket('ping', function(){
+    self.emit('ping');
+  });
 };
 
 /**
@@ -2040,21 +543,14 @@ Socket.prototype.ping = function () {
  */
 
 Socket.prototype.onDrain = function() {
-  for (var i = 0; i < this.prevBufferLen; i++) {
-    if (this.callbackBuffer[i]) {
-      this.callbackBuffer[i]();
-    }
-  }
-
   this.writeBuffer.splice(0, this.prevBufferLen);
-  this.callbackBuffer.splice(0, this.prevBufferLen);
 
   // setting prevBufferLen = 0 is very important
   // for example, when upgrading, upgrade packet is sent over,
   // and a nonzero prevBufferLen could cause problems on `drain`
   this.prevBufferLen = 0;
 
-  if (this.writeBuffer.length == 0) {
+  if (0 === this.writeBuffer.length) {
     this.emit('drain');
   } else {
     this.flush();
@@ -2084,13 +580,14 @@ Socket.prototype.flush = function () {
  *
  * @param {String} message.
  * @param {Function} callback function.
+ * @param {Object} options.
  * @return {Socket} for chaining.
  * @api public
  */
 
 Socket.prototype.write =
-Socket.prototype.send = function (msg, fn) {
-  this.sendPacket('message', msg, fn);
+Socket.prototype.send = function (msg, options, fn) {
+  this.sendPacket('message', msg, options, fn);
   return this;
 };
 
@@ -2099,19 +596,37 @@ Socket.prototype.send = function (msg, fn) {
  *
  * @param {String} packet type.
  * @param {String} data.
+ * @param {Object} options.
  * @param {Function} callback function.
  * @api private
  */
 
-Socket.prototype.sendPacket = function (type, data, fn) {
+Socket.prototype.sendPacket = function (type, data, options, fn) {
+  if('function' == typeof data) {
+    fn = data;
+    data = undefined;
+  }
+
+  if ('function' == typeof options) {
+    fn = options;
+    options = null;
+  }
+
   if ('closing' == this.readyState || 'closed' == this.readyState) {
     return;
   }
 
-  var packet = { type: type, data: data };
+  options = options || {};
+  options.compress = false !== options.compress;
+
+  var packet = {
+    type: type,
+    data: data,
+    options: options
+  };
   this.emit('packetCreate', packet);
   this.writeBuffer.push(packet);
-  this.callbackBuffer.push(fn);
+  if (fn) this.once('flush', fn);
   this.flush();
 };
 
@@ -2127,24 +642,6 @@ Socket.prototype.close = function () {
 
     var self = this;
 
-    function close() {
-      self.onClose('forced close');
-      debug('socket closing - telling transport to close');
-      self.transport.close();
-    }
-
-    function cleanupAndClose() {
-      self.removeListener('upgrade', cleanupAndClose);
-      self.removeListener('upgradeError', cleanupAndClose);
-      close();
-    }
-
-    function waitForUpgrade() {
-      // wait for upgrade to finish since we can't send packets while pausing a transport
-      self.once('upgrade', cleanupAndClose);
-      self.once('upgradeError', cleanupAndClose);
-    }
-
     if (this.writeBuffer.length) {
       this.once('drain', function() {
         if (this.upgrading) {
@@ -2158,6 +655,24 @@ Socket.prototype.close = function () {
     } else {
       close();
     }
+  }
+
+  function close() {
+    self.onClose('forced close');
+    debug('socket closing - telling transport to close');
+    self.transport.close();
+  }
+
+  function cleanupAndClose() {
+    self.removeListener('upgrade', cleanupAndClose);
+    self.removeListener('upgradeError', cleanupAndClose);
+    close();
+  }
+
+  function waitForUpgrade() {
+    // wait for upgrade to finish since we can't send packets while pausing a transport
+    self.once('upgrade', cleanupAndClose);
+    self.once('upgradeError', cleanupAndClose);
   }
 
   return this;
@@ -2191,14 +706,6 @@ Socket.prototype.onClose = function (reason, desc) {
     clearTimeout(this.pingIntervalTimer);
     clearTimeout(this.pingTimeoutTimer);
 
-    // clean buffers in next tick, so developers can still
-    // grab the buffers on `close` event
-    setTimeout(function() {
-      self.writeBuffer = [];
-      self.callbackBuffer = [];
-      self.prevBufferLen = 0;
-    }, 0);
-
     // stop event from firing again for transport
     this.transport.removeAllListeners('close');
 
@@ -2216,6 +723,11 @@ Socket.prototype.onClose = function (reason, desc) {
 
     // emit close event
     this.emit('close', reason, desc);
+
+    // clean buffers after, so users can still
+    // grab the buffers on `close` event
+    self.writeBuffer = [];
+    self.prevBufferLen = 0;
   }
 };
 
@@ -2235,8 +747,8 @@ Socket.prototype.filterUpgrades = function (upgrades) {
   return filteredUpgrades;
 };
 
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./transport":14,"./transports":15,"component-emitter":9,"debug":22,"engine.io-parser":25,"indexof":40,"parsejson":32,"parseqs":33,"parseuri":34}],14:[function(_dereq_,module,exports){
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {})
+},{"./transport":4,"./transports":5,"component-emitter":15,"debug":17,"engine.io-parser":19,"indexof":23,"parsejson":26,"parseqs":27,"parseuri":28}],4:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
@@ -2278,6 +790,9 @@ function Transport (opts) {
   this.ca = opts.ca;
   this.ciphers = opts.ciphers;
   this.rejectUnauthorized = opts.rejectUnauthorized;
+
+  // other options for Node.js client
+  this.extraHeaders = opts.extraHeaders;
 }
 
 /**
@@ -2285,13 +800,6 @@ function Transport (opts) {
  */
 
 Emitter(Transport.prototype);
-
-/**
- * A counter used to prevent collisions in the timestamps used
- * for cache busting.
- */
-
-Transport.timestamps = 0;
 
 /**
  * Emits an error.
@@ -2397,13 +905,13 @@ Transport.prototype.onClose = function () {
   this.emit('close');
 };
 
-},{"component-emitter":9,"engine.io-parser":25}],15:[function(_dereq_,module,exports){
+},{"component-emitter":15,"engine.io-parser":19}],5:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module dependencies
  */
 
-var XMLHttpRequest = _dereq_('xmlhttprequest');
+var XMLHttpRequest = _dereq_('xmlhttprequest-ssl');
 var XHR = _dereq_('./polling-xhr');
 var JSONP = _dereq_('./polling-jsonp');
 var websocket = _dereq_('./websocket');
@@ -2453,8 +961,8 @@ function polling(opts){
   }
 }
 
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling-jsonp":16,"./polling-xhr":17,"./websocket":19,"xmlhttprequest":20}],16:[function(_dereq_,module,exports){
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {})
+},{"./polling-jsonp":6,"./polling-xhr":7,"./websocket":9,"xmlhttprequest-ssl":10}],6:[function(_dereq_,module,exports){
 (function (global){
 
 /**
@@ -2590,7 +1098,12 @@ JSONPPolling.prototype.doPoll = function () {
   };
 
   var insertAt = document.getElementsByTagName('script')[0];
-  insertAt.parentNode.insertBefore(script, insertAt);
+  if (insertAt) {
+    insertAt.parentNode.insertBefore(script, insertAt);
+  }
+  else {
+    (document.head || document.body).appendChild(script);
+  }
   this.script = script;
 
   var isUAgecko = 'undefined' != typeof navigator && /gecko/i.test(navigator.userAgent);
@@ -2690,14 +1203,14 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
   }
 };
 
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":18,"component-inherit":21}],17:[function(_dereq_,module,exports){
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {})
+},{"./polling":8,"component-inherit":16}],7:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module requirements.
  */
 
-var XMLHttpRequest = _dereq_('xmlhttprequest');
+var XMLHttpRequest = _dereq_('xmlhttprequest-ssl');
 var Polling = _dereq_('./polling');
 var Emitter = _dereq_('component-emitter');
 var inherit = _dereq_('component-inherit');
@@ -2738,6 +1251,8 @@ function XHR(opts){
     this.xd = opts.hostname != global.location.hostname ||
       port != opts.port;
     this.xs = opts.secure != isSSL;
+  } else {
+    this.extraHeaders = opts.extraHeaders;
   }
 }
 
@@ -2777,6 +1292,9 @@ XHR.prototype.request = function(opts){
   opts.ca = this.ca;
   opts.ciphers = this.ciphers;
   opts.rejectUnauthorized = this.rejectUnauthorized;
+
+  // other options for Node.js client
+  opts.extraHeaders = this.extraHeaders;
 
   return new Request(opts);
 };
@@ -2847,6 +1365,9 @@ function Request(opts){
   this.ciphers = opts.ciphers;
   this.rejectUnauthorized = opts.rejectUnauthorized;
 
+  // other options for Node.js client
+  this.extraHeaders = opts.extraHeaders;
+
   this.create();
 }
 
@@ -2880,6 +1401,16 @@ Request.prototype.create = function(){
   try {
     debug('xhr open %s: %s', this.method, this.uri);
     xhr.open(this.method, this.uri, this.async);
+    try {
+      if (this.extraHeaders) {
+        xhr.setDisableHeaderCheck(true);
+        for (var i in this.extraHeaders) {
+          if (this.extraHeaders.hasOwnProperty(i)) {
+            xhr.setRequestHeader(i, this.extraHeaders[i]);
+          }
+        }
+      }
+    } catch (e) {}
     if (this.supportsBinary) {
       // This has to be done after open because Firefox is stupid
       // http://stackoverflow.com/questions/13216903/get-binary-data-with-xmlhttprequest-in-a-firefox-extension
@@ -3023,7 +1554,17 @@ Request.prototype.onLoad = function(){
       if (!this.supportsBinary) {
         data = this.xhr.responseText;
       } else {
-        data = 'ok';
+        try {
+          data = String.fromCharCode.apply(null, new Uint8Array(this.xhr.response));
+        } catch (e) {
+          var ui8Arr = new Uint8Array(this.xhr.response);
+          var dataArray = [];
+          for (var idx = 0, length = ui8Arr.length; idx < length; idx++) {
+            dataArray.push(ui8Arr[idx]);
+          }
+
+          data = String.fromCharCode.apply(null, dataArray);
+        }
       }
     }
   } catch (e) {
@@ -3078,8 +1619,8 @@ function unloadHandler() {
   }
 }
 
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":18,"component-emitter":9,"component-inherit":21,"debug":22,"xmlhttprequest":20}],18:[function(_dereq_,module,exports){
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {})
+},{"./polling":8,"component-emitter":15,"component-inherit":16,"debug":17,"xmlhttprequest-ssl":10}],8:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
@@ -3088,6 +1629,7 @@ var Transport = _dereq_('../transport');
 var parseqs = _dereq_('parseqs');
 var parser = _dereq_('engine.io-parser');
 var inherit = _dereq_('component-inherit');
+var yeast = _dereq_('yeast');
 var debug = _dereq_('debug')('engine.io-client:polling');
 
 /**
@@ -3101,7 +1643,7 @@ module.exports = Polling;
  */
 
 var hasXHR2 = (function() {
-  var XMLHttpRequest = _dereq_('xmlhttprequest');
+  var XMLHttpRequest = _dereq_('xmlhttprequest-ssl');
   var xhr = new XMLHttpRequest({ xdomain: false });
   return null != xhr.responseType;
 })();
@@ -3303,7 +1845,7 @@ Polling.prototype.uri = function(){
 
   // cache busting is forced
   if (false !== this.timestampRequests) {
-    query[this.timestampParam] = +new Date + '-' + Transport.timestamps++;
+    query[this.timestampParam] = yeast();
   }
 
   if (!this.supportsBinary && !query.sid) {
@@ -3323,10 +1865,12 @@ Polling.prototype.uri = function(){
     query = '?' + query;
   }
 
-  return schema + '://' + this.hostname + port + this.path + query;
+  var ipv6 = this.hostname.indexOf(':') !== -1;
+  return schema + '://' + (ipv6 ? '[' + this.hostname + ']' : this.hostname) + port + this.path + query;
 };
 
-},{"../transport":14,"component-inherit":21,"debug":22,"engine.io-parser":25,"parseqs":33,"xmlhttprequest":20}],19:[function(_dereq_,module,exports){
+},{"../transport":4,"component-inherit":16,"debug":17,"engine.io-parser":19,"parseqs":27,"xmlhttprequest-ssl":10,"yeast":30}],9:[function(_dereq_,module,exports){
+(function (global){
 /**
  * Module dependencies.
  */
@@ -3335,15 +1879,17 @@ var Transport = _dereq_('../transport');
 var parser = _dereq_('engine.io-parser');
 var parseqs = _dereq_('parseqs');
 var inherit = _dereq_('component-inherit');
+var yeast = _dereq_('yeast');
 var debug = _dereq_('debug')('engine.io-client:websocket');
+var BrowserWebSocket = global.WebSocket || global.MozWebSocket;
 
 /**
- * `ws` exposes a WebSocket-compatible interface in
- * Node, or the `WebSocket` or `MozWebSocket` globals
- * in the browser.
+ * Get either the `WebSocket` or `MozWebSocket` globals
+ * in the browser or the WebSocket-compatible interface
+ * exposed by `ws` for Node environment.
  */
 
-var WebSocket = _dereq_('ws');
+var WebSocket = BrowserWebSocket || (typeof window !== 'undefined' ? null : _dereq_('ws'));
 
 /**
  * Module exports.
@@ -3363,6 +1909,7 @@ function WS(opts){
   if (forceBase64) {
     this.supportsBinary = false;
   }
+  this.perMessageDeflate = opts.perMessageDeflate;
   Transport.call(this, opts);
 }
 
@@ -3401,7 +1948,10 @@ WS.prototype.doOpen = function(){
   var self = this;
   var uri = this.uri();
   var protocols = void(0);
-  var opts = { agent: this.agent };
+  var opts = {
+    agent: this.agent,
+    perMessageDeflate: this.perMessageDeflate
+  };
 
   // SSL options for Node.js client
   opts.pfx = this.pfx;
@@ -3411,14 +1961,23 @@ WS.prototype.doOpen = function(){
   opts.ca = this.ca;
   opts.ciphers = this.ciphers;
   opts.rejectUnauthorized = this.rejectUnauthorized;
+  if (this.extraHeaders) {
+    opts.headers = this.extraHeaders;
+  }
 
-  this.ws = new WebSocket(uri, protocols, opts);
+  this.ws = BrowserWebSocket ? new WebSocket(uri) : new WebSocket(uri, protocols, opts);
 
   if (this.ws.binaryType === undefined) {
     this.supportsBinary = false;
   }
 
-  this.ws.binaryType = 'arraybuffer';
+  if (this.ws.supports && this.ws.supports.binary) {
+    this.supportsBinary = true;
+    this.ws.binaryType = 'buffer';
+  } else {
+    this.ws.binaryType = 'arraybuffer';
+  }
+
   this.addEventListeners();
 };
 
@@ -3472,28 +2031,57 @@ if ('undefined' != typeof navigator
 WS.prototype.write = function(packets){
   var self = this;
   this.writable = false;
+
   // encodePacket efficient as it uses WS framing
   // no need for encodePayload
-  for (var i = 0, l = packets.length; i < l; i++) {
-    parser.encodePacket(packets[i], this.supportsBinary, function(data) {
-      //Sometimes the websocket has already been closed but the browser didn't
-      //have a chance of informing us about it yet, in that case send will
-      //throw an error
-      try {
-        self.ws.send(data);
-      } catch (e){
-        debug('websocket closed before onclose event');
-      }
-    });
+  var total = packets.length;
+  for (var i = 0, l = total; i < l; i++) {
+    (function(packet) {
+      parser.encodePacket(packet, self.supportsBinary, function(data) {
+        if (!BrowserWebSocket) {
+          // always create a new object (GH-437)
+          var opts = {};
+          if (packet.options) {
+            opts.compress = packet.options.compress;
+          }
+
+          if (self.perMessageDeflate) {
+            var len = 'string' == typeof data ? global.Buffer.byteLength(data) : data.length;
+            if (len < self.perMessageDeflate.threshold) {
+              opts.compress = false;
+            }
+          }
+        }
+
+        //Sometimes the websocket has already been closed but the browser didn't
+        //have a chance of informing us about it yet, in that case send will
+        //throw an error
+        try {
+          if (BrowserWebSocket) {
+            // TypeError is thrown when passing the second argument on Safari
+            self.ws.send(data);
+          } else {
+            self.ws.send(data, opts);
+          }
+        } catch (e){
+          debug('websocket closed before onclose event');
+        }
+
+        --total || done();
+      });
+    })(packets[i]);
   }
 
-  function ondrain() {
-    self.writable = true;
-    self.emit('drain');
+  function done(){
+    self.emit('flush');
+
+    // fake drain
+    // defer to next tick to allow Socket to clear writeBuffer
+    setTimeout(function(){
+      self.writable = true;
+      self.emit('drain');
+    }, 0);
   }
-  // fake drain
-  // defer to next tick to allow Socket to clear writeBuffer
-  setTimeout(ondrain, 0);
 };
 
 /**
@@ -3537,7 +2125,7 @@ WS.prototype.uri = function(){
 
   // append timestamp to URI
   if (this.timestampRequests) {
-    query[this.timestampParam] = +new Date;
+    query[this.timestampParam] = yeast();
   }
 
   // communicate binary support capabilities
@@ -3552,7 +2140,8 @@ WS.prototype.uri = function(){
     query = '?' + query;
   }
 
-  return schema + '://' + this.hostname + port + this.path + query;
+  var ipv6 = this.hostname.indexOf(':') !== -1;
+  return schema + '://' + (ipv6 ? '[' + this.hostname + ']' : this.hostname) + port + this.path + query;
 };
 
 /**
@@ -3566,7 +2155,8 @@ WS.prototype.check = function(){
   return !!WebSocket && !('__initialize' in WebSocket && this.name === WS.prototype.name);
 };
 
-},{"../transport":14,"component-inherit":21,"debug":22,"engine.io-parser":25,"parseqs":33,"ws":35}],20:[function(_dereq_,module,exports){
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {})
+},{"../transport":4,"component-inherit":16,"debug":17,"engine.io-parser":19,"parseqs":27,"ws":undefined,"yeast":30}],10:[function(_dereq_,module,exports){
 // browser shim for xmlhttprequest module
 var hasCORS = _dereq_('has-cors');
 
@@ -3604,7 +2194,395 @@ module.exports = function(opts) {
   }
 }
 
-},{"has-cors":38}],21:[function(_dereq_,module,exports){
+},{"has-cors":22}],11:[function(_dereq_,module,exports){
+module.exports = after
+
+function after(count, callback, err_cb) {
+    var bail = false
+    err_cb = err_cb || noop
+    proxy.count = count
+
+    return (count === 0) ? callback() : proxy
+
+    function proxy(err, result) {
+        if (proxy.count <= 0) {
+            throw new Error('after called too many times')
+        }
+        --proxy.count
+
+        // after first error, rest are passed to err_cb
+        if (err) {
+            bail = true
+            callback(err)
+            // future error callbacks will go to error handler
+            callback = err_cb
+        } else if (proxy.count === 0 && !bail) {
+            callback(null, result)
+        }
+    }
+}
+
+function noop() {}
+
+},{}],12:[function(_dereq_,module,exports){
+/**
+ * An abstraction for slicing an arraybuffer even when
+ * ArrayBuffer.prototype.slice is not supported
+ *
+ * @api public
+ */
+
+module.exports = function(arraybuffer, start, end) {
+  var bytes = arraybuffer.byteLength;
+  start = start || 0;
+  end = end || bytes;
+
+  if (arraybuffer.slice) { return arraybuffer.slice(start, end); }
+
+  if (start < 0) { start += bytes; }
+  if (end < 0) { end += bytes; }
+  if (end > bytes) { end = bytes; }
+
+  if (start >= bytes || start >= end || bytes === 0) {
+    return new ArrayBuffer(0);
+  }
+
+  var abv = new Uint8Array(arraybuffer);
+  var result = new Uint8Array(end - start);
+  for (var i = start, ii = 0; i < end; i++, ii++) {
+    result[ii] = abv[i];
+  }
+  return result.buffer;
+};
+
+},{}],13:[function(_dereq_,module,exports){
+/*
+ * base64-arraybuffer
+ * https://github.com/niklasvh/base64-arraybuffer
+ *
+ * Copyright (c) 2012 Niklas von Hertzen
+ * Licensed under the MIT license.
+ */
+(function(chars){
+  "use strict";
+
+  exports.encode = function(arraybuffer) {
+    var bytes = new Uint8Array(arraybuffer),
+    i, len = bytes.length, base64 = "";
+
+    for (i = 0; i < len; i+=3) {
+      base64 += chars[bytes[i] >> 2];
+      base64 += chars[((bytes[i] & 3) << 4) | (bytes[i + 1] >> 4)];
+      base64 += chars[((bytes[i + 1] & 15) << 2) | (bytes[i + 2] >> 6)];
+      base64 += chars[bytes[i + 2] & 63];
+    }
+
+    if ((len % 3) === 2) {
+      base64 = base64.substring(0, base64.length - 1) + "=";
+    } else if (len % 3 === 1) {
+      base64 = base64.substring(0, base64.length - 2) + "==";
+    }
+
+    return base64;
+  };
+
+  exports.decode =  function(base64) {
+    var bufferLength = base64.length * 0.75,
+    len = base64.length, i, p = 0,
+    encoded1, encoded2, encoded3, encoded4;
+
+    if (base64[base64.length - 1] === "=") {
+      bufferLength--;
+      if (base64[base64.length - 2] === "=") {
+        bufferLength--;
+      }
+    }
+
+    var arraybuffer = new ArrayBuffer(bufferLength),
+    bytes = new Uint8Array(arraybuffer);
+
+    for (i = 0; i < len; i+=4) {
+      encoded1 = chars.indexOf(base64[i]);
+      encoded2 = chars.indexOf(base64[i+1]);
+      encoded3 = chars.indexOf(base64[i+2]);
+      encoded4 = chars.indexOf(base64[i+3]);
+
+      bytes[p++] = (encoded1 << 2) | (encoded2 >> 4);
+      bytes[p++] = ((encoded2 & 15) << 4) | (encoded3 >> 2);
+      bytes[p++] = ((encoded3 & 3) << 6) | (encoded4 & 63);
+    }
+
+    return arraybuffer;
+  };
+})("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
+
+},{}],14:[function(_dereq_,module,exports){
+(function (global){
+/**
+ * Create a blob builder even when vendor prefixes exist
+ */
+
+var BlobBuilder = global.BlobBuilder
+  || global.WebKitBlobBuilder
+  || global.MSBlobBuilder
+  || global.MozBlobBuilder;
+
+/**
+ * Check if Blob constructor is supported
+ */
+
+var blobSupported = (function() {
+  try {
+    var a = new Blob(['hi']);
+    return a.size === 2;
+  } catch(e) {
+    return false;
+  }
+})();
+
+/**
+ * Check if Blob constructor supports ArrayBufferViews
+ * Fails in Safari 6, so we need to map to ArrayBuffers there.
+ */
+
+var blobSupportsArrayBufferView = blobSupported && (function() {
+  try {
+    var b = new Blob([new Uint8Array([1,2])]);
+    return b.size === 2;
+  } catch(e) {
+    return false;
+  }
+})();
+
+/**
+ * Check if BlobBuilder is supported
+ */
+
+var blobBuilderSupported = BlobBuilder
+  && BlobBuilder.prototype.append
+  && BlobBuilder.prototype.getBlob;
+
+/**
+ * Helper function that maps ArrayBufferViews to ArrayBuffers
+ * Used by BlobBuilder constructor and old browsers that didn't
+ * support it in the Blob constructor.
+ */
+
+function mapArrayBufferViews(ary) {
+  for (var i = 0; i < ary.length; i++) {
+    var chunk = ary[i];
+    if (chunk.buffer instanceof ArrayBuffer) {
+      var buf = chunk.buffer;
+
+      // if this is a subarray, make a copy so we only
+      // include the subarray region from the underlying buffer
+      if (chunk.byteLength !== buf.byteLength) {
+        var copy = new Uint8Array(chunk.byteLength);
+        copy.set(new Uint8Array(buf, chunk.byteOffset, chunk.byteLength));
+        buf = copy.buffer;
+      }
+
+      ary[i] = buf;
+    }
+  }
+}
+
+function BlobBuilderConstructor(ary, options) {
+  options = options || {};
+
+  var bb = new BlobBuilder();
+  mapArrayBufferViews(ary);
+
+  for (var i = 0; i < ary.length; i++) {
+    bb.append(ary[i]);
+  }
+
+  return (options.type) ? bb.getBlob(options.type) : bb.getBlob();
+};
+
+function BlobConstructor(ary, options) {
+  mapArrayBufferViews(ary);
+  return new Blob(ary, options || {});
+};
+
+module.exports = (function() {
+  if (blobSupported) {
+    return blobSupportsArrayBufferView ? global.Blob : BlobConstructor;
+  } else if (blobBuilderSupported) {
+    return BlobBuilderConstructor;
+  } else {
+    return undefined;
+  }
+})();
+
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {})
+},{}],15:[function(_dereq_,module,exports){
+
+/**
+ * Expose `Emitter`.
+ */
+
+module.exports = Emitter;
+
+/**
+ * Initialize a new `Emitter`.
+ *
+ * @api public
+ */
+
+function Emitter(obj) {
+  if (obj) return mixin(obj);
+};
+
+/**
+ * Mixin the emitter properties.
+ *
+ * @param {Object} obj
+ * @return {Object}
+ * @api private
+ */
+
+function mixin(obj) {
+  for (var key in Emitter.prototype) {
+    obj[key] = Emitter.prototype[key];
+  }
+  return obj;
+}
+
+/**
+ * Listen on the given `event` with `fn`.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.on =
+Emitter.prototype.addEventListener = function(event, fn){
+  this._callbacks = this._callbacks || {};
+  (this._callbacks[event] = this._callbacks[event] || [])
+    .push(fn);
+  return this;
+};
+
+/**
+ * Adds an `event` listener that will be invoked a single
+ * time then automatically removed.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.once = function(event, fn){
+  var self = this;
+  this._callbacks = this._callbacks || {};
+
+  function on() {
+    self.off(event, on);
+    fn.apply(this, arguments);
+  }
+
+  on.fn = fn;
+  this.on(event, on);
+  return this;
+};
+
+/**
+ * Remove the given callback for `event` or all
+ * registered callbacks.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.off =
+Emitter.prototype.removeListener =
+Emitter.prototype.removeAllListeners =
+Emitter.prototype.removeEventListener = function(event, fn){
+  this._callbacks = this._callbacks || {};
+
+  // all
+  if (0 == arguments.length) {
+    this._callbacks = {};
+    return this;
+  }
+
+  // specific event
+  var callbacks = this._callbacks[event];
+  if (!callbacks) return this;
+
+  // remove all handlers
+  if (1 == arguments.length) {
+    delete this._callbacks[event];
+    return this;
+  }
+
+  // remove specific handler
+  var cb;
+  for (var i = 0; i < callbacks.length; i++) {
+    cb = callbacks[i];
+    if (cb === fn || cb.fn === fn) {
+      callbacks.splice(i, 1);
+      break;
+    }
+  }
+  return this;
+};
+
+/**
+ * Emit `event` with the given args.
+ *
+ * @param {String} event
+ * @param {Mixed} ...
+ * @return {Emitter}
+ */
+
+Emitter.prototype.emit = function(event){
+  this._callbacks = this._callbacks || {};
+  var args = [].slice.call(arguments, 1)
+    , callbacks = this._callbacks[event];
+
+  if (callbacks) {
+    callbacks = callbacks.slice(0);
+    for (var i = 0, len = callbacks.length; i < len; ++i) {
+      callbacks[i].apply(this, args);
+    }
+  }
+
+  return this;
+};
+
+/**
+ * Return array of callbacks for `event`.
+ *
+ * @param {String} event
+ * @return {Array}
+ * @api public
+ */
+
+Emitter.prototype.listeners = function(event){
+  this._callbacks = this._callbacks || {};
+  return this._callbacks[event] || [];
+};
+
+/**
+ * Check if this emitter has `event` handlers.
+ *
+ * @param {String} event
+ * @return {Boolean}
+ * @api public
+ */
+
+Emitter.prototype.hasListeners = function(event){
+  return !! this.listeners(event).length;
+};
+
+},{}],16:[function(_dereq_,module,exports){
 
 module.exports = function(a, b){
   var fn = function(){};
@@ -3612,7 +2590,7 @@ module.exports = function(a, b){
   a.prototype = new fn;
   a.prototype.constructor = a;
 };
-},{}],22:[function(_dereq_,module,exports){
+},{}],17:[function(_dereq_,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -3626,6 +2604,10 @@ exports.formatArgs = formatArgs;
 exports.save = save;
 exports.load = load;
 exports.useColors = useColors;
+exports.storage = 'undefined' != typeof chrome
+               && 'undefined' != typeof chrome.storage
+                  ? chrome.storage.local
+                  : localstorage();
 
 /**
  * Colors.
@@ -3716,10 +2698,10 @@ function formatArgs() {
  */
 
 function log() {
-  // This hackery is required for IE8,
-  // where the `console.log` function doesn't have 'apply'
-  return 'object' == typeof console
-    && 'function' == typeof console.log
+  // this hackery is required for IE8/9, where
+  // the `console.log` function doesn't have 'apply'
+  return 'object' === typeof console
+    && console.log
     && Function.prototype.apply.call(console.log, console, arguments);
 }
 
@@ -3733,9 +2715,9 @@ function log() {
 function save(namespaces) {
   try {
     if (null == namespaces) {
-      localStorage.removeItem('debug');
+      exports.storage.removeItem('debug');
     } else {
-      localStorage.debug = namespaces;
+      exports.storage.debug = namespaces;
     }
   } catch(e) {}
 }
@@ -3750,7 +2732,7 @@ function save(namespaces) {
 function load() {
   var r;
   try {
-    r = localStorage.debug;
+    r = exports.storage.debug;
   } catch(e) {}
   return r;
 }
@@ -3761,7 +2743,24 @@ function load() {
 
 exports.enable(load());
 
-},{"./debug":23}],23:[function(_dereq_,module,exports){
+/**
+ * Localstorage attempts to return the localstorage.
+ *
+ * This is necessary because safari throws
+ * when a user disables cookies/localstorage
+ * and you attempt to access it.
+ *
+ * @return {LocalStorage}
+ * @api private
+ */
+
+function localstorage(){
+  try {
+    return window.localStorage;
+  } catch (e) {}
+}
+
+},{"./debug":18}],18:[function(_dereq_,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -3960,120 +2959,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":24}],24:[function(_dereq_,module,exports){
-/**
- * Helpers.
- */
-
-var s = 1000;
-var m = s * 60;
-var h = m * 60;
-var d = h * 24;
-var y = d * 365.25;
-
-/**
- * Parse or format the given `val`.
- *
- * Options:
- *
- *  - `long` verbose formatting [false]
- *
- * @param {String|Number} val
- * @param {Object} options
- * @return {String|Number}
- * @api public
- */
-
-module.exports = function(val, options){
-  options = options || {};
-  if ('string' == typeof val) return parse(val);
-  return options.long
-    ? long(val)
-    : short(val);
-};
-
-/**
- * Parse the given `str` and return milliseconds.
- *
- * @param {String} str
- * @return {Number}
- * @api private
- */
-
-function parse(str) {
-  var match = /^((?:\d+)?\.?\d+) *(ms|seconds?|s|minutes?|m|hours?|h|days?|d|years?|y)?$/i.exec(str);
-  if (!match) return;
-  var n = parseFloat(match[1]);
-  var type = (match[2] || 'ms').toLowerCase();
-  switch (type) {
-    case 'years':
-    case 'year':
-    case 'y':
-      return n * y;
-    case 'days':
-    case 'day':
-    case 'd':
-      return n * d;
-    case 'hours':
-    case 'hour':
-    case 'h':
-      return n * h;
-    case 'minutes':
-    case 'minute':
-    case 'm':
-      return n * m;
-    case 'seconds':
-    case 'second':
-    case 's':
-      return n * s;
-    case 'ms':
-      return n;
-  }
-}
-
-/**
- * Short format for `ms`.
- *
- * @param {Number} ms
- * @return {String}
- * @api private
- */
-
-function short(ms) {
-  if (ms >= d) return Math.round(ms / d) + 'd';
-  if (ms >= h) return Math.round(ms / h) + 'h';
-  if (ms >= m) return Math.round(ms / m) + 'm';
-  if (ms >= s) return Math.round(ms / s) + 's';
-  return ms + 'ms';
-}
-
-/**
- * Long format for `ms`.
- *
- * @param {Number} ms
- * @return {String}
- * @api private
- */
-
-function long(ms) {
-  return plural(ms, d, 'day')
-    || plural(ms, h, 'hour')
-    || plural(ms, m, 'minute')
-    || plural(ms, s, 'second')
-    || ms + ' ms';
-}
-
-/**
- * Pluralization helper.
- */
-
-function plural(ms, n, name) {
-  if (ms < n) return;
-  if (ms < n * 1.5) return Math.floor(ms / n) + ' ' + name;
-  return Math.ceil(ms / n) + ' ' + name + 's';
-}
-
-},{}],25:[function(_dereq_,module,exports){
+},{"ms":25}],19:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -4262,7 +3148,7 @@ function encodeBlob(packet, supportsBinary, callback) {
 
 exports.encodeBase64Packet = function(packet, callback) {
   var message = 'b' + exports.packets[packet.type];
-  if (Blob && packet.data instanceof Blob) {
+  if (Blob && packet.data instanceof global.Blob) {
     var fr = new FileReader();
     fr.onload = function() {
       var b64 = fr.result.split(',')[1];
@@ -4670,8 +3556,8 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
   });
 };
 
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./keys":26,"after":27,"arraybuffer.slice":28,"base64-arraybuffer":29,"blob":30,"has-binary":36,"utf8":31}],26:[function(_dereq_,module,exports){
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {})
+},{"./keys":20,"after":11,"arraybuffer.slice":12,"base64-arraybuffer":13,"blob":14,"has-binary":21,"utf8":29}],20:[function(_dereq_,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -4692,229 +3578,346 @@ module.exports = Object.keys || function keys (obj){
   return arr;
 };
 
-},{}],27:[function(_dereq_,module,exports){
-module.exports = after
+},{}],21:[function(_dereq_,module,exports){
+(function (global){
 
-function after(count, callback, err_cb) {
-    var bail = false
-    err_cb = err_cb || noop
-    proxy.count = count
+/*
+ * Module requirements.
+ */
 
-    return (count === 0) ? callback() : proxy
+var isArray = _dereq_('isarray');
 
-    function proxy(err, result) {
-        if (proxy.count <= 0) {
-            throw new Error('after called too many times')
-        }
-        --proxy.count
-
-        // after first error, rest are passed to err_cb
-        if (err) {
-            bail = true
-            callback(err)
-            // future error callbacks will go to error handler
-            callback = err_cb
-        } else if (proxy.count === 0 && !bail) {
-            callback(null, result)
-        }
-    }
-}
-
-function noop() {}
-
-},{}],28:[function(_dereq_,module,exports){
 /**
- * An abstraction for slicing an arraybuffer even when
- * ArrayBuffer.prototype.slice is not supported
+ * Module exports.
+ */
+
+module.exports = hasBinary;
+
+/**
+ * Checks for binary data.
  *
+ * Right now only Buffer and ArrayBuffer are supported..
+ *
+ * @param {Object} anything
  * @api public
  */
 
-module.exports = function(arraybuffer, start, end) {
-  var bytes = arraybuffer.byteLength;
-  start = start || 0;
-  end = end || bytes;
+function hasBinary(data) {
 
-  if (arraybuffer.slice) { return arraybuffer.slice(start, end); }
+  function _hasBinary(obj) {
+    if (!obj) return false;
 
-  if (start < 0) { start += bytes; }
-  if (end < 0) { end += bytes; }
-  if (end > bytes) { end = bytes; }
+    if ( (global.Buffer && global.Buffer.isBuffer(obj)) ||
+         (global.ArrayBuffer && obj instanceof ArrayBuffer) ||
+         (global.Blob && obj instanceof Blob) ||
+         (global.File && obj instanceof File)
+        ) {
+      return true;
+    }
 
-  if (start >= bytes || start >= end || bytes === 0) {
-    return new ArrayBuffer(0);
+    if (isArray(obj)) {
+      for (var i = 0; i < obj.length; i++) {
+          if (_hasBinary(obj[i])) {
+              return true;
+          }
+      }
+    } else if (obj && 'object' == typeof obj) {
+      if (obj.toJSON) {
+        obj = obj.toJSON();
+      }
+
+      for (var key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key) && _hasBinary(obj[key])) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
-  var abv = new Uint8Array(arraybuffer);
-  var result = new Uint8Array(end - start);
-  for (var i = start, ii = 0; i < end; i++, ii++) {
-    result[ii] = abv[i];
+  return _hasBinary(data);
+}
+
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {})
+},{"isarray":24}],22:[function(_dereq_,module,exports){
+
+/**
+ * Module exports.
+ *
+ * Logic borrowed from Modernizr:
+ *
+ *   - https://github.com/Modernizr/Modernizr/blob/master/feature-detects/cors.js
+ */
+
+try {
+  module.exports = typeof XMLHttpRequest !== 'undefined' &&
+    'withCredentials' in new XMLHttpRequest();
+} catch (err) {
+  // if XMLHttp support is disabled in IE then it will throw
+  // when trying to create
+  module.exports = false;
+}
+
+},{}],23:[function(_dereq_,module,exports){
+
+var indexOf = [].indexOf;
+
+module.exports = function(arr, obj){
+  if (indexOf) return arr.indexOf(obj);
+  for (var i = 0; i < arr.length; ++i) {
+    if (arr[i] === obj) return i;
   }
-  return result.buffer;
+  return -1;
+};
+},{}],24:[function(_dereq_,module,exports){
+module.exports = Array.isArray || function (arr) {
+  return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],29:[function(_dereq_,module,exports){
-/*
- * base64-arraybuffer
- * https://github.com/niklasvh/base64-arraybuffer
+},{}],25:[function(_dereq_,module,exports){
+/**
+ * Helpers.
+ */
+
+var s = 1000;
+var m = s * 60;
+var h = m * 60;
+var d = h * 24;
+var y = d * 365.25;
+
+/**
+ * Parse or format the given `val`.
  *
- * Copyright (c) 2012 Niklas von Hertzen
- * Licensed under the MIT license.
- */
-(function(chars){
-  "use strict";
-
-  exports.encode = function(arraybuffer) {
-    var bytes = new Uint8Array(arraybuffer),
-    i, len = bytes.length, base64 = "";
-
-    for (i = 0; i < len; i+=3) {
-      base64 += chars[bytes[i] >> 2];
-      base64 += chars[((bytes[i] & 3) << 4) | (bytes[i + 1] >> 4)];
-      base64 += chars[((bytes[i + 1] & 15) << 2) | (bytes[i + 2] >> 6)];
-      base64 += chars[bytes[i + 2] & 63];
-    }
-
-    if ((len % 3) === 2) {
-      base64 = base64.substring(0, base64.length - 1) + "=";
-    } else if (len % 3 === 1) {
-      base64 = base64.substring(0, base64.length - 2) + "==";
-    }
-
-    return base64;
-  };
-
-  exports.decode =  function(base64) {
-    var bufferLength = base64.length * 0.75,
-    len = base64.length, i, p = 0,
-    encoded1, encoded2, encoded3, encoded4;
-
-    if (base64[base64.length - 1] === "=") {
-      bufferLength--;
-      if (base64[base64.length - 2] === "=") {
-        bufferLength--;
-      }
-    }
-
-    var arraybuffer = new ArrayBuffer(bufferLength),
-    bytes = new Uint8Array(arraybuffer);
-
-    for (i = 0; i < len; i+=4) {
-      encoded1 = chars.indexOf(base64[i]);
-      encoded2 = chars.indexOf(base64[i+1]);
-      encoded3 = chars.indexOf(base64[i+2]);
-      encoded4 = chars.indexOf(base64[i+3]);
-
-      bytes[p++] = (encoded1 << 2) | (encoded2 >> 4);
-      bytes[p++] = ((encoded2 & 15) << 4) | (encoded3 >> 2);
-      bytes[p++] = ((encoded3 & 3) << 6) | (encoded4 & 63);
-    }
-
-    return arraybuffer;
-  };
-})("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
-
-},{}],30:[function(_dereq_,module,exports){
-(function (global){
-/**
- * Create a blob builder even when vendor prefixes exist
+ * Options:
+ *
+ *  - `long` verbose formatting [false]
+ *
+ * @param {String|Number} val
+ * @param {Object} options
+ * @return {String|Number}
+ * @api public
  */
 
-var BlobBuilder = global.BlobBuilder
-  || global.WebKitBlobBuilder
-  || global.MSBlobBuilder
-  || global.MozBlobBuilder;
+module.exports = function(val, options){
+  options = options || {};
+  if ('string' == typeof val) return parse(val);
+  return options.long
+    ? long(val)
+    : short(val);
+};
 
 /**
- * Check if Blob constructor is supported
+ * Parse the given `str` and return milliseconds.
+ *
+ * @param {String} str
+ * @return {Number}
+ * @api private
  */
 
-var blobSupported = (function() {
-  try {
-    var a = new Blob(['hi']);
-    return a.size === 2;
-  } catch(e) {
-    return false;
-  }
-})();
-
-/**
- * Check if Blob constructor supports ArrayBufferViews
- * Fails in Safari 6, so we need to map to ArrayBuffers there.
- */
-
-var blobSupportsArrayBufferView = blobSupported && (function() {
-  try {
-    var b = new Blob([new Uint8Array([1,2])]);
-    return b.size === 2;
-  } catch(e) {
-    return false;
-  }
-})();
-
-/**
- * Check if BlobBuilder is supported
- */
-
-var blobBuilderSupported = BlobBuilder
-  && BlobBuilder.prototype.append
-  && BlobBuilder.prototype.getBlob;
-
-/**
- * Helper function that maps ArrayBufferViews to ArrayBuffers
- * Used by BlobBuilder constructor and old browsers that didn't
- * support it in the Blob constructor.
- */
-
-function mapArrayBufferViews(ary) {
-  for (var i = 0; i < ary.length; i++) {
-    var chunk = ary[i];
-    if (chunk.buffer instanceof ArrayBuffer) {
-      var buf = chunk.buffer;
-
-      // if this is a subarray, make a copy so we only
-      // include the subarray region from the underlying buffer
-      if (chunk.byteLength !== buf.byteLength) {
-        var copy = new Uint8Array(chunk.byteLength);
-        copy.set(new Uint8Array(buf, chunk.byteOffset, chunk.byteLength));
-        buf = copy.buffer;
-      }
-
-      ary[i] = buf;
-    }
+function parse(str) {
+  str = '' + str;
+  if (str.length > 10000) return;
+  var match = /^((?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|years?|yrs?|y)?$/i.exec(str);
+  if (!match) return;
+  var n = parseFloat(match[1]);
+  var type = (match[2] || 'ms').toLowerCase();
+  switch (type) {
+    case 'years':
+    case 'year':
+    case 'yrs':
+    case 'yr':
+    case 'y':
+      return n * y;
+    case 'days':
+    case 'day':
+    case 'd':
+      return n * d;
+    case 'hours':
+    case 'hour':
+    case 'hrs':
+    case 'hr':
+    case 'h':
+      return n * h;
+    case 'minutes':
+    case 'minute':
+    case 'mins':
+    case 'min':
+    case 'm':
+      return n * m;
+    case 'seconds':
+    case 'second':
+    case 'secs':
+    case 'sec':
+    case 's':
+      return n * s;
+    case 'milliseconds':
+    case 'millisecond':
+    case 'msecs':
+    case 'msec':
+    case 'ms':
+      return n;
   }
 }
 
-function BlobBuilderConstructor(ary, options) {
-  options = options || {};
+/**
+ * Short format for `ms`.
+ *
+ * @param {Number} ms
+ * @return {String}
+ * @api private
+ */
 
-  var bb = new BlobBuilder();
-  mapArrayBufferViews(ary);
+function short(ms) {
+  if (ms >= d) return Math.round(ms / d) + 'd';
+  if (ms >= h) return Math.round(ms / h) + 'h';
+  if (ms >= m) return Math.round(ms / m) + 'm';
+  if (ms >= s) return Math.round(ms / s) + 's';
+  return ms + 'ms';
+}
 
-  for (var i = 0; i < ary.length; i++) {
-    bb.append(ary[i]);
+/**
+ * Long format for `ms`.
+ *
+ * @param {Number} ms
+ * @return {String}
+ * @api private
+ */
+
+function long(ms) {
+  return plural(ms, d, 'day')
+    || plural(ms, h, 'hour')
+    || plural(ms, m, 'minute')
+    || plural(ms, s, 'second')
+    || ms + ' ms';
+}
+
+/**
+ * Pluralization helper.
+ */
+
+function plural(ms, n, name) {
+  if (ms < n) return;
+  if (ms < n * 1.5) return Math.floor(ms / n) + ' ' + name;
+  return Math.ceil(ms / n) + ' ' + name + 's';
+}
+
+},{}],26:[function(_dereq_,module,exports){
+(function (global){
+/**
+ * JSON parse.
+ *
+ * @see Based on jQuery#parseJSON (MIT) and JSON2
+ * @api private
+ */
+
+var rvalidchars = /^[\],:{}\s]*$/;
+var rvalidescape = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g;
+var rvalidtokens = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g;
+var rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g;
+var rtrimLeft = /^\s+/;
+var rtrimRight = /\s+$/;
+
+module.exports = function parsejson(data) {
+  if ('string' != typeof data || !data) {
+    return null;
   }
 
-  return (options.type) ? bb.getBlob(options.type) : bb.getBlob();
-};
+  data = data.replace(rtrimLeft, '').replace(rtrimRight, '');
 
-function BlobConstructor(ary, options) {
-  mapArrayBufferViews(ary);
-  return new Blob(ary, options || {});
-};
-
-module.exports = (function() {
-  if (blobSupported) {
-    return blobSupportsArrayBufferView ? global.Blob : BlobConstructor;
-  } else if (blobBuilderSupported) {
-    return BlobBuilderConstructor;
-  } else {
-    return undefined;
+  // Attempt to parse using the native JSON parser first
+  if (global.JSON && JSON.parse) {
+    return JSON.parse(data);
   }
-})();
 
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],31:[function(_dereq_,module,exports){
+  if (rvalidchars.test(data.replace(rvalidescape, '@')
+      .replace(rvalidtokens, ']')
+      .replace(rvalidbraces, ''))) {
+    return (new Function('return ' + data))();
+  }
+};
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {})
+},{}],27:[function(_dereq_,module,exports){
+/**
+ * Compiles a querystring
+ * Returns string representation of the object
+ *
+ * @param {Object}
+ * @api private
+ */
+
+exports.encode = function (obj) {
+  var str = '';
+
+  for (var i in obj) {
+    if (obj.hasOwnProperty(i)) {
+      if (str.length) str += '&';
+      str += encodeURIComponent(i) + '=' + encodeURIComponent(obj[i]);
+    }
+  }
+
+  return str;
+};
+
+/**
+ * Parses a simple querystring into an object
+ *
+ * @param {String} qs
+ * @api private
+ */
+
+exports.decode = function(qs){
+  var qry = {};
+  var pairs = qs.split('&');
+  for (var i = 0, l = pairs.length; i < l; i++) {
+    var pair = pairs[i].split('=');
+    qry[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+  }
+  return qry;
+};
+
+},{}],28:[function(_dereq_,module,exports){
+/**
+ * Parses an URI
+ *
+ * @author Steven Levithan <stevenlevithan.com> (MIT license)
+ * @api private
+ */
+
+var re = /^(?:(?![^:@]+:[^:@\/]*@)(http|https|ws|wss):\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?((?:[a-f0-9]{0,4}:){2,7}[a-f0-9]{0,4}|[^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/;
+
+var parts = [
+    'source', 'protocol', 'authority', 'userInfo', 'user', 'password', 'host', 'port', 'relative', 'path', 'directory', 'file', 'query', 'anchor'
+];
+
+module.exports = function parseuri(str) {
+    var src = str,
+        b = str.indexOf('['),
+        e = str.indexOf(']');
+
+    if (b != -1 && e != -1) {
+        str = str.substring(0, b) + str.substring(b, e).replace(/:/g, ';') + str.substring(e, str.length);
+    }
+
+    var m = re.exec(str || ''),
+        uri = {},
+        i = 14;
+
+    while (i--) {
+        uri[parts[i]] = m[i] || '';
+    }
+
+    if (b != -1 && e != -1) {
+        uri.source = src;
+        uri.host = uri.host.substring(1, uri.host.length - 1).replace(/;/g, ':');
+        uri.authority = uri.authority.replace('[', '').replace(']', '').replace(/;/g, ':');
+        uri.ipv6uri = true;
+    }
+
+    return uri;
+};
+
+},{}],29:[function(_dereq_,module,exports){
 (function (global){
 /*! https://mths.be/utf8js v2.0.0 by @mathias */
 ;(function(root) {
@@ -5161,168 +4164,1530 @@ module.exports = (function() {
 
 }(this));
 
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],32:[function(_dereq_,module,exports){
-(function (global){
-/**
- * JSON parse.
- *
- * @see Based on jQuery#parseJSON (MIT) and JSON2
- * @api private
- */
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {})
+},{}],30:[function(_dereq_,module,exports){
+'use strict';
 
-var rvalidchars = /^[\],:{}\s]*$/;
-var rvalidescape = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g;
-var rvalidtokens = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g;
-var rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g;
-var rtrimLeft = /^\s+/;
-var rtrimRight = /\s+$/;
-
-module.exports = function parsejson(data) {
-  if ('string' != typeof data || !data) {
-    return null;
-  }
-
-  data = data.replace(rtrimLeft, '').replace(rtrimRight, '');
-
-  // Attempt to parse using the native JSON parser first
-  if (global.JSON && JSON.parse) {
-    return JSON.parse(data);
-  }
-
-  if (rvalidchars.test(data.replace(rvalidescape, '@')
-      .replace(rvalidtokens, ']')
-      .replace(rvalidbraces, ''))) {
-    return (new Function('return ' + data))();
-  }
-};
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],33:[function(_dereq_,module,exports){
-/**
- * Compiles a querystring
- * Returns string representation of the object
- *
- * @param {Object}
- * @api private
- */
-
-exports.encode = function (obj) {
-  var str = '';
-
-  for (var i in obj) {
-    if (obj.hasOwnProperty(i)) {
-      if (str.length) str += '&';
-      str += encodeURIComponent(i) + '=' + encodeURIComponent(obj[i]);
-    }
-  }
-
-  return str;
-};
+var alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_'.split('')
+  , length = 64
+  , map = {}
+  , seed = 0
+  , i = 0
+  , prev;
 
 /**
- * Parses a simple querystring into an object
+ * Return a string representing the specified number.
  *
- * @param {String} qs
- * @api private
+ * @param {Number} num The number to convert.
+ * @returns {String} The string representation of the number.
+ * @api public
  */
+function encode(num) {
+  var encoded = '';
 
-exports.decode = function(qs){
-  var qry = {};
-  var pairs = qs.split('&');
-  for (var i = 0, l = pairs.length; i < l; i++) {
-    var pair = pairs[i].split('=');
-    qry[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
-  }
-  return qry;
-};
+  do {
+    encoded = alphabet[num % length] + encoded;
+    num = Math.floor(num / length);
+  } while (num > 0);
 
-},{}],34:[function(_dereq_,module,exports){
+  return encoded;
+}
+
 /**
- * Parses an URI
+ * Return the integer value specified by the given string.
  *
- * @author Steven Levithan <stevenlevithan.com> (MIT license)
- * @api private
+ * @param {String} str The string to convert.
+ * @returns {Number} The integer value represented by the string.
+ * @api public
  */
+function decode(str) {
+  var decoded = 0;
 
-var re = /^(?:(?![^:@]+:[^:@\/]*@)(http|https|ws|wss):\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?((?:[a-f0-9]{0,4}:){2,7}[a-f0-9]{0,4}|[^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/;
+  for (i = 0; i < str.length; i++) {
+    decoded = decoded * length + map[str.charAt(i)];
+  }
 
-var parts = [
-    'source', 'protocol', 'authority', 'userInfo', 'user', 'password', 'host', 'port', 'relative', 'path', 'directory', 'file', 'query', 'anchor'
-];
+  return decoded;
+}
 
-module.exports = function parseuri(str) {
-    var src = str,
-        b = str.indexOf('['),
-        e = str.indexOf(']');
+/**
+ * Yeast: A tiny growing id generator.
+ *
+ * @returns {String} A unique id.
+ * @api public
+ */
+function yeast() {
+  var now = encode(+new Date());
 
-    if (b != -1 && e != -1) {
-        str = str.substring(0, b) + str.substring(b, e).replace(/:/g, ';') + str.substring(e, str.length);
-    }
+  if (now !== prev) return seed = 0, prev = now;
+  return now +'.'+ encode(seed++);
+}
 
-    var m = re.exec(str || ''),
-        uri = {},
-        i = 14;
+//
+// Map each character to its index.
+//
+for (; i < length; i++) map[alphabet[i]] = i;
 
-    while (i--) {
-        uri[parts[i]] = m[i] || '';
-    }
+//
+// Expose the `yeast`, `encode` and `decode` functions.
+//
+yeast.encode = encode;
+yeast.decode = decode;
+module.exports = yeast;
 
-    if (b != -1 && e != -1) {
-        uri.source = src;
-        uri.host = uri.host.substring(1, uri.host.length - 1).replace(/;/g, ':');
-        uri.authority = uri.authority.replace('[', '').replace(']', '').replace(/;/g, ':');
-        uri.ipv6uri = true;
-    }
-
-    return uri;
-};
-
-},{}],35:[function(_dereq_,module,exports){
+},{}],31:[function(_dereq_,module,exports){
 
 /**
  * Module dependencies.
  */
 
-var global = (function() { return this; })();
-
-/**
- * WebSocket constructor.
- */
-
-var WebSocket = global.WebSocket || global.MozWebSocket;
+var url = _dereq_('./url');
+var parser = _dereq_('socket.io-parser');
+var Manager = _dereq_('./manager');
+var debug = _dereq_('debug')('socket.io-client');
 
 /**
  * Module exports.
  */
 
-module.exports = WebSocket ? ws : null;
+module.exports = exports = lookup;
 
 /**
- * WebSocket constructor.
+ * Managers cache.
+ */
+
+var cache = exports.managers = {};
+
+/**
+ * Looks up an existing `Manager` for multiplexing.
+ * If the user summons:
  *
- * The third `opts` options object gets ignored in web browsers, since it's
- * non-standard, and throws a TypeError if passed to the constructor.
- * See: https://github.com/einaros/ws/issues/227
+ *   `io('http://localhost/a');`
+ *   `io('http://localhost/b');`
  *
- * @param {String} uri
- * @param {Array} protocols (optional)
- * @param {Object) opts (optional)
+ * We reuse the existing instance based on same scheme/port/host,
+ * and we initialize sockets for each namespace.
+ *
  * @api public
  */
 
-function ws(uri, protocols, opts) {
-  var instance;
-  if (protocols) {
-    instance = new WebSocket(uri, protocols);
-  } else {
-    instance = new WebSocket(uri);
+function lookup(uri, opts) {
+  if (typeof uri == 'object') {
+    opts = uri;
+    uri = undefined;
   }
-  return instance;
+
+  opts = opts || {};
+
+  var parsed = url(uri);
+  var source = parsed.source;
+  var id = parsed.id;
+  var path = parsed.path;
+  var sameNamespace = cache[id] && path in cache[id].nsps;
+  var newConnection = opts.forceNew || opts['force new connection'] ||
+                      false === opts.multiplex || sameNamespace;
+
+  var io;
+
+  if (newConnection) {
+    debug('ignoring socket cache for %s', source);
+    io = Manager(source, opts);
+  } else {
+    if (!cache[id]) {
+      debug('new io instance for %s', source);
+      cache[id] = Manager(source, opts);
+    }
+    io = cache[id];
+  }
+
+  return io.socket(parsed.path);
 }
 
-if (WebSocket) ws.prototype = WebSocket.prototype;
+/**
+ * Protocol version.
+ *
+ * @api public
+ */
 
-},{}],36:[function(_dereq_,module,exports){
+exports.protocol = parser.protocol;
+
+/**
+ * `connect`.
+ *
+ * @param {String} uri
+ * @api public
+ */
+
+exports.connect = lookup;
+
+/**
+ * Expose constructors for standalone build.
+ *
+ * @api public
+ */
+
+exports.Manager = _dereq_('./manager');
+exports.Socket = _dereq_('./socket');
+
+},{"./manager":32,"./socket":34,"./url":35,"debug":39,"socket.io-parser":47}],32:[function(_dereq_,module,exports){
+
+/**
+ * Module dependencies.
+ */
+
+var eio = _dereq_('engine.io-client');
+var Socket = _dereq_('./socket');
+var Emitter = _dereq_('component-emitter');
+var parser = _dereq_('socket.io-parser');
+var on = _dereq_('./on');
+var bind = _dereq_('component-bind');
+var debug = _dereq_('debug')('socket.io-client:manager');
+var indexOf = _dereq_('indexof');
+var Backoff = _dereq_('backo2');
+
+/**
+ * IE6+ hasOwnProperty
+ */
+
+var has = Object.prototype.hasOwnProperty;
+
+/**
+ * Module exports
+ */
+
+module.exports = Manager;
+
+/**
+ * `Manager` constructor.
+ *
+ * @param {String} engine instance or engine uri/opts
+ * @param {Object} options
+ * @api public
+ */
+
+function Manager(uri, opts){
+  if (!(this instanceof Manager)) return new Manager(uri, opts);
+  if (uri && ('object' == typeof uri)) {
+    opts = uri;
+    uri = undefined;
+  }
+  opts = opts || {};
+
+  opts.path = opts.path || '/socket.io';
+  this.nsps = {};
+  this.subs = [];
+  this.opts = opts;
+  this.reconnection(opts.reconnection !== false);
+  this.reconnectionAttempts(opts.reconnectionAttempts || Infinity);
+  this.reconnectionDelay(opts.reconnectionDelay || 1000);
+  this.reconnectionDelayMax(opts.reconnectionDelayMax || 5000);
+  this.randomizationFactor(opts.randomizationFactor || 0.5);
+  this.backoff = new Backoff({
+    min: this.reconnectionDelay(),
+    max: this.reconnectionDelayMax(),
+    jitter: this.randomizationFactor()
+  });
+  this.timeout(null == opts.timeout ? 20000 : opts.timeout);
+  this.readyState = 'closed';
+  this.uri = uri;
+  this.connecting = [];
+  this.lastPing = null;
+  this.encoding = false;
+  this.packetBuffer = [];
+  this.encoder = new parser.Encoder();
+  this.decoder = new parser.Decoder();
+  this.autoConnect = opts.autoConnect !== false;
+  if (this.autoConnect) this.open();
+}
+
+/**
+ * Propagate given event to sockets and emit on `this`
+ *
+ * @api private
+ */
+
+Manager.prototype.emitAll = function() {
+  this.emit.apply(this, arguments);
+  for (var nsp in this.nsps) {
+    if (has.call(this.nsps, nsp)) {
+      this.nsps[nsp].emit.apply(this.nsps[nsp], arguments);
+    }
+  }
+};
+
+/**
+ * Update `socket.id` of all sockets
+ *
+ * @api private
+ */
+
+Manager.prototype.updateSocketIds = function(){
+  for (var nsp in this.nsps) {
+    if (has.call(this.nsps, nsp)) {
+      this.nsps[nsp].id = this.engine.id;
+    }
+  }
+};
+
+/**
+ * Mix in `Emitter`.
+ */
+
+Emitter(Manager.prototype);
+
+/**
+ * Sets the `reconnection` config.
+ *
+ * @param {Boolean} true/false if it should automatically reconnect
+ * @return {Manager} self or value
+ * @api public
+ */
+
+Manager.prototype.reconnection = function(v){
+  if (!arguments.length) return this._reconnection;
+  this._reconnection = !!v;
+  return this;
+};
+
+/**
+ * Sets the reconnection attempts config.
+ *
+ * @param {Number} max reconnection attempts before giving up
+ * @return {Manager} self or value
+ * @api public
+ */
+
+Manager.prototype.reconnectionAttempts = function(v){
+  if (!arguments.length) return this._reconnectionAttempts;
+  this._reconnectionAttempts = v;
+  return this;
+};
+
+/**
+ * Sets the delay between reconnections.
+ *
+ * @param {Number} delay
+ * @return {Manager} self or value
+ * @api public
+ */
+
+Manager.prototype.reconnectionDelay = function(v){
+  if (!arguments.length) return this._reconnectionDelay;
+  this._reconnectionDelay = v;
+  this.backoff && this.backoff.setMin(v);
+  return this;
+};
+
+Manager.prototype.randomizationFactor = function(v){
+  if (!arguments.length) return this._randomizationFactor;
+  this._randomizationFactor = v;
+  this.backoff && this.backoff.setJitter(v);
+  return this;
+};
+
+/**
+ * Sets the maximum delay between reconnections.
+ *
+ * @param {Number} delay
+ * @return {Manager} self or value
+ * @api public
+ */
+
+Manager.prototype.reconnectionDelayMax = function(v){
+  if (!arguments.length) return this._reconnectionDelayMax;
+  this._reconnectionDelayMax = v;
+  this.backoff && this.backoff.setMax(v);
+  return this;
+};
+
+/**
+ * Sets the connection timeout. `false` to disable
+ *
+ * @return {Manager} self or value
+ * @api public
+ */
+
+Manager.prototype.timeout = function(v){
+  if (!arguments.length) return this._timeout;
+  this._timeout = v;
+  return this;
+};
+
+/**
+ * Starts trying to reconnect if reconnection is enabled and we have not
+ * started reconnecting yet
+ *
+ * @api private
+ */
+
+Manager.prototype.maybeReconnectOnOpen = function() {
+  // Only try to reconnect if it's the first time we're connecting
+  if (!this.reconnecting && this._reconnection && this.backoff.attempts === 0) {
+    // keeps reconnection from firing twice for the same reconnection loop
+    this.reconnect();
+  }
+};
+
+
+/**
+ * Sets the current transport `socket`.
+ *
+ * @param {Function} optional, callback
+ * @return {Manager} self
+ * @api public
+ */
+
+Manager.prototype.open =
+Manager.prototype.connect = function(fn){
+  debug('readyState %s', this.readyState);
+  if (~this.readyState.indexOf('open')) return this;
+
+  debug('opening %s', this.uri);
+  this.engine = eio(this.uri, this.opts);
+  var socket = this.engine;
+  var self = this;
+  this.readyState = 'opening';
+  this.skipReconnect = false;
+
+  // emit `open`
+  var openSub = on(socket, 'open', function() {
+    self.onopen();
+    fn && fn();
+  });
+
+  // emit `connect_error`
+  var errorSub = on(socket, 'error', function(data){
+    debug('connect_error');
+    self.cleanup();
+    self.readyState = 'closed';
+    self.emitAll('connect_error', data);
+    if (fn) {
+      var err = new Error('Connection error');
+      err.data = data;
+      fn(err);
+    } else {
+      // Only do this if there is no fn to handle the error
+      self.maybeReconnectOnOpen();
+    }
+  });
+
+  // emit `connect_timeout`
+  if (false !== this._timeout) {
+    var timeout = this._timeout;
+    debug('connect attempt will timeout after %d', timeout);
+
+    // set timer
+    var timer = setTimeout(function(){
+      debug('connect attempt timed out after %d', timeout);
+      openSub.destroy();
+      socket.close();
+      socket.emit('error', 'timeout');
+      self.emitAll('connect_timeout', timeout);
+    }, timeout);
+
+    this.subs.push({
+      destroy: function(){
+        clearTimeout(timer);
+      }
+    });
+  }
+
+  this.subs.push(openSub);
+  this.subs.push(errorSub);
+
+  return this;
+};
+
+/**
+ * Called upon transport open.
+ *
+ * @api private
+ */
+
+Manager.prototype.onopen = function(){
+  debug('open');
+
+  // clear old subs
+  this.cleanup();
+
+  // mark as open
+  this.readyState = 'open';
+  this.emit('open');
+
+  // add new subs
+  var socket = this.engine;
+  this.subs.push(on(socket, 'data', bind(this, 'ondata')));
+  this.subs.push(on(socket, 'ping', bind(this, 'onping')));
+  this.subs.push(on(socket, 'pong', bind(this, 'onpong')));
+  this.subs.push(on(socket, 'error', bind(this, 'onerror')));
+  this.subs.push(on(socket, 'close', bind(this, 'onclose')));
+  this.subs.push(on(this.decoder, 'decoded', bind(this, 'ondecoded')));
+};
+
+/**
+ * Called upon a ping.
+ *
+ * @api private
+ */
+
+Manager.prototype.onping = function(){
+  this.lastPing = new Date;
+  this.emitAll('ping');
+};
+
+/**
+ * Called upon a packet.
+ *
+ * @api private
+ */
+
+Manager.prototype.onpong = function(){
+  this.emitAll('pong', new Date - this.lastPing);
+};
+
+/**
+ * Called with data.
+ *
+ * @api private
+ */
+
+Manager.prototype.ondata = function(data){
+  this.decoder.add(data);
+};
+
+/**
+ * Called when parser fully decodes a packet.
+ *
+ * @api private
+ */
+
+Manager.prototype.ondecoded = function(packet) {
+  this.emit('packet', packet);
+};
+
+/**
+ * Called upon socket error.
+ *
+ * @api private
+ */
+
+Manager.prototype.onerror = function(err){
+  debug('error', err);
+  this.emitAll('error', err);
+};
+
+/**
+ * Creates a new socket for the given `nsp`.
+ *
+ * @return {Socket}
+ * @api public
+ */
+
+Manager.prototype.socket = function(nsp){
+  var socket = this.nsps[nsp];
+  if (!socket) {
+    socket = new Socket(this, nsp);
+    this.nsps[nsp] = socket;
+    var self = this;
+    socket.on('connecting', onConnecting);
+    socket.on('connect', function(){
+      socket.id = self.engine.id;
+    });
+
+    if (this.autoConnect) {
+      // manually call here since connecting evnet is fired before listening
+      onConnecting();
+    }
+  }
+
+  function onConnecting() {
+    if (!~indexOf(self.connecting, socket)) {
+      self.connecting.push(socket);
+    }
+  }
+
+  return socket;
+};
+
+/**
+ * Called upon a socket close.
+ *
+ * @param {Socket} socket
+ */
+
+Manager.prototype.destroy = function(socket){
+  var index = indexOf(this.connecting, socket);
+  if (~index) this.connecting.splice(index, 1);
+  if (this.connecting.length) return;
+
+  this.close();
+};
+
+/**
+ * Writes a packet.
+ *
+ * @param {Object} packet
+ * @api private
+ */
+
+Manager.prototype.packet = function(packet){
+  debug('writing packet %j', packet);
+  var self = this;
+
+  if (!self.encoding) {
+    // encode, then write to engine with result
+    self.encoding = true;
+    this.encoder.encode(packet, function(encodedPackets) {
+      for (var i = 0; i < encodedPackets.length; i++) {
+        self.engine.write(encodedPackets[i], packet.options);
+      }
+      self.encoding = false;
+      self.processPacketQueue();
+    });
+  } else { // add packet to the queue
+    self.packetBuffer.push(packet);
+  }
+};
+
+/**
+ * If packet buffer is non-empty, begins encoding the
+ * next packet in line.
+ *
+ * @api private
+ */
+
+Manager.prototype.processPacketQueue = function() {
+  if (this.packetBuffer.length > 0 && !this.encoding) {
+    var pack = this.packetBuffer.shift();
+    this.packet(pack);
+  }
+};
+
+/**
+ * Clean up transport subscriptions and packet buffer.
+ *
+ * @api private
+ */
+
+Manager.prototype.cleanup = function(){
+  debug('cleanup');
+
+  var sub;
+  while (sub = this.subs.shift()) sub.destroy();
+
+  this.packetBuffer = [];
+  this.encoding = false;
+  this.lastPing = null;
+
+  this.decoder.destroy();
+};
+
+/**
+ * Close the current socket.
+ *
+ * @api private
+ */
+
+Manager.prototype.close =
+Manager.prototype.disconnect = function(){
+  debug('disconnect');
+  this.skipReconnect = true;
+  this.reconnecting = false;
+  if ('opening' == this.readyState) {
+    // `onclose` will not fire because
+    // an open event never happened
+    this.cleanup();
+  }
+  this.backoff.reset();
+  this.readyState = 'closed';
+  if (this.engine) this.engine.close();
+};
+
+/**
+ * Called upon engine close.
+ *
+ * @api private
+ */
+
+Manager.prototype.onclose = function(reason){
+  debug('onclose');
+
+  this.cleanup();
+  this.backoff.reset();
+  this.readyState = 'closed';
+  this.emit('close', reason);
+
+  if (this._reconnection && !this.skipReconnect) {
+    this.reconnect();
+  }
+};
+
+/**
+ * Attempt a reconnection.
+ *
+ * @api private
+ */
+
+Manager.prototype.reconnect = function(){
+  if (this.reconnecting || this.skipReconnect) return this;
+
+  var self = this;
+
+  if (this.backoff.attempts >= this._reconnectionAttempts) {
+    debug('reconnect failed');
+    this.backoff.reset();
+    this.emitAll('reconnect_failed');
+    this.reconnecting = false;
+  } else {
+    var delay = this.backoff.duration();
+    debug('will wait %dms before reconnect attempt', delay);
+
+    this.reconnecting = true;
+    var timer = setTimeout(function(){
+      if (self.skipReconnect) return;
+
+      debug('attempting reconnect');
+      self.emitAll('reconnect_attempt', self.backoff.attempts);
+      self.emitAll('reconnecting', self.backoff.attempts);
+
+      // check again for the case socket closed in above events
+      if (self.skipReconnect) return;
+
+      self.open(function(err){
+        if (err) {
+          debug('reconnect attempt error');
+          self.reconnecting = false;
+          self.reconnect();
+          self.emitAll('reconnect_error', err.data);
+        } else {
+          debug('reconnect success');
+          self.onreconnect();
+        }
+      });
+    }, delay);
+
+    this.subs.push({
+      destroy: function(){
+        clearTimeout(timer);
+      }
+    });
+  }
+};
+
+/**
+ * Called upon successful reconnect.
+ *
+ * @api private
+ */
+
+Manager.prototype.onreconnect = function(){
+  var attempt = this.backoff.attempts;
+  this.reconnecting = false;
+  this.backoff.reset();
+  this.updateSocketIds();
+  this.emitAll('reconnect', attempt);
+};
+
+},{"./on":33,"./socket":34,"backo2":36,"component-bind":37,"component-emitter":38,"debug":39,"engine.io-client":1,"indexof":42,"socket.io-parser":47}],33:[function(_dereq_,module,exports){
+
+/**
+ * Module exports.
+ */
+
+module.exports = on;
+
+/**
+ * Helper for subscriptions.
+ *
+ * @param {Object|EventEmitter} obj with `Emitter` mixin or `EventEmitter`
+ * @param {String} event name
+ * @param {Function} callback
+ * @api public
+ */
+
+function on(obj, ev, fn) {
+  obj.on(ev, fn);
+  return {
+    destroy: function(){
+      obj.removeListener(ev, fn);
+    }
+  };
+}
+
+},{}],34:[function(_dereq_,module,exports){
+
+/**
+ * Module dependencies.
+ */
+
+var parser = _dereq_('socket.io-parser');
+var Emitter = _dereq_('component-emitter');
+var toArray = _dereq_('to-array');
+var on = _dereq_('./on');
+var bind = _dereq_('component-bind');
+var debug = _dereq_('debug')('socket.io-client:socket');
+var hasBin = _dereq_('has-binary');
+
+/**
+ * Module exports.
+ */
+
+module.exports = exports = Socket;
+
+/**
+ * Internal events (blacklisted).
+ * These events can't be emitted by the user.
+ *
+ * @api private
+ */
+
+var events = {
+  connect: 1,
+  connect_error: 1,
+  connect_timeout: 1,
+  connecting: 1,
+  disconnect: 1,
+  error: 1,
+  reconnect: 1,
+  reconnect_attempt: 1,
+  reconnect_failed: 1,
+  reconnect_error: 1,
+  reconnecting: 1,
+  ping: 1,
+  pong: 1
+};
+
+/**
+ * Shortcut to `Emitter#emit`.
+ */
+
+var emit = Emitter.prototype.emit;
+
+/**
+ * `Socket` constructor.
+ *
+ * @api public
+ */
+
+function Socket(io, nsp){
+  this.io = io;
+  this.nsp = nsp;
+  this.json = this; // compat
+  this.ids = 0;
+  this.acks = {};
+  this.receiveBuffer = [];
+  this.sendBuffer = [];
+  this.connected = false;
+  this.disconnected = true;
+  if (this.io.autoConnect) this.open();
+}
+
+/**
+ * Mix in `Emitter`.
+ */
+
+Emitter(Socket.prototype);
+
+/**
+ * Subscribe to open, close and packet events
+ *
+ * @api private
+ */
+
+Socket.prototype.subEvents = function() {
+  if (this.subs) return;
+
+  var io = this.io;
+  this.subs = [
+    on(io, 'open', bind(this, 'onopen')),
+    on(io, 'packet', bind(this, 'onpacket')),
+    on(io, 'close', bind(this, 'onclose'))
+  ];
+};
+
+/**
+ * "Opens" the socket.
+ *
+ * @api public
+ */
+
+Socket.prototype.open =
+Socket.prototype.connect = function(){
+  if (this.connected) return this;
+
+  this.subEvents();
+  this.io.open(); // ensure open
+  if ('open' == this.io.readyState) this.onopen();
+  this.emit('connecting');
+  return this;
+};
+
+/**
+ * Sends a `message` event.
+ *
+ * @return {Socket} self
+ * @api public
+ */
+
+Socket.prototype.send = function(){
+  var args = toArray(arguments);
+  args.unshift('message');
+  this.emit.apply(this, args);
+  return this;
+};
+
+/**
+ * Override `emit`.
+ * If the event is in `events`, it's emitted normally.
+ *
+ * @param {String} event name
+ * @return {Socket} self
+ * @api public
+ */
+
+Socket.prototype.emit = function(ev){
+  if (events.hasOwnProperty(ev)) {
+    emit.apply(this, arguments);
+    return this;
+  }
+
+  var args = toArray(arguments);
+  var parserType = parser.EVENT; // default
+  if (hasBin(args)) { parserType = parser.BINARY_EVENT; } // binary
+  var packet = { type: parserType, data: args };
+
+  packet.options = {};
+  packet.options.compress = !this.flags || false !== this.flags.compress;
+
+  // event ack callback
+  if ('function' == typeof args[args.length - 1]) {
+    debug('emitting packet with ack id %d', this.ids);
+    this.acks[this.ids] = args.pop();
+    packet.id = this.ids++;
+  }
+
+  if (this.connected) {
+    this.packet(packet);
+  } else {
+    this.sendBuffer.push(packet);
+  }
+
+  delete this.flags;
+
+  return this;
+};
+
+/**
+ * Sends a packet.
+ *
+ * @param {Object} packet
+ * @api private
+ */
+
+Socket.prototype.packet = function(packet){
+  packet.nsp = this.nsp;
+  this.io.packet(packet);
+};
+
+/**
+ * Called upon engine `open`.
+ *
+ * @api private
+ */
+
+Socket.prototype.onopen = function(){
+  debug('transport is open - connecting');
+
+  // write connect packet if necessary
+  if ('/' != this.nsp) {
+    this.packet({ type: parser.CONNECT });
+  }
+};
+
+/**
+ * Called upon engine `close`.
+ *
+ * @param {String} reason
+ * @api private
+ */
+
+Socket.prototype.onclose = function(reason){
+  debug('close (%s)', reason);
+  this.connected = false;
+  this.disconnected = true;
+  delete this.id;
+  this.emit('disconnect', reason);
+};
+
+/**
+ * Called with socket packet.
+ *
+ * @param {Object} packet
+ * @api private
+ */
+
+Socket.prototype.onpacket = function(packet){
+  if (packet.nsp != this.nsp) return;
+
+  switch (packet.type) {
+    case parser.CONNECT:
+      this.onconnect();
+      break;
+
+    case parser.EVENT:
+      this.onevent(packet);
+      break;
+
+    case parser.BINARY_EVENT:
+      this.onevent(packet);
+      break;
+
+    case parser.ACK:
+      this.onack(packet);
+      break;
+
+    case parser.BINARY_ACK:
+      this.onack(packet);
+      break;
+
+    case parser.DISCONNECT:
+      this.ondisconnect();
+      break;
+
+    case parser.ERROR:
+      this.emit('error', packet.data);
+      break;
+  }
+};
+
+/**
+ * Called upon a server event.
+ *
+ * @param {Object} packet
+ * @api private
+ */
+
+Socket.prototype.onevent = function(packet){
+  var args = packet.data || [];
+  debug('emitting event %j', args);
+
+  if (null != packet.id) {
+    debug('attaching ack callback to event');
+    args.push(this.ack(packet.id));
+  }
+
+  if (this.connected) {
+    emit.apply(this, args);
+  } else {
+    this.receiveBuffer.push(args);
+  }
+};
+
+/**
+ * Produces an ack callback to emit with an event.
+ *
+ * @api private
+ */
+
+Socket.prototype.ack = function(id){
+  var self = this;
+  var sent = false;
+  return function(){
+    // prevent double callbacks
+    if (sent) return;
+    sent = true;
+    var args = toArray(arguments);
+    debug('sending ack %j', args);
+
+    var type = hasBin(args) ? parser.BINARY_ACK : parser.ACK;
+    self.packet({
+      type: type,
+      id: id,
+      data: args
+    });
+  };
+};
+
+/**
+ * Called upon a server acknowlegement.
+ *
+ * @param {Object} packet
+ * @api private
+ */
+
+Socket.prototype.onack = function(packet){
+  var ack = this.acks[packet.id];
+  if ('function' == typeof ack) {
+    debug('calling ack %s with %j', packet.id, packet.data);
+    ack.apply(this, packet.data);
+    delete this.acks[packet.id];
+  } else {
+    debug('bad ack %s', packet.id);
+  }
+};
+
+/**
+ * Called upon server connect.
+ *
+ * @api private
+ */
+
+Socket.prototype.onconnect = function(){
+  this.connected = true;
+  this.disconnected = false;
+  this.emit('connect');
+  this.emitBuffered();
+};
+
+/**
+ * Emit buffered events (received and emitted).
+ *
+ * @api private
+ */
+
+Socket.prototype.emitBuffered = function(){
+  var i;
+  for (i = 0; i < this.receiveBuffer.length; i++) {
+    emit.apply(this, this.receiveBuffer[i]);
+  }
+  this.receiveBuffer = [];
+
+  for (i = 0; i < this.sendBuffer.length; i++) {
+    this.packet(this.sendBuffer[i]);
+  }
+  this.sendBuffer = [];
+};
+
+/**
+ * Called upon server disconnect.
+ *
+ * @api private
+ */
+
+Socket.prototype.ondisconnect = function(){
+  debug('server disconnect (%s)', this.nsp);
+  this.destroy();
+  this.onclose('io server disconnect');
+};
+
+/**
+ * Called upon forced client/server side disconnections,
+ * this method ensures the manager stops tracking us and
+ * that reconnections don't get triggered for this.
+ *
+ * @api private.
+ */
+
+Socket.prototype.destroy = function(){
+  if (this.subs) {
+    // clean subscriptions to avoid reconnections
+    for (var i = 0; i < this.subs.length; i++) {
+      this.subs[i].destroy();
+    }
+    this.subs = null;
+  }
+
+  this.io.destroy(this);
+};
+
+/**
+ * Disconnects the socket manually.
+ *
+ * @return {Socket} self
+ * @api public
+ */
+
+Socket.prototype.close =
+Socket.prototype.disconnect = function(){
+  if (this.connected) {
+    debug('performing disconnect (%s)', this.nsp);
+    this.packet({ type: parser.DISCONNECT });
+  }
+
+  // remove socket from pool
+  this.destroy();
+
+  if (this.connected) {
+    // fire events
+    this.onclose('io client disconnect');
+  }
+  return this;
+};
+
+/**
+ * Sets the compress flag.
+ *
+ * @param {Boolean} if `true`, compresses the sending data
+ * @return {Socket} self
+ * @api public
+ */
+
+Socket.prototype.compress = function(compress){
+  this.flags = this.flags || {};
+  this.flags.compress = compress;
+  return this;
+};
+
+},{"./on":33,"component-bind":37,"component-emitter":38,"debug":39,"has-binary":41,"socket.io-parser":47,"to-array":51}],35:[function(_dereq_,module,exports){
+(function (global){
+
+/**
+ * Module dependencies.
+ */
+
+var parseuri = _dereq_('parseuri');
+var debug = _dereq_('debug')('socket.io-client:url');
+
+/**
+ * Module exports.
+ */
+
+module.exports = url;
+
+/**
+ * URL parser.
+ *
+ * @param {String} url
+ * @param {Object} An object meant to mimic window.location.
+ *                 Defaults to window.location.
+ * @api public
+ */
+
+function url(uri, loc){
+  var obj = uri;
+
+  // default to window.location
+  var loc = loc || global.location;
+  if (null == uri) uri = loc.protocol + '//' + loc.host;
+
+  // relative path support
+  if ('string' == typeof uri) {
+    if ('/' == uri.charAt(0)) {
+      if ('/' == uri.charAt(1)) {
+        uri = loc.protocol + uri;
+      } else {
+        uri = loc.host + uri;
+      }
+    }
+
+    if (!/^(https?|wss?):\/\//.test(uri)) {
+      debug('protocol-less url %s', uri);
+      if ('undefined' != typeof loc) {
+        uri = loc.protocol + '//' + uri;
+      } else {
+        uri = 'https://' + uri;
+      }
+    }
+
+    // parse
+    debug('parse %s', uri);
+    obj = parseuri(uri);
+  }
+
+  // make sure we treat `localhost:80` and `localhost` equally
+  if (!obj.port) {
+    if (/^(http|ws)$/.test(obj.protocol)) {
+      obj.port = '80';
+    }
+    else if (/^(http|ws)s$/.test(obj.protocol)) {
+      obj.port = '443';
+    }
+  }
+
+  obj.path = obj.path || '/';
+
+  var ipv6 = obj.host.indexOf(':') !== -1;
+  var host = ipv6 ? '[' + obj.host + ']' : obj.host;
+
+  // define unique id
+  obj.id = obj.protocol + '://' + host + ':' + obj.port;
+  // define href
+  obj.href = obj.protocol + '://' + host + (loc && loc.port == obj.port ? '' : (':' + obj.port));
+
+  return obj;
+}
+
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {})
+},{"debug":39,"parseuri":45}],36:[function(_dereq_,module,exports){
+
+/**
+ * Expose `Backoff`.
+ */
+
+module.exports = Backoff;
+
+/**
+ * Initialize backoff timer with `opts`.
+ *
+ * - `min` initial timeout in milliseconds [100]
+ * - `max` max timeout [10000]
+ * - `jitter` [0]
+ * - `factor` [2]
+ *
+ * @param {Object} opts
+ * @api public
+ */
+
+function Backoff(opts) {
+  opts = opts || {};
+  this.ms = opts.min || 100;
+  this.max = opts.max || 10000;
+  this.factor = opts.factor || 2;
+  this.jitter = opts.jitter > 0 && opts.jitter <= 1 ? opts.jitter : 0;
+  this.attempts = 0;
+}
+
+/**
+ * Return the backoff duration.
+ *
+ * @return {Number}
+ * @api public
+ */
+
+Backoff.prototype.duration = function(){
+  var ms = this.ms * Math.pow(this.factor, this.attempts++);
+  if (this.jitter) {
+    var rand =  Math.random();
+    var deviation = Math.floor(rand * this.jitter * ms);
+    ms = (Math.floor(rand * 10) & 1) == 0  ? ms - deviation : ms + deviation;
+  }
+  return Math.min(ms, this.max) | 0;
+};
+
+/**
+ * Reset the number of attempts.
+ *
+ * @api public
+ */
+
+Backoff.prototype.reset = function(){
+  this.attempts = 0;
+};
+
+/**
+ * Set the minimum duration
+ *
+ * @api public
+ */
+
+Backoff.prototype.setMin = function(min){
+  this.ms = min;
+};
+
+/**
+ * Set the maximum duration
+ *
+ * @api public
+ */
+
+Backoff.prototype.setMax = function(max){
+  this.max = max;
+};
+
+/**
+ * Set the jitter
+ *
+ * @api public
+ */
+
+Backoff.prototype.setJitter = function(jitter){
+  this.jitter = jitter;
+};
+
+
+},{}],37:[function(_dereq_,module,exports){
+/**
+ * Slice reference.
+ */
+
+var slice = [].slice;
+
+/**
+ * Bind `obj` to `fn`.
+ *
+ * @param {Object} obj
+ * @param {Function|String} fn or string
+ * @return {Function}
+ * @api public
+ */
+
+module.exports = function(obj, fn){
+  if ('string' == typeof fn) fn = obj[fn];
+  if ('function' != typeof fn) throw new Error('bind() requires a function');
+  var args = slice.call(arguments, 2);
+  return function(){
+    return fn.apply(obj, args.concat(slice.call(arguments)));
+  }
+};
+
+},{}],38:[function(_dereq_,module,exports){
+
+/**
+ * Expose `Emitter`.
+ */
+
+module.exports = Emitter;
+
+/**
+ * Initialize a new `Emitter`.
+ *
+ * @api public
+ */
+
+function Emitter(obj) {
+  if (obj) return mixin(obj);
+};
+
+/**
+ * Mixin the emitter properties.
+ *
+ * @param {Object} obj
+ * @return {Object}
+ * @api private
+ */
+
+function mixin(obj) {
+  for (var key in Emitter.prototype) {
+    obj[key] = Emitter.prototype[key];
+  }
+  return obj;
+}
+
+/**
+ * Listen on the given `event` with `fn`.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.on =
+Emitter.prototype.addEventListener = function(event, fn){
+  this._callbacks = this._callbacks || {};
+  (this._callbacks['$' + event] = this._callbacks['$' + event] || [])
+    .push(fn);
+  return this;
+};
+
+/**
+ * Adds an `event` listener that will be invoked a single
+ * time then automatically removed.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.once = function(event, fn){
+  function on() {
+    this.off(event, on);
+    fn.apply(this, arguments);
+  }
+
+  on.fn = fn;
+  this.on(event, on);
+  return this;
+};
+
+/**
+ * Remove the given callback for `event` or all
+ * registered callbacks.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.off =
+Emitter.prototype.removeListener =
+Emitter.prototype.removeAllListeners =
+Emitter.prototype.removeEventListener = function(event, fn){
+  this._callbacks = this._callbacks || {};
+
+  // all
+  if (0 == arguments.length) {
+    this._callbacks = {};
+    return this;
+  }
+
+  // specific event
+  var callbacks = this._callbacks['$' + event];
+  if (!callbacks) return this;
+
+  // remove all handlers
+  if (1 == arguments.length) {
+    delete this._callbacks['$' + event];
+    return this;
+  }
+
+  // remove specific handler
+  var cb;
+  for (var i = 0; i < callbacks.length; i++) {
+    cb = callbacks[i];
+    if (cb === fn || cb.fn === fn) {
+      callbacks.splice(i, 1);
+      break;
+    }
+  }
+  return this;
+};
+
+/**
+ * Emit `event` with the given args.
+ *
+ * @param {String} event
+ * @param {Mixed} ...
+ * @return {Emitter}
+ */
+
+Emitter.prototype.emit = function(event){
+  this._callbacks = this._callbacks || {};
+  var args = [].slice.call(arguments, 1)
+    , callbacks = this._callbacks['$' + event];
+
+  if (callbacks) {
+    callbacks = callbacks.slice(0);
+    for (var i = 0, len = callbacks.length; i < len; ++i) {
+      callbacks[i].apply(this, args);
+    }
+  }
+
+  return this;
+};
+
+/**
+ * Return array of callbacks for `event`.
+ *
+ * @param {String} event
+ * @return {Array}
+ * @api public
+ */
+
+Emitter.prototype.listeners = function(event){
+  this._callbacks = this._callbacks || {};
+  return this._callbacks['$' + event] || [];
+};
+
+/**
+ * Check if this emitter has `event` handlers.
+ *
+ * @param {String} event
+ * @return {Boolean}
+ * @api public
+ */
+
+Emitter.prototype.hasListeners = function(event){
+  return !! this.listeners(event).length;
+};
+
+},{}],39:[function(_dereq_,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"./debug":40,"dup":17}],40:[function(_dereq_,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"dup":18,"ms":44}],41:[function(_dereq_,module,exports){
 (function (global){
 
 /*
@@ -5351,7 +5716,7 @@ function hasBinary(data) {
   function _hasBinary(obj) {
     if (!obj) return false;
 
-    if ( (global.Buffer && global.Buffer.isBuffer(obj)) ||
+    if ( (global.Buffer && global.Buffer.isBuffer && global.Buffer.isBuffer(obj)) ||
          (global.ArrayBuffer && obj instanceof ArrayBuffer) ||
          (global.Blob && obj instanceof Blob) ||
          (global.File && obj instanceof File)
@@ -5366,7 +5731,8 @@ function hasBinary(data) {
           }
       }
     } else if (obj && 'object' == typeof obj) {
-      if (obj.toJSON) {
+      // see: https://github.com/Automattic/has-binary/pull/4
+      if (obj.toJSON && 'function' == typeof obj.toJSON) {
         obj = obj.toJSON();
       }
 
@@ -5383,171 +5749,16 @@ function hasBinary(data) {
   return _hasBinary(data);
 }
 
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"isarray":37}],37:[function(_dereq_,module,exports){
-module.exports = Array.isArray || function (arr) {
-  return Object.prototype.toString.call(arr) == '[object Array]';
-};
-
-},{}],38:[function(_dereq_,module,exports){
-
-/**
- * Module dependencies.
- */
-
-var global = _dereq_('global');
-
-/**
- * Module exports.
- *
- * Logic borrowed from Modernizr:
- *
- *   - https://github.com/Modernizr/Modernizr/blob/master/feature-detects/cors.js
- */
-
-try {
-  module.exports = 'XMLHttpRequest' in global &&
-    'withCredentials' in new global.XMLHttpRequest();
-} catch (err) {
-  // if XMLHttp support is disabled in IE then it will throw
-  // when trying to create
-  module.exports = false;
-}
-
-},{"global":39}],39:[function(_dereq_,module,exports){
-
-/**
- * Returns `this`. Execute this without a "context" (i.e. without it being
- * attached to an object of the left-hand side), and `this` points to the
- * "global" scope of the current JS execution.
- */
-
-module.exports = (function () { return this; })();
-
-},{}],40:[function(_dereq_,module,exports){
-
-var indexOf = [].indexOf;
-
-module.exports = function(arr, obj){
-  if (indexOf) return arr.indexOf(obj);
-  for (var i = 0; i < arr.length; ++i) {
-    if (arr[i] === obj) return i;
-  }
-  return -1;
-};
-},{}],41:[function(_dereq_,module,exports){
-
-/**
- * HOP ref.
- */
-
-var has = Object.prototype.hasOwnProperty;
-
-/**
- * Return own keys in `obj`.
- *
- * @param {Object} obj
- * @return {Array}
- * @api public
- */
-
-exports.keys = Object.keys || function(obj){
-  var keys = [];
-  for (var key in obj) {
-    if (has.call(obj, key)) {
-      keys.push(key);
-    }
-  }
-  return keys;
-};
-
-/**
- * Return own values in `obj`.
- *
- * @param {Object} obj
- * @return {Array}
- * @api public
- */
-
-exports.values = function(obj){
-  var vals = [];
-  for (var key in obj) {
-    if (has.call(obj, key)) {
-      vals.push(obj[key]);
-    }
-  }
-  return vals;
-};
-
-/**
- * Merge `b` into `a`.
- *
- * @param {Object} a
- * @param {Object} b
- * @return {Object} a
- * @api public
- */
-
-exports.merge = function(a, b){
-  for (var key in b) {
-    if (has.call(b, key)) {
-      a[key] = b[key];
-    }
-  }
-  return a;
-};
-
-/**
- * Return length of `obj`.
- *
- * @param {Object} obj
- * @return {Number}
- * @api public
- */
-
-exports.length = function(obj){
-  return exports.keys(obj).length;
-};
-
-/**
- * Check if `obj` is empty.
- *
- * @param {Object} obj
- * @return {Boolean}
- * @api public
- */
-
-exports.isEmpty = function(obj){
-  return 0 == exports.length(obj);
-};
-},{}],42:[function(_dereq_,module,exports){
-/**
- * Parses an URI
- *
- * @author Steven Levithan <stevenlevithan.com> (MIT license)
- * @api private
- */
-
-var re = /^(?:(?![^:@]+:[^:@\/]*@)(http|https|ws|wss):\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?((?:[a-f0-9]{0,4}:){2,7}[a-f0-9]{0,4}|[^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/;
-
-var parts = [
-    'source', 'protocol', 'authority', 'userInfo', 'user', 'password', 'host'
-  , 'port', 'relative', 'path', 'directory', 'file', 'query', 'anchor'
-];
-
-module.exports = function parseuri(str) {
-  var m = re.exec(str || '')
-    , uri = {}
-    , i = 14;
-
-  while (i--) {
-    uri[parts[i]] = m[i] || '';
-  }
-
-  return uri;
-};
-
-},{}],43:[function(_dereq_,module,exports){
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {})
+},{"isarray":43}],42:[function(_dereq_,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23}],43:[function(_dereq_,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],44:[function(_dereq_,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],45:[function(_dereq_,module,exports){
+arguments[4][28][0].apply(exports,arguments)
+},{"dup":28}],46:[function(_dereq_,module,exports){
 (function (global){
 /*global Blob,File*/
 
@@ -5691,8 +5902,8 @@ exports.removeBlobs = function(data, callback) {
   }
 };
 
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./is-buffer":45,"isarray":46}],44:[function(_dereq_,module,exports){
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {})
+},{"./is-buffer":48,"isarray":43}],47:[function(_dereq_,module,exports){
 
 /**
  * Module dependencies.
@@ -6094,7 +6305,7 @@ function error(data){
   };
 }
 
-},{"./binary":43,"./is-buffer":45,"component-emitter":9,"debug":10,"isarray":46,"json3":47}],45:[function(_dereq_,module,exports){
+},{"./binary":46,"./is-buffer":48,"component-emitter":49,"debug":39,"isarray":43,"json3":50}],48:[function(_dereq_,module,exports){
 (function (global){
 
 module.exports = isBuf;
@@ -6110,862 +6321,904 @@ function isBuf(obj) {
          (global.ArrayBuffer && obj instanceof ArrayBuffer);
 }
 
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],46:[function(_dereq_,module,exports){
-module.exports=_dereq_(37)
-},{}],47:[function(_dereq_,module,exports){
-/*! JSON v3.2.6 | http://bestiejs.github.io/json3 | Copyright 2012-2013, Kit Cambridge | http://kit.mit-license.org */
-;(function (window) {
-  // Convenience aliases.
-  var getClass = {}.toString, isProperty, forEach, undef;
-
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {})
+},{}],49:[function(_dereq_,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15}],50:[function(_dereq_,module,exports){
+(function (global){
+/*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
+;(function () {
   // Detect the `define` function exposed by asynchronous module loaders. The
   // strict `define` check is necessary for compatibility with `r.js`.
   var isLoader = typeof define === "function" && define.amd;
 
-  // Detect native implementations.
-  var nativeJSON = typeof JSON == "object" && JSON;
+  // A set of types used to distinguish objects from primitives.
+  var objectTypes = {
+    "function": true,
+    "object": true
+  };
 
-  // Set up the JSON 3 namespace, preferring the CommonJS `exports` object if
-  // available.
-  var JSON3 = typeof exports == "object" && exports && !exports.nodeType && exports;
+  // Detect the `exports` object exposed by CommonJS implementations.
+  var freeExports = objectTypes[typeof exports] && exports && !exports.nodeType && exports;
 
-  if (JSON3 && nativeJSON) {
-    // Explicitly delegate to the native `stringify` and `parse`
-    // implementations in CommonJS environments.
-    JSON3.stringify = nativeJSON.stringify;
-    JSON3.parse = nativeJSON.parse;
-  } else {
-    // Export for web browsers, JavaScript engines, and asynchronous module
-    // loaders, using the global `JSON` object if available.
-    JSON3 = window.JSON = nativeJSON || {};
+  // Use the `global` object exposed by Node (including Browserify via
+  // `insert-module-globals`), Narwhal, and Ringo as the default context,
+  // and the `window` object in browsers. Rhino exports a `global` function
+  // instead.
+  var root = objectTypes[typeof window] && window || this,
+      freeGlobal = freeExports && objectTypes[typeof module] && module && !module.nodeType && typeof global == "object" && global;
+
+  if (freeGlobal && (freeGlobal["global"] === freeGlobal || freeGlobal["window"] === freeGlobal || freeGlobal["self"] === freeGlobal)) {
+    root = freeGlobal;
   }
 
-  // Test the `Date#getUTC*` methods. Based on work by @Yaffle.
-  var isExtended = new Date(-3509827334573292);
-  try {
-    // The `getUTCFullYear`, `Month`, and `Date` methods return nonsensical
-    // results for certain dates in Opera >= 10.53.
-    isExtended = isExtended.getUTCFullYear() == -109252 && isExtended.getUTCMonth() === 0 && isExtended.getUTCDate() === 1 &&
-      // Safari < 2.0.2 stores the internal millisecond time value correctly,
-      // but clips the values returned by the date methods to the range of
-      // signed 32-bit integers ([-2 ** 31, 2 ** 31 - 1]).
-      isExtended.getUTCHours() == 10 && isExtended.getUTCMinutes() == 37 && isExtended.getUTCSeconds() == 6 && isExtended.getUTCMilliseconds() == 708;
-  } catch (exception) {}
+  // Public: Initializes JSON 3 using the given `context` object, attaching the
+  // `stringify` and `parse` functions to the specified `exports` object.
+  function runInContext(context, exports) {
+    context || (context = root["Object"]());
+    exports || (exports = root["Object"]());
 
-  // Internal: Determines whether the native `JSON.stringify` and `parse`
-  // implementations are spec-compliant. Based on work by Ken Snyder.
-  function has(name) {
-    if (has[name] !== undef) {
-      // Return cached feature test result.
-      return has[name];
+    // Native constructor aliases.
+    var Number = context["Number"] || root["Number"],
+        String = context["String"] || root["String"],
+        Object = context["Object"] || root["Object"],
+        Date = context["Date"] || root["Date"],
+        SyntaxError = context["SyntaxError"] || root["SyntaxError"],
+        TypeError = context["TypeError"] || root["TypeError"],
+        Math = context["Math"] || root["Math"],
+        nativeJSON = context["JSON"] || root["JSON"];
+
+    // Delegate to the native `stringify` and `parse` implementations.
+    if (typeof nativeJSON == "object" && nativeJSON) {
+      exports.stringify = nativeJSON.stringify;
+      exports.parse = nativeJSON.parse;
     }
 
-    var isSupported;
-    if (name == "bug-string-char-index") {
-      // IE <= 7 doesn't support accessing string characters using square
-      // bracket notation. IE 8 only supports this for primitives.
-      isSupported = "a"[0] != "a";
-    } else if (name == "json") {
-      // Indicates whether both `JSON.stringify` and `JSON.parse` are
-      // supported.
-      isSupported = has("json-stringify") && has("json-parse");
-    } else {
-      var value, serialized = '{"a":[1,true,false,null,"\\u0000\\b\\n\\f\\r\\t"]}';
-      // Test `JSON.stringify`.
-      if (name == "json-stringify") {
-        var stringify = JSON3.stringify, stringifySupported = typeof stringify == "function" && isExtended;
-        if (stringifySupported) {
-          // A test function object with a custom `toJSON` method.
-          (value = function () {
-            return 1;
-          }).toJSON = value;
-          try {
-            stringifySupported =
-              // Firefox 3.1b1 and b2 serialize string, number, and boolean
-              // primitives as object literals.
-              stringify(0) === "0" &&
-              // FF 3.1b1, b2, and JSON 2 serialize wrapped primitives as object
-              // literals.
-              stringify(new Number()) === "0" &&
-              stringify(new String()) == '""' &&
-              // FF 3.1b1, 2 throw an error if the value is `null`, `undefined`, or
-              // does not define a canonical JSON representation (this applies to
-              // objects with `toJSON` properties as well, *unless* they are nested
-              // within an object or array).
-              stringify(getClass) === undef &&
-              // IE 8 serializes `undefined` as `"undefined"`. Safari <= 5.1.7 and
-              // FF 3.1b3 pass this test.
-              stringify(undef) === undef &&
-              // Safari <= 5.1.7 and FF 3.1b3 throw `Error`s and `TypeError`s,
-              // respectively, if the value is omitted entirely.
-              stringify() === undef &&
-              // FF 3.1b1, 2 throw an error if the given value is not a number,
-              // string, array, object, Boolean, or `null` literal. This applies to
-              // objects with custom `toJSON` methods as well, unless they are nested
-              // inside object or array literals. YUI 3.0.0b1 ignores custom `toJSON`
-              // methods entirely.
-              stringify(value) === "1" &&
-              stringify([value]) == "[1]" &&
-              // Prototype <= 1.6.1 serializes `[undefined]` as `"[]"` instead of
-              // `"[null]"`.
-              stringify([undef]) == "[null]" &&
-              // YUI 3.0.0b1 fails to serialize `null` literals.
-              stringify(null) == "null" &&
-              // FF 3.1b1, 2 halts serialization if an array contains a function:
-              // `[1, true, getClass, 1]` serializes as "[1,true,],". FF 3.1b3
-              // elides non-JSON values from objects and arrays, unless they
-              // define custom `toJSON` methods.
-              stringify([undef, getClass, null]) == "[null,null,null]" &&
-              // Simple serialization test. FF 3.1b1 uses Unicode escape sequences
-              // where character escape codes are expected (e.g., `\b` => `\u0008`).
-              stringify({ "a": [value, true, false, null, "\x00\b\n\f\r\t"] }) == serialized &&
-              // FF 3.1b1 and b2 ignore the `filter` and `width` arguments.
-              stringify(null, value) === "1" &&
-              stringify([1, 2], null, 1) == "[\n 1,\n 2\n]" &&
-              // JSON 2, Prototype <= 1.7, and older WebKit builds incorrectly
-              // serialize extended years.
-              stringify(new Date(-8.64e15)) == '"-271821-04-20T00:00:00.000Z"' &&
-              // The milliseconds are optional in ES 5, but required in 5.1.
-              stringify(new Date(8.64e15)) == '"+275760-09-13T00:00:00.000Z"' &&
-              // Firefox <= 11.0 incorrectly serializes years prior to 0 as negative
-              // four-digit years instead of six-digit years. Credits: @Yaffle.
-              stringify(new Date(-621987552e5)) == '"-000001-01-01T00:00:00.000Z"' &&
-              // Safari <= 5.1.5 and Opera >= 10.53 incorrectly serialize millisecond
-              // values less than 1000. Credits: @Yaffle.
-              stringify(new Date(-1)) == '"1969-12-31T23:59:59.999Z"';
-          } catch (exception) {
-            stringifySupported = false;
-          }
-        }
-        isSupported = stringifySupported;
+    // Convenience aliases.
+    var objectProto = Object.prototype,
+        getClass = objectProto.toString,
+        isProperty, forEach, undef;
+
+    // Test the `Date#getUTC*` methods. Based on work by @Yaffle.
+    var isExtended = new Date(-3509827334573292);
+    try {
+      // The `getUTCFullYear`, `Month`, and `Date` methods return nonsensical
+      // results for certain dates in Opera >= 10.53.
+      isExtended = isExtended.getUTCFullYear() == -109252 && isExtended.getUTCMonth() === 0 && isExtended.getUTCDate() === 1 &&
+        // Safari < 2.0.2 stores the internal millisecond time value correctly,
+        // but clips the values returned by the date methods to the range of
+        // signed 32-bit integers ([-2 ** 31, 2 ** 31 - 1]).
+        isExtended.getUTCHours() == 10 && isExtended.getUTCMinutes() == 37 && isExtended.getUTCSeconds() == 6 && isExtended.getUTCMilliseconds() == 708;
+    } catch (exception) {}
+
+    // Internal: Determines whether the native `JSON.stringify` and `parse`
+    // implementations are spec-compliant. Based on work by Ken Snyder.
+    function has(name) {
+      if (has[name] !== undef) {
+        // Return cached feature test result.
+        return has[name];
       }
-      // Test `JSON.parse`.
-      if (name == "json-parse") {
-        var parse = JSON3.parse;
-        if (typeof parse == "function") {
-          try {
-            // FF 3.1b1, b2 will throw an exception if a bare literal is provided.
-            // Conforming implementations should also coerce the initial argument to
-            // a string prior to parsing.
-            if (parse("0") === 0 && !parse(false)) {
-              // Simple parsing test.
-              value = parse(serialized);
-              var parseSupported = value["a"].length == 5 && value["a"][0] === 1;
-              if (parseSupported) {
-                try {
-                  // Safari <= 5.1.2 and FF 3.1b1 allow unescaped tabs in strings.
-                  parseSupported = !parse('"\t"');
-                } catch (exception) {}
+      var isSupported;
+      if (name == "bug-string-char-index") {
+        // IE <= 7 doesn't support accessing string characters using square
+        // bracket notation. IE 8 only supports this for primitives.
+        isSupported = "a"[0] != "a";
+      } else if (name == "json") {
+        // Indicates whether both `JSON.stringify` and `JSON.parse` are
+        // supported.
+        isSupported = has("json-stringify") && has("json-parse");
+      } else {
+        var value, serialized = '{"a":[1,true,false,null,"\\u0000\\b\\n\\f\\r\\t"]}';
+        // Test `JSON.stringify`.
+        if (name == "json-stringify") {
+          var stringify = exports.stringify, stringifySupported = typeof stringify == "function" && isExtended;
+          if (stringifySupported) {
+            // A test function object with a custom `toJSON` method.
+            (value = function () {
+              return 1;
+            }).toJSON = value;
+            try {
+              stringifySupported =
+                // Firefox 3.1b1 and b2 serialize string, number, and boolean
+                // primitives as object literals.
+                stringify(0) === "0" &&
+                // FF 3.1b1, b2, and JSON 2 serialize wrapped primitives as object
+                // literals.
+                stringify(new Number()) === "0" &&
+                stringify(new String()) == '""' &&
+                // FF 3.1b1, 2 throw an error if the value is `null`, `undefined`, or
+                // does not define a canonical JSON representation (this applies to
+                // objects with `toJSON` properties as well, *unless* they are nested
+                // within an object or array).
+                stringify(getClass) === undef &&
+                // IE 8 serializes `undefined` as `"undefined"`. Safari <= 5.1.7 and
+                // FF 3.1b3 pass this test.
+                stringify(undef) === undef &&
+                // Safari <= 5.1.7 and FF 3.1b3 throw `Error`s and `TypeError`s,
+                // respectively, if the value is omitted entirely.
+                stringify() === undef &&
+                // FF 3.1b1, 2 throw an error if the given value is not a number,
+                // string, array, object, Boolean, or `null` literal. This applies to
+                // objects with custom `toJSON` methods as well, unless they are nested
+                // inside object or array literals. YUI 3.0.0b1 ignores custom `toJSON`
+                // methods entirely.
+                stringify(value) === "1" &&
+                stringify([value]) == "[1]" &&
+                // Prototype <= 1.6.1 serializes `[undefined]` as `"[]"` instead of
+                // `"[null]"`.
+                stringify([undef]) == "[null]" &&
+                // YUI 3.0.0b1 fails to serialize `null` literals.
+                stringify(null) == "null" &&
+                // FF 3.1b1, 2 halts serialization if an array contains a function:
+                // `[1, true, getClass, 1]` serializes as "[1,true,],". FF 3.1b3
+                // elides non-JSON values from objects and arrays, unless they
+                // define custom `toJSON` methods.
+                stringify([undef, getClass, null]) == "[null,null,null]" &&
+                // Simple serialization test. FF 3.1b1 uses Unicode escape sequences
+                // where character escape codes are expected (e.g., `\b` => `\u0008`).
+                stringify({ "a": [value, true, false, null, "\x00\b\n\f\r\t"] }) == serialized &&
+                // FF 3.1b1 and b2 ignore the `filter` and `width` arguments.
+                stringify(null, value) === "1" &&
+                stringify([1, 2], null, 1) == "[\n 1,\n 2\n]" &&
+                // JSON 2, Prototype <= 1.7, and older WebKit builds incorrectly
+                // serialize extended years.
+                stringify(new Date(-8.64e15)) == '"-271821-04-20T00:00:00.000Z"' &&
+                // The milliseconds are optional in ES 5, but required in 5.1.
+                stringify(new Date(8.64e15)) == '"+275760-09-13T00:00:00.000Z"' &&
+                // Firefox <= 11.0 incorrectly serializes years prior to 0 as negative
+                // four-digit years instead of six-digit years. Credits: @Yaffle.
+                stringify(new Date(-621987552e5)) == '"-000001-01-01T00:00:00.000Z"' &&
+                // Safari <= 5.1.5 and Opera >= 10.53 incorrectly serialize millisecond
+                // values less than 1000. Credits: @Yaffle.
+                stringify(new Date(-1)) == '"1969-12-31T23:59:59.999Z"';
+            } catch (exception) {
+              stringifySupported = false;
+            }
+          }
+          isSupported = stringifySupported;
+        }
+        // Test `JSON.parse`.
+        if (name == "json-parse") {
+          var parse = exports.parse;
+          if (typeof parse == "function") {
+            try {
+              // FF 3.1b1, b2 will throw an exception if a bare literal is provided.
+              // Conforming implementations should also coerce the initial argument to
+              // a string prior to parsing.
+              if (parse("0") === 0 && !parse(false)) {
+                // Simple parsing test.
+                value = parse(serialized);
+                var parseSupported = value["a"].length == 5 && value["a"][0] === 1;
                 if (parseSupported) {
                   try {
-                    // FF 4.0 and 4.0.1 allow leading `+` signs and leading
-                    // decimal points. FF 4.0, 4.0.1, and IE 9-10 also allow
-                    // certain octal literals.
-                    parseSupported = parse("01") !== 1;
+                    // Safari <= 5.1.2 and FF 3.1b1 allow unescaped tabs in strings.
+                    parseSupported = !parse('"\t"');
                   } catch (exception) {}
-                }
-                if (parseSupported) {
-                  try {
-                    // FF 4.0, 4.0.1, and Rhino 1.7R3-R4 allow trailing decimal
-                    // points. These environments, along with FF 3.1b1 and 2,
-                    // also allow trailing commas in JSON objects and arrays.
-                    parseSupported = parse("1.") !== 1;
-                  } catch (exception) {}
+                  if (parseSupported) {
+                    try {
+                      // FF 4.0 and 4.0.1 allow leading `+` signs and leading
+                      // decimal points. FF 4.0, 4.0.1, and IE 9-10 also allow
+                      // certain octal literals.
+                      parseSupported = parse("01") !== 1;
+                    } catch (exception) {}
+                  }
+                  if (parseSupported) {
+                    try {
+                      // FF 4.0, 4.0.1, and Rhino 1.7R3-R4 allow trailing decimal
+                      // points. These environments, along with FF 3.1b1 and 2,
+                      // also allow trailing commas in JSON objects and arrays.
+                      parseSupported = parse("1.") !== 1;
+                    } catch (exception) {}
+                  }
                 }
               }
+            } catch (exception) {
+              parseSupported = false;
             }
-          } catch (exception) {
-            parseSupported = false;
+          }
+          isSupported = parseSupported;
+        }
+      }
+      return has[name] = !!isSupported;
+    }
+
+    if (!has("json")) {
+      // Common `[[Class]]` name aliases.
+      var functionClass = "[object Function]",
+          dateClass = "[object Date]",
+          numberClass = "[object Number]",
+          stringClass = "[object String]",
+          arrayClass = "[object Array]",
+          booleanClass = "[object Boolean]";
+
+      // Detect incomplete support for accessing string characters by index.
+      var charIndexBuggy = has("bug-string-char-index");
+
+      // Define additional utility methods if the `Date` methods are buggy.
+      if (!isExtended) {
+        var floor = Math.floor;
+        // A mapping between the months of the year and the number of days between
+        // January 1st and the first of the respective month.
+        var Months = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+        // Internal: Calculates the number of days between the Unix epoch and the
+        // first day of the given month.
+        var getDay = function (year, month) {
+          return Months[month] + 365 * (year - 1970) + floor((year - 1969 + (month = +(month > 1))) / 4) - floor((year - 1901 + month) / 100) + floor((year - 1601 + month) / 400);
+        };
+      }
+
+      // Internal: Determines if a property is a direct property of the given
+      // object. Delegates to the native `Object#hasOwnProperty` method.
+      if (!(isProperty = objectProto.hasOwnProperty)) {
+        isProperty = function (property) {
+          var members = {}, constructor;
+          if ((members.__proto__ = null, members.__proto__ = {
+            // The *proto* property cannot be set multiple times in recent
+            // versions of Firefox and SeaMonkey.
+            "toString": 1
+          }, members).toString != getClass) {
+            // Safari <= 2.0.3 doesn't implement `Object#hasOwnProperty`, but
+            // supports the mutable *proto* property.
+            isProperty = function (property) {
+              // Capture and break the object's prototype chain (see section 8.6.2
+              // of the ES 5.1 spec). The parenthesized expression prevents an
+              // unsafe transformation by the Closure Compiler.
+              var original = this.__proto__, result = property in (this.__proto__ = null, this);
+              // Restore the original prototype chain.
+              this.__proto__ = original;
+              return result;
+            };
+          } else {
+            // Capture a reference to the top-level `Object` constructor.
+            constructor = members.constructor;
+            // Use the `constructor` property to simulate `Object#hasOwnProperty` in
+            // other environments.
+            isProperty = function (property) {
+              var parent = (this.constructor || constructor).prototype;
+              return property in this && !(property in parent && this[property] === parent[property]);
+            };
+          }
+          members = null;
+          return isProperty.call(this, property);
+        };
+      }
+
+      // Internal: Normalizes the `for...in` iteration algorithm across
+      // environments. Each enumerated key is yielded to a `callback` function.
+      forEach = function (object, callback) {
+        var size = 0, Properties, members, property;
+
+        // Tests for bugs in the current environment's `for...in` algorithm. The
+        // `valueOf` property inherits the non-enumerable flag from
+        // `Object.prototype` in older versions of IE, Netscape, and Mozilla.
+        (Properties = function () {
+          this.valueOf = 0;
+        }).prototype.valueOf = 0;
+
+        // Iterate over a new instance of the `Properties` class.
+        members = new Properties();
+        for (property in members) {
+          // Ignore all properties inherited from `Object.prototype`.
+          if (isProperty.call(members, property)) {
+            size++;
           }
         }
-        isSupported = parseSupported;
-      }
-    }
-    return has[name] = !!isSupported;
-  }
+        Properties = members = null;
 
-  if (!has("json")) {
-    // Common `[[Class]]` name aliases.
-    var functionClass = "[object Function]";
-    var dateClass = "[object Date]";
-    var numberClass = "[object Number]";
-    var stringClass = "[object String]";
-    var arrayClass = "[object Array]";
-    var booleanClass = "[object Boolean]";
-
-    // Detect incomplete support for accessing string characters by index.
-    var charIndexBuggy = has("bug-string-char-index");
-
-    // Define additional utility methods if the `Date` methods are buggy.
-    if (!isExtended) {
-      var floor = Math.floor;
-      // A mapping between the months of the year and the number of days between
-      // January 1st and the first of the respective month.
-      var Months = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
-      // Internal: Calculates the number of days between the Unix epoch and the
-      // first day of the given month.
-      var getDay = function (year, month) {
-        return Months[month] + 365 * (year - 1970) + floor((year - 1969 + (month = +(month > 1))) / 4) - floor((year - 1901 + month) / 100) + floor((year - 1601 + month) / 400);
-      };
-    }
-
-    // Internal: Determines if a property is a direct property of the given
-    // object. Delegates to the native `Object#hasOwnProperty` method.
-    if (!(isProperty = {}.hasOwnProperty)) {
-      isProperty = function (property) {
-        var members = {}, constructor;
-        if ((members.__proto__ = null, members.__proto__ = {
-          // The *proto* property cannot be set multiple times in recent
-          // versions of Firefox and SeaMonkey.
-          "toString": 1
-        }, members).toString != getClass) {
-          // Safari <= 2.0.3 doesn't implement `Object#hasOwnProperty`, but
-          // supports the mutable *proto* property.
-          isProperty = function (property) {
-            // Capture and break the object's prototype chain (see section 8.6.2
-            // of the ES 5.1 spec). The parenthesized expression prevents an
-            // unsafe transformation by the Closure Compiler.
-            var original = this.__proto__, result = property in (this.__proto__ = null, this);
-            // Restore the original prototype chain.
-            this.__proto__ = original;
-            return result;
+        // Normalize the iteration algorithm.
+        if (!size) {
+          // A list of non-enumerable properties inherited from `Object.prototype`.
+          members = ["valueOf", "toString", "toLocaleString", "propertyIsEnumerable", "isPrototypeOf", "hasOwnProperty", "constructor"];
+          // IE <= 8, Mozilla 1.0, and Netscape 6.2 ignore shadowed non-enumerable
+          // properties.
+          forEach = function (object, callback) {
+            var isFunction = getClass.call(object) == functionClass, property, length;
+            var hasProperty = !isFunction && typeof object.constructor != "function" && objectTypes[typeof object.hasOwnProperty] && object.hasOwnProperty || isProperty;
+            for (property in object) {
+              // Gecko <= 1.0 enumerates the `prototype` property of functions under
+              // certain conditions; IE does not.
+              if (!(isFunction && property == "prototype") && hasProperty.call(object, property)) {
+                callback(property);
+              }
+            }
+            // Manually invoke the callback for each non-enumerable property.
+            for (length = members.length; property = members[--length]; hasProperty.call(object, property) && callback(property));
+          };
+        } else if (size == 2) {
+          // Safari <= 2.0.4 enumerates shadowed properties twice.
+          forEach = function (object, callback) {
+            // Create a set of iterated properties.
+            var members = {}, isFunction = getClass.call(object) == functionClass, property;
+            for (property in object) {
+              // Store each property name to prevent double enumeration. The
+              // `prototype` property of functions is not enumerated due to cross-
+              // environment inconsistencies.
+              if (!(isFunction && property == "prototype") && !isProperty.call(members, property) && (members[property] = 1) && isProperty.call(object, property)) {
+                callback(property);
+              }
+            }
           };
         } else {
-          // Capture a reference to the top-level `Object` constructor.
-          constructor = members.constructor;
-          // Use the `constructor` property to simulate `Object#hasOwnProperty` in
-          // other environments.
-          isProperty = function (property) {
-            var parent = (this.constructor || constructor).prototype;
-            return property in this && !(property in parent && this[property] === parent[property]);
+          // No bugs detected; use the standard `for...in` algorithm.
+          forEach = function (object, callback) {
+            var isFunction = getClass.call(object) == functionClass, property, isConstructor;
+            for (property in object) {
+              if (!(isFunction && property == "prototype") && isProperty.call(object, property) && !(isConstructor = property === "constructor")) {
+                callback(property);
+              }
+            }
+            // Manually invoke the callback for the `constructor` property due to
+            // cross-environment inconsistencies.
+            if (isConstructor || isProperty.call(object, (property = "constructor"))) {
+              callback(property);
+            }
           };
         }
-        members = null;
-        return isProperty.call(this, property);
-      };
-    }
-
-    // Internal: A set of primitive types used by `isHostType`.
-    var PrimitiveTypes = {
-      'boolean': 1,
-      'number': 1,
-      'string': 1,
-      'undefined': 1
-    };
-
-    // Internal: Determines if the given object `property` value is a
-    // non-primitive.
-    var isHostType = function (object, property) {
-      var type = typeof object[property];
-      return type == 'object' ? !!object[property] : !PrimitiveTypes[type];
-    };
-
-    // Internal: Normalizes the `for...in` iteration algorithm across
-    // environments. Each enumerated key is yielded to a `callback` function.
-    forEach = function (object, callback) {
-      var size = 0, Properties, members, property;
-
-      // Tests for bugs in the current environment's `for...in` algorithm. The
-      // `valueOf` property inherits the non-enumerable flag from
-      // `Object.prototype` in older versions of IE, Netscape, and Mozilla.
-      (Properties = function () {
-        this.valueOf = 0;
-      }).prototype.valueOf = 0;
-
-      // Iterate over a new instance of the `Properties` class.
-      members = new Properties();
-      for (property in members) {
-        // Ignore all properties inherited from `Object.prototype`.
-        if (isProperty.call(members, property)) {
-          size++;
-        }
-      }
-      Properties = members = null;
-
-      // Normalize the iteration algorithm.
-      if (!size) {
-        // A list of non-enumerable properties inherited from `Object.prototype`.
-        members = ["valueOf", "toString", "toLocaleString", "propertyIsEnumerable", "isPrototypeOf", "hasOwnProperty", "constructor"];
-        // IE <= 8, Mozilla 1.0, and Netscape 6.2 ignore shadowed non-enumerable
-        // properties.
-        forEach = function (object, callback) {
-          var isFunction = getClass.call(object) == functionClass, property, length;
-          var hasProperty = !isFunction && typeof object.constructor != 'function' && isHostType(object, 'hasOwnProperty') ? object.hasOwnProperty : isProperty;
-          for (property in object) {
-            // Gecko <= 1.0 enumerates the `prototype` property of functions under
-            // certain conditions; IE does not.
-            if (!(isFunction && property == "prototype") && hasProperty.call(object, property)) {
-              callback(property);
-            }
-          }
-          // Manually invoke the callback for each non-enumerable property.
-          for (length = members.length; property = members[--length]; hasProperty.call(object, property) && callback(property));
-        };
-      } else if (size == 2) {
-        // Safari <= 2.0.4 enumerates shadowed properties twice.
-        forEach = function (object, callback) {
-          // Create a set of iterated properties.
-          var members = {}, isFunction = getClass.call(object) == functionClass, property;
-          for (property in object) {
-            // Store each property name to prevent double enumeration. The
-            // `prototype` property of functions is not enumerated due to cross-
-            // environment inconsistencies.
-            if (!(isFunction && property == "prototype") && !isProperty.call(members, property) && (members[property] = 1) && isProperty.call(object, property)) {
-              callback(property);
-            }
-          }
-        };
-      } else {
-        // No bugs detected; use the standard `for...in` algorithm.
-        forEach = function (object, callback) {
-          var isFunction = getClass.call(object) == functionClass, property, isConstructor;
-          for (property in object) {
-            if (!(isFunction && property == "prototype") && isProperty.call(object, property) && !(isConstructor = property === "constructor")) {
-              callback(property);
-            }
-          }
-          // Manually invoke the callback for the `constructor` property due to
-          // cross-environment inconsistencies.
-          if (isConstructor || isProperty.call(object, (property = "constructor"))) {
-            callback(property);
-          }
-        };
-      }
-      return forEach(object, callback);
-    };
-
-    // Public: Serializes a JavaScript `value` as a JSON string. The optional
-    // `filter` argument may specify either a function that alters how object and
-    // array members are serialized, or an array of strings and numbers that
-    // indicates which properties should be serialized. The optional `width`
-    // argument may be either a string or number that specifies the indentation
-    // level of the output.
-    if (!has("json-stringify")) {
-      // Internal: A map of control characters and their escaped equivalents.
-      var Escapes = {
-        92: "\\\\",
-        34: '\\"',
-        8: "\\b",
-        12: "\\f",
-        10: "\\n",
-        13: "\\r",
-        9: "\\t"
+        return forEach(object, callback);
       };
 
-      // Internal: Converts `value` into a zero-padded string such that its
-      // length is at least equal to `width`. The `width` must be <= 6.
-      var leadingZeroes = "000000";
-      var toPaddedString = function (width, value) {
-        // The `|| 0` expression is necessary to work around a bug in
-        // Opera <= 7.54u2 where `0 == -0`, but `String(-0) !== "0"`.
-        return (leadingZeroes + (value || 0)).slice(-width);
-      };
+      // Public: Serializes a JavaScript `value` as a JSON string. The optional
+      // `filter` argument may specify either a function that alters how object and
+      // array members are serialized, or an array of strings and numbers that
+      // indicates which properties should be serialized. The optional `width`
+      // argument may be either a string or number that specifies the indentation
+      // level of the output.
+      if (!has("json-stringify")) {
+        // Internal: A map of control characters and their escaped equivalents.
+        var Escapes = {
+          92: "\\\\",
+          34: '\\"',
+          8: "\\b",
+          12: "\\f",
+          10: "\\n",
+          13: "\\r",
+          9: "\\t"
+        };
 
-      // Internal: Double-quotes a string `value`, replacing all ASCII control
-      // characters (characters with code unit values between 0 and 31) with
-      // their escaped equivalents. This is an implementation of the
-      // `Quote(value)` operation defined in ES 5.1 section 15.12.3.
-      var unicodePrefix = "\\u00";
-      var quote = function (value) {
-        var result = '"', index = 0, length = value.length, isLarge = length > 10 && charIndexBuggy, symbols;
-        if (isLarge) {
-          symbols = value.split("");
-        }
-        for (; index < length; index++) {
-          var charCode = value.charCodeAt(index);
-          // If the character is a control character, append its Unicode or
-          // shorthand escape sequence; otherwise, append the character as-is.
-          switch (charCode) {
-            case 8: case 9: case 10: case 12: case 13: case 34: case 92:
-              result += Escapes[charCode];
-              break;
-            default:
-              if (charCode < 32) {
-                result += unicodePrefix + toPaddedString(2, charCode.toString(16));
+        // Internal: Converts `value` into a zero-padded string such that its
+        // length is at least equal to `width`. The `width` must be <= 6.
+        var leadingZeroes = "000000";
+        var toPaddedString = function (width, value) {
+          // The `|| 0` expression is necessary to work around a bug in
+          // Opera <= 7.54u2 where `0 == -0`, but `String(-0) !== "0"`.
+          return (leadingZeroes + (value || 0)).slice(-width);
+        };
+
+        // Internal: Double-quotes a string `value`, replacing all ASCII control
+        // characters (characters with code unit values between 0 and 31) with
+        // their escaped equivalents. This is an implementation of the
+        // `Quote(value)` operation defined in ES 5.1 section 15.12.3.
+        var unicodePrefix = "\\u00";
+        var quote = function (value) {
+          var result = '"', index = 0, length = value.length, useCharIndex = !charIndexBuggy || length > 10;
+          var symbols = useCharIndex && (charIndexBuggy ? value.split("") : value);
+          for (; index < length; index++) {
+            var charCode = value.charCodeAt(index);
+            // If the character is a control character, append its Unicode or
+            // shorthand escape sequence; otherwise, append the character as-is.
+            switch (charCode) {
+              case 8: case 9: case 10: case 12: case 13: case 34: case 92:
+                result += Escapes[charCode];
                 break;
-              }
-              result += isLarge ? symbols[index] : charIndexBuggy ? value.charAt(index) : value[index];
-          }
-        }
-        return result + '"';
-      };
-
-      // Internal: Recursively serializes an object. Implements the
-      // `Str(key, holder)`, `JO(value)`, and `JA(value)` operations.
-      var serialize = function (property, object, callback, properties, whitespace, indentation, stack) {
-        var value, className, year, month, date, time, hours, minutes, seconds, milliseconds, results, element, index, length, prefix, result;
-        try {
-          // Necessary for host object support.
-          value = object[property];
-        } catch (exception) {}
-        if (typeof value == "object" && value) {
-          className = getClass.call(value);
-          if (className == dateClass && !isProperty.call(value, "toJSON")) {
-            if (value > -1 / 0 && value < 1 / 0) {
-              // Dates are serialized according to the `Date#toJSON` method
-              // specified in ES 5.1 section 15.9.5.44. See section 15.9.1.15
-              // for the ISO 8601 date time string format.
-              if (getDay) {
-                // Manually compute the year, month, date, hours, minutes,
-                // seconds, and milliseconds if the `getUTC*` methods are
-                // buggy. Adapted from @Yaffle's `date-shim` project.
-                date = floor(value / 864e5);
-                for (year = floor(date / 365.2425) + 1970 - 1; getDay(year + 1, 0) <= date; year++);
-                for (month = floor((date - getDay(year, 0)) / 30.42); getDay(year, month + 1) <= date; month++);
-                date = 1 + date - getDay(year, month);
-                // The `time` value specifies the time within the day (see ES
-                // 5.1 section 15.9.1.2). The formula `(A % B + B) % B` is used
-                // to compute `A modulo B`, as the `%` operator does not
-                // correspond to the `modulo` operation for negative numbers.
-                time = (value % 864e5 + 864e5) % 864e5;
-                // The hours, minutes, seconds, and milliseconds are obtained by
-                // decomposing the time within the day. See section 15.9.1.10.
-                hours = floor(time / 36e5) % 24;
-                minutes = floor(time / 6e4) % 60;
-                seconds = floor(time / 1e3) % 60;
-                milliseconds = time % 1e3;
-              } else {
-                year = value.getUTCFullYear();
-                month = value.getUTCMonth();
-                date = value.getUTCDate();
-                hours = value.getUTCHours();
-                minutes = value.getUTCMinutes();
-                seconds = value.getUTCSeconds();
-                milliseconds = value.getUTCMilliseconds();
-              }
-              // Serialize extended years correctly.
-              value = (year <= 0 || year >= 1e4 ? (year < 0 ? "-" : "+") + toPaddedString(6, year < 0 ? -year : year) : toPaddedString(4, year)) +
-                "-" + toPaddedString(2, month + 1) + "-" + toPaddedString(2, date) +
-                // Months, dates, hours, minutes, and seconds should have two
-                // digits; milliseconds should have three.
-                "T" + toPaddedString(2, hours) + ":" + toPaddedString(2, minutes) + ":" + toPaddedString(2, seconds) +
-                // Milliseconds are optional in ES 5.0, but required in 5.1.
-                "." + toPaddedString(3, milliseconds) + "Z";
-            } else {
-              value = null;
-            }
-          } else if (typeof value.toJSON == "function" && ((className != numberClass && className != stringClass && className != arrayClass) || isProperty.call(value, "toJSON"))) {
-            // Prototype <= 1.6.1 adds non-standard `toJSON` methods to the
-            // `Number`, `String`, `Date`, and `Array` prototypes. JSON 3
-            // ignores all `toJSON` methods on these objects unless they are
-            // defined directly on an instance.
-            value = value.toJSON(property);
-          }
-        }
-        if (callback) {
-          // If a replacement function was provided, call it to obtain the value
-          // for serialization.
-          value = callback.call(object, property, value);
-        }
-        if (value === null) {
-          return "null";
-        }
-        className = getClass.call(value);
-        if (className == booleanClass) {
-          // Booleans are represented literally.
-          return "" + value;
-        } else if (className == numberClass) {
-          // JSON numbers must be finite. `Infinity` and `NaN` are serialized as
-          // `"null"`.
-          return value > -1 / 0 && value < 1 / 0 ? "" + value : "null";
-        } else if (className == stringClass) {
-          // Strings are double-quoted and escaped.
-          return quote("" + value);
-        }
-        // Recursively serialize objects and arrays.
-        if (typeof value == "object") {
-          // Check for cyclic structures. This is a linear search; performance
-          // is inversely proportional to the number of unique nested objects.
-          for (length = stack.length; length--;) {
-            if (stack[length] === value) {
-              // Cyclic structures cannot be serialized by `JSON.stringify`.
-              throw TypeError();
-            }
-          }
-          // Add the object to the stack of traversed objects.
-          stack.push(value);
-          results = [];
-          // Save the current indentation level and indent one additional level.
-          prefix = indentation;
-          indentation += whitespace;
-          if (className == arrayClass) {
-            // Recursively serialize array elements.
-            for (index = 0, length = value.length; index < length; index++) {
-              element = serialize(index, value, callback, properties, whitespace, indentation, stack);
-              results.push(element === undef ? "null" : element);
-            }
-            result = results.length ? (whitespace ? "[\n" + indentation + results.join(",\n" + indentation) + "\n" + prefix + "]" : ("[" + results.join(",") + "]")) : "[]";
-          } else {
-            // Recursively serialize object members. Members are selected from
-            // either a user-specified list of property names, or the object
-            // itself.
-            forEach(properties || value, function (property) {
-              var element = serialize(property, value, callback, properties, whitespace, indentation, stack);
-              if (element !== undef) {
-                // According to ES 5.1 section 15.12.3: "If `gap` {whitespace}
-                // is not the empty string, let `member` {quote(property) + ":"}
-                // be the concatenation of `member` and the `space` character."
-                // The "`space` character" refers to the literal space
-                // character, not the `space` {width} argument provided to
-                // `JSON.stringify`.
-                results.push(quote(property) + ":" + (whitespace ? " " : "") + element);
-              }
-            });
-            result = results.length ? (whitespace ? "{\n" + indentation + results.join(",\n" + indentation) + "\n" + prefix + "}" : ("{" + results.join(",") + "}")) : "{}";
-          }
-          // Remove the object from the traversed object stack.
-          stack.pop();
-          return result;
-        }
-      };
-
-      // Public: `JSON.stringify`. See ES 5.1 section 15.12.3.
-      JSON3.stringify = function (source, filter, width) {
-        var whitespace, callback, properties, className;
-        if (typeof filter == "function" || typeof filter == "object" && filter) {
-          if ((className = getClass.call(filter)) == functionClass) {
-            callback = filter;
-          } else if (className == arrayClass) {
-            // Convert the property names array into a makeshift set.
-            properties = {};
-            for (var index = 0, length = filter.length, value; index < length; value = filter[index++], ((className = getClass.call(value)), className == stringClass || className == numberClass) && (properties[value] = 1));
-          }
-        }
-        if (width) {
-          if ((className = getClass.call(width)) == numberClass) {
-            // Convert the `width` to an integer and create a string containing
-            // `width` number of space characters.
-            if ((width -= width % 1) > 0) {
-              for (whitespace = "", width > 10 && (width = 10); whitespace.length < width; whitespace += " ");
-            }
-          } else if (className == stringClass) {
-            whitespace = width.length <= 10 ? width : width.slice(0, 10);
-          }
-        }
-        // Opera <= 7.54u2 discards the values associated with empty string keys
-        // (`""`) only if they are used directly within an object member list
-        // (e.g., `!("" in { "": 1})`).
-        return serialize("", (value = {}, value[""] = source, value), callback, properties, whitespace, "", []);
-      };
-    }
-
-    // Public: Parses a JSON source string.
-    if (!has("json-parse")) {
-      var fromCharCode = String.fromCharCode;
-
-      // Internal: A map of escaped control characters and their unescaped
-      // equivalents.
-      var Unescapes = {
-        92: "\\",
-        34: '"',
-        47: "/",
-        98: "\b",
-        116: "\t",
-        110: "\n",
-        102: "\f",
-        114: "\r"
-      };
-
-      // Internal: Stores the parser state.
-      var Index, Source;
-
-      // Internal: Resets the parser state and throws a `SyntaxError`.
-      var abort = function() {
-        Index = Source = null;
-        throw SyntaxError();
-      };
-
-      // Internal: Returns the next token, or `"$"` if the parser has reached
-      // the end of the source string. A token may be a string, number, `null`
-      // literal, or Boolean literal.
-      var lex = function () {
-        var source = Source, length = source.length, value, begin, position, isSigned, charCode;
-        while (Index < length) {
-          charCode = source.charCodeAt(Index);
-          switch (charCode) {
-            case 9: case 10: case 13: case 32:
-              // Skip whitespace tokens, including tabs, carriage returns, line
-              // feeds, and space characters.
-              Index++;
-              break;
-            case 123: case 125: case 91: case 93: case 58: case 44:
-              // Parse a punctuator token (`{`, `}`, `[`, `]`, `:`, or `,`) at
-              // the current position.
-              value = charIndexBuggy ? source.charAt(Index) : source[Index];
-              Index++;
-              return value;
-            case 34:
-              // `"` delimits a JSON string; advance to the next character and
-              // begin parsing the string. String tokens are prefixed with the
-              // sentinel `@` character to distinguish them from punctuators and
-              // end-of-string tokens.
-              for (value = "@", Index++; Index < length;) {
-                charCode = source.charCodeAt(Index);
+              default:
                 if (charCode < 32) {
-                  // Unescaped ASCII control characters (those with a code unit
-                  // less than the space character) are not permitted.
-                  abort();
-                } else if (charCode == 92) {
-                  // A reverse solidus (`\`) marks the beginning of an escaped
-                  // control character (including `"`, `\`, and `/`) or Unicode
-                  // escape sequence.
-                  charCode = source.charCodeAt(++Index);
-                  switch (charCode) {
-                    case 92: case 34: case 47: case 98: case 116: case 110: case 102: case 114:
-                      // Revive escaped control characters.
-                      value += Unescapes[charCode];
-                      Index++;
-                      break;
-                    case 117:
-                      // `\u` marks the beginning of a Unicode escape sequence.
-                      // Advance to the first character and validate the
-                      // four-digit code point.
-                      begin = ++Index;
-                      for (position = Index + 4; Index < position; Index++) {
-                        charCode = source.charCodeAt(Index);
-                        // A valid sequence comprises four hexdigits (case-
-                        // insensitive) that form a single hexadecimal value.
-                        if (!(charCode >= 48 && charCode <= 57 || charCode >= 97 && charCode <= 102 || charCode >= 65 && charCode <= 70)) {
-                          // Invalid Unicode escape sequence.
-                          abort();
-                        }
-                      }
-                      // Revive the escaped character.
-                      value += fromCharCode("0x" + source.slice(begin, Index));
-                      break;
-                    default:
-                      // Invalid escape sequence.
-                      abort();
-                  }
-                } else {
-                  if (charCode == 34) {
-                    // An unescaped double-quote character marks the end of the
-                    // string.
-                    break;
-                  }
-                  charCode = source.charCodeAt(Index);
-                  begin = Index;
-                  // Optimize for the common case where a string is valid.
-                  while (charCode >= 32 && charCode != 92 && charCode != 34) {
-                    charCode = source.charCodeAt(++Index);
-                  }
-                  // Append the string as-is.
-                  value += source.slice(begin, Index);
+                  result += unicodePrefix + toPaddedString(2, charCode.toString(16));
+                  break;
                 }
+                result += useCharIndex ? symbols[index] : value.charAt(index);
+            }
+          }
+          return result + '"';
+        };
+
+        // Internal: Recursively serializes an object. Implements the
+        // `Str(key, holder)`, `JO(value)`, and `JA(value)` operations.
+        var serialize = function (property, object, callback, properties, whitespace, indentation, stack) {
+          var value, className, year, month, date, time, hours, minutes, seconds, milliseconds, results, element, index, length, prefix, result;
+          try {
+            // Necessary for host object support.
+            value = object[property];
+          } catch (exception) {}
+          if (typeof value == "object" && value) {
+            className = getClass.call(value);
+            if (className == dateClass && !isProperty.call(value, "toJSON")) {
+              if (value > -1 / 0 && value < 1 / 0) {
+                // Dates are serialized according to the `Date#toJSON` method
+                // specified in ES 5.1 section 15.9.5.44. See section 15.9.1.15
+                // for the ISO 8601 date time string format.
+                if (getDay) {
+                  // Manually compute the year, month, date, hours, minutes,
+                  // seconds, and milliseconds if the `getUTC*` methods are
+                  // buggy. Adapted from @Yaffle's `date-shim` project.
+                  date = floor(value / 864e5);
+                  for (year = floor(date / 365.2425) + 1970 - 1; getDay(year + 1, 0) <= date; year++);
+                  for (month = floor((date - getDay(year, 0)) / 30.42); getDay(year, month + 1) <= date; month++);
+                  date = 1 + date - getDay(year, month);
+                  // The `time` value specifies the time within the day (see ES
+                  // 5.1 section 15.9.1.2). The formula `(A % B + B) % B` is used
+                  // to compute `A modulo B`, as the `%` operator does not
+                  // correspond to the `modulo` operation for negative numbers.
+                  time = (value % 864e5 + 864e5) % 864e5;
+                  // The hours, minutes, seconds, and milliseconds are obtained by
+                  // decomposing the time within the day. See section 15.9.1.10.
+                  hours = floor(time / 36e5) % 24;
+                  minutes = floor(time / 6e4) % 60;
+                  seconds = floor(time / 1e3) % 60;
+                  milliseconds = time % 1e3;
+                } else {
+                  year = value.getUTCFullYear();
+                  month = value.getUTCMonth();
+                  date = value.getUTCDate();
+                  hours = value.getUTCHours();
+                  minutes = value.getUTCMinutes();
+                  seconds = value.getUTCSeconds();
+                  milliseconds = value.getUTCMilliseconds();
+                }
+                // Serialize extended years correctly.
+                value = (year <= 0 || year >= 1e4 ? (year < 0 ? "-" : "+") + toPaddedString(6, year < 0 ? -year : year) : toPaddedString(4, year)) +
+                  "-" + toPaddedString(2, month + 1) + "-" + toPaddedString(2, date) +
+                  // Months, dates, hours, minutes, and seconds should have two
+                  // digits; milliseconds should have three.
+                  "T" + toPaddedString(2, hours) + ":" + toPaddedString(2, minutes) + ":" + toPaddedString(2, seconds) +
+                  // Milliseconds are optional in ES 5.0, but required in 5.1.
+                  "." + toPaddedString(3, milliseconds) + "Z";
+              } else {
+                value = null;
               }
-              if (source.charCodeAt(Index) == 34) {
-                // Advance to the next character and return the revived string.
+            } else if (typeof value.toJSON == "function" && ((className != numberClass && className != stringClass && className != arrayClass) || isProperty.call(value, "toJSON"))) {
+              // Prototype <= 1.6.1 adds non-standard `toJSON` methods to the
+              // `Number`, `String`, `Date`, and `Array` prototypes. JSON 3
+              // ignores all `toJSON` methods on these objects unless they are
+              // defined directly on an instance.
+              value = value.toJSON(property);
+            }
+          }
+          if (callback) {
+            // If a replacement function was provided, call it to obtain the value
+            // for serialization.
+            value = callback.call(object, property, value);
+          }
+          if (value === null) {
+            return "null";
+          }
+          className = getClass.call(value);
+          if (className == booleanClass) {
+            // Booleans are represented literally.
+            return "" + value;
+          } else if (className == numberClass) {
+            // JSON numbers must be finite. `Infinity` and `NaN` are serialized as
+            // `"null"`.
+            return value > -1 / 0 && value < 1 / 0 ? "" + value : "null";
+          } else if (className == stringClass) {
+            // Strings are double-quoted and escaped.
+            return quote("" + value);
+          }
+          // Recursively serialize objects and arrays.
+          if (typeof value == "object") {
+            // Check for cyclic structures. This is a linear search; performance
+            // is inversely proportional to the number of unique nested objects.
+            for (length = stack.length; length--;) {
+              if (stack[length] === value) {
+                // Cyclic structures cannot be serialized by `JSON.stringify`.
+                throw TypeError();
+              }
+            }
+            // Add the object to the stack of traversed objects.
+            stack.push(value);
+            results = [];
+            // Save the current indentation level and indent one additional level.
+            prefix = indentation;
+            indentation += whitespace;
+            if (className == arrayClass) {
+              // Recursively serialize array elements.
+              for (index = 0, length = value.length; index < length; index++) {
+                element = serialize(index, value, callback, properties, whitespace, indentation, stack);
+                results.push(element === undef ? "null" : element);
+              }
+              result = results.length ? (whitespace ? "[\n" + indentation + results.join(",\n" + indentation) + "\n" + prefix + "]" : ("[" + results.join(",") + "]")) : "[]";
+            } else {
+              // Recursively serialize object members. Members are selected from
+              // either a user-specified list of property names, or the object
+              // itself.
+              forEach(properties || value, function (property) {
+                var element = serialize(property, value, callback, properties, whitespace, indentation, stack);
+                if (element !== undef) {
+                  // According to ES 5.1 section 15.12.3: "If `gap` {whitespace}
+                  // is not the empty string, let `member` {quote(property) + ":"}
+                  // be the concatenation of `member` and the `space` character."
+                  // The "`space` character" refers to the literal space
+                  // character, not the `space` {width} argument provided to
+                  // `JSON.stringify`.
+                  results.push(quote(property) + ":" + (whitespace ? " " : "") + element);
+                }
+              });
+              result = results.length ? (whitespace ? "{\n" + indentation + results.join(",\n" + indentation) + "\n" + prefix + "}" : ("{" + results.join(",") + "}")) : "{}";
+            }
+            // Remove the object from the traversed object stack.
+            stack.pop();
+            return result;
+          }
+        };
+
+        // Public: `JSON.stringify`. See ES 5.1 section 15.12.3.
+        exports.stringify = function (source, filter, width) {
+          var whitespace, callback, properties, className;
+          if (objectTypes[typeof filter] && filter) {
+            if ((className = getClass.call(filter)) == functionClass) {
+              callback = filter;
+            } else if (className == arrayClass) {
+              // Convert the property names array into a makeshift set.
+              properties = {};
+              for (var index = 0, length = filter.length, value; index < length; value = filter[index++], ((className = getClass.call(value)), className == stringClass || className == numberClass) && (properties[value] = 1));
+            }
+          }
+          if (width) {
+            if ((className = getClass.call(width)) == numberClass) {
+              // Convert the `width` to an integer and create a string containing
+              // `width` number of space characters.
+              if ((width -= width % 1) > 0) {
+                for (whitespace = "", width > 10 && (width = 10); whitespace.length < width; whitespace += " ");
+              }
+            } else if (className == stringClass) {
+              whitespace = width.length <= 10 ? width : width.slice(0, 10);
+            }
+          }
+          // Opera <= 7.54u2 discards the values associated with empty string keys
+          // (`""`) only if they are used directly within an object member list
+          // (e.g., `!("" in { "": 1})`).
+          return serialize("", (value = {}, value[""] = source, value), callback, properties, whitespace, "", []);
+        };
+      }
+
+      // Public: Parses a JSON source string.
+      if (!has("json-parse")) {
+        var fromCharCode = String.fromCharCode;
+
+        // Internal: A map of escaped control characters and their unescaped
+        // equivalents.
+        var Unescapes = {
+          92: "\\",
+          34: '"',
+          47: "/",
+          98: "\b",
+          116: "\t",
+          110: "\n",
+          102: "\f",
+          114: "\r"
+        };
+
+        // Internal: Stores the parser state.
+        var Index, Source;
+
+        // Internal: Resets the parser state and throws a `SyntaxError`.
+        var abort = function () {
+          Index = Source = null;
+          throw SyntaxError();
+        };
+
+        // Internal: Returns the next token, or `"$"` if the parser has reached
+        // the end of the source string. A token may be a string, number, `null`
+        // literal, or Boolean literal.
+        var lex = function () {
+          var source = Source, length = source.length, value, begin, position, isSigned, charCode;
+          while (Index < length) {
+            charCode = source.charCodeAt(Index);
+            switch (charCode) {
+              case 9: case 10: case 13: case 32:
+                // Skip whitespace tokens, including tabs, carriage returns, line
+                // feeds, and space characters.
+                Index++;
+                break;
+              case 123: case 125: case 91: case 93: case 58: case 44:
+                // Parse a punctuator token (`{`, `}`, `[`, `]`, `:`, or `,`) at
+                // the current position.
+                value = charIndexBuggy ? source.charAt(Index) : source[Index];
                 Index++;
                 return value;
-              }
-              // Unterminated string.
-              abort();
-            default:
-              // Parse numbers and literals.
-              begin = Index;
-              // Advance past the negative sign, if one is specified.
-              if (charCode == 45) {
-                isSigned = true;
-                charCode = source.charCodeAt(++Index);
-              }
-              // Parse an integer or floating-point value.
-              if (charCode >= 48 && charCode <= 57) {
-                // Leading zeroes are interpreted as octal literals.
-                if (charCode == 48 && ((charCode = source.charCodeAt(Index + 1)), charCode >= 48 && charCode <= 57)) {
-                  // Illegal octal literal.
-                  abort();
-                }
-                isSigned = false;
-                // Parse the integer component.
-                for (; Index < length && ((charCode = source.charCodeAt(Index)), charCode >= 48 && charCode <= 57); Index++);
-                // Floats cannot contain a leading decimal point; however, this
-                // case is already accounted for by the parser.
-                if (source.charCodeAt(Index) == 46) {
-                  position = ++Index;
-                  // Parse the decimal component.
-                  for (; position < length && ((charCode = source.charCodeAt(position)), charCode >= 48 && charCode <= 57); position++);
-                  if (position == Index) {
-                    // Illegal trailing decimal.
+              case 34:
+                // `"` delimits a JSON string; advance to the next character and
+                // begin parsing the string. String tokens are prefixed with the
+                // sentinel `@` character to distinguish them from punctuators and
+                // end-of-string tokens.
+                for (value = "@", Index++; Index < length;) {
+                  charCode = source.charCodeAt(Index);
+                  if (charCode < 32) {
+                    // Unescaped ASCII control characters (those with a code unit
+                    // less than the space character) are not permitted.
                     abort();
+                  } else if (charCode == 92) {
+                    // A reverse solidus (`\`) marks the beginning of an escaped
+                    // control character (including `"`, `\`, and `/`) or Unicode
+                    // escape sequence.
+                    charCode = source.charCodeAt(++Index);
+                    switch (charCode) {
+                      case 92: case 34: case 47: case 98: case 116: case 110: case 102: case 114:
+                        // Revive escaped control characters.
+                        value += Unescapes[charCode];
+                        Index++;
+                        break;
+                      case 117:
+                        // `\u` marks the beginning of a Unicode escape sequence.
+                        // Advance to the first character and validate the
+                        // four-digit code point.
+                        begin = ++Index;
+                        for (position = Index + 4; Index < position; Index++) {
+                          charCode = source.charCodeAt(Index);
+                          // A valid sequence comprises four hexdigits (case-
+                          // insensitive) that form a single hexadecimal value.
+                          if (!(charCode >= 48 && charCode <= 57 || charCode >= 97 && charCode <= 102 || charCode >= 65 && charCode <= 70)) {
+                            // Invalid Unicode escape sequence.
+                            abort();
+                          }
+                        }
+                        // Revive the escaped character.
+                        value += fromCharCode("0x" + source.slice(begin, Index));
+                        break;
+                      default:
+                        // Invalid escape sequence.
+                        abort();
+                    }
+                  } else {
+                    if (charCode == 34) {
+                      // An unescaped double-quote character marks the end of the
+                      // string.
+                      break;
+                    }
+                    charCode = source.charCodeAt(Index);
+                    begin = Index;
+                    // Optimize for the common case where a string is valid.
+                    while (charCode >= 32 && charCode != 92 && charCode != 34) {
+                      charCode = source.charCodeAt(++Index);
+                    }
+                    // Append the string as-is.
+                    value += source.slice(begin, Index);
                   }
-                  Index = position;
                 }
-                // Parse exponents. The `e` denoting the exponent is
-                // case-insensitive.
-                charCode = source.charCodeAt(Index);
-                if (charCode == 101 || charCode == 69) {
+                if (source.charCodeAt(Index) == 34) {
+                  // Advance to the next character and return the revived string.
+                  Index++;
+                  return value;
+                }
+                // Unterminated string.
+                abort();
+              default:
+                // Parse numbers and literals.
+                begin = Index;
+                // Advance past the negative sign, if one is specified.
+                if (charCode == 45) {
+                  isSigned = true;
                   charCode = source.charCodeAt(++Index);
-                  // Skip past the sign following the exponent, if one is
-                  // specified.
-                  if (charCode == 43 || charCode == 45) {
-                    Index++;
-                  }
-                  // Parse the exponential component.
-                  for (position = Index; position < length && ((charCode = source.charCodeAt(position)), charCode >= 48 && charCode <= 57); position++);
-                  if (position == Index) {
-                    // Illegal empty exponent.
-                    abort();
-                  }
-                  Index = position;
                 }
-                // Coerce the parsed value to a JavaScript number.
-                return +source.slice(begin, Index);
-              }
-              // A negative sign may only precede numbers.
-              if (isSigned) {
-                abort();
-              }
-              // `true`, `false`, and `null` literals.
-              if (source.slice(Index, Index + 4) == "true") {
-                Index += 4;
-                return true;
-              } else if (source.slice(Index, Index + 5) == "false") {
-                Index += 5;
-                return false;
-              } else if (source.slice(Index, Index + 4) == "null") {
-                Index += 4;
-                return null;
-              }
-              // Unrecognized token.
-              abort();
-          }
-        }
-        // Return the sentinel `$` character if the parser has reached the end
-        // of the source string.
-        return "$";
-      };
-
-      // Internal: Parses a JSON `value` token.
-      var get = function (value) {
-        var results, hasMembers;
-        if (value == "$") {
-          // Unexpected end of input.
-          abort();
-        }
-        if (typeof value == "string") {
-          if ((charIndexBuggy ? value.charAt(0) : value[0]) == "@") {
-            // Remove the sentinel `@` character.
-            return value.slice(1);
-          }
-          // Parse object and array literals.
-          if (value == "[") {
-            // Parses a JSON array, returning a new JavaScript array.
-            results = [];
-            for (;; hasMembers || (hasMembers = true)) {
-              value = lex();
-              // A closing square bracket marks the end of the array literal.
-              if (value == "]") {
-                break;
-              }
-              // If the array literal contains elements, the current token
-              // should be a comma separating the previous element from the
-              // next.
-              if (hasMembers) {
-                if (value == ",") {
-                  value = lex();
-                  if (value == "]") {
-                    // Unexpected trailing `,` in array literal.
+                // Parse an integer or floating-point value.
+                if (charCode >= 48 && charCode <= 57) {
+                  // Leading zeroes are interpreted as octal literals.
+                  if (charCode == 48 && ((charCode = source.charCodeAt(Index + 1)), charCode >= 48 && charCode <= 57)) {
+                    // Illegal octal literal.
                     abort();
                   }
-                } else {
-                  // A `,` must separate each array element.
+                  isSigned = false;
+                  // Parse the integer component.
+                  for (; Index < length && ((charCode = source.charCodeAt(Index)), charCode >= 48 && charCode <= 57); Index++);
+                  // Floats cannot contain a leading decimal point; however, this
+                  // case is already accounted for by the parser.
+                  if (source.charCodeAt(Index) == 46) {
+                    position = ++Index;
+                    // Parse the decimal component.
+                    for (; position < length && ((charCode = source.charCodeAt(position)), charCode >= 48 && charCode <= 57); position++);
+                    if (position == Index) {
+                      // Illegal trailing decimal.
+                      abort();
+                    }
+                    Index = position;
+                  }
+                  // Parse exponents. The `e` denoting the exponent is
+                  // case-insensitive.
+                  charCode = source.charCodeAt(Index);
+                  if (charCode == 101 || charCode == 69) {
+                    charCode = source.charCodeAt(++Index);
+                    // Skip past the sign following the exponent, if one is
+                    // specified.
+                    if (charCode == 43 || charCode == 45) {
+                      Index++;
+                    }
+                    // Parse the exponential component.
+                    for (position = Index; position < length && ((charCode = source.charCodeAt(position)), charCode >= 48 && charCode <= 57); position++);
+                    if (position == Index) {
+                      // Illegal empty exponent.
+                      abort();
+                    }
+                    Index = position;
+                  }
+                  // Coerce the parsed value to a JavaScript number.
+                  return +source.slice(begin, Index);
+                }
+                // A negative sign may only precede numbers.
+                if (isSigned) {
                   abort();
                 }
-              }
-              // Elisions and leading commas are not permitted.
-              if (value == ",") {
+                // `true`, `false`, and `null` literals.
+                if (source.slice(Index, Index + 4) == "true") {
+                  Index += 4;
+                  return true;
+                } else if (source.slice(Index, Index + 5) == "false") {
+                  Index += 5;
+                  return false;
+                } else if (source.slice(Index, Index + 4) == "null") {
+                  Index += 4;
+                  return null;
+                }
+                // Unrecognized token.
                 abort();
-              }
-              results.push(get(value));
             }
-            return results;
-          } else if (value == "{") {
-            // Parses a JSON object, returning a new JavaScript object.
-            results = {};
-            for (;; hasMembers || (hasMembers = true)) {
-              value = lex();
-              // A closing curly brace marks the end of the object literal.
-              if (value == "}") {
-                break;
-              }
-              // If the object literal contains members, the current token
-              // should be a comma separator.
-              if (hasMembers) {
-                if (value == ",") {
-                  value = lex();
-                  if (value == "}") {
-                    // Unexpected trailing `,` in object literal.
+          }
+          // Return the sentinel `$` character if the parser has reached the end
+          // of the source string.
+          return "$";
+        };
+
+        // Internal: Parses a JSON `value` token.
+        var get = function (value) {
+          var results, hasMembers;
+          if (value == "$") {
+            // Unexpected end of input.
+            abort();
+          }
+          if (typeof value == "string") {
+            if ((charIndexBuggy ? value.charAt(0) : value[0]) == "@") {
+              // Remove the sentinel `@` character.
+              return value.slice(1);
+            }
+            // Parse object and array literals.
+            if (value == "[") {
+              // Parses a JSON array, returning a new JavaScript array.
+              results = [];
+              for (;; hasMembers || (hasMembers = true)) {
+                value = lex();
+                // A closing square bracket marks the end of the array literal.
+                if (value == "]") {
+                  break;
+                }
+                // If the array literal contains elements, the current token
+                // should be a comma separating the previous element from the
+                // next.
+                if (hasMembers) {
+                  if (value == ",") {
+                    value = lex();
+                    if (value == "]") {
+                      // Unexpected trailing `,` in array literal.
+                      abort();
+                    }
+                  } else {
+                    // A `,` must separate each array element.
                     abort();
                   }
-                } else {
-                  // A `,` must separate each object member.
+                }
+                // Elisions and leading commas are not permitted.
+                if (value == ",") {
                   abort();
                 }
+                results.push(get(value));
               }
-              // Leading commas are not permitted, object property names must be
-              // double-quoted strings, and a `:` must separate each property
-              // name and value.
-              if (value == "," || typeof value != "string" || (charIndexBuggy ? value.charAt(0) : value[0]) != "@" || lex() != ":") {
-                abort();
+              return results;
+            } else if (value == "{") {
+              // Parses a JSON object, returning a new JavaScript object.
+              results = {};
+              for (;; hasMembers || (hasMembers = true)) {
+                value = lex();
+                // A closing curly brace marks the end of the object literal.
+                if (value == "}") {
+                  break;
+                }
+                // If the object literal contains members, the current token
+                // should be a comma separator.
+                if (hasMembers) {
+                  if (value == ",") {
+                    value = lex();
+                    if (value == "}") {
+                      // Unexpected trailing `,` in object literal.
+                      abort();
+                    }
+                  } else {
+                    // A `,` must separate each object member.
+                    abort();
+                  }
+                }
+                // Leading commas are not permitted, object property names must be
+                // double-quoted strings, and a `:` must separate each property
+                // name and value.
+                if (value == "," || typeof value != "string" || (charIndexBuggy ? value.charAt(0) : value[0]) != "@" || lex() != ":") {
+                  abort();
+                }
+                results[value.slice(1)] = get(lex());
               }
-              results[value.slice(1)] = get(lex());
+              return results;
             }
-            return results;
+            // Unexpected token encountered.
+            abort();
           }
-          // Unexpected token encountered.
-          abort();
-        }
-        return value;
-      };
+          return value;
+        };
 
-      // Internal: Updates a traversed object member.
-      var update = function(source, property, callback) {
-        var element = walk(source, property, callback);
-        if (element === undef) {
-          delete source[property];
-        } else {
-          source[property] = element;
-        }
-      };
-
-      // Internal: Recursively traverses a parsed JSON object, invoking the
-      // `callback` function for each value. This is an implementation of the
-      // `Walk(holder, name)` operation defined in ES 5.1 section 15.12.2.
-      var walk = function (source, property, callback) {
-        var value = source[property], length;
-        if (typeof value == "object" && value) {
-          // `forEach` can't be used to traverse an array in Opera <= 8.54
-          // because its `Object#hasOwnProperty` implementation returns `false`
-          // for array indices (e.g., `![1, 2, 3].hasOwnProperty("0")`).
-          if (getClass.call(value) == arrayClass) {
-            for (length = value.length; length--;) {
-              update(value, length, callback);
-            }
+        // Internal: Updates a traversed object member.
+        var update = function (source, property, callback) {
+          var element = walk(source, property, callback);
+          if (element === undef) {
+            delete source[property];
           } else {
-            forEach(value, function (property) {
-              update(value, property, callback);
-            });
+            source[property] = element;
           }
-        }
-        return callback.call(source, property, value);
-      };
+        };
 
-      // Public: `JSON.parse`. See ES 5.1 section 15.12.2.
-      JSON3.parse = function (source, callback) {
-        var result, value;
-        Index = 0;
-        Source = "" + source;
-        result = get(lex());
-        // If a JSON string contains multiple tokens, it is invalid.
-        if (lex() != "$") {
-          abort();
-        }
-        // Reset the parser state.
-        Index = Source = null;
-        return callback && getClass.call(callback) == functionClass ? walk((value = {}, value[""] = result, value), "", callback) : result;
-      };
+        // Internal: Recursively traverses a parsed JSON object, invoking the
+        // `callback` function for each value. This is an implementation of the
+        // `Walk(holder, name)` operation defined in ES 5.1 section 15.12.2.
+        var walk = function (source, property, callback) {
+          var value = source[property], length;
+          if (typeof value == "object" && value) {
+            // `forEach` can't be used to traverse an array in Opera <= 8.54
+            // because its `Object#hasOwnProperty` implementation returns `false`
+            // for array indices (e.g., `![1, 2, 3].hasOwnProperty("0")`).
+            if (getClass.call(value) == arrayClass) {
+              for (length = value.length; length--;) {
+                update(value, length, callback);
+              }
+            } else {
+              forEach(value, function (property) {
+                update(value, property, callback);
+              });
+            }
+          }
+          return callback.call(source, property, value);
+        };
+
+        // Public: `JSON.parse`. See ES 5.1 section 15.12.2.
+        exports.parse = function (source, callback) {
+          var result, value;
+          Index = 0;
+          Source = "" + source;
+          result = get(lex());
+          // If a JSON string contains multiple tokens, it is invalid.
+          if (lex() != "$") {
+            abort();
+          }
+          // Reset the parser state.
+          Index = Source = null;
+          return callback && getClass.call(callback) == functionClass ? walk((value = {}, value[""] = result, value), "", callback) : result;
+        };
+      }
     }
+
+    exports["runInContext"] = runInContext;
+    return exports;
+  }
+
+  if (freeExports && !isLoader) {
+    // Export for CommonJS environments.
+    runInContext(root, freeExports);
+  } else {
+    // Export for web browsers and JavaScript engines.
+    var nativeJSON = root.JSON,
+        previousJSON = root["JSON3"],
+        isRestored = false;
+
+    var JSON3 = runInContext(root, (root["JSON3"] = {
+      // Public: Restores the original value of the global `JSON` object and
+      // returns a reference to the `JSON3` object.
+      "noConflict": function () {
+        if (!isRestored) {
+          isRestored = true;
+          root.JSON = nativeJSON;
+          root["JSON3"] = previousJSON;
+          nativeJSON = previousJSON = null;
+        }
+        return JSON3;
+      }
+    }));
+
+    root.JSON = {
+      "parse": JSON3.parse,
+      "stringify": JSON3.stringify
+    };
   }
 
   // Export for asynchronous module loaders.
@@ -6974,9 +7227,10 @@ module.exports=_dereq_(37)
       return JSON3;
     });
   }
-}(this));
+}).call(this);
 
-},{}],48:[function(_dereq_,module,exports){
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {})
+},{}],51:[function(_dereq_,module,exports){
 module.exports = toArray
 
 function toArray(list, index) {
@@ -6991,11 +7245,10 @@ function toArray(list, index) {
     return array
 }
 
-},{}]},{},[1])
-(1)
+},{}]},{},[31])(31)
 });
 
-/*! adapterjs - v0.13.0 - 2016-01-08 */
+/*! adapterjs - v0.13.2 - 2016-03-18 */
 
 // Adapter's interface.
 var AdapterJS = AdapterJS || {};
@@ -7014,7 +7267,7 @@ AdapterJS.options = AdapterJS.options || {};
 // AdapterJS.options.hidePluginInstallPrompt = true;
 
 // AdapterJS version
-AdapterJS.VERSION = '0.13.0';
+AdapterJS.VERSION = '0.13.2';
 
 // This function will be called when the WebRTC API is ready to be used
 // Whether it is the native implementation (Chrome, Firefox, Opera) or
@@ -7055,6 +7308,7 @@ AdapterJS.webRTCReady = function (callback) {
 AdapterJS.WebRTCPlugin = AdapterJS.WebRTCPlugin || {};
 
 // The object to store plugin information
+/* jshint ignore:start */
 AdapterJS.WebRTCPlugin.pluginInfo = {
   prefix : 'Tem',
   plugName : 'TemWebRTCPlugin',
@@ -7071,6 +7325,7 @@ if(!!navigator.platform.match(/^Mac/i)) {
 else if(!!navigator.platform.match(/^Win/i)) {
   AdapterJS.WebRTCPlugin.pluginInfo.downloadLink = 'http://bit.ly/1kkS4FN';
 }
+/* jshint ignore:end */
 
 AdapterJS.WebRTCPlugin.TAGS = {
   NONE  : 'none',
@@ -7157,16 +7412,14 @@ AdapterJS.WebRTCPlugin.callWhenPluginReady = null;
 // This function is the only private function that is not encapsulated to
 // allow the plugin method to be called.
 __TemWebRTCReady0 = function () {
-  webrtcDetectedVersion = AdapterJS.WebRTCPlugin.plugin.version;
-
   if (document.readyState === 'complete') {
     AdapterJS.WebRTCPlugin.pluginState = AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY;
     AdapterJS.maybeThroughWebRTCReady();
   } else {
-    AdapterJS.WebRTCPlugin.documentReadyInterval = setInterval(function () {
+    var timer = setInterval(function () {
       if (document.readyState === 'complete') {
         // TODO: update comments, we wait for the document to be ready
-        clearInterval(AdapterJS.WebRTCPlugin.documentReadyInterval);
+        clearInterval(timer);
         AdapterJS.WebRTCPlugin.pluginState = AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY;
         AdapterJS.maybeThroughWebRTCReady();
       }
@@ -7237,65 +7490,62 @@ AdapterJS.isDefined = null;
 // This sets:
 // - webrtcDetectedBrowser: The browser agent name.
 // - webrtcDetectedVersion: The browser version.
+// - webrtcMinimumVersion: The minimum browser version still supported by AJS.
 // - webrtcDetectedType: The types of webRTC support.
 //   - 'moz': Mozilla implementation of webRTC.
 //   - 'webkit': WebKit implementation of webRTC.
 //   - 'plugin': Using the plugin implementation.
 AdapterJS.parseWebrtcDetectedBrowser = function () {
-  var hasMatch, checkMatch = navigator.userAgent.match(
-    /(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
-  if (/trident/i.test(checkMatch[1])) {
-    hasMatch = /\brv[ :]+(\d+)/g.exec(navigator.userAgent) || [];
+  var hasMatch = null;
+  if ((!!window.opr && !!opr.addons) || 
+    !!window.opera || 
+    navigator.userAgent.indexOf(' OPR/') >= 0) {
+    // Opera 8.0+
+    webrtcDetectedBrowser = 'opera';
+    webrtcDetectedType    = 'webkit';
+    webrtcMinimumVersion  = 26;
+    hasMatch = /OPR\/(\d+)/i.exec(navigator.userAgent) || [];
+    webrtcDetectedVersion = parseInt(hasMatch[1], 10);
+  } else if (typeof InstallTrigger !== 'undefined') {
+    // Firefox 1.0+
+    // Bowser and Version set in Google's adapter
+    webrtcDetectedType    = 'moz';
+  } else if (Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0) {
+    // Safari
+    webrtcDetectedBrowser = 'safari';
+    webrtcDetectedType    = 'plugin';
+    webrtcMinimumVersion  = 7;
+    hasMatch = /version\/(\d+)/i.exec(navigator.userAgent) || [];
+    webrtcDetectedVersion = parseInt(hasMatch[1], 10);
+  } else if (/*@cc_on!@*/false || !!document.documentMode) {
+    // Internet Explorer 6-11
     webrtcDetectedBrowser = 'IE';
+    webrtcDetectedType    = 'plugin';
+    webrtcMinimumVersion  = 9;
+    hasMatch = /\brv[ :]+(\d+)/g.exec(navigator.userAgent) || [];
     webrtcDetectedVersion = parseInt(hasMatch[1] || '0', 10);
-  } else if (checkMatch[1] === 'Chrome') {
-    hasMatch = navigator.userAgent.match(/\bOPR\/(\d+)/);
-    if (hasMatch !== null) {
-      webrtcDetectedBrowser = 'opera';
-      webrtcDetectedVersion = parseInt(hasMatch[1], 10);
+    if (!webrtcDetectedVersion) {
+      hasMatch = /\bMSIE[ :]+(\d+)/g.exec(navigator.userAgent) || [];
+      webrtcDetectedVersion = parseInt(hasMatch[1] || '0', 10);      
     }
+  } else if (!!window.StyleMedia) {
+    // Edge 20+
+    // Bowser and Version set in Google's adapter
+    webrtcDetectedType    = '';
+  } else if (!!window.chrome && !!window.chrome.webstore) {
+    // Chrome 1+
+    // Bowser and Version set in Google's adapter
+    webrtcDetectedType    = 'webkit';
+  } else if ((webrtcDetectedBrowser === 'chrome'|| webrtcDetectedBrowser === 'opera') && 
+    !!window.CSS) {
+    // Blink engine detection
+    webrtcDetectedBrowser = 'blink';
+    // TODO: detected WebRTC version
   }
-  if (navigator.userAgent.indexOf('Safari')) {
-    if (typeof InstallTrigger !== 'undefined') {
-      webrtcDetectedBrowser = 'firefox';
-    } else if (/*@cc_on!@*/ false || !!document.documentMode) {
-      webrtcDetectedBrowser = 'IE';
-    } else if (
-      Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0) {
-      webrtcDetectedBrowser = 'safari';
-    } else if (!!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0) {
-      webrtcDetectedBrowser = 'opera';
-    } else if (!!window.chrome) {
-      webrtcDetectedBrowser = 'chrome';
-    }
-  }
-  if (!webrtcDetectedBrowser) {
-    webrtcDetectedVersion = checkMatch[1];
-  }
-  if (!webrtcDetectedVersion) {
-    try {
-      checkMatch = (checkMatch[2]) ? [checkMatch[1], checkMatch[2]] :
-        [navigator.appName, navigator.appVersion, '-?'];
-      if ((hasMatch = navigator.userAgent.match(/version\/(\d+)/i)) !== null) {
-        checkMatch.splice(1, 1, hasMatch[1]);
-      }
-      webrtcDetectedVersion = parseInt(checkMatch[1], 10);
-    } catch (error) { }
-  }
-};
 
-// To fix configuration as some browsers does not support
-// the 'urls' attribute.
-AdapterJS.maybeFixConfiguration = function (pcConfig) {
-  if (pcConfig === null) {
-    return;
-  }
-  for (var i = 0; i < pcConfig.iceServers.length; i++) {
-    if (pcConfig.iceServers[i].hasOwnProperty('urls')) {
-      pcConfig.iceServers[i].url = pcConfig.iceServers[i].urls;
-      delete pcConfig.iceServers[i].urls;
-    }
-  }
+  window.webrtcDetectedBrowser = webrtcDetectedBrowser;
+  window.webrtcDetectedVersion = webrtcDetectedVersion;
+  window.webrtcMinimumVersion  = webrtcMinimumVersion;
 };
 
 AdapterJS.addEvent = function(elem, evnt, func) {
@@ -7316,6 +7566,7 @@ AdapterJS.renderNotificationBar = function (text, buttonText, buttonLink, openNe
 
   var w = window;
   var i = document.createElement('iframe');
+  i.name = 'adapterjs-alert';
   i.style.position = 'fixed';
   i.style.top = '-41px';
   i.style.left = 0;
@@ -7332,7 +7583,7 @@ AdapterJS.renderNotificationBar = function (text, buttonText, buttonLink, openNe
     i.style.transition = 'all .5s ease-out';
   }
   document.body.appendChild(i);
-  c = (i.contentWindow) ? i.contentWindow :
+  var c = (i.contentWindow) ? i.contentWindow :
     (i.contentDocument.document) ? i.contentDocument.document : i.contentDocument;
   c.document.open();
   c.document.write('<span style="display: inline-block; font-family: Helvetica, Arial,' +
@@ -7347,13 +7598,13 @@ AdapterJS.renderNotificationBar = function (text, buttonText, buttonLink, openNe
       if (!!displayRefreshBar) {
         AdapterJS.renderNotificationBar(AdapterJS.TEXT.EXTENSION ?
           AdapterJS.TEXT.EXTENSION.REQUIRE_REFRESH : AdapterJS.TEXT.REFRESH.REQUIRE_REFRESH,
-          AdapterJS.TEXT.REFRESH.BUTTON, 'javascript:location.reload()');
+          AdapterJS.TEXT.REFRESH.BUTTON, 'javascript:location.reload()'); // jshint ignore:line
       }
       window.open(buttonLink, !!openNewTab ? '_blank' : '_top');
 
       e.preventDefault();
       try {
-        event.cancelBubble = true;
+        e.cancelBubble = true;
       } catch(error) { }
 
       var pluginInstallInterval = setInterval(function(){
@@ -7367,11 +7618,11 @@ AdapterJS.renderNotificationBar = function (text, buttonText, buttonLink, openNe
             clearInterval(pluginInstallInterval);
             AdapterJS.WebRTCPlugin.defineWebRTCInterface();
           },
-          function() { 
+          function() {
             // still no plugin detected, nothing to do
           });
       } , 500);
-    });   
+    });
 
     // On click on Cancel
     AdapterJS.addEvent(c.document.getElementById('cancel'), 'click', function(e) {
@@ -7546,17 +7797,21 @@ webrtcDetectedBrowser = null;
 // Detected browser version.
 webrtcDetectedVersion = null;
 
+// The minimum browser version still supported by AJS.
+webrtcMinimumVersion  = null;
+
 // Check for browser types and react accordingly
-if ( navigator.mozGetUserMedia
-  || navigator.webkitGetUserMedia
-  || (navigator.mediaDevices 
-    && navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)) ) { 
+if ( navigator.mozGetUserMedia || 
+  navigator.webkitGetUserMedia || 
+  (navigator.mediaDevices && 
+    navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)) ) { 
 
   ///////////////////////////////////////////////////////////////////
   // INJECTION OF GOOGLE'S ADAPTER.JS CONTENT
 
+/* jshint ignore:start */
   /*
-   *  Copyright (c) 2014 The WebRTC project authors. All Rights Reserved.
+   *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
    *
    *  Use of this source code is governed by a BSD-style license
    *  that can be found in the LICENSE file in the root of the source
@@ -7568,7 +7823,9 @@ if ( navigator.mozGetUserMedia
      eqeqeq: true, forin: false, globalstrict: true, node: true,
      quotmark: single, undef: true, unused: strict */
   /* global mozRTCIceCandidate, mozRTCPeerConnection, Promise,
-  mozRTCSessionDescription, webkitRTCPeerConnection, MediaStreamTrack */
+  mozRTCSessionDescription, webkitRTCPeerConnection, MediaStreamTrack,
+  MediaStream, RTCIceGatherer, RTCIceTransport, RTCDtlsTransport,
+  RTCRtpSender, RTCRtpReceiver*/
   /* exported trace,requestUserMedia */
   
   'use strict';
@@ -7590,7 +7847,7 @@ if ( navigator.mozGetUserMedia
     },
     extractVersion: function(uastring, expr, pos) {
       var match = uastring.match(expr);
-      return match && match.length >= pos && parseInt(match[pos]);
+      return match && match.length >= pos && parseInt(match[pos], 10);
     }
   };
   
@@ -7645,7 +7902,7 @@ if ( navigator.mozGetUserMedia
   if (typeof window === 'undefined' || !window.navigator) {
     webrtcUtils.log('This does not appear to be a browser');
     webrtcDetectedBrowser = 'not a browser';
-  } else if (navigator.mozGetUserMedia && window.mozRTCPeerConnection) {
+  } else if (navigator.mozGetUserMedia) {
     webrtcUtils.log('This appears to be Firefox');
   
     webrtcDetectedBrowser = 'firefox';
@@ -7657,43 +7914,52 @@ if ( navigator.mozGetUserMedia
     // the minimum firefox version still supported by adapter.
     webrtcMinimumVersion = 31;
   
-    // The RTCPeerConnection object.
-    window.RTCPeerConnection = function(pcConfig, pcConstraints) {
-      if (webrtcDetectedVersion < 38) {
-        // .urls is not supported in FF < 38.
-        // create RTCIceServers with a single url.
-        if (pcConfig && pcConfig.iceServers) {
-          var newIceServers = [];
-          for (var i = 0; i < pcConfig.iceServers.length; i++) {
-            var server = pcConfig.iceServers[i];
-            if (server.hasOwnProperty('urls')) {
-              for (var j = 0; j < server.urls.length; j++) {
-                var newServer = {
-                  url: server.urls[j]
-                };
-                if (server.urls[j].indexOf('turn') === 0) {
-                  newServer.username = server.username;
-                  newServer.credential = server.credential;
+    // Shim for RTCPeerConnection on older versions.
+    if (!window.RTCPeerConnection) {
+      window.RTCPeerConnection = function(pcConfig, pcConstraints) {
+        if (webrtcDetectedVersion < 38) {
+          // .urls is not supported in FF < 38.
+          // create RTCIceServers with a single url.
+          if (pcConfig && pcConfig.iceServers) {
+            var newIceServers = [];
+            for (var i = 0; i < pcConfig.iceServers.length; i++) {
+              var server = pcConfig.iceServers[i];
+              if (server.hasOwnProperty('urls')) {
+                for (var j = 0; j < server.urls.length; j++) {
+                  var newServer = {
+                    url: server.urls[j]
+                  };
+                  if (server.urls[j].indexOf('turn') === 0) {
+                    newServer.username = server.username;
+                    newServer.credential = server.credential;
+                  }
+                  newIceServers.push(newServer);
                 }
-                newIceServers.push(newServer);
+              } else {
+                newIceServers.push(pcConfig.iceServers[i]);
               }
+            }
+            pcConfig.iceServers = newIceServers;
+          }
+        }
+        return new mozRTCPeerConnection(pcConfig, pcConstraints); // jscs:ignore requireCapitalizedConstructors
+      };
+  
+      // wrap static methods. Currently just generateCertificate.
+      if (mozRTCPeerConnection.generateCertificate) {
+        Object.defineProperty(window.RTCPeerConnection, 'generateCertificate', {
+          get: function() {
+            if (arguments.length) {
+              return mozRTCPeerConnection.generateCertificate.apply(null,
+                  arguments);
             } else {
-              newIceServers.push(pcConfig.iceServers[i]);
+              return mozRTCPeerConnection.generateCertificate;
             }
           }
-          pcConfig.iceServers = newIceServers;
-        }
+        });
       }
-      return new mozRTCPeerConnection(pcConfig, pcConstraints); // jscs:ignore requireCapitalizedConstructors
-    };
   
-    // The RTCSessionDescription object.
-    if (!window.RTCSessionDescription) {
       window.RTCSessionDescription = mozRTCSessionDescription;
-    }
-  
-    // The RTCIceCandidate object.
-    if (!window.RTCIceCandidate) {
       window.RTCIceCandidate = mozRTCIceCandidate;
     }
   
@@ -7861,6 +8127,20 @@ if ( navigator.mozGetUserMedia
   
       return pc;
     };
+  
+    // wrap static methods. Currently just generateCertificate.
+    if (webkitRTCPeerConnection.generateCertificate) {
+      Object.defineProperty(window.RTCPeerConnection, 'generateCertificate', {
+        get: function() {
+          if (arguments.length) {
+            return webkitRTCPeerConnection.generateCertificate.apply(null,
+                arguments);
+          } else {
+            return webkitRTCPeerConnection.generateCertificate;
+          }
+        }
+      });
+    }
   
     // add promise support
     ['createOffer', 'createAnswer'].forEach(function(method) {
@@ -8045,8 +8325,1164 @@ if ( navigator.mozGetUserMedia
     webrtcDetectedVersion = webrtcUtils.extractVersion(navigator.userAgent,
         /Edge\/(\d+).(\d+)$/, 2);
   
-    // the minimum version still supported by adapter.
-    webrtcMinimumVersion = 12;
+    // The minimum version still supported by adapter.
+    // This is the build number for Edge.
+    webrtcMinimumVersion = 10547;
+  
+    if (window.RTCIceGatherer) {
+      // Generate an alphanumeric identifier for cname or mids.
+      // TODO: use UUIDs instead? https://gist.github.com/jed/982883
+      var generateIdentifier = function() {
+        return Math.random().toString(36).substr(2, 10);
+      };
+  
+      // The RTCP CNAME used by all peerconnections from the same JS.
+      var localCName = generateIdentifier();
+  
+      // SDP helpers - to be moved into separate module.
+      var SDPUtils = {};
+  
+      // Splits SDP into lines, dealing with both CRLF and LF.
+      SDPUtils.splitLines = function(blob) {
+        return blob.trim().split('\n').map(function(line) {
+          return line.trim();
+        });
+      };
+  
+      // Splits SDP into sessionpart and mediasections. Ensures CRLF.
+      SDPUtils.splitSections = function(blob) {
+        var parts = blob.split('\r\nm=');
+        return parts.map(function(part, index) {
+          return (index > 0 ? 'm=' + part : part).trim() + '\r\n';
+        });
+      };
+  
+      // Returns lines that start with a certain prefix.
+      SDPUtils.matchPrefix = function(blob, prefix) {
+        return SDPUtils.splitLines(blob).filter(function(line) {
+          return line.indexOf(prefix) === 0;
+        });
+      };
+  
+      // Parses an ICE candidate line. Sample input:
+      // candidate:702786350 2 udp 41819902 8.8.8.8 60769 typ relay raddr 8.8.8.8 rport 55996"
+      SDPUtils.parseCandidate = function(line) {
+        var parts;
+        // Parse both variants.
+        if (line.indexOf('a=candidate:') === 0) {
+          parts = line.substring(12).split(' ');
+        } else {
+          parts = line.substring(10).split(' ');
+        }
+  
+        var candidate = {
+          foundation: parts[0],
+          component: parts[1],
+          protocol: parts[2].toLowerCase(),
+          priority: parseInt(parts[3], 10),
+          ip: parts[4],
+          port: parseInt(parts[5], 10),
+          // skip parts[6] == 'typ'
+          type: parts[7]
+        };
+  
+        for (var i = 8; i < parts.length; i += 2) {
+          switch (parts[i]) {
+            case 'raddr':
+              candidate.relatedAddress = parts[i + 1];
+              break;
+            case 'rport':
+              candidate.relatedPort = parseInt(parts[i + 1], 10);
+              break;
+            case 'tcptype':
+              candidate.tcpType = parts[i + 1];
+              break;
+            default: // Unknown extensions are silently ignored.
+              break;
+          }
+        }
+        return candidate;
+      };
+  
+      // Translates a candidate object into SDP candidate attribute.
+      SDPUtils.writeCandidate = function(candidate) {
+        var sdp = [];
+        sdp.push(candidate.foundation);
+        sdp.push(candidate.component);
+        sdp.push(candidate.protocol.toUpperCase());
+        sdp.push(candidate.priority);
+        sdp.push(candidate.ip);
+        sdp.push(candidate.port);
+  
+        var type = candidate.type;
+        sdp.push('typ');
+        sdp.push(type);
+        if (type !== 'host' && candidate.relatedAddress &&
+            candidate.relatedPort) {
+          sdp.push('raddr');
+          sdp.push(candidate.relatedAddress); // was: relAddr
+          sdp.push('rport');
+          sdp.push(candidate.relatedPort); // was: relPort
+        }
+        if (candidate.tcpType && candidate.protocol.toLowerCase() === 'tcp') {
+          sdp.push('tcptype');
+          sdp.push(candidate.tcpType);
+        }
+        return 'candidate:' + sdp.join(' ');
+      };
+  
+      // Parses an rtpmap line, returns RTCRtpCoddecParameters. Sample input:
+      // a=rtpmap:111 opus/48000/2
+      SDPUtils.parseRtpMap = function(line) {
+        var parts = line.substr(9).split(' ');
+        var parsed = {
+          payloadType: parseInt(parts.shift(), 10) // was: id
+        };
+  
+        parts = parts[0].split('/');
+  
+        parsed.name = parts[0];
+        parsed.clockRate = parseInt(parts[1], 10); // was: clockrate
+        parsed.numChannels = parts.length === 3 ? parseInt(parts[2], 10) : 1; // was: channels
+        return parsed;
+      };
+  
+      // Generate an a=rtpmap line from RTCRtpCodecCapability or RTCRtpCodecParameters.
+      SDPUtils.writeRtpMap = function(codec) {
+        var pt = codec.payloadType;
+        if (codec.preferredPayloadType !== undefined) {
+          pt = codec.preferredPayloadType;
+        }
+        return 'a=rtpmap:' + pt + ' ' + codec.name + '/' + codec.clockRate +
+            (codec.numChannels !== 1 ? '/' + codec.numChannels : '') + '\r\n';
+      };
+  
+      // Parses an ftmp line, returns dictionary. Sample input:
+      // a=fmtp:96 vbr=on;cng=on
+      // Also deals with vbr=on; cng=on
+      SDPUtils.parseFmtp = function(line) {
+        var parsed = {};
+        var kv;
+        var parts = line.substr(line.indexOf(' ') + 1).split(';');
+        for (var j = 0; j < parts.length; j++) {
+          kv = parts[j].trim().split('=');
+          parsed[kv[0].trim()] = kv[1];
+        }
+        return parsed;
+      };
+  
+      // Generates an a=ftmp line from RTCRtpCodecCapability or RTCRtpCodecParameters.
+      SDPUtils.writeFtmp = function(codec) {
+        var line = '';
+        var pt = codec.payloadType;
+        if (codec.preferredPayloadType !== undefined) {
+          pt = codec.preferredPayloadType;
+        }
+        if (codec.parameters && codec.parameters.length) {
+          var params = [];
+          Object.keys(codec.parameters).forEach(function(param) {
+            params.push(param + '=' + codec.parameters[param]);
+          });
+          line += 'a=fmtp:' + pt + ' ' + params.join(';') + '\r\n';
+        }
+        return line;
+      };
+  
+      // Parses an rtcp-fb line, returns RTCPRtcpFeedback object. Sample input:
+      // a=rtcp-fb:98 nack rpsi
+      SDPUtils.parseRtcpFb = function(line) {
+        var parts = line.substr(line.indexOf(' ') + 1).split(' ');
+        return {
+          type: parts.shift(),
+          parameter: parts.join(' ')
+        };
+      };
+      // Generate a=rtcp-fb lines from RTCRtpCodecCapability or RTCRtpCodecParameters.
+      SDPUtils.writeRtcpFb = function(codec) {
+        var lines = '';
+        var pt = codec.payloadType;
+        if (codec.preferredPayloadType !== undefined) {
+          pt = codec.preferredPayloadType;
+        }
+        if (codec.rtcpFeedback && codec.rtcpFeedback.length) {
+          // FIXME: special handling for trr-int?
+          codec.rtcpFeedback.forEach(function(fb) {
+            lines += 'a=rtcp-fb:' + pt + ' ' + fb.type + ' ' + fb.parameter +
+                '\r\n';
+          });
+        }
+        return lines;
+      };
+  
+      // Parses an RFC 5576 ssrc media attribute. Sample input:
+      // a=ssrc:3735928559 cname:something
+      SDPUtils.parseSsrcMedia = function(line) {
+        var sp = line.indexOf(' ');
+        var parts = {
+          ssrc: line.substr(7, sp - 7),
+        };
+        var colon = line.indexOf(':', sp);
+        if (colon > -1) {
+          parts.attribute = line.substr(sp + 1, colon - sp - 1);
+          parts.value = line.substr(colon + 1);
+        } else {
+          parts.attribute = line.substr(sp + 1);
+        }
+        return parts;
+      };
+  
+      // Extracts DTLS parameters from SDP media section or sessionpart.
+      // FIXME: for consistency with other functions this should only
+      //   get the fingerprint line as input. See also getIceParameters.
+      SDPUtils.getDtlsParameters = function(mediaSection, sessionpart) {
+        var lines = SDPUtils.splitLines(mediaSection);
+        lines = lines.concat(SDPUtils.splitLines(sessionpart)); // Search in session part, too.
+        var fpLine = lines.filter(function(line) {
+          return line.indexOf('a=fingerprint:') === 0;
+        })[0].substr(14);
+        // Note: a=setup line is ignored since we use the 'auto' role.
+        var dtlsParameters = {
+          role: 'auto',
+          fingerprints: [{
+            algorithm: fpLine.split(' ')[0],
+            value: fpLine.split(' ')[1]
+          }]
+        };
+        return dtlsParameters;
+      };
+  
+      // Serializes DTLS parameters to SDP.
+      SDPUtils.writeDtlsParameters = function(params, setupType) {
+        var sdp = 'a=setup:' + setupType + '\r\n';
+        params.fingerprints.forEach(function(fp) {
+          sdp += 'a=fingerprint:' + fp.algorithm + ' ' + fp.value + '\r\n';
+        });
+        return sdp;
+      };
+      // Parses ICE information from SDP media section or sessionpart.
+      // FIXME: for consistency with other functions this should only
+      //   get the ice-ufrag and ice-pwd lines as input.
+      SDPUtils.getIceParameters = function(mediaSection, sessionpart) {
+        var lines = SDPUtils.splitLines(mediaSection);
+        lines = lines.concat(SDPUtils.splitLines(sessionpart)); // Search in session part, too.
+        var iceParameters = {
+          usernameFragment: lines.filter(function(line) {
+            return line.indexOf('a=ice-ufrag:') === 0;
+          })[0].substr(12),
+          password: lines.filter(function(line) {
+            return line.indexOf('a=ice-pwd:') === 0;
+          })[0].substr(10)
+        };
+        return iceParameters;
+      };
+  
+      // Serializes ICE parameters to SDP.
+      SDPUtils.writeIceParameters = function(params) {
+        return 'a=ice-ufrag:' + params.usernameFragment + '\r\n' +
+            'a=ice-pwd:' + params.password + '\r\n';
+      };
+  
+      // Parses the SDP media section and returns RTCRtpParameters.
+      SDPUtils.parseRtpParameters = function(mediaSection) {
+        var description = {
+          codecs: [],
+          headerExtensions: [],
+          fecMechanisms: [],
+          rtcp: []
+        };
+        var lines = SDPUtils.splitLines(mediaSection);
+        var mline = lines[0].split(' ');
+        for (var i = 3; i < mline.length; i++) { // find all codecs from mline[3..]
+          var pt = mline[i];
+          var rtpmapline = SDPUtils.matchPrefix(
+              mediaSection, 'a=rtpmap:' + pt + ' ')[0];
+          if (rtpmapline) {
+            var codec = SDPUtils.parseRtpMap(rtpmapline);
+            var fmtps = SDPUtils.matchPrefix(
+                mediaSection, 'a=fmtp:' + pt + ' ');
+            // Only the first a=fmtp:<pt> is considered.
+            codec.parameters = fmtps.length ? SDPUtils.parseFmtp(fmtps[0]) : {};
+            codec.rtcpFeedback = SDPUtils.matchPrefix(
+                mediaSection, 'a=rtcp-fb:' + pt + ' ')
+              .map(SDPUtils.parseRtcpFb);
+            description.codecs.push(codec);
+          }
+        }
+        // FIXME: parse headerExtensions, fecMechanisms and rtcp.
+        return description;
+      };
+  
+      // Generates parts of the SDP media section describing the capabilities / parameters.
+      SDPUtils.writeRtpDescription = function(kind, caps) {
+        var sdp = '';
+  
+        // Build the mline.
+        sdp += 'm=' + kind + ' ';
+        sdp += caps.codecs.length > 0 ? '9' : '0'; // reject if no codecs.
+        sdp += ' UDP/TLS/RTP/SAVPF ';
+        sdp += caps.codecs.map(function(codec) {
+          if (codec.preferredPayloadType !== undefined) {
+            return codec.preferredPayloadType;
+          }
+          return codec.payloadType;
+        }).join(' ') + '\r\n';
+  
+        sdp += 'c=IN IP4 0.0.0.0\r\n';
+        sdp += 'a=rtcp:9 IN IP4 0.0.0.0\r\n';
+  
+        // Add a=rtpmap lines for each codec. Also fmtp and rtcp-fb.
+        caps.codecs.forEach(function(codec) {
+          sdp += SDPUtils.writeRtpMap(codec);
+          sdp += SDPUtils.writeFtmp(codec);
+          sdp += SDPUtils.writeRtcpFb(codec);
+        });
+        // FIXME: add headerExtensions, fecMechanismş and rtcp.
+        sdp += 'a=rtcp-mux\r\n';
+        return sdp;
+      };
+  
+      SDPUtils.writeSessionBoilerplate = function() {
+        // FIXME: sess-id should be an NTP timestamp.
+        return 'v=0\r\n' +
+            'o=thisisadapterortc 8169639915646943137 2 IN IP4 127.0.0.1\r\n' +
+            's=-\r\n' +
+            't=0 0\r\n';
+      };
+  
+      SDPUtils.writeMediaSection = function(transceiver, caps, type, stream) {
+        var sdp = SDPUtils.writeRtpDescription(transceiver.kind, caps);
+  
+        // Map ICE parameters (ufrag, pwd) to SDP.
+        sdp += SDPUtils.writeIceParameters(
+            transceiver.iceGatherer.getLocalParameters());
+  
+        // Map DTLS parameters to SDP.
+        sdp += SDPUtils.writeDtlsParameters(
+            transceiver.dtlsTransport.getLocalParameters(),
+            type === 'offer' ? 'actpass' : 'active');
+  
+        sdp += 'a=mid:' + transceiver.mid + '\r\n';
+  
+        if (transceiver.rtpSender && transceiver.rtpReceiver) {
+          sdp += 'a=sendrecv\r\n';
+        } else if (transceiver.rtpSender) {
+          sdp += 'a=sendonly\r\n';
+        } else if (transceiver.rtpReceiver) {
+          sdp += 'a=recvonly\r\n';
+        } else {
+          sdp += 'a=inactive\r\n';
+        }
+  
+        // FIXME: for RTX there might be multiple SSRCs. Not implemented in Edge yet.
+        if (transceiver.rtpSender) {
+          var msid = 'msid:' + stream.id + ' ' +
+              transceiver.rtpSender.track.id + '\r\n';
+          sdp += 'a=' + msid;
+          sdp += 'a=ssrc:' + transceiver.sendSsrc + ' ' + msid;
+        }
+        // FIXME: this should be written by writeRtpDescription.
+        sdp += 'a=ssrc:' + transceiver.sendSsrc + ' cname:' +
+            localCName + '\r\n';
+        return sdp;
+      };
+  
+      // Gets the direction from the mediaSection or the sessionpart.
+      SDPUtils.getDirection = function(mediaSection, sessionpart) {
+        // Look for sendrecv, sendonly, recvonly, inactive, default to sendrecv.
+        var lines = SDPUtils.splitLines(mediaSection);
+        for (var i = 0; i < lines.length; i++) {
+          switch (lines[i]) {
+            case 'a=sendrecv':
+            case 'a=sendonly':
+            case 'a=recvonly':
+            case 'a=inactive':
+              return lines[i].substr(2);
+          }
+        }
+        if (sessionpart) {
+          return SDPUtils.getDirection(sessionpart);
+        }
+        return 'sendrecv';
+      };
+  
+      // ORTC defines an RTCIceCandidate object but no constructor.
+      // Not implemented in Edge.
+      if (!window.RTCIceCandidate) {
+        window.RTCIceCandidate = function(args) {
+          return args;
+        };
+      }
+      // ORTC does not have a session description object but
+      // other browsers (i.e. Chrome) that will support both PC and ORTC
+      // in the future might have this defined already.
+      if (!window.RTCSessionDescription) {
+        window.RTCSessionDescription = function(args) {
+          return args;
+        };
+      }
+  
+      window.RTCPeerConnection = function(config) {
+        var self = this;
+  
+        this.onicecandidate = null;
+        this.onaddstream = null;
+        this.onremovestream = null;
+        this.onsignalingstatechange = null;
+        this.oniceconnectionstatechange = null;
+        this.onnegotiationneeded = null;
+        this.ondatachannel = null;
+  
+        this.localStreams = [];
+        this.remoteStreams = [];
+        this.getLocalStreams = function() { return self.localStreams; };
+        this.getRemoteStreams = function() { return self.remoteStreams; };
+  
+        this.localDescription = new RTCSessionDescription({
+          type: '',
+          sdp: ''
+        });
+        this.remoteDescription = new RTCSessionDescription({
+          type: '',
+          sdp: ''
+        });
+        this.signalingState = 'stable';
+        this.iceConnectionState = 'new';
+  
+        this.iceOptions = {
+          gatherPolicy: 'all',
+          iceServers: []
+        };
+        if (config && config.iceTransportPolicy) {
+          switch (config.iceTransportPolicy) {
+            case 'all':
+            case 'relay':
+              this.iceOptions.gatherPolicy = config.iceTransportPolicy;
+              break;
+            case 'none':
+              // FIXME: remove once implementation and spec have added this.
+              throw new TypeError('iceTransportPolicy "none" not supported');
+          }
+        }
+        if (config && config.iceServers) {
+          // Edge does not like
+          // 1) stun:
+          // 2) turn: that does not have all of turn:host:port?transport=udp
+          // 3) an array of urls
+          config.iceServers.forEach(function(server) {
+            if (server.urls) {
+              var url;
+              if (typeof(server.urls) === 'string') {
+                url = server.urls;
+              } else {
+                url = server.urls[0];
+              }
+              if (url.indexOf('transport=udp') !== -1) {
+                self.iceServers.push({
+                  username: server.username,
+                  credential: server.credential,
+                  urls: url
+                });
+              }
+            }
+          });
+        }
+  
+        // per-track iceGathers, iceTransports, dtlsTransports, rtpSenders, ...
+        // everything that is needed to describe a SDP m-line.
+        this.transceivers = [];
+  
+        // since the iceGatherer is currently created in createOffer but we
+        // must not emit candidates until after setLocalDescription we buffer
+        // them in this array.
+        this._localIceCandidatesBuffer = [];
+      };
+  
+      window.RTCPeerConnection.prototype._emitBufferedCandidates = function() {
+        var self = this;
+        // FIXME: need to apply ice candidates in a way which is async but in-order
+        this._localIceCandidatesBuffer.forEach(function(event) {
+          if (self.onicecandidate !== null) {
+            self.onicecandidate(event);
+          }
+        });
+        this._localIceCandidatesBuffer = [];
+      };
+  
+      window.RTCPeerConnection.prototype.addStream = function(stream) {
+        // Clone is necessary for local demos mostly, attaching directly
+        // to two different senders does not work (build 10547).
+        this.localStreams.push(stream.clone());
+        this._maybeFireNegotiationNeeded();
+      };
+  
+      window.RTCPeerConnection.prototype.removeStream = function(stream) {
+        var idx = this.localStreams.indexOf(stream);
+        if (idx > -1) {
+          this.localStreams.splice(idx, 1);
+          this._maybeFireNegotiationNeeded();
+        }
+      };
+  
+      // Determines the intersection of local and remote capabilities.
+      window.RTCPeerConnection.prototype._getCommonCapabilities =
+          function(localCapabilities, remoteCapabilities) {
+        var commonCapabilities = {
+          codecs: [],
+          headerExtensions: [],
+          fecMechanisms: []
+        };
+        localCapabilities.codecs.forEach(function(lCodec) {
+          for (var i = 0; i < remoteCapabilities.codecs.length; i++) {
+            var rCodec = remoteCapabilities.codecs[i];
+            if (lCodec.name.toLowerCase() === rCodec.name.toLowerCase() &&
+                lCodec.clockRate === rCodec.clockRate &&
+                lCodec.numChannels === rCodec.numChannels) {
+              // push rCodec so we reply with offerer payload type
+              commonCapabilities.codecs.push(rCodec);
+  
+              // FIXME: also need to determine intersection between
+              // .rtcpFeedback and .parameters
+              break;
+            }
+          }
+        });
+  
+        localCapabilities.headerExtensions.forEach(function(lHeaderExtension) {
+          for (var i = 0; i < remoteCapabilities.headerExtensions.length; i++) {
+            var rHeaderExtension = remoteCapabilities.headerExtensions[i];
+            if (lHeaderExtension.uri === rHeaderExtension.uri) {
+              commonCapabilities.headerExtensions.push(rHeaderExtension);
+              break;
+            }
+          }
+        });
+  
+        // FIXME: fecMechanisms
+        return commonCapabilities;
+      };
+  
+      // Create ICE gatherer, ICE transport and DTLS transport.
+      window.RTCPeerConnection.prototype._createIceAndDtlsTransports =
+          function(mid, sdpMLineIndex) {
+        var self = this;
+        var iceGatherer = new RTCIceGatherer(self.iceOptions);
+        var iceTransport = new RTCIceTransport(iceGatherer);
+        iceGatherer.onlocalcandidate = function(evt) {
+          var event = {};
+          event.candidate = {sdpMid: mid, sdpMLineIndex: sdpMLineIndex};
+  
+          var cand = evt.candidate;
+          // Edge emits an empty object for RTCIceCandidateComplete‥
+          if (!cand || Object.keys(cand).length === 0) {
+            // polyfill since RTCIceGatherer.state is not implemented in Edge 10547 yet.
+            if (iceGatherer.state === undefined) {
+              iceGatherer.state = 'completed';
+            }
+  
+            // Emit a candidate with type endOfCandidates to make the samples work.
+            // Edge requires addIceCandidate with this empty candidate to start checking.
+            // The real solution is to signal end-of-candidates to the other side when
+            // getting the null candidate but some apps (like the samples) don't do that.
+            event.candidate.candidate =
+                'candidate:1 1 udp 1 0.0.0.0 9 typ endOfCandidates';
+          } else {
+            // RTCIceCandidate doesn't have a component, needs to be added
+            cand.component = iceTransport.component === 'RTCP' ? 2 : 1;
+            event.candidate.candidate = SDPUtils.writeCandidate(cand);
+          }
+  
+          var complete = self.transceivers.every(function(transceiver) {
+            return transceiver.iceGatherer &&
+                transceiver.iceGatherer.state === 'completed';
+          });
+          // FIXME: update .localDescription with candidate and (potentially) end-of-candidates.
+          //     To make this harder, the gatherer might emit candidates before localdescription
+          //     is set. To make things worse, gather.getLocalCandidates still errors in
+          //     Edge 10547 when no candidates have been gathered yet.
+  
+          if (self.onicecandidate !== null) {
+            // Emit candidate if localDescription is set.
+            // Also emits null candidate when all gatherers are complete.
+            if (self.localDescription && self.localDescription.type === '') {
+              self._localIceCandidatesBuffer.push(event);
+              if (complete) {
+                self._localIceCandidatesBuffer.push({});
+              }
+            } else {
+              self.onicecandidate(event);
+              if (complete) {
+                self.onicecandidate({});
+              }
+            }
+          }
+        };
+        iceTransport.onicestatechange = function() {
+          self._updateConnectionState();
+        };
+  
+        var dtlsTransport = new RTCDtlsTransport(iceTransport);
+        dtlsTransport.ondtlsstatechange = function() {
+          self._updateConnectionState();
+        };
+        dtlsTransport.onerror = function() {
+          // onerror does not set state to failed by itself.
+          dtlsTransport.state = 'failed';
+          self._updateConnectionState();
+        };
+  
+        return {
+          iceGatherer: iceGatherer,
+          iceTransport: iceTransport,
+          dtlsTransport: dtlsTransport
+        };
+      };
+  
+      // Start the RTP Sender and Receiver for a transceiver.
+      window.RTCPeerConnection.prototype._transceive = function(transceiver,
+          send, recv) {
+        var params = this._getCommonCapabilities(transceiver.localCapabilities,
+            transceiver.remoteCapabilities);
+        if (send && transceiver.rtpSender) {
+          params.encodings = [{
+            ssrc: transceiver.sendSsrc
+          }];
+          params.rtcp = {
+            cname: localCName,
+            ssrc: transceiver.recvSsrc
+          };
+          transceiver.rtpSender.send(params);
+        }
+        if (recv && transceiver.rtpReceiver) {
+          params.encodings = [{
+            ssrc: transceiver.recvSsrc
+          }];
+          params.rtcp = {
+            cname: transceiver.cname,
+            ssrc: transceiver.sendSsrc
+          };
+          transceiver.rtpReceiver.receive(params);
+        }
+      };
+  
+      window.RTCPeerConnection.prototype.setLocalDescription =
+          function(description) {
+        var self = this;
+        if (description.type === 'offer') {
+          if (!this._pendingOffer) {
+          } else {
+            this.transceivers = this._pendingOffer;
+            delete this._pendingOffer;
+          }
+        } else if (description.type === 'answer') {
+          var sections = SDPUtils.splitSections(self.remoteDescription.sdp);
+          var sessionpart = sections.shift();
+          sections.forEach(function(mediaSection, sdpMLineIndex) {
+            var transceiver = self.transceivers[sdpMLineIndex];
+            var iceGatherer = transceiver.iceGatherer;
+            var iceTransport = transceiver.iceTransport;
+            var dtlsTransport = transceiver.dtlsTransport;
+            var localCapabilities = transceiver.localCapabilities;
+            var remoteCapabilities = transceiver.remoteCapabilities;
+            var rejected = mediaSection.split('\n', 1)[0]
+                .split(' ', 2)[1] === '0';
+  
+            if (!rejected) {
+              var remoteIceParameters = SDPUtils.getIceParameters(mediaSection,
+                  sessionpart);
+              iceTransport.start(iceGatherer, remoteIceParameters, 'controlled');
+  
+              var remoteDtlsParameters = SDPUtils.getDtlsParameters(mediaSection,
+                sessionpart);
+              dtlsTransport.start(remoteDtlsParameters);
+  
+              // Calculate intersection of capabilities.
+              var params = self._getCommonCapabilities(localCapabilities,
+                  remoteCapabilities);
+  
+              // Start the RTCRtpSender. The RTCRtpReceiver for this transceiver
+              // has already been started in setRemoteDescription.
+              self._transceive(transceiver,
+                  params.codecs.length > 0,
+                  false);
+            }
+          });
+        }
+  
+        this.localDescription = description;
+        switch (description.type) {
+          case 'offer':
+            this._updateSignalingState('have-local-offer');
+            break;
+          case 'answer':
+            this._updateSignalingState('stable');
+            break;
+          default:
+            throw new TypeError('unsupported type "' + description.type + '"');
+        }
+  
+        // If a success callback was provided, emit ICE candidates after it has been
+        // executed. Otherwise, emit callback after the Promise is resolved.
+        var hasCallback = arguments.length > 1 &&
+          typeof arguments[1] === 'function';
+        if (hasCallback) {
+          var cb = arguments[1];
+          window.setTimeout(function() {
+            cb();
+            self._emitBufferedCandidates();
+          }, 0);
+        }
+        var p = Promise.resolve();
+        p.then(function() {
+          if (!hasCallback) {
+            window.setTimeout(self._emitBufferedCandidates.bind(self), 0);
+          }
+        });
+        return p;
+      };
+  
+      window.RTCPeerConnection.prototype.setRemoteDescription =
+          function(description) {
+        var self = this;
+        var stream = new MediaStream();
+        var sections = SDPUtils.splitSections(description.sdp);
+        var sessionpart = sections.shift();
+        sections.forEach(function(mediaSection, sdpMLineIndex) {
+          var lines = SDPUtils.splitLines(mediaSection);
+          var mline = lines[0].substr(2).split(' ');
+          var kind = mline[0];
+          var rejected = mline[1] === '0';
+          var direction = SDPUtils.getDirection(mediaSection, sessionpart);
+  
+          var transceiver;
+          var iceGatherer;
+          var iceTransport;
+          var dtlsTransport;
+          var rtpSender;
+          var rtpReceiver;
+          var sendSsrc;
+          var recvSsrc;
+          var localCapabilities;
+  
+          // FIXME: ensure the mediaSection has rtcp-mux set.
+          var remoteCapabilities = SDPUtils.parseRtpParameters(mediaSection);
+          var remoteIceParameters;
+          var remoteDtlsParameters;
+          if (!rejected) {
+            remoteIceParameters = SDPUtils.getIceParameters(mediaSection,
+                sessionpart);
+            remoteDtlsParameters = SDPUtils.getDtlsParameters(mediaSection,
+                sessionpart);
+          }
+          var mid = SDPUtils.matchPrefix(mediaSection, 'a=mid:')[0].substr(6);
+  
+          var cname;
+          // Gets the first SSRC. Note that with RTX there might be multiple SSRCs.
+          var remoteSsrc = SDPUtils.matchPrefix(mediaSection, 'a=ssrc:')
+              .map(function(line) {
+                return SDPUtils.parseSsrcMedia(line);
+              })
+              .filter(function(obj) {
+                return obj.attribute === 'cname';
+              })[0];
+          if (remoteSsrc) {
+            recvSsrc = parseInt(remoteSsrc.ssrc, 10);
+            cname = remoteSsrc.value;
+          }
+  
+          if (description.type === 'offer') {
+            var transports = self._createIceAndDtlsTransports(mid, sdpMLineIndex);
+  
+            localCapabilities = RTCRtpReceiver.getCapabilities(kind);
+            sendSsrc = (2 * sdpMLineIndex + 2) * 1001;
+  
+            rtpReceiver = new RTCRtpReceiver(transports.dtlsTransport, kind);
+  
+            // FIXME: not correct when there are multiple streams but that is
+            // not currently supported in this shim.
+            stream.addTrack(rtpReceiver.track);
+  
+            // FIXME: look at direction.
+            if (self.localStreams.length > 0 &&
+                self.localStreams[0].getTracks().length >= sdpMLineIndex) {
+              // FIXME: actually more complicated, needs to match types etc
+              var localtrack = self.localStreams[0].getTracks()[sdpMLineIndex];
+              rtpSender = new RTCRtpSender(localtrack, transports.dtlsTransport);
+            }
+  
+            self.transceivers[sdpMLineIndex] = {
+              iceGatherer: transports.iceGatherer,
+              iceTransport: transports.iceTransport,
+              dtlsTransport: transports.dtlsTransport,
+              localCapabilities: localCapabilities,
+              remoteCapabilities: remoteCapabilities,
+              rtpSender: rtpSender,
+              rtpReceiver: rtpReceiver,
+              kind: kind,
+              mid: mid,
+              cname: cname,
+              sendSsrc: sendSsrc,
+              recvSsrc: recvSsrc
+            };
+            // Start the RTCRtpReceiver now. The RTPSender is started in setLocalDescription.
+            self._transceive(self.transceivers[sdpMLineIndex],
+                false,
+                direction === 'sendrecv' || direction === 'sendonly');
+          } else if (description.type === 'answer' && !rejected) {
+            transceiver = self.transceivers[sdpMLineIndex];
+            iceGatherer = transceiver.iceGatherer;
+            iceTransport = transceiver.iceTransport;
+            dtlsTransport = transceiver.dtlsTransport;
+            rtpSender = transceiver.rtpSender;
+            rtpReceiver = transceiver.rtpReceiver;
+            sendSsrc = transceiver.sendSsrc;
+            //recvSsrc = transceiver.recvSsrc;
+            localCapabilities = transceiver.localCapabilities;
+  
+            self.transceivers[sdpMLineIndex].recvSsrc = recvSsrc;
+            self.transceivers[sdpMLineIndex].remoteCapabilities =
+                remoteCapabilities;
+            self.transceivers[sdpMLineIndex].cname = cname;
+  
+            iceTransport.start(iceGatherer, remoteIceParameters, 'controlling');
+            dtlsTransport.start(remoteDtlsParameters);
+  
+            self._transceive(transceiver,
+                direction === 'sendrecv' || direction === 'recvonly',
+                direction === 'sendrecv' || direction === 'sendonly');
+  
+            if (rtpReceiver &&
+                (direction === 'sendrecv' || direction === 'sendonly')) {
+              stream.addTrack(rtpReceiver.track);
+            } else {
+              // FIXME: actually the receiver should be created later.
+              delete transceiver.rtpReceiver;
+            }
+          }
+        });
+  
+        this.remoteDescription = description;
+        switch (description.type) {
+          case 'offer':
+            this._updateSignalingState('have-remote-offer');
+            break;
+          case 'answer':
+            this._updateSignalingState('stable');
+            break;
+          default:
+            throw new TypeError('unsupported type "' + description.type + '"');
+        }
+        window.setTimeout(function() {
+          if (self.onaddstream !== null && stream.getTracks().length) {
+            self.remoteStreams.push(stream);
+            window.setTimeout(function() {
+              self.onaddstream({stream: stream});
+            }, 0);
+          }
+        }, 0);
+        if (arguments.length > 1 && typeof arguments[1] === 'function') {
+          window.setTimeout(arguments[1], 0);
+        }
+        return Promise.resolve();
+      };
+  
+      window.RTCPeerConnection.prototype.close = function() {
+        this.transceivers.forEach(function(transceiver) {
+          /* not yet
+          if (transceiver.iceGatherer) {
+            transceiver.iceGatherer.close();
+          }
+          */
+          if (transceiver.iceTransport) {
+            transceiver.iceTransport.stop();
+          }
+          if (transceiver.dtlsTransport) {
+            transceiver.dtlsTransport.stop();
+          }
+          if (transceiver.rtpSender) {
+            transceiver.rtpSender.stop();
+          }
+          if (transceiver.rtpReceiver) {
+            transceiver.rtpReceiver.stop();
+          }
+        });
+        // FIXME: clean up tracks, local streams, remote streams, etc
+        this._updateSignalingState('closed');
+      };
+  
+      // Update the signaling state.
+      window.RTCPeerConnection.prototype._updateSignalingState =
+          function(newState) {
+        this.signalingState = newState;
+        if (this.onsignalingstatechange !== null) {
+          this.onsignalingstatechange();
+        }
+      };
+  
+      // Determine whether to fire the negotiationneeded event.
+      window.RTCPeerConnection.prototype._maybeFireNegotiationNeeded =
+          function() {
+        // Fire away (for now).
+        if (this.onnegotiationneeded !== null) {
+          this.onnegotiationneeded();
+        }
+      };
+  
+      // Update the connection state.
+      window.RTCPeerConnection.prototype._updateConnectionState =
+          function() {
+        var self = this;
+        var newState;
+        var states = {
+          'new': 0,
+          closed: 0,
+          connecting: 0,
+          checking: 0,
+          connected: 0,
+          completed: 0,
+          failed: 0
+        };
+        this.transceivers.forEach(function(transceiver) {
+          states[transceiver.iceTransport.state]++;
+          states[transceiver.dtlsTransport.state]++;
+        });
+        // ICETransport.completed and connected are the same for this purpose.
+        states.connected += states.completed;
+  
+        newState = 'new';
+        if (states.failed > 0) {
+          newState = 'failed';
+        } else if (states.connecting > 0 || states.checking > 0) {
+          newState = 'connecting';
+        } else if (states.disconnected > 0) {
+          newState = 'disconnected';
+        } else if (states.new > 0) {
+          newState = 'new';
+        } else if (states.connecting > 0 || states.completed > 0) {
+          newState = 'connected';
+        }
+  
+        if (newState !== self.iceConnectionState) {
+          self.iceConnectionState = newState;
+          if (this.oniceconnectionstatechange !== null) {
+            this.oniceconnectionstatechange();
+          }
+        }
+      };
+  
+      window.RTCPeerConnection.prototype.createOffer = function() {
+        var self = this;
+        if (this._pendingOffer) {
+          throw new Error('createOffer called while there is a pending offer.');
+        }
+        var offerOptions;
+        if (arguments.length === 1 && typeof arguments[0] !== 'function') {
+          offerOptions = arguments[0];
+        } else if (arguments.length === 3) {
+          offerOptions = arguments[2];
+        }
+  
+        var tracks = [];
+        var numAudioTracks = 0;
+        var numVideoTracks = 0;
+        // Default to sendrecv.
+        if (this.localStreams.length) {
+          numAudioTracks = this.localStreams[0].getAudioTracks().length;
+          numVideoTracks = this.localStreams[0].getVideoTracks().length;
+        }
+        // Determine number of audio and video tracks we need to send/recv.
+        if (offerOptions) {
+          // Reject Chrome legacy constraints.
+          if (offerOptions.mandatory || offerOptions.optional) {
+            throw new TypeError(
+                'Legacy mandatory/optional constraints not supported.');
+          }
+          if (offerOptions.offerToReceiveAudio !== undefined) {
+            numAudioTracks = offerOptions.offerToReceiveAudio;
+          }
+          if (offerOptions.offerToReceiveVideo !== undefined) {
+            numVideoTracks = offerOptions.offerToReceiveVideo;
+          }
+        }
+        if (this.localStreams.length) {
+          // Push local streams.
+          this.localStreams[0].getTracks().forEach(function(track) {
+            tracks.push({
+              kind: track.kind,
+              track: track,
+              wantReceive: track.kind === 'audio' ?
+                  numAudioTracks > 0 : numVideoTracks > 0
+            });
+            if (track.kind === 'audio') {
+              numAudioTracks--;
+            } else if (track.kind === 'video') {
+              numVideoTracks--;
+            }
+          });
+        }
+        // Create M-lines for recvonly streams.
+        while (numAudioTracks > 0 || numVideoTracks > 0) {
+          if (numAudioTracks > 0) {
+            tracks.push({
+              kind: 'audio',
+              wantReceive: true
+            });
+            numAudioTracks--;
+          }
+          if (numVideoTracks > 0) {
+            tracks.push({
+              kind: 'video',
+              wantReceive: true
+            });
+            numVideoTracks--;
+          }
+        }
+  
+        var sdp = SDPUtils.writeSessionBoilerplate();
+        var transceivers = [];
+        tracks.forEach(function(mline, sdpMLineIndex) {
+          // For each track, create an ice gatherer, ice transport, dtls transport,
+          // potentially rtpsender and rtpreceiver.
+          var track = mline.track;
+          var kind = mline.kind;
+          var mid = generateIdentifier();
+  
+          var transports = self._createIceAndDtlsTransports(mid, sdpMLineIndex);
+  
+          var localCapabilities = RTCRtpSender.getCapabilities(kind);
+          var rtpSender;
+          var rtpReceiver;
+  
+          // generate an ssrc now, to be used later in rtpSender.send
+          var sendSsrc = (2 * sdpMLineIndex + 1) * 1001;
+          if (track) {
+            rtpSender = new RTCRtpSender(track, transports.dtlsTransport);
+          }
+  
+          if (mline.wantReceive) {
+            rtpReceiver = new RTCRtpReceiver(transports.dtlsTransport, kind);
+          }
+  
+          transceivers[sdpMLineIndex] = {
+            iceGatherer: transports.iceGatherer,
+            iceTransport: transports.iceTransport,
+            dtlsTransport: transports.dtlsTransport,
+            localCapabilities: localCapabilities,
+            remoteCapabilities: null,
+            rtpSender: rtpSender,
+            rtpReceiver: rtpReceiver,
+            kind: kind,
+            mid: mid,
+            sendSsrc: sendSsrc,
+            recvSsrc: null
+          };
+          var transceiver = transceivers[sdpMLineIndex];
+          sdp += SDPUtils.writeMediaSection(transceiver,
+              transceiver.localCapabilities, 'offer', self.localStreams[0]);
+        });
+  
+        this._pendingOffer = transceivers;
+        var desc = new RTCSessionDescription({
+          type: 'offer',
+          sdp: sdp
+        });
+        if (arguments.length && typeof arguments[0] === 'function') {
+          window.setTimeout(arguments[0], 0, desc);
+        }
+        return Promise.resolve(desc);
+      };
+  
+      window.RTCPeerConnection.prototype.createAnswer = function() {
+        var self = this;
+        var answerOptions;
+        if (arguments.length === 1 && typeof arguments[0] !== 'function') {
+          answerOptions = arguments[0];
+        } else if (arguments.length === 3) {
+          answerOptions = arguments[2];
+        }
+  
+        var sdp = SDPUtils.writeSessionBoilerplate();
+        this.transceivers.forEach(function(transceiver) {
+          // Calculate intersection of capabilities.
+          var commonCapabilities = self._getCommonCapabilities(
+              transceiver.localCapabilities,
+              transceiver.remoteCapabilities);
+  
+          sdp += SDPUtils.writeMediaSection(transceiver, commonCapabilities,
+              'answer', self.localStreams[0]);
+        });
+  
+        var desc = new RTCSessionDescription({
+          type: 'answer',
+          sdp: sdp
+        });
+        if (arguments.length && typeof arguments[0] === 'function') {
+          window.setTimeout(arguments[0], 0, desc);
+        }
+        return Promise.resolve(desc);
+      };
+  
+      window.RTCPeerConnection.prototype.addIceCandidate = function(candidate) {
+        var mLineIndex = candidate.sdpMLineIndex;
+        if (candidate.sdpMid) {
+          for (var i = 0; i < this.transceivers.length; i++) {
+            if (this.transceivers[i].mid === candidate.sdpMid) {
+              mLineIndex = i;
+              break;
+            }
+          }
+        }
+        var transceiver = this.transceivers[mLineIndex];
+        if (transceiver) {
+          var cand = Object.keys(candidate.candidate).length > 0 ?
+              SDPUtils.parseCandidate(candidate.candidate) : {};
+          // Ignore Chrome's invalid candidates since Edge does not like them.
+          if (cand.protocol === 'tcp' && cand.port === 0) {
+            return;
+          }
+          // Ignore RTCP candidates, we assume RTCP-MUX.
+          if (cand.component !== '1') {
+            return;
+          }
+          // A dirty hack to make samples work.
+          if (cand.type === 'endOfCandidates') {
+            cand = {};
+          }
+          transceiver.iceTransport.addRemoteCandidate(cand);
+        }
+        if (arguments.length > 1 && typeof arguments[1] === 'function') {
+          window.setTimeout(arguments[1], 0);
+        }
+        return Promise.resolve();
+      };
+  
+      window.RTCPeerConnection.prototype.getStats = function() {
+        var promises = [];
+        this.transceivers.forEach(function(transceiver) {
+          ['rtpSender', 'rtpReceiver', 'iceGatherer', 'iceTransport',
+              'dtlsTransport'].forEach(function(method) {
+            if (transceiver[method]) {
+              promises.push(transceiver[method].getStats());
+            }
+          });
+        });
+        var cb = arguments.length > 1 && typeof arguments[1] === 'function' &&
+            arguments[1];
+        return new Promise(function(resolve) {
+          var results = {};
+          Promise.all(promises).then(function(res) {
+            res.forEach(function(result) {
+              Object.keys(result).forEach(function(id) {
+                results[id] = result[id];
+              });
+            });
+            if (cb) {
+              window.setTimeout(cb, 0, results);
+            }
+            resolve(results);
+          });
+        });
+      };
+    }
   } else {
     webrtcUtils.log('Browser does not appear to be WebRTC-capable');
   }
@@ -8070,11 +9506,17 @@ if ( navigator.mozGetUserMedia
   /* Orginal exports removed in favor of AdapterJS custom export.
   if (typeof module !== 'undefined') {
     var RTCPeerConnection;
+    var RTCIceCandidate;
+    var RTCSessionDescription;
     if (typeof window !== 'undefined') {
       RTCPeerConnection = window.RTCPeerConnection;
+      RTCIceCandidate = window.RTCIceCandidate;
+      RTCSessionDescription = window.RTCSessionDescription;
     }
     module.exports = {
       RTCPeerConnection: RTCPeerConnection,
+      RTCIceCandidate: RTCIceCandidate,
+      RTCSessionDescription: RTCSessionDescription,
       getUserMedia: getUserMedia,
       attachMediaStream: attachMediaStream,
       reattachMediaStream: reattachMediaStream,
@@ -8091,6 +9533,8 @@ if ( navigator.mozGetUserMedia
     define([], function() {
       return {
         RTCPeerConnection: window.RTCPeerConnection,
+        RTCIceCandidate: window.RTCIceCandidate,
+        RTCSessionDescription: window.RTCSessionDescription,
         getUserMedia: getUserMedia,
         attachMediaStream: attachMediaStream,
         reattachMediaStream: reattachMediaStream,
@@ -8106,13 +9550,16 @@ if ( navigator.mozGetUserMedia
   }
   */
 
+/* jshint ignore:end */
 
   // END OF INJECTION OF GOOGLE'S ADAPTER.JS CONTENT
   ///////////////////////////////////////////////////////////////////
 
+  AdapterJS.parseWebrtcDetectedBrowser();
+
   ///////////////////////////////////////////////////////////////////
   // EXTENSION FOR CHROME, FIREFOX AND EDGE
-  // Includes legacy functions 
+  // Includes legacy functions
   // -- createIceServer
   // -- createIceServers
   // -- MediaStreamTrack.getSources
@@ -8138,25 +9585,26 @@ if ( navigator.mozGetUserMedia
 
     createIceServer = function (url, username, password) {
       console.warn('createIceServer is deprecated. It should be replaced with an application level implementation.');
-      
+      // Note: Google's import of AJS will auto-reverse to 'url': '...' for FF < 38
+
       var iceServer = null;
-      var url_parts = url.split(':');
-      if (url_parts[0].indexOf('stun') === 0) {
-        iceServer = { url : url };
-      } else if (url_parts[0].indexOf('turn') === 0) {
+      var urlParts = url.split(':');
+      if (urlParts[0].indexOf('stun') === 0) {
+        iceServer = { urls : [url] };
+      } else if (urlParts[0].indexOf('turn') === 0) {
         if (webrtcDetectedVersion < 27) {
-          var turn_url_parts = url.split('?');
-          if (turn_url_parts.length === 1 ||
-            turn_url_parts[1].indexOf('transport=udp') === 0) {
+          var turnUrlParts = url.split('?');
+          if (turnUrlParts.length === 1 ||
+            turnUrlParts[1].indexOf('transport=udp') === 0) {
             iceServer = {
-              url : turn_url_parts[0],
+              urls : [turnUrlParts[0]],
               credential : password,
               username : username
             };
           }
         } else {
           iceServer = {
-            url : url,
+            urls : [url],
             credential : password,
             username : username
           };
@@ -8180,12 +9628,12 @@ if ( navigator.mozGetUserMedia
   } else if ( navigator.webkitGetUserMedia ) {
     createIceServer = function (url, username, password) {
       console.warn('createIceServer is deprecated. It should be replaced with an application level implementation.');
-      
+
       var iceServer = null;
-      var url_parts = url.split(':');
-      if (url_parts[0].indexOf('stun') === 0) {
+      var urlParts = url.split(':');
+      if (urlParts[0].indexOf('stun') === 0) {
         iceServer = { 'url' : url };
-      } else if (url_parts[0].indexOf('turn') === 0) {
+      } else if (urlParts[0].indexOf('turn') === 0) {
         iceServer = {
           'url' : url,
           'credential' : password,
@@ -8221,7 +9669,7 @@ if ( navigator.mozGetUserMedia
   // attachMediaStream and reattachMediaStream for Egde
   if (navigator.mediaDevices && navigator.userAgent.match(
       /Edge\/(\d+).(\d+)$/)) {
-    window.getUserMedia = navigator.getUserMedia.bind(navigator);
+    getUserMedia = window.getUserMedia = navigator.getUserMedia.bind(navigator);
     attachMediaStream = function(element, stream) {
       element.srcObject = stream;
       return element;
@@ -8232,11 +9680,18 @@ if ( navigator.mozGetUserMedia
     };
   }
 
-  // Need to override attachMediaStream and reattachMediaStream 
+  // Need to override attachMediaStream and reattachMediaStream
   // to support the plugin's logic
   attachMediaStream_base = attachMediaStream;
   attachMediaStream = function (element, stream) {
-    attachMediaStream_base(element, stream);
+    if ((webrtcDetectedBrowser === 'chrome' ||
+         webrtcDetectedBrowser === 'opera') && 
+        !stream) {
+      // Chrome does not support "src = null"
+      element.src = '';
+    } else {
+      attachMediaStream_base(element, stream);
+    }
     return element;
   };
   reattachMediaStream_base = reattachMediaStream;
@@ -8244,6 +9699,14 @@ if ( navigator.mozGetUserMedia
     reattachMediaStream_base(to, from);
     return to;
   };
+
+  // Propagate attachMediaStream and gUM in window and AdapterJS
+  window.attachMediaStream      = attachMediaStream;
+  window.reattachMediaStream    = reattachMediaStream;
+  window.getUserMedia           = getUserMedia;
+  AdapterJS.attachMediaStream   = attachMediaStream;
+  AdapterJS.reattachMediaStream = reattachMediaStream;
+  AdapterJS.getUserMedia        = getUserMedia;
 
   // Removed Google defined promises when promise is not defined
   if (typeof Promise === 'undefined') {
@@ -8301,7 +9764,6 @@ if ( navigator.mozGetUserMedia
     console.groupEnd = function (arg) {};
     /* jshint +W020 */
   }
-  webrtcDetectedType = 'plugin';
   AdapterJS.parseWebrtcDetectedBrowser();
   isIE = webrtcDetectedBrowser === 'IE';
 
@@ -8427,7 +9889,7 @@ if ( navigator.mozGetUserMedia
   AdapterJS.WebRTCPlugin.defineWebRTCInterface = function () {
     if (AdapterJS.WebRTCPlugin.pluginState ===
         AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY) {
-      console.error("AdapterJS - WebRTC interface has already been defined");
+      console.error('AdapterJS - WebRTC interface has already been defined');
       return;
     }
 
@@ -8439,13 +9901,13 @@ if ( navigator.mozGetUserMedia
 
     createIceServer = function (url, username, password) {
       var iceServer = null;
-      var url_parts = url.split(':');
-      if (url_parts[0].indexOf('stun') === 0) {
+      var urlParts = url.split(':');
+      if (urlParts[0].indexOf('stun') === 0) {
         iceServer = {
           'url' : url,
           'hasCredentials' : false
         };
-      } else if (url_parts[0].indexOf('turn') === 0) {
+      } else if (urlParts[0].indexOf('turn') === 0) {
         iceServer = {
           'url' : url,
           'hasCredentials' : true,
@@ -8471,27 +9933,58 @@ if ( navigator.mozGetUserMedia
     };
 
     RTCPeerConnection = function (servers, constraints) {
-      var iceServers = null;
-      if (servers) {
-        iceServers = servers.iceServers;
-        for (var i = 0; i < iceServers.length; i++) {
-          if (iceServers[i].urls && !iceServers[i].url) {
-            iceServers[i].url = iceServers[i].urls;
-          }
-          iceServers[i].hasCredentials = AdapterJS.
-            isDefined(iceServers[i].username) &&
-            AdapterJS.isDefined(iceServers[i].credential);
+      // Validate server argumenr
+      if (!(servers === undefined ||
+            servers === null ||
+            Array.isArray(servers.iceServers))) {
+        throw new Error('Failed to construct \'RTCPeerConnection\': Malformed RTCConfiguration');
+      }
+
+      // Validate constraints argument
+      if (typeof constraints !== 'undefined' && constraints !== null) {
+        var invalidConstraits = false;
+        invalidConstraits |= typeof constraints !== 'object';
+        invalidConstraits |= constraints.hasOwnProperty('mandatory') && 
+                              constraints.mandatory !== undefined && 
+                              constraints.mandatory !== null && 
+                              constraints.mandatory.constructor !== Object;
+        invalidConstraits |= constraints.hasOwnProperty('optional') && 
+                              constraints.optional !== undefined &&
+                              constraints.optional !== null &&
+                              !Array.isArray(constraints.optional);
+        if (invalidConstraits) {
+          throw new Error('Failed to construct \'RTCPeerConnection\': Malformed constraints object');
         }
       }
-      var mandatory = (constraints && constraints.mandatory) ?
-        constraints.mandatory : null;
-      var optional = (constraints && constraints.optional) ?
-        constraints.optional : null;
 
+      // Call relevant PeerConnection constructor according to plugin version
       AdapterJS.WebRTCPlugin.WaitForPluginReady();
-      return AdapterJS.WebRTCPlugin.plugin.
-        PeerConnection(AdapterJS.WebRTCPlugin.pageId,
-        iceServers, mandatory, optional);
+      if (AdapterJS.WebRTCPlugin.plugin.PEER_CONNECTION_VERSION &&
+          AdapterJS.WebRTCPlugin.plugin.PEER_CONNECTION_VERSION > 1) {
+        // RTCPeerConnection prototype from the new spec
+        return AdapterJS.WebRTCPlugin.plugin.PeerConnection(servers);
+      } else {
+        // RTCPeerConnection prototype from the old spec
+        var iceServers = null;
+        if (servers && Array.isArray(servers.iceServers)) {
+          iceServers = servers.iceServers;
+          for (var i = 0; i < iceServers.length; i++) {
+            if (iceServers[i].urls && !iceServers[i].url) {
+              iceServers[i].url = iceServers[i].urls;
+            }
+            iceServers[i].hasCredentials = AdapterJS.
+              isDefined(iceServers[i].username) &&
+              AdapterJS.isDefined(iceServers[i].credential);
+          }
+        }
+        var mandatory = (constraints && constraints.mandatory) ?
+          constraints.mandatory : null;
+        var optional = (constraints && constraints.optional) ?
+          constraints.optional : null;
+        return AdapterJS.WebRTCPlugin.plugin.
+          PeerConnection(AdapterJS.WebRTCPlugin.pageId,
+          iceServers, mandatory, optional);
+      }
     };
 
     MediaStreamTrack = {};
@@ -8501,7 +9994,7 @@ if ( navigator.mozGetUserMedia
       });
     };
 
-    window.getUserMedia = function (constraints, successCallback, failureCallback) {
+    getUserMedia = function (constraints, successCallback, failureCallback) {
       constraints.audio = constraints.audio || false;
       constraints.video = constraints.video || false;
 
@@ -8510,11 +10003,16 @@ if ( navigator.mozGetUserMedia
           getUserMedia(constraints, successCallback, failureCallback);
       });
     };
-    window.navigator.getUserMedia = window.getUserMedia;
+    window.navigator.getUserMedia = getUserMedia;
 
     // Defined mediaDevices when promises are available
-    if ( !navigator.mediaDevices 
-      && typeof Promise !== 'undefined') {
+    if ( !navigator.mediaDevices &&
+      typeof Promise !== 'undefined') {
+      requestUserMedia = function(constraints) {
+        return new Promise(function(resolve, reject) {
+          getUserMedia(constraints, resolve, reject);
+        });
+      };
       navigator.mediaDevices = {getUserMedia: requestUserMedia,
                                 enumerateDevices: function() {
         return new Promise(function(resolve) {
@@ -8523,6 +10021,7 @@ if ( navigator.mozGetUserMedia
             resolve(devices.map(function(device) {
               return {label: device.label,
                       kind: kinds[device.kind],
+                      id: device.id,
                       deviceId: device.id,
                       groupId: ''};
             }));
@@ -8632,31 +10131,32 @@ if ( navigator.mozGetUserMedia
       }
     };
 
+    // Propagate attachMediaStream and gUM in window and AdapterJS
+    window.attachMediaStream      = attachMediaStream;
+    window.reattachMediaStream    = reattachMediaStream;
+    window.getUserMedia           = getUserMedia;
+    AdapterJS.attachMediaStream   = attachMediaStream;
+    AdapterJS.reattachMediaStream = reattachMediaStream;
+    AdapterJS.getUserMedia        = getUserMedia;
+
     AdapterJS.forwardEventHandlers = function (destElem, srcElem, prototype) {
-
       properties = Object.getOwnPropertyNames( prototype );
+      for(var prop in properties) {
+        if (prop) {
+          propName = properties[prop];
 
-      for(prop in properties) {
-        propName = properties[prop];
-
-        if (typeof(propName.slice) === 'function') {
-          if (propName.slice(0,2) == 'on' && srcElem[propName] != null) {
-            if (isIE) {
-              destElem.attachEvent(propName,srcElem[propName]);
-            } else {
-              destElem.addEventListener(propName.slice(2), srcElem[propName], false)
-            }
-          } else {
-            //TODO (http://jira.temasys.com.sg/browse/TWP-328) Forward non-event properties ?
+          if (typeof propName.slice === 'function' &&
+              propName.slice(0,2) === 'on' && 
+              typeof srcElem[propName] === 'function') {
+              AdapterJS.addEvent(destElem, propName.slice(2), srcElem[propName]);
           }
         }
       }
-
-      var subPrototype = Object.getPrototypeOf(prototype)
-      if(subPrototype != null) {
+      var subPrototype = Object.getPrototypeOf(prototype);
+      if(!!subPrototype) {
         AdapterJS.forwardEventHandlers(destElem, srcElem, subPrototype);
       }
-    }
+    };
 
     RTCIceCandidate = function (candidate) {
       if (!candidate.sdpMid) {
@@ -8734,10 +10234,14 @@ if ( navigator.mozGetUserMedia
   };
 
   var clone = function(obj) {
-    if (null == obj || "object" != typeof obj) return obj;
+    if (null === obj || 'object' !== typeof obj) {
+      return obj;
+    }
     var copy = obj.constructor();
     for (var attr in obj) {
-        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
+      if (obj.hasOwnProperty(attr)) {
+        copy[attr] = obj[attr];
+      }
     }
     return copy;
   };
@@ -8768,11 +10272,10 @@ if ( navigator.mozGetUserMedia
             clearInterval(checkIfReady);
 
             baseGetUserMedia(updatedConstraints, successCb, function (error) {
-              if (error.name === 'PermissionDeniedError' && window.parent.location.protocol === 'https:') {
+              if (['PermissionDeniedError', 'SecurityError'].indexOf(error.name) > -1 && window.parent.location.protocol === 'https:') {
                 AdapterJS.renderNotificationBar(AdapterJS.TEXT.EXTENSION.REQUIRE_INSTALLATION_FF,
                   AdapterJS.TEXT.EXTENSION.BUTTON_FF,
-                  'http://skylink.io/screensharing/ff_addon.php?domain=' + window.location.hostname, false, true);
-                //window.location.href = 'http://skylink.io/screensharing/ff_addon.php?domain=' + window.location.hostname;
+                  'https://addons.mozilla.org/en-US/firefox/addon/skylink-webrtc-tools/', true, true);
               } else {
                 failureCb(error);
               }
@@ -8785,7 +10288,12 @@ if ( navigator.mozGetUserMedia
       }
     };
 
-    getUserMedia = navigator.getUserMedia;
+    AdapterJS.getUserMedia = window.getUserMedia = navigator.getUserMedia;
+    navigator.mediaDevices.getUserMedia = function(constraints) {
+      return new Promise(function(resolve, reject) {
+        window.getUserMedia(constraints, resolve, reject);
+      });
+    };
 
   } else if (window.navigator.webkitGetUserMedia) {
     baseGetUserMedia = window.navigator.getUserMedia;
@@ -8865,7 +10373,12 @@ if ( navigator.mozGetUserMedia
       }
     };
 
-    getUserMedia = navigator.getUserMedia;
+    AdapterJS.getUserMedia = window.getUserMedia = navigator.getUserMedia;
+    navigator.mediaDevices.getUserMedia = function(constraints) {
+      return new Promise(function(resolve, reject) {
+        window.getUserMedia(constraints, resolve, reject);
+      });
+    };
 
   } else if (navigator.mediaDevices && navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)) {
     // nothing here because edge does not support screensharing
@@ -8902,7 +10415,12 @@ if ( navigator.mozGetUserMedia
       }
     };
 
-    getUserMedia = window.navigator.getUserMedia;
+    AdapterJS.getUserMedia = getUserMedia = 
+       window.getUserMedia = navigator.getUserMedia;
+    if ( navigator.mediaDevices &&
+      typeof Promise !== 'undefined') {
+      navigator.mediaDevices.getUserMedia = requestUserMedia;
+    }
   }
 
   // For chrome, use an iframe to load the screensharing extension
@@ -8920,7 +10438,7 @@ if ( navigator.mozGetUserMedia
 
     (document.body || document.documentElement).appendChild(iframe);
 
-    var postFrameMessage = function (object) {
+    var postFrameMessage = function (object) { // jshint ignore:line
       object = object || {};
 
       if (!iframe.isLoaded) {
@@ -8936,7 +10454,8 @@ if ( navigator.mozGetUserMedia
     console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.10 - Fri Mar 04 2016 16:07:21 GMT+0800 (SGT) */
+
+/*! skylinkjs - v0.6.10 - Wed Mar 23 2016 22:59:14 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8978,6 +10497,71 @@ if (!Object.keys) {
       return result;
     }
   })()
+}
+
+// Array.forEach polyfill
+// Production steps of ECMA-262, Edition 5, 15.4.4.18
+// Reference: http://es5.github.io/#x15.4.4.18
+if (!Array.prototype.forEach) {
+
+  Array.prototype.forEach = function(callback, thisArg) {
+
+    var T, k;
+
+    if (this == null) {
+      throw new TypeError(' this is null or not defined');
+    }
+
+    // 1. Let O be the result of calling toObject() passing the
+    // |this| value as the argument.
+    var O = Object(this);
+
+    // 2. Let lenValue be the result of calling the Get() internal
+    // method of O with the argument "length".
+    // 3. Let len be toUint32(lenValue).
+    var len = O.length >>> 0;
+
+    // 4. If isCallable(callback) is false, throw a TypeError exception.
+    // See: http://es5.github.com/#x9.11
+    if (typeof callback !== "function") {
+      throw new TypeError(callback + ' is not a function');
+    }
+
+    // 5. If thisArg was supplied, let T be thisArg; else let
+    // T be undefined.
+    if (arguments.length > 1) {
+      T = thisArg;
+    }
+
+    // 6. Let k be 0
+    k = 0;
+
+    // 7. Repeat, while k < len
+    while (k < len) {
+
+      var kValue;
+
+      // a. Let Pk be ToString(k).
+      //    This is implicit for LHS operands of the in operator
+      // b. Let kPresent be the result of calling the HasProperty
+      //    internal method of O with argument Pk.
+      //    This step can be combined with c
+      // c. If kPresent is true, then
+      if (k in O) {
+
+        // i. Let kValue be the result of calling the Get internal
+        // method of O with argument Pk.
+        kValue = O[k];
+
+        // ii. Call the Call internal method of callback with T as
+        // the this value and argument list containing kValue, k, and O.
+        callback.call(T, kValue, k, O);
+      }
+      // d. Increase k by 1.
+      k++;
+    }
+    // 8. return undefined
+  };
 }
 
 // Mozilla provided polyfill for Date.getISOString()
@@ -9117,30 +10701,378 @@ function Skylink() {
   if (!(this instanceof Skylink)) {
     return new Skylink();
   }
-
-  /**
-   * Helper function that generates an Unique ID (UUID) string.
-   * @method generateUUID
-   * @return {String} Generated Unique ID (UUID) string.
-   * @example
-   *    // Get Unique ID (UUID)
-   *    var uuid = SkylinkDemo.generateUUID();
-   * @for Skylink
-   * @since 0.5.9
-   */
-  this.generateUUID = function() {
-    var d = new Date().getTime();
-    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = (d + Math.random() * 16) % 16 | 0;
-      d = Math.floor(d / 16);
-      return (c == 'x' ? r : (r & 0x7 | 0x8)).toString(16);
-    });
-    return uuid;
-  };
 }
 this.Skylink = Skylink;
 
 Skylink.prototype.VERSION = '0.6.10';
+
+/**
+ * These are the list of Peer connection signaling states that Skylink would trigger.
+ * - Some of the state references the [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCSignalingState).
+ * @attribute PEER_CONNECTION_STATE
+ * @type JSON
+ * @param {String} STABLE <small>Value <code>"stable"</code></small>
+ *   The state when there is no handshaking in progress and when
+ *   handshaking has just started or close.<br>
+ * This state occurs when Peer connection has just been initialised and after
+ *   <code>HAVE_LOCAL_OFFER</code> or <code>HAVE_REMOTE_OFFER</code>.
+ * @param {String} HAVE_LOCAL_OFFER <small>Value <code>"have-local-offer"</code></small>
+ *   The state when the local session description <code>"offer"</code> is generated and to be sent.<br>
+ * This state occurs after <code>STABLE</code> state.
+ * @param {String} HAVE_REMOTE_OFFER <small>Value <code>"have-remote-offer"</code></small>
+ *   The state when the remote session description <code>"offer"</code> is received.<br>
+ * At this stage, this indicates that the Peer connection signaling handshaking has been completed, and
+ *   likely would go back to <code>STABLE</code> after local <code>"answer"</code> is received by Peer.
+ * @param {String} CLOSED <small>Value <code>"closed"</code></small>
+ *   The state when the Peer connection is closed.<br>
+ * This state occurs when connection with Peer has been closed, usually when Peer leaves the room.
+ * @readOnly
+ * @component Peer
+ * @for Skylink
+ * @since 0.5.0
+ */
+Skylink.prototype.PEER_CONNECTION_STATE = {
+  STABLE: 'stable',
+  HAVE_LOCAL_OFFER: 'have-local-offer',
+  HAVE_REMOTE_OFFER: 'have-remote-offer',
+  CLOSED: 'closed'
+};
+
+/**
+ * These are the types of server Peers that Skylink would connect with.
+ * - Different server Peers that serves different functionalities.
+ * - The server Peers functionalities are only available depending on the
+ *   Application Key configuration.
+ * - Eventually, this list will be populated as there are more server Peer
+ *   functionalities provided by the Skylink platform.
+ * @attribute SERVER_PEER_TYPE
+ * @param {String} MCU <small>Value <code>"mcu"</code></small>
+ *   This server Peer is a MCU server connection.
+ * @type JSON
+ * @readOnly
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.SERVER_PEER_TYPE = {
+  MCU: 'mcu'
+  //SIP: 'sip'
+};
+
+/**
+ * These are the list of Peer list retrieval states that Skylink would trigger.
+ * - This relates to and requires the Privileged Key feature where Peers using
+ *   that Privileged alias Key becomes a privileged Peer with privileged functionalities.
+ * @attribute GET_PEERS_STATE
+ * @type JSON
+ * @param {String} ENQUIRED <small>Value <code>"enquired"</code></small>
+ *   The state when the privileged Peer already enquired signaling for list of peers.
+ * @param {String} RECEIVED <small>Value <code>"received"</code></small>
+ *   The state when the privileged Peer received list of peers from signaling.
+ * @readOnly
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.GET_PEERS_STATE = {
+  ENQUIRED: 'enquired',
+  RECEIVED: 'received'
+};
+
+/**
+ * These are the list of Peer introduction states that Skylink would trigger.
+ * - This relates to and requires the Privileged Key feature where Peers using
+ *   that Privileged alias Key becomes a privileged Peer with privileged functionalities.
+ * @attribute INTRODUCE_STATE
+ * @type JSON
+ * @param {String} INTRODUCING <small>Value <code>"enquired"</code></small>
+ *   The state when the privileged Peer have sent the introduction signal.
+ * @param {String} ERROR <small>Value <code>"error"</code></small>
+ *   The state when the Peer introduction has occurred an exception.
+ * @readOnly
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.INTRODUCE_STATE = {
+  INTRODUCING: 'introducing',
+  ERROR: 'error'
+};
+
+/**
+ * These are the list of Peer connection ICE connection states that Skylink would trigger.
+ * - These states references the [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState),
+ *   except the <code>TRICKLE_FAILED</code> state, which is an addition provided state by Skylink
+ *   to inform that trickle ICE has failed.
+ * @attribute ICE_CONNECTION_STATE
+ * @type JSON
+ * @param {String} STARTING <small>Value <code>"starting"</code></small>
+ *   The state when the ICE agent is gathering addresses and/or waiting
+ *   for remote candidates to be supplied.<br>
+ * This state occurs when Peer connection has just been initialised.
+ * @param {String} CHECKING <small>Value <code>"checking"</code></small>
+ *   The state when the ICE agent has received remote candidates
+ *   on at least one component, and is checking candidate pairs but has
+ *   not yet found a connection. In addition to checking, it may also
+ *   still be gathering.<br>
+ * This state occurs after <code>STARTING</code> state.
+ * @param {String} CONNECTED <small>Value <code>"connected"</code></small>
+ *  The state when the ICE agent has found a usable connection
+ *   for all components but is still checking other candidate pairs to see
+ *   if there is a better connection. It may also still be gathering.<br>
+ * This state occurs after <code>CHECKING</code>.
+ * @param {String} COMPLETED <small>Value <code>"completed"</code></small>
+ *   The state when the ICE agent has finished gathering and
+ *   checking and found a connection for all components.<br>
+ * This state occurs after <code>CONNECTED</code> (or sometimes after <code>CHECKING</code>).
+ * @param {String} FAILED <small>Value <code>"failed"</code></small>
+ *   The state when the ICE agent is finished checking all
+ *   candidate pairs and failed to find a connection for at least one
+ *   component.<br>
+ * This state occurs during the ICE connection attempt after <code>STARTING</code> state.
+ * @param {String} DISCONNECTED <small>Value <code>"disconnected"</code></small>
+ *   The state when liveness checks have failed for one or
+ *   more components. This is more aggressive than "failed", and may
+ *   trigger intermittently (and resolve itself without action) on
+ *   a flaky network.<br>
+ * This state occurs after <code>CONNECTED</code> or <code>COMPLETED</code> state.
+ * @param {String} CLOSED <small>Value <code>"closed"</code></small>
+ *   The state when the ICE agent has shut down and is no
+ *   longer responding to STUN requests.<br>
+ * This state occurs after Peer connection has been disconnected <em>(closed)</em>.
+ * @param {String} TRICKLE_FAILED <small>Value <code>"trickeFailed"</code></small>
+ *   The state when attempting to connect successfully with ICE connection fails
+ *    with trickle ICE connections.<br>
+ * Trickle ICE would be disabled after <code>3</code> attempts to have a better
+ *   successful ICE connection.
+ * @readOnly
+ * @since 0.1.0
+ * @component ICE
+ * @for Skylink
+ */
+Skylink.prototype.ICE_CONNECTION_STATE = {
+  STARTING: 'starting',
+  CHECKING: 'checking',
+  CONNECTED: 'connected',
+  COMPLETED: 'completed',
+  CLOSED: 'closed',
+  FAILED: 'failed',
+  TRICKLE_FAILED: 'trickleFailed',
+  DISCONNECTED: 'disconnected'
+};
+
+/**
+ * These are the list of available transports that
+ *   Skylink would use to connect to the TURN servers with.
+ * - For example as explanation how these options works below, let's take that
+ *   these are list of TURN servers given by the platform signaling:<br>
+ *   <small><code>turn:turnurl:123?transport=tcp</code><br>
+ *   <code>turn:turnurl?transport=udp</code><br>
+ *   <code>turn:turnurl:1234</code><br>
+ *   <code>turn:turnurl</code></small>
+ * @attribute TURN_TRANSPORT
+ * @type JSON
+ * @param {String} TCP <small>Value <code>"tcp"</code></small>
+ *   The option to connect using only TCP transports.
+ *   <small>EXAMPLE OUTPUT<br>
+ *   <code>turn:turnurl:123?transport=tcp</code><br>
+ *   <code>turn:turnurl?transport=tcp</code><br>
+ *   <code>turn:turnurl:1234?transport=tcp</code></small>
+ * @param {String} UDP <small>Value <code>"udp"</code></small>
+ *   The option to connect using only UDP transports.
+ *   <small>EXAMPLE OUTPUT<br>
+ *   <code>turn:turnurl:123?transport=udp</code><br>
+ *   <code>turn:turnurl?transport=udp</code><br>
+ *   <code>turn:turnurl:1234?transport=udp</code></small>
+ * @param {String} ANY <small><b>DEFAULT</b> | Value <code>"any"</code></small>
+ *   This option to use any transports that is preconfigured by provided by the platform signaling.
+ *   <small>EXAMPLE OUTPUT<br>
+ *   <code>turn:turnurl:123?transport=tcp</code><br>
+ *   <code>turn:turnurl?transport=udp</code><br>
+ *   <code>turn:turnurl:1234</code><br>
+ *   <code>turn:turnurl</code></small>
+ * @param {String} NONE <small>Value <code>"none"</code></small>
+ *   This option to set no transports.
+ *   <small>EXAMPLE OUTPUT<br>
+ *   <code>turn:turnurl:123</code><br>
+ *   <code>turn:turnurl</code><br>
+ *   <code>turn:turnurl:1234</code></small>
+ * @param {String} ALL <small>Value <code>"all"</code></small>
+ *   This option to use both TCP and UDP transports.
+ *   <small>EXAMPLE OUTPUT<br>
+ *   <code>turn:turnurl:123?transport=tcp</code><br>
+ *   <code>turn:turnurl:123?transport=udp</code><br>
+ *   <code>turn:turnurl?transport=tcp</code><br>
+ *   <code>turn:turnurl?transport=udp</code><br>
+ *   <code>turn:turnurl:1234?transport=tcp</code><br>
+ *   <code>turn:turnurl:1234?transport=udp</code></small>
+ * @readOnly
+ * @since 0.5.4
+ * @component ICE
+ * @for Skylink
+ */
+Skylink.prototype.TURN_TRANSPORT = {
+  UDP: 'udp',
+  TCP: 'tcp',
+  ANY: 'any',
+  NONE: 'none',
+  ALL: 'all'
+};
+
+/**
+ * The list of Peer connection ICE candidate generation states that Skylink would trigger.
+ * - These states references the [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState).
+ * @attribute CANDIDATE_GENERATION_STATE
+ * @type JSON
+ * @param {String} NEW <small>Value <code>"new"</code></small>
+ *   The state when the object was just created, and no networking has occurred yet.<br>
+ * This state occurs when Peer connection has just been initialised.
+ * @param {String} GATHERING <small>Value <code>"gathering"</code></small>
+ *   The state when the ICE engine is in the process of gathering candidates for connection.<br>
+ * This state occurs after <code>NEW</code> state.
+ * @param {String} COMPLETED <small>Value <code>"completed"</code></small>
+ *   The ICE engine has completed gathering. Events such as adding a
+ *   new interface or a new TURN server will cause the state to go back to gathering.<br>
+ * This state occurs after <code>GATHERING</code> state and means ICE gathering has been done.
+ * @readOnly
+ * @since 0.4.1
+ * @component ICE
+ * @for Skylink
+ */
+Skylink.prototype.CANDIDATE_GENERATION_STATE = {
+  NEW: 'new',
+  GATHERING: 'gathering',
+  COMPLETED: 'completed'
+};
+
+/**
+ * The current version of the internal <u>Data Transfer (DT)</u> Protocol that Skylink is using.<br>
+ * - This is not a feature for developers to use but rather for SDK developers to
+ *   see the Protocol version used in this Skylink version.
+ * - In some cases, this information may be used for reporting issues with Skylink.
+ * - DT_PROTOCOL VERSION: <code>0.1.0</code>.
+ * @attribute DT_PROTOCOL_VERSION
+ * @type String
+ * @readOnly
+ * @component DataTransfer
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype.DT_PROTOCOL_VERSION = '0.1.0';
+
+/**
+ * These are the types of data transfers that indicates if transfer is an
+ *   outgoing <small><em>(uploading)</em></small> or incoming <small><em>(downloding)</em></small> transfers.
+ * @attribute DATA_TRANSFER_TYPE
+ * @type JSON
+ * @param {String} UPLOAD <small>Value <code>"upload"</code></small>
+ *   This data transfer is an outgoing <em>(uploading)</em> transfer.<br>
+ *   Data is sent to the receiving Peer using the associated DataChannel connection.
+ * @param {String} DOWNLOAD <small>Value <code>"download"</code></small>
+ *   The data transfer is an incoming <em>(downloading)</em> transfer.<br>
+ *   Data is received from the sending Peer using the associated DataChannel connection.
+ * @readOnly
+ * @component DataTransfer
+ * @for Skylink
+ * @since 0.1.0
+ */
+Skylink.prototype.DATA_TRANSFER_TYPE = {
+  UPLOAD: 'upload',
+  DOWNLOAD: 'download'
+};
+
+/**
+ * These are the list of data transfer states that Skylink would trigger.
+ * @attribute DATA_TRANSFER_STATE
+ * @type JSON
+ * @param {String} UPLOAD_REQUEST <small>Value <code>"request"</code></small>
+ *   The state when a data transfer request has been received from Peer.
+ * This happens after Peer starts a data transfer using
+ *   {{#crossLink "Skylink/sendBlobData:method"}}sendBlobData(){{/crossLink}} or
+ *   {{#crossLink "Skylink/sendURLData:method"}}sendURLData(){{/crossLink}}.
+ * @param {String} UPLOAD_STARTED <small>Value <code>"uploadStarted"</code></small>
+ *   The state when the data transfer will begin and start to upload the first data
+ *   packets to receiving Peer.<br>
+ * This happens after receiving Peer accepts a data transfer using
+ *   {{#crossLink "Skylink/acceptDataTransfer:method"}}acceptDataTransfer(){{/crossLink}}.
+ * @param {String} DOWNLOAD_STARTED <small>Value <code>"downloadStarted"</code></small>
+ *   The state when the data transfer has begin and associated DataChannel connection is
+ *   expected to receive the first data packet from sending Peer.<br>
+ * This happens after self accepts a data transfer using
+ *   {{#crossLink "Skylink/acceptDataTransfer:method"}}acceptDataTransfer(){{/crossLink}} upon
+ *   the triggered state of <code>UPLOAD_REQUEST</code>.
+ * @param {String} REJECTED <small>Value <code>"rejected"</code></small>
+ *   The state when the data transfer has been rejected by receiving Peer and data transfer is
+ *   terminated.<br>
+ * This happens after Peer rejects a data transfer using
+ *   {{#crossLink "Skylink/acceptDataTransfer:method"}}acceptDataTransfer(){{/crossLink}}.
+ * @param {String} UPLOADING <small>Value <code>"uploading"</code></small>
+ *   The state when the data transfer is still being transferred to receiving Peer.<br>
+ * This happens after state <code>UPLOAD_STARTED</code>.
+ * @param {String} DOWNLOADING <small>Value <code>"downloading"</code></small>
+ *   The state when the data transfer is still being transferred from sending Peer.<br>
+ * This happens after state <code>DOWNLOAD_STARTED</code>.
+ * @param {String} UPLOAD_COMPLETED <small>Value <code>"uploadCompleted"</code></small>
+ *   The state when the data transfer has been transferred to receiving Peer successfully.<br>
+ * This happens after state <code>UPLOADING</code> or <code>UPLOAD_STARTED</code>, depending
+ *   on how huge the data being transferred is.
+ * @param {String} DOWNLOAD_COMPLETED <small>Value <code>"downloadCompleted"</code></small>
+ *   The state when the data transfer has been transferred from sending Peer successfully.<br>
+ * This happens after state <code>DOWNLOADING</code> or <code>DOWNLOAD_STARTED</code>, depending
+ *   on how huge the data being transferred is.
+ * @param {String} CANCEL <small>Value <code>"cancel"</code></small>
+ *   The state when the data transfer has been terminated by Peer.<br>
+ * This happens after state <code>DOWNLOAD_STARTED</code> or <code>UPLOAD_STARTED</code>.
+ * @param {String} ERROR <small>Value <code>"error"</code></small>
+ *   The state when the data transfer has occurred an exception.<br>
+ * At this stage, the data transfer would usually be terminated and may lead to state <code>CANCEL</code>.
+ * @readOnly
+ * @component DataTransfer
+ * @for Skylink
+ * @since 0.4.0
+ */
+Skylink.prototype.DATA_TRANSFER_STATE = {
+  UPLOAD_REQUEST: 'request',
+  UPLOAD_STARTED: 'uploadStarted',
+  DOWNLOAD_STARTED: 'downloadStarted',
+  REJECTED: 'rejected',
+  CANCEL: 'cancel',
+  ERROR: 'error',
+  UPLOADING: 'uploading',
+  DOWNLOADING: 'downloading',
+  UPLOAD_COMPLETED: 'uploadCompleted',
+  DOWNLOAD_COMPLETED: 'downloadCompleted'
+};
+
+/**
+ * These are the list of DataChannel connection states that Skylink would trigger.
+ * - Some of the state references the [w3c WebRTC Specification Draft](http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState),
+ *   except the <code>ERROR</code> state, which is an addition provided state by Skylink
+ *   to inform exception during the DataChannel connection with Peers.
+ * @attribute DATA_CHANNEL_STATE
+ * @type JSON
+ * @param {String} CONNECTING <small>Value <code>"connecting"</code></small>
+ *   The state when DataChannel is attempting to establish a connection.<br>
+ *   This is the initial state when a DataChannel connection is created.
+ * @param {String} OPEN <small>Value <code>"open"</code></small>
+ *   The state when DataChannel connection is established.<br>
+ *   This happens usually after <code>CONNECTING</code> state, or not when DataChannel connection
+ *   is from initializing Peer (the one who begins the DataChannel connection).
+ * @param {String} CLOSING <small>Value <code>"closing"</code></small>
+ *   The state when DataChannel connection is closing.<br>
+ *   This happens when DataChannel connection is closing and happens after <code>OPEN</code>.
+ * @param {String} CLOSED <small>Value <code>"closed"</code></small>
+ *   The state when DataChannel connection is closed.<br>
+ *   This happens when DataChannel connection has closed and happens after <code>CLOSING</code>
+ *   (or sometimes <code>OPEN</code> depending on the browser implementation).
+ * @param {String} ERROR <small>Value <code>"error"</code></small>
+ *   The state when DataChannel connection have met with an exception.<br>
+ *   This may happen during any state not after <code>CLOSED</code>.
+ * @readOnly
+ * @component DataChannel
+ * @for Skylink
+ * @since 0.1.0
+ */
 Skylink.prototype.DATA_CHANNEL_STATE = {
   CONNECTING: 'connecting',
   OPEN: 'open',
@@ -9181,16 +11113,596 @@ Skylink.prototype.DATA_CHANNEL_TYPE = {
 };
 
 /**
- * The flag that indicates if Peers connection should have any
- *   DataChannel connections.
- * @attribute _enableDataChannel
- * @type Boolean
- * @default true
- * @private
- * @component DataChannel
+ * These are the list of available transfer encodings that would be used by Skylink during a data transfer.
+ * - The currently supported data type is <code>BINARY_STRING</code>.
+ * - Support for data types <code>BLOB</code> and <code>ARRAY_BUFFER</code> is still in implementation.
+ * @attribute DATA_TRANSFER_DATA_TYPE
+ * @type JSON
+ * @param {String} BINARY_STRING <small><b>DEFAULT</b> | Value <code>"binaryString"</code></small>
+ *   The option to let Skylink encode data packets using
+ *   [binary converted strings](https://developer.mozilla.org/en-US/docs/Web/HTTP/data_URIs)
+ *   when sending the data packets through the DataChannel connection during data transfers.
+ * @param {String} ARRAY_BUFFER <small><em>IN IMPLEMENTATION</em> | Value <code>"arrayBuffer"</code></small>
+ *   The option to let Skylink encode data packets using
+ *   [ArrayBuffers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
+ *   when sending the data packets through the DataChannel connection during data transfers.
+ * @param {String} BLOB <small><em>IN IMPLEMENTATION</em> | Value <code>"blob"</code></small>
+ *   The option to let Skylink encode data packets using
+ *   [Blobs](https://developer.mozilla.org/en/docs/Web/API/Blob)
+ *   when sending the data packets through the DataChannel connection during data transfers.
+ * @readOnly
+ * @component DataProcess
+ * @partof DATA TRANSFER FUNCTIONALITY
  * @for Skylink
- * @since 0.3.0
+ * @since 0.1.0
  */
+Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
+  BINARY_STRING: 'binaryString',
+  ARRAY_BUFFER: 'arrayBuffer',
+  BLOB: 'blob'
+};
+
+/**
+ * These are the list of platform signaling system actions that Skylink would be given with.
+ * - Upon receiving from the signaling, the application has to reflect the
+ *   relevant actions given.
+ * - You may refer to {{#crossLink "Skylink/SYSTEM_ACTION_REASON:attribute"}}SYSTEM_ACTION_REASON{{/crossLink}}
+ *   for the types of system action reasons that would be given.
+ * @attribute SYSTEM_ACTION
+ * @type JSON
+ * @param {String} WARNING <small>Value <code>"warning"</code></small>
+ *   This action serves a warning to self. Usually if
+ *   warning is not heeded, it may result in an <code>REJECT</code> action.
+ * @param {String} REJECT <small>Value <code>"reject"</code></small>
+ *   This action means that self has been kicked out
+ *   of the current signaling room connection, and subsequent Peer connections
+ *   would be disconnected.
+ * @readOnly
+ * @component Room
+ * @for Skylink
+ * @since 0.5.1
+ */
+Skylink.prototype.SYSTEM_ACTION = {
+  WARNING: 'warning',
+  REJECT: 'reject'
+};
+
+/**
+ * These are the list of Skylink platform signaling codes as the reason
+ *   for the system action given by the platform signaling that Skylink would receive.
+ * - You may refer to {{#crossLink "Skylink/SYSTEM_ACTION:attribute"}}SYSTEM_ACTION{{/crossLink}}
+ *   for the types of system actions that would be given.
+ * - Reason codes like <code>FAST_MESSAGE</code>, <code>ROOM_FULL</code>, <code>VERIFICATION</code> and
+ *   <code>OVER_SEAT_LIMIT</code> has been removed as they are no longer supported.
+ * @attribute SYSTEM_ACTION_REASON
+ * @type JSON
+ * @param {String} ROOM_LOCKED <small>Value <code>"locked"</code> | Action ties with <code>REJECT</code></small>
+ *   The reason code when room is locked and self is rejected from joining the room.
+ * @param {String} DUPLICATED_LOGIN <small>Value <code>"duplicatedLogin"</code> | Action ties with <code>REJECT</code></small>
+ *   The reason code when the credentials given is already in use, which the platform signaling
+ *   throws an exception for this error.<br>
+ * This rarely occurs as Skylink handles this issue, and it's recommended to report this issue if this occurs.
+ * @param {String} SERVER_ERROR <small>Value <code>"serverError"</code> | Action ties with <code>REJECT</code></small>
+ *   The reason code when the connection with the platform signaling has an exception with self.<br>
+ * This rarely (and should not) occur and it's recommended to  report this issue if this occurs.
+ * @param {String} EXPIRED <small>Value <code>"expired"</code> | Action ties with <code>REJECT</code></small>
+ *   The reason code when the persistent room meeting has expired so self is unable to join the room as
+ *   the end time of the meeting has ended.<br>
+ * Depending on other meeting timings available for this room, the persistent room will appear expired.<br>
+ * This relates to the persistent room feature configured in the Application Key.
+ * @param {String} ROOM_CLOSED <small>Value <code>"roomclose"</code> | Action ties with <code>REJECT</code></small>
+ *   The reason code when the persistent room meeting has ended and has been rendered expired so self is rejected
+ *   from the room as the meeting is over.<br>
+ * This relates to the persistent room feature configured in the Application Key.
+ * @param {String} ROOM_CLOSING <small>Value <code>"toclose"</code> | Action ties with <code>WARNING</code></small>
+ *   The reason code when the persistent room meeting is going to end soon, so this warning is given to inform
+ *   users before self is rejected from the room.<br>
+ * This relates to the persistent room feature configured in the Application Key.
+ * @readOnly
+ * @component Room
+ * @for Skylink
+ * @since 0.5.2
+ */
+Skylink.prototype.SYSTEM_ACTION_REASON = {
+  //FAST_MESSAGE: 'fastmsg',
+  ROOM_LOCKED: 'locked',
+  //ROOM_FULL: 'roomfull',
+  DUPLICATED_LOGIN: 'duplicatedLogin',
+  SERVER_ERROR: 'serverError',
+  //VERIFICATION: 'verification',
+  EXPIRED: 'expired',
+  ROOM_CLOSED: 'roomclose',
+  ROOM_CLOSING: 'toclose'
+};
+
+/**
+ * These are the logging levels that Skylink provides.
+ * - This manipulates the debugging messages sent to <code>console</code> object.
+ * - Refer to [Javascript Web Console](https://developer.mozilla.org/en/docs/Web/API/console).
+ * @attribute LOG_LEVEL
+ * @type JSON
+ * @param {Number} DEBUG <small>Value <code>4</code> | Level higher than <code>LOG</code></small>
+ *   Displays debugging logs from <code>LOG</code> level onwards with <code>DEBUG</code> logs.
+ * @param {Number} LOG <small>Value <code>3</code> | Level higher than <code>INFO</code></small>
+ *   Displays debugging logs from <code>INFO</code> level onwards with <code>LOG</code> logs.
+ * @param {Number} INFO <small>Value <code>2</code> | Level higher than <code>WARN</code></small>
+ *   Displays debugging logs from <code>WARN</code> level onwards with <code>INFO</code> logs.
+ * @param {Number} WARN <small>Value <code>1</code> | Level higher than <code>ERROR</code></small>
+ *   Displays debugging logs of <code>ERROR</code> level with <code>WARN</code> logs.
+ * @param {Number} ERROR <small><b>DEFAULT</b> | Value <code>0</code> | Lowest level</small>
+ *   Displays only <code>ERROR</code> logs.
+ * @readOnly
+ * @component Log
+ * @for Skylink
+ * @since 0.5.4
+ */
+Skylink.prototype.LOG_LEVEL = {
+  DEBUG: 4,
+  LOG: 3,
+  INFO: 2,
+  WARN: 1,
+  ERROR: 0
+};
+
+/**
+ * These are the list of socket connection error states that Skylink would trigger.
+ * - These error states references the [socket.io-client events](http://socket.io/docs/client-api/).
+ * @attribute SOCKET_ERROR
+ * @type JSON
+ * @param {Number} CONNECTION_FAILED <small>Value <code>0</code></small>
+ *   The error state when Skylink have failed to establish a socket connection with
+ *   platform signaling in the first attempt.
+ * @param {String} RECONNECTION_FAILED <small>Value <code>-1</code></small>
+ *   The error state when Skylink have failed to
+ *   reestablish a socket connection with platform signaling after the first attempt
+ *   <code>CONNECTION_FAILED</code>.
+ * @param {String} CONNECTION_ABORTED <small>Value <code>-2</code></small>
+ *   The error state when attempt to reestablish socket connection
+ *   with platform signaling has been aborted after the failed first attempt
+ *   <code>CONNECTION_FAILED</code>.
+ * @param {String} RECONNECTION_ABORTED <small>Value <code>-3</code></small>
+ *   The error state when attempt to reestablish socket connection
+ *   with platform signaling has been aborted after several failed reattempts
+ *   <code>RECONNECTION_FAILED</code>.
+ * @param {String} RECONNECTION_ATTEMPT <small>Value <code>-4</code></small>
+ *   The error state when Skylink is attempting to reestablish
+ *   a socket connection with platform signaling after a failed attempt
+ *   <code>CONNECTION_FAILED</code> or <code>RECONNECTION_FAILED</code>.
+ * @readOnly
+ * @component Socket
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype.SOCKET_ERROR = {
+  CONNECTION_FAILED: 0,
+  RECONNECTION_FAILED: -1,
+  CONNECTION_ABORTED: -2,
+  RECONNECTION_ABORTED: -3,
+  RECONNECTION_ATTEMPT: -4
+};
+
+/**
+ * These are the list of fallback attempt types that Skylink would attempt with.
+ * @attribute SOCKET_FALLBACK
+ * @type JSON
+ * @param {String} NON_FALLBACK <small>Value <code>"nonfallback"</code> | Protocol <code>"http:"</code>,
+ * <code>"https:"</code> | Transports <code>"WebSocket"</code>, <code>"Polling"</code></small>
+ *   The current socket connection attempt
+ *   is using the first selected socket connection port for
+ *   the current selected transport <code>"Polling"</code> or <code>"WebSocket"</code>.
+ * @param {String} FALLBACK_PORT <small>Value <code>"fallbackPortNonSSL"</code> | Protocol <code>"http:"</code>
+ *  | Transports <code>"WebSocket"</code></small>
+ *   The current socket connection reattempt
+ *   is using the next selected socket connection port for
+ *   <code>HTTP</code> protocol connection with the current selected transport
+ *   <code>"Polling"</code> or <code>"WebSocket"</code>.
+ * @param {String} FALLBACK_PORT_SSL <small>Value <code>"fallbackPortSSL"</code> | Protocol <code>"https:"</code>
+ *  | Transports <code>"WebSocket"</code></small>
+ *   The current socket connection reattempt
+ *   is using the next selected socket connection port for
+ *   <code>HTTPS</code> protocol connection with the current selected transport
+ *   <code>"Polling"</code> or <code>"WebSocket"</code>.
+ * @param {String} LONG_POLLING <small>Value <code>"fallbackLongPollingNonSSL"</code> | Protocol <code>"http:"</code>
+ *  | Transports <code>"Polling"</code></small>
+ *   The current socket connection reattempt
+ *   is using the next selected socket connection port for
+ *   <code>HTTP</code> protocol connection with <code>"Polling"</code> after
+ *   many attempts of <code>"WebSocket"</code> has failed.
+ *   This occurs only for socket connection that is originally using
+ *   <code>"WebSocket"</code> transports.
+ * @param {String} LONG_POLLING_SSL <small>Value <code>"fallbackLongPollingSSL"</code> | Protocol <code>"https:"</code>
+ *  | Transports <code>"Polling"</code></small>
+ *   The current socket connection reattempt
+ *   is using the next selected socket connection port for
+ *   <code>HTTPS</code> protocol connection with <code>"Polling"</code> after
+ *   many attempts of <code>"WebSocket"</code> has failed.
+ *   This occurs only for socket connection that is originally using
+ *   <code>"WebSocket"</code> transports.
+ * @readOnly
+ * @component Socket
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype.SOCKET_FALLBACK = {
+  NON_FALLBACK: 'nonfallback',
+  FALLBACK_PORT: 'fallbackPortNonSSL',
+  FALLBACK_SSL_PORT: 'fallbackPortSSL',
+  LONG_POLLING: 'fallbackLongPollingNonSSL',
+  LONG_POLLING_SSL: 'fallbackLongPollingSSL'
+};
+
+/**
+ * These are the list of Peer connection handshake states that Skylink would trigger.
+ * - Do not be confused with {{#crossLink "Skylink/PEER_CONNECTION_STATE:attr"}}PEER_CONNECTION_STATE{{/crossLink}}.
+ *   This is the Peer recognition connection that is established with the platform signaling protocol, and not
+ *   the Peer connection signaling state itself.
+ * - In this case, this happens before the {{#crossLink "Skylink/PEER_CONNECTION_STATE:attr"}}PEER_CONNECTION_STATE
+ *   handshaking states. {{/crossLink}} The <code>OFFER</code> and <code>ANSWER</code> relates to the
+ *   {{#crossLink "Skylink/PEER_CONNECTION_STATE:attr"}}PEER_CONNECTION_STATE states{{/crossLink}}.
+ * - For example as explanation how these state works below, let's make self as the offerer and
+ *   the connecting Peer as the answerer.
+ * @attribute HANDSHAKE_PROGRESS
+ * @type JSON
+ * @param {String} ENTER <small>Value <code>"enter"</code></small>
+ *   The state when Peer have received <code>ENTER</code> from self,
+ *   and Peer connection with self is initialised with self.<br>
+ * This state will occur for both self and Peer as <code>ENTER</code>
+ *   message is sent to ping for Peers in the room.<br>
+ * At this state, Peer would sent <code>WELCOME</code> to the peer to
+ *   start the session description connection handshake.<br>
+ * <table class="table table-condensed">
+ *   <thead><tr><th class="col-md-1"></th><th class="col-md-5">Self</th><th>Peer</th></thead>
+ *   <tbody>
+ *     <tr><td class="col-md-1">1.</td>
+ *       <td class="col-md-5">Sends <code>ENTER</code></td><td>Sends <code>ENTER</code></td></tr>
+ *     <tr><td class="col-md-1">2.</td>
+ *       <td class="col-md-5">-</td><td>Receives self <code>ENTER</code></td></tr>
+ *     <tr><td class="col-md-1">3.</td>
+ *       <td class="col-md-5">-</td><td>Sends self <code>WELCOME</code></td></tr>
+ *   </tbody>
+ * </table>
+ * @param {String} WELCOME <small>Value <code>"welcome"</code></small>
+ *   The state when self have received <code>WELCOME</code> from Peer,
+ *   and Peer connection is initialised with Peer.<br>
+ * At this state, self would start the session description connection handshake and
+ *   send the local <code>OFFER</code> session description to Peer.
+ * <table class="table table-condensed">
+ *   <thead><tr><th class="col-md-1"></th><th class="col-md-5">Self</th><th>Peer</th></thead>
+ *   <tbody>
+ *     <tr><td class="col-md-1">4.</td>
+ *       <td class="col-md-5">Receives <code>WELCOME</code></td><td>-</td></tr>
+ *     <tr><td class="col-md-1">5.</td>
+ *       <td class="col-md-5">Generates <code>OFFER</code></td><td>-</td></tr>
+ *     <tr><td class="col-md-1">6.</td>
+ *       <td class="col-md-5">Sets local <code>OFFER</code><sup>REF</sup></td><td>-</td></tr>
+ *     <tr><td class="col-md-1">7.</td>
+ *       <td class="col-md-5">Sends <code>OFFER</code></td><td>-</td></tr>
+ *   </tbody>
+ * </table>
+ * <sup>REF</sup>: The will cause {{#crossLink "Skylink/PEER_CONNECTION_STATE:attr"}}PEER_CONNECTION_STATE{{/crossLink}}
+ *   state go to <code>HAVE_LOCAL_OFFER</code>.
+ * @param {String} OFFER <small>Value <code>"offer"</code></small>
+ *   The state when Peer received <code>OFFER</code> from self.
+ * At this state, Peer would set the remote <code>OFFER</code> session description and
+ *   start to send local <code>ANSWER</code> session description to self.<br>
+ * <table class="table table-condensed">
+ *   <thead><tr><th class="col-md-1"></th><th class="col-md-5">Self</th><th>Peer</th></thead>
+ *   <tbody>
+ *     <tr><td class="col-md-1">8.</td>
+ *        <td class="col-md-5">-</td><td>Receives <code>OFFER</code></td></tr>
+ *     <tr><td class="col-md-1">9.</td>
+ *        <td class="col-md-5">-</td><td>Sets remote <code>OFFER</code><sup>REF</sup></td></tr>
+ *     <tr><td class="col-md-1">10.</td>
+ *        <td class="col-md-5">-</td><td>Generates <code>ANSWER</code></td></tr>
+ *     <tr><td class="col-md-1">11.</td>
+ *        <td class="col-md-5">-</td><td>Sets local <code>ANSWER</code></td></tr>
+ *     <tr><td class="col-md-1">12.</td>
+ *        <td class="col-md-5">-</td><td>Sends <code>ANSWER</code></td></tr>
+ *   </tbody>
+ * </table>
+ * <sup>REF</sup>: The will cause {{#crossLink "Skylink/PEER_CONNECTION_STATE:attr"}}PEER_CONNECTION_STATE{{/crossLink}}
+ *   state go to <code>HAVE_REMOTE_OFFER</code>.
+ * @param {String} ANSWER <small>Value <code>"answer"</code></small>
+ *   The state when self received <code>ANSWER</code> from Peer.<br>
+ * At this state, self would set the remote <code>ANSWER</code> session description and
+ *   the connection handshaking progress has been completed.<br>
+ * <table class="table table-condensed">
+ *   <thead><tr><th class="col-md-1"></th><th class="col-md-5">Self</th><th>Peer</th></thead>
+ *   <tbody>
+ *     <tr><td class="col-md-1">13.</td>
+ *        <td class="col-md-5">Receives <code>ANSWER</code></td><td>-</td></tr>
+ *     <tr><td class="col-md-1">14.</td>
+ *        <td class="col-md-5">Sets remote <code>ANSWER</code></td><td>-</td></tr>
+ *   </tbody>
+ * </table>
+ * @param {String} ERROR <small>Value <code>"error"</code></small>
+ *   The state when connection handshake has occurred and exception,
+ *   in this which the connection handshake could have been aborted abruptly
+ *   and no Peer connection is established.
+ * @readOnly
+ * @component Peer
+ * @for Skylink
+ * @since 0.1.0
+ */
+Skylink.prototype.HANDSHAKE_PROGRESS = {
+  ENTER: 'enter',
+  WELCOME: 'welcome',
+  OFFER: 'offer',
+  ANSWER: 'answer',
+  ERROR: 'error'
+};
+
+/**
+ * The current version of the internal <u>Signaling Message (SM)</u> Protocol that Skylink is using.<br>
+ * - This is not a feature for developers to use but rather for SDK developers to
+ *   see the Protocol version used in this Skylink version.
+ * - In some cases, this information may be used for reporting issues with Skylink.
+ * - SM_PROTOCOL VERSION: <code>0.1.</code>.
+ * @attribute SM_PROTOCOL_VERSION
+ * @type String
+ * @required
+ * @component Socket
+ * @for Skylink
+ * @since 0.6.0
+ */
+Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
+
+
+/**
+ * These are the list of available video codecs settings that Skylink would use
+ *   when streaming video stream with Peers.
+ * - The video codec would be used if the self and Peer's browser supports the selected codec.
+ * - This would default to the browser selected codec. In most cases, option <code>VP8</code> is
+ *   used by default.
+ * @attribute VIDEO_CODEC
+ * @param {String} AUTO <small><b>DEFAULT</b> | Value <code>"auto"</code></small>
+ *   The option to let Skylink use any video codec selected by the browser generated session description.
+ * @param {String} VP8 <small>Value <code>"VP8"</code></small>
+ *   The option to let Skylink use the [VP8](https://en.wikipedia.org/wiki/VP8) codec.<br>
+ *   This is the common and mandantory video codec used by most browsers.
+ * @param {String} H264 <small>Value <code>"H264"</code></small>
+ *   The option to let Skylink use the [H264](https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC) codec.<br>
+ *   This only works if the browser supports the H264 video codec.
+ * @type JSON
+ * @readOnly
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype.VIDEO_CODEC = {
+  AUTO: 'auto',
+  VP8: 'VP8',
+  H264: 'H264'
+};
+
+/**
+ * These are the list of available audio codecs settings that Skylink would use
+ *   when streaming audio stream with Peers.
+ * - The audio codec would be used if the self and Peer's browser supports the selected codec.
+ * - This would default to the browser selected codec. In most cases, option <code>OPUS</code> is
+ *   used by default.
+ * @attribute AUDIO_CODEC
+ * @param {String} AUTO <small><b>DEFAULT</b> | Value <code>"auto"</code></small>
+ *   The option to let Skylink use any audio codec selected by the browser generated session description.
+ * @param {String} OPUS <small>Value <code>"opus"</code></small>
+ *   The option to let Skylink use the [OPUS](https://en.wikipedia.org/wiki/Opus_(audio_format)) codec.<br>
+ *   This is the common and mandantory audio codec used.
+ * @param {String} ISAC <small>Value <code>"ISAC"</code></small>
+ *   The option to let Skylink use the [iSAC](https://en.wikipedia.org/wiki/Internet_Speech_Audio_Codec).<br>
+ *   This only works if the browser supports the iSAC video codec.
+ * @type JSON
+ * @readOnly
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype.AUDIO_CODEC = {
+  AUTO: 'auto',
+  ISAC: 'ISAC',
+  OPUS: 'opus'
+};
+
+/**
+ * These are the list of suggested video resolutions that Skylink should configure
+ *   when retrieving self user media video stream.
+ * - Setting the resolution may not force set the resolution provided as it
+ *   depends on the how the browser handles the resolution.
+ * - It's recommended to use video resolution option to maximum <code>FHD</code>, as the other
+ *   resolution options may be unrealistic and create performance issues. However, we provide them
+ *   to allow developers to test with the browser capability, but do use it at your own risk.
+ * - The higher the resolution, the more CPU usage might be used, hence it's recommended to
+ *   use the default option <code>VGA</code>.
+ * - This follows the
+ *   [Wikipedia Graphics display resolution page](https://en.wikipedia.org/wiki/Graphics_display_resolution#Video_Graphics_Array)
+ * @param {JSON} QQVGA <small>Value <code>{ width: 160, height: 120 }</code> | Aspect Ratio <code>4:3</code></small>
+ *   The option to use QQVGA resolution.
+ * @param {JSON} HQVGA <small>Value <code>{ width: 240, height: 160 }</code> | Aspect Ratio <code>3:2</code></small>
+ *   The option to use HQVGA resolution.
+ * @param {JSON} QVGA <small>Value <code>{ width: 320, height: 240 }</code> | Aspect Ratio <code>4:3</code></small>
+ *   The option to use QVGA resolution.
+ * @param {JSON} WQVGA <small>Value <code>{ width: 384, height: 240 }</code> | Aspect Ratio <code>16:10</code></small>
+ *   The option to use WQVGA resolution.
+ * @param {JSON} HVGA <small>Value <code>{ width: 480, height: 320 }</code> | Aspect Ratio <code>3:2</code></small>
+ *   The option to use HVGA resolution.
+ * @param {JSON} VGA <small><b>DEFAULT</b> | Value <code>{ width: 640, height: 480 }</code> | Aspect Ratio <code>4:3</code></small>
+ *   The option to use VGA resolution.
+ * @param {JSON} WVGA <small>Value <code>{ width: 768, height: 480 }</code> | Aspect Ratio <code>16:10</code></small>
+ *   The option to use WVGA resolution.
+ * @param {JSON} FWVGA <small>Value <code>{ width: 854, height: 480 }</code> | Aspect Ratio <code>16:9</code></small>
+ *   The option to use FWVGA resolution.
+ * @param {JSON} SVGA <small>Value <code>{ width: 800, height: 600 }</code> | Aspect Ratio <code>4:3</code></small>
+ *   The option to use SVGA resolution.
+ * @param {JSON} DVGA <small>Value <code>{ width: 960, height: 640 }</code> | Aspect Ratio <code>3:2</code></small>
+ *   The option to use DVGA resolution.
+ * @param {JSON} WSVGA <small>Value <code>{ width: 1024, height: 576 }</code> | Aspect Ratio <code>16:9</code></small>
+ *   The option to use WSVGA resolution.
+ * @param {JSON} HD <small>Value <code>{ width: 1280, height: 720 }</code> | Aspect Ratio <code>16:9</code></small>
+ *   The option to use HD resolution.
+ * @param {JSON} HDPLUS <small>Value <code>{ width: 1600, height: 900 }</code> | Aspect Ratio <code>16:9</code></small>
+ *   The option to use HDPLUS resolution.
+ * @param {JSON} FHD <small>Value <code>{ width: 1920, height: 1080 }</code> | Aspect Ratio <code>16:9</code></small>
+ *   The option to use FHD resolution.
+ * @param {JSON} QHD <small>Value <code>{ width: 2560, height: 1440 }</code> | Aspect Ratio <code>16:9</code></small>
+ *   The option to use QHD resolution.
+ * @param {JSON} WQXGAPLUS <small>Value <code>{ width: 3200, height: 1800 }</code> | Aspect Ratio <code>16:9</code></small>
+ *   The option to use WQXGAPLUS resolution.
+ * @param {JSON} UHD <small>Value <code>{ width: 3840, height: 2160 }</code> | Aspect Ratio <code>16:9</code></small>
+ *   The option to use UHD resolution.
+ * @param {JSON} UHDPLUS <small>Value <code>{ width: 5120, height: 2880 }</code> | Aspect Ratio <code>16:9</code></small>
+ *   The option to use UHDPLUS resolution.
+ * @param {JSON} FUHD <small>Value <code>{ width: 7680, height: 4320 }</code> | Aspect Ratio <code>16:9</code></small>
+ *   The option to use FUHD resolution.
+ * @param {JSON} QUHD <small>Value <code>{ width: 15360, height: 8640 }</code> | Aspect Ratio <code>16:9</code></small>
+ *   The option to use QUHD resolution.
+ * @attribute VIDEO_RESOLUTION
+ * @type JSON
+ * @readOnly
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype.VIDEO_RESOLUTION = {
+  QQVGA: { width: 160, height: 120, aspectRatio: '4:3' },
+  HQVGA: { width: 240, height: 160, aspectRatio: '3:2' },
+  QVGA: { width: 320, height: 240, aspectRatio: '4:3' },
+  WQVGA: { width: 384, height: 240, aspectRatio: '16:10' },
+  HVGA: { width: 480, height: 320, aspectRatio: '3:2' },
+  VGA: { width: 640, height: 480, aspectRatio: '4:3' },
+  WVGA: { width: 768, height: 480, aspectRatio: '16:10' },
+  FWVGA: { width: 854, height: 480, aspectRatio: '16:9' },
+  SVGA: { width: 800, height: 600, aspectRatio: '4:3' },
+  DVGA: { width: 960, height: 640, aspectRatio: '3:2' },
+  WSVGA: { width: 1024, height: 576, aspectRatio: '16:9' },
+  HD: { width: 1280, height: 720, aspectRatio: '16:9' },
+  HDPLUS: { width: 1600, height: 900, aspectRatio: '16:9' },
+  FHD: { width: 1920, height: 1080, aspectRatio: '16:9' },
+  QHD: { width: 2560, height: 1440, aspectRatio: '16:9' },
+  WQXGAPLUS: { width: 3200, height: 1800, aspectRatio: '16:9' },
+  UHD: { width: 3840, height: 2160, aspectRatio: '16:9' },
+  UHDPLUS: { width: 5120, height: 2880, aspectRatio: '16:9' },
+  FUHD: { width: 7680, height: 4320, aspectRatio: '16:9' },
+  QUHD: { width: 15360, height: 8640, aspectRatio: '16:9' }
+};
+
+/**
+ * These are the list of room initialization ready states that Skylink would trigger.
+ * - The states indicates if the required connection information has been retrieved successfully from
+ *   the platform server to start a connection.
+ * - These states are triggered when {{#crossLink "Skylink/init:method"}}init(){{/crossLink}} or
+ *   {{#crossLink "Skylink/joinRoom:attr"}}joinRoom(){{/crossLink}} is invoked.
+ * @attribute READY_STATE_CHANGE
+ * @type JSON
+ * @param {Number} INIT <small>Value <code>0</code></small>
+ *   The state when Skylink is at the initial state before retrieval.<br>
+ * If all dependencies has been loaded, this would proceed to <code>LOADING</code> state.
+ * @param {Number} LOADING <small>Value <code>1</code></small>
+ *   The state when Skylink starts retrieving the connection information from the platform server.<br>
+ * This state occurs after <code>INIT</code> state and if retrieval is successful, this would
+ *   proceed to <code>COMPLETED</code> state.
+ * @param {Number} COMPLETED <small>Value <code>2</code></small>
+ *   The state when the connection information has been retrieved successfully.<br>
+ * This state occurs after <code>LOADING</code>, and if it's
+ *   {{#crossLink "Skylink/joinRoom:attr"}}joinRoom(){{/crossLink}} that is invoked, room connection
+ *   would commerce.
+ * @param {Number} ERROR <small>Value <code>-1</code></small>
+ *   The state when an exception occured while retrieving the connection information.<br>
+ * This state might be triggered when dependencies failed to load or HTTP retrieval fails.<br>
+ * Reference {{#crossLink "Skylink/READY_STATE_CHANGE_ERROR:attr"}}READY_STATE_CHANGE_ERROR{{/crossLink}}
+ *   to see the list of errors that might have triggered the <code>ERROR</code> state.
+ * @readOnly
+ * @component Room
+ * @for Skylink
+ * @since 0.1.0
+ */
+Skylink.prototype.READY_STATE_CHANGE = {
+  INIT: 0,
+  LOADING: 1,
+  COMPLETED: 2,
+  ERROR: -1
+};
+
+/**
+ * These are the list of room initialization ready state errors that Skylink has.
+ * - Ready state errors like <code>ROOM_LOCKED</code>, <code>API_NOT_ENOUGH_CREDIT</code>,
+ *   <code>API_NOT_ENOUGH_PREPAID_CREDIT</code>, <code>API_FAILED_FINDING_PREPAID_CREDIT</code> and
+ *   <code>SCRIPT_ERROR</code> has been removed as they are no longer supported.
+ * @attribute READY_STATE_CHANGE_ERROR
+ * @type JSON
+ * @param {Number} API_INVALID <small>Value <code>4001</code></small>
+ *   The error when provided Application Key does not exists <em>(invalid)</em>.<br>
+ * For this error, it's recommended that you check if the Application Key exists in your account
+ *   in the developer console.
+ * @param {Number} API_DOMAIN_NOT_MATCH <small>Value <code>4002</code></small>
+ *   The error when application accessing from backend IP address is not valid for provided Application Key.<br>
+ * This rarely (and should not) occur and it's recommended to report this issue if this occurs.
+ * @param {Number} API_CORS_DOMAIN_NOT_MATCH <small>Value <code>4003</code></small>
+ *   The error when application accessing from the CORS domain is not valid for provided Application Key.<br>
+ * For this error, it's recommended that you check the CORS configuration for the provided Application Key
+ *   in the developer console.
+ * @param {Number} API_CREDENTIALS_INVALID <small>Value <code>4004</code></small>
+ *   The error when credentials provided is not valid for provided Application Key.<br>
+ * For this error, it's recommended to check the <code>credentials</code> provided in
+ *   {{#crossLink "Skylink/init:method"}}init() configuration{{/crossLink}}.
+ * @param {Number} API_CREDENTIALS_NOT_MATCH <small>Value <code>4005</code></small>
+ *   The error when credentials does not match as expected generated credentials for provided Application Key.<br>
+ * For this error, it's recommended to check the <code>credentials</code> provided in
+ *   {{#crossLink "Skylink/init:method"}}init() configuration{{/crossLink}}.
+ * @param {Number} API_INVALID_PARENT_KEY <small>Value <code>4006</code></small>
+ *   The error when provided alias Application Key has an error because parent Application Key does not exists.<br>
+ * For this error, it's recommended to provide another alias Application Key.
+ * @param {Number} API_NO_MEETING_RECORD_FOUND <small>Value <code>4010</code></small>
+ *   The error when there is no meeting currently that is open or available to join
+ *   for self at the current time in the selected room.<br>
+ * For this error, it's recommended to retrieve the list of meetings and check if it exists using
+ *   the [Meeting Resource REST API](https://temasys.atlassian.net/wiki/display/TPD/SkylinkAPI+-+Meeting+%28Persistent+Room%29+Resources).
+ * @param {Number} NO_SOCKET_IO <small>Value <code>1</code></small>
+ *   The error when socket.io dependency is not loaded.<br>
+ * For this error, it's recommended to load the
+ *   [correct socket.io-client dependency](http://socket.io/download/) from the CDN.
+ * @param {Number} NO_XMLHTTPREQUEST_SUPPORT <small>Value <code>2</code></small>
+ *   The error when XMLHttpRequest is not supported in current browser.<br>
+ * For this error, it's recommended to ask user to switch to another browser that supports <code>XMLHttpRequest</code>.
+ * @param {Number} NO_WEBRTC_SUPPORT <small>Value <code>3</code></small>
+ *   The error when WebRTC is not supported in current browser.<br>
+ * For this error, it's recommended to ask user to switch to another browser that supports WebRTC.
+ * @param {Number} NO_PATH <small>Value <code>4</code></small>
+ *   The error when constructed path is invalid.<br>
+ * This rarely (and should not) occur and it's recommended to report this issue if this occurs.
+ * @param {Number} INVALID_XMLHTTPREQUEST_STATUS <small>Value <code>5</code></small>
+ *   The error when XMLHttpRequest does not return a HTTP status code of <code>200</code> but a HTTP failure.<br>
+ * This rarely (and should not) occur and it's recommended to report this issue if this occurs.
+ * @param {Number} ADAPTER_NO_LOADED <small>Value <code>7</code></small>
+ *   The error when AdapterJS dependency is not loaded.<br>
+ * For this error, it's recommended to load the
+ *   [correct AdapterJS dependency](https://github.com/Temasys/AdapterJS/releases) from the CDN.
+ * @param {Number} XML_HTTP_REQUEST_ERROR <small>Value <code>-1</code></small>
+ *   The error when XMLHttpRequest failure on the network level when attempting to
+ *   connect to the platform server to retrieve selected room connection information.<br>
+ * This might happen when connection timeouts. If this is a persistent issue, it's recommended to report this issue.
+ * @readOnly
+ * @component Room
+ * @for Skylink
+ * @since 0.4.0
+ */
+Skylink.prototype.READY_STATE_CHANGE_ERROR = {
+  API_INVALID: 4001,
+  API_DOMAIN_NOT_MATCH: 4002,
+  API_CORS_DOMAIN_NOT_MATCH: 4003,
+  API_CREDENTIALS_INVALID: 4004,
+  API_CREDENTIALS_NOT_MATCH: 4005,
+  API_INVALID_PARENT_KEY: 4006,
+  API_NO_MEETING_RECORD_FOUND: 4010,
+  //ROOM_LOCKED: 5001,
+  XML_HTTP_REQUEST_ERROR: -1,
+  NO_SOCKET_IO: 1,
+  NO_XMLHTTPREQUEST_SUPPORT: 2,
+  NO_WEBRTC_SUPPORT: 3,
+  NO_PATH: 4,
+  //INVALID_XMLHTTPREQUEST_STATUS: 5,
+  //SCRIPT_ERROR: 6,
+  ADAPTER_NO_LOADED: 7
+};
+
 Skylink.prototype._enableDataChannel = true;
 
 /**
@@ -9565,36 +12077,6 @@ Skylink.prototype._CHUNK_DATAURL_SIZE = 1212;
 Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 12288;
 
 /**
- * These are the list of available transfer encodings that would be used by Skylink during a data transfer.
- * - The currently supported data type is <code>BINARY_STRING</code>.
- * - Support for data types <code>BLOB</code> and <code>ARRAY_BUFFER</code> is still in implementation.
- * @attribute DATA_TRANSFER_DATA_TYPE
- * @type JSON
- * @param {String} BINARY_STRING <small><b>DEFAULT</b> | Value <code>"binaryString"</code></small>
- *   The option to let Skylink encode data packets using
- *   [binary converted strings](https://developer.mozilla.org/en-US/docs/Web/HTTP/data_URIs)
- *   when sending the data packets through the DataChannel connection during data transfers.
- * @param {String} ARRAY_BUFFER <small><em>IN IMPLEMENTATION</em> | Value <code>"arrayBuffer"</code></small>
- *   The option to let Skylink encode data packets using
- *   [ArrayBuffers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
- *   when sending the data packets through the DataChannel connection during data transfers.
- * @param {String} BLOB <small><em>IN IMPLEMENTATION</em> | Value <code>"blob"</code></small>
- *   The option to let Skylink encode data packets using
- *   [Blobs](https://developer.mozilla.org/en/docs/Web/API/Blob)
- *   when sending the data packets through the DataChannel connection during data transfers.
- * @readOnly
- * @component DataProcess
- * @partof DATA TRANSFER FUNCTIONALITY
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
-  BINARY_STRING: 'binaryString',
-  ARRAY_BUFFER: 'arrayBuffer',
-  BLOB: 'blob'
-};
-
-/**
  * Converts a binary string (base64) derived from
  *  [dataURL conversion](https://developer.mozilla.org/en-US
  *   /docs/Web/API/FileReader/readAsDataURL)
@@ -9750,21 +12232,6 @@ Skylink.prototype._assembleDataURL = function(dataURLArray) {
 
   return outputStr;
 };
-Skylink.prototype.DT_PROTOCOL_VERSION = '0.1.0';
-
-/**
- * The fixed delimiter that is used in Skylink to
- *   concat the DataChannel channelName and the actual
- *   transfer ID together based on the transfer ID provided in
- *   {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}.
- * @attribute _TRANSFER_DELIMITER
- * @type String
- * @final
- * @private
- * @component DataTransfer
- * @for Skylink
- * @since 0.5.10
- */
 Skylink.prototype._TRANSFER_DELIMITER = '_skylink__';
 
 /**
@@ -9816,90 +12283,6 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
  * @since 0.6.1
  */
 Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['Android', 'iOS'];
-
-/**
- * These are the types of data transfers that indicates if transfer is an
- *   outgoing <small><em>(uploading)</em></small> or incoming <small><em>(downloding)</em></small> transfers.
- * @attribute DATA_TRANSFER_TYPE
- * @type JSON
- * @param {String} UPLOAD <small>Value <code>"upload"</code></small>
- *   This data transfer is an outgoing <em>(uploading)</em> transfer.<br>
- *   Data is sent to the receiving Peer using the associated DataChannel connection.
- * @param {String} DOWNLOAD <small>Value <code>"download"</code></small>
- *   The data transfer is an incoming <em>(downloading)</em> transfer.<br>
- *   Data is received from the sending Peer using the associated DataChannel connection.
- * @readOnly
- * @component DataTransfer
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype.DATA_TRANSFER_TYPE = {
-  UPLOAD: 'upload',
-  DOWNLOAD: 'download'
-};
-
-/**
- * These are the list of data transfer states that Skylink would trigger.
- * @attribute DATA_TRANSFER_STATE
- * @type JSON
- * @param {String} UPLOAD_REQUEST <small>Value <code>"request"</code></small>
- *   The state when a data transfer request has been received from Peer.
- * This happens after Peer starts a data transfer using
- *   {{#crossLink "Skylink/sendBlobData:method"}}sendBlobData(){{/crossLink}} or
- *   {{#crossLink "Skylink/sendURLData:method"}}sendURLData(){{/crossLink}}.
- * @param {String} UPLOAD_STARTED <small>Value <code>"uploadStarted"</code></small>
- *   The state when the data transfer will begin and start to upload the first data
- *   packets to receiving Peer.<br>
- * This happens after receiving Peer accepts a data transfer using
- *   {{#crossLink "Skylink/acceptDataTransfer:method"}}acceptDataTransfer(){{/crossLink}}.
- * @param {String} DOWNLOAD_STARTED <small>Value <code>"downloadStarted"</code></small>
- *   The state when the data transfer has begin and associated DataChannel connection is
- *   expected to receive the first data packet from sending Peer.<br>
- * This happens after self accepts a data transfer using
- *   {{#crossLink "Skylink/acceptDataTransfer:method"}}acceptDataTransfer(){{/crossLink}} upon
- *   the triggered state of <code>UPLOAD_REQUEST</code>.
- * @param {String} REJECTED <small>Value <code>"rejected"</code></small>
- *   The state when the data transfer has been rejected by receiving Peer and data transfer is
- *   terminated.<br>
- * This happens after Peer rejects a data transfer using
- *   {{#crossLink "Skylink/acceptDataTransfer:method"}}acceptDataTransfer(){{/crossLink}}.
- * @param {String} UPLOADING <small>Value <code>"uploading"</code></small>
- *   The state when the data transfer is still being transferred to receiving Peer.<br>
- * This happens after state <code>UPLOAD_STARTED</code>.
- * @param {String} DOWNLOADING <small>Value <code>"downloading"</code></small>
- *   The state when the data transfer is still being transferred from sending Peer.<br>
- * This happens after state <code>DOWNLOAD_STARTED</code>.
- * @param {String} UPLOAD_COMPLETED <small>Value <code>"uploadCompleted"</code></small>
- *   The state when the data transfer has been transferred to receiving Peer successfully.<br>
- * This happens after state <code>UPLOADING</code> or <code>UPLOAD_STARTED</code>, depending
- *   on how huge the data being transferred is.
- * @param {String} DOWNLOAD_COMPLETED <small>Value <code>"downloadCompleted"</code></small>
- *   The state when the data transfer has been transferred from sending Peer successfully.<br>
- * This happens after state <code>DOWNLOADING</code> or <code>DOWNLOAD_STARTED</code>, depending
- *   on how huge the data being transferred is.
- * @param {String} CANCEL <small>Value <code>"cancel"</code></small>
- *   The state when the data transfer has been terminated by Peer.<br>
- * This happens after state <code>DOWNLOAD_STARTED</code> or <code>UPLOAD_STARTED</code>.
- * @param {String} ERROR <small>Value <code>"error"</code></small>
- *   The state when the data transfer has occurred an exception.<br>
- * At this stage, the data transfer would usually be terminated and may lead to state <code>CANCEL</code>.
- * @readOnly
- * @component DataTransfer
- * @for Skylink
- * @since 0.4.0
- */
-Skylink.prototype.DATA_TRANSFER_STATE = {
-  UPLOAD_REQUEST: 'request',
-  UPLOAD_STARTED: 'uploadStarted',
-  DOWNLOAD_STARTED: 'downloadStarted',
-  REJECTED: 'rejected',
-  CANCEL: 'cancel',
-  ERROR: 'error',
-  UPLOADING: 'uploading',
-  DOWNLOADING: 'downloading',
-  UPLOAD_COMPLETED: 'uploadCompleted',
-  DOWNLOAD_COMPLETED: 'downloadCompleted'
-};
 
 /**
  * Stores the list of ongoing data transfers data packets (chunks) to be sent to receiving end
@@ -12143,326 +14526,22 @@ Skylink.prototype.sendURLData = function(data, timeout, targetPeerId, callback) 
   this._startDataTransfer(data, dataInfo, listOfPeers, callback);
 };
 
-Skylink.prototype._peerCandidatesQueue = {};
-
-/**
- * Stores the list of flags associated to the PeerConnections
- *   to disable trickle ICE as attempting to establish an
- *   ICE connection failed after many trickle ICE connection
- *   attempts. To ensure the stability and increase the chances
- *   of a successful ICE connection, track the Peer connection and store
- *   it as a flag in this list to disable trickling of ICE connections.
- * @attribute _peerIceTrickleDisabled
- * @param {Boolean} (#peerId) The Peer trickle ICE disabled flag.
- *   If value is <code>true</code>, it means that trickling of ICE is
- *   disabled for subsequent connection attempt.
- * @type JSON
- * @private
- * @required
- * @since 0.5.8
- * @component ICE
- * @for Skylink
- */
-Skylink.prototype._peerIceTrickleDisabled = {};
-
-/**
- * Stores the list of candidates sent <code>local</code> and added <code>remote</code> information.
- * @attribute _addedCandidates
- * @param {JSON} (#peerId) The list of candidates sent and added associated with the Peer ID.
- * @param {Array} (#peerId).relay The number of relay candidates added and sent.
- * @param {Array} (#peerId).srflx The number of server reflexive candidates added and sent.
- * @param {Array} (#peerId).host The number of host candidates added and sent.
- * @type JSON
- * @private
- * @required
- * @since 0.6.4
- * @component ICE
- * @for Skylink
- */
-Skylink.prototype._addedCandidates = {};
-
-/**
- * The list of Peer connection ICE candidate generation states that Skylink would trigger.
- * - These states references the [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState).
- * @attribute CANDIDATE_GENERATION_STATE
- * @type JSON
- * @param {String} NEW <small>Value <code>"new"</code></small>
- *   The state when the object was just created, and no networking has occurred yet.<br>
- * This state occurs when Peer connection has just been initialised.
- * @param {String} GATHERING <small>Value <code>"gathering"</code></small>
- *   The state when the ICE engine is in the process of gathering candidates for connection.<br>
- * This state occurs after <code>NEW</code> state.
- * @param {String} COMPLETED <small>Value <code>"completed"</code></small>
- *   The ICE engine has completed gathering. Events such as adding a
- *   new interface or a new TURN server will cause the state to go back to gathering.<br>
- * This state occurs after <code>GATHERING</code> state and means ICE gathering has been done.
- * @readOnly
- * @since 0.4.1
- * @component ICE
- * @for Skylink
- */
-Skylink.prototype.CANDIDATE_GENERATION_STATE = {
-  NEW: 'new',
-  GATHERING: 'gathering',
-  COMPLETED: 'completed'
-};
-
-/**
- * Handles the ICE candidate object received from associated Peer connection
- *   to send the ICE candidate object or wait for all gathering to complete
- *   before sending the candidate to prevent trickle ICE.
- * @method _onIceCandidate
- * @param {String} targetMid The Peer ID associated with the ICE
- *   candidate object received.
- * @param {Event} event The event object received in the <code>RTCPeerConnection.
- *   onicecandidate</code> to parse the ICE candidate and determine
- *   if gathering has completed.
- * @trigger candidateGenerationState
- * @private
- * @since 0.1.0
- * @component ICE
- * @for Skylink
- */
-Skylink.prototype._onIceCandidate = function(targetMid, event) {
-  var self = this;
-  if (event.candidate) {
-    if (self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid]) {
-      var messageCan = event.candidate.candidate.split(' ');
-      var candidateType = messageCan[7];
-      log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
-        candidateType + ' candidate:'], event);
-
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.CANDIDATE,
-        label: event.candidate.sdpMLineIndex,
-        id: event.candidate.sdpMid,
-        candidate: event.candidate.candidate,
-        mid: self._user.sid,
-        target: targetMid,
-        rid: self._room.id
-      });
-
-      if (!self._addedCandidates[targetMid]) {
-        self._addedCandidates[targetMid] = {
-          relay: [],
-          host: [],
-          srflx: []
-        };
-      }
-
-      // shouldnt happen but just incase
-      if (!self._addedCandidates[targetMid][candidateType]) {
-        self._addedCandidates[targetMid][candidateType] = [];
-      }
-
-      self._addedCandidates[targetMid][candidateType].push('local:' + messageCan[4] +
-        (messageCan[5] !== '0' ? ':' + messageCan[5] : '') +
-        (messageCan[2] ? '?transport=' + messageCan[2].toLowerCase() : ''));
-
-    }
-  } else {
-    log.debug([targetMid, 'RTCIceCandidate', null, 'End of gathering']);
-    self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.COMPLETED,
-      targetMid);
-    // Disable Ice trickle option
-    if (!self._enableIceTrickle || self._peerIceTrickleDisabled[targetMid]) {
-      var sessionDescription = self._peerConnections[targetMid].localDescription;
-
-      // make checks for firefox session description
-      if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && window.webrtcDetectedBrowser === 'firefox') {
-        sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
-      }
-
-      self._sendChannelMessage({
-        type: sessionDescription.type,
-        sdp: sessionDescription.sdp,
-        mid: self._user.sid,
-        agent: window.webrtcDetectedBrowser,
-        target: targetMid,
-        rid: self._room.id
-      });
-    }
-
-    // We should remove this.. this could be due to ICE failures
-    // Adding this fix is bad
-    // Does the restart in the case when the candidates are extremely a lot
-    /*var doACandidateRestart = self._addedCandidates[targetMid].relay.length > 20 &&
-      (window.webrtcDetectedBrowser === 'chrome' || window.webrtcDetectedBrowser === 'opera');
-
-    log.debug([targetMid, 'RTCIceCandidate', null, 'Relay candidates generated length'], self._addedCandidates[targetMid].relay.length);
-
-    if (doACandidateRestart) {
-      setTimeout(function () {
-        if (self._peerConnections[targetMid]) {
-          if(self._peerConnections[targetMid].iceConnectionState !== self.ICE_CONNECTION_STATE.CONNECTED &&
-            self._peerConnections[targetMid].iceConnectionState !== self.ICE_CONNECTION_STATE.COMPLETED) {
-            // restart
-            self._restartPeerConnection(targetMid, true, true, null, false);
-          }
-        }
-      }, self._addedCandidates[targetMid].relay.length * 50);
-    }*/
-  }
-};
-
-/**
- * Buffers an ICE candidate object associated with a Peer connection
- *   to prevent disruption to ICE connection when ICE candidate
- *   is received before <code>RTCPeerConnection.setRemoteDescription</code>
- *   is called.
- * @method _addIceCandidateToQueue
- * @param {String} targetMid The Peer ID associated with the ICE
- *   candidate object.
- * @param {Object} candidate The constructed ICE candidate object.
- * @private
- * @since 0.5.2
- * @component ICE
- * @for Skylink
- */
-Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
-  log.debug([targetMid, null, null, 'Queued candidate to add after ' +
-    'setRemoteDescription'], candidate);
-  this._peerCandidatesQueue[targetMid] =
-    this._peerCandidatesQueue[targetMid] || [];
-  this._peerCandidatesQueue[targetMid].push(candidate);
-};
-
-/**
- * Handles the event when adding an ICE candidate has been added
- *   successfully. This is mainly to prevent JShint errors.
- * @method _onAddIceCandidateSuccess
- * @private
- * @since 0.5.9
- * @component ICE
- * @for Skylink
- */
-Skylink.prototype._onAddIceCandidateSuccess = function () {
-  log.debug([null, 'RTCICECandidate', null, 'Successfully added ICE candidate']);
-};
-
-/**
- * Handles the event when adding an ICE candidate has failed.
- * This is mainly to prevent JShint errors.
- * @method _onAddIceCandidateFailure
- * @param {Object} error The error received in the failure callback
- *   in <code>RTCPeerConnection.addIceCandidate(candidate, successCb, failureCb)</code>.
- * @private
- * @since 0.5.9
- * @component ICE
- * @for Skylink
- */
-Skylink.prototype._onAddIceCandidateFailure = function (error) {
-  log.error([null, 'RTCICECandidate', null, 'Error'], error);
-};
-
-/**
- * Adds the list of ICE candidates bufferred before <code>RTCPeerConnection.setRemoteDescription
- *   </code> is called associated with the Peer connection.
- * @method _addIceCandidateFromQueue
- * @param {String} targetMid The Peer ID to add the associated bufferred
- *   ICE candidates.
- * @private
- * @since 0.5.2
- * @component ICE
- * @for Skylink
- */
-Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
-  this._peerCandidatesQueue[targetMid] =
-    this._peerCandidatesQueue[targetMid] || [];
-  if(this._peerCandidatesQueue[targetMid].length > 0) {
-    for (var i = 0; i < this._peerCandidatesQueue[targetMid].length; i++) {
-      var candidate = this._peerCandidatesQueue[targetMid][i];
-      log.debug([targetMid, null, null, 'Added queued candidate'], candidate);
-      this._peerConnections[targetMid].addIceCandidate(candidate,
-        this._onAddIceCandidateSuccess, this._onAddIceCandidateFailure);
-    }
-    delete this._peerCandidatesQueue[targetMid];
-  } else {
-    log.log([targetMid, null, null, 'No queued candidates to add']);
-  }
-};
-Skylink.prototype.ICE_CONNECTION_STATE = {
-  STARTING: 'starting',
-  CHECKING: 'checking',
-  CONNECTED: 'connected',
-  COMPLETED: 'completed',
-  CLOSED: 'closed',
-  FAILED: 'failed',
-  TRICKLE_FAILED: 'trickleFailed',
-  DISCONNECTED: 'disconnected'
-};
-
-/**
- * These are the list of available transports that
- *   Skylink would use to connect to the TURN servers with.
- * - For example as explanation how these options works below, let's take that
- *   these are list of TURN servers given by the platform signaling:<br>
- *   <small><code>turn:turnurl:123?transport=tcp</code><br>
- *   <code>turn:turnurl?transport=udp</code><br>
- *   <code>turn:turnurl:1234</code><br>
- *   <code>turn:turnurl</code></small>
- * @attribute TURN_TRANSPORT
- * @type JSON
- * @param {String} TCP <small>Value <code>"tcp"</code></small>
- *   The option to connect using only TCP transports.
- *   <small>EXAMPLE OUTPUT<br>
- *   <code>turn:turnurl:123?transport=tcp</code><br>
- *   <code>turn:turnurl?transport=tcp</code><br>
- *   <code>turn:turnurl:1234?transport=tcp</code></small>
- * @param {String} UDP <small>Value <code>"udp"</code></small>
- *   The option to connect using only UDP transports.
- *   <small>EXAMPLE OUTPUT<br>
- *   <code>turn:turnurl:123?transport=udp</code><br>
- *   <code>turn:turnurl?transport=udp</code><br>
- *   <code>turn:turnurl:1234?transport=udp</code></small>
- * @param {String} ANY <small><b>DEFAULT</b> | Value <code>"any"</code></small>
- *   This option to use any transports that is preconfigured by provided by the platform signaling.
- *   <small>EXAMPLE OUTPUT<br>
- *   <code>turn:turnurl:123?transport=tcp</code><br>
- *   <code>turn:turnurl?transport=udp</code><br>
- *   <code>turn:turnurl:1234</code><br>
- *   <code>turn:turnurl</code></small>
- * @param {String} NONE <small>Value <code>"none"</code></small>
- *   This option to set no transports.
- *   <small>EXAMPLE OUTPUT<br>
- *   <code>turn:turnurl:123</code><br>
- *   <code>turn:turnurl</code><br>
- *   <code>turn:turnurl:1234</code></small>
- * @param {String} ALL <small>Value <code>"all"</code></small>
- *   This option to use both TCP and UDP transports.
- *   <small>EXAMPLE OUTPUT<br>
- *   <code>turn:turnurl:123?transport=tcp</code><br>
- *   <code>turn:turnurl:123?transport=udp</code><br>
- *   <code>turn:turnurl?transport=tcp</code><br>
- *   <code>turn:turnurl?transport=udp</code><br>
- *   <code>turn:turnurl:1234?transport=tcp</code><br>
- *   <code>turn:turnurl:1234?transport=udp</code></small>
- * @readOnly
- * @since 0.5.4
- * @component ICE
- * @for Skylink
- */
-Skylink.prototype.TURN_TRANSPORT = {
-  UDP: 'udp',
-  TCP: 'tcp',
-  ANY: 'any',
-  NONE: 'none',
-  ALL: 'all'
-};
+Skylink.prototype._enableIceTrickle = true;
 
 /**
  * The flag that indicates if PeerConnections should enable
- *    trickling of ICE to connect the ICE connection.
- * @attribute _enableIceTrickle
+ *    restarting of ICE to reconnect the failed ICE connection.
+ * @attribute _enableIceRestart
  * @type Boolean
  * @default true
  * @private
  * @required
- * @since 0.3.0
+ * @since 0.6.x
  * @component ICE
  * @for Skylink
  */
-Skylink.prototype._enableIceTrickle = true;
+Skylink.prototype._enableIceRestart = window.webrtcDetectedBrowser !== 'firefox';
+
 
 /**
  * The flag that indicates if PeerConnections ICE gathering
@@ -12748,897 +14827,97 @@ Skylink.prototype._setIceServers = function(givenConfig) {
     iceServers: newIceServers
   };
 };
-Skylink.prototype.PEER_CONNECTION_STATE = {
-  STABLE: 'stable',
-  HAVE_LOCAL_OFFER: 'have-local-offer',
-  HAVE_REMOTE_OFFER: 'have-remote-offer',
-  CLOSED: 'closed'
-};
+Skylink.prototype.refreshConnection = function(passedTargetPeerId, passedCallback) {
+  var superRef = this;
+  var listOfPeers = Object.keys(superRef._peers);
+  var listOfPeersErrors = {};
+  var callback = function () {};
 
-/**
- * These are the types of server Peers that Skylink would connect with.
- * - Different server Peers that serves different functionalities.
- * - The server Peers functionalities are only available depending on the
- *   Application Key configuration.
- * - Eventually, this list will be populated as there are more server Peer
- *   functionalities provided by the Skylink platform.
- * @attribute SERVER_PEER_TYPE
- * @param {String} MCU <small>Value <code>"mcu"</code></small>
- *   This server Peer is a MCU server connection.
- * @type JSON
- * @readOnly
- * @component Peer
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype.SERVER_PEER_TYPE = {
-  MCU: 'mcu'
-  //SIP: 'sip'
-};
+  // Parsing the method paramters
+  // refreshConnection(['p1', 'p2'])
+  if (Array.isArray(passedTargetPeerId)) {
+    listOfPeers = passedTargetPeerId.splice(0);
 
-/**
- * Stores the timestamp of the moment when the last Peers connection
- *   restarts has happened. Used for the restart Peers connection functionality.
- * @attribute _lastRestart
- * @type Object
- * @required
- * @private
- * @component Peer
- * @for Skylink
- * @since 0.5.9
- */
-Skylink.prototype._lastRestart = null;
+  // refreshConnection('p1')
+  } else if (typeof passedTargetPeerId === 'string' && !!passedTargetPeerId) {
+    listOfPeers = [passedTargetPeerId];
 
-/**
- * Stores the counter of the number of consecutive
- *   Peers connection restarts retries.
- * @attribute _retryCount
- * @type Number
- * @required
- * @private
- * @component Peer
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype._retryCount = 0;
-
-/**
- * Stores the list of Peers connection.
- * @attribute _peerConnections
- * @param {Object} (#peerId) The Peer ID associated to the RTCPeerConnection object.
- * @type JSON
- * @required
- * @private
- * @component Peer
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype._peerConnections = {};
-
-/**
- * Connects to the Peer.
- * @method _addPeer
- * @param {String} targetMid The Peer ID to connect to.
- * @param {JSON} peerBrowser The Peer platform agent information.
- * @param {String} peerBrowser.agent The Peer platform browser or agent name.
- * @param {Number} peerBrowser.version The Peer platform browser or agent version.
- * @param {Number} peerBrowser.os The Peer platform name.
- * @param {Boolean} [toOffer=false] The flag that indicates if the Peer connection
- *   should be start connection as an offerer or as an answerer.
- * @param {Boolean} [restartConn=false] The flag that indicates if the Peer
- *   connection is part of restart functionality use-case.
- * @param {Boolean} [receiveOnly=false] The flag that indicates if the Peer
- *   connection would send Stream or not (receive only).
- * @param {Boolean} [isSS=false] The flag that indicates if the Peer
- *   connection Stream sent is a screensharing stream or not.
- * @private
- * @component Peer
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartConn, receiveOnly, isSS) {
-  var self = this;
-  if (self._peerConnections[targetMid] && !restartConn) {
-    log.error([targetMid, null, null, 'Connection to peer has already been made']);
-    return;
-  }
-  log.log([targetMid, null, null, 'Starting the connection to peer. Options provided:'], {
-    peerBrowser: peerBrowser,
-    toOffer: toOffer,
-    receiveOnly: receiveOnly,
-    enableDataChannel: self._enableDataChannel
-  });
-
-  log.info('Adding peer', isSS);
-
-  if (!restartConn) {
-    self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS);
+  // refreshConnection(function () {})
+  } else if (typeof passedTargetPeerId === 'function') {
+    callback = passedTargetPeerId;
   }
 
-  if (!self._peerConnections[targetMid]) {
-    log.error([targetMid, null, null, 'Failed creating the connection to peer']);
-    return;
+  // NOTE: Passing refreshConnection(function () {}, function () {}) takes in the 2nd parameter
+  // refreshConnection(.., function () {})
+  if (typeof passedCallback === 'function') {
+    callback = passedCallback;
   }
 
-  self._peerConnections[targetMid].receiveOnly = !!receiveOnly;
-  self._peerConnections[targetMid].hasScreen = !!isSS;
-  if (!receiveOnly) {
-    self._addLocalMediaStreams(targetMid);
-  }
-  // I'm the callee I need to make an offer
-  if (toOffer) {
-    if (self._enableDataChannel) {
-      if (typeof self._dataChannels[targetMid] !== 'object') {
-        log.error([targetMid, 'RTCDataChannel', null, 'Create offer error as unable to create datachannel ' +
-          'as datachannels array is undefined'], self._dataChannels[targetMid]);
-        return;
-      }
-
-      self._dataChannels[targetMid].main =
-        self._createDataChannel(targetMid, self.DATA_CHANNEL_TYPE.MESSAGING, null, targetMid);
-      self._peerConnections[targetMid].hasMainChannel = true;
-    }
-    self._doOffer(targetMid, peerBrowser);
-  }
-
-  // do a peer connection health check
-  // let MCU handle this case
-  if (!self._hasMCU) {
-    this._startPeerConnectionHealthCheck(targetMid, toOffer);
-  } else {
-    log.warn([targetMid, 'PeerConnectionHealth', null, 'Not setting health timer for MCU connection']);
-    return;
-  }
-};
-
-/**
- * Recreates a peer connection.
- * This is the fallback restart mechanism for other platforms.
- * @method _restartPeerConnection
- * @param {String} peerId The Peer ID to recreate the connection with.
- * @private
- * @component Peer
- * @for Skylink
- * @since 0.6.6
- */
-Skylink.prototype._recreatePeerConnection = function (peerId) {
-  var self = this;
-
-  if (!self._peerConnections[peerId]) {
-    log.error([peerId, null, null, 'Peer does not have an existing ' +
-      'connection. Unable to recreate connection']);
-    return;
-  }
-
-  // get the value of receiveOnly
-  log.log([peerId, null, null, 'Recreating a peer connection']);
-
-   // get the value of receiveOnly
-  var receiveOnly = self._peerConnections[peerId] ?
-    !!self._peerConnections[peerId].receiveOnly : false;
-  var hasScreenSharing = self._peerConnections[peerId] ?
-    !!self._peerConnections[peerId].hasScreen : false;
-
-  // close the peer connection and remove the reference
-  var iceConnectionStateClosed = false;
-  var peerConnectionStateClosed = false;
-  var dataChannelStateClosed = !self._enableDataChannel;
-
-  delete self._peerConnectionHealth[peerId];
-
-  self._stopPeerConnectionHealthCheck(peerId);
-
-  if (self._peerConnections[peerId].signalingState !== 'closed') {
-    self._peerConnections[peerId].close();
-  }
-
-  if (self._peerConnections[peerId].hasStream) {
-    self._trigger('streamEnded', peerId, self.getPeerInfo(peerId), false);
-  }
-
-  self._peerConnections[peerId].dataChannelClosed = true;
-
-  delete self._peerConnections[peerId];
-
-  log.log([peerId, null, null, 'Re-creating peer connection']);
-
-  self._peerConnections[peerId] = self._createPeerConnection(peerId, !!hasScreenSharing);
-
-  if (self._peerConnections[peerId]){
-    self._peerConnections[peerId].receiveOnly = receiveOnly;
-    self._peerConnections[peerId].hasScreen = hasScreenSharing;
-  }
-
-  return self._peerConnections[peerId];
-};
-
-/**
- * Restarts a Peer connection in a P2P environment.
- * This is usually done for replacing the previous Stream attached and restarting
- *   the connection with a new one, or when the ICE connection has issues
- *   streaming video/audio stream in the remote Stream which requires
- *   a refresh in the ICE connection.
- * @method _restartPeerConnection
- * @param {String} peerId The Peer ID to restart the connection with.
- * @param {Boolean} isSelfInitiatedRestart The flag that indicates if the restart action
- *    was caused by self.
- * @param {Boolean} isConnectionRestart The flag that indicates whether the restarting action
- *   is caused by ICE connection or handshake connection failure. Currently, this feature works the same as
- *   <code>explict</code> parameter.
- * @param {Function} callback The callback fired after the Peer connection has
- *   been succesfully initiated with a restart. Set this value to <code>null</code> if you
- *   do not want to pass in any callbacks.
- * @param {Boolean} [explict=false] The flag that indicates whether the restart functionality
- *   is invoked by the application or by Skylink when the ICE connection fails to establish
- *   a "healthy" connection state. Currently, this feature works the same as
- *   <code>isConnectionRestart</code> parameter.
- * @private
- * @component Peer
- * @for Skylink
- * @since 0.5.8
- */
-Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, isConnectionRestart, callback, explicit) {
-  var self = this;
-
-  if (!self._peerConnections[peerId]) {
-    log.error([peerId, null, null, 'Peer does not have an existing ' +
-      'connection. Unable to restart']);
-    return;
-  }
-
-  delete self._peerConnectionHealth[peerId];
-
-  self._stopPeerConnectionHealthCheck(peerId);
-
-  var pc = self._peerConnections[peerId];
-
-  var agent = (self.getPeerInfo(peerId) || {}).agent || {};
-
-  // fallback to older versions for mobile users
-  if (['Android', 'iOS'].indexOf(agent.name) > -1) {
-    pc = self._recreatePeerConnection(peerId);
-
-    if (!pc) {
-      var noConnObjError = 'Failed restarting (fallback) with mobile SDKs as peer connection object is not defined';
-      log.error([peerId, 'RTCPeerConnection', null, noConnObjError], {
-          localDescription: pc.localDescription,
-          remoteDescription: pc.remoteDescription
-      });
-      if (typeof callback === 'function') {
-        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart failure callback']);
-        callback(null, new Error(noConnObjError));
-      }
+  /* Success Case */
+  var successCaseFn = function () {
+    if (Object.keys(listOfPeersErrors).length > 0) {
+      errorCaseFn();
       return;
     }
-  }
 
-  // This is when the state is stable and re-handshaking is possible
-  // This could be due to previous connection handshaking that is already done
-  if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
-    if (self._peerConnections[peerId] && !self._peerConnections[peerId].receiveOnly) {
-      self._addLocalMediaStreams(peerId);
-    }
-
-    if (isSelfInitiatedRestart){
-      log.log([peerId, null, null, 'Sending restart message to signaling server']);
-
-      var lastRestart = Date.now() || function() { return +new Date(); };
-
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.RESTART,
-        mid: self._user.sid,
-        rid: self._room.id,
-        agent: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
-        os: window.navigator.platform,
-        userInfo: self.getPeerInfo(),
-        target: peerId,
-        isConnectionRestart: !!isConnectionRestart,
-        lastRestart: lastRestart,
-        // This will not be used based off the logic in _restartHandler
-        weight: self._peerPriorityWeight,
-        receiveOnly: self._peerConnections[peerId].receiveOnly,
-        enableIceTrickle: self._enableIceTrickle,
-        enableDataChannel: self._enableDataChannel,
-        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-        explicit: !!explicit
-      });
-
-      self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), false);
-
-      if (typeof callback === 'function') {
-        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
-        callback(null, null);
-      }
-    } else {
-      if (typeof callback === 'function') {
-        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback (receiving peer)']);
-        callback(null, null);
-      }
-    }
-
-    // following the previous logic to do checker always
-    self._startPeerConnectionHealthCheck(peerId, false);
-
-  } else {
-    // Let's check if the signalingState is stable first.
-    // In another galaxy or universe, where the local description gets dropped..
-    // In the offerHandler or answerHandler, do the appropriate flags to ignore or drop "extra" descriptions
-    if (pc.signalingState === self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER ||
-      pc.signalingState === self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
-      // Checks if the local description is defined first
-      var hasLocalDescription = pc.localDescription && pc.localDescription.sdp;
-      // By then it should have at least the local description..
-      if (hasLocalDescription) {
-        self._sendChannelMessage({
-          type: pc.localDescription.type,
-          sdp: pc.localDescription.sdp,
-          mid: self._user.sid,
-          target: peerId,
-          rid: self._room.id,
-          restart: true
-        });
-      } else {
-        var noLocalDescriptionError = 'Failed re-sending localDescription as there is ' +
-          'no localDescription set to connection. There could be a handshaking step error';
-        log.error([peerId, 'RTCPeerConnection', null, noLocalDescriptionError], {
-            localDescription: pc.localDescription,
-            remoteDescription: pc.remoteDescription
-        });
-        if (typeof callback === 'function') {
-          log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart failure callback']);
-          callback(null, new Error(noLocalDescriptionError));
-        }
-      }
-    // It could have connection state closed
-    } else {
-      var unableToRestartError = 'Failed restarting as peer connection state is ' + pc.signalingState;
-      log.warn([peerId, 'RTCPeerConnection', null, unableToRestartError]);
-      if (typeof callback === 'function') {
-        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart failure callback']);
-        callback(null, new Error(unableToRestartError));
-      }
-    }
-  }
-};
-
-/**
- * Disconnects the Peer connection and remove object references associated.
- * @method _removePeer
- * @param {String} peerId The Peer ID to disconnect the connection with.
- * @trigger peerLeft
- * @private
- * @component Peer
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._removePeer = function(peerId) {
-  var peerInfo = clone(this.getPeerInfo(peerId)) || {
-    userData: '',
-    settings: {},
-    mediaStatus: {},
-    agent: {},
-    room: clone(this._selectedRoom)
-  };
-
-  if (peerId !== 'MCU') {
-    this._trigger('peerLeft', peerId, peerInfo, false);
-  } else {
-    this._hasMCU = false;
-    log.log([peerId, null, null, 'MCU has stopped listening and left']);
-    this._trigger('serverPeerLeft', peerId, this.SERVER_PEER_TYPE.MCU);
-  }
-  // stop any existing peer health timer
-  this._stopPeerConnectionHealthCheck(peerId);
-
-  // check if health timer exists
-  if (typeof this._peerConnections[peerId] !== 'undefined') {
-    // new flag to check if datachannels are all closed
-    this._peerConnections[peerId].dataChannelClosed = true;
-
-    if (this._peerConnections[peerId].signalingState !== 'closed') {
-      this._peerConnections[peerId].close();
-    }
-
-    if (this._peerConnections[peerId].hasStream) {
-      this._trigger('streamEnded', peerId, this.getPeerInfo(peerId), false);
-    }
-
-    delete this._peerConnections[peerId];
-  }
-  // remove peer informations session
-  if (typeof this._peerInformations[peerId] !== 'undefined') {
-    delete this._peerInformations[peerId];
-  }
-  if (typeof this._peerConnectionHealth[peerId] !== 'undefined') {
-    delete this._peerConnectionHealth[peerId];
-  }
-  // close datachannel connection
-  if (this._enableDataChannel) {
-    this._closeDataChannel(peerId);
-  }
-
-  log.log([peerId, null, null, 'Successfully removed peer']);
-};
-
-/**
- * Creates a Peer connection. This does not start the handshake connection
- *   but creates the Peer connection object ready for connection.
- * @method _createPeerConnection
- * @param {String} targetMid The Peer ID to create the connection object
- *   with.
- * @param {Boolean} [isScreenSharing=false] The flag that indicates if the Peer
- *   connection Stream sent is a screensharing stream or not.
- * @return {Object} The Peer connection object associated with
- *   the provided ID.
- * @private
- * @component Peer
- * @for Skylink
- * @since 0.5.1
- */
-Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
-  var pc, self = this;
-  // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
-  // using .urls feature
-  var newRTCPeerConnection = window.webkitRTCPeerConnection || window.mozRTCPeerConnection ||
-    window.RTCPeerConnection;
-  try {
-    pc = new newRTCPeerConnection(
-      self._room.connection.peerConfig,
-      self._room.connection.peerConstraints);
-    log.info([targetMid, null, null, 'Created peer connection']);
-    log.debug([targetMid, null, null, 'Peer connection config:'],
-      self._room.connection.peerConfig);
-    log.debug([targetMid, null, null, 'Peer connection constraints:'],
-      self._room.connection.peerConstraints);
-  } catch (error) {
-    log.error([targetMid, null, null, 'Failed creating peer connection:'], error);
-    return null;
-  }
-  // attributes (added on by Temasys)
-  pc.setOffer = '';
-  pc.setAnswer = '';
-  pc.hasStream = false;
-  pc.hasScreen = !!isScreenSharing;
-  pc.hasMainChannel = false;
-  pc.firefoxStreamId = '';
-
-  // datachannels
-  self._dataChannels[targetMid] = {};
-  // candidates
-  self._addedCandidates[targetMid] = {
-    relay: [],
-    host: [],
-    srflx: []
-  };
-
-  // callbacks
-  // standard not implemented: onnegotiationneeded,
-  pc.ondatachannel = function(event) {
-    var dc = event.channel || event;
-    log.debug([targetMid, 'RTCDataChannel', dc.label, 'Received datachannel ->'], dc);
-    if (self._enableDataChannel) {
-
-      var channelType = self.DATA_CHANNEL_TYPE.DATA;
-      var channelKey = dc.label;
-
-      // if peer does not have main channel, the first item is main
-      if (!pc.hasMainChannel) {
-        channelType = self.DATA_CHANNEL_TYPE.MESSAGING;
-        channelKey = 'main';
-        pc.hasMainChannel = true;
-      }
-
-      self._dataChannels[targetMid][channelKey] =
-        self._createDataChannel(targetMid, channelType, dc, dc.label);
-
-    } else {
-      log.warn([targetMid, 'RTCDataChannel', dc.label, 'Not adding datachannel as enable datachannel ' +
-        'is set to false']);
-    }
-  };
-  pc.onaddstream = function(event) {
-    var stream = event.stream || event;
-    pc.hasStream = true;
-
-    var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
-    var timeout = 0;
-
-    // NOTE: Add timeouts to the firefox stream received because it seems to have some sort of black stream rendering at first
-    // This may not be advisable but that it seems to work after 1500s. (tried with ICE established but it does not work and getStats)
-    if (agent.name === 'firefox' && window.webrtcDetectedBrowser !== 'firefox') {
-      timeout = 1500;
-    }
-    setTimeout(function () {
-      self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
-    }, timeout);
-  };
-  pc.onicecandidate = function(event) {
-    log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'],
-      event.candidate);
-    self._onIceCandidate(targetMid, event);
-  };
-  pc.oniceconnectionstatechange = function(evt) {
-    checkIceConnectionState(targetMid, pc.iceConnectionState,
-      function(iceConnectionState) {
-      log.debug([targetMid, 'RTCIceConnectionState', null,
-        'Ice connection state changed ->'], iceConnectionState);
-      self._trigger('iceConnectionState', iceConnectionState, targetMid);
-
-      // clear all peer connection health check
-      // peer connection is stable. now if there is a waiting check on it
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED &&
-        pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
-        log.debug([targetMid, 'PeerConnectionHealth', null,
-          'Peer connection with user is stable']);
-        self._peerConnectionHealth[targetMid] = true;
-        self._stopPeerConnectionHealthCheck(targetMid);
-        self._retryCount = 0;
-      }
-
-      if (typeof self._ICEConnectionFailures[targetMid] === 'undefined') {
-        self._ICEConnectionFailures[targetMid] = 0;
-      }
-
-      if (self._ICEConnectionFailures[targetMid] > 2) {
-        self._peerIceTrickleDisabled[targetMid] = true;
-      }
-
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {
-        self._ICEConnectionFailures[targetMid] += 1;
-
-        if (self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid]) {
-          self._trigger('iceConnectionState',
-            self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
-        }
-        // refresh when failed. ignore for MCU case since restart is handled by MCU in this case
-        if (!self._hasMCU) {
-          self._restartPeerConnection(targetMid, true, true, null, false);
-        }
-      }
-
-      /**** SJS-53: Revert of commit ******
-      // resend if failed
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {
-        log.debug([targetMid, 'RTCIceConnectionState', null,
-          'Ice connection state failed. Re-negotiating connection']);
-        self._removePeer(targetMid);
-        self._sendChannelMessage({
-          type: self._SIG_MESSAGE_TYPE.WELCOME,
-          mid: self._user.sid,
-          rid: self._room.id,
-          agent: window.webrtcDetectedBrowser,
-          version: window.webrtcDetectedVersion,
-          userInfo: self.getPeerInfo(),
-          target: targetMid,
-          restartNego: true,
-          hsPriority: -1
-        });
-      } *****/
-    });
-  };
-  // pc.onremovestream = function () {
-  //   self._onRemoteStreamRemoved(targetMid);
-  // };
-  pc.onsignalingstatechange = function() {
-    log.debug([targetMid, 'RTCSignalingState', null,
-      'Peer connection state changed ->'], pc.signalingState);
-    self._trigger('peerConnectionState', pc.signalingState, targetMid);
-
-    // clear all peer connection health check
-    // peer connection is stable. now if there is a waiting check on it
-    if ((pc.iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED ||
-      pc.iceConnectionState === self.ICE_CONNECTION_STATE.CONNECTED) &&
-      pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
-      log.debug([targetMid, 'PeerConnectionHealth', null,
-        'Peer connection with user is stable']);
-      self._peerConnectionHealth[targetMid] = true;
-      self._stopPeerConnectionHealthCheck(targetMid);
-      self._retryCount = 0;
-    }
-  };
-  pc.onicegatheringstatechange = function() {
-    log.log([targetMid, 'RTCIceGatheringState', null,
-      'Ice gathering state changed ->'], pc.iceGatheringState);
-    self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
-  };
-
-  if (window.webrtcDetectedBrowser === 'firefox') {
-    pc.removeStream = function (stream) {
-      var senders = pc.getSenders();
-      for (var s = 0; s < senders.length; s++) {
-        var tracks = stream.getTracks();
-        for (var t = 0; t < tracks.length; t++) {
-          if (tracks[t] === senders[s].track) {
-            pc.removeTrack(senders[s]);
-          }
-        }
-      }
+    var successPayload = {
+      listOfPeers: listOfPeers
     };
-  }
 
-  return pc;
-};
+    log.log([null, 'Skylink', 'refreshConnection()', 'Refreshed all connections ->'], successPayload);
 
-/**
- * Refreshes a Peer connection.
- * - This feature can be used to refresh a Peer connection when the
- *   remote Stream received does not stream any audio/video stream.
- * - If there are more than 1 refresh during 5 seconds
- *   or refresh is less than 3 seconds since the last refresh
- *   initiated by the other peer, it will be aborted.
- * - As for MCU connection, the restart mechanism makes the self user
- *    leave and join the currently connected room again.
- * @method refreshConnection
- * @param {String|Array} [targetPeerId] The array of targeted Peers connection to refresh
- *   the connection with.
- * @param {Function} [callback] The callback fired after all targeted Peers connection has
- *   been initiated with refresh or have met with an exception.
- *   The callback signature is <code>function (error, success)</code>.
- * @param {JSON} callback.error The error object received in the callback.
- *   If received as <code>null</code>, it means that there is no errors.
- * @param {Array} callback.error.listOfPeers The list of Peers that the
- *   refresh connection had been initiated with.
- * @param {JSON} callback.error.refreshErrors The list of errors occurred
- *   based on per Peer basis.
- * @param {Object|String} callback.error.refreshErrors.(#peerId) The Peer ID that
- *   is associated with the error that occurred when refreshing the connection.
- * @param {JSON} callback.success The success object received in the callback.
- *   If received as <code>null</code>, it means that there are errors.
- * @param {Array} callback.success.listOfPeers The list of Peers that the
- *   refresh connection had been initiated with.
- * @example
- *   SkylinkDemo.on("iceConnectionState", function (state, peerId)) {
- *     if (iceConnectionState === SkylinkDemo.ICE_CONNECTION_STATE.FAILED) {
- *       // Do a refresh
- *       SkylinkDemo.refreshConnection(peerId);
- *     }
- *   });
- * @trigger peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined, serverPeerLeft
- * @component Peer
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
-  var self = this;
+    callback(null, successPayload);
+  };
 
-  var listOfPeers = Object.keys(self._peerConnections);
-  var listOfPeerRestarts = [];
-  var error = '';
-  var listOfPeerRestartErrors = {};
+  /* Error Case */
+  var errorCaseFn = function () {
+    var errorPayload = {
+      listOfPeers: listOfPeers,
+      refreshErrors: listOfPeersErrors
+    };
 
-  if(Array.isArray(targetPeerId)) {
-    listOfPeers = targetPeerId;
+    log.error([null, 'Skylink', 'refreshConnection()', 'Failed refreshing all connections ->'], errorPayload);
 
-  } else if (typeof targetPeerId === 'string') {
-    listOfPeers = [targetPeerId];
-  } else if (typeof targetPeerId === 'function') {
-    callback = targetPeerId;
-  }
+    callback(errorPayload, null);
+  };
 
+
+  // Prevent refreshing empty connection list
   if (listOfPeers.length === 0) {
-    error = 'There is currently no peer connections to restart';
-    log.warn([null, 'PeerConnection', null, error]);
-
-    listOfPeerRestartErrors.self = new Error(error);
-
-    if (typeof callback === 'function') {
-      callback({
-        refreshErrors: listOfPeerRestartErrors,
-        listOfPeers: listOfPeers
-      }, null);
-    }
+    listOfPeersErrors.self = new Error('Failed refreshing connections as there is no Peer connections to refresh');
+    errorCaseFn();
     return;
   }
 
-  // To fix jshint dont put functions within a loop
-  var refreshSinglePeerCallback = function (peerId) {
-    return function (error, success) {
-      if (listOfPeerRestarts.indexOf(peerId) === -1) {
-        if (error) {
-          log.error([peerId, 'RTCPeerConnection', null, 'Failed restarting for peer'], error);
-          listOfPeerRestartErrors[peerId] = error;
-        }
-        listOfPeerRestarts.push(peerId);
-      }
-
-      if (listOfPeerRestarts.length === listOfPeers.length) {
-        if (typeof callback === 'function') {
-          log.log([null, 'PeerConnection', null, 'Invoked all peers to restart. Firing callback']);
-
-          if (Object.keys(listOfPeerRestartErrors).length > 0) {
-            callback({
-              refreshErrors: listOfPeerRestartErrors,
-              listOfPeers: listOfPeers
-            }, null);
-          } else {
-            callback(null, {
-              listOfPeers: listOfPeers
-            });
-          }
-        }
-      }
-    };
-  };
-
-  var refreshSinglePeer = function(peerId, peerCallback){
-    if (!self._peerConnections[peerId]) {
-      error = 'There is currently no existing peer connection made ' +
-        'with the peer. Unable to restart connection';
-      log.error([peerId, null, null, error]);
-      listOfPeerRestartErrors[peerId] = new Error(error);
-      return;
-    }
-
-    var now = Date.now() || function() { return +new Date(); };
-
-    if (now - self.lastRestart < 3000) {
-      error = 'Last restart was so tight. Aborting.';
-      log.error([peerId, null, null, error]);
-      listOfPeerRestartErrors[peerId] = new Error(error);
-      return;
-    }
-
-    log.log([peerId, 'PeerConnection', null, 'Restarting peer connection']);
-
-    // do a hard reset on variable object
-    self._restartPeerConnection(peerId, true, false, peerCallback, true);
-  };
-
-  var toRefresh = function() {
-    if(!self._hasMCU) {
-      var i;
-
-      for (i = 0; i < listOfPeers.length; i++) {
-        var peerId = listOfPeers[i];
-
-        if (Object.keys(self._peerConnections).indexOf(peerId) > -1) {
-          refreshSinglePeer(peerId, refreshSinglePeerCallback(peerId));
-        } else {
-          error = 'Peer connection with peer does not exists. Unable to restart';
-          log.error([peerId, 'PeerConnection', null, error]);
-          listOfPeerRestartErrors[peerId] = new Error(error);
-        }
-
-        // there's an error to trigger for
-        if (i === listOfPeers.length - 1 && Object.keys(listOfPeerRestartErrors).length > 0) {
-          if (typeof callback === 'function') {
-            callback({
-              refreshErrors: listOfPeerRestartErrors,
-              listOfPeers: listOfPeers
-            }, null);
-          }
-        }
-      }
-    } else {
-      self._restartMCUConnection(callback);
-    }
-  };
-
-  self._throttle(toRefresh,5000)();
-
-};
-
-/**
- * Restarts all Peers connection in a MCU connection environment.
- * This would require the current user to leave the room and restart all
- *   current existing Peers connection.
- * @method _restartMCUConnection
- * @param {Function} [callback] The callback fired after all targeted Peers connection has
- *   been initiated with refresh or have met with an exception.
- *   The callback signature is <code>function (error, success)</code>.
- * @param {JSON} callback.error The error object received in the callback.
- *   If received as <code>null</code>, it means that there is no errors.
- * @param {Array} callback.error.listOfPeers The list of Peers that the
- *   refresh connection had been initiated with.
- * @param {JSON} callback.error.refreshErrors The list of errors occurred
- *   based on per Peer basis.
- * @param {Object|String} callback.error.refreshErrors.(#peerId) The Peer ID associated
- *   with the error that occurred when refreshing the connection.
- * @param {JSON} callback.success The success object received in the callback.
- *   If received as <code>null</code>, it means that there are errors.
- * @param {Array} callback.success.listOfPeers The list of Peers that the
- *   refresh connection had been initiated with.
- * @private
- * @trigger peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined
- * @component Peer
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._restartMCUConnection = function(callback) {
-  var self = this;
-  log.info([self._user.sid, null, null, 'Restarting with MCU enabled']);
-  // Save room name
-  /*var roomName = (self._room.id).substring((self._room.id)
-                    .indexOf('_api_') + 5, (self._room.id).length);*/
-  var listOfPeers = Object.keys(self._peerConnections);
-  var listOfPeerRestartErrors = {};
-  var peerId; // j shint is whinning
-  var receiveOnly = false;
-  // for MCU case, these dont matter at all
-  var lastRestart = Date.now() || function() { return +new Date(); };
-  var weight = (new Date()).valueOf();
-
-  self._trigger('serverPeerRestart', 'MCU', self.SERVER_PEER_TYPE.MCU);
-
-  for (var i = 0; i < listOfPeers.length; i++) {
-    peerId = listOfPeers[i];
-
-    if (!self._peerConnections[peerId]) {
-      var error = 'Peer connection with peer does not exists. Unable to restart';
-      log.error([peerId, 'PeerConnection', null, error]);
-      listOfPeerRestartErrors[peerId] = new Error(error);
-      continue;
-    }
-
+  listOfPeers.forEach(function (peerId) {
+    // Dropping of Peer ID with "MCU"
     if (peerId === 'MCU') {
-      receiveOnly = !!self._peerConnections[peerId].receiveOnly;
+      return;
     }
 
-    if (peerId !== 'MCU') {
-      self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
-
-      log.log([peerId, null, null, 'Sending restart message to signaling server']);
-
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.RESTART,
-        mid: self._user.sid,
-        rid: self._room.id,
-        agent: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
-        os: window.navigator.platform,
-        userInfo: self.getPeerInfo(),
-        target: peerId, //'MCU',
-        isConnectionRestart: false,
-        lastRestart: lastRestart,
-        weight: self._peerPriorityWeight,
-        receiveOnly: receiveOnly,
-        enableIceTrickle: self._enableIceTrickle,
-        enableDataChannel: self._enableDataChannel,
-        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-        explicit: true
-      });
-    }
-  }
-
-  // Restart with MCU = peer leaves then rejoins room
-  var peerJoinedFn = function (peerId, peerInfo, isSelf) {
-    log.log([null, 'PeerConnection', null, 'Invoked all peers to restart with MCU. Firing callback']);
-
-    if (typeof callback === 'function') {
-      if (Object.keys(listOfPeerRestartErrors).length > 0) {
-        callback({
-          refreshErrors: listOfPeerRestartErrors,
-          listOfPeers: listOfPeers
-        }, null);
-      } else {
-        callback(null, {
-          listOfPeers: listOfPeers
-        });
-      }
-    }
-  };
-
-  self.once('peerJoined', peerJoinedFn, function (peerId, peerInfo, isSelf) {
-    return isSelf;
-  });
-
-  self.leaveRoom(false, function (error, success) {
-    if (error) {
-      if (typeof callback === 'function') {
-        for (var i = 0; i < listOfPeers.length; i++) {
-          listOfPeerRestartErrors[listOfPeers[i]] = error;
-        }
-        callback({
-          refreshErrors: listOfPeerRestartErrors,
-          listOfPeers: listOfPeers
-        }, null);
-      }
+    if (superRef._peers.hasOwnProperty(peerId) && superRef._peers[peerId]) {
+      superRef._peers[peerId].handshakeRestart();
     } else {
-      //self._trigger('serverPeerLeft', 'MCU', self.SERVER_PEER_TYPE.MCU);
-      self.joinRoom(self._selectedRoom);
+      listOfPeersErrors[peerId] = new Error('Failed refreshing connection "' + peerId +
+        '" as there is no connection with this Peer to refresh');
     }
   });
+
+  // For MCU environment, we have to re-join the Room as there is no support for re-negotiation yet
+  if (superRef._hasMCU) {
+    superRef._trigger('serverPeerRestart', 'MCU', superRef.SERVER_PEER_TYPE.MCU);
+
+    superRef.joinRoom(superRef._selectedRoom, function (error, success) {
+      if (error) {
+        listOfPeersErrors.MCU = error;
+      }
+
+      successCaseFn();
+    });
+
+  } else {
+    successCaseFn();
+  }
 };
 Skylink.prototype._peerInformations = {};
 
@@ -13794,11 +15073,8 @@ Skylink.prototype.getPeerInfo = function(peerId) {
   var isNotSelf = this._user && this._user.sid ? peerId !== this._user.sid : false;
 
   if (typeof peerId === 'string' && isNotSelf) {
-    // peer info
-    var peerInfo = this._peerInformations[peerId];
-
-    if (typeof peerInfo === 'object') {
-      return peerInfo;
+    if (this._peers[peerId]) {
+      return this._peers[peerId].getInfo();
     }
 
     return null;
@@ -13842,502 +15118,6 @@ Skylink.prototype.getPeerInfo = function(peerId) {
   }
 };
 
-Skylink.prototype.HANDSHAKE_PROGRESS = {
-  ENTER: 'enter',
-  WELCOME: 'welcome',
-  OFFER: 'offer',
-  ANSWER: 'answer',
-  ERROR: 'error'
-};
-
-/**
- * Stores the list of Peer connection health timeout objects that
- *   waits for any existing Peer "healthy" state in successful
- *   {{#crossLink "Skylink/_peerConnectionHealth:attr"}}_peerConnectionHealth{{/crossLink}}.
- *   If timeout has reached it's limit and does not have any "healthy" connection state
- *   with Peer connection, it will restart the connection again with
- *   {{#crossLink "Skylink/_restartPeerConnection:method"}}_restartPeerConnection(){{/crossLink}}.
- * @attribute _peerConnectionHealthTimers
- * @param {Object} (#peerId) The timeout object set using <code>setTimeout()</code> that
- *   does the wait for any "healthy" state connection associated with the Peer connection.
- *   This will be removed when the Peer connection has ended or when the Peer
- *   connection has been met with a "healthy" state.
- * @type JSON
- * @private
- * @required
- * @component Peer
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._peerConnectionHealthTimers = {};
-
-/**
- * Stores the list of Peer connections that has connection
- *   established successfully. When the Peer connection has a
- *   successful ICE connection state of <code>"completed"</code>,
- *   it stores the Peer connection as "healthy".
- * @attribute _peerConnectionHealth
- * @param {Boolean} (#peerId) The flag that indicates if the associated Peer
- *   connection is in a "healthy" state. If the value is <code>true</code>, it means
- *   that the Peer connectin is in a "healthy" state.
- * @type JSON
- * @private
- * @required
- * @component Peer
- * @since 0.5.5
- */
-Skylink.prototype._peerConnectionHealth = {};
-
-/**
- * Stores the peer connection priority weight.
- * @attribute _peerPriorityWeight
- * @type Number
- * @private
- * @required
- * @for Skylink
- * @since 0.5.0
- */
-Skylink.prototype._peerPriorityWeight = 0;
-
-/**
- * Starts to initiate the WebRTC layer of handshake connection by
- *   creating the <code>OFFER</code> session description and then
- *   sending it to the associated Peer.
- * The offerer status may be shifted to the other peer depending on
- *   when version of browser that is initiating the connection
- *   to what version of browser to.
- * @method _doOffer
- * @param {String} targetMid The Peer ID to send the <code>OFFER</code> to.
- * @param {JSON} peerBrowser The Peer platform agent information.
- * @param {String} peerBrowser.name The Peer platform browser or agent name.
- * @param {Number} peerBrowser.version The Peer platform browser or agent version.
- * @param {Number} peerBrowser.os The Peer platform name.
- * @param {Function} renegoCallback The callback function that triggers after
- *   the offer has been created or responsed.
- * @private
- * @for Skylink
- * @component Peer
- * @since 0.5.2
- */
-Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
-  var self = this;
-  var pc = self._peerConnections[targetMid] || self._addPeer(targetMid, peerBrowser);
-  log.log([targetMid, null, null, 'Checking caller status'], peerBrowser);
-  // NOTE ALEX: handle the pc = 0 case, just to be sure
-  var inputConstraints = self._room.connection.offerConstraints;
-  var sc = self._room.connection.sdpConstraints;
-  for (var name in sc.mandatory) {
-    if (sc.mandatory.hasOwnProperty(name)) {
-      inputConstraints.mandatory[name] = sc.mandatory[name];
-    }
-  }
-  inputConstraints.optional.concat(sc.optional);
-  checkMediaDataChannelSettings(peerBrowser.agent, peerBrowser.version,
-    function(beOfferer, unifiedOfferConstraints) {
-    // attempt to force make firefox not to offer datachannel.
-    // we will not be using datachannel in MCU
-    if (window.webrtcDetectedType === 'moz' && peerBrowser.agent === 'MCU') {
-      unifiedOfferConstraints.mandatory = unifiedOfferConstraints.mandatory || {};
-      unifiedOfferConstraints.mandatory.MozDontOfferDataChannel = true;
-      beOfferer = true;
-    }
-
-    unifiedOfferConstraints.mandatory.iceRestart = true;
-    peerBrowser.os = peerBrowser.os || '';
-
-    if (!(peerBrowser.agent === 'MCU' || self._hasMCU)) {
-      /*
-       // for windows firefox to mac chrome interopability
-      if (window.webrtcDetectedBrowser === 'firefox' &&
-        window.navigator.platform.indexOf('Win') === 0 &&
-        peerBrowser.agent !== 'firefox' &&
-        peerBrowser.agent !== 'MCU' &&
-        peerBrowser.os.indexOf('Mac') === 0) {
-        beOfferer = false;
-      }*/
-      if (window.webrtcDetectedBrowser === 'firefox' && peerBrowser.agent !== 'firefox') {
-        beOfferer = false;
-      }
-    } else {
-      beOfferer = true;
-    }
-
-    if (beOfferer) {
-      if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion >= 32) {
-        unifiedOfferConstraints = {
-          offerToReceiveAudio: true,
-          offerToReceiveVideo: true
-        };
-
-        /*if (window.webrtcDetectedVersion > 37) {
-          unifiedOfferConstraints = {};
-        }*/
-      }
-
-      log.debug([targetMid, null, null, 'Creating offer with config:'], unifiedOfferConstraints);
-
-      pc.createOffer(function(offer) {
-        log.debug([targetMid, null, null, 'Created offer'], offer);
-        self._setLocalAndSendMessage(targetMid, offer);
-      }, function(error) {
-        self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR,
-          targetMid, error);
-        log.error([targetMid, null, null, 'Failed creating an offer:'], error);
-      }, unifiedOfferConstraints);
-    } else {
-      log.debug([targetMid, null, null, 'User\'s browser is not eligible to create ' +
-        'the offer to the other peer. Requesting other peer to create the offer instead'
-        ], peerBrowser);
-
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.WELCOME,
-        mid: self._user.sid,
-        rid: self._room.id,
-        agent: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
-        os: window.navigator.platform,
-        userInfo: self.getPeerInfo(),
-        target: targetMid,
-        weight: -1,
-        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
-      });
-    }
-  }, inputConstraints);
-};
-
-/**
- * Responses to the <code>OFFER</code> session description received and
- *    creates an <code>ANSWER</code> session description to sent
- *   to the associated Peer to complete the WebRTC handshake layer.
- * @method _doAnswer
- * @param {String} targetMid The Peer ID to send the <code>ANSWER</code> to.
- * @private
- * @for Skylink
- * @component Peer
- * @since 0.1.0
- */
-Skylink.prototype._doAnswer = function(targetMid) {
-  var self = this;
-  log.log([targetMid, null, null, 'Creating answer with config:'],
-    self._room.connection.sdpConstraints);
-  var pc = self._peerConnections[targetMid];
-  if (pc) {
-    // No ICE restart constraints for createAnswer as it fails in chrome 48
-    // { iceRestart: true }
-    pc.createAnswer(function(answer) {
-      log.debug([targetMid, null, null, 'Created answer'], answer);
-      self._setLocalAndSendMessage(targetMid, answer);
-    }, function(error) {
-      log.error([targetMid, null, null, 'Failed creating an answer:'], error);
-      self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-    });//, self._room.connection.sdpConstraints);
-  } else {
-    /* Houston ..*/
-    log.error([targetMid, null, null, 'Requested to create an answer but user ' +
-      'does not have any existing connection to peer']);
-    return;
-  }
-};
-
-/**
- * Starts the waiting timeout for a "healthy" connection
- *   with associated Peer connection.
- * It waits for any existing Peer "healthy" state in successful
- *   {{#crossLink "Skylink/_peerConnectionHealth:attr"}}_peerConnectionHealth{{/crossLink}}.
- * If timeout has reached it's limit and does not have any "healthy" connection state
- *   with Peer connection, it will restart the connection again with
- *   {{#crossLink "Skylink/_restartPeerConnection:method"}}_restartPeerConnection(){{/crossLink}}.
- * This sets the timeout object associated with the Peer into
- *   {{#crossLink "Skylink/_peerConnectionHealthTimers"}}_peerConnectionHealthTimers(){{/crossLink}}.
- * @method _startPeerConnectionHealthCheck
- * @param {String} peerId The Peer ID to start a waiting timeout for a "healthy" connection.
- * @param {Boolean} [toOffer=false] The flag that indicates if Peer connection
- *   is an offerer or an answerer for an accurate timeout waiting time.
- * @private
- * @component Peer
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
-  var self = this;
-  var timer = (self._enableIceTrickle && !self._peerIceTrickleDisabled[peerId]) ?
-    (toOffer ? 12500 : 10000) : 50000;
-  timer = (self._hasMCU) ? 105000 : timer;
-
-  // increase timeout for android/ios
-  /*var agent = self.getPeerInfo(peerId).agent;
-  if (['Android', 'iOS'].indexOf(agent.name) > -1) {
-    timer = 105000;
-  }*/
-
-  timer += self._retryCount*10000;
-
-  log.log([peerId, 'PeerConnectionHealth', null,
-    'Initializing check for peer\'s connection health']);
-
-  if (self._peerConnectionHealthTimers[peerId]) {
-    // might be a re-handshake again
-    self._stopPeerConnectionHealthCheck(peerId);
-  }
-
-  self._peerConnectionHealthTimers[peerId] = setTimeout(function () {
-    // re-handshaking should start here.
-    var connectionStable = false;
-    var pc = self._peerConnections[peerId];
-
-    if (pc) {
-      var dc = (self._dataChannels[peerId] || {}).main;
-
-      var dcConnected = pc.hasMainChannel ? dc && dc.readyState === self.DATA_CHANNEL_STATE.OPEN : true;
-      var iceConnected = pc.iceConnectionState === self.ICE_CONNECTION_STATE.CONNECTED ||
-        pc.iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED;
-      var signalingConnected = pc.signalingState === self.PEER_CONNECTION_STATE.STABLE;
-
-      connectionStable = dcConnected && iceConnected && signalingConnected;
-
-      log.debug([peerId, 'PeerConnectionHealth', null, 'Connection status'], {
-        dcConnected: dcConnected,
-        iceConnected: iceConnected,
-        signalingConnected: signalingConnected
-      });
-    }
-
-    log.debug([peerId, 'PeerConnectionHealth', null, 'Require reconnection?'], connectionStable);
-
-    if (!connectionStable) {
-      log.warn([peerId, 'PeerConnectionHealth', null, 'Peer\'s health timer ' +
-      'has expired'], 10000);
-
-      // clear the loop first
-      self._stopPeerConnectionHealthCheck(peerId);
-
-      log.debug([peerId, 'PeerConnectionHealth', null,
-        'Ice connection state time out. Re-negotiating connection']);
-
-      //Maximum increament is 5 minutes
-      if (self._retryCount<30){
-        //Increase after each consecutive connection failure
-        self._retryCount++;
-      }
-
-      // do a complete clean
-      if (!self._hasMCU) {
-        self._restartPeerConnection(peerId, true, true, null, false);
-      } else {
-        self._restartMCUConnection();
-      }
-    } else {
-      self._peerConnectionHealth[peerId] = true;
-    }
-  }, timer);
-};
-
-/**
- * Stops the waiting timeout for a "healthy" connection associated
- *   with the Peer.
- * @method _stopPeerConnectionHealthCheck
- * @param {String} peerId The Peer ID to stop a waiting
- *   timeout for a "healthy" connection.
- * @private
- * @component Peer
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._stopPeerConnectionHealthCheck = function (peerId) {
-  var self = this;
-
-  if (self._peerConnectionHealthTimers[peerId]) {
-    log.debug([peerId, 'PeerConnectionHealth', null,
-      'Stopping peer connection health timer check']);
-
-    clearTimeout(self._peerConnectionHealthTimers[peerId]);
-    delete self._peerConnectionHealthTimers[peerId];
-
-  } else {
-    log.debug([peerId, 'PeerConnectionHealth', null,
-      'Peer connection health does not have a timer check']);
-  }
-};
-
-/**
- * Sets the WebRTC handshake layer session description into the
- *   Peer <code>RTCPeerConnection</code> object <i><code>
- *   RTCPeerConnection.setLocalDescription()</code></i> associated
- *   with the Peer connection.
- * @method _setLocalAndSendMessage
- * @param {String} targetMid The Peer ID to send the session description to
- *   after setting into the associated <code>RTCPeerConnection</code> object.
- * @param {JSON} sessionDescription The <code>OFFER</code> or an <code>ANSWER</code>
- *   session description to set to the associated Peer after setting into
- *   the <code>RTCPeerConnection</code> object.
- * @trigger handshakeProgress
- * @private
- * @component Peer
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
-  var self = this;
-  var pc = self._peerConnections[targetMid];
-
-  /*if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && pc.setAnswer) {
-    log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
-      'Ignoring session description. User has already set local answer'], sessionDescription);
-    return;
-  }
-  if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER && pc.setOffer) {
-    log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
-      'Ignoring session description. User has already set local offer'], sessionDescription);
-    return;
-  }*/
-
-  // NOTE ALEX: handle the pc = 0 case, just to be sure
-  var sdpLines = sessionDescription.sdp.split('\r\n');
-
-  // remove h264 invalid pref
-  sdpLines = self._removeSDPFirefoxH264Pref(sdpLines);
-  // Check if stereo was enabled
-  if (self._streamSettings.hasOwnProperty('audio')) {
-    if (self._streamSettings.audio.stereo) {
-      self._addSDPStereo(sdpLines);
-    }
-  }
-
-  log.info([targetMid, null, null, 'Requested stereo:'], (self._streamSettings.audio ?
-    (self._streamSettings.audio.stereo ? self._streamSettings.audio.stereo : false) :
-    false));
-
-  // set sdp bitrate
-  if (self._streamSettings.hasOwnProperty('bandwidth')) {
-    var peerSettings = (self._peerInformations[targetMid] || {}).settings || {};
-
-    sdpLines = self._setSDPBitrate(sdpLines, peerSettings);
-  }
-
-  // set sdp resolution
-  /*if (self._streamSettings.hasOwnProperty('video')) {
-    sdpLines = self._setSDPVideoResolution(sdpLines, self._streamSettings.video);
-  }*/
-
-  self._streamSettings.bandwidth = self._streamSettings.bandwidth || {};
-
-  self._streamSettings.video = self._streamSettings.video || false;
-
-  log.info([targetMid, null, null, 'Custom bandwidth settings:'], {
-    audio: (self._streamSettings.bandwidth.audio || 'Not set') + ' kB/s',
-    video: (self._streamSettings.bandwidth.video || 'Not set') + ' kB/s',
-    data: (self._streamSettings.bandwidth.data || 'Not set') + ' kB/s'
-  });
-
-  if (self._streamSettings.video.hasOwnProperty('frameRate') &&
-    self._streamSettings.video.hasOwnProperty('resolution')){
-    log.info([targetMid, null, null, 'Custom resolution settings:'], {
-      frameRate: (self._streamSettings.video.frameRate || 'Not set') + ' fps',
-      width: (self._streamSettings.video.resolution.width || 'Not set') + ' px',
-      height: (self._streamSettings.video.resolution.height || 'Not set') + ' px'
-    });
-  }
-
-  // set video codec
-  if (self._selectedVideoCodec !== self.VIDEO_CODEC.AUTO) {
-    sdpLines = self._setSDPVideoCodec(sdpLines);
-  } else {
-    log.log([targetMid, null, null, 'Not setting any video codec']);
-  }
-
-  // set audio codec
-  if (self._selectedAudioCodec !== self.AUDIO_CODEC.AUTO) {
-    sdpLines = self._setSDPAudioCodec(sdpLines);
-  } else {
-    log.log([targetMid, null, null, 'Not setting any audio codec']);
-  }
-
-  sessionDescription.sdp = sdpLines.join('\r\n');
-
-  // NOTE ALEX: opus should not be used for mobile
-  // Set Opus as the preferred codec in SDP if Opus is present.
-  //sessionDescription.sdp = preferOpus(sessionDescription.sdp);
-  // limit bandwidth
-  //sessionDescription.sdp = this._limitBandwidth(sessionDescription.sdp);
-  log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
-    'Updated session description:'], sessionDescription);
-
-  pc.setLocalDescription(sessionDescription, function() {
-    log.debug([targetMid, sessionDescription.type, 'Local description set']);
-    self._trigger('handshakeProgress', sessionDescription.type, targetMid);
-    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
-      pc.setAnswer = 'local';
-    } else {
-      pc.setOffer = 'local';
-    }
-    var shouldWaitForCandidates = false;
-
-    if (!(self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid])) {
-      shouldWaitForCandidates = true;
-      // there is no sessiondescription created at first go
-      if (pc.setOffer === 'remote' || pc.setAnswer === 'remote') {
-        shouldWaitForCandidates = false;
-      }
-    }
-    if (!shouldWaitForCandidates) {
-      // make checks for firefox session description
-      if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && window.webrtcDetectedBrowser === 'firefox') {
-        sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
-      }
-
-      self._sendChannelMessage({
-        type: sessionDescription.type,
-        sdp: sessionDescription.sdp,
-        mid: self._user.sid,
-        target: targetMid,
-        rid: self._room.id
-      });
-    } else {
-      log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
-        'Waiting for Ice gathering to complete to prevent Ice trickle']);
-    }
-  }, function(error) {
-    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-    log.error([targetMid, 'RTCSessionDescription', sessionDescription.type,
-      'Failed setting local description: '], error);
-  });
-};
-
-Skylink.prototype.GET_PEERS_STATE = {
-	ENQUIRED: 'enquired',
-	RECEIVED: 'received'
-};
-
-/**
- * These are the list of Peer introduction states that Skylink would trigger.
- * - This relates to and requires the Privileged Key feature where Peers using
- *   that Privileged alias Key becomes a privileged Peer with privileged functionalities.
- * @attribute INTRODUCE_STATE
- * @type JSON
- * @param {String} INTRODUCING <small>Value <code>"enquired"</code></small>
- *   The state when the privileged Peer have sent the introduction signal.
- * @param {String} ERROR <small>Value <code>"error"</code></small>
- *   The state when the Peer introduction has occurred an exception.
- * @readOnly
- * @component Peer
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype.INTRODUCE_STATE = {
-	INTRODUCING: 'introducing',
-	ERROR: 'error'
-};
-
-/**
- * Whether this user automatically introduce to other peers.
- * @attribute _autoIntroduce
- * @type Boolean
- * @default true
- * @private
- * @component Peer
- * @for Skylink
- * @since 0.6.1
- */
 Skylink.prototype._autoIntroduce = true;
 
 /**
@@ -14498,73 +15278,1422 @@ Skylink.prototype.introducePeer = function(sendingPeerId, receivingPeerId){
 };
 
 
-Skylink.prototype.SYSTEM_ACTION = {
-  WARNING: 'warning',
-  REJECT: 'reject'
-};
+Skylink.prototype._peers = {};
 
 /**
- * These are the list of Skylink platform signaling codes as the reason
- *   for the system action given by the platform signaling that Skylink would receive.
- * - You may refer to {{#crossLink "Skylink/SYSTEM_ACTION:attribute"}}SYSTEM_ACTION{{/crossLink}}
- *   for the types of system actions that would be given.
- * - Reason codes like <code>FAST_MESSAGE</code>, <code>ROOM_FULL</code>, <code>VERIFICATION</code> and
- *   <code>OVER_SEAT_LIMIT</code> has been removed as they are no longer supported.
- * @attribute SYSTEM_ACTION_REASON
- * @type JSON
- * @param {String} ROOM_LOCKED <small>Value <code>"locked"</code> | Action ties with <code>REJECT</code></small>
- *   The reason code when room is locked and self is rejected from joining the room.
- * @param {String} DUPLICATED_LOGIN <small>Value <code>"duplicatedLogin"</code> | Action ties with <code>REJECT</code></small>
- *   The reason code when the credentials given is already in use, which the platform signaling
- *   throws an exception for this error.<br>
- * This rarely occurs as Skylink handles this issue, and it's recommended to report this issue if this occurs.
- * @param {String} SERVER_ERROR <small>Value <code>"serverError"</code> | Action ties with <code>REJECT</code></small>
- *   The reason code when the connection with the platform signaling has an exception with self.<br>
- * This rarely (and should not) occur and it's recommended to  report this issue if this occurs.
- * @param {String} EXPIRED <small>Value <code>"expired"</code> | Action ties with <code>REJECT</code></small>
- *   The reason code when the persistent room meeting has expired so self is unable to join the room as
- *   the end time of the meeting has ended.<br>
- * Depending on other meeting timings available for this room, the persistent room will appear expired.<br>
- * This relates to the persistent room feature configured in the Application Key.
- * @param {String} ROOM_CLOSED <small>Value <code>"roomclose"</code> | Action ties with <code>REJECT</code></small>
- *   The reason code when the persistent room meeting has ended and has been rendered expired so self is rejected
- *   from the room as the meeting is over.<br>
- * This relates to the persistent room feature configured in the Application Key.
- * @param {String} ROOM_CLOSING <small>Value <code>"toclose"</code> | Action ties with <code>WARNING</code></small>
- *   The reason code when the persistent room meeting is going to end soon, so this warning is given to inform
- *   users before self is rejected from the room.<br>
- * This relates to the persistent room feature configured in the Application Key.
- * @readOnly
- * @component Room
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype.SYSTEM_ACTION_REASON = {
-  //FAST_MESSAGE: 'fastmsg',
-  ROOM_LOCKED: 'locked',
-  //ROOM_FULL: 'roomfull',
-  DUPLICATED_LOGIN: 'duplicatedLogin',
-  SERVER_ERROR: 'serverError',
-  //VERIFICATION: 'verification',
-  EXPIRED: 'expired',
-  ROOM_CLOSED: 'roomclose',
-  ROOM_CLOSING: 'toclose'
-};
-
-/**
- * Stores the current room self is joined to.
- * The selected room will be usually defaulted to
- *   {{#crossLink "Skylink/_defaultRoom:attribute"}}_defaultRoom{{/crossLink}}
- *   if there is no selected room in
- *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}.
- * @attribute _selectedRoom
- * @type String
- * @default Skylink._defaultRoom
+ * Creates a Peer.
+ * @method _createPeer
+ * @param {String} peerId The Peer ID.
+ * @param {JSON} peerData The Peer information and settings.
  * @private
- * @component Room
  * @for Skylink
- * @since 0.3.0
+ * @since 0.6.x
  */
+Skylink.prototype._createPeer = function (peerId, peerData) {
+  var superRef = this;
+
+  /**
+   * Singleton class object for the provided Peer.
+   * @class SkylinkPeer
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  var SkylinkPeer = function () {
+    // Configure for enableDataChannel setting
+    //   This feature allows RTCDataChannel channel between the Peers RTCPeerConnection
+    if (typeof peerData.enableDataChannel === 'boolean') {
+      // Ensure that it can only be true if both Peers have the enableDataChannel option as true
+      this._connectionSettings.enableDataChannel = peerData.enableDataChannel === true &&
+        this._connectionSettings.enableDataChannel === true;
+    }
+
+    /* NOTE: What do we do in mobile SDKs setting ? If we set defaults based on init() configuration,
+       having it as false might cause issues since mobile SDKs has it true always be default */
+    // Configure for enableIceTrickle setting
+    //   This feature allows trickling of ICE connection for faster establishment of connectivity
+    if (typeof peerData.enableIceTrickle === 'boolean') {
+      // Ensure that it can only be true if both Peers have the enableIceTrickle option as true
+      this._connectionSettings.enableIceTrickle = peerData.enableIceTrickle === true &&
+        this._connectionSettings.enableIceTrickle === true;
+    }
+
+    // Configure for enableIceRestart setting
+    //   This feature allows fetching of new RTCIceCandidates when iceConnectionState is "failed" or
+    //   "disconnected", which enables a more successful reconnection
+    if (typeof peerData.enableIceRestart === 'boolean') {
+      // Ensure that it can only be true if both Peers have the enableIceRestart option as true
+      this._connectionSettings.enableIceRestart = peerData.enableIceRestart === true &&
+        superRef._enableIceRestart === true;
+
+    // Fallback to ensure that enableIceRestart is false if not configured since other SDKs does not
+    //   have ICE restart feature implemented on their end yet
+    } else {
+      this._connectionSettings.enableIceRestart = false;
+    }
+
+    // Configure the agent name information
+    //   Examples: "Android", "iOS", "firefox", "chrome", "safari" etc
+    if (typeof peerData.agent === 'string') {
+      this.agent.name = peerData.agent;
+    }
+
+    // Configure the agent version information
+    //   Examples: 47, 0.1
+    if (typeof peerData.version === 'number') {
+      this.agent.version = peerData.version;
+    }
+
+    // Configure the agent os information. This field may be empty
+    //   Examples: "MacOSIntel", "Win32"
+    if (typeof peerData.os === 'string') {
+      this.agent.os = peerData.os;
+    }
+
+    // Configure the weight setting
+    //   The Peer with the highest weight will be determined as the offerer always.
+    //   This weight is configured once each time a Room session has started.
+    if (typeof peerData.weight === 'number') {
+      this.weight = peerData.weight;
+    }
+
+    // Update the new streaming information
+    this.update(peerData);
+
+    // Construct the RTCPeerConnection object reference
+    this._construct();
+
+    // Peer has joined the Room
+    if (this.id === 'MCU') {
+      superRef._trigger('serverPeerJoined', 'MCU', superRef.SERVER_PEER_TYPE.MCU);
+
+    } else {
+      superRef._trigger('peerJoined', this.id, this.getInfo(), false);
+    }
+  };
+
+  /**
+   * Stores the Peer ID.
+   * @attribute id
+   * @type String
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.id = peerId;
+
+  /**
+   * Stores the Peer custom user data.
+   * @attribute data
+   * @type Any
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.data = null;
+
+  /**
+   * Stores the Peer connecting agent information.
+   * @attribute agent
+   * @type JSON
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.agent = {
+    name: 'Unknown',
+    version: 0,
+    os: ''
+  };
+
+  /**
+   * Stores the Peer priority weight for handshaking offerer.
+   * @attribute weight
+   * @type Number
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.weight = 0;
+
+  /**
+   * Stores the Peer streaming information.
+   * @attribute streamingInfo
+   * @type JSON
+   * @for SkylinKPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.streamingInfo = {
+    settings: {},
+    mediaStatus: {}
+  };
+
+  /**
+   * Stores the list of DataChannels.
+   * @attribute _channels
+   * @type JSON
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._channels = {};
+
+  /**
+   * Stores the Peer connection settings.
+   * @attribute _connectionSettings
+   * @type JSON
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._connectionSettings = {
+    enableDataChannel: superRef._enableDataChannel === true,
+    enableIceTrickle: superRef._enableIceTrickle === true,
+    enableIceRestart: false,
+    stereo: false
+  };
+
+  /**
+   * Stores the Peer connection RTCIceCandidates.
+   * @attribute _candidates
+   * @type JSON
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._candidates = {
+    incoming: {
+      queued: [],
+      success: [],
+      failure: []
+    },
+    outgoing: []
+  };
+
+  /**
+   * Stores the Peer connection status.
+   * @attribute _connectionStatus
+   * @type JSON
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._connectionStatus = {
+    candidatesGathered: false,
+    candidatesGathering: false,
+    established: false,
+    checker: null,
+    retries: 0,
+    timeout: 0,
+    iceFailures: 0,
+    processingLocalSDP: false,
+    processingRemoteSDP: false,
+    updateCounter: 0
+  };
+
+  /**
+   * Stores the Peer connection RTCPeerConnection reference.
+   * @attribute _RTCPeerConnection
+   * @type RTCPeerConnection
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._RTCPeerConnection = null;
+
+  /**
+   * Gets the Peer information for <code>getPeerInfo()</code>.
+   * @method getInfo
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.getInfo = function () {
+    var ref = this;
+
+    var returnData = {
+      userData: clone(ref.data),
+      settings: clone(ref.streamingInfo.settings),
+      mediaStatus: clone(ref.streamingInfo.mediaStatus),
+      agent: clone(ref.agent),
+      room: clone(superRef._selectedRoom)
+    };
+
+    // Prevent typeof "boolean" (false) or (null) being returned as an empty string
+    if (typeof returnData.userData === 'undefined') {
+      returnData.userData = '';
+    }
+
+    return returnData;
+  };
+
+  /**
+   * Creates the offer RTCSessionDescription for the RTCPeerConnection object.
+   * @method handshakeOffer
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.handshakeOffer = function () {
+    var ref = this;
+
+    // Prevent creating the local offer RTCSessionDescription if RTCPeerConnection.signalingState is not "stable"
+    if (ref._RTCPeerConnection.signalingState !== 'stable') {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of creating local offer ' +
+        'as signalingState is not "stable" ->'], ref._RTCPeerConnection.signalingState);
+      return;
+    }
+
+    /* NOTE: Firefox may support ICE restart in later build of Nightly 48 */
+    var restartICE = ref._connectionSettings.enableIceRestart &&
+      ['disconnected', 'failed'].indexOf(ref._RTCPeerConnection.iceConnectionState) > -1;
+
+    // RTCPeerConnection.createOffer() RTCOfferOptions
+    var options = {
+      mandatory: {
+        OfferToReceiveAudio: true,
+        OfferToReceiveVideo: true,
+        iceRestart: restartICE
+      }
+    };
+
+    // Fallback to the older mandatory format as Safari / IE does not support the new format yet
+    if (['firefox', 'chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1) {
+      options = {
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: true,
+        /* NOTE: Is this flag standard in mandatory ? */
+        iceRestart: restartICE
+      };
+    }
+
+    /* TODO: Create DataChannel here? */
+
+    log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Creating local offer with options ->'], options);
+
+    /**
+     * Start creating the local offer RTCSessionDescription with createOffer()
+     */
+    // RTCPeerConnection.createOffer() success
+    ref._RTCPeerConnection.createOffer(function (offer) {
+      log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Created local offer ->'], offer);
+
+      if (superRef._SDPParser.detectICERestart(ref._RTCPeerConnection.localDescription, offer)) {
+        log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Restarting the ICE gathered flag as ' +
+          'ICE restart is detected']);
+
+        ref._connectionStatus.candidatesGathered = false;
+      }
+
+      // Sets the local offer RTCSessionDescription
+      ref._handshakeSetLocal(offer);
+
+    // RTCPeerConnection.createOffer() failure
+    }, function (error) {
+      log.error([ref.id, 'Peer', 'RTCSessionDescription', 'Failed creating local offer ->'], error);
+
+      superRef._trigger('handshakeProgress', superRef.HANDSHAKE_PROGRESS.ERROR, ref.id, error);
+
+    // RTCPeerConnection.createOffer() RTCOfferOptions parameter
+    }, options);
+  };
+
+  /**
+   * Creates the answer RTCSessionDescription for the RTCPeerConnection object
+   *   based on the offer RTCSessionDescription received.
+   * @method handshakeAnswer
+   * @param {RTCSessionDescription} offer The remote offer RTCSessionDescription received.
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.handshakeAnswer = function (offer) {
+    var ref = this;
+
+    // Prevent creating the local answer RTCSessionDescription if RTCPeerConnection.signalingState is not "stable"
+    if (ref._RTCPeerConnection.signalingState !== 'stable') {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of creating local answer ' +
+        'as signalingState is not "stable" ->'], ref._RTCPeerConnection.signalingState);
+      return;
+    }
+
+    // Sets the remote offer RTCSessionDescription
+    ref._handshakeSetRemote(offer, function () {
+      log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Creating local answer']);
+
+      /**
+       * Start creating the local answer RTCSessionDescription with createAnswer()
+       */
+      // RTCPeerConnection.createAnswer() success
+      ref._RTCPeerConnection.createAnswer(function (answer) {
+        log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Created local answer ->'], answer);
+
+        if (superRef._SDPParser.detectICERestart(ref._RTCPeerConnection.localDescription, answer)) {
+          log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Restarting the ICE gathered flag as ' +
+            'ICE restart is detected']);
+
+          ref._connectionStatus.candidatesGathered = false;
+        }
+
+        // Set the local answer
+        ref._handshakeSetLocal(answer);
+
+      // RTCPeerConnection.createAnswer() failure
+      }, function (error) {
+        log.error([ref.id, 'Peer', 'RTCSessionDescription', 'Failed creating local answer ->'], error);
+
+        superRef._trigger('handshakeProgress', superRef.HANDSHAKE_PROGRESS.ERROR, ref.id, error);
+      });
+    });
+  };
+
+  /**
+   * Completes the handshaking of local/remote RTCSessionDescription for the RTCPeerConnection object.
+   * @method handshakeComplete
+   * @param {RTCSessionDescription} answer The remote answer RTCSessionDescription received.
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.handshakeComplete = function (answer) {
+    var ref = this;
+
+    // Sets the remote answer RTCSessionDescription
+    ref._handshakeSetRemote(answer, function () {
+      log.log([ref.id, 'Peer', 'RTCSessionDescription', 'Handshaking has completed']);
+    });
+  };
+
+  /**
+   * Restarts the handshaking of local/remote RTCSessionDescription for the RTCPeerConnection object.
+   * @method handshakeRestart
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.handshakeRestart = function () {
+    var ref = this;
+
+    // Check if RTCPeerConnection.signalingState is at "have-local-offer",
+    //   which we resend the local offer RTCSessionDescription
+    if (ref._RTCPeerConnection.signalingState === 'have-local-offer') {
+      log.log([ref.id, 'Peer', 'RTCSessionDescription', 'Resending of local offer ' +
+        'as signalingState is at "have-local-offer" ->'], ref._RTCPeerConnection.signalingState);
+
+      var sessionDescription = ref._RTCPeerConnection.localDescription;
+
+      // Prevent sending a corrupted local RTCSessionDescription
+      if (!(!!sessionDescription && !!sessionDescription.sdp)) {
+        log.error([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of sending local sessionDescription ' +
+          'as it is missing']);
+        return;
+      }
+
+      // Check if trickle ICE is disabled or if the candidate generation has been completed as in the
+      //   use-case of trickle ICE disabled, it sends the local RTCSessionDescription with all the RTCIceCandidates
+      if (!ref._connectionSettings.enableIceTrickle && !ref._connectionStatus.candidatesGathered) {
+        log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Halting resending of local ' + sessionDescription.type +
+          ' until local candidates have all been gathered ->'], sessionDescription);
+        return;
+      }
+
+      log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Resending local ' +
+        sessionDescription.type + ' ->'], sessionDescription);
+
+      // Resend the local RTCSessionDescription
+      superRef._sendChannelMessage({
+        type: sessionDescription.type,
+        sdp: sessionDescription.sdp,
+        mid: superRef._user.sid,
+        target: ref.id,
+        rid: superRef._room.id
+      });
+
+    // Restart connection negotiation handshaking
+    } else {
+      // Update to the latest local MediaStream everytime a request for restart connection
+      ref._addStream();
+
+      // Send the restart message to start re-negotiation (another handshaking of local/remote RTCSessionDescription)
+      superRef._sendChannelMessage({
+        type: superRef._SIG_MESSAGE_TYPE.RESTART,
+        mid: superRef._user.sid,
+        rid: superRef._room.id,
+        agent: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion,
+        os: window.navigator.platform,
+        userInfo: superRef.getPeerInfo(),
+        target: ref.id,
+        weight: superRef._peerPriorityWeight,
+        receiveOnly: superRef._hasMCU && ref.id !== 'MCU',
+        enableIceTrickle: superRef._enableIceTrickle,
+        enableDataChannel: superRef._enableDataChannel,
+        enableIceRestart: superRef._enableIceRestart
+      });
+
+      // Peer has restarted connection (another set of handshaking)
+      if (ref.id === 'MCU') {
+        superRef._trigger('serverPeerRestart', 'MCU', superRef.SERVER_PEER_TYPE.MCU);
+
+      } else {
+        superRef._trigger('peerRestart', ref.id, ref.getInfo(), true);
+      }
+    }
+
+    // Start the connection monitor checker
+    ref.monitorConnection();
+  };
+
+  /**
+   * Monitors the RTCPeerConnection connection object and the main RTCDataChannel connection.
+   * This restarts the RTCPeerConnection connection object if connection is bad.
+   * @method monitorConnection
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.monitorConnection = function () {
+    var ref = this;
+
+    // Configure the waiting timeout trickle ICE
+    if (ref._connectionSettings.enableIceTrickle) {
+      /* NOTE: Is there proof that it takes longer ? */
+      // The Peer that is the offerer should take longer
+      if (ref.weight > superRef._peerPriorityWeight) {
+        ref._connectionStatus.timeout = 12500;
+      } else {
+        ref._connectionStatus.timeout = 10000;
+      }
+
+    // Configure a higher waiting timeout if trickle ICE is disabled as it would take longer
+    //   for all the local RTCIceCandidates to be gathered
+    } else {
+      ref._connectionStatus.timeout = 50000;
+    }
+
+    /* NOTE: Unknown reason why it was added like that in the past */
+    // Configure an additional waiting timeout for MCU environment
+    if (superRef._hasMCU) {
+      ref._connectionStatus.timeout = 105000;
+    }
+
+    // Increment the waiting timeout based off the retries counter
+    ref._connectionStatus.timeout += ref._connectionStatus.retries * 10000;
+
+    // Clear any existing checker to replace with the new checker
+    if (ref._connectionStatus.checker) {
+      clearTimeout(ref._connectionStatus.checker);
+    }
+
+    // Start a new connection status checker
+    ref._connectionStatus.checker = setTimeout(function () {
+      var isDataChannelConnectionHealthy = true; //false;
+      var isConnectionHealthy = false;
+
+      // Prevent restarting the Peer if the connection has ended
+      if (!superRef._peers[ref.id]) {
+        log.warn([ref.id, 'Peer', 'RTCPeerConnection', 'Dropping of restarting connection as connection has ended']);
+        return;
+      }
+
+      // Prevent restarting a "closed" RTCPeerConnection
+      if (ref._RTCPeerConnection.signalingState === 'closed') {
+        log.warn([ref.id, 'Peer', 'RTCPeerConnection', 'Dropping of restarting connection as signalingState ' +
+          'is "closed" ->'], ref._RTCPeerConnection.signalingState);
+        return;
+      }
+
+      if (superRef._hasMCU) {
+        log.warn([ref.id, 'Peer', 'RTCPeerConnection', 'Dropping of restart connection it is in MCU environment']);
+        return;
+      }
+
+      /* TODO: Implement main DataChannels connection checker */
+      /*if (ref._connectionSettings.enableDataChannel) {
+        if (ref._channels.main) {
+          isDataChannelConnectionHealthy = true;
+        }
+
+      // Setting the datachannel connection healthy flag as "true" because there's not a need
+      } else {
+        isDataChannelConnectionHealthy = true;
+      }*/
+
+      if (['connected', 'completed'].indexOf(ref._RTCPeerConnection.iceConnectionState) > -1 &&
+        ref._RTCPeerConnection.signalingState === 'stable') {
+        isConnectionHealthy = true;
+      }
+
+      if (isDataChannelConnectionHealthy && isConnectionHealthy) {
+        log.debug([ref.id, 'Peer', 'RTCPeerConnection', 'Dropping of restarting connection as connection ' +
+          'is healthy']);
+        return;
+      }
+
+      log.debug([ref.id, 'Peer', 'RTCPeerConnection', 'Restarting connection again ->'], {
+        channel: isDataChannelConnectionHealthy,
+        connection: isConnectionHealthy
+      });
+
+      // Limit the maximum increment to 5 minutes
+      if (ref._connectionStatus.retries < 30){
+        ref._connectionStatus.retries++;
+      }
+
+      ref.handshakeRestart();
+
+    }, ref._connectionStatus.timeout);
+
+    log.log([ref.id, 'Peer', 'RTCPeerConnection', 'Monitoring connection status']);
+  };
+
+  /**
+   * Sets the remote RTCIceCandidate for the RTCPeerConnection object.
+   * @method addCandidate
+   * @param {RTCIceCandidate} candidate The remote RTCIceCandidate received.
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.addCandidate = function (candidate) {
+    var ref = this;
+
+    // Check if trickle ICE is disabled, which in that case we do no need to send the RTCIceCandidate
+    //   as it will be present in the remote RTCSessionDescription
+    if (!ref._connectionSettings.enableIceTrickle) {
+      log.debug([ref.id, 'Peer', 'RTCIceCandidate',
+        'Not adding remote candidate as trickle ICE is disabled ->'], candidate);
+      return;
+    }
+
+    // Prevent adding other types of candidates if it's not a "relay" (TURN) candidate
+    if (superRef._forceTURN && candidate.candidate.indexOf('relay') === -1) {
+      log.warn([ref.id, 'Peer', 'RTCIceCandidate', 'Dropping of adding remote candidate ' +
+        'as it is not a "relay" candidate in forced TURN case ->'], candidate);
+      return;
+    }
+
+    // Prevent adding remote RTCIceCandidate if RTCPeerConnection object does not have remote RTCSessionDescription
+    if (!(!!ref._RTCPeerConnection.remoteDescription && !!ref._RTCPeerConnection.remoteDescription.sdp)) {
+      log.debug([ref.id, 'Peer', 'RTCIceCandidate',
+        'Queuing remote candidate as connection is not ready yet ->'], candidate);
+
+      // Queues the remote RTCIceCandidate received,
+      //   which is to be added after remote RTCSessionDescription is received
+      ref._candidates.incoming.queued.push(candidate);
+      return;
+    }
+
+    log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Adding remote candidate ->'], candidate);
+
+    /**
+     * Adds the remote RTCIceCandidate with addIceCandidate()
+     */
+    // RTCPeerConnection.addIceCandidate() success
+    ref._RTCPeerConnection.addIceCandidate(candidate, function () {
+      log.log([ref.id, 'Peer', 'RTCIceCandidate', 'Added remote candidate successfully ->'], candidate);
+
+      ref._candidates.incoming.success.push(candidate);
+
+    // RTCPeerConnection.addIceCandidate() failure
+    }, function (error) {
+      log.error([ref.id, 'Peer', 'RTCSessionDescription', 'Failed adding remote candidate ->'], {
+        error: error,
+        candidate: candidate
+      });
+
+      ref._candidates.incoming.failure.push({
+        candidate: candidate,
+        error: error
+      });
+    });
+  };
+
+  /**
+   * Updates the Peer information.
+   * @method update
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.update = function (peerData) {
+    var ref = this;
+
+    // Configure the Peer session information
+    if (typeof peerData.userInfo === 'object' && peerData.userInfo !== null) {
+      // Configure the custom data information
+      if (peerData.userInfo.hasOwnProperty('userData')) {
+        ref.data = peerData.userInfo.userData;
+      }
+
+      // Configure the streaming muted status information
+      if (typeof peerData.userInfo.mediaStatus === 'object' && peerData.userInfo.mediaStatus !== null) {
+        ref.streamingInfo.mediaStatus = peerData.userInfo.mediaStatus;
+      }
+
+      // Configure the streaming settings information
+      if (typeof peerData.userInfo.settings === 'object' && peerData.userInfo.settings !== null) {
+        ref.streamingInfo.settings = peerData.userInfo.settings;
+
+        // Configure for streaming settings audio stereo (for OPUS codec connection) setting
+        if (typeof peerData.userInfo.settings.audio === 'object') {
+          /* NOTE: Perhaps we actually need not to have both Peers connected to have OPUS streaming since
+             it is not the decoding part for the self Peer only? */
+          // Both Peers has to have audio.stereo option enabled
+          ref._connectionSettings.stereo = peerData.userInfo.settings.audio.stereo === true &&
+            (superRef._streamSettings.audio && superRef._streamSettings.audio.stereo === true);
+        }
+      }
+    }
+
+    if (ref._connectionStatus.updateCounter > 0) {
+      superRef._trigger('peerUpdated', ref.id, ref.getInfo(), false);
+    }
+
+    ref._connectionStatus.updateCounter++;
+
+    log.log([ref.id, 'Peer', null, 'Session streaming information has been updated ->'], ref.getInfo());
+  };
+
+  /**
+   * Destroys the RTCPeerConnection object.
+   * @method disconnect
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.disconnect = function () {
+    var ref = this;
+
+    // Prevent closing a RTCPeerConnection object at signalingState that is "closed",
+    // as it might throw an Error
+    if (ref._RTCPeerConnection.signalingState !== 'closed') {
+      log.debug([ref.id, 'Peer', 'RTCPeerConnection', 'Closing connection']);
+
+      ref._RTCPeerConnection.close();
+    }
+
+    // Clear the connection health timer if there is one existing
+    if (ref._connectionStatus.checker) {
+      log.debug([ref.id, 'Peer', 'RTCPeerConnection', 'Removing monitoring connection status checker']);
+
+      clearTimeout(ref._connectionStatus.checker);
+    }
+
+    // Trigger that the Peer has left the Room (or is disconnected)
+    if (ref.id === 'MCU') {
+      superRef._trigger('serverPeerLeft', 'MCU', superRef.SERVER_PEER_TYPE.MCU);
+
+    } else {
+      superRef._trigger('peerLeft', ref.id, superRef._peers[peerId].getInfo(), false);
+    }
+
+    /* TODO: Close all DataChannels connection */
+
+    log.info([ref.id, 'Peer', 'RTCPeerConnection', 'Connection session has ended']);
+  };
+
+  /**
+   * Creates the RTCPeerConnection object.
+   * @method _construct
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._construct = function () {
+    var ref = this;
+
+    // RTCPeerConnection configuration
+    var configuration = {
+      iceServers: []
+    };
+
+    // RTCPeerConnection optional configuration
+    var optional = {
+      optional: [{
+        DtlsSrtpKeyAgreement: true
+      }]
+    };
+
+    if (Array.isArray(superRef._room.connection.peerConfig.iceServers)) {
+      configuration.iceServers = superRef._room.connection.peerConfig.iceServers;
+    }
+
+    /**
+     * Construct the RTCPeerConnection object
+     */
+    ref._RTCPeerConnection = new RTCPeerConnection(configuration, optional);
+
+    // Handles the .onicecandidate event.
+    ref._handleOnIceCandidateEvent();
+
+    // Handles the .onaddstream event.
+    ref._handleOnAddStreamEvent();
+
+    // Handles the .oniceconnectionstatechange event.
+    ref._handleOnIceConnectionStateChangeEvent();
+
+    // Handles the .onsignalingstatechange event.
+    ref._handleOnSignalingStateChangeEvent();
+
+    // Handles the .ondatachannel event.
+    ref._handleOnDataChannelEvent();
+
+    /* NOTE: Not listening to .onicegatheringstatechange event as it's never triggered */
+
+    // Stream the local MediaStream object in connection
+    ref._addStream();
+
+    log.log([ref.id, 'Peer', 'RTCPeerConnection', 'Connection has started']);
+
+    // Start a connection monitor checker
+    ref.monitorConnection();
+  };
+
+  /**
+   * Updates with the currently selected local MediaStream object.
+   * Screensharing MediaStream gets the priority first before user media MediaStream.
+   * @method _addStream
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._addStream = function () {
+    var ref = this;
+
+    // Prevent sending of local MediaStream to P2P Peers in MCU environment.
+    //   We only send the local MediaStream to the Peer with "MCU" as the ID
+    if (superRef._hasMCU && ref.id !== 'MCU') {
+      log.debug([ref.id, 'Peer', 'MediaStream', 'Dropping of sending any local stream as ' +
+        'we are receiving only']);
+      return;
+    }
+
+    /**
+     * Function that checks if local MediaStream exists before removing all
+     *   currently added MediaStreams and sending
+     */
+    var updateStreamFn = function (updatedStream) {
+      var hasAlreadyAdded = false;
+
+      // Remove the currently added local MediaStreams in the RTCPeerConnection object reference
+      ref._RTCPeerConnection.getLocalStreams().forEach(function (stream) {
+        if (updatedStream !== null && stream.id === updatedStream.id) {
+          log.warn([ref.id, 'Peer', 'MediaStream', 'Dropping of removing local stream ' +
+            'as it has already been added ->'], stream);
+          hasAlreadyAdded = true;
+          return;
+        }
+
+        log.debug([ref.id, 'Peer', 'MediaStream', 'Removing local stream ->'], stream);
+
+        // Polyfill for removeStream() function as it is currently not implemented in Firefox 40+
+        if (window.webrtcDetectedBrowser === 'firefox') {
+          // Fetch the list of RTPSenders
+          ref._RTCPeerConnection.getSenders().forEach(function (sender) {
+            var tracks = stream.getAudioTracks().concat(stream.getVideoTracks());
+            // Fetch the list of MediaStreamTracks in the stream
+            tracks.forEach(function (track) {
+              // If MediaStreamTrack matches, remove the RTPSender in removeTrack() function
+              if (track === sender.track) {
+                ref._RTCPeerConnection.removeTrack(sender);
+              }
+            });
+          });
+
+        // Use the removeStream() function
+        } else {
+          ref._RTCPeerConnection.removeStream(stream);
+        }
+      });
+
+      if (!hasAlreadyAdded && updatedStream !== null) {
+        log.debug([ref.id, 'Peer', 'MediaStream', 'Adding local stream ->'], updatedStream);
+        ref._RTCPeerConnection.addStream(updatedStream);
+      }
+    };
+
+    /**
+     * Priority: Screensharing > User media > No stream
+     */
+    // Check if there is screensharing local MediaStream and send this first
+    if (superRef._mediaScreen) {
+      log.log([ref.id, 'Peer', 'MediaStream', 'Sending local stream (screensharing) ->'], superRef._mediaScreen);
+
+      updateStreamFn(superRef._mediaScreen);
+
+    // Else check if there is userMedia local MediaStream and send this
+    } else if (superRef._mediaStream) {
+      log.log([ref.id, 'Peer', 'MediaStream', 'Sending local stream (userMedia) ->'], superRef._mediaStream);
+
+      updateStreamFn(superRef._mediaStream);
+
+    // Else we will be sending no local MediaStream
+    } else {
+      log.warn([ref.id, 'Peer', 'MediaStream', 'Sending no stream']);
+
+      updateStreamFn(null);
+    }
+  };
+
+  /**
+   * Handles the RTCPeerConnection.onicecandidate event.
+   * @method _handleOnIceCandidateEvent
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._handleOnIceCandidateEvent = function () {
+    var ref = this;
+
+    ref._RTCPeerConnection.onicecandidate = function (evt) {
+      var candidate = evt.candidate || evt;
+
+      // Check if ICE gathering has completed, which happens when RTCIceCandidate.candidate returns null.
+      if (!candidate.candidate) {
+        log.log([ref.id, 'Peer', 'RTCIceCandidate', 'Local candidates have been gathered completely']);
+
+        // Polyfill the .onicegatheringstatechange event to "completed".
+        //   It seems like .onicegatheringstatechange event is never triggered and not event used in appRTC now
+        log.log([ref.id, 'Peer', 'RTCIceGatheringState', 'Current ICE gathering state ->'],
+          superRef.CANDIDATE_GENERATION_STATE.COMPLETED);
+
+        ref._connectionStatus.candidatesGathered = true;
+        ref._connectionStatus.candidatesGathering = false;
+
+        superRef._trigger('candidateGenerationState', superRef.CANDIDATE_GENERATION_STATE.COMPLETED, ref.id);
+
+        // Check if trickle ICE is disabled, which we have to send the local RTCSessionDescription
+        //   after ICE gathering has completed
+        if (!ref._connectionSettings.enableIceTrickle) {
+          var sessionDescription = ref._RTCPeerConnection.localDescription;
+
+          // Prevent sending a corrupted local RTCSessionDescription
+          if (!(!!sessionDescription && !!sessionDescription.sdp)) {
+            log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of sending local sessionDescription ' +
+              'as it is not ready yet']);
+            return;
+          }
+
+          /**
+           * Parse SDP: Configure for the use-case of switching of streams for the Firefox local RTCSessionDescription
+           *   during re-negotiation. Firefox is always the answerer with other Peers
+           */
+          if (window.webrtcDetectedBrowser === 'firefox' && ref.agent.name !== 'firefox') {
+            /* NOTE: Should we check if the sessionDescription.type is "answer" before implementing the logic? */
+            log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating Firefox local answer with SSRC lines ' +
+              'to interop with other browsers']);
+            sessionDescription.sdp = superRef._SDPParser.configureFirefoxAnswerSSRC(sessionDescription.sdp);
+          }
+
+          log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Sending delayed local ' +
+            sessionDescription.type + ' ->'], sessionDescription);
+
+          // Send the delayed local RTCSessionDescription (with all RTCIceCandidates present)
+          superRef._sendChannelMessage({
+            type: sessionDescription.type,
+            sdp: sessionDescription.sdp,
+            mid: superRef._user.sid,
+            target: ref.id,
+            rid: superRef._room.id
+          });
+        }
+
+      // Else RTCIceCandidate.candidate is still gathering
+      } else {
+        log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Generated local candidate ->'], candidate);
+
+        if (!ref._connectionStatus.candidatesGathering) {
+          // Polyfill the .onicegatheringstatechange event to "gathering".
+          //   It seems like .onicegatheringstatechange event is never triggered and not event used in appRTC now
+          log.log([ref.id, 'Peer', 'RTCIceGatheringState', 'Current ICE gathering state ->'],
+            superRef.CANDIDATE_GENERATION_STATE.GATHERING);
+
+          ref._connectionStatus.candidatesGathering = true;
+
+          superRef._trigger('candidateGenerationState', superRef.CANDIDATE_GENERATION_STATE.GATHERING, ref.id);
+        }
+
+        // Check if trickle ICE is disabled, which in that case we do no need to send the RTCIceCandidate
+        //   as it will be present in the local RTCSessionDescription
+        if (!ref._connectionSettings.enableIceTrickle) {
+          log.debug([ref.id, 'Peer', 'RTCIceCandidate',
+            'Not sending local candidate as trickle ICE is disabled ->'], candidate);
+          return;
+        }
+
+        // Prevent sending other types of candidates if it's not a "relay" (TURN) candidate
+        if (superRef._forceTURN && candidate.candidate.indexOf('relay') === -1) {
+          log.warn([ref.id, 'Peer', 'RTCIceCandidate', 'Dropping of sending local candidate ' +
+            'as it is not a "relay" candidate in forced TURN case ->'], candidate);
+          return;
+        }
+
+        // Send the local RTCIceCandidate
+        superRef._sendChannelMessage({
+          type: superRef._SIG_MESSAGE_TYPE.CANDIDATE,
+          label: candidate.sdpMLineIndex,
+          id: candidate.sdpMid,
+          candidate: candidate.candidate,
+          mid: superRef._user.sid,
+          target: ref.id,
+          rid: superRef._room.id
+        });
+
+        log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Sending generated local candidate ->'], candidate);
+
+        // Log the local RTCIceCandidate sent
+        ref._candidates.outgoing.push(candidate);
+      }
+    };
+  };
+
+  /**
+   * Handles the RTCPeerConnection.onaddstream event.
+   * @method _handleOnAddStreamEvent
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._handleOnAddStreamEvent = function () {
+    var ref = this;
+
+    // Handle Firefox 46 and above using .ontrack and deprecating .onaddstream
+    if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion > 45) {
+      var stream = new MediaStream();
+      var hasTriggeredStreamEvent = false;
+
+      ref._RTCPeerConnection.ontrack = function (evt) {
+        var track = evt.track || evt;
+
+        log.log([ref.id, 'Peer', 'MediaStreamTrack', 'Received remote track ->'], track);
+
+        stream.addTrack(track);
+
+        // Prevent triggering of empty remote MediaStream if Peer ID is "MCU" since MCU does not
+        //   send any remote MediaStream from this Peer but from the P2P Peers
+        if (ref.id !== 'MCU' && !hasTriggeredStreamEvent) {
+          log.log([ref.id, 'Peer', 'MediaStream', 'Constructing remote stream ->'], stream);
+
+          superRef._trigger('incomingStream', ref.id, stream, false, ref.getInfo());
+          hasTriggeredStreamEvent = true;
+        }
+
+        /* NOTE: Should we actually use .getRemoteStreams() to get the MediaStream with the correct ID ? */
+      };
+
+    } else {
+      ref._RTCPeerConnection.onaddstream = function (evt) {
+        var stream = evt.stream || evt;
+
+        log.log([ref.id, 'Peer', 'MediaStream', 'Received remote stream ->'], stream);
+
+        /* NOTE: Should we do integration checks to wait for magical timeout */
+
+        // Prevent triggering of empty remote MediaStream by checking the streaming information or if Peer ID
+        //   is "MCU" since MCU does not send any remote MediaStream from this Peer but from the P2P Peers
+        if (!(!!ref.streamingInfo.settings.audio || !!ref.streamingInfo.settings.video) || ref.id === 'MCU') {
+          log.warn([ref.id, 'Peer', 'MediaStream', 'Dropping of received remote stream as it is empty ->'], stream);
+          return;
+        }
+
+        superRef._trigger('incomingStream', ref.id, stream, false, ref.getInfo());
+      };
+    }
+  };
+
+  /**
+   * Handles the RTCPeerConnection.oniceconnectionstatechange event.
+   * @method _handleOnIceConnectionStateChangeEvent
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._handleOnIceConnectionStateChangeEvent = function () {
+    var ref = this;
+
+    ref._RTCPeerConnection.oniceconnectionstatechange = function () {
+      var state = ref._RTCPeerConnection.iceConnectionState;
+
+      log.log([ref.id, 'Peer', 'RTCIceConnectionState', 'Current ICE connection state ->'], state);
+
+      superRef._trigger('iceConnectionState', state, ref.id);
+
+      // Increment every ICE failures
+      if (state === 'failed') {
+        ref._connectionStatus.iceFailures++;
+      }
+
+      // Go to "trickleFailed" state if trickle ICE is enabled and iceConnectionState "failed" for the 3rd time
+      if (ref._connectionSettings.enableIceTrickle && ref._connectionStatus.iceFailures === 3) {
+        superRef._trigger('iceConnectionState', superRef.ICE_CONNECTION_STATE.TRICKLE_FAILED);
+      }
+
+      // Restart connection for iceConnectionState "failed" or "disconnected"
+      if (['failed', 'disconnected'].indexOf(state) > -1) {
+        ref.handshakeRestart();
+      }
+    };
+  };
+
+  /**
+   * Handles the RTCPeerConnection.onsignalingstatechange event.
+   * @method _handleOnSignalingStateChangeEvent
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._handleOnSignalingStateChangeEvent = function () {
+    var ref = this;
+
+    ref._RTCPeerConnection.onsignalingstatechange = function () {
+      var state = ref._RTCPeerConnection.signalingState;
+
+      log.log([ref.id, 'Peer', 'RTCSignalingState', 'Current signaling state ->'], state);
+
+      superRef._trigger('peerConnectionState', state, ref.id);
+
+      /* NOTE: We will not fix when "closed" and attempt to reconnect if object is not meant to be closed */
+    };
+  };
+
+  /**
+   * Handles the RTCPeerConnection.ondatachannel event.
+   * @method _handleOnDataChannelEvent
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._handleOnDataChannelEvent = function () {
+    var ref = this;
+
+    ref._RTCPeerConnection.ondatachannel = function (evt) {
+      var channel = evt.channel || evt;
+
+      log.log([ref.id, 'Peer', 'RTCDataChannel', 'Received datachannel ->'], channel);
+    };
+  };
+
+  /**
+   * Sets the local RTCSessionDescription object.
+   * @method _handshakeSetLocal
+   * @param {RTCSessionDescription} sessionDescription The local RTCSessionDescription.
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._handshakeSetLocal = function (sessionDescription) {
+    var ref = this;
+
+    // Prevent setting the local offer RTCSessionDescription if
+    //   RTCPeerConnection.signalingState is not "stable"
+    if (sessionDescription.type === 'offer') {
+      if (ref._RTCPeerConnection.signalingState !== 'stable') {
+        log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of setting local offer ' +
+          'as signalingState is not "stable" ->'], ref._RTCPeerConnection.signalingState);
+        return;
+      }
+    // Prevent setting the local answer RTCSessionDescription if
+    //   RTCPeerConnection.signalingState is not "have-remote-offer"
+    } else {
+      if (ref._RTCPeerConnection.signalingState !== 'have-remote-offer') {
+        log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of setting local answer ' +
+          'as signalingState is not "have-remote-offer" ->'], ref._RTCPeerConnection.signalingState);
+        return;
+      }
+    }
+
+    /**
+     * Parse SDP: Configure OPUS codec stereo modification
+     */
+    log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating OPUS stereo enabled option ->'],
+      ref._connectionSettings.stereo);
+
+    sessionDescription.sdp = superRef._SDPParser.configureOPUSStereo(sessionDescription.sdp,
+      ref._connectionSettings.stereo);
+
+    /**
+     * Parse SDP: Configure the connection issues with Chrome 50 to Safari/IE browsers
+     *   when Chrome is offerer
+     */
+    if (['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1 &&
+      ['IE', 'safari'].indexOf(ref.agent.name) > -1 && sessionDescription.type === 'offer') {
+
+      log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating local offer for connection from ' +
+        'Chrome/Opera browsers to Safari/IE browsers']);
+
+      sessionDescription.sdp = superRef._SDPParser.configureChrome50OfferToPluginBrowsers(sessionDescription.sdp);
+    }
+
+    /**
+     * Parse SDP: Configure the maximum audio bitrate to send
+     */
+    // Prevent retrieving values when .bandwidth is not defined.
+    if (superRef._streamSettings.bandwidth && typeof superRef._streamSettings.bandwidth.audio === 'number' &&
+      superRef._streamSettings.bandwidth.audio > 0) {
+
+      log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating maximum sending audio bitrate ->'],
+        superRef._streamSettings.bandwidth.audio);
+
+      sessionDescription.sdp = superRef._SDPParser.configureMaxSendingBandwidth(sessionDescription.sdp,
+        'audio', superRef._streamSettings.bandwidth.audio);
+
+    } else {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Not configuration maximum sending audio bitrate ' +
+        'and leaving to browser\'s defaults']);
+    }
+
+    /**
+     * Parse SDP: Configure the maximum video bitrate to send
+     */
+    // Prevent retrieving values when .bandwidth is not defined.
+    if (superRef._streamSettings.bandwidth && typeof superRef._streamSettings.bandwidth.video === 'number' &&
+      superRef._streamSettings.bandwidth.video > 0) {
+
+      log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating maximum sending video bitrate ->'],
+        superRef._streamSettings.bandwidth.video);
+
+      sessionDescription.sdp = superRef._SDPParser.configureMaxSendingBandwidth(sessionDescription.sdp,
+        'video', superRef._streamSettings.bandwidth.video);
+
+    } else {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Not configuration maximum sending video bitrate ' +
+        'and leaving to browser\'s defaults']);
+    }
+
+    /**
+     * Parse SDP: Configure the maximum data bitrate to send
+     */
+    // Prevent retrieving values when .bandwidth is not defined.
+    if (superRef._streamSettings.bandwidth && typeof superRef._streamSettings.bandwidth.data === 'number' &&
+      superRef._streamSettings.bandwidth.data > 0) {
+
+      log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating maximum sending data bitrate ->'],
+        superRef._streamSettings.bandwidth.data);
+
+      sessionDescription.sdp = superRef._SDPParser.configureMaxSendingBandwidth(sessionDescription.sdp,
+        'data', superRef._streamSettings.bandwidth.data);
+
+    } else {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Not configuration maximum sending data bitrate ' +
+        'and leaving to browser\'s defaults']);
+    }
+
+    /**
+     * Parse SDP: Remove the H264 preference from Firefox 32 (Ubuntu) browsers that was
+     *   causing connection issues previously
+     */
+    log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Removing any Firefox H264 profile experimental feature']);
+
+    sessionDescription.sdp = superRef._SDPParser.removeFirefoxH264Pref(sessionDescription.sdp);
+
+    /**
+     * Configure the audio codec to use in connection when available
+     */
+    if (superRef._selectedAudioCodec !== superRef.AUDIO_CODEC.AUTO) {
+      log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating to select audio codec if available ->'],
+        superRef._selectedAudioCodec);
+
+      sessionDescription.sdp = superRef._SDPParser.configureCodec(sessionDescription.sdp, 'audio',
+        superRef._selectedAudioCodec);
+
+    } else {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Using browser\'s selected default audio codec']);
+    }
+
+    /**
+     * Parse SDP: Configure the video codec to use in connection when available
+     */
+    if (superRef._selectedVideoCodec !== superRef.VIDEO_CODEC.AUTO) {
+      log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating to select video codec if available ->'],
+        superRef._selectedVideoCodec);
+
+      sessionDescription.sdp = superRef._SDPParser.configureCodec(sessionDescription.sdp, 'video',
+        superRef._selectedVideoCodec);
+
+    } else {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Using browser\'s selected default video codec']);
+    }
+
+    log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting local ' +
+      sessionDescription.type + ' ->'], sessionDescription);
+
+    // Prevent setting the local RTCSessionDescription if the
+    //   RTCPeerConnection object is currently processing another local RTCSessionDescription
+    if (ref._connectionStatus.processingLocalSDP) {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of setting local ' + sessionDescription.type +
+        ' as another local description is being processed ->'], sessionDescription);
+      return;
+    }
+
+    // Set the processing local RTCSessionDescription flag to true
+    ref._connectionStatus.processingLocalSDP = true;
+
+    /**
+     * Sets the local RTCSessionDescription with setLocalDescription()
+     */
+    // RTCPeerConnection.setLocalDescription() success
+    ref._RTCPeerConnection.setLocalDescription(sessionDescription, function () {
+      log.log([ref.id, 'Peer', 'RTCSessionDescription', 'Set local ' +
+        sessionDescription.type + ' success ->'], sessionDescription);
+
+      // Set the processing local RTCSessionDescription flag to false
+      ref._connectionStatus.processingLocalSDP = false;
+
+      superRef._trigger('handshakeProgress', sessionDescription.type, ref.id);
+
+      // Check if trickle ICE is disabled or if the candidate generation has been completed as in the use-case
+      //   of trickle ICE disabled, it sends the local RTCSessionDescription with all the RTCIceCandidates
+      if (!ref._connectionSettings.enableIceTrickle && !ref._connectionStatus.candidatesGathered) {
+        log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Halting sending of local ' + sessionDescription.type +
+          ' until local candidates have all been gathered ->'], sessionDescription);
+        return;
+      }
+
+      log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Sending local ' +
+        sessionDescription.type + ' ->'], sessionDescription);
+
+      /**
+       * Parse SDP: Configure for the use-case of switching of streams for the Firefox local RTCSessionDescription
+       *   during re-negotiation. Firefox is always the answerer with other Peers
+       */
+      if (window.webrtcDetectedBrowser === 'firefox' && ref.agent.name !== 'firefox') {
+        /* NOTE: Should we check if the sessionDescription.type is "answer" before implementing the logic? */
+        log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating Firefox local answer with SSRC lines ' +
+          'to interop with other browsers']);
+        sessionDescription.sdp = superRef._SDPParser.configureFirefoxAnswerSSRC(sessionDescription.sdp);
+      }
+
+      // Send the local RTCSessionDescription
+      superRef._sendChannelMessage({
+        type: sessionDescription.type,
+        sdp: sessionDescription.sdp,
+        mid: superRef._user.sid,
+        target: ref.id,
+        rid: superRef._room.id
+      });
+
+    // RTCPeerConnection.setLocalDescription() failure
+    }, function (error) {
+      log.error([ref.id, 'Peer', 'RTCSessionDescription', 'Failed setting local ' +
+        sessionDescription.type + ' ->'], error);
+
+      // Set the processing local RTCSessionDescription flag to false
+      ref._connectionStatus.processingLocalSDP = false;
+
+      superRef._trigger('handshakeProgress', superRef.HANDSHAKE_PROGRESS.ERROR, ref.id, error);
+    });
+  };
+
+  /**
+   * Sets the remote RTCSessionDescription object.
+   * @method _handshakeSetRemote
+   * @param {RTCSessionDescription} sessionDescription The remote RTCSessionDescription received.
+   * @param {Function} callback The callback function triggered when
+   *   setting the remote RTCSessionDescription is succesful.
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._handshakeSetRemote = function (sessionDescription, callback) {
+    var ref = this;
+
+    // Prevent setting the remote offer RTCSessionDescription if
+    //   RTCPeerConnection.signalingState is not "stable"
+    if (sessionDescription.type === 'offer') {
+      if (ref._RTCPeerConnection.signalingState !== 'stable') {
+        log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of setting remote offer ' +
+          'as signalingState is not "stable" ->'], ref._RTCPeerConnection.signalingState);
+        return;
+      }
+    // Prevent setting the local offer RTCSessionDescription if
+    //   RTCPeerConnection.signalingState is not "have-local-offer"
+    } else {
+      if (ref._RTCPeerConnection.signalingState !== 'have-local-offer') {
+        log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of setting remote answer ' +
+          'as signalingState is not "have-local-offer" ->'], ref._RTCPeerConnection.signalingState);
+        return;
+      }
+    }
+
+    /**
+     * Parse SDP: Configure for the use-case where self Peer is Firefox and Peer ID is "MCU"
+     *   to suit MCU environment needs
+     */
+    if (window.webrtcDetectedBrowser === 'firefox' && ref.id === 'MCU') {
+      log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating local answer for Firefox interop with MCU']);
+      sessionDescription.sdp = superRef._SDPParser.configureMCUFirefoxAnswer(sessionDescription.sdp);
+    }
+
+    /**
+     * Parse SDP: Configure to remove non-relay (TURN) candidates when trickle ICE is disabled
+     */
+    if (superRef._forceTURN && !ref._connectionSettings.enableIceTrickle) {
+      log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating to receive only "relay" remote candidates']);
+      sessionDescription.sdp = superRef._SDPParser.removeNonRelayCandidates(sessionDescription.sdp);
+    }
+
+    log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting remote ' +
+      sessionDescription.type + ' ->'], sessionDescription);
+
+    // Prevent setting the remote RTCSessionDescription if the
+    //   RTCPeerConnection object is currently processing another remote RTCSessionDescription
+    if (ref._connectionStatus.processingRemoteSDP) {
+      log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of setting remote ' + sessionDescription.type +
+        ' as another remote description is being processed ->'], sessionDescription);
+      return;
+    }
+
+    // Set the processing remote RTCSessionDescription flag to true
+    ref._connectionStatus.processingRemoteSDP = true;
+
+    /**
+     * Set the remote RTCSessionDescription with setRemoteDescription()
+     */
+    // RTCPeerConnection.setRemoteDescription() success
+    ref._RTCPeerConnection.setRemoteDescription(sessionDescription, function () {
+      log.log([ref.id, 'Peer', 'RTCSessionDescription', 'Set remote ' +
+        sessionDescription.type + ' success ->'], sessionDescription);
+
+      // Set the processing remote RTCSessionDescription flag to false
+      ref._connectionStatus.processingRemoteSDP = false;
+
+      superRef._trigger('handshakeProgress', sessionDescription.type, ref.id);
+
+      callback();
+
+      for (var i = 0; i < ref._candidates.incoming.queued.length; i++) {
+        var candidate = ref._candidates.incoming.queued[i];
+
+        log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Adding remote candidate (queued) ->'], candidate);
+
+        ref.addCandidate(candidate);
+      }
+
+      ref._candidates.incoming.queued = [];
+
+    // RTCPeerConnection.setRemoteDescription() failure
+    }, function (error) {
+      log.error([ref.id, 'Peer', 'RTCSessionDescription', 'Failed setting remote ' +
+        sessionDescription.type + ' ->'], error);
+
+      // Set the processing remote RTCSessionDescription flag to false
+      ref._connectionStatus.processingRemoteSDP = false;
+
+      superRef._trigger('handshakeProgress', superRef.HANDSHAKE_PROGRESS.ERROR, ref.id, error);
+    });
+  };
+
+  superRef._peers[peerId] = new SkylinkPeer();
+};
+
+/**
+ * Destroys a Peer.
+ * @method _destroyPeer
+ * @param {String} peerId The Peer ID.
+ * @private
+ * @for Skylink
+ * @since 0.6.x
+ */
+Skylink.prototype._destroyPeer = function (peerId) {
+  var superRef = this;
+
+  if (superRef._peers[peerId]) {
+    superRef._peers[peerId].disconnect();
+
+    delete superRef._peers[peerId];
+  }
+
+  log.log([peerId, 'Peer', 'RTCPeerConnection', 'Session and connection has ended']);
+};
 Skylink.prototype._selectedRoom = null;
 
 /**
@@ -14588,6 +16717,17 @@ Skylink.prototype._roomLocked = false;
  * @since 0.4.0
  */
 Skylink.prototype._inRoom = false;
+
+/**
+ * Stores the peer connection priority weight.
+ * @attribute _peerPriorityWeight
+ * @type Number
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.0
+ */
+Skylink.prototype._peerPriorityWeight = 0;
 
 /**
  * Connects self to the selected room.
@@ -15221,6 +17361,8 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
     stopScreenshare = false;
   }
 
+  /* NOTE: Still allow disconnection of channel perhaps? */
+
   if (!self._inRoom) {
     error = 'Unable to leave room as user is not in any room';
     log.error(error);
@@ -15236,17 +17378,12 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
   // NOTE: ENTER/WELCOME made but no peerconnection...
   // which may result in peerLeft not triggered..
   // WHY? but to ensure clear all
-  var peers = Object.keys(self._peerInformations);
-  var conns = Object.keys(self._peerConnections);
-  var i;
-  for (i = 0; i < conns.length; i++) {
-    if (peers.indexOf(conns[i]) === -1) {
-      peers.push(conns[i]);
-    }
-  }
-  for (i = 0; i < peers.length; i++) {
-    self._removePeer(peers[i]);
-  }
+  Object.keys(self._peers).forEach(function (peerId) {
+    self._destroyPeer(peerId);
+  });
+
+  self._peers = {};
+
   self._inRoom = false;
   self._closeChannel();
 
@@ -15319,111 +17456,6 @@ Skylink.prototype.unlockRoom = function() {
   this._trigger('roomLock', false, this._user.sid,
     this.getPeerInfo(), true);
 };
-Skylink.prototype.READY_STATE_CHANGE = {
-  INIT: 0,
-  LOADING: 1,
-  COMPLETED: 2,
-  ERROR: -1
-};
-
-/**
- * These are the list of room initialization ready state errors that Skylink has.
- * - Ready state errors like <code>ROOM_LOCKED</code>, <code>API_NOT_ENOUGH_CREDIT</code>,
- *   <code>API_NOT_ENOUGH_PREPAID_CREDIT</code>, <code>API_FAILED_FINDING_PREPAID_CREDIT</code> and
- *   <code>SCRIPT_ERROR</code> has been removed as they are no longer supported.
- * @attribute READY_STATE_CHANGE_ERROR
- * @type JSON
- * @param {Number} API_INVALID <small>Value <code>4001</code></small>
- *   The error when provided Application Key does not exists <em>(invalid)</em>.<br>
- * For this error, it's recommended that you check if the Application Key exists in your account
- *   in the developer console.
- * @param {Number} API_DOMAIN_NOT_MATCH <small>Value <code>4002</code></small>
- *   The error when application accessing from backend IP address is not valid for provided Application Key.<br>
- * This rarely (and should not) occur and it's recommended to report this issue if this occurs.
- * @param {Number} API_CORS_DOMAIN_NOT_MATCH <small>Value <code>4003</code></small>
- *   The error when application accessing from the CORS domain is not valid for provided Application Key.<br>
- * For this error, it's recommended that you check the CORS configuration for the provided Application Key
- *   in the developer console.
- * @param {Number} API_CREDENTIALS_INVALID <small>Value <code>4004</code></small>
- *   The error when credentials provided is not valid for provided Application Key.<br>
- * For this error, it's recommended to check the <code>credentials</code> provided in
- *   {{#crossLink "Skylink/init:method"}}init() configuration{{/crossLink}}.
- * @param {Number} API_CREDENTIALS_NOT_MATCH <small>Value <code>4005</code></small>
- *   The error when credentials does not match as expected generated credentials for provided Application Key.<br>
- * For this error, it's recommended to check the <code>credentials</code> provided in
- *   {{#crossLink "Skylink/init:method"}}init() configuration{{/crossLink}}.
- * @param {Number} API_INVALID_PARENT_KEY <small>Value <code>4006</code></small>
- *   The error when provided alias Application Key has an error because parent Application Key does not exists.<br>
- * For this error, it's recommended to provide another alias Application Key.
- * @param {Number} API_NO_MEETING_RECORD_FOUND <small>Value <code>4010</code></small>
- *   The error when there is no meeting currently that is open or available to join
- *   for self at the current time in the selected room.<br>
- * For this error, it's recommended to retrieve the list of meetings and check if it exists using
- *   the [Meeting Resource REST API](https://temasys.atlassian.net/wiki/display/TPD/SkylinkAPI+-+Meeting+%28Persistent+Room%29+Resources).
- * @param {Number} NO_SOCKET_IO <small>Value <code>1</code></small>
- *   The error when socket.io dependency is not loaded.<br>
- * For this error, it's recommended to load the
- *   [correct socket.io-client dependency](http://socket.io/download/) from the CDN.
- * @param {Number} NO_XMLHTTPREQUEST_SUPPORT <small>Value <code>2</code></small>
- *   The error when XMLHttpRequest is not supported in current browser.<br>
- * For this error, it's recommended to ask user to switch to another browser that supports <code>XMLHttpRequest</code>.
- * @param {Number} NO_WEBRTC_SUPPORT <small>Value <code>3</code></small>
- *   The error when WebRTC is not supported in current browser.<br>
- * For this error, it's recommended to ask user to switch to another browser that supports WebRTC.
- * @param {Number} NO_PATH <small>Value <code>4</code></small>
- *   The error when constructed path is invalid.<br>
- * This rarely (and should not) occur and it's recommended to report this issue if this occurs.
- * @param {Number} INVALID_XMLHTTPREQUEST_STATUS <small>Value <code>5</code></small>
- *   The error when XMLHttpRequest does not return a HTTP status code of <code>200</code> but a HTTP failure.<br>
- * This rarely (and should not) occur and it's recommended to report this issue if this occurs.
- * @param {Number} ADAPTER_NO_LOADED <small>Value <code>7</code></small>
- *   The error when AdapterJS dependency is not loaded.<br>
- * For this error, it's recommended to load the
- *   [correct AdapterJS dependency](https://github.com/Temasys/AdapterJS/releases) from the CDN.
- * @param {Number} XML_HTTP_REQUEST_ERROR <small>Value <code>-1</code></small>
- *   The error when XMLHttpRequest failure on the network level when attempting to
- *   connect to the platform server to retrieve selected room connection information.<br>
- * This might happen when connection timeouts. If this is a persistent issue, it's recommended to report this issue.
- * @readOnly
- * @component Room
- * @for Skylink
- * @since 0.4.0
- */
-Skylink.prototype.READY_STATE_CHANGE_ERROR = {
-  API_INVALID: 4001,
-  API_DOMAIN_NOT_MATCH: 4002,
-  API_CORS_DOMAIN_NOT_MATCH: 4003,
-  API_CREDENTIALS_INVALID: 4004,
-  API_CREDENTIALS_NOT_MATCH: 4005,
-  API_INVALID_PARENT_KEY: 4006,
-  API_NO_MEETING_RECORD_FOUND: 4010,
-  //ROOM_LOCKED: 5001,
-  XML_HTTP_REQUEST_ERROR: -1,
-  NO_SOCKET_IO: 1,
-  NO_XMLHTTPREQUEST_SUPPORT: 2,
-  NO_WEBRTC_SUPPORT: 3,
-  NO_PATH: 4,
-  //INVALID_XMLHTTPREQUEST_STATUS: 5,
-  //SCRIPT_ERROR: 6,
-  ADAPTER_NO_LOADED: 7
-};
-
-/**
- * These are the list of available platform signaling servers Skylink
- *   should connect to for faster connectivity.
- * @attribute REGIONAL_SERVER
- * @type JSON
- * @param {String} APAC1 <small>Value <code>"sg"</code></small>
- *   The option to select the Asia pacific server 1 regional server.
- * @param {String} US1 <small>Value <code>"us2"</code></small>
- *   The option to select the US server 1 regional server.
- * @deprecated Signaling server selection is handled on
- *    the server side based on load and latency.
- * @readOnly
- * @component Room
- * @for Skylink
- * @since 0.5.0
- */
 Skylink.prototype.REGIONAL_SERVER = {
   APAC1: 'sg',
   US1: 'us2'
@@ -16175,7 +18207,9 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   The flag that indicates if PeerConnections connection should use any STUN server connection.
  *   Tampering this flag may cause issues to connections, so set this value at your own risk.
  * @param {Boolean} [options.forceTURN=false] The flag that indicates if PeerConnections connection
- *   should only use TURN server connection which enables a quicker connectivity.
+ *   should only use TURN server connection which enables a quicker connectivity. This forces
+ *   connection through TURN server and use TURN server connection only. If TURN is not enabled for
+ *   the Application Key, connection may not work with this flag enabled.
  *   This configuration will override the settings for <code>enableTURNServer</code>
  *   and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and
  *   <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.
@@ -16611,31 +18645,441 @@ Skylink.prototype.init = function(options, callback) {
   self._loadInfo();
 };
 
-
-
-
-
-
-Skylink.prototype.LOG_LEVEL = {
-  DEBUG: 4,
-  LOG: 3,
-  INFO: 2,
-  WARN: 1,
-  ERROR: 0
-};
-
 /**
- * The format string that is printed in every Skylink console logs for Skylink logs identification.<br>
- * <small>Example: <code>"SkylinkJS - <<logs here>>"</code></small>
- * @attribute _LOG_KEY
- * @type String
- * @scoped true
- * @readOnly
- * @private
- * @component Log
+ * Helper function that generates an Unique ID (UUID) string.
+ * @method generateUUID
+ * @return {String} Generated Unique ID (UUID) string.
+ * @example
+ *    // Get Unique ID (UUID)
+ *    var uuid = SkylinkDemo.generateUUID();
  * @for Skylink
- * @since 0.5.4
+ * @since 0.5.9
  */
+/* jshint ignore:start */
+Skylink.prototype.generateUUID = function() {
+  var d = new Date().getTime();
+  var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = (d + Math.random() * 16) % 16 | 0;
+    d = Math.floor(d / 16);
+    return (c == 'x' ? r : (r & 0x7 | 0x8)).toString(16);
+  });
+  return uuid;
+};
+/* jshint ignore:end */
+
+Skylink.prototype._SDPParser = {
+
+  /**
+   * Handles the Firefox MCU answer mangling.
+   * @method configureMCUFirefoxAnswer
+   * @param {String} sdpString The local answer RTCSessionDescription.sdp.
+   * @return {String} updatedSdpString The modified local answer RTCSessionDescription.sdp
+   *   for Firefox connection with MCU Peer.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  configureMCUFirefoxAnswer: function (sdpString) {
+    var newSdpString = '';
+
+    /* NOTE: Do we still need these fixes? There is no clear reason for this (undocumented sorry) */
+    // Remove all "generation 0"
+    newSdpString = sdpString.replace(/ generation 0/g, '');
+    newSdpString = newSdpString.replace(/ udp /g, ' UDP ');
+
+    // Return modified RTCSessionDescription.sdp
+    return newSdpString;
+  },
+
+  /**
+   * Handles the Firefox to other browsers SSRC lines received that instead of interpretating
+   *   as "default" for MediaStream.id, interpret as the original id given.
+   * Check if sender of local answer RTCSessionDescription is Firefox and
+   *   receiver is other browsers before parsing it.
+   * @method configureFirefoxAnswerSSRC
+   * @param {String} sdpString The local answer RTCSessionDescription.sdp.
+   * @return {String} updatedSdpString The modified local answer RTCSessionDescription.sdp
+   *   for Firefox connection with Peers connecting with other agents.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  configureFirefoxAnswerSSRC: function (sdpString) {
+    // Check if there is a line to point to a specific MediaStream ID
+    if (sdpString.indexOf('a=msid-semantic:WMS *') > 0) {
+      var sdpLines = sdpString.split('\r\n'),
+          streamId = '',
+          shouldReplaceSSRCSemantic = -1;
+
+      /**
+       * Function that loops and checks if there is any MediaStream ID or MediaStreamTrack ID to
+       *   replace based on the type provided
+       */
+      var parseTracksSSRCFn = function (track) {
+        var trackId = '';
+
+        // Loop out for the a=msid: line that contains the {MediaStream ID} {MediaStreamTrack ID}
+        //   based on track type provided - "audio" / "video"
+        for (var i = 0; i < sdpLines.length; i++) {
+          // Check if there is a MediaStreamTrack ID that exists, start appending the tracks
+          if (!!trackId) {
+            // Check if there is a=ssrc: lines to pass in the extra ssrc lines with the label and MediaStream ID.
+            if (sdpLines[i].indexOf('a=ssrc:') === 0) {
+              var ssrcId = sdpLines[i].split(':')[1].split(' ')[0];
+
+              sdpLines.splice(i+1, 0, 'a=ssrc:' + ssrcId +  ' msid:' + streamId + ' ' + trackId,
+                'a=ssrc:' + ssrcId + ' mslabel:default',
+                'a=ssrc:' + ssrcId + ' label:' + trackId);
+              break;
+
+            // Prevent going to the next track type or track
+            } else if (sdpLines[i].indexOf('a=mid:') === 0) {
+              break;
+            }
+
+          } else if (sdpLines[i].indexOf('a=msid:') === 0) {
+            if (i > 0 && sdpLines[i-1].indexOf('a=mid:' + track) === 0) {
+              var parts = sdpLines[i].split(':')[1].split(' ');
+
+              streamId = parts[0];
+              trackId = parts[1];
+              shouldReplaceSSRCSemantic = true;
+            }
+          }
+        }
+      };
+
+      parseTracksSSRCFn('video');
+      parseTracksSSRCFn('audio');
+
+      // Commenting out for now as this lines seems to not affect functionality
+      /*if (shouldReplaceSSRCSemantic) {
+        for (var i = 0; i < sdpLines.length; i++) {
+          if (sdpLines[i].indexOf('a=msid-semantic:WMS ') === 0) {
+            var parts = sdpLines[i].split(' ');
+            parts[parts.length - 1] = streamId;
+            sdpLines[i] = parts.join(' ');
+            break;
+          }
+        }
+
+      }*/
+
+      // Return modified RTCSessionDescription.sdp
+      return sdpLines.join('\r\n');
+    }
+
+    // Return unmodified RTCSessionDescription.sdp
+    return sdpString;
+  },
+
+  /**
+   * Handles the OPUS stereo flag configuration.
+   * @method configureOPUSStereo
+   * @param {String} sdpString The local RTCSessionDescription.sdp.
+   * @param {Boolean} [enableStereo=false] The flag that indicates if stereo should
+   *   be enabled for using OPUS audio codec.
+   * @return {String} updatedSdpString The modification local RTCSessionDescription.sdp
+   *   for connection using OPUS audio codec to have stereo enabled.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  configureOPUSStereo: function (sdpString, enableStereo) {
+    var sdpLines = sdpString.split('\r\n'),
+        opusFmtpLine = null;
+
+    // Loop out and search for the OPUS codec line to obtain the fmtp line
+    for (var i = 0; i < sdpLines.length; i++) {
+      if (sdpLines[i].indexOf('a=rtpmap:') === 0 && sdpLines[i].indexOf('opus/48000/') > 0) {
+        var parts = sdpLines[i].split(':');
+
+        // Prevent undefined content
+        if (typeof parts[1] === 'string') {
+          opusFmtpLine = parts[1].split(' ')[0];
+        }
+        break;
+      }
+    }
+
+    /**
+     * Function that loops and parses the payload based on the config line given
+     */
+    var parsePayloadFn = function (line, flag) {
+      var lineParts = line.split(' '),
+        hasFlag = false;
+
+      // Remove the fmtp:payload line
+      lineParts.splice(0, 1);
+
+      // Split the lines into ";"
+      lineParts = (lineParts.join(' ')).split(';');
+
+      // Loop out and search if stereo= flag exists already
+      for (var k = 0; k < lineParts.length; k++) {
+        // Check for the stereo=1 flag
+        if (lineParts[k].indexOf(flag + '=') === 0) {
+          if (!enableStereo) {
+            lineParts.splice(k, 1);
+            break;
+          }
+
+          lineParts[k] = flag + '=1';
+          hasFlag = true;
+        }
+      }
+
+      if (enableStereo && !hasFlag) {
+        lineParts.push(flag + '=1');
+      }
+
+      return line.split(' ')[0] + ' ' + lineParts.join(';');
+    };
+
+    // Check if OPUS codec fmtp line exists
+    if (opusFmtpLine) {
+      for (var j = 0; j < sdpLines.length; j++) {
+        // Check if this line is the OPUS fmtp line payload
+        if (sdpLines[j].indexOf('a=fmtp:' + opusFmtpLine) === 0) {
+          sdpLines[j] = parsePayloadFn(sdpLines[j], 'stereo');
+          sdpLines[j] = parsePayloadFn(sdpLines[j], 'sprop-stereo');
+          break;
+        }
+      }
+    }
+
+    // Return modified RTCSessionDescription.sdp
+    return sdpLines.join('\r\n');
+  },
+
+  /**
+   * Handles the maximum sending bandwidth configuration.
+   * @method configureMaxSendingBandwidth
+   * @param {String} sdpString The local RTCSessionDescription.sdp.
+   * @param {String} mediaType The media type to configure.
+   *   Types are <code>"audio"</code>, <code>"video"</code> and <code>"data"</code>.
+   * @param {Number} maxBitrate The maximum sending bitrate value.
+   *   This value cannot be <code>0</code> or less.
+   * @return {String} updatedSdpString The modified local RTCSessionDescription.sdp
+   *   with maximum sending bandwidth configuration based on the media type and bitrate value provided.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  configureMaxSendingBandwidth: function (sdpString, mediaType, maxBitrate) {
+    var sdpLines = sdpString.split('\r\n'),
+        sdpMediaType = '';
+
+    if (mediaType === 'audio') {
+      sdpMediaType = 'audio';
+
+    } else if (mediaType === 'video') {
+      sdpMediaType = 'video';
+
+    } else if (mediaType === 'data') {
+      sdpMediaType = 'application';
+
+    // Prevent setting any unknown types
+    } else {
+      log.error('Dropping of configurating maximum sending bandwidth as unknown mediaType is provided ->', mediaType);
+      return sdpString;
+    }
+
+    for (var i = 0; i < sdpLines.length; i += 1) {
+      // Configure the maximum sending bitrate for the selected media type
+      if (sdpLines[i].indexOf('m=' + sdpMediaType) === 0) {
+        sdpLines.splice(i + 1, 0, 'b=AS:' + maxBitrate);
+        break;
+      }
+    }
+
+    // Return modified RTCSessionDescription.sdp
+    return sdpLines.join('\r\n');
+  },
+
+  /**
+   * Removes the H264 preference from that started originally from
+   *   Firefox 32 (Ubuntu) browsers to prevent breaking connection
+   *   with browsers that do not support it.
+   * @method removeFirefoxH264Pref
+   * @param {String} sdpString The local RTCSessionDescription.sdp.
+   * @return {String} updatedSdpString The modification local RTCSessionDescription.sdp
+   *   that has the H264 preference removed.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  removeFirefoxH264Pref: function (sdpString) {
+    var sdpLines = sdpString.split('\r\n');
+
+    // Remove line that causes issue in Firefox 32 (Ubuntu) experimental feature.
+    var invalidLineIndex = sdpLines.indexOf(
+      'a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1');
+
+    if (invalidLineIndex > -1) {
+      sdpLines.splice(invalidLineIndex, 1);
+    }
+
+    // Return modified RTCSessionDescription.sdp
+    return sdpLines.join('\r\n');
+  },
+
+  /**
+   * Handles the selected codec based on the media type provided.
+   * @method configureCodec
+   * @param {String} sdpString The local RTCSessionDescription.sdp.
+   * @param {String} mediaType The media type to configure.
+   *   Types are <code>"audio"</code> and <code>"video"</code>.
+   * @param {String} codec The codec to use when available.
+   * @return {String} updatedSdpString The modified local RTCSessionDescription.sdp
+   *   with the selected codec when available.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  configureCodec: function (sdpString, sdpMediaType, codec) {
+    var sdpLines = sdpString.split('\r\n');
+    var codecFound = false;
+    var codecPayload = null;
+
+    // Loop to find the codec payload codec line
+    for (var i = 0; i < sdpLines.length; i += 1) {
+      var rtpmapLine = sdpLines[i];
+
+      if (rtpmapLine.indexOf('a=rtpmap:') === 0) {
+        if (rtpmapLine.indexOf(codec) > 0) {
+          codecFound = true;
+          codecPayload = rtpmapLine.split(':')[1].split(' ')[0];
+        }
+      }
+    }
+
+    if (codecFound) {
+      // Loop out for our line
+      for (var j = 0; j < sdpLines.length; j += 1) {
+        var payloadsLine = sdpLines[j];
+
+        if (payloadsLine.indexOf('m=' + sdpMediaType) === 0) {
+          var parts = payloadsLine.split(' ');
+          var payloads = payloadsLine.split(' ');
+
+          // Remove unwanted parts of the lines
+          //   Example line: m=video 59533 UDP/TLS/RTP/SAVPF [100 101 116 117 96 97 98] <-- Codecs selection order here
+          payloads.splice(0, 3);
+
+          var selectedPayloadIndex = payloads.indexOf(codecPayload);
+
+          // Check if the payload is in the selected order.
+          //   Just add it as the first if it is not in the selected order
+          if (selectedPayloadIndex === -1) {
+            payloads.splice(0, 0, codecPayload);
+
+          // Move the current first selected codec to our preferred codec index
+          //   Replace the current first selected codec with our preferred codec
+          } else {
+            var first = payloads[0];
+            payloads[0] = codecPayload;
+            payloads[selectedPayloadIndex] = first;
+          }
+
+          sdpLines[j] = parts[0] + ' ' + parts[1] + ' ' + parts[2] + ' ' + payloads.join(' ');
+          break;
+        }
+      }
+    }
+
+    return sdpLines.join('\r\n');
+  },
+
+  /**
+   * Removes candidates that are not "relay" type in the remote RTCSessionDescription.
+   * @method removeNonRelayCandidates
+   * @param {String} sdpString The remote RTCSessionDescription.sdp.
+   * @return {String} updatedSdpString The modification remote RTCSessionDescription.sdp
+   *   that has candidates that are not "relay" type removed.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  removeNonRelayCandidates: function (sdpString) {
+    var newSdpString = '';
+
+    newSdpString = sdpString.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
+
+    // Return modified RTCSessionDescription.sdp
+    return newSdpString;
+  },
+
+  /**
+   * Handles the connection issues with Chrome 50 browsers with Safari / IE browsers.
+   * @method configureChrome50OfferToPluginBrowsers
+   * @param {String} sdpString The local offer RTCSessionDescription.sdp.
+   * @return {String} updatedSdpString The modified local offer RTCSessionDescription.sdp
+   *   with connection interopability from Chrome 50 with Safari / IE browsers.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  configureChrome50OfferToPluginBrowsers: function (sdpString) {
+    var newSdpString = '';
+
+    // See https://bugs.chromium.org/p/webrtc/issues/detail?id=3962 for the fix
+    //   and https://github.com/Temasys/AdapterJS/issues/151 from a guy in AdapterJS who raised the patch
+
+    newSdpString = sdpString.replace(/a=rtpmap:\d+ rtx\/\d+\r\n/g, '');
+    newSdpString = newSdpString.replace(/a=fmtp:\d+ apt=\d+\r\n/g, '');
+
+    // Return modified RTCSessionDescription.sdp
+    return newSdpString;
+  },
+
+  /**
+   * Detects if ICE restart has been made by comparing the different local RTCSessionDescription provided.
+   * @method detectICERestart
+   * @param {RTCSessionDescription} currentSdp The current local RTCSessionDescription.
+   * @param {RTCSessionDescription} newSdp The newly generated local RTCSessionDescription.
+   * @return {Boolean} The returned flag that indicates if ICE restart has been made.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  detectICERestart: function (currentSdp, newSdp) {
+    if (!(!!currentSdp && !!currentSdp.sdp)) {
+      return false;
+    }
+
+    /**
+     * Function that parses the ICE credentials
+     */
+    var parseICECredsFn = function (sdpString) {
+      var sdpLines = sdpString.split('\r\n'),
+          username = '',
+          password = '';
+
+      for (var i = 0; i < sdpLines.length; i++) {
+        // Parse for ICE username
+        if (sdpLines[i].indexOf('a=ice-ufrag:') === 0) {
+          username = sdpLines[i].split(':')[1];
+
+        // Parse for ICE password
+        } else if (sdpLines[i].indexOf('a=ice-pwd:') === 0) {
+          password = sdpLines[i].split(':')[1];
+        }
+      }
+
+      return {
+        username: username,
+        password: password
+      };
+    };
+
+    var currentSdpCreds = parseICECredsFn(currentSdp.sdp),
+        newSdpCreds = parseICECredsFn(newSdp.sdp);
+
+    return currentSdpCreds.username !== newSdpCreds.username ||
+      currentSdpCreds.password !== newSdpCreds.password;
+  }
+};
 var _LOG_KEY = 'SkylinkJS';
 
 
@@ -18764,26 +21208,6 @@ Skylink.prototype._throttle = function(func, wait){
       self._timestamp.func = now;
   };
 };
-Skylink.prototype.SOCKET_ERROR = {
-  CONNECTION_FAILED: 0,
-  RECONNECTION_FAILED: -1,
-  CONNECTION_ABORTED: -2,
-  RECONNECTION_ABORTED: -3,
-  RECONNECTION_ATTEMPT: -4
-};
-
-/**
- * Stores the queued socket messages to sent to the platform signaling to
- *   prevent messages from being dropped due to messages being sent in
- *   less than a second interval.
- * @attribute _socketMessageQueue
- * @type Array
- * @private
- * @required
- * @component Socket
- * @for Skylink
- * @since 0.5.8
- */
 Skylink.prototype._socketMessageQueue = [];
 
 /**
@@ -18821,56 +21245,6 @@ Skylink.prototype._socketMessageTimeout = null;
 Skylink.prototype._socketPorts = {
   'http:': [80, 3000],
   'https:': [443, 3443]
-};
-
-/**
- * These are the list of fallback attempt types that Skylink would attempt with.
- * @attribute SOCKET_FALLBACK
- * @type JSON
- * @param {String} NON_FALLBACK <small>Value <code>"nonfallback"</code> | Protocol <code>"http:"</code>,
- * <code>"https:"</code> | Transports <code>"WebSocket"</code>, <code>"Polling"</code></small>
- *   The current socket connection attempt
- *   is using the first selected socket connection port for
- *   the current selected transport <code>"Polling"</code> or <code>"WebSocket"</code>.
- * @param {String} FALLBACK_PORT <small>Value <code>"fallbackPortNonSSL"</code> | Protocol <code>"http:"</code>
- *  | Transports <code>"WebSocket"</code></small>
- *   The current socket connection reattempt
- *   is using the next selected socket connection port for
- *   <code>HTTP</code> protocol connection with the current selected transport
- *   <code>"Polling"</code> or <code>"WebSocket"</code>.
- * @param {String} FALLBACK_PORT_SSL <small>Value <code>"fallbackPortSSL"</code> | Protocol <code>"https:"</code>
- *  | Transports <code>"WebSocket"</code></small>
- *   The current socket connection reattempt
- *   is using the next selected socket connection port for
- *   <code>HTTPS</code> protocol connection with the current selected transport
- *   <code>"Polling"</code> or <code>"WebSocket"</code>.
- * @param {String} LONG_POLLING <small>Value <code>"fallbackLongPollingNonSSL"</code> | Protocol <code>"http:"</code>
- *  | Transports <code>"Polling"</code></small>
- *   The current socket connection reattempt
- *   is using the next selected socket connection port for
- *   <code>HTTP</code> protocol connection with <code>"Polling"</code> after
- *   many attempts of <code>"WebSocket"</code> has failed.
- *   This occurs only for socket connection that is originally using
- *   <code>"WebSocket"</code> transports.
- * @param {String} LONG_POLLING_SSL <small>Value <code>"fallbackLongPollingSSL"</code> | Protocol <code>"https:"</code>
- *  | Transports <code>"Polling"</code></small>
- *   The current socket connection reattempt
- *   is using the next selected socket connection port for
- *   <code>HTTPS</code> protocol connection with <code>"Polling"</code> after
- *   many attempts of <code>"WebSocket"</code> has failed.
- *   This occurs only for socket connection that is originally using
- *   <code>"WebSocket"</code> transports.
- * @readOnly
- * @component Socket
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype.SOCKET_FALLBACK = {
-  NON_FALLBACK: 'nonfallback',
-  FALLBACK_PORT: 'fallbackPortNonSSL',
-  FALLBACK_SSL_PORT: 'fallbackPortSSL',
-  LONG_POLLING: 'fallbackLongPollingNonSSL',
-  LONG_POLLING_SSL: 'fallbackLongPollingSSL'
 };
 
 /**
@@ -19328,83 +21702,6 @@ Skylink.prototype._closeChannel = function() {
   this._channelOpen = false;
   this._trigger('channelClose');
 };
-Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
-
-/**
- * The list of Protocol types that is used for messaging using
- *   the platform signaling socket connection.
- * @attribute _SIG_MESSAGE_TYPE
- * @type JSON
- * @param {String} JOIN_ROOM Protocol sent from Skylink to platform signaling to let
- *    self join the room. Join room Step 1.
- * @param {String} IN_ROOM Protocol received from platform signaling to inform
- *    Skylink that self has joined the room. Join room Step 2 (Completed).
- * @param {String} ENTER Protocol Skylink sends to all Peer peers
- *    in the room to start handshake connection. Handshake connection Step 1.
- * @param {String} WELCOME Protocol received to Peer as a response
- *    to self <code>ENTER</code> message. This is sent as a response to
- *    Peer <code>ENTER</code> message. Handshake connection Step 2.
- * @param {String} OFFER Protocol sent to Peer as a response
- *    to the <code>WELCOME</code> message received after generating the offer session description with
- *    <code>RTCPeerConnection.createOffer()</code>. This is received as a response from
- *    Peer after sending <code>WELCOME</code> message and requires
- *    setting into the Peer connection before sending the
- *    <code>ANSWER</code> response. Handshake connection Step 3.
- * @param {String} ANSWER Protocol received from Peer as a response
- *    to self <code>OFFER</code> message offer session description and requires setting
- *    into the Peer connection. This is sent to Peer as a response
- *    to the <code>OFFER</code> message received after setting the received <code>OFFER</code>
- *    message and generating the answer session description with <code>RTCPeerConnection.createAnswer()</code>.
- *    Handshake connection Step 4 (Completed).
- * @param {String} CANDIDATE Protocol received from Peer when connection
- *    ICE candidate has been generated and requires self to add to the Peer connection.
- * @param {String} BYE Protocol received from platform signaling when a Peer has left
- *    the room.
- * @param {String} REDIRECT Protocol received from platform signaling when self is kicked out from
- *    the currently joined room.
- * @param {String} UPDATE_USER Protocol received when a Peer information has been
- *    updated. The message object should contain the updated peer information.
- *    This is broadcasted by self when self peer information is updated.
- * @param {String} ROOM_LOCK Protocol received when the current joined room lock status have
- *    been updated. The message object should contain the updated room lock status.
- *    This is broadcasted by self when self updates the room lock status.
- * @param {String} MUTE_VIDEO Protocol received when a Peer Stream video media streaming
- *    muted status have been updated. The message object should contain the updated Stream video media
- *    streaming muted status. This is broadcasted by self when self Stream video media streaming
- *    muted status have been updated.
- * @param {String} MUTE_AUDIO Protocol received when a Peer connection Stream audio media streaming
- *    muted status have been updated. The message object should contain the updated Stream audio media
- *    streaming muted status. This is broadcasted by self when self Stream audio media streaming
- *    muted status have been updated.
- * @param {String} PUBLIC_MESSAGE Protocol received when a Peer broadcasts a message
- *    object to all Peer peers via the platform signaling socket connection.
- *    This is broadcasted by self when self sends the message object.
- * @param {String} PRIVATE_MESSAGE Protocol received when a Peer sends a message
- *    object targeted to several Peer peers via the platform signaling socket connection.
- *    This is sent by self when self sends the message object.
- * @param {String} RESTART Protocol received when a Peer connection requires a reconnection.
- *    At this point, the Peer connection have to recreate the <code>RTCPeerConnection</code>
- *    object again. This is sent by self when self initiates the reconnection.
- * @param {String} STREAM Protocol received when a Peer connection Stream status have
- *    changed.
- * @param {String} GET_PEERS Protocol for privileged self to get the list of Peer peers
- *    under the same parent Application Key.
- * @param {String} PEER_LIST Protocol to retrieve a list of peers under the same parent.
- * @param {String} INTRODUCE Protocol sent to the platform signaling to
- *    introduce Peer peers to each other.
- * @param {String} INTRODUCE_ERROR Protocol received when Peer peers introduction failed.
- * @param {String} APPROACH Protocol to indicate that a Peer has been introduced.
- *    At this point, self would send an <code>ENTER</code> to introduced Peer
- *    to start the handshake connection.
- * @param {String} GROUP Protocol received that bundles messages together when socket messages are
- *    sent less than 1 second interval apart from the previous sent socket message. This would
- *    prevent receiving <code>REDIRECT</code> from the platform signaling.
- * @readOnly
- * @private
- * @component Message
- * @for Skylink
- * @since 0.5.6
- */
 Skylink.prototype._SIG_MESSAGE_TYPE = {
   JOIN_ROOM: 'joinRoom',
   IN_ROOM: 'inRoom',
@@ -19672,7 +21969,9 @@ Skylink.prototype._approachEventHandler = function(message){
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     receiveOnly: self._receiveOnly,
-    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+    enableIceTrickle: self._enableIceTrickle,
+    enableDataChannel: self._enableDataChannel,
+    enableIceRestart: self._enableIceRestart,
     target: message.target
   });
 };
@@ -19730,14 +22029,15 @@ Skylink.prototype._redirectHandler = function(message) {
  * @since 0.2.0
  */
 Skylink.prototype._updateUserEventHandler = function(message) {
-  var targetMid = message.mid;
-  log.log([targetMid, null, message.type, 'Peer updated userData:'], message.userData);
-  if (this._peerInformations[targetMid]) {
-    this._peerInformations[targetMid].userData = message.userData || {};
-    this._trigger('peerUpdated', targetMid,
-      this.getPeerInfo(targetMid), false);
-  } else {
-    log.log([targetMid, null, message.type, 'Peer does not have any user information']);
+  var self = this;
+  var peerId = message.mid;
+
+  if (self._peers[peerId]) {
+    self._peers[peerId].update({
+      userInfo: {
+        userData: message.userData
+      }
+    });
   }
 };
 
@@ -19780,14 +22080,22 @@ Skylink.prototype._roomLockEventHandler = function(message) {
  * @since 0.2.0
  */
 Skylink.prototype._muteAudioEventHandler = function(message) {
-  var targetMid = message.mid;
-  log.log([targetMid, null, message.type, 'Peer\'s audio muted:'], message.muted);
-  if (this._peerInformations[targetMid]) {
-    this._peerInformations[targetMid].mediaStatus.audioMuted = message.muted;
-    this._trigger('peerUpdated', targetMid,
-      this.getPeerInfo(targetMid), false);
-  } else {
-    log.log([targetMid, message.type, 'Peer does not have any user information']);
+  var self = this;
+  var peerId = message.mid;
+
+  if (self._peers[peerId]) {
+    var mediaStatus = (self._peers[peerId].getInfo() || {}).mediaStatus || {
+      audioMuted: true,
+      videoMuted: true
+    };
+
+    mediaStatus.audioMuted = message.muted === true;
+
+    self._peers[peerId].update({
+      userInfo: {
+        mediaStatus: mediaStatus
+      }
+    });
   }
 };
 
@@ -19808,14 +22116,22 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
  * @since 0.2.0
  */
 Skylink.prototype._muteVideoEventHandler = function(message) {
-  var targetMid = message.mid;
-  log.log([targetMid, null, message.type, 'Peer\'s video muted:'], message.muted);
-  if (this._peerInformations[targetMid]) {
-    this._peerInformations[targetMid].mediaStatus.videoMuted = message.muted;
-    this._trigger('peerUpdated', targetMid,
-      this.getPeerInfo(targetMid), false);
-  } else {
-    log.log([targetMid, null, message.type, 'Peer does not have any user information']);
+  var self = this;
+  var peerId = message.mid;
+
+  if (self._peers[peerId]) {
+    var mediaStatus = (self._peers[peerId].getInfo() || {}).mediaStatus || {
+      audioMuted: true,
+      videoMuted: true
+    };
+
+    mediaStatus.videoMuted = message.muted === true;
+
+    self._peers[peerId].update({
+      userInfo: {
+        mediaStatus: mediaStatus
+      }
+    });
   }
 };
 
@@ -19882,15 +22198,18 @@ Skylink.prototype._streamEventHandler = function(message) {
  * @since 0.1.0
  */
 Skylink.prototype._byeHandler = function(message) {
-  var targetMid = message.mid;
-  var selfId = (this._user || {}).sid;
+  var peerId = message.mid;
 
+  this._destroyPeer(peerId);
+
+  /*
+  var selfId = (this._user || {}).sid;
   if (selfId !== targetMid){
     log.log([targetMid, null, message.type, 'Peer has left the room']);
     this._removePeer(targetMid);
   } else {
     log.log([targetMid, null, message.type, 'Self has left the room']);
-  }
+  }*/
 };
 
 /**
@@ -19987,6 +22306,11 @@ Skylink.prototype._inRoomHandler = function(message) {
     self._peerPriorityWeight = message.tieBreaker;
   }
 
+  // Append a lower weight for Firefox because setting as answerer always causes less problems with other agents
+  if (window.webrtcDetectedBrowser === 'firefox') {
+    self._peerPriorityWeight -= 100000000;
+  }
+
   if (self._mediaScreen && self._mediaScreen !== null) {
     self._trigger('incomingStream', self._user.sid, self._mediaScreen, true, self.getPeerInfo());
   } else if (self._mediaStream && self._mediaStream !== null) {
@@ -20006,7 +22330,9 @@ Skylink.prototype._inRoomHandler = function(message) {
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     receiveOnly: self._receiveOnly,
-    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+    enableIceTrickle: self._enableIceTrickle,
+    enableDataChannel: self._enableDataChannel,
+    enableIceRestart: self._enableIceRestart
   });
 };
 
@@ -20091,61 +22417,45 @@ Skylink.prototype._inRoomHandler = function(message) {
  */
 Skylink.prototype._enterHandler = function(message) {
   var self = this;
-  var targetMid = message.mid;
-  log.log([targetMid, null, message.type, 'Incoming peer have initiated ' +
-    'handshake. Peer\'s information:'], message.userInfo);
-  // need to check entered user is new or not.
-  // peerInformations because it takes a sequence before creating the
-  // peerconnection object. peerInformations are stored at the start of the
-  // handshake, so user knows if there is a peer already.
-  if (self._peerInformations[targetMid]) {
-    // NOTE ALEX: and if we already have a connection when the peer enter,
-    // what should we do? what are the possible use case?
-    log.log([targetMid, null, message.type, 'Ignoring message as peer is already added']);
-    return;
-  }
-  // add peer
-  self._addPeer(targetMid, {
-    agent: message.agent,
-    version: message.version,
-    os: message.os
-  }, false, false, message.receiveOnly, message.sessionType === 'screensharing');
-  self._peerInformations[targetMid] = message.userInfo || {};
-  self._peerInformations[targetMid].agent = {
-    name: message.agent,
-    version: message.version,
-    os: message.os || ''
-  };
-  if (targetMid !== 'MCU') {
-    self._trigger('peerJoined', targetMid, message.userInfo, false);
+  var peerId = message.mid;
+  var receiveOnly = false;
 
-  } else {
-    log.info([targetMid, 'RTCPeerConnection', 'MCU', 'MCU feature has been enabled'], message);
-    log.log([targetMid, null, message.type, 'MCU has joined'], message.userInfo);
-    this._hasMCU = true;
-    this._trigger('serverPeerJoined', targetMid, this.SERVER_PEER_TYPE.MCU);
+  if (!self._peers[peerId]) {
+    log.debug([peerId, 'Peer', null, 'Session has started with peer']);
+
+    self._createPeer(peerId, message);
+
+    // For MCU case
+    if (peerId === 'MCU') {
+      self._hasMCU = true;
+
+      log.info('MCU has joined the room');
+    }
+
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, peerId);
   }
 
-  self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
+  // Configure the receiveOnly flag
+  if (peerId !== 'MCU' && self._hasMCU) {
+    /* NOTE: Is the receiveOnly logic correct ? */
+    receiveOnly = true;
+  }
 
   self._sendChannelMessage({
     type: self._SIG_MESSAGE_TYPE.WELCOME,
     mid: self._user.sid,
     rid: self._room.id,
-    receiveOnly: self._peerConnections[targetMid] ?
-    	!!self._peerConnections[targetMid].receiveOnly : false,
+    receiveOnly: receiveOnly,
     enableIceTrickle: self._enableIceTrickle,
     enableDataChannel: self._enableDataChannel,
+    enableIceRestart: self._enableIceRestart,
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
-    target: targetMid,
-    weight: self._peerPriorityWeight,
-    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+    target: peerId,
+    weight: self._peerPriorityWeight
   });
-
-  self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
 };
 
 /**
@@ -20247,109 +22557,50 @@ Skylink.prototype._enterHandler = function(message) {
  */
 Skylink.prototype._restartHandler = function(message){
   var self = this;
-  var targetMid = message.mid;
+  var peerId = message.mid;
+  var receiveOnly = false;
 
-  if (!self._peerInformations[targetMid]) {
-    log.error([targetMid, null, null, 'Peer does not have an existing ' +
-      'session. Ignoring restart process.']);
+  if (!self._peers[peerId]) {
+    log.warn([peerId, 'Peer', null, 'Dropping restart request as there is no session with peer']);
     return;
   }
 
-  // NOTE: for now we ignore, but we should take-note to implement in the near future
+  self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), false);
+
+  // Update with latest Peer streaming information during the restart
+  self._peers[peerId].update(message);
+
   if (self._hasMCU) {
-    self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false);
+    log.debug([peerId, 'Peer', null, 'Dropping restart request as MCU is present']);
     return;
   }
 
-  self.lastRestart = message.lastRestart || Date.now() || function() { return +new Date(); };
-
-  if (!self._peerConnections[targetMid]) {
-    log.error([targetMid, null, null, 'Peer does not have an existing ' +
-      'connection. Unable to restart']);
-    return;
-  }
-
-  // mcu has re-joined
-  // NOTE: logic trip since _hasMCU flags are ignored, this could result in failure perhaps?
-  if (targetMid === 'MCU') {
-    log.log([targetMid, null, message.type, 'MCU has restarted its connection']);
-    self._hasMCU = true;
-  }
-
-  // Uncomment because we do not need this
-  //self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-
-  message.agent = (!message.agent) ? 'chrome' : message.agent;
-  self._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
-    message.enableIceTrickle : self._enableIceTrickle;
-  self._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
-    message.enableDataChannel : self._enableDataChannel;
-
-  // re-add information
-  self._peerInformations[targetMid] = message.userInfo || {};
-  self._peerInformations[targetMid].agent = {
-    name: message.agent,
-    version: message.version,
-    os: message.os || ''
-  };
-
-  var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
-
-  // This variable is not used
-  //var peerConnectionStateStable = false;
-
-  log.info([targetMid, 'RTCPeerConnection', null, 'Received restart request from peer'], message);
-  // we are no longer adding any peer
-  /*self._addPeer(targetMid, {
-    agent: message.agent,
-    version: message.version,
-    os: message.os
-  }, true, true, message.receiveOnly, message.sessionType === 'screensharing');*/
-
-  //Only consider peer's restart weight if self also sent a restart which cause a potential conflict
-  //Otherwise go ahead with peer's restart
-  var beOfferer = false;
-
-  // Works in this matter.. no idea why.
-  if (window.webrtcDetectedBrowser !== 'firefox' && message.agent === 'firefox') {
-    log.debug([targetMid, 'RTCPeerConnection', null, 'Restarting as offerer as peer cannot be offerer'], agent);
-    beOfferer = true;
-  } else {
-    // Checks if weight is lesser than peer's weight
-    // If lesser, always do the restart mechanism
-    if (self._peerPriorityWeight < message.weight) {
-      beOfferer = true;
-    }
-  }
-
-  if (beOfferer) {
-    log.debug([targetMid, 'RTCPeerConnection', null, 'Restarting negotiation'], agent);
-    self._doOffer(targetMid, {
-      agent: agent.name,
-      version: agent.version,
-      os: agent.os
-    }, true);
+  // If User's weight is higher than Peer's or that it is "MCU"
+  if (self._peerPriorityWeight > message.weight) {
+    self._peers[peerId].handshakeOffer();
 
   } else {
-    log.debug([targetMid, 'RTCPeerConnection', null, 'Waiting for peer to start re-negotiation'], agent);
+    log.debug([peerId, 'Peer', null, 'Peer\'s priority weight is higher than User\'s, relying on User to initiate handshaking']);
+
     self._sendChannelMessage({
-      type: self._SIG_MESSAGE_TYPE.WELCOME,
+      type: self._SIG_MESSAGE_TYPE.RESTART,
       mid: self._user.sid,
       rid: self._room.id,
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion,
       os: window.navigator.platform,
       userInfo: self.getPeerInfo(),
-      target: targetMid,
-      weight: -1,
-      sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+      target: peerId, //'MCU',
+      weight: self._peerPriorityWeight,
+      receiveOnly: self._hasMCU && peerId !== 'MCU',
+      enableIceTrickle: self._enableIceTrickle,
+      enableDataChannel: self._enableDataChannel,
+      enableIceRestart: self._enableIceRestart
     });
   }
 
-  self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false);
-
-  // following the previous logic to do checker always
-  self._startPeerConnectionHealthCheck(targetMid, false);
+  // Monitor the Peer connection
+  self._peers[peerId].monitorConnection();
 };
 
 /**
@@ -20438,116 +22689,52 @@ Skylink.prototype._restartHandler = function(message){
  * @since 0.5.4
  */
 Skylink.prototype._welcomeHandler = function(message) {
-  var targetMid = message.mid;
-  var restartConn = false;
-  var beOfferer = this._peerPriorityWeight < message.weight;
+  var self = this;
+  var peerId = message.mid;
+  var receiveOnly = false;
 
-  log.log([targetMid, null, message.type, 'Received peer\'s response ' +
-    'to handshake initiation. Peer\'s information:'], message.userInfo);
+  if (!self._peers[peerId]) {
+    log.debug([peerId, 'Peer', null, 'Session has started with peer']);
 
-  if (this._peerConnections[targetMid]) {
-    if (!this._peerConnections[targetMid].setOffer || message.weight < 0) {
-      if (message.weight < 0) {
-        log.log([targetMid, null, message.type, 'Peer\'s weight is lower ' +
-          'than 0. Proceeding with offer'], message.weight);
-        restartConn = true;
-        beOfferer = true;
+    self._createPeer(peerId, message);
 
-        // -2: hard restart of connection
-        if (message.weight === -2) {
-          this._restartHandler(message);
-          return;
-        }
+    // For MCU case
+    if (peerId === 'MCU') {
+      self._hasMCU = true;
 
-      } else if (beOfferer) {
-        log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
-          'is higher than user\'s. Proceeding with offer'
-          ], this._peerPriorityWeight + ' < ' + message.weight);
-        restartConn = true;
-
-      } else {
-        log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
-          'is lesser than user\'s. Ignoring message'
-          ], this._peerPriorityWeight + ' > ' + message.weight);
-        return;
-      }
-    } else {
-      log.warn([targetMid, null, message.type,
-        'Ignoring message as peer is already added']);
-      return;
+      log.info('MCU has joined the room');
     }
+
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, peerId);
   }
 
-  message.agent = (!message.agent) ? 'chrome' : message.agent;
-  this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
-    message.enableIceTrickle : this._enableIceTrickle;
-  this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
-    message.enableDataChannel : this._enableDataChannel;
+  // Configure the receiveOnly flag
+  if (peerId !== 'MCU' && self._hasMCU) {
+    /* NOTE: Is the receiveOnly logic correct ? */
+    receiveOnly = true;
+  }
 
-  // mcu has joined
-  if (targetMid === 'MCU') {
-    log.info([targetMid, 'RTCPeerConnection', 'MCU', 'MCU feature is currently enabled'],
-      message);
-    log.log([targetMid, null, message.type, 'MCU has ' +
-      ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
-    this._hasMCU = true;
-    this._trigger('serverPeerJoined', targetMid, this.SERVER_PEER_TYPE.MCU);
-    log.log([targetMid, null, message.type, 'Always setting as offerer because peer is MCU']);
-    beOfferer = true;
+  // If User's weight is higher than Peer's or that it is "MCU"
+  if (self._peerPriorityWeight > message.weight || peerId === 'MCU') {
+    self._peers[peerId].handshakeOffer();
+
   } else {
-    // if it is not MCU and P2P make sure that beOfferer is false for firefox -> chrome/opera/ie/safari
-    if (window.webrtcDetectedBrowser === 'firefox' && message.agent !== 'firefox') {
-      beOfferer = false;
-    }
-  }
+    log.debug([peerId, 'Peer', null, 'Peer\'s priority weight is higher than User\'s, relying on User to initiate handshaking']);
 
-  if (this._hasMCU) {
-    log.log([targetMid, null, message.type, 'Always setting as offerer because MCU is present']);
-    beOfferer = true;
-  }
-
-  if (!this._peerInformations[targetMid]) {
-    this._peerInformations[targetMid] = message.userInfo || {};
-    this._peerInformations[targetMid].agent = {
-      name: message.agent,
-      version: message.version,
-      os: message.os || ''
-    };
-    // disable mcu for incoming peer sent by MCU
-    /*if (message.agent === 'MCU') {
-    	this._enableDataChannel = false;
-
-    }*/
-    // user is not mcu
-    if (targetMid !== 'MCU') {
-      this._trigger('peerJoined', targetMid, message.userInfo, false);
-    }
-
-    this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-  }
-
-  log.debug([targetMid, 'RTCPeerConnection', null, 'Should peer start the connection'], beOfferer);
-
-  this._addPeer(targetMid, {
-    agent: message.agent,
-		version: message.version,
-		os: message.os
-  }, beOfferer, restartConn, message.receiveOnly, message.sessionType === 'screensharing');
-
-  if (!beOfferer) {
-    log.debug([targetMid, 'RTCPeerConnection', null, 'Peer has to start the connection. Sending restart message'], beOfferer);
-
-    this._sendChannelMessage({
-      type: this._SIG_MESSAGE_TYPE.WELCOME,
-      mid: this._user.sid,
-      rid: this._room.id,
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.WELCOME,
+      mid: self._user.sid,
+      rid: self._room.id,
+      receiveOnly: receiveOnly,
+      enableIceTrickle: self._enableIceTrickle,
+      enableDataChannel: self._enableDataChannel,
+      enableIceRestart: self._enableIceRestart,
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion,
       os: window.navigator.platform,
-      userInfo: this.getPeerInfo(),
-      target: targetMid,
-      weight: -1,
-      sessionType: !!this._mediaScreen ? 'screensharing' : 'stream'
+      userInfo: self.getPeerInfo(),
+      target: peerId,
+      weight: self._peerPriorityWeight
     });
   }
 };
@@ -20570,50 +22757,19 @@ Skylink.prototype._welcomeHandler = function(message) {
  */
 Skylink.prototype._offerHandler = function(message) {
   var self = this;
-  var targetMid = message.mid;
-  var pc = self._peerConnections[targetMid];
-
-  if (!pc) {
-    log.error([targetMid, null, message.type, 'Peer connection object ' +
-      'not found. Unable to setRemoteDescription for offer']);
-    return;
-  }
-
-  /*if (pc.localDescription ? !!pc.localDescription.sdp : false) {
-    log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
-      pc.localDescription);
-    return;
-  }*/
-
-  log.log([targetMid, null, message.type, 'Received offer from peer. ' +
-    'Session description:'], message.sdp);
-  var offer = new window.RTCSessionDescription({
-    type: message.type,
+  var peerId = message.mid;
+  var offer = new RTCSessionDescription ({
+    type: 'offer',
     sdp: message.sdp
   });
-  log.log([targetMid, 'RTCSessionDescription', message.type,
-    'Session description object created'], offer);
 
-  // This is always the initial state. or even after negotiation is successful
-  if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
-    log.warn([targetMid, null, message.type, 'Peer connection state is not in ' +
-      '"stable" state for re-negotiation. Dropping message.'], {
-        signalingState: pc.signalingState,
-        isRestart: !!message.resend
-      });
+  if (!self._peers[peerId]) {
+    log.warn([peerId, 'Peer', 'RTCSessionDescription', 'Dropping remote offer as ' +
+      'connection object is missing ->'], offer);
     return;
   }
 
-  pc.setRemoteDescription(offer, function() {
-    log.debug([targetMid, 'RTCSessionDescription', message.type, 'Remote description set']);
-    pc.setOffer = 'remote';
-    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
-    self._addIceCandidateFromQueue(targetMid);
-    self._doAnswer(targetMid);
-  }, function(error) {
-    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-    log.error([targetMid, null, message.type, 'Failed setting remote description:'], error);
-  });
+  self._peers[peerId].handshakeAnswer(offer);
 };
 
 
@@ -20640,78 +22796,21 @@ Skylink.prototype._offerHandler = function(message) {
  * @since 0.5.1
  */
 Skylink.prototype._candidateHandler = function(message) {
-  var targetMid = message.mid;
-  var pc = this._peerConnections[targetMid];
-  log.log([targetMid, null, message.type, 'Received candidate from peer. Candidate config:'], {
-    sdp: message.sdp,
-    target: message.target,
+  var self = this;
+  var peerId = message.mid;
+  var candidate = new RTCIceCandidate ({
+    sdpMLineIndex: message.label,
     candidate: message.candidate,
-    label: message.label
-  });
-  // create ice candidate object
-  var messageCan = message.candidate.split(' ');
-  var canType = messageCan[7];
-  log.log([targetMid, null, message.type, 'Candidate type:'], canType);
-  // if (canType !== 'relay' && canType !== 'srflx') {
-  // trace('Skipping non relay and non srflx candidates.');
-  var index = message.label;
-  var candidate = new window.RTCIceCandidate({
-    sdpMLineIndex: index,
-    candidate: message.candidate,
-    //id: message.id,
     sdpMid: message.id
-    //label: index
   });
-  if (pc) {
-  	if (pc.signalingState === this.PEER_CONNECTION_STATE.CLOSED) {
-  		log.warn([targetMid, null, message.type, 'Peer connection state ' +
-  			'is closed. Not adding candidate']);
-	    return;
-  	}
-    /*if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
-      log.debug([targetMid, null, null,
-        'Received but not adding Candidate as we are already connected to this peer']);
-      return;
-    }*/
-    // set queue before ice candidate cannot be added before setRemoteDescription.
-    // this will cause a black screen of media stream
-    if ((pc.setOffer === 'local' && pc.setAnswer === 'remote') ||
-      (pc.setAnswer === 'local' && pc.setOffer === 'remote')) {
-      pc.addIceCandidate(candidate, this._onAddIceCandidateSuccess, this._onAddIceCandidateFailure);
-      // NOTE ALEX: not implemented in chrome yet, need to wait
-      // function () { trace('ICE  -  addIceCandidate Succesfull. '); },
-      // function (error) { trace('ICE  - AddIceCandidate Failed: ' + error); }
-      //);
-      log.debug([targetMid, 'RTCIceCandidate', message.type,
-        'Added candidate'], candidate);
-    } else {
-      this._addIceCandidateToQueue(targetMid, candidate);
-    }
-  } else {
-    // Added ice candidate to queue because it may be received before sending the offer
-    log.debug([targetMid, 'RTCIceCandidate', message.type,
-      'Not adding candidate as peer connection not present']);
-    // NOTE ALEX: if the offer was slow, this can happen
-    // we might keep a buffer of candidates to replay after receiving an offer.
-    this._addIceCandidateToQueue(targetMid, candidate);
+
+  if (!self._peers[peerId]) {
+    log.warn([peerId, 'Peer', 'RTCIceCandidate', 'Dropping remote candidate as ' +
+      'connection object is missing ->'], candidate);
+    return;
   }
 
-  if (!this._addedCandidates[targetMid]) {
-    this._addedCandidates[targetMid] = {
-      relay: [],
-      host: [],
-      srflx: []
-    };
-  }
-
-  // shouldnt happen but just incase
-  if (!this._addedCandidates[targetMid][canType]) {
-    this._addedCandidates[targetMid][canType] = [];
-  }
-
-  this._addedCandidates[targetMid][canType].push('remote:' + messageCan[4] +
-    (messageCan[5] !== '0' ? ':' + messageCan[5] : '') +
-    (messageCan[2] ? '?transport=' + messageCan[2].toLowerCase() : ''));
+  self._peers[peerId].addCandidate(candidate);
 };
 
 /**
@@ -20732,68 +22831,19 @@ Skylink.prototype._candidateHandler = function(message) {
  */
 Skylink.prototype._answerHandler = function(message) {
   var self = this;
-  var targetMid = message.mid;
-
-  log.log([targetMid, null, message.type,
-    'Received answer from peer. Session description:'], message.sdp);
-
-  var pc = self._peerConnections[targetMid];
-
-  if (!pc) {
-    log.error([targetMid, null, message.type, 'Peer connection object ' +
-      'not found. Unable to setRemoteDescription for answer']);
-    return;
-  }
-
-  var answer = new window.RTCSessionDescription({
-    type: message.type,
+  var peerId = message.mid;
+  var answer = new RTCSessionDescription ({
+    type: 'answer',
     sdp: message.sdp
   });
 
-  log.log([targetMid, 'RTCSessionDescription', message.type,
-    'Session description object created'], answer);
-
-  /*if (pc.remoteDescription ? !!pc.remoteDescription.sdp : false) {
-    log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
-      pc.remoteDescription);
+  if (!self._peers[peerId]) {
+    log.warn([peerId, 'Peer', 'RTCSessionDescription', 'Dropping remote answer as ' +
+      'connection object is missing ->'], answer);
     return;
   }
 
-  if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
-    log.error([targetMid, null, message.type, 'Unable to set peer connection ' +
-      'at signalingState "stable". Ignoring remote answer'], pc.signalingState);
-    return;
-  }*/
-
-  // if firefox and peer is mcu, replace the sdp to suit mcu needs
-  if (window.webrtcDetectedType === 'moz' && targetMid === 'MCU') {
-    answer.sdp = answer.sdp.replace(/ generation 0/g, '');
-    answer.sdp = answer.sdp.replace(/ udp /g, ' UDP ');
-  }
-
-  // This should be the state after offer is received. or even after negotiation is successful
-  if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
-    log.warn([targetMid, null, message.type, 'Peer connection state is not in ' +
-      '"have-local-offer" state for re-negotiation. Dropping message.'], {
-        signalingState: pc.signalingState,
-        isRestart: !!message.restart
-      });
-    return;
-  }
-
-  pc.setRemoteDescription(answer, function() {
-    log.debug([targetMid, null, message.type, 'Remote description set']);
-    pc.setAnswer = 'remote';
-    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
-    self._addIceCandidateFromQueue(targetMid);
-
-  }, function(error) {
-    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-    log.error([targetMid, null, message.type, 'Failed setting remote description:'], {
-      error: error,
-      state: pc.signalingState
-    });
-  });
+  self._peers[peerId].handshakeComplete(answer);
 };
 
 /**
@@ -20882,49 +22932,6 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
   }, this._user.sid, this.getPeerInfo(), true);
 };
 
-Skylink.prototype.VIDEO_CODEC = {
-  AUTO: 'auto',
-  VP8: 'VP8',
-  H264: 'H264'
-};
-
-/**
- * These are the list of available audio codecs settings that Skylink would use
- *   when streaming audio stream with Peers.
- * - The audio codec would be used if the self and Peer's browser supports the selected codec.
- * - This would default to the browser selected codec. In most cases, option <code>OPUS</code> is
- *   used by default.
- * @attribute AUDIO_CODEC
- * @param {String} AUTO <small><b>DEFAULT</b> | Value <code>"auto"</code></small>
- *   The option to let Skylink use any audio codec selected by the browser generated session description.
- * @param {String} OPUS <small>Value <code>"opus"</code></small>
- *   The option to let Skylink use the [OPUS](https://en.wikipedia.org/wiki/Opus_(audio_format)) codec.<br>
- *   This is the common and mandantory audio codec used.
- * @param {String} ISAC <small>Value <code>"ISAC"</code></small>
- *   The option to let Skylink use the [iSAC](https://en.wikipedia.org/wiki/Internet_Speech_Audio_Codec).<br>
- *   This only works if the browser supports the iSAC video codec.
- * @type JSON
- * @readOnly
- * @component Stream
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype.AUDIO_CODEC = {
-  AUTO: 'auto',
-  ISAC: 'ISAC',
-  OPUS: 'opus'
-};
-
-/**
- * Stores the preferred Peer connection streaming audio codec.
- * @attribute _selectedAudioCodec
- * @type String
- * @default Skylink.AUDIO_CODEC.AUTO
- * @private
- * @component Stream
- * @for Skylink
- * @since 0.5.10
- */
 Skylink.prototype._selectedAudioCodec = 'auto';
 
 /**
@@ -20938,89 +22945,6 @@ Skylink.prototype._selectedAudioCodec = 'auto';
  * @since 0.5.10
  */
 Skylink.prototype._selectedVideoCodec = 'auto';
-
-
-/**
- * These are the list of suggested video resolutions that Skylink should configure
- *   when retrieving self user media video stream.
- * - Setting the resolution may not force set the resolution provided as it
- *   depends on the how the browser handles the resolution.
- * - It's recommended to use video resolution option to maximum <code>FHD</code>, as the other
- *   resolution options may be unrealistic and create performance issues. However, we provide them
- *   to allow developers to test with the browser capability, but do use it at your own risk.
- * - The higher the resolution, the more CPU usage might be used, hence it's recommended to
- *   use the default option <code>VGA</code>.
- * - This follows the
- *   [Wikipedia Graphics display resolution page](https://en.wikipedia.org/wiki/Graphics_display_resolution#Video_Graphics_Array)
- * @param {JSON} QQVGA <small>Value <code>{ width: 160, height: 120 }</code> | Aspect Ratio <code>4:3</code></small>
- *   The option to use QQVGA resolution.
- * @param {JSON} HQVGA <small>Value <code>{ width: 240, height: 160 }</code> | Aspect Ratio <code>3:2</code></small>
- *   The option to use HQVGA resolution.
- * @param {JSON} QVGA <small>Value <code>{ width: 320, height: 240 }</code> | Aspect Ratio <code>4:3</code></small>
- *   The option to use QVGA resolution.
- * @param {JSON} WQVGA <small>Value <code>{ width: 384, height: 240 }</code> | Aspect Ratio <code>16:10</code></small>
- *   The option to use WQVGA resolution.
- * @param {JSON} HVGA <small>Value <code>{ width: 480, height: 320 }</code> | Aspect Ratio <code>3:2</code></small>
- *   The option to use HVGA resolution.
- * @param {JSON} VGA <small><b>DEFAULT</b> | Value <code>{ width: 640, height: 480 }</code> | Aspect Ratio <code>4:3</code></small>
- *   The option to use VGA resolution.
- * @param {JSON} WVGA <small>Value <code>{ width: 768, height: 480 }</code> | Aspect Ratio <code>16:10</code></small>
- *   The option to use WVGA resolution.
- * @param {JSON} FWVGA <small>Value <code>{ width: 854, height: 480 }</code> | Aspect Ratio <code>16:9</code></small>
- *   The option to use FWVGA resolution.
- * @param {JSON} SVGA <small>Value <code>{ width: 800, height: 600 }</code> | Aspect Ratio <code>4:3</code></small>
- *   The option to use SVGA resolution.
- * @param {JSON} DVGA <small>Value <code>{ width: 960, height: 640 }</code> | Aspect Ratio <code>3:2</code></small>
- *   The option to use DVGA resolution.
- * @param {JSON} WSVGA <small>Value <code>{ width: 1024, height: 576 }</code> | Aspect Ratio <code>16:9</code></small>
- *   The option to use WSVGA resolution.
- * @param {JSON} HD <small>Value <code>{ width: 1280, height: 720 }</code> | Aspect Ratio <code>16:9</code></small>
- *   The option to use HD resolution.
- * @param {JSON} HDPLUS <small>Value <code>{ width: 1600, height: 900 }</code> | Aspect Ratio <code>16:9</code></small>
- *   The option to use HDPLUS resolution.
- * @param {JSON} FHD <small>Value <code>{ width: 1920, height: 1080 }</code> | Aspect Ratio <code>16:9</code></small>
- *   The option to use FHD resolution.
- * @param {JSON} QHD <small>Value <code>{ width: 2560, height: 1440 }</code> | Aspect Ratio <code>16:9</code></small>
- *   The option to use QHD resolution.
- * @param {JSON} WQXGAPLUS <small>Value <code>{ width: 3200, height: 1800 }</code> | Aspect Ratio <code>16:9</code></small>
- *   The option to use WQXGAPLUS resolution.
- * @param {JSON} UHD <small>Value <code>{ width: 3840, height: 2160 }</code> | Aspect Ratio <code>16:9</code></small>
- *   The option to use UHD resolution.
- * @param {JSON} UHDPLUS <small>Value <code>{ width: 5120, height: 2880 }</code> | Aspect Ratio <code>16:9</code></small>
- *   The option to use UHDPLUS resolution.
- * @param {JSON} FUHD <small>Value <code>{ width: 7680, height: 4320 }</code> | Aspect Ratio <code>16:9</code></small>
- *   The option to use FUHD resolution.
- * @param {JSON} QUHD <small>Value <code>{ width: 15360, height: 8640 }</code> | Aspect Ratio <code>16:9</code></small>
- *   The option to use QUHD resolution.
- * @attribute VIDEO_RESOLUTION
- * @type JSON
- * @readOnly
- * @component Stream
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype.VIDEO_RESOLUTION = {
-  QQVGA: { width: 160, height: 120, aspectRatio: '4:3' },
-  HQVGA: { width: 240, height: 160, aspectRatio: '3:2' },
-  QVGA: { width: 320, height: 240, aspectRatio: '4:3' },
-  WQVGA: { width: 384, height: 240, aspectRatio: '16:10' },
-  HVGA: { width: 480, height: 320, aspectRatio: '3:2' },
-  VGA: { width: 640, height: 480, aspectRatio: '4:3' },
-  WVGA: { width: 768, height: 480, aspectRatio: '16:10' },
-  FWVGA: { width: 854, height: 480, aspectRatio: '16:9' },
-  SVGA: { width: 800, height: 600, aspectRatio: '4:3' },
-  DVGA: { width: 960, height: 640, aspectRatio: '3:2' },
-  WSVGA: { width: 1024, height: 576, aspectRatio: '16:9' },
-  HD: { width: 1280, height: 720, aspectRatio: '16:9' },
-  HDPLUS: { width: 1600, height: 900, aspectRatio: '16:9' },
-  FHD: { width: 1920, height: 1080, aspectRatio: '16:9' },
-  QHD: { width: 2560, height: 1440, aspectRatio: '16:9' },
-  WQXGAPLUS: { width: 3200, height: 1800, aspectRatio: '16:9' },
-  UHD: { width: 3840, height: 2160, aspectRatio: '16:9' },
-  UHDPLUS: { width: 5120, height: 2880, aspectRatio: '16:9' },
-  FUHD: { width: 7680, height: 4320, aspectRatio: '16:9' },
-  QUHD: { width: 15360, height: 8640, aspectRatio: '16:9' }
-};
 
 /**
  * Stores the self user media MediaStream object.
@@ -21912,7 +23836,7 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
   try {
     log.log([peerId, null, null, 'Adding local stream']);
 
-    var pc = this._peerConnections[peerId];
+    var pc = this._peers[peerId];
 
     if (pc) {
       if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
@@ -22667,7 +24591,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
 Skylink.prototype.sendStream = function(stream, callback) {
   var self = this;
   var restartCount = 0;
-  var peerCount = Object.keys(self._peerConnections).length;
+  var peerCount = Object.keys(self._peers).length;
 
   if (typeof stream !== 'object' || stream === null) {
     var error = 'Provided stream settings is invalid';
@@ -22678,7 +24602,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
     return;
   }
 
-  var hasNoPeers = Object.keys(self._peerConnections).length === 0;
+  var hasNoPeers = Object.keys(self._peers).length === 0;
 
   // Stream object
   // getAudioTracks or getVideoTracks first because adapterjs
@@ -22704,9 +24628,9 @@ Skylink.prototype.sendStream = function(stream, callback) {
         } else {
           self._trigger('incomingStream', self._user.sid, self._mediaStream,
             true, self.getPeerInfo(), false);
-          for (var peer in self._peerConnections) {
-            if (self._peerConnections.hasOwnProperty(peer)) {
-              self._restartPeerConnection(peer, true, false, null, true);
+          for (var peer in self._peers) {
+            if (self._peers.hasOwnProperty(peer)) {
+              self._peers[peer].handshakeRestart();
             }
           }
         }
@@ -22770,9 +24694,9 @@ Skylink.prototype.sendStream = function(stream, callback) {
         } else {
           self._trigger('incomingStream', self._user.sid, self._mediaStream,
             true, self.getPeerInfo(), false);
-          for (var peer in self._peerConnections) {
-            if (self._peerConnections.hasOwnProperty(peer)) {
-              self._restartPeerConnection(peer, true, false, null, true);
+          for (var peer in self._peers) {
+            if (self._peers.hasOwnProperty(peer)) {
+              self._peers[peer].handshakeRestart();
             }
           }
         }
@@ -23120,9 +25044,9 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
             } else {
               self._trigger('incomingStream', self._user.sid, stream,
                 true, self.getPeerInfo(), false);
-              for (var peer in self._peerConnections) {
-                if (self._peerConnections.hasOwnProperty(peer)) {
-                  self._restartPeerConnection(peer, true, false, null, true);
+              for (var peer in self._peers) {
+                if (self._peers.hasOwnProperty(peer)) {
+                  self._peers[peer].handshakeRestart();
                 }
               }
             }
@@ -23217,439 +25141,14 @@ Skylink.prototype.stopScreen = function () {
           this._trigger('incomingStream', this._user.sid, this._mediaStream, true,
             this.getPeerInfo(), false);
         }
-        for (var peer in this._peerConnections) {
-          if (this._peerConnections.hasOwnProperty(peer)) {
-            this._restartPeerConnection(peer, true, false, null, true);
+        for (var peer in this._peers) {
+          if (this._peers.hasOwnProperty(peer)) {
+            this._peers[peer].handshakeRestart();
           }
         }
       }
     }
   }
-};
-Skylink.prototype._addSDPStereo = function(sdpLines) {
-  var opusRtmpLineIndex = 0;
-  var opusLineFound = false;
-  var opusPayload = 0;
-  var fmtpLineFound = false;
-
-  var i, j;
-  var line;
-
-  for (i = 0; i < sdpLines.length; i += 1) {
-    line = sdpLines[i];
-
-    if (line.indexOf('a=rtpmap:') === 0) {
-      var parts = line.split(' ');
-
-      if (parts[1].indexOf('opus/48000/') === 0) {
-        opusLineFound = true;
-        opusPayload = parts[0].split(':')[1];
-        opusRtmpLineIndex = i;
-        break;
-      }
-    }
-  }
-
-  // if found
-  if (opusLineFound) {
-    log.debug([null, 'SDP', null, 'OPUS line is found. Enabling stereo']);
-
-    // loop for fmtp payload
-    for (j = 0; j < sdpLines.length; j += 1) {
-      line = sdpLines[j];
-
-      if (line.indexOf('a=fmtp:' + opusPayload) === 0) {
-        fmtpLineFound = true;
-        sdpLines[j] += '; stereo=1';
-        break;
-      }
-    }
-
-    // if line doesn't exists for an instance firefox
-    if (!fmtpLineFound) {
-      sdpLines.splice(opusRtmpLineIndex, 0, 'a=fmtp:' + opusPayload + ' stereo=1');
-    }
-  }
-
-  return sdpLines;
-};
-
-
-/**
- * <b>BROKEN (not in use)</b>. Modifies the array of session description received to set
- *   a custom video resolution in the video streaming connection.
- * @method _setSDPVideoResolution
- * @param {Array} sdpLines The array of lines in the session description.
- * @return {Array} The updated array of lines in the session description
- *    with the custom video resolution.
- * @private
- * @component SDP
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype._setSDPVideoResolution = function(sdpLines){
-  var video = this._streamSettings.video;
-  var frameRate = video.frameRate || 50;
-  var resolution = {
-    width: 320,
-    height: 50
-  }; //video.resolution || {};
-
-  var videoLineFound = false;
-  var videoLineIndex = 0;
-  var fmtpPayloads = [];
-
-  var i, j, k;
-  var line;
-
-  var sdpLineData = 'max-fr=' + frameRate +
-    '; max-recv-width=320' + //(resolution.width ? resolution.width : 640) +
-    '; max-recv-height=160'; //+ (resolution.height ? resolution.height : 480);
-
-  for (i = 0; i < sdpLines.length; i += 1) {
-    line = sdpLines[i];
-
-    if (line.indexOf('a=video') === 0 || line.indexOf('m=video') === 0) {
-      videoLineFound = true;
-      videoLineIndex = i;
-      fmtpPayloads = line.split(' ');
-      fmtpPayloads.splice(0, 3);
-      break;
-    }
-  }
-
-  if (videoLineFound) {
-    // loop for every video codec
-    // ignore if not vp8 or h264
-    for (j = 0; j < fmtpPayloads.length; j += 1) {
-      var payload = fmtpPayloads[j];
-      var rtpmapLineIndex = 0;
-      var fmtpLineIndex = 0;
-      var fmtpLineFound = false;
-      var ignore = false;
-
-      for (k = 0; k < sdpLines.length; k += 1) {
-       line = sdpLines[k];
-
-        if (line.indexOf('a=rtpmap:' + payload) === 0) {
-          // for non h264 or vp8 codec, ignore. these are experimental codecs
-          // that may not exists afterwards
-          if (!(line.indexOf('VP8') > 0 || line.indexOf('H264') > 0)) {
-            ignore = true;
-            break;
-          }
-          rtpmapLineIndex = k;
-        }
-
-        if (line.indexOf('a=fmtp:' + payload) === 0) {
-          fmtpLineFound = true;
-          fmtpLineIndex = k;
-        }
-      }
-
-      if (ignore) {
-        continue;
-      }
-
-      if (fmtpLineFound) {
-        sdpLines[fmtpLineIndex] += ';' + sdpLineData;
-
-      } else {
-        sdpLines.splice(rtpmapLineIndex + 1, 0, 'a=fmtp:' + payload + ' ' + sdpLineData);
-      }
-    }
-
-    log.debug([null, 'SDP', null, 'Setting video resolution (broken)']);
-  }
-  return sdpLines;
-};
-
-/**
- * Modifies the array of session description received to set
- *   a custom bandwidth bitrate (in kbps) in the streaming connection.
- * Setting the bandwidth flags may not
- *   force set the bandwidth for each connection stream channels as it depends
- *   on how the browser handles the bandwidth bitrate.
- * @method _setSDPBitrate
- * @param {Array} sdpLines The array of lines in the session description.
- * @return {Array} The updated array of lines in the session description
- *    with custom bandwidth bitrate (in kbps) settings.
- * @private
- * @component SDP
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
-  // Find if user has audioStream
-  var bandwidth = this._streamSettings.bandwidth;
-  var hasAudio = !!(settings || {}).audio;
-  var hasVideo = !!(settings || {}).video;
-
-  var i, j, k;
-
-  var audioIndex = 0;
-  var videoIndex = 0;
-  var dataIndex = 0;
-
-  var audioLineFound = false;
-  var videoLineFound = false;
-  var dataLineFound = false;
-
-  for (i = 0; i < sdpLines.length; i += 1) {
-    // set the audio bandwidth
-    if (sdpLines[i].indexOf('a=audio') === 0 || sdpLines[i].indexOf('m=audio') === 0) {
-
-      sdpLines.splice(i + 1, 0, 'b=AS:' + bandwidth.audio);
-
-      log.debug([null, 'SDP', null, 'Setting audio bitrate (' +
-        bandwidth.audio + ')'], i);
-      break;
-    }
-  }
-
-  for (j = 0; j < sdpLines.length; j += 1) {
-    // set the video bandwidth
-    if (sdpLines[j].indexOf('a=video') === 0 || sdpLines[j].indexOf('m=video') === 0) {
-      sdpLines.splice(j + 1, 0, 'b=AS:' + bandwidth.video);
-
-      log.debug([null, 'SDP', null, 'Setting video bitrate (' +
-        bandwidth.video + ')'], j);
-      break;
-    }
-  }
-
-  for (k = 0; k < sdpLines.length; k += 1) {
-    // set the data bandwidth
-    if (sdpLines[k].indexOf('a=application') === 0 || sdpLines[k].indexOf('m=application') === 0) {
-      sdpLines.splice(k + 1, 0, 'b=AS:' + bandwidth.data);
-
-      log.debug([null, 'SDP', null, 'Setting data bitrate (' +
-        bandwidth.data + ')'], k);
-      break;
-    }
-  }
-  return sdpLines;
-};
-
-/**
- * Modifies the array of session description received to configure
- *   the selected video codec to use in the video streaming connection.
- * @method _setSDPVideoCodec
- * @param {Array} sdpLines The array of lines in the session description.
- * @return {Array} The updated array of lines in the session description
- *    with the selected video codec.
- * @private
- * @component SDP
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._setSDPVideoCodec = function(sdpLines) {
-  log.log('Setting video codec', this._selectedVideoCodec);
-  var codecFound = false;
-  var payload = 0;
-
-  var i, j;
-  var line;
-
-  for (i = 0; i < sdpLines.length; i += 1) {
-    line = sdpLines[i];
-
-    if (line.indexOf('a=rtpmap:') === 0) {
-      if (line.indexOf(this._selectedVideoCodec) > 0) {
-        codecFound = true;
-        payload = line.split(':')[1].split(' ')[0];
-        break;
-      }
-    }
-  }
-
-  if (codecFound) {
-    for (j = 0; j < sdpLines.length; j += 1) {
-      line = sdpLines[j];
-
-      if (line.indexOf('m=video') === 0 || line.indexOf('a=video') === 0) {
-        var parts = line.split(' ');
-        var payloads = line.split(' ');
-        payloads.splice(0, 3);
-
-        var selectedPayloadIndex = payloads.indexOf(payload);
-
-        if (selectedPayloadIndex === -1) {
-          payloads.splice(0, 0, payload);
-        } else {
-          var first = payloads[0];
-          payloads[0] = payload;
-          payloads[selectedPayloadIndex] = first;
-        }
-        sdpLines[j] = parts[0] + ' ' + parts[1] + ' ' + parts[2] + ' ' + payloads.join(' ');
-        break;
-      }
-    }
-  }
-  return sdpLines;
-};
-
-/**
- * Modifies the array of session description received to configure
- *   the selected audio codec to use in the audio streaming connection.
- * @method _setSDPAudioCodec
- * @param {Array} sdpLines The array of lines in the session description.
- * @return {Array} The updated array of lines in the session description
- *    with the selected audio codec.
- * @private
- * @component SDP
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._setSDPAudioCodec = function(sdpLines) {
-  log.log('Setting audio codec', this._selectedAudioCodec);
-  var codecFound = false;
-  var payload = 0;
-
-  var i, j;
-  var line;
-
-  for (i = 0; i < sdpLines.length; i += 1) {
-    line = sdpLines[i];
-
-    if (line.indexOf('a=rtpmap:') === 0) {
-      if (line.indexOf(this._selectedAudioCodec) > 0) {
-        codecFound = true;
-        payload = line.split(':')[1].split(' ')[0];
-      }
-    }
-  }
-
-  if (codecFound) {
-    for (j = 0; j < sdpLines.length; j += 1) {
-      line = sdpLines[j];
-
-      if (line.indexOf('m=audio') === 0 || line.indexOf('a=audio') === 0) {
-        var parts = line.split(' ');
-        var payloads = line.split(' ');
-        payloads.splice(0, 3);
-
-        var selectedPayloadIndex = payloads.indexOf(payload);
-
-        if (selectedPayloadIndex === -1) {
-          payloads.splice(0, 0, payload);
-        } else {
-          var first = payloads[0];
-          payloads[0] = payload;
-          payloads[selectedPayloadIndex] = first;
-        }
-        sdpLines[j] = parts[0] + ' ' + parts[1] + ' ' + parts[2] + ' ' + payloads.join(' ');
-        break;
-      }
-    }
-  }
-  return sdpLines;
-};
-
-/**
- * Modifies the array of session description received to remove the
- *   Firefox 32 H262 preference to prevent breaking connection with nsupported browsers.
- * @method _removeSDPFirefoxH264Pref
- * @param {Array} sdpLines The array of lines in the session description.
- * @return {Array} The updated array of lines in the session description
- *    removed of the Firefox 32 H262 preference.
- * @private
- * @component SDP
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._removeSDPFirefoxH264Pref = function(sdpLines) {
-  var invalidLineIndex = sdpLines.indexOf(
-    'a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1');
-  if (invalidLineIndex > -1) {
-    log.debug([null, 'SDP', null, 'Firefox H264 invalid pref found:'], invalidLineIndex);
-    sdpLines.splice(invalidLineIndex, 1);
-  }
-  return sdpLines;
-};
-
-/**
- * Modifies the session description received to append the correct ssrc lines for Firefox.
- * @method _addSDPSsrcFirefoxAnswer
- * @param {String} targetMid The peer connection ID.
- * @param {String} answerSdp The answer session description.
- * @return {String} The update answer session description with correct SSRC lines.
- * @private
- * @component SDP
- * @for Skylink
- * @since 0.6.6
- */
-Skylink.prototype._addSDPSsrcFirefoxAnswer = function (targetMid, sdp) {
-  var self = this;
-  var agent = self.getPeerInfo(targetMid).agent;
-
-  var pc = self._peerConnections[targetMid];
-
-  if (!pc) {
-    log.error([targetMid, 'RTCSessionDesription', 'answer', 'Peer connection object ' +
-      'not found. Unable to parse answer session description for peer']);
-    return;
-  }
-
-  var updatedSdp = sdp;
-
-  // for this case, this is because firefox uses Unified Plan and Chrome uses
-  // Plan B. we have to remodify this a bit to let the non-ff detect as new mediastream
-  // as chrome/opera/safari detects it as default due to missing ssrc specified as used in plan B.
-  if (window.webrtcDetectedBrowser === 'firefox' && agent.name !== 'firefox' &&
-    //pc.remoteDescription.sdp.indexOf('a=msid-semantic: WMS *') === -1 &&
-    updatedSdp.indexOf('a=msid-semantic:WMS *') > 0) {
-    // start parsing
-    var sdpLines = updatedSdp.split('\r\n');
-    var streamId = '';
-    var replaceSSRCSemantic = -1;
-    var i;
-    var trackId = '';
-
-    var parseTracksSSRC = function (track) {
-      for (i = 0, trackId = ''; i < sdpLines.length; i++) {
-        if (!!trackId) {
-          if (sdpLines[i].indexOf('a=ssrc:') === 0) {
-            var ssrcId = sdpLines[i].split(':')[1].split(' ')[0];
-            sdpLines.splice(i+1, 0, 'a=ssrc:' + ssrcId +  ' msid:' + streamId + ' ' + trackId,
-              'a=ssrc:' + ssrcId + ' mslabel:default',
-              'a=ssrc:' + ssrcId + ' label:' + trackId);
-            break;
-          } else if (sdpLines[i].indexOf('a=mid:') === 0) {
-            break;
-          }
-        } else if (sdpLines[i].indexOf('a=msid:') === 0) {
-          if (i > 0 && sdpLines[i-1].indexOf('a=mid:' + track) === 0) {
-            var parts = sdpLines[i].split(':')[1].split(' ');
-
-            streamId = parts[0];
-            trackId = parts[1];
-            replaceSSRCSemantic = true;
-          }
-        }
-      }
-    };
-
-    parseTracksSSRC('video');
-    parseTracksSSRC('audio');
-
-    /*if (replaceSSRCSemantic) {
-      for (i = 0; i < sdpLines.length; i++) {
-        if (sdpLines[i].indexOf('a=msid-semantic:WMS ') === 0) {
-          var parts = sdpLines[i].split(' ');
-          parts[parts.length - 1] = streamId;
-          sdpLines[i] = parts.join(' ');
-          break;
-        }
-      }
-
-    }*/
-    updatedSdp = sdpLines.join('\r\n');
-
-    log.debug([targetMid, 'RTCSessionDesription', 'answer', 'Parsed remote description from firefox'], sdpLines);
-  }
-
-  return updatedSdp;
 };
 window.Skylink = Skylink;
 }).call(this);
