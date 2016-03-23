@@ -204,6 +204,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
    */
   SkylinkPeer.prototype._connectionStatus = {
     candidatesGathered: false,
+    candidatesGathering: false,
     established: false,
     checker: null,
     retries: 0,
@@ -876,6 +877,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
           superRef.CANDIDATE_GENERATION_STATE.COMPLETED);
 
         ref._connectionStatus.candidatesGathered = true;
+        ref._connectionStatus.candidatesGathering = false;
 
         superRef._trigger('candidateGenerationState', superRef.CANDIDATE_GENERATION_STATE.COMPLETED, ref.id);
 
@@ -919,6 +921,17 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       // Else RTCIceCandidate.candidate is still gathering
       } else {
         log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Generated local candidate ->'], candidate);
+
+        if (!ref._connectionStatus.candidatesGathering) {
+          // Polyfill the .onicegatheringstatechange event to "gathering".
+          //   It seems like .onicegatheringstatechange event is never triggered and not event used in appRTC now
+          log.log([ref.id, 'Peer', 'RTCIceGatheringState', 'Current ICE gathering state ->'],
+            superRef.CANDIDATE_GENERATION_STATE.GATHERING);
+
+          ref._connectionStatus.candidatesGathering = true;
+
+          superRef._trigger('candidateGenerationState', superRef.CANDIDATE_GENERATION_STATE.GATHERING, ref.id);
+        }
 
         // Check if trickle ICE is disabled, which in that case we do no need to send the RTCIceCandidate
         //   as it will be present in the local RTCSessionDescription
