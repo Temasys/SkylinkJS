@@ -341,28 +341,12 @@ Skylink.prototype._SDPParser = {
    * @since 0.6.x
    */
   removeNonRelayCandidates: function (sdpString) {
-    var sdpLines = sdpString.split('\r\n'),
-        hasOnlyRelayCandidates = false;
+    var newSdpString = '';
 
-    // Loop and remove candidates
-    while (!hasOnlyRelayCandidates) {
-      var doNotLoopCheckAgain = true;
-
-      for (var i = 0; i < sdpLines.length; i++) {
-        if (sdpLines[i].indexOf('a=candidate') === 0 && sdpLines[i].indexOf('relay') === -1) {
-          sdpLines.splice(i, 1);
-          doNotLoopCheckAgain = false;
-          break;
-        }
-      }
-
-      if (doNotLoopCheckAgain) {
-        hasOnlyRelayCandidates = true;
-      }
-    }
+    newSdpString = sdpString.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
 
     // Return modified RTCSessionDescription.sdp
-    return sdpLines.join('\r\n');
+    return newSdpString;
   },
 
   /**
