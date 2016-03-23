@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Wed Mar 23 2016 21:35:32 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Wed Mar 23 2016 21:41:02 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5081,8 +5081,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     }
 
     /* NOTE: Firefox may support ICE restart in later build of Nightly 48 */
-    var restartICE = true; //ref._connectionSettings.enableIceRestart &&
-      //['disconnected', 'failed'].indexOf(ref._RTCPeerConnection.iceConnectionState) > -1;
+    var restartICE = ref._connectionSettings.enableIceRestart &&
+      ['disconnected', 'failed'].indexOf(ref._RTCPeerConnection.iceConnectionState) > -1;
 
     // RTCPeerConnection.createOffer() RTCOfferOptions
     var options = {
