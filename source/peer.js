@@ -627,45 +627,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     });
   };
 
-  /* TODO: Update peer information */
-
-  /**
-   * Destroys the RTCPeerConnection object.
-   * @method disconnect
-   * @for SkylinkPeer
-   * @since 0.6.x
-   */
-  SkylinkPeer.prototype.disconnect = function () {
-    var ref = this;
-
-    // Prevent closing a RTCPeerConnection object at signalingState that is "closed",
-    // as it might throw an Error
-    if (ref._RTCPeerConnection.signalingState !== 'closed') {
-      log.debug([ref.id, 'Peer', 'RTCPeerConnection', 'Closing connection']);
-
-      ref._RTCPeerConnection.close();
-    }
-
-    // Clear the connection health timer if there is one existing
-    if (ref._connectionStatus.checker) {
-      log.debug([ref.id, 'Peer', 'RTCPeerConnection', 'Removing monitoring connection status checker']);
-
-      clearTimeout(ref._connectionStatus.checker);
-    }
-
-    // Trigger that the Peer has left the Room (or is disconnected)
-    if (ref.id === 'MCU') {
-      superRef._trigger('serverPeerLeft', 'MCU', superRef.SERVER_PEER_TYPE.MCU);
-
-    } else {
-      superRef._trigger('peerLeft', ref.id, superRef._peers[peerId].getInfo(), false);
-    }
-
-    /* TODO: Close all DataChannels connection */
-
-    log.info([ref.id, 'Peer', 'RTCPeerConnection', 'Connection session has ended']);
-  };
-
   /**
    * Updates the Peer information.
    * @method update
@@ -709,6 +670,43 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     ref._connectionStatus.updateCounter++;
 
     log.log([ref.id, 'Peer', null, 'Session streaming information has been updated ->'], ref.getInfo());
+  };
+
+  /**
+   * Destroys the RTCPeerConnection object.
+   * @method disconnect
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype.disconnect = function () {
+    var ref = this;
+
+    // Prevent closing a RTCPeerConnection object at signalingState that is "closed",
+    // as it might throw an Error
+    if (ref._RTCPeerConnection.signalingState !== 'closed') {
+      log.debug([ref.id, 'Peer', 'RTCPeerConnection', 'Closing connection']);
+
+      ref._RTCPeerConnection.close();
+    }
+
+    // Clear the connection health timer if there is one existing
+    if (ref._connectionStatus.checker) {
+      log.debug([ref.id, 'Peer', 'RTCPeerConnection', 'Removing monitoring connection status checker']);
+
+      clearTimeout(ref._connectionStatus.checker);
+    }
+
+    // Trigger that the Peer has left the Room (or is disconnected)
+    if (ref.id === 'MCU') {
+      superRef._trigger('serverPeerLeft', 'MCU', superRef.SERVER_PEER_TYPE.MCU);
+
+    } else {
+      superRef._trigger('peerLeft', ref.id, superRef._peers[peerId].getInfo(), false);
+    }
+
+    /* TODO: Close all DataChannels connection */
+
+    log.info([ref.id, 'Peer', 'RTCPeerConnection', 'Connection session has ended']);
   };
 
   /**
@@ -886,7 +884,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         if (!ref._connectionSettings.enableIceTrickle) {
           var sessionDescription = ref._RTCPeerConnection.localDescription;
 
-          /* NOTE: Check the case where ICE restart happens during disabled trickle ICE connections */
           // Prevent sending a corrupted local RTCSessionDescription
           if (!(!!sessionDescription && !!sessionDescription.sdp)) {
             log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Dropping of sending local sessionDescription ' +
