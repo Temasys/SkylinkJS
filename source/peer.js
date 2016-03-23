@@ -266,8 +266,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     }
 
     /* NOTE: Firefox may support ICE restart in later build of Nightly 48 */
-    var restartICE = ref._connectionSettings.enableIceRestart &&
-      ['disconnected', 'failed'].indexOf(ref._RTCPeerConnection.iceConnectionState) > -1;
+    var restartICE = true; //ref._connectionSettings.enableIceRestart &&
+      //['disconnected', 'failed'].indexOf(ref._RTCPeerConnection.iceConnectionState) > -1;
 
     // RTCPeerConnection.createOffer() RTCOfferOptions
     var options = {
@@ -298,6 +298,13 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     // RTCPeerConnection.createOffer() success
     ref._RTCPeerConnection.createOffer(function (offer) {
       log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Created local offer ->'], offer);
+
+      if (superRef._SDPParser.detectICERestart(ref._RTCPeerConnection.localDescription, offer)) {
+        log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Restarting the ICE gathered flag as ' +
+          'ICE restart is detected']);
+
+        ref._connectionStatus.candidatesGathered = false;
+      }
 
       // Sets the local offer RTCSessionDescription
       ref._handshakeSetLocal(offer);
@@ -340,6 +347,13 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       // RTCPeerConnection.createAnswer() success
       ref._RTCPeerConnection.createAnswer(function (answer) {
         log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Created local answer ->'], answer);
+
+        if (superRef._SDPParser.detectICERestart(ref._RTCPeerConnection.localDescription, answer)) {
+          log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Restarting the ICE gathered flag as ' +
+            'ICE restart is detected']);
+
+          ref._connectionStatus.candidatesGathered = false;
+        }
 
         // Set the local answer
         ref._handshakeSetLocal(answer);

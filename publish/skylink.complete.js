@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Wed Mar 23 2016 21:41:02 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Wed Mar 23 2016 22:32:59 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10455,7 +10455,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.10 - Wed Mar 23 2016 21:41:02 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Wed Mar 23 2016 22:32:59 GMT+0800 (SGT) */
 
 (function() {
 
@@ -15538,8 +15538,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     }
 
     /* NOTE: Firefox may support ICE restart in later build of Nightly 48 */
-    var restartICE = ref._connectionSettings.enableIceRestart &&
-      ['disconnected', 'failed'].indexOf(ref._RTCPeerConnection.iceConnectionState) > -1;
+    var restartICE = true; //ref._connectionSettings.enableIceRestart &&
+      //['disconnected', 'failed'].indexOf(ref._RTCPeerConnection.iceConnectionState) > -1;
 
     // RTCPeerConnection.createOffer() RTCOfferOptions
     var options = {
@@ -15570,6 +15570,13 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     // RTCPeerConnection.createOffer() success
     ref._RTCPeerConnection.createOffer(function (offer) {
       log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Created local offer ->'], offer);
+
+      if (superRef._SDPParser.detectICERestart(ref._RTCPeerConnection.localDescription, offer)) {
+        log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Restarting the ICE gathered flag as ' +
+          'ICE restart is detected']);
+
+        ref._connectionStatus.candidatesGathered = false;
+      }
 
       // Sets the local offer RTCSessionDescription
       ref._handshakeSetLocal(offer);
@@ -15612,6 +15619,13 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       // RTCPeerConnection.createAnswer() success
       ref._RTCPeerConnection.createAnswer(function (answer) {
         log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Created local answer ->'], answer);
+
+        if (superRef._SDPParser.detectICERestart(ref._RTCPeerConnection.localDescription, answer)) {
+          log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Restarting the ICE gathered flag as ' +
+            'ICE restart is detected']);
+
+          ref._connectionStatus.candidatesGathered = false;
+        }
 
         // Set the local answer
         ref._handshakeSetLocal(answer);
@@ -19007,6 +19021,53 @@ Skylink.prototype._SDPParser = {
 
     // Return modified RTCSessionDescription.sdp
     return newSdpString;
+  },
+
+  /**
+   * Detects if ICE restart has been made by comparing the different local RTCSessionDescription provided.
+   * @method detectICERestart
+   * @param {RTCSessionDescription} currentSdp The current local RTCSessionDescription.
+   * @param {RTCSessionDescription} newSdp The newly generated local RTCSessionDescription.
+   * @return {Boolean} The returned flag that indicates if ICE restart has been made.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  detectICERestart: function (currentSdp, newSdp) {
+    if (!(!!currentSdp && !!currentSdp.sdp)) {
+      return false;
+    }
+
+    /**
+     * Function that parses the ICE credentials
+     */
+    var parseICECredsFn = function (sdpString) {
+      var sdpLines = sdpString.split('\r\n'),
+          username = '',
+          password = '';
+
+      for (var i = 0; i < sdpLines.length; i++) {
+        // Parse for ICE username
+        if (sdpLines[i].indexOf('a=ice-ufrag:') === 0) {
+          username = sdpLines[i].split(':')[1];
+
+        // Parse for ICE password
+        } else if (sdpLines[i].indexOf('a=ice-pwd:') === 0) {
+          password = sdpLines[i].split(':')[1];
+        }
+      }
+
+      return {
+        username: username,
+        password: password
+      };
+    };
+
+    var currentSdpCreds = parseICECredsFn(currentSdp.sdp),
+        newSdpCreds = parseICECredsFn(newSdp.sdp);
+
+    return currentSdpCreds.username !== newSdpCreds.username ||
+      currentSdpCreds.password !== newSdpCreds.password;
   }
 };
 var _LOG_KEY = 'SkylinkJS';

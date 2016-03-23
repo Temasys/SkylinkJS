@@ -370,5 +370,52 @@ Skylink.prototype._SDPParser = {
 
     // Return modified RTCSessionDescription.sdp
     return newSdpString;
+  },
+
+  /**
+   * Detects if ICE restart has been made by comparing the different local RTCSessionDescription provided.
+   * @method detectICERestart
+   * @param {RTCSessionDescription} currentSdp The current local RTCSessionDescription.
+   * @param {RTCSessionDescription} newSdp The newly generated local RTCSessionDescription.
+   * @return {Boolean} The returned flag that indicates if ICE restart has been made.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  detectICERestart: function (currentSdp, newSdp) {
+    if (!(!!currentSdp && !!currentSdp.sdp)) {
+      return false;
+    }
+
+    /**
+     * Function that parses the ICE credentials
+     */
+    var parseICECredsFn = function (sdpString) {
+      var sdpLines = sdpString.split('\r\n'),
+          username = '',
+          password = '';
+
+      for (var i = 0; i < sdpLines.length; i++) {
+        // Parse for ICE username
+        if (sdpLines[i].indexOf('a=ice-ufrag:') === 0) {
+          username = sdpLines[i].split(':')[1];
+
+        // Parse for ICE password
+        } else if (sdpLines[i].indexOf('a=ice-pwd:') === 0) {
+          password = sdpLines[i].split(':')[1];
+        }
+      }
+
+      return {
+        username: username,
+        password: password
+      };
+    };
+
+    var currentSdpCreds = parseICECredsFn(currentSdp.sdp),
+        newSdpCreds = parseICECredsFn(newSdp.sdp);
+
+    return currentSdpCreds.username !== newSdpCreds.username ||
+      currentSdpCreds.password !== newSdpCreds.password;
   }
 };
