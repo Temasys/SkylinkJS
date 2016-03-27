@@ -591,6 +591,13 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       return;
     }
 
+    // Prevent adding candidates when it is "closed"
+    if (ref._RTCPeerConnection.signalingState === 'closed') {
+      log.warn([ref.id, 'Peer', 'RTCIceCandidate', 'Dropping of adding remote candidate ' +
+        'as connection as signalingState is "closed" ->'], candidate);
+      return;
+    }
+
     // Prevent adding remote RTCIceCandidate if RTCPeerConnection object does not have remote RTCSessionDescription
     if (!(!!ref._RTCPeerConnection.remoteDescription && !!ref._RTCPeerConnection.remoteDescription.sdp)) {
       log.debug([ref.id, 'Peer', 'RTCIceCandidate',

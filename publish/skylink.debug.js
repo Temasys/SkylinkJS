@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Wed Mar 23 2016 22:59:14 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sun Mar 27 2016 23:58:35 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5403,6 +5403,13 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     if (superRef._forceTURN && candidate.candidate.indexOf('relay') === -1) {
       log.warn([ref.id, 'Peer', 'RTCIceCandidate', 'Dropping of adding remote candidate ' +
         'as it is not a "relay" candidate in forced TURN case ->'], candidate);
+      return;
+    }
+
+    // Prevent adding candidates when it is "closed"
+    if (ref._RTCPeerConnection.signalingState === 'closed') {
+      log.warn([ref.id, 'Peer', 'RTCIceCandidate', 'Dropping of adding remote candidate ' +
+        'as connection as signalingState is "closed" ->'], candidate);
       return;
     }
 
