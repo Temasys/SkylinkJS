@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Sun Mar 27 2016 23:58:35 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Mon Mar 28 2016 19:28:22 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5095,7 +5095,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     };
 
     // Fallback to the older mandatory format as Safari / IE does not support the new format yet
-    if (['firefox', 'chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1) {
+    if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) === -1) {
       options = {
         offerToReceiveAudio: true,
         offerToReceiveVideo: true,
@@ -5112,7 +5112,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
      * Start creating the local offer RTCSessionDescription with createOffer()
      */
     // RTCPeerConnection.createOffer() success
-    ref._RTCPeerConnection.createOffer(function (offer) {
+    var createOfferSuccessFn = function (offer) {
       log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Created local offer ->'], offer);
 
       if (superRef._SDPParser.detectICERestart(ref._RTCPeerConnection.localDescription, offer)) {
@@ -5124,15 +5124,22 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
       // Sets the local offer RTCSessionDescription
       ref._handshakeSetLocal(offer);
+    };
 
     // RTCPeerConnection.createOffer() failure
-    }, function (error) {
+    var createOfferFailureFn = function (error) {
       log.error([ref.id, 'Peer', 'RTCSessionDescription', 'Failed creating local offer ->'], error);
 
       superRef._trigger('handshakeProgress', superRef.HANDSHAKE_PROGRESS.ERROR, ref.id, error);
+    };
 
-    // RTCPeerConnection.createOffer() RTCOfferOptions parameter
-    }, options);
+    // Fallback for Edge browsers
+    if (window.webrtcDetectedBrowser === 'edge') {
+      ref._RTCPeerConnection.createOffer(options).then(createOfferSuccessFn).catch(createOfferFailureFn);
+
+    } else {
+      ref._RTCPeerConnection.createOffer(createOfferSuccessFn, createOfferFailureFn, options);
+    }
   };
 
   /**
@@ -5161,7 +5168,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
        * Start creating the local answer RTCSessionDescription with createAnswer()
        */
       // RTCPeerConnection.createAnswer() success
-      ref._RTCPeerConnection.createAnswer(function (answer) {
+      var createAnswerSuccessFn = function (answer) {
         log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Created local answer ->'], answer);
 
         if (superRef._SDPParser.detectICERestart(ref._RTCPeerConnection.localDescription, answer)) {
@@ -5173,13 +5180,21 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
         // Set the local answer
         ref._handshakeSetLocal(answer);
+      };
 
       // RTCPeerConnection.createAnswer() failure
-      }, function (error) {
+      var createAnswerFailureFn = function (error) {
         log.error([ref.id, 'Peer', 'RTCSessionDescription', 'Failed creating local answer ->'], error);
 
         superRef._trigger('handshakeProgress', superRef.HANDSHAKE_PROGRESS.ERROR, ref.id, error);
-      });
+      };
+
+      // Fallback for Edge browsers
+      if (window.webrtcDetectedBrowser === 'edge') {
+        ref._RTCPeerConnection.createAnswer().then(createAnswerSuccessFn).catch(createAnswerFailureFn);
+      } else {
+        ref._RTCPeerConnection.createAnswer(createAnswerSuccessFn, createAnswerFailureFn);
+      }
     });
   };
 
@@ -5430,13 +5445,14 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
      * Adds the remote RTCIceCandidate with addIceCandidate()
      */
     // RTCPeerConnection.addIceCandidate() success
-    ref._RTCPeerConnection.addIceCandidate(candidate, function () {
+    var addIceCandidateSuccessFn = function () {
       log.log([ref.id, 'Peer', 'RTCIceCandidate', 'Added remote candidate successfully ->'], candidate);
 
       ref._candidates.incoming.success.push(candidate);
+    };
 
     // RTCPeerConnection.addIceCandidate() failure
-    }, function (error) {
+    var addIceCandidateFailureFn = function (error) {
       log.error([ref.id, 'Peer', 'RTCSessionDescription', 'Failed adding remote candidate ->'], {
         error: error,
         candidate: candidate
@@ -5446,7 +5462,14 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         candidate: candidate,
         error: error
       });
-    });
+    };
+
+    // Fallback for Edge browsers
+    if (window.webrtcDetectedBrowser === 'edge') {
+      ref._RTCPeerConnection.addIceCandidate(candidate).then(addIceCandidateSuccessFn).catch(addIceCandidateFailureFn);
+    } else {
+      ref._RTCPeerConnection.addIceCandidate(candidate, addIceCandidateSuccessFn, addIceCandidateFailureFn);
+    }
   };
 
   /**
@@ -6071,7 +6094,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
      * Sets the local RTCSessionDescription with setLocalDescription()
      */
     // RTCPeerConnection.setLocalDescription() success
-    ref._RTCPeerConnection.setLocalDescription(sessionDescription, function () {
+    var setLocalDescriptionSuccessFn = function () {
       log.log([ref.id, 'Peer', 'RTCSessionDescription', 'Set local ' +
         sessionDescription.type + ' success ->'], sessionDescription);
 
@@ -6110,9 +6133,10 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         target: ref.id,
         rid: superRef._room.id
       });
+    };
 
     // RTCPeerConnection.setLocalDescription() failure
-    }, function (error) {
+    var setLocalDescriptionFailureFn = function (error) {
       log.error([ref.id, 'Peer', 'RTCSessionDescription', 'Failed setting local ' +
         sessionDescription.type + ' ->'], error);
 
@@ -6120,7 +6144,14 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       ref._connectionStatus.processingLocalSDP = false;
 
       superRef._trigger('handshakeProgress', superRef.HANDSHAKE_PROGRESS.ERROR, ref.id, error);
-    });
+    };
+
+    // Fallback for Edge browsers
+    if (window.webrtcDetectedBrowser === 'edge') {
+      ref._RTCPeerConnection.setLocalDescription(sessionDescription).then(setLocalDescriptionSuccessFn).catch(setLocalDescriptionFailureFn);
+    } else {
+      ref._RTCPeerConnection.setLocalDescription(sessionDescription, setLocalDescriptionSuccessFn, setLocalDescriptionFailureFn);
+    }
   };
 
   /**
@@ -6189,7 +6220,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
      * Set the remote RTCSessionDescription with setRemoteDescription()
      */
     // RTCPeerConnection.setRemoteDescription() success
-    ref._RTCPeerConnection.setRemoteDescription(sessionDescription, function () {
+    var setRemoteDescriptionSuccessFn = function () {
       log.log([ref.id, 'Peer', 'RTCSessionDescription', 'Set remote ' +
         sessionDescription.type + ' success ->'], sessionDescription);
 
@@ -6209,9 +6240,10 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       }
 
       ref._candidates.incoming.queued = [];
+    };
 
     // RTCPeerConnection.setRemoteDescription() failure
-    }, function (error) {
+    var setRemoteDescriptionFailureFn = function (error) {
       log.error([ref.id, 'Peer', 'RTCSessionDescription', 'Failed setting remote ' +
         sessionDescription.type + ' ->'], error);
 
@@ -6219,7 +6251,14 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       ref._connectionStatus.processingRemoteSDP = false;
 
       superRef._trigger('handshakeProgress', superRef.HANDSHAKE_PROGRESS.ERROR, ref.id, error);
-    });
+    };
+
+    // Fallback for Edge browsers
+    if (window.webrtcDetectedBrowser === 'edge') {
+      ref._RTCPeerConnection.setRemoteDescription(sessionDescription).then(setRemoteDescriptionSuccessFn).catch(setRemoteDescriptionFailureFn);
+    } else {
+      ref._RTCPeerConnection.setRemoteDescription(sessionDescription, setRemoteDescriptionSuccessFn, setRemoteDescriptionFailureFn);
+    }
   };
 
   superRef._peers[peerId] = new SkylinkPeer();
