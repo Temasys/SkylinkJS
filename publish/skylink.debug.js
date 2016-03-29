@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Mon Mar 21 2016 14:03:21 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Tue Mar 29 2016 10:24:50 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13366,7 +13366,10 @@ Skylink.prototype._stopLocalMediaStreams = function (options) {
     log.log([null, 'MediaStream', self._selectedRoom, 'User\'s MediaStream will not be stopped']);
   }
 
-  this._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+  // prevent triggering when user is not in the room
+  if (this._inRoom) {
+    this._trigger('peerUpdated', this._user.sid, this.getPeerInfo(), true);
+  }
 };
 
 /**
