@@ -223,8 +223,8 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
   if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1) {
     offerConstraints = {
       mandatory: {
-        offerToReceiveAudio: true,
-        offerToReceiveVideo: true
+        OfferToReceiveAudio: true,
+        OfferToReceiveVideo: true
       }
     };
   }

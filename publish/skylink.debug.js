@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Tue Mar 29 2016 10:24:50 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Tue Apr 05 2016 20:31:23 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5047,8 +5047,8 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
   if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1) {
     offerConstraints = {
       mandatory: {
-        offerToReceiveAudio: true,
-        offerToReceiveVideo: true
+        OfferToReceiveAudio: true,
+        OfferToReceiveVideo: true
       }
     };
   }
