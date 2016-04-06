@@ -356,7 +356,8 @@ Skylink.prototype._approachEventHandler = function(message){
     userInfo: self.getPeerInfo(),
     receiveOnly: self._receiveOnly,
     sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-    target: message.target
+    target: message.target,
+    weight: self._peerPriorityWeight
   });
 };
 
@@ -689,7 +690,8 @@ Skylink.prototype._inRoomHandler = function(message) {
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     receiveOnly: self._receiveOnly,
-    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+    weight: self._peerPriorityWeight
   });
 };
 

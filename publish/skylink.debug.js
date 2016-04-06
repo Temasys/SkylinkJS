@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Tue Apr 05 2016 20:31:23 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Wed Apr 06 2016 17:49:44 GMT+0800 (SGT) */
 
 (function() {
 
@@ -10833,7 +10833,8 @@ Skylink.prototype._approachEventHandler = function(message){
     userInfo: self.getPeerInfo(),
     receiveOnly: self._receiveOnly,
     sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-    target: message.target
+    target: message.target,
+    weight: self._peerPriorityWeight
   });
 };
 
@@ -11166,7 +11167,8 @@ Skylink.prototype._inRoomHandler = function(message) {
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     receiveOnly: self._receiveOnly,
-    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+    weight: self._peerPriorityWeight
   });
 };
 
