@@ -962,14 +962,20 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
             sessionDescription.sdp = superRef._SDPParser.configureFirefoxAnswerSSRC(sessionDescription.sdp);
           }
 
-          /**
-           * Parse SDP: Remove the SILK codec preference from Edge browsers connecting to other browsers
-           */
+          // Fallback for Edge browsers with other browsers (non-Edge)
           if (window.webrtcDetectedBrowser === 'edge' && ref.agent.name !== 'edge') {
             log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Removing SILK codec references for ' +
               'Edge interopability with other browsers']);
 
+            /**
+             * Parse SDP: Remove the SILK codec preference from Edge browsers connecting to other browsers
+             */
             sessionDescription.sdp = superRef._SDPParser.removeEdgeSILKCodec(sessionDescription.sdp);
+
+            /**
+             * Parse SDP: Configure connection issues with Edge and other browsers
+             */
+            sessionDescription.sdp = superRef._SDPParser.configureEdgeToOtherBrowsers(sessionDescription.sdp);
           }
 
           log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Sending delayed local ' +
@@ -1358,14 +1364,20 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         sessionDescription.sdp = superRef._SDPParser.configureFirefoxAnswerSSRC(sessionDescription.sdp);
       }
 
-      /**
-       * Parse SDP: Remove the SILK codec preference from Edge browsers connecting to other browsers
-       */
+      // Fallback for Edge browsers with other browsers (non-Edge)
       if (window.webrtcDetectedBrowser === 'edge' && ref.agent.name !== 'edge') {
         log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Removing SILK codec references for ' +
           'Edge interopability with other browsers']);
 
+        /**
+         * Parse SDP: Remove the SILK codec preference from Edge browsers connecting to other browsers
+         */
         sessionDescription.sdp = superRef._SDPParser.removeEdgeSILKCodec(sessionDescription.sdp);
+
+        /**
+         * Parse SDP: Configure connection issues with Edge and other browsers
+         */
+        sessionDescription.sdp = superRef._SDPParser.configureEdgeToOtherBrowsers(sessionDescription.sdp);
       }
 
       // Send the local RTCSessionDescription

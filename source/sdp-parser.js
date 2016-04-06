@@ -462,5 +462,26 @@ Skylink.prototype._SDPParser = {
 
     // Return modified RTCSessionDescription.sdp
     return sdpLines.join('\r\n');
+  },
+
+  /**
+   * Handles the connection issues with Edge browsers with other browsers (non-Edge).
+   * @method configureEdgeToOtherBrowsers
+   * @param {String} sdpString The local offer RTCSessionDescription.sdp.
+   * @return {String} updatedSdpString The modified local offer RTCSessionDescription.sdp
+   *   with connection interopability from Edge with other browsers (non-Edge).
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  configureEdgeToOtherBrowsers: function (sdpString) {
+    var newSdpString = '';
+
+    // Remove all rtcp-fb lines with this reference -> x-message app send:dsh recv:dsh
+    //   This somehow causes connectivity issues with other browsers (non-Edge)
+    newSdpString = sdpString.replace(/a=rtcp-fb:.*\r\n/g, '');
+
+    // Return modified RTCSessionDescription.sdp
+    return newSdpString;
   }
 };
