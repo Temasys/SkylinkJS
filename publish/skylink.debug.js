@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Thu Apr 07 2016 03:21:03 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Thu Apr 07 2016 03:29:26 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5256,6 +5256,9 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         return;
       }
 
+      // Configure required configurations before the sending local RTCSessionDescription first
+      ref._handshakeConfigureLocal(sessionDescription);
+
       log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Resending local ' +
         sessionDescription.type + ' ->'], sessionDescription);
 
@@ -5766,32 +5769,8 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
             return;
           }
 
-          /**
-           * Parse SDP: Configure for the use-case of switching of streams for the Firefox local RTCSessionDescription
-           *   during re-negotiation. Firefox is always the answerer with other Peers
-           */
-          if (window.webrtcDetectedBrowser === 'firefox' && ref.agent.name !== 'firefox') {
-            /* NOTE: Should we check if the sessionDescription.type is "answer" before implementing the logic? */
-            log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating Firefox local answer with SSRC lines ' +
-              'to interop with other browsers']);
-            sessionDescription.sdp = superRef._SDPParser.configureFirefoxAnswerSSRC(sessionDescription.sdp);
-          }
-
-          // Fallback for Edge browsers with other browsers (non-Edge)
-          if (window.webrtcDetectedBrowser === 'edge' && ref.agent.name !== 'edge') {
-            log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Removing SILK codec references for ' +
-              'Edge interopability with other browsers']);
-
-            /**
-             * Parse SDP: Remove the SILK codec preference from Edge browsers connecting to other browsers
-             */
-            sessionDescription.sdp = superRef._SDPParser.removeEdgeSILKCodec(sessionDescription.sdp);
-
-            /**
-             * Parse SDP: Configure connection issues with Edge and other browsers
-             */
-            sessionDescription.sdp = superRef._SDPParser.configureEdgeToOtherBrowsers(sessionDescription.sdp);
-          }
+          // Configure required configurations before the sending local RTCSessionDescription first
+          ref._handshakeConfigureLocal(sessionDescription);
 
           log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Sending delayed local ' +
             sessionDescription.type + ' ->'], sessionDescription);
@@ -6165,35 +6144,11 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         return;
       }
 
+      // Configure required configurations before the sending local RTCSessionDescription first
+      ref._handshakeConfigureLocal(sessionDescription);
+
       log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Sending local ' +
         sessionDescription.type + ' ->'], sessionDescription);
-
-      /**
-       * Parse SDP: Configure for the use-case of switching of streams for the Firefox local RTCSessionDescription
-       *   during re-negotiation. Firefox is always the answerer with other Peers
-       */
-      if (window.webrtcDetectedBrowser === 'firefox' && ref.agent.name !== 'firefox') {
-        /* NOTE: Should we check if the sessionDescription.type is "answer" before implementing the logic? */
-        log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating Firefox local answer with SSRC lines ' +
-          'to interop with other browsers']);
-        sessionDescription.sdp = superRef._SDPParser.configureFirefoxAnswerSSRC(sessionDescription.sdp);
-      }
-
-      // Fallback for Edge browsers with other browsers (non-Edge)
-      if (window.webrtcDetectedBrowser === 'edge' && ref.agent.name !== 'edge') {
-        log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Removing SILK codec references for ' +
-          'Edge interopability with other browsers']);
-
-        /**
-         * Parse SDP: Remove the SILK codec preference from Edge browsers connecting to other browsers
-         */
-        sessionDescription.sdp = superRef._SDPParser.removeEdgeSILKCodec(sessionDescription.sdp);
-
-        /**
-         * Parse SDP: Configure connection issues with Edge and other browsers
-         */
-        sessionDescription.sdp = superRef._SDPParser.configureEdgeToOtherBrowsers(sessionDescription.sdp);
-      }
 
       // Send the local RTCSessionDescription
       superRef._sendChannelMessage({
@@ -6328,6 +6283,45 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       ref._RTCPeerConnection.setRemoteDescription(sessionDescription).then(setRemoteDescriptionSuccessFn).catch(setRemoteDescriptionFailureFn);
     } else {
       ref._RTCPeerConnection.setRemoteDescription(sessionDescription, setRemoteDescriptionSuccessFn, setRemoteDescriptionFailureFn);
+    }
+  };
+
+  /**
+   * Configures the local RTCSessionDescription object to be sent.
+   * @method _handshakeConfigureLocal
+   * @param {RTCSessionDescription} sessionDescription The local RTCSessionDescription generated.
+   * @private
+   * @for SkylinkPeer
+   * @since 0.6.x
+   */
+  SkylinkPeer.prototype._handshakeConfigureLocal = function (sessionDescription) {
+    var ref = this;
+
+    /**
+     * Parse SDP: Configure for the use-case of switching of streams for the Firefox local RTCSessionDescription
+     *   during re-negotiation. Firefox is always the answerer with other Peers
+     */
+    if (window.webrtcDetectedBrowser === 'firefox' && ref.agent.name !== 'firefox') {
+      /* NOTE: Should we check if the sessionDescription.type is "answer" before implementing the logic? */
+      log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating Firefox local answer with SSRC lines ' +
+        'to interop with other browsers']);
+      sessionDescription.sdp = superRef._SDPParser.configureFirefoxAnswerSSRC(sessionDescription.sdp);
+    }
+
+    // Fallback for Edge browsers with other browsers (non-Edge)
+    if (window.webrtcDetectedBrowser === 'edge' && ref.agent.name !== 'edge') {
+      log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Removing SILK codec references for ' +
+        'Edge interopability with other browsers']);
+
+      /**
+       * Parse SDP: Remove the SILK codec preference from Edge browsers connecting to other browsers
+       */
+      sessionDescription.sdp = superRef._SDPParser.removeEdgeSILKCodec(sessionDescription.sdp);
+
+      /**
+       * Parse SDP: Configure connection issues with Edge and other browsers
+       */
+      sessionDescription.sdp = superRef._SDPParser.configureEdgeToOtherBrowsers(sessionDescription.sdp);
     }
   };
 
