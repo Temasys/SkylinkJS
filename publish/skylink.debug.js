@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Wed Apr 06 2016 18:39:36 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Wed Apr 06 2016 20:36:05 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3276,47 +3276,53 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
  */
 Skylink.prototype._onIceCandidate = function(targetMid, event) {
   var self = this;
-  if (event.candidate) {
+  var candidate = event.candidate || event;
+
+  if (candidate.candidate) {
+    var messageCan = candidate.candidate.split(' ');
+    var candidateType = messageCan[7];
+    log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
+      candidateType + ' candidate:'], candidate);
+
     if (self._enableIceTrickle) {
-      var messageCan = event.candidate.candidate.split(' ');
-      var candidateType = messageCan[7];
-      log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
-        candidateType + ' candidate:'], event);
-
-      if (self._forceTURN && candidateType !== 'relay') {
-        log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
-          '" candidate as TURN connections is forced']);
-        return;
-      }
-
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.CANDIDATE,
-        label: event.candidate.sdpMLineIndex,
-        id: event.candidate.sdpMid,
-        candidate: event.candidate.candidate,
-        mid: self._user.sid,
-        target: targetMid,
-        rid: self._room.id
-      });
-
-      if (!self._addedCandidates[targetMid]) {
-        self._addedCandidates[targetMid] = {
-          relay: [],
-          host: [],
-          srflx: []
-        };
-      }
-
-      // shouldnt happen but just incase
-      if (!self._addedCandidates[targetMid][candidateType]) {
-        self._addedCandidates[targetMid][candidateType] = [];
-      }
-
-      self._addedCandidates[targetMid][candidateType].push('local:' + messageCan[4] +
-        (messageCan[5] !== '0' ? ':' + messageCan[5] : '') +
-        (messageCan[2] ? '?transport=' + messageCan[2].toLowerCase() : ''));
-
+      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
+        '" candidate as trickle ICE is disabled'], candidate);
+      return;
     }
+
+    if (self._forceTURN && candidateType !== 'relay') {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
+        '" candidate as TURN connections is forced'], candidate);
+      return;
+    }
+
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.CANDIDATE,
+      label: candidate.sdpMLineIndex,
+      id: candidate.sdpMid,
+      candidate: candidate.candidate,
+      mid: self._user.sid,
+      target: targetMid,
+      rid: self._room.id
+    });
+
+    if (!self._addedCandidates[targetMid]) {
+      self._addedCandidates[targetMid] = {
+        relay: [],
+        host: [],
+        srflx: []
+      };
+    }
+
+    // shouldnt happen but just incase
+    if (!self._addedCandidates[targetMid][candidateType]) {
+      self._addedCandidates[targetMid][candidateType] = [];
+    }
+
+    self._addedCandidates[targetMid][candidateType].push('local:' + messageCan[4] +
+      (messageCan[5] !== '0' ? ':' + messageCan[5] : '') +
+      (messageCan[2] ? '?transport=' + messageCan[2].toLowerCase() : ''));
+
   } else {
     log.debug([targetMid, 'RTCIceCandidate', null, 'End of gathering']);
     self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.COMPLETED,
