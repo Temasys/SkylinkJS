@@ -962,6 +962,16 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
             sessionDescription.sdp = superRef._SDPParser.configureFirefoxAnswerSSRC(sessionDescription.sdp);
           }
 
+          /**
+           * Parse SDP: Remove the SILK codec preference from Edge browsers connecting to other browsers
+           */
+          if (window.webrtcDetectedBrowser === 'edge' && ref.agent.name !== 'edge') {
+            log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Removing SILK codec references for ' +
+              'Edge interopability with other browsers']);
+
+            sessionDescription.sdp = superRef._SDPParser.removeEdgeSILKCodec(sessionDescription.sdp);
+          }
+
           log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Sending delayed local ' +
             sessionDescription.type + ' ->'], sessionDescription);
 
@@ -1272,7 +1282,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     sessionDescription.sdp = superRef._SDPParser.removeFirefoxH264Pref(sessionDescription.sdp);
 
     /**
-     * Configure the audio codec to use in connection when available
+     * Parse SDP: Configure the audio codec to use in connection when available
      */
     if (superRef._selectedAudioCodec !== superRef.AUDIO_CODEC.AUTO) {
       log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating to select audio codec if available ->'],
@@ -1346,6 +1356,16 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating Firefox local answer with SSRC lines ' +
           'to interop with other browsers']);
         sessionDescription.sdp = superRef._SDPParser.configureFirefoxAnswerSSRC(sessionDescription.sdp);
+      }
+
+      /**
+       * Parse SDP: Remove the SILK codec preference from Edge browsers connecting to other browsers
+       */
+      if (window.webrtcDetectedBrowser === 'edge' && ref.agent.name !== 'edge') {
+        log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Removing SILK codec references for ' +
+          'Edge interopability with other browsers']);
+
+        sessionDescription.sdp = superRef._SDPParser.removeEdgeSILKCodec(sessionDescription.sdp);
       }
 
       // Send the local RTCSessionDescription

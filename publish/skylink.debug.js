@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Thu Apr 07 2016 02:52:49 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Thu Apr 07 2016 03:09:42 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5777,6 +5777,16 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
             sessionDescription.sdp = superRef._SDPParser.configureFirefoxAnswerSSRC(sessionDescription.sdp);
           }
 
+          /**
+           * Parse SDP: Remove the SILK codec preference from Edge browsers connecting to other browsers
+           */
+          if (window.webrtcDetectedBrowser === 'edge' && ref.agent.name !== 'edge') {
+            log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Removing SILK codec references for ' +
+              'Edge interopability with other browsers']);
+
+            sessionDescription.sdp = superRef._SDPParser.removeEdgeSILKCodec(sessionDescription.sdp);
+          }
+
           log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Sending delayed local ' +
             sessionDescription.type + ' ->'], sessionDescription);
 
@@ -6087,7 +6097,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     sessionDescription.sdp = superRef._SDPParser.removeFirefoxH264Pref(sessionDescription.sdp);
 
     /**
-     * Configure the audio codec to use in connection when available
+     * Parse SDP: Configure the audio codec to use in connection when available
      */
     if (superRef._selectedAudioCodec !== superRef.AUDIO_CODEC.AUTO) {
       log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating to select audio codec if available ->'],
@@ -6161,6 +6171,16 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating Firefox local answer with SSRC lines ' +
           'to interop with other browsers']);
         sessionDescription.sdp = superRef._SDPParser.configureFirefoxAnswerSSRC(sessionDescription.sdp);
+      }
+
+      /**
+       * Parse SDP: Remove the SILK codec preference from Edge browsers connecting to other browsers
+       */
+      if (window.webrtcDetectedBrowser === 'edge' && ref.agent.name !== 'edge') {
+        log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Removing SILK codec references for ' +
+          'Edge interopability with other browsers']);
+
+        sessionDescription.sdp = superRef._SDPParser.removeEdgeSILKCodec(sessionDescription.sdp);
       }
 
       // Send the local RTCSessionDescription
@@ -8705,6 +8725,51 @@ Skylink.prototype._SDPParser = {
 
     return currentSdpCreds.username !== newSdpCreds.username ||
       currentSdpCreds.password !== newSdpCreds.password;
+  },
+
+  /**
+   * Removes the SILK codec from Edge to other browsers connection
+   *   as other browsers do not support the SILK codec.
+   * @method removeEdgeSILKCodec
+   * @param {String} sdpString The local offer RTCSessionDescription.sdp.
+   * @return {String} updatedSdpString The modified local offer RTCSessionDescription.sdp
+   *   with removed SILK codec references.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  removeEdgeSILKCodec: function (sdpString) {
+    var sdpLines = sdpString.split('\r\n'),
+        codecPayload = null;
+
+    // Find the SILK codec reference first
+    for (var i = 0; i < sdpLines.length; i++) {
+      if (sdpLines[i].indexOf('a=rtpmap:') === 0 && sdpLines[i].indexOf('SILK') > 0) {
+        codecPayload = (sdpLines[i].split(':')[1] || '').split(' ')[0];
+        break;
+      }
+    }
+
+    if (codecPayload) {
+      for (var j = 0; j < sdpLines.length; j++) {
+        if (sdpLines[j].indexOf('m=audio') === 0) {
+          var parts = sdpLines[j].split(' ');
+
+          for (var p = 0; p < parts.length; p++) {
+            if (parts[p] === codecPayload) {
+              parts.splice(p, 1);
+              break;
+            }
+          }
+
+          sdpLines[j] = parts.join(' ');
+          break;
+        }
+      }
+    }
+
+    // Return modified RTCSessionDescription.sdp
+    return sdpLines.join('\r\n');
   }
 };
 var _LOG_KEY = 'SkylinkJS';
