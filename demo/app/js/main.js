@@ -515,7 +515,7 @@ Demo.Skylink.init(config, function (error, success) {
   if (success) {
     Demo.Skylink.joinRoom({
       userData: displayName,
-      audio: { stereo: window.webrtcDetectedBrowser === 'firefox' },
+      audio: { stereo: true },
       video: true
     });
   }
