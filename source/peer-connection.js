@@ -312,7 +312,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         lastRestart: lastRestart,
         // This will not be used based off the logic in _restartHandler
         weight: self._peerPriorityWeight,
-        receiveOnly: self._peerConnections[peerId].receiveOnly,
+        receiveOnly: self._peerConnections[peerId] && self._peerConnections[peerId].receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
         sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
