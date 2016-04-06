@@ -19,26 +19,6 @@
 Skylink.prototype._peerCandidatesQueue = {};
 
 /**
- * Stores the list of flags associated to the PeerConnections
- *   to disable trickle ICE as attempting to establish an
- *   ICE connection failed after many trickle ICE connection
- *   attempts. To ensure the stability and increase the chances
- *   of a successful ICE connection, track the Peer connection and store
- *   it as a flag in this list to disable trickling of ICE connections.
- * @attribute _peerIceTrickleDisabled
- * @param {Boolean} (#peerId) The Peer trickle ICE disabled flag.
- *   If value is <code>true</code>, it means that trickling of ICE is
- *   disabled for subsequent connection attempt.
- * @type JSON
- * @private
- * @required
- * @since 0.5.8
- * @component ICE
- * @for Skylink
- */
-Skylink.prototype._peerIceTrickleDisabled = {};
-
-/**
  * Stores the list of candidates sent <code>local</code> and added <code>remote</code> information.
  * @attribute _addedCandidates
  * @param {JSON} (#peerId) The list of candidates sent and added associated with the Peer ID.
@@ -99,7 +79,7 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
 Skylink.prototype._onIceCandidate = function(targetMid, event) {
   var self = this;
   if (event.candidate) {
-    if (self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid]) {
+    if (self._enableIceTrickle) {
       var messageCan = event.candidate.candidate.split(' ');
       var candidateType = messageCan[7];
       log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
@@ -144,7 +124,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
     self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.COMPLETED,
       targetMid);
     // Disable Ice trickle option
-    if (!self._enableIceTrickle || self._peerIceTrickleDisabled[targetMid]) {
+    if (!self._enableIceTrickle) {
       var sessionDescription = self._peerConnections[targetMid].localDescription;
 
       // make checks for firefox session description

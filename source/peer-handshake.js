@@ -308,8 +308,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
  */
 Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var self = this;
-  var timer = (self._enableIceTrickle && !self._peerIceTrickleDisabled[peerId]) ?
-    (toOffer ? 12500 : 10000) : 50000;
+  var timer = self._enableIceTrickle ? (toOffer ? 12500 : 10000) : 50000;
   timer = (self._hasMCU) ? 105000 : timer;
 
   // increase timeout for android/ios
@@ -565,7 +564,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     }
     var shouldWaitForCandidates = false;
 
-    if (!(self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid])) {
+    if (!self._enableIceTrickle) {
       shouldWaitForCandidates = true;
       // there is no sessiondescription created at first go
       if (pc.setOffer === 'remote' || pc.setAnswer === 'remote') {
