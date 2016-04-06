@@ -1294,6 +1294,20 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Using browser\'s selected default video codec']);
     }
 
+    /**
+     * Parse SDP: Prefer OPUS codec for Edge to other browsers connection
+     */
+    if ((window.webrtcDetectedBrowser === 'edge' && ref.agent.name !== 'edge') ||
+        (window.webrtcDetectedBrowser !== 'edge' && ref.agent.name === 'edge')) {
+
+      var codec = superRef.AUDIO_CODEC.OPUS;
+
+      log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating to select OPUS audio codec for ' +
+        'interopability with Edge to other browsers ->'], codec);
+
+      sessionDescription.sdp = superRef._SDPParser.configureCodec(sessionDescription.sdp, 'audio', codec);
+    }
+
     log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting local ' +
       sessionDescription.type + ' ->'], sessionDescription);
 

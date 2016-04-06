@@ -286,7 +286,8 @@ Skylink.prototype._SDPParser = {
       var rtpmapLine = sdpLines[i];
 
       if (rtpmapLine.indexOf('a=rtpmap:') === 0) {
-        if (rtpmapLine.indexOf(codec) > 0) {
+        if (rtpmapLine.indexOf(codec) > 0 || (window.webrtcDetectedBrowser === 'edge' &&
+          codec === 'opus' && rtpmapLine.indexOf('OPUS') > 0)) {
           codecFound = true;
           codecPayload = rtpmapLine.split(':')[1].split(' ')[0];
         }
