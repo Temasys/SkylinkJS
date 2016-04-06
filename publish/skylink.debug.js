@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Thu Apr 07 2016 03:40:31 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Thu Apr 07 2016 03:51:40 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5441,6 +5441,14 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       return;
     }
 
+    // Prevent adding Edge's RTCIceCandidate.candidate "endOfCandidates" in other browsers
+    if (window.webrtcDetectedBrowser !== 'edge' && candidate.candidate.indexOf('endOfCandidates') > 0) {
+      log.warn([ref.id, 'Peer', 'RTCIceCandidate',
+        'Dropping of adding remote candidate as it is type of "endOfCandidates" ' +
+        'and is only used for Edge ->'], candidate);
+      return;
+    }
+
     // Prevent adding remote RTCIceCandidate if RTCPeerConnection object does not have remote RTCSessionDescription
     if (!(!!ref._RTCPeerConnection.remoteDescription && !!ref._RTCPeerConnection.remoteDescription.sdp)) {
       log.debug([ref.id, 'Peer', 'RTCIceCandidate',
@@ -5756,6 +5764,21 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         ref._connectionStatus.candidatesGathering = false;
 
         superRef._trigger('candidateGenerationState', superRef.CANDIDATE_GENERATION_STATE.COMPLETED, ref.id);
+
+        // Spoof "endOfCandidates" for Edge
+        if (window.webrtcDetectedBrowser !== 'edge' && ref.agent.name === 'edge') {
+          log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Spoofing end of candidates for Edge browser ->']);
+
+          superRef._sendChannelMessage({
+            type: superRef._SIG_MESSAGE_TYPE.CANDIDATE,
+            label: 0,
+            id: superRef._SDPParser.retrieveMid(ref._RTCPeerConnection.localDescription),
+            candidate: 'candidate:1 1 udp 1 0.0.0.0 9 typ endOfCandidates',
+            mid: superRef._user.sid,
+            target: ref.id,
+            rid: superRef._room.id
+          });
+        }
 
         // Check if trickle ICE is disabled, which we have to send the local RTCSessionDescription
         //   after ICE gathering has completed
@@ -8746,6 +8769,31 @@ Skylink.prototype._SDPParser = {
 
     return currentSdpCreds.username !== newSdpCreds.username ||
       currentSdpCreds.password !== newSdpCreds.password;
+  },
+
+  /**
+   * Retrieves the mid ID from the local RTCSessionDescription.
+   * @method detectICERestart
+   * @param {RTCSessionDescription} currentSdp The current local RTCSessionDescription.
+   * @return {String} The mid ID.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  retrieveMid: function (sdp) {
+    if (!(!!sdp && !!sdp.sdp)) {
+      return '';
+    }
+
+    var sdpLines = sdp.sdp.split('\r\n');
+
+    for (var i = 0; i < sdpLines.length; i++) {
+      if (sdpLines[i].indexOf('a=mid:') === 0) {
+        return sdpLines[i].split(':')[1];
+      }
+    }
+
+    return '';
   },
 
   /**

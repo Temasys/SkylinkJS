@@ -421,6 +421,31 @@ Skylink.prototype._SDPParser = {
   },
 
   /**
+   * Retrieves the mid ID from the local RTCSessionDescription.
+   * @method detectICERestart
+   * @param {RTCSessionDescription} currentSdp The current local RTCSessionDescription.
+   * @return {String} The mid ID.
+   * @private
+   * @for Skylink
+   * @since 0.6.x
+   */
+  retrieveMid: function (sdp) {
+    if (!(!!sdp && !!sdp.sdp)) {
+      return '';
+    }
+
+    var sdpLines = sdp.sdp.split('\r\n');
+
+    for (var i = 0; i < sdpLines.length; i++) {
+      if (sdpLines[i].indexOf('a=mid:') === 0) {
+        return sdpLines[i].split(':')[1];
+      }
+    }
+
+    return '';
+  },
+
+  /**
    * Removes the SILK codec from Edge to other browsers connection
    *   as other browsers do not support the SILK codec.
    * @method removeEdgeSILKCodec

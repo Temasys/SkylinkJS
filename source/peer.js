@@ -626,6 +626,14 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       return;
     }
 
+    // Prevent adding Edge's RTCIceCandidate.candidate "endOfCandidates" in other browsers
+    if (window.webrtcDetectedBrowser !== 'edge' && candidate.candidate.indexOf('endOfCandidates') > 0) {
+      log.warn([ref.id, 'Peer', 'RTCIceCandidate',
+        'Dropping of adding remote candidate as it is type of "endOfCandidates" ' +
+        'and is only used for Edge ->'], candidate);
+      return;
+    }
+
     // Prevent adding remote RTCIceCandidate if RTCPeerConnection object does not have remote RTCSessionDescription
     if (!(!!ref._RTCPeerConnection.remoteDescription && !!ref._RTCPeerConnection.remoteDescription.sdp)) {
       log.debug([ref.id, 'Peer', 'RTCIceCandidate',
@@ -941,6 +949,21 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         ref._connectionStatus.candidatesGathering = false;
 
         superRef._trigger('candidateGenerationState', superRef.CANDIDATE_GENERATION_STATE.COMPLETED, ref.id);
+
+        // Spoof "endOfCandidates" for Edge
+        if (window.webrtcDetectedBrowser !== 'edge' && ref.agent.name === 'edge') {
+          log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Spoofing end of candidates for Edge browser ->']);
+
+          superRef._sendChannelMessage({
+            type: superRef._SIG_MESSAGE_TYPE.CANDIDATE,
+            label: 0,
+            id: superRef._SDPParser.retrieveMid(ref._RTCPeerConnection.localDescription),
+            candidate: 'candidate:1 1 udp 1 0.0.0.0 9 typ endOfCandidates',
+            mid: superRef._user.sid,
+            target: ref.id,
+            rid: superRef._room.id
+          });
+        }
 
         // Check if trickle ICE is disabled, which we have to send the local RTCSessionDescription
         //   after ICE gathering has completed
