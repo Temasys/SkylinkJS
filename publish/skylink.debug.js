@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Tue Apr 05 2016 20:31:23 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Wed Apr 06 2016 13:11:33 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3302,6 +3302,12 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
       var candidateType = messageCan[7];
       log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
         candidateType + ' candidate:'], event);
+
+      if (self._forceTURN && candidateType !== 'relay') {
+        log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
+          '" candidate as TURN connections is forced']);
+        return;
+      }
 
       self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.CANDIDATE,
@@ -11830,6 +11836,13 @@ Skylink.prototype._candidateHandler = function(message) {
     sdpMid: message.id
     //label: index
   });
+
+  if (this._forceTURN && canType !== 'relay') {
+    log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring adding of "' + canType +
+      '" candidate as TURN connections is forced']);
+    return;
+  }
+
   if (pc) {
   	if (pc.signalingState === this.PEER_CONNECTION_STATE.CLOSED) {
   		log.warn([targetMid, null, message.type, 'Peer connection state ' +

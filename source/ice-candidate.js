@@ -105,6 +105,12 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
       log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
         candidateType + ' candidate:'], event);
 
+      if (self._forceTURN && candidateType !== 'relay') {
+        log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
+          '" candidate as TURN connections is forced']);
+        return;
+      }
+
       self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.CANDIDATE,
         label: event.candidate.sdpMLineIndex,

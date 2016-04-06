@@ -1353,6 +1353,13 @@ Skylink.prototype._candidateHandler = function(message) {
     sdpMid: message.id
     //label: index
   });
+
+  if (this._forceTURN && canType !== 'relay') {
+    log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring adding of "' + canType +
+      '" candidate as TURN connections is forced']);
+    return;
+  }
+
   if (pc) {
   	if (pc.signalingState === this.PEER_CONNECTION_STATE.CLOSED) {
   		log.warn([targetMid, null, message.type, 'Peer connection state ' +
