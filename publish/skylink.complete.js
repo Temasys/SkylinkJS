@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Thu Apr 07 2016 02:19:54 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Thu Apr 07 2016 02:30:37 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10455,7 +10455,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.10 - Thu Apr 07 2016 02:19:54 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Thu Apr 07 2016 02:30:37 GMT+0800 (SGT) */
 
 (function() {
 
@@ -15953,15 +15953,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       // Configure the streaming settings information
       if (typeof peerData.userInfo.settings === 'object' && peerData.userInfo.settings !== null) {
         ref.streamingInfo.settings = peerData.userInfo.settings;
-
-        // Configure for streaming settings audio stereo (for OPUS codec connection) setting
-        if (typeof peerData.userInfo.settings.audio === 'object') {
-          /* NOTE: Perhaps we actually need not to have both Peers connected to have OPUS streaming since
-             it is not the decoding part for the self Peer only? */
-          // Both Peers has to have audio.stereo option enabled
-          ref._connectionSettings.stereo = peerData.userInfo.settings.audio.stereo === true &&
-            (superRef._streamSettings.audio && superRef._streamSettings.audio.stereo === true);
-        }
       }
     }
 
@@ -16424,6 +16415,14 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     /**
      * Parse SDP: Configure OPUS codec stereo modification
      */
+    /*
+       NOTE: We will not make stereo option enabled for where both peers has to enable the option for
+         stereo to work. We will configure it just as sending stream for the peer.
+         Configuring at here to re-update with current audio stereo status always
+     */
+    ref._connectionSettings.stereo = superRef._streamSettings.audio &&
+      superRef._streamSettings.audio.stereo === true;
+
     log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating OPUS stereo enabled option ->'],
       ref._connectionSettings.stereo);
 
