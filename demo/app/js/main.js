@@ -710,12 +710,12 @@ $(document).ready(function () {
 });
 
 
-/*(function(){
+(function(){
 
   var data = {};
   //window.candidatesCounter = {};
 
-  Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
+  /*Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
     data[peerId] = peerInfo;
   });
 
@@ -725,14 +725,14 @@ $(document).ready(function () {
 
   Demo.Skylink.on('peerJoined', function (peerId) {
     //candidatesCounter[peerId] = [];
+  });*/
+
+  Demo.Skylink.once('iceConnectionState', function (state, peerId) {
+    setInterval(function () {
+      Demo.Skylink._restartPeerConnection(peerId, true, false, null, true);
+    }, 1);
+  }, function (state) {
+    return state === 'connected';
   });
 
-  Demo.Skylink.on('iceConnectionState', function (state, peerId) {
-    if (state === 'connected') {
-      setTimeout(function () {
-        Demo.Skylink._restartPeerConnection(peerId, true, false, null, true);
-      }, 1);
-    }
-  });
-
-})();*/
+})();

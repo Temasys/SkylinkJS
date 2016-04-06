@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Wed Apr 06 2016 18:04:56 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Wed Apr 06 2016 18:22:42 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11645,14 +11645,22 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   log.debug([targetMid, 'RTCPeerConnection', null, 'Should peer start the connection'], beOfferer);
 
-  this._addPeer(targetMid, {
+  var agent = {
     agent: message.agent,
-		version: message.version,
-		os: message.os
-  }, beOfferer, restartConn, message.receiveOnly, message.sessionType === 'screensharing');
+    version: message.version,
+    os: message.os
+  };
 
-  if (!beOfferer) {
-    log.debug([targetMid, 'RTCPeerConnection', null, 'Peer has to start the connection. Sending restart message'], beOfferer);
+  if (!this._peerConnections[targetMid]) {
+    this._addPeer(targetMid, agent, false, restartConn, message.receiveOnly, message.sessionType === 'screensharing');
+  }
+
+  if (beOfferer) {
+    log.debug([targetMid, 'RTCPeerConnection', null, 'Starting negotiation'], agent);
+    this._doOffer(targetMid, agent);
+
+  } else {
+    log.debug([targetMid, 'RTCPeerConnection', null, 'Peer has to start the connection. Resending message'], beOfferer);
 
     this._sendChannelMessage({
       type: this._SIG_MESSAGE_TYPE.WELCOME,
@@ -11663,7 +11671,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       os: window.navigator.platform,
       userInfo: this.getPeerInfo(),
       target: targetMid,
-      weight: self._peerPriorityWeight,
+      weight: this._peerPriorityWeight,
       sessionType: !!this._mediaScreen ? 'screensharing' : 'stream'
     });
   }
