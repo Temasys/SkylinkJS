@@ -857,7 +857,35 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       if (!hasAlreadyAdded && updatedStream !== null) {
         log.debug([ref.id, 'Peer', 'MediaStream', 'Adding local stream ->'], updatedStream);
 
-        ref._RTCPeerConnection.addStream(updatedStream);
+        // Fallback to only receive audio for Edge to other browsers case
+        if ((window.webrtcDetectedBrowser === 'edge' && ref.agent.name !== 'edge') ||
+          (window.webrtcDetectedBrowser !== 'edge' && ref.agent.name === 'edge')) {
+
+          log.warn([ref.id, 'Peer', 'MediaStream', 'Fallback to only send audio for connection ' +
+            'for Edge with other browsers']);
+
+          try {
+            var audioOnlyStream = updatedStream.clone();
+
+            audioOnlyStream.getVideoTracks().forEach(function (track) {
+              log.warn([ref.id, 'Peer', 'MediaStreamTrack', 'Removing video track from stream ->'], track);
+
+              audioOnlyStream.removeTrack(track);
+            });
+
+            ref._RTCPeerConnection.addStream(audioOnlyStream);
+
+          } catch (error) {
+            log.error([ref.id, 'Peer', 'MediaStream', 'Dropping of adding stream due to lack of ' +
+              'stream .clone() support ->'], {
+              stream: updatedStream,
+              error: error
+            });
+          }
+
+        } else {
+          ref._RTCPeerConnection.addStream(updatedStream);
+        }
       }
     };
 
