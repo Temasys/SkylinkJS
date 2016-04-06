@@ -274,9 +274,9 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     var options = {
       mandatory: {
         OfferToReceiveAudio: true,
-        OfferToReceiveVideo: true,
-        iceRestart: restartICE
-      }
+        OfferToReceiveVideo: true
+      },
+      iceRestart: restartICE
     };
 
     // Fallback to the older mandatory format as Safari / IE does not support the new format yet

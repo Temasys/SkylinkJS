@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Mon Mar 28 2016 19:28:22 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Thu Apr 07 2016 02:19:54 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5089,9 +5089,9 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     var options = {
       mandatory: {
         OfferToReceiveAudio: true,
-        OfferToReceiveVideo: true,
-        iceRestart: restartICE
-      }
+        OfferToReceiveVideo: true
+      },
+      iceRestart: restartICE
     };
 
     // Fallback to the older mandatory format as Safari / IE does not support the new format yet
