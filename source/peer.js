@@ -287,6 +287,16 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         /* NOTE: Is this flag standard in mandatory ? */
         iceRestart: restartICE
       };
+
+      // Fallback to only receive audio for Edge to other browsers case
+      if ((window.webrtcDetectedBrowser === 'edge' && ref.agent.name !== 'edge') ||
+        (window.webrtcDetectedBrowser !== 'edge' && ref.agent.name === 'edge')) {
+
+        log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Fallback to only receive audio for connection ' +
+          'for Edge with other browsers']);
+
+        options.offerToReceiveVideo = false;
+      }
     }
 
     /* TODO: Create DataChannel here? */
@@ -846,6 +856,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
       if (!hasAlreadyAdded && updatedStream !== null) {
         log.debug([ref.id, 'Peer', 'MediaStream', 'Adding local stream ->'], updatedStream);
+
         ref._RTCPeerConnection.addStream(updatedStream);
       }
     };
