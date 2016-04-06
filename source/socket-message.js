@@ -1271,6 +1271,14 @@ Skylink.prototype._offerHandler = function(message) {
   log.log([targetMid, 'RTCSessionDescription', message.type,
     'Session description object created'], offer);
 
+  // Configure it to force TURN connections by removing non-"relay" candidates
+  if (self._forceTURN && (!self._enableIceTrickle || self._peerIceTrickleDisabled[targetMid])) {
+    log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from offer ' +
+      ' as TURN connections is forced']);
+
+    offer.sdp = offer.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
+  }
+
   // This is always the initial state. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
     log.warn([targetMid, null, message.type, 'Peer connection state is not in ' +
@@ -1467,6 +1475,14 @@ Skylink.prototype._answerHandler = function(message) {
   if (window.webrtcDetectedType === 'moz' && targetMid === 'MCU') {
     answer.sdp = answer.sdp.replace(/ generation 0/g, '');
     answer.sdp = answer.sdp.replace(/ udp /g, ' UDP ');
+  }
+
+  // Configure it to force TURN connections by removing non-"relay" candidates
+  if (self._forceTURN && (!self._enableIceTrickle || self._peerIceTrickleDisabled[targetMid])) {
+    log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from answer ' +
+      ' as TURN connections is forced']);
+
+    answer.sdp = answer.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
   }
 
   // This should be the state after offer is received. or even after negotiation is successful
