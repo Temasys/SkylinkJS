@@ -562,32 +562,26 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     } else {
       pc.setOffer = 'local';
     }
-    var shouldWaitForCandidates = false;
 
-    if (!self._enableIceTrickle) {
-      shouldWaitForCandidates = true;
-      // there is no sessiondescription created at first go
-      if (pc.setOffer === 'remote' || pc.setAnswer === 'remote') {
-        shouldWaitForCandidates = false;
-      }
-    }
-    if (!shouldWaitForCandidates) {
-      // make checks for firefox session description
-      if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && window.webrtcDetectedBrowser === 'firefox') {
-        sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
-      }
-
-      self._sendChannelMessage({
-        type: sessionDescription.type,
-        sdp: sessionDescription.sdp,
-        mid: self._user.sid,
-        target: targetMid,
-        rid: self._room.id
-      });
-    } else {
+    if (!self._enableIceTrickle && !pc.gathered) {
       log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
         'Waiting for Ice gathering to complete to prevent Ice trickle']);
+      return;
     }
+
+    // make checks for firefox session description
+    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && window.webrtcDetectedBrowser === 'firefox') {
+      sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
+    }
+
+    self._sendChannelMessage({
+      type: sessionDescription.type,
+      sdp: sessionDescription.sdp,
+      mid: self._user.sid,
+      target: targetMid,
+      rid: self._room.id
+    });
+
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 

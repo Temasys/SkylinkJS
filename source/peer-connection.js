@@ -479,6 +479,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.firefoxStreamId = '';
   pc.processingLocalSDP = false;
   pc.processingRemoteSDP = false;
+  pc.gathered = false;
 
   // datachannels
   self._dataChannels[targetMid] = {};
@@ -531,8 +532,15 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     }, timeout);
   };
   pc.onicecandidate = function(event) {
-    log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'],
-      event.candidate);
+    var candidate = event.candidate || event;
+
+    if (candidate.candidate) {
+      pc.gathered = false;
+    } else {
+      pc.gathered = true;
+    }
+
+    log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'], event);
     self._onIceCandidate(targetMid, event);
   };
   pc.oniceconnectionstatechange = function(evt) {
