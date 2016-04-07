@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Wed Apr 06 2016 20:36:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Thu Apr 07 2016 12:41:10 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3284,15 +3284,15 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
     log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
       candidateType + ' candidate:'], candidate);
 
-    if (self._enableIceTrickle) {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
-        '" candidate as trickle ICE is disabled'], candidate);
-      return;
-    }
-
     if (self._forceTURN && candidateType !== 'relay') {
       log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
         '" candidate as TURN connections is forced'], candidate);
+      return;
+    }
+
+    if (!self._enableIceTrickle) {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
+        '" candidate as trickle ICE is disabled'], candidate);
       return;
     }
 
