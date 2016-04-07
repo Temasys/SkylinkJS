@@ -540,8 +540,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
       pc.gathered = true;
     }
 
-    log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'], event);
-    self._onIceCandidate(targetMid, event);
+    log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'], candidate);
+    self._onIceCandidate(targetMid, candidate);
   };
   pc.oniceconnectionstatechange = function(evt) {
     checkIceConnectionState(targetMid, pc.iceConnectionState,

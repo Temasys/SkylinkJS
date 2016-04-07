@@ -67,18 +67,15 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
  * @method _onIceCandidate
  * @param {String} targetMid The Peer ID associated with the ICE
  *   candidate object received.
- * @param {Event} event The event object received in the <code>RTCPeerConnection.
- *   onicecandidate</code> to parse the ICE candidate and determine
- *   if gathering has completed.
+ * @param {RTCIceCandidate} candidate The local generated candidate object.
  * @trigger candidateGenerationState
  * @private
  * @since 0.1.0
  * @component ICE
  * @for Skylink
  */
-Skylink.prototype._onIceCandidate = function(targetMid, event) {
+Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
   var self = this;
-  var candidate = event.candidate || event;
 
   if (candidate.candidate) {
     var messageCan = candidate.candidate.split(' ');

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Thu Apr 07 2016 14:11:06 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Thu Apr 07 2016 14:12:57 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3265,18 +3265,15 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
  * @method _onIceCandidate
  * @param {String} targetMid The Peer ID associated with the ICE
  *   candidate object received.
- * @param {Event} event The event object received in the <code>RTCPeerConnection.
- *   onicecandidate</code> to parse the ICE candidate and determine
- *   if gathering has completed.
+ * @param {RTCIceCandidate} candidate The local generated candidate object.
  * @trigger candidateGenerationState
  * @private
  * @since 0.1.0
  * @component ICE
  * @for Skylink
  */
-Skylink.prototype._onIceCandidate = function(targetMid, event) {
+Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
   var self = this;
-  var candidate = event.candidate || event;
 
   if (candidate.candidate) {
     var messageCan = candidate.candidate.split(' ');
@@ -4328,8 +4325,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
       pc.gathered = true;
     }
 
-    log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'], event);
-    self._onIceCandidate(targetMid, event);
+    log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'], candidate);
+    self._onIceCandidate(targetMid, candidate);
   };
   pc.oniceconnectionstatechange = function(evt) {
     checkIceConnectionState(targetMid, pc.iceConnectionState,

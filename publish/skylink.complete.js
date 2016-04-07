@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Thu Apr 07 2016 14:11:06 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Thu Apr 07 2016 14:12:57 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10455,7 +10455,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.11 - Thu Apr 07 2016 14:11:06 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Thu Apr 07 2016 14:12:57 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13722,18 +13722,15 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
  * @method _onIceCandidate
  * @param {String} targetMid The Peer ID associated with the ICE
  *   candidate object received.
- * @param {Event} event The event object received in the <code>RTCPeerConnection.
- *   onicecandidate</code> to parse the ICE candidate and determine
- *   if gathering has completed.
+ * @param {RTCIceCandidate} candidate The local generated candidate object.
  * @trigger candidateGenerationState
  * @private
  * @since 0.1.0
  * @component ICE
  * @for Skylink
  */
-Skylink.prototype._onIceCandidate = function(targetMid, event) {
+Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
   var self = this;
-  var candidate = event.candidate || event;
 
   if (candidate.candidate) {
     var messageCan = candidate.candidate.split(' ');
@@ -14785,8 +14782,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
       pc.gathered = true;
     }
 
-    log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'], event);
-    self._onIceCandidate(targetMid, event);
+    log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'], candidate);
+    self._onIceCandidate(targetMid, candidate);
   };
   pc.oniceconnectionstatechange = function(evt) {
     checkIceConnectionState(targetMid, pc.iceConnectionState,
