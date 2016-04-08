@@ -682,6 +682,11 @@ Skylink.prototype._inRoomHandler = function(message) {
     self._peerPriorityWeight -= 100000000;
   }
 
+  // Append a higher weight for Edge because setting as offerer allows it to receive audio only with other agents
+  if (window.webrtcDetectedBrowser === 'edge') {
+    self._peerPriorityWeight += 200000000000;
+  }
+
   if (self._mediaScreen && self._mediaScreen !== null) {
     self._trigger('incomingStream', self._user.sid, self._mediaScreen, true, self.getPeerInfo());
   } else if (self._mediaStream && self._mediaStream !== null) {
