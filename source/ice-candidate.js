@@ -84,9 +84,14 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       candidateType + ' candidate:'], candidate);
 
     if (self._forceTURN && candidateType !== 'relay') {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
-        '" candidate as TURN connections is forced'], candidate);
-      return;
+      if (!self._hasMCU) {
+        log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
+          '" candidate as TURN connections is forced'], candidate);
+        return;
+      }
+
+      log.warn([targetMid, 'RTCICECandidate', null, 'Not ignoring sending of "' + candidateType +
+        '" candidate although TURN connections is forced as MCU is present']);
     }
 
     if (!self._enableIceTrickle) {

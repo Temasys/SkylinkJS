@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Thu Apr 07 2016 14:12:57 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Sat Apr 09 2016 00:58:01 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10455,7 +10455,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.11 - Thu Apr 07 2016 14:12:57 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Sat Apr 09 2016 00:58:01 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13739,9 +13739,14 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       candidateType + ' candidate:'], candidate);
 
     if (self._forceTURN && candidateType !== 'relay') {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
-        '" candidate as TURN connections is forced'], candidate);
-      return;
+      if (!self._hasMCU) {
+        log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
+          '" candidate as TURN connections is forced'], candidate);
+        return;
+      }
+
+      log.warn([targetMid, 'RTCICECandidate', null, 'Not ignoring sending of "' + candidateType +
+        '" candidate although TURN connections is forced as MCU is present']);
     }
 
     if (!self._enableIceTrickle) {
@@ -22194,10 +22199,16 @@ Skylink.prototype._offerHandler = function(message) {
 
   // Configure it to force TURN connections by removing non-"relay" candidates
   if (self._forceTURN && !self._enableIceTrickle) {
-    log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from offer ' +
-      ' as TURN connections is forced']);
+    if (!self._hasMCU) {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from offer ' +
+        ' as TURN connections is forced']);
 
-    offer.sdp = offer.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
+      offer.sdp = offer.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
+
+    } else {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Not removing non-"relay"' +
+        '" candidates although TURN connections is forced as MCU is present']);
+    }
   }
 
   // This is always the initial state. or even after negotiation is successful
@@ -22284,9 +22295,14 @@ Skylink.prototype._candidateHandler = function(message) {
   });
 
   if (this._forceTURN && canType !== 'relay') {
-    log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring adding of "' + canType +
-      '" candidate as TURN connections is forced']);
-    return;
+    if (!this._hasMCU) {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring adding of "' + canType +
+        '" candidate as TURN connections is forced']);
+      return;
+    }
+
+    log.warn([targetMid, 'RTCICECandidate', null, 'Not ignoring adding of "' + canType +
+      '" candidate although TURN connections is forced as MCU is present']);
   }
 
   if (pc) {
@@ -22400,10 +22416,16 @@ Skylink.prototype._answerHandler = function(message) {
 
   // Configure it to force TURN connections by removing non-"relay" candidates
   if (self._forceTURN && !self._enableIceTrickle) {
-    log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from answer ' +
-      ' as TURN connections is forced']);
+    if (!self._hasMCU) {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from answer ' +
+        ' as TURN connections is forced']);
 
-    answer.sdp = answer.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
+      answer.sdp = answer.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
+
+    } else {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Not removing non-"relay"' +
+        '" candidates although TURN connections is forced as MCU is present']);
+    }
   }
 
   // This should be the state after offer is received. or even after negotiation is successful
