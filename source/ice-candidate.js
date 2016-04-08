@@ -83,6 +83,12 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
     log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
       candidateType + ' candidate:'], candidate);
 
+    if (!self._enableIceTrickle) {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
+        '" candidate as trickle ICE is disabled'], candidate);
+      return;
+    }
+
     if (self._forceTURN && candidateType !== 'relay') {
       if (!self._hasMCU) {
         log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
@@ -92,12 +98,6 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
 
       log.warn([targetMid, 'RTCICECandidate', null, 'Not ignoring sending of "' + candidateType +
         '" candidate although TURN connections is forced as MCU is present']);
-    }
-
-    if (!self._enableIceTrickle) {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
-        '" candidate as trickle ICE is disabled'], candidate);
-      return;
     }
 
     self._sendChannelMessage({
