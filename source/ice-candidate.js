@@ -97,7 +97,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       }
 
       log.warn([targetMid, 'RTCICECandidate', null, 'Not ignoring sending of "' + candidateType +
-        '" candidate although TURN connections is forced as MCU is present']);
+        '" candidate although TURN connections is forced as MCU is present'], candidate);
     }
 
     self._sendChannelMessage({

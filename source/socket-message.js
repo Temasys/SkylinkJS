@@ -1371,18 +1371,18 @@ Skylink.prototype._candidateHandler = function(message) {
   if (this._forceTURN && canType !== 'relay') {
     if (!this._hasMCU) {
       log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring adding of "' + canType +
-        '" candidate as TURN connections is forced']);
+        '" candidate as TURN connections is forced'], candidate);
       return;
     }
 
     log.warn([targetMid, 'RTCICECandidate', null, 'Not ignoring adding of "' + canType +
-      '" candidate although TURN connections is forced as MCU is present']);
+      '" candidate although TURN connections is forced as MCU is present'], candidate);
   }
 
   if (pc) {
   	if (pc.signalingState === this.PEER_CONNECTION_STATE.CLOSED) {
   		log.warn([targetMid, null, message.type, 'Peer connection state ' +
-  			'is closed. Not adding candidate']);
+  			'is closed. Not adding candidate'], candidate);
 	    return;
   	}
     /*if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
@@ -1407,7 +1407,7 @@ Skylink.prototype._candidateHandler = function(message) {
   } else {
     // Added ice candidate to queue because it may be received before sending the offer
     log.debug([targetMid, 'RTCIceCandidate', message.type,
-      'Not adding candidate as peer connection not present']);
+      'Not adding candidate as peer connection not present'], candidate);
     // NOTE ALEX: if the offer was slow, this can happen
     // we might keep a buffer of candidates to replay after receiving an offer.
     this._addIceCandidateToQueue(targetMid, candidate);
