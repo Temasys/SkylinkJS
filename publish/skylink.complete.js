@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Sat Apr 09 2016 16:38:41 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sat Apr 09 2016 17:26:06 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10455,7 +10455,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.10 - Sat Apr 09 2016 16:38:41 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sat Apr 09 2016 17:26:06 GMT+0800 (SGT) */
 
 (function() {
 
@@ -16033,6 +16033,15 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       configuration.iceServers = superRef._room.connection.peerConfig.iceServers;
     }
 
+    // Enforce TURN connections for Edge.
+    /* NOTE: This fails for some reason. Edge interop is beta */
+    if (superRef._forceTURN && window.webrtcDetectedBrowser === 'edge') {
+      log.warn([ref.id, 'Peer', 'RTCPeerConnection', 'Configurating Edge ICE transport policy to ' +
+        'gather TURN candidates only. This is an experimental feature and may not work.']);
+
+      configuration.iceTransportPolicy = 'relay';
+    }
+
     /**
      * Construct the RTCPeerConnection object
      */
@@ -16204,29 +16213,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
         superRef._trigger('candidateGenerationState', superRef.CANDIDATE_GENERATION_STATE.COMPLETED, ref.id);
 
-        // Spoof "endOfCandidates" for Edge
-        if (window.webrtcDetectedBrowser !== 'edge' && ref.agent.name === 'edge') {
-          /**
-           * Parse SDP: Create the "spoof" "endOfCandidates" local RTCIceCandidates to tell
-           *   Edge that ICE gathering has completed.
-           */
-          var edgeEndOfCandidate = superRef._SDPParser.configureEdgeEndOfCandidates(
-            ref._RTCPeerConnection.localDescription);
-
-          log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Spoofing end of candidates for Edge browser ->'],
-            edgeEndOfCandidate);
-
-          superRef._sendChannelMessage({
-            type: superRef._SIG_MESSAGE_TYPE.CANDIDATE,
-            label: edgeEndOfCandidate.sdpMLineIndex,
-            id: edgeEndOfCandidate.sdpMid,
-            candidate: edgeEndOfCandidate.candidate,
-            mid: superRef._user.sid,
-            target: ref.id,
-            rid: superRef._room.id
-          });
-        }
-
         // Check if trickle ICE is disabled, which we have to send the local RTCSessionDescription
         //   after ICE gathering has completed
         if (!ref._connectionSettings.enableIceTrickle) {
@@ -16249,6 +16235,29 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
           superRef._sendChannelMessage({
             type: sessionDescription.type,
             sdp: sessionDescription.sdp,
+            mid: superRef._user.sid,
+            target: ref.id,
+            rid: superRef._room.id
+          });
+        }
+
+        // Spoof "endOfCandidates" for Edge
+        if (window.webrtcDetectedBrowser !== 'edge' && ref.agent.name === 'edge') {
+          /**
+           * Parse SDP: Create the "spoof" "endOfCandidates" local RTCIceCandidates to tell
+           *   Edge that ICE gathering has completed.
+           */
+          var edgeEndOfCandidate = superRef._SDPParser.configureEdgeEndOfCandidates(
+            ref._RTCPeerConnection.localDescription);
+
+          log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Spoofing end of candidates for Edge browser ->'],
+            edgeEndOfCandidate);
+
+          superRef._sendChannelMessage({
+            type: superRef._SIG_MESSAGE_TYPE.CANDIDATE,
+            label: edgeEndOfCandidate.sdpMLineIndex,
+            id: edgeEndOfCandidate.sdpMid,
+            candidate: edgeEndOfCandidate.candidate,
             mid: superRef._user.sid,
             target: ref.id,
             rid: superRef._room.id
