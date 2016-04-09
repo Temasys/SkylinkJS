@@ -533,6 +533,15 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
   sessionDescription.sdp = sdpLines.join('\r\n');
 
+  // Remove REMB packet for MCU connection consistent video quality
+  // NOTE: This is a temporary solution. This is bad to modify from the client since REMB packet
+  //   is required to control quality based on network conditions.
+  if (self._hasMCU && ['chrome', 'opera', 'safari', 'IE'].indexOf(window.webrtcDetectedBrowser) > -1) {
+    log.warn([targetMid, null, null, 'Removing REMB packet for streaming quality in MCU environment']);
+
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtcp-fb:100 goog-remb\r\n/g, '');
+  }
+
   // NOTE ALEX: opus should not be used for mobile
   // Set Opus as the preferred codec in SDP if Opus is present.
   //sessionDescription.sdp = preferOpus(sessionDescription.sdp);
