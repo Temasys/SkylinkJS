@@ -421,28 +421,37 @@ Skylink.prototype._SDPParser = {
   },
 
   /**
-   * Retrieves the mid ID from the local RTCSessionDescription.
-   * @method detectICERestart
+   * Creates the "spoofed" Edge's "endOfCandidate" RTCIceCandidate
+   *   required for interopability by parsing the audio mid ID
+   *   from the local RTCSessionDescription.
+   * @method configureEdgeEndOfCandidates
    * @param {RTCSessionDescription} currentSdp The current local RTCSessionDescription.
-   * @return {String} The mid ID.
+   * @return {RTCIceCandidate} endOfCandidate The local "endOfCandidates" candidate
+   *   to be returned to Edge for interopability.
    * @private
    * @for Skylink
    * @since 0.6.x
    */
-  retrieveMid: function (sdp) {
-    if (!(!!sdp && !!sdp.sdp)) {
-      return '';
-    }
+  configureEdgeEndOfCandidates: function (currentSdp) {
+    var candidate = new RTCIceCandidate({
+      sdpMLineIndex: 0,
+      sdpMid: '',
+      candidate: 'candidate:1 1 udp 1 0.0.0.0 9 typ endOfCandidates'
+    });
 
-    var sdpLines = sdp.sdp.split('\r\n');
+    if (!!currentSdp && !!currentSdp.sdp) {
+      var sdpLines = currentSdp.sdp.split('\r\n');
 
-    for (var i = 0; i < sdpLines.length; i++) {
-      if (sdpLines[i].indexOf('a=mid:') === 0) {
-        return sdpLines[i].split(':')[1];
+      // Parse and find that one a:mid line since we are only sending and receiving audio only.
+      for (var i = 0; i < sdpLines.length; i++) {
+        if (sdpLines[i].indexOf('a=mid:') === 0) {
+          candidate.sdpMid = sdpLines[i].split(':')[1] || '';
+          break;
+        }
       }
     }
 
-    return '';
+    return candidate;
   },
 
   /**

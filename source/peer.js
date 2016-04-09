@@ -952,13 +952,21 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
 
         // Spoof "endOfCandidates" for Edge
         if (window.webrtcDetectedBrowser !== 'edge' && ref.agent.name === 'edge') {
-          log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Spoofing end of candidates for Edge browser ->']);
+          /**
+           * Parse SDP: Create the "spoof" "endOfCandidates" local RTCIceCandidates to tell
+           *   Edge that ICE gathering has completed.
+           */
+          var edgeEndOfCandidate = superRef._SDPParser.configureEdgeEndOfCandidates(
+            ref._RTCPeerConnection.localDescription);
+
+          log.debug([ref.id, 'Peer', 'RTCIceCandidate', 'Spoofing end of candidates for Edge browser ->'],
+            edgeEndOfCandidate);
 
           superRef._sendChannelMessage({
             type: superRef._SIG_MESSAGE_TYPE.CANDIDATE,
-            label: 0,
-            id: superRef._SDPParser.retrieveMid(ref._RTCPeerConnection.localDescription),
-            candidate: 'candidate:1 1 udp 1 0.0.0.0 9 typ endOfCandidates',
+            label: edgeEndOfCandidate.sdpMLineIndex,
+            id: edgeEndOfCandidate.sdpMid,
+            candidate: edgeEndOfCandidate.candidate,
             mid: superRef._user.sid,
             target: ref.id,
             rid: superRef._room.id
