@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Sat Apr 09 2016 16:18:22 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sat Apr 09 2016 16:26:20 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10455,7 +10455,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.10 - Sat Apr 09 2016 16:18:22 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sat Apr 09 2016 16:26:20 GMT+0800 (SGT) */
 
 (function() {
 
@@ -15582,13 +15582,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     var createOfferSuccessFn = function (offer) {
       log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Created local offer ->'], offer);
 
-      if (superRef._SDPParser.detectICERestart(ref._RTCPeerConnection.localDescription, offer)) {
-        log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Restarting the ICE gathered flag as ' +
-          'ICE restart is detected']);
-
-        ref._connectionStatus.candidatesGathered = false;
-      }
-
       // Sets the local offer RTCSessionDescription
       ref._handshakeSetLocal(offer);
     };
@@ -15637,13 +15630,6 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       // RTCPeerConnection.createAnswer() success
       var createAnswerSuccessFn = function (answer) {
         log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Created local answer ->'], answer);
-
-        if (superRef._SDPParser.detectICERestart(ref._RTCPeerConnection.localDescription, answer)) {
-          log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Restarting the ICE gathered flag as ' +
-            'ICE restart is detected']);
-
-          ref._connectionStatus.candidatesGathered = false;
-        }
 
         // Set the local answer
         ref._handshakeSetLocal(answer);
@@ -16458,6 +16444,16 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
    */
   SkylinkPeer.prototype._handshakeSetLocal = function (sessionDescription) {
     var ref = this;
+
+    /**
+     * Parse SDP: Detect ICE restart and restart candidates gathered flag for disabled trickle ICE state.
+     */
+    if (superRef._SDPParser.detectICERestart(ref._RTCPeerConnection.localDescription, sessionDescription)) {
+      log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Restarting the ICE gathered flag as ' +
+        'ICE restart is detected']);
+
+      ref._connectionStatus.candidatesGathered = false;
+    }
 
     // Prevent setting the local offer RTCSessionDescription if
     //   RTCPeerConnection.signalingState is not "stable"
