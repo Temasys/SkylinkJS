@@ -959,10 +959,10 @@ Skylink.prototype._restartHandler = function(message){
   //self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
 
   message.agent = (!message.agent) ? 'chrome' : message.agent;
-  self._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
+  /*self._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
     message.enableIceTrickle : self._enableIceTrickle;
   self._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
-    message.enableDataChannel : self._enableDataChannel;
+    message.enableDataChannel : self._enableDataChannel;*/
 
   // re-add information
   self._peerInformations[targetMid] = message.userInfo || {};
@@ -1156,10 +1156,10 @@ Skylink.prototype._welcomeHandler = function(message) {
   }
 
   message.agent = (!message.agent) ? 'chrome' : message.agent;
-  this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
+  /*this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
     message.enableIceTrickle : this._enableIceTrickle;
   this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
-    message.enableDataChannel : this._enableDataChannel;
+    message.enableDataChannel : this._enableDataChannel;*/
 
   // mcu has joined
   if (targetMid === 'MCU') {
