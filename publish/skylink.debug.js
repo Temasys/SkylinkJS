@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.10 - Sat Apr 09 2016 16:26:20 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.10 - Sat Apr 09 2016 16:38:41 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5104,9 +5104,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
       };
 
       // Fallback to only receive audio for Edge to other browsers case
-      if ((window.webrtcDetectedBrowser === 'edge' && ref.agent.name !== 'edge') ||
-        (window.webrtcDetectedBrowser !== 'edge' && ref.agent.name === 'edge')) {
-
+      if (window.webrtcDetectedBrowser === 'edge' && ref.agent.name !== 'edge') {
         log.warn([ref.id, 'Peer', 'RTCSessionDescription', 'Fallback to only receive audio for connection ' +
           'for Edge with other browsers']);
 
@@ -5670,9 +5668,7 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
         log.debug([ref.id, 'Peer', 'MediaStream', 'Adding local stream ->'], updatedStream);
 
         // Fallback to only receive audio for Edge to other browsers case
-        if ((window.webrtcDetectedBrowser === 'edge' && ref.agent.name !== 'edge') ||
-          (window.webrtcDetectedBrowser !== 'edge' && ref.agent.name === 'edge')) {
-
+        if (window.webrtcDetectedBrowser === 'edge' && ref.agent.name !== 'edge') {
           log.warn([ref.id, 'Peer', 'MediaStream', 'Fallback to only send audio for connection ' +
             'for Edge with other browsers']);
 
@@ -6139,15 +6135,12 @@ Skylink.prototype._createPeer = function (peerId, peerData) {
     /**
      * Parse SDP: Prefer OPUS codec for Edge to other browsers connection
      */
-    if ((window.webrtcDetectedBrowser === 'edge' && ref.agent.name !== 'edge') ||
-        (window.webrtcDetectedBrowser !== 'edge' && ref.agent.name === 'edge')) {
-
-      var codec = superRef.AUDIO_CODEC.OPUS;
-
+    if (window.webrtcDetectedBrowser === 'edge' && ref.agent.name !== 'edge') {
       log.info([ref.id, 'Peer', 'RTCSessionDescription', 'Configurating to select OPUS audio codec for ' +
-        'interopability with Edge to other browsers ->'], codec);
+        'interopability with Edge to other browsers ->'], superRef.AUDIO_CODEC.OPUS);
 
-      sessionDescription.sdp = superRef._SDPParser.configureCodec(sessionDescription.sdp, 'audio', codec);
+      sessionDescription.sdp = superRef._SDPParser.configureCodec(sessionDescription.sdp, 'audio',
+        superRef.AUDIO_CODEC.OPUS);
     }
 
     log.debug([ref.id, 'Peer', 'RTCSessionDescription', 'Setting local ' +
@@ -12104,6 +12097,11 @@ Skylink.prototype._inRoomHandler = function(message) {
   // Append a lower weight for Firefox because setting as answerer always causes less problems with other agents
   if (window.webrtcDetectedBrowser === 'firefox') {
     self._peerPriorityWeight -= 100000000;
+  }
+
+  // Append a higher weight for Edge because setting as offerer allows it to receive audio only with other agents
+  if (window.webrtcDetectedBrowser === 'edge') {
+    self._peerPriorityWeight += 200000000000;
   }
 
   if (self._mediaScreen && self._mediaScreen !== null) {
