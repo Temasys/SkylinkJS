@@ -167,67 +167,6 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
 };
 
 /**
- * Recreates a peer connection.
- * This is the fallback restart mechanism for other platforms.
- * @method _restartPeerConnection
- * @param {String} peerId The Peer ID to recreate the connection with.
- * @private
- * @component Peer
- * @for Skylink
- * @since 0.6.6
- */
-Skylink.prototype._recreatePeerConnection = function (peerId) {
-  var self = this;
-
-  if (!self._peerConnections[peerId]) {
-    log.error([peerId, null, null, 'Peer does not have an existing ' +
-      'connection. Unable to recreate connection']);
-    return;
-  }
-
-  // get the value of receiveOnly
-  log.log([peerId, null, null, 'Recreating a peer connection']);
-
-   // get the value of receiveOnly
-  var receiveOnly = self._peerConnections[peerId] ?
-    !!self._peerConnections[peerId].receiveOnly : false;
-  var hasScreenSharing = self._peerConnections[peerId] ?
-    !!self._peerConnections[peerId].hasScreen : false;
-
-  // close the peer connection and remove the reference
-  var iceConnectionStateClosed = false;
-  var peerConnectionStateClosed = false;
-  var dataChannelStateClosed = !self._enableDataChannel;
-
-  delete self._peerConnectionHealth[peerId];
-
-  self._stopPeerConnectionHealthCheck(peerId);
-
-  if (self._peerConnections[peerId].signalingState !== 'closed') {
-    self._peerConnections[peerId].close();
-  }
-
-  if (self._peerConnections[peerId].hasStream) {
-    self._trigger('streamEnded', peerId, self.getPeerInfo(peerId), false);
-  }
-
-  self._peerConnections[peerId].dataChannelClosed = true;
-
-  delete self._peerConnections[peerId];
-
-  log.log([peerId, null, null, 'Re-creating peer connection']);
-
-  self._peerConnections[peerId] = self._createPeerConnection(peerId, !!hasScreenSharing);
-
-  if (self._peerConnections[peerId]){
-    self._peerConnections[peerId].receiveOnly = receiveOnly;
-    self._peerConnections[peerId].hasScreen = hasScreenSharing;
-  }
-
-  return self._peerConnections[peerId];
-};
-
-/**
  * Restarts a Peer connection in a P2P environment.
  * This is usually done for replacing the previous Stream attached and restarting
  *   the connection with a new one, or when the ICE connection has issues

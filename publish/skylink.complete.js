@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Sun Apr 10 2016 12:14:01 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Sun Apr 10 2016 12:15:11 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10455,7 +10455,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.11 - Sun Apr 10 2016 12:14:01 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Sun Apr 10 2016 12:15:11 GMT+0800 (SGT) */
 
 (function() {
 
@@ -14417,67 +14417,6 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
     log.warn([targetMid, 'PeerConnectionHealth', null, 'Not setting health timer for MCU connection']);
     return;
   }
-};
-
-/**
- * Recreates a peer connection.
- * This is the fallback restart mechanism for other platforms.
- * @method _restartPeerConnection
- * @param {String} peerId The Peer ID to recreate the connection with.
- * @private
- * @component Peer
- * @for Skylink
- * @since 0.6.6
- */
-Skylink.prototype._recreatePeerConnection = function (peerId) {
-  var self = this;
-
-  if (!self._peerConnections[peerId]) {
-    log.error([peerId, null, null, 'Peer does not have an existing ' +
-      'connection. Unable to recreate connection']);
-    return;
-  }
-
-  // get the value of receiveOnly
-  log.log([peerId, null, null, 'Recreating a peer connection']);
-
-   // get the value of receiveOnly
-  var receiveOnly = self._peerConnections[peerId] ?
-    !!self._peerConnections[peerId].receiveOnly : false;
-  var hasScreenSharing = self._peerConnections[peerId] ?
-    !!self._peerConnections[peerId].hasScreen : false;
-
-  // close the peer connection and remove the reference
-  var iceConnectionStateClosed = false;
-  var peerConnectionStateClosed = false;
-  var dataChannelStateClosed = !self._enableDataChannel;
-
-  delete self._peerConnectionHealth[peerId];
-
-  self._stopPeerConnectionHealthCheck(peerId);
-
-  if (self._peerConnections[peerId].signalingState !== 'closed') {
-    self._peerConnections[peerId].close();
-  }
-
-  if (self._peerConnections[peerId].hasStream) {
-    self._trigger('streamEnded', peerId, self.getPeerInfo(peerId), false);
-  }
-
-  self._peerConnections[peerId].dataChannelClosed = true;
-
-  delete self._peerConnections[peerId];
-
-  log.log([peerId, null, null, 'Re-creating peer connection']);
-
-  self._peerConnections[peerId] = self._createPeerConnection(peerId, !!hasScreenSharing);
-
-  if (self._peerConnections[peerId]){
-    self._peerConnections[peerId].receiveOnly = receiveOnly;
-    self._peerConnections[peerId].hasScreen = hasScreenSharing;
-  }
-
-  return self._peerConnections[peerId];
 };
 
 /**
