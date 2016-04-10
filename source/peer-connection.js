@@ -275,8 +275,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
     // Let's check if the signalingState is stable first.
     // In another galaxy or universe, where the local description gets dropped..
     // In the offerHandler or answerHandler, do the appropriate flags to ignore or drop "extra" descriptions
-    if (pc.signalingState === self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER ||
-      pc.signalingState === self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
+    if (pc.signalingState === self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
       // Checks if the local description is defined first
       var hasLocalDescription = pc.localDescription && pc.localDescription.sdp;
       // By then it should have at least the local description..
