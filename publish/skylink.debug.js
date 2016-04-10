@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Wed Apr 06 2016 18:24:54 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Sun Apr 10 2016 12:14:01 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4065,22 +4065,19 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
-  // fallback to older versions for mobile users
-  if (['Android', 'iOS'].indexOf(agent.name) > -1) {
-    pc = self._recreatePeerConnection(peerId);
+  // prevent restarts for other SDK clients
+  if (['Android', 'iOS', 'cpp'].indexOf(agent.name) > -1) {
+    var notSupportedError = new Error('Failed restarting with other agents connecting from other SDKs as ' +
+      're-negotiation is not supported by other SDKs');
 
-    if (!pc) {
-      var noConnObjError = 'Failed restarting (fallback) with mobile SDKs as peer connection object is not defined';
-      log.error([peerId, 'RTCPeerConnection', null, noConnObjError], {
-          localDescription: pc.localDescription,
-          remoteDescription: pc.remoteDescription
-      });
-      if (typeof callback === 'function') {
-        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart failure callback']);
-        callback(null, new Error(noConnObjError));
-      }
-      return;
+    log.warn([peerId, 'RTCPeerConnection', null, 'Ignoring restart request as agent\'s SDK does not support it'],
+        notSupportedError);
+
+    if (typeof callback === 'function') {
+      log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart failure callback']);
+      callback(null, notSupportedError);
     }
+    return;
   }
 
   // This is when the state is stable and re-handshaking is possible
