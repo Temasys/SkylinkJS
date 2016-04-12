@@ -141,20 +141,9 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
     self._addLocalMediaStreams(targetMid);
   }
   // I'm the callee I need to make an offer
-  if (toOffer) {
-    if (self._enableDataChannel) {
-      if (typeof self._dataChannels[targetMid] !== 'object') {
-        log.error([targetMid, 'RTCDataChannel', null, 'Create offer error as unable to create datachannel ' +
-          'as datachannels array is undefined'], self._dataChannels[targetMid]);
-        return;
-      }
-
-      self._dataChannels[targetMid].main =
-        self._createDataChannel(targetMid, self.DATA_CHANNEL_TYPE.MESSAGING, null, targetMid);
-      self._peerConnections[targetMid].hasMainChannel = true;
-    }
+  /*if (toOffer) {
     self._doOffer(targetMid, peerBrowser);
-  }
+  }*/
 
   // do a peer connection health check
   // let MCU handle this case

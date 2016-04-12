@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Sun Apr 10 2016 12:28:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Tue Apr 12 2016 16:57:38 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3937,20 +3937,9 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
     self._addLocalMediaStreams(targetMid);
   }
   // I'm the callee I need to make an offer
-  if (toOffer) {
-    if (self._enableDataChannel) {
-      if (typeof self._dataChannels[targetMid] !== 'object') {
-        log.error([targetMid, 'RTCDataChannel', null, 'Create offer error as unable to create datachannel ' +
-          'as datachannels array is undefined'], self._dataChannels[targetMid]);
-        return;
-      }
-
-      self._dataChannels[targetMid].main =
-        self._createDataChannel(targetMid, self.DATA_CHANNEL_TYPE.MESSAGING, null, targetMid);
-      self._peerConnections[targetMid].hasMainChannel = true;
-    }
+  /*if (toOffer) {
     self._doOffer(targetMid, peerBrowser);
-  }
+  }*/
 
   // do a peer connection health check
   // let MCU handle this case
@@ -4986,6 +4975,18 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
         OfferToReceiveVideo: true
       }
     };
+  }
+
+  if (self._enableDataChannel) {
+    if (typeof self._dataChannels[targetMid] !== 'object') {
+      log.error([targetMid, 'RTCDataChannel', null, 'Create offer error as unable to create datachannel ' +
+        'as datachannels array is undefined'], self._dataChannels[targetMid]);
+      return;
+    }
+
+    self._dataChannels[targetMid].main =
+      self._createDataChannel(targetMid, self.DATA_CHANNEL_TYPE.MESSAGING, null, targetMid);
+    self._peerConnections[targetMid].hasMainChannel = true;
   }
 
   log.debug([targetMid, null, null, 'Creating offer with config:'], offerConstraints);
