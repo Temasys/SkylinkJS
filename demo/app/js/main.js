@@ -727,12 +727,12 @@ $(document).ready(function () {
     //candidatesCounter[peerId] = [];
   });
 
-  Demo.Skylink.on('iceConnectionState', function (state, peerId) {
-    if (state === 'connected') {
-      setTimeout(function () {
-        Demo.Skylink._restartPeerConnection(peerId, true, false, null, true);
-      }, 1);
-    }
+  Demo.Skylink.once('iceConnectionState', function (state, peerId) {
+    setInterval(function () {
+      Demo.Skylink._restartPeerConnection(peerId, true, false, null, true);
+    }, 1);
+  }, function (state) {
+    return state === 'connected';
   });
 
 })();*/

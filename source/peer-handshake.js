@@ -229,6 +229,18 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
     };
   }
 
+  if (self._enableDataChannel) {
+    if (typeof self._dataChannels[targetMid] !== 'object') {
+      log.error([targetMid, 'RTCDataChannel', null, 'Create offer error as unable to create datachannel ' +
+        'as datachannels array is undefined'], self._dataChannels[targetMid]);
+      return;
+    }
+
+    self._dataChannels[targetMid].main =
+      self._createDataChannel(targetMid, self.DATA_CHANNEL_TYPE.MESSAGING, null, targetMid);
+    self._peerConnections[targetMid].hasMainChannel = true;
+  }
+
   log.debug([targetMid, null, null, 'Creating offer with config:'], offerConstraints);
 
   pc.createOffer(function(offer) {
