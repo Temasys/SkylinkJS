@@ -408,7 +408,11 @@ Demo.Skylink.on('peerConnectionState', function (state, peerId) {
   $('#user' + peerId + ' .6' ).css('color', color);
 });
 //---------------------------------------------------
-Demo.Skylink.on('dataChannelState', function (state, peerId) {
+Demo.Skylink.on('dataChannelState', function (state, peerId, error, channelName, channelType) {
+  if (channelType !== Demo.Skylink.DATA_CHANNEL_TYPE.MESSAGING) {
+    return;
+  }
+
   var color = 'red';
   switch (state) {
     case Demo.Skylink.DATA_CHANNEL_STATE.ERROR:
