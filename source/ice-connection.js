@@ -41,9 +41,7 @@
  * This state occurs after Peer connection has been disconnected <em>(closed)</em>.
  * @param {String} TRICKLE_FAILED <small>Value <code>"trickeFailed"</code></small>
  *   The state when attempting to connect successfully with ICE connection fails
- *    with trickle ICE connections.<br>
- * Trickle ICE would be disabled after <code>3</code> attempts to have a better
- *   successful ICE connection.
+ *    with trickle ICE connections.
  * @readOnly
  * @since 0.1.0
  * @component ICE

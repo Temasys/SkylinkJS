@@ -403,6 +403,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.firefoxStreamId = '';
   pc.processingLocalSDP = false;
   pc.processingRemoteSDP = false;
+  pc.gathered = false;
 
   // datachannels
   self._dataChannels[targetMid] = {};
@@ -455,9 +456,16 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     }, timeout);
   };
   pc.onicecandidate = function(event) {
-    log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'],
-      event.candidate);
-    self._onIceCandidate(targetMid, event);
+    var candidate = event.candidate || event;
+
+    if (candidate.candidate) {
+      pc.gathered = false;
+    } else {
+      pc.gathered = true;
+    }
+
+    log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'], candidate);
+    self._onIceCandidate(targetMid, candidate);
   };
   pc.oniceconnectionstatechange = function(evt) {
     checkIceConnectionState(targetMid, pc.iceConnectionState,
@@ -481,17 +489,14 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
         self._ICEConnectionFailures[targetMid] = 0;
       }
 
-      if (self._ICEConnectionFailures[targetMid] > 2) {
-        self._peerIceTrickleDisabled[targetMid] = true;
-      }
-
       if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {
         self._ICEConnectionFailures[targetMid] += 1;
 
-        if (self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid]) {
+        if (self._enableIceTrickle) {
           self._trigger('iceConnectionState',
             self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
         }
+
         // refresh when failed. ignore for MCU case since restart is handled by MCU in this case
         if (!self._hasMCU) {
           self._restartPeerConnection(targetMid, true, true, null, false);

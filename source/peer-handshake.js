@@ -320,8 +320,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
  */
 Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var self = this;
-  var timer = (self._enableIceTrickle && !self._peerIceTrickleDisabled[peerId]) ?
-    (toOffer ? 12500 : 10000) : 50000;
+  var timer = self._enableIceTrickle ? (toOffer ? 12500 : 10000) : 50000;
   timer = (self._hasMCU) ? 105000 : timer;
 
   // increase timeout for android/ios
@@ -584,32 +583,26 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     } else {
       pc.setOffer = 'local';
     }
-    var shouldWaitForCandidates = false;
 
-    if (!(self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid])) {
-      shouldWaitForCandidates = true;
-      // there is no sessiondescription created at first go
-      if (pc.setOffer === 'remote' || pc.setAnswer === 'remote') {
-        shouldWaitForCandidates = false;
-      }
-    }
-    if (!shouldWaitForCandidates) {
-      // make checks for firefox session description
-      if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && window.webrtcDetectedBrowser === 'firefox') {
-        sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
-      }
-
-      self._sendChannelMessage({
-        type: sessionDescription.type,
-        sdp: sessionDescription.sdp,
-        mid: self._user.sid,
-        target: targetMid,
-        rid: self._room.id
-      });
-    } else {
+    if (!self._enableIceTrickle && !pc.gathered) {
       log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
         'Waiting for Ice gathering to complete to prevent Ice trickle']);
+      return;
     }
+
+    // make checks for firefox session description
+    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && window.webrtcDetectedBrowser === 'firefox') {
+      sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
+    }
+
+    self._sendChannelMessage({
+      type: sessionDescription.type,
+      sdp: sessionDescription.sdp,
+      mid: self._user.sid,
+      target: targetMid,
+      rid: self._room.id
+    });
+
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 

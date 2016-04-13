@@ -968,10 +968,10 @@ Skylink.prototype._restartHandler = function(message){
   //self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
 
   message.agent = (!message.agent) ? 'chrome' : message.agent;
-  self._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
+  /*self._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
     message.enableIceTrickle : self._enableIceTrickle;
   self._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
-    message.enableDataChannel : self._enableDataChannel;
+    message.enableDataChannel : self._enableDataChannel;*/
 
   // re-add information
   self._peerInformations[targetMid] = message.userInfo || {};
@@ -1124,10 +1124,10 @@ Skylink.prototype._welcomeHandler = function(message) {
     'to handshake initiation. Peer\'s information:'], message.userInfo);
 
   message.agent = (!message.agent) ? 'chrome' : message.agent;
-  this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
+  /*this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
     message.enableIceTrickle : this._enableIceTrickle;
   this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
-    message.enableDataChannel : this._enableDataChannel;
+    message.enableDataChannel : this._enableDataChannel;*/
 
   // mcu has joined
   if (targetMid === 'MCU') {
@@ -1242,6 +1242,20 @@ Skylink.prototype._offerHandler = function(message) {
   log.log([targetMid, 'RTCSessionDescription', message.type,
     'Session description object created'], offer);
 
+  // Configure it to force TURN connections by removing non-"relay" candidates
+  if (self._forceTURN && !self._enableIceTrickle) {
+    if (!self._hasMCU) {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from offer ' +
+        ' as TURN connections is forced']);
+
+      offer.sdp = offer.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
+
+    } else {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Not removing non-"relay"' +
+        '" candidates although TURN connections is forced as MCU is present']);
+    }
+  }
+
   // This is always the initial state. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
     log.warn([targetMid, null, message.type, 'Peer connection state is not in ' +
@@ -1324,10 +1338,22 @@ Skylink.prototype._candidateHandler = function(message) {
     sdpMid: message.id
     //label: index
   });
+
+  if (this._forceTURN && canType !== 'relay') {
+    if (!this._hasMCU) {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring adding of "' + canType +
+        '" candidate as TURN connections is forced'], candidate);
+      return;
+    }
+
+    log.warn([targetMid, 'RTCICECandidate', null, 'Not ignoring adding of "' + canType +
+      '" candidate although TURN connections is forced as MCU is present'], candidate);
+  }
+
   if (pc) {
   	if (pc.signalingState === this.PEER_CONNECTION_STATE.CLOSED) {
   		log.warn([targetMid, null, message.type, 'Peer connection state ' +
-  			'is closed. Not adding candidate']);
+  			'is closed. Not adding candidate'], candidate);
 	    return;
   	}
     /*if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
@@ -1352,7 +1378,7 @@ Skylink.prototype._candidateHandler = function(message) {
   } else {
     // Added ice candidate to queue because it may be received before sending the offer
     log.debug([targetMid, 'RTCIceCandidate', message.type,
-      'Not adding candidate as peer connection not present']);
+      'Not adding candidate as peer connection not present'], candidate);
     // NOTE ALEX: if the offer was slow, this can happen
     // we might keep a buffer of candidates to replay after receiving an offer.
     this._addIceCandidateToQueue(targetMid, candidate);
@@ -1431,6 +1457,20 @@ Skylink.prototype._answerHandler = function(message) {
   if (window.webrtcDetectedType === 'moz' && targetMid === 'MCU') {
     answer.sdp = answer.sdp.replace(/ generation 0/g, '');
     answer.sdp = answer.sdp.replace(/ udp /g, ' UDP ');
+  }
+
+  // Configure it to force TURN connections by removing non-"relay" candidates
+  if (self._forceTURN && !self._enableIceTrickle) {
+    if (!self._hasMCU) {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from answer ' +
+        ' as TURN connections is forced']);
+
+      answer.sdp = answer.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
+
+    } else {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Not removing non-"relay"' +
+        '" candidates although TURN connections is forced as MCU is present']);
+    }
   }
 
   // This should be the state after offer is received. or even after negotiation is successful
