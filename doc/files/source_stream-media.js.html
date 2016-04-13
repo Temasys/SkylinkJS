@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.11</title>
+    <title>SkylinkJS 0.6.12</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.11</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.12</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -1412,7 +1412,10 @@ Skylink.prototype._stopLocalMediaStreams = function (options) {
     log.log([null, &#x27;MediaStream&#x27;, self._selectedRoom, &#x27;User\&#x27;s MediaStream will not be stopped&#x27;]);
   }
 
-  this._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
+  // prevent triggering when user is not in the room
+  if (this._inRoom) {
+    this._trigger(&#x27;peerUpdated&#x27;, this._user.sid, this.getPeerInfo(), true);
+  }
 };
 
 /**
