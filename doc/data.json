@@ -5226,7 +5226,7 @@
                         },
                         {
                             "name": "forceTURN",
-                            "description": "The flag that indicates if PeerConnections connection\n  should only use TURN server connection which enables a quicker connectivity.\n  This configuration will override the settings for <code>enableTURNServer</code>\n  and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and\n  <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.",
+                            "description": "The flag that indicates if PeerConnections connection\n  should only use TURN server connection which enables a quicker connectivity.\n  Note that this will not work if TURN is disabled for the Application Key provided.\n  This configuration will override the settings for <code>enableTURNServer</code>\n  and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and\n  <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
@@ -5423,7 +5423,7 @@
                                 },
                                 {
                                     "name": "forceTURN",
-                                    "description": "The flag that indicates if PeerConnections connection\n  should only use TURN server connection which enables a quicker connectivity.\n  This configuration will override the settings for <code>enableTURNServer</code>\n  and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and\n  <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.",
+                                    "description": "The flag that indicates if PeerConnections connection\n  should only use TURN server connection which enables a quicker connectivity.\n  Note that this will not work if TURN is disabled for the Application Key provided.\n  This configuration will override the settings for <code>enableTURNServer</code>\n  and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and\n  <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.",
                                     "type": "Boolean"
                                 },
                                 {

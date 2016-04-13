@@ -23024,6 +23024,7 @@ This is where the Application Key is configured and attached to Skylink for usag
                       <small class="default"><span>DEFAULT: </span>false</small>
                       <p>The flag that indicates if PeerConnections connection
   should only use TURN server connection which enables a quicker connectivity.
+  Note that this will not work if TURN is disabled for the Application Key provided.
   This configuration will override the settings for <code>enableTURNServer</code>
   and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and
   <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.</p>
@@ -23621,6 +23622,7 @@ This will configure TURN server connection using port <code>443</code> only and
                               
                               The flag that indicates if PeerConnections connection
   should only use TURN server connection which enables a quicker connectivity.
+  Note that this will not work if TURN is disabled for the Application Key provided.
   This configuration will override the settings for <code>enableTURNServer</code>
   and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and
   <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.

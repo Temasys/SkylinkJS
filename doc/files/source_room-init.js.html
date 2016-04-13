@@ -975,6 +975,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   Tampering this flag may cause issues to connections, so set this value at your own risk.
  * @param {Boolean} [options.forceTURN=false] The flag that indicates if PeerConnections connection
  *   should only use TURN server connection which enables a quicker connectivity.
+ *   Note that this will not work if TURN is disabled for the Application Key provided.
  *   This configuration will override the settings for &lt;code&gt;enableTURNServer&lt;/code&gt;
  *   and &lt;code&gt;enableSTUNServer&lt;/code&gt; and set &lt;code&gt;enableTURNServer&lt;/code&gt; as &lt;code&gt;true&lt;/code&gt; and
  *   &lt;code&gt;enableSTUNServer&lt;/code&gt; as &lt;code&gt;false&lt;/code&gt; if the value is set to &lt;code&gt;true&lt;/code&gt;.
@@ -1113,6 +1114,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   if &lt;code&gt;turns:&lt;/code&gt; protocol is supported, it will use &lt;code&gt;turns:&lt;/code&gt; protocol.
  * @param {Boolean} callback.success.forceTURN The flag that indicates if PeerConnections connection
  *   should only use TURN server connection which enables a quicker connectivity.
+ *   Note that this will not work if TURN is disabled for the Application Key provided.
  *   This configuration will override the settings for &lt;code&gt;enableTURNServer&lt;/code&gt;
  *   and &lt;code&gt;enableSTUNServer&lt;/code&gt; and set &lt;code&gt;enableTURNServer&lt;/code&gt; as &lt;code&gt;true&lt;/code&gt; and
  *   &lt;code&gt;enableSTUNServer&lt;/code&gt; as &lt;code&gt;false&lt;/code&gt; if the value is set to &lt;code&gt;true&lt;/code&gt;.
