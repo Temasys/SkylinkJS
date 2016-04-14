@@ -712,31 +712,3 @@ $(document).ready(function () {
     selectedPeers = [];
   })
 });
-
-
-/*(function(){
-
-  var data = {};
-  //window.candidatesCounter = {};
-
-  Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
-    data[peerId] = peerInfo;
-  });
-
-  Demo.Skylink.on('channelMessage', function (message, isSelf) {
-    //console.log('messaging', message, isSelf);
-  });
-
-  Demo.Skylink.on('peerJoined', function (peerId) {
-    //candidatesCounter[peerId] = [];
-  });
-
-  Demo.Skylink.once('iceConnectionState', function (state, peerId) {
-    setInterval(function () {
-      Demo.Skylink._restartPeerConnection(peerId, true, false, null, true);
-    }, 1);
-  }, function (state) {
-    return state === 'connected';
-  });
-
-})();*/
