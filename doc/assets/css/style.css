@@ -368,6 +368,12 @@ blockquote small:after {
   }
 }
 
+@media (max-width: 768px) {
+  .btn-navbar {
+    margin: 10px 15px 8px;
+  }
+}
+
 @media (max-width: 700px) {
   .nav-links {
     float: none!important;
