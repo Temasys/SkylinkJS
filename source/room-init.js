@@ -884,6 +884,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   Tampering this flag may cause issues to connections, so set this value at your own risk.
  * @param {Boolean} [options.forceTURN=false] The flag that indicates if PeerConnections connection
  *   should only use TURN server connection which enables a quicker connectivity.
+ *   Note that this will not work if TURN is disabled for the Application Key provided.
  *   This configuration will override the settings for <code>enableTURNServer</code>
  *   and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and
  *   <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.
@@ -1022,6 +1023,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   if <code>turns:</code> protocol is supported, it will use <code>turns:</code> protocol.
  * @param {Boolean} callback.success.forceTURN The flag that indicates if PeerConnections connection
  *   should only use TURN server connection which enables a quicker connectivity.
+ *   Note that this will not work if TURN is disabled for the Application Key provided.
  *   This configuration will override the settings for <code>enableTURNServer</code>
  *   and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and
  *   <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.

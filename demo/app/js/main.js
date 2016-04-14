@@ -408,7 +408,11 @@ Demo.Skylink.on('peerConnectionState', function (state, peerId) {
   $('#user' + peerId + ' .6' ).css('color', color);
 });
 //---------------------------------------------------
-Demo.Skylink.on('dataChannelState', function (state, peerId) {
+Demo.Skylink.on('dataChannelState', function (state, peerId, error, channelName, channelType) {
+  if (channelType !== Demo.Skylink.DATA_CHANNEL_TYPE.MESSAGING) {
+    return;
+  }
+
   var color = 'red';
   switch (state) {
     case Demo.Skylink.DATA_CHANNEL_STATE.ERROR:
@@ -727,12 +731,12 @@ $(document).ready(function () {
     //candidatesCounter[peerId] = [];
   });
 
-  Demo.Skylink.on('iceConnectionState', function (state, peerId) {
-    if (state === 'connected') {
-      setTimeout(function () {
-        Demo.Skylink._restartPeerConnection(peerId, true, false, null, true);
-      }, 1);
-    }
+  Demo.Skylink.once('iceConnectionState', function (state, peerId) {
+    setInterval(function () {
+      Demo.Skylink._restartPeerConnection(peerId, true, false, null, true);
+    }, 1);
+  }, function (state) {
+    return state === 'connected';
   });
 
 })();*/

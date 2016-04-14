@@ -1,7 +1,7 @@
 {
   "name": "skylinkjs",
   "description": "WebRTC real-time video conversation library",
-  "version": "0.6.11",
+  "version": "0.6.12",
   "homepage": "https://skylink.io",
   "author": {
     "name": "Temasys Communications Pte. Ltd.",
@@ -24,7 +24,7 @@
     "doc-style/**"
   ],
   "dependencies": {
-    "adapterjs": "0.13.2",
+    "adapterjs": "0.13.3",
     "socket.io-client": "1.4.4"
   },
   "keywords": ["webrtc", "real-time", "p2p"]

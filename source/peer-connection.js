@@ -141,20 +141,9 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
     self._addLocalMediaStreams(targetMid);
   }
   // I'm the callee I need to make an offer
-  if (toOffer) {
-    if (self._enableDataChannel) {
-      if (typeof self._dataChannels[targetMid] !== 'object') {
-        log.error([targetMid, 'RTCDataChannel', null, 'Create offer error as unable to create datachannel ' +
-          'as datachannels array is undefined'], self._dataChannels[targetMid]);
-        return;
-      }
-
-      self._dataChannels[targetMid].main =
-        self._createDataChannel(targetMid, self.DATA_CHANNEL_TYPE.MESSAGING, null, targetMid);
-      self._peerConnections[targetMid].hasMainChannel = true;
-    }
+  /*if (toOffer) {
     self._doOffer(targetMid, peerBrowser);
-  }
+  }*/
 
   // do a peer connection health check
   // let MCU handle this case
@@ -164,67 +153,6 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
     log.warn([targetMid, 'PeerConnectionHealth', null, 'Not setting health timer for MCU connection']);
     return;
   }
-};
-
-/**
- * Recreates a peer connection.
- * This is the fallback restart mechanism for other platforms.
- * @method _restartPeerConnection
- * @param {String} peerId The Peer ID to recreate the connection with.
- * @private
- * @component Peer
- * @for Skylink
- * @since 0.6.6
- */
-Skylink.prototype._recreatePeerConnection = function (peerId) {
-  var self = this;
-
-  if (!self._peerConnections[peerId]) {
-    log.error([peerId, null, null, 'Peer does not have an existing ' +
-      'connection. Unable to recreate connection']);
-    return;
-  }
-
-  // get the value of receiveOnly
-  log.log([peerId, null, null, 'Recreating a peer connection']);
-
-   // get the value of receiveOnly
-  var receiveOnly = self._peerConnections[peerId] ?
-    !!self._peerConnections[peerId].receiveOnly : false;
-  var hasScreenSharing = self._peerConnections[peerId] ?
-    !!self._peerConnections[peerId].hasScreen : false;
-
-  // close the peer connection and remove the reference
-  var iceConnectionStateClosed = false;
-  var peerConnectionStateClosed = false;
-  var dataChannelStateClosed = !self._enableDataChannel;
-
-  delete self._peerConnectionHealth[peerId];
-
-  self._stopPeerConnectionHealthCheck(peerId);
-
-  if (self._peerConnections[peerId].signalingState !== 'closed') {
-    self._peerConnections[peerId].close();
-  }
-
-  if (self._peerConnections[peerId].hasStream) {
-    self._trigger('streamEnded', peerId, self.getPeerInfo(peerId), false);
-  }
-
-  self._peerConnections[peerId].dataChannelClosed = true;
-
-  delete self._peerConnections[peerId];
-
-  log.log([peerId, null, null, 'Re-creating peer connection']);
-
-  self._peerConnections[peerId] = self._createPeerConnection(peerId, !!hasScreenSharing);
-
-  if (self._peerConnections[peerId]){
-    self._peerConnections[peerId].receiveOnly = receiveOnly;
-    self._peerConnections[peerId].hasScreen = hasScreenSharing;
-  }
-
-  return self._peerConnections[peerId];
 };
 
 /**
@@ -269,22 +197,19 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
-  // fallback to older versions for mobile users
-  if (['Android', 'iOS'].indexOf(agent.name) > -1) {
-    pc = self._recreatePeerConnection(peerId);
+  // prevent restarts for other SDK clients
+  if (['Android', 'iOS', 'cpp'].indexOf(agent.name) > -1) {
+    var notSupportedError = new Error('Failed restarting with other agents connecting from other SDKs as ' +
+      're-negotiation is not supported by other SDKs');
 
-    if (!pc) {
-      var noConnObjError = 'Failed restarting (fallback) with mobile SDKs as peer connection object is not defined';
-      log.error([peerId, 'RTCPeerConnection', null, noConnObjError], {
-          localDescription: pc.localDescription,
-          remoteDescription: pc.remoteDescription
-      });
-      if (typeof callback === 'function') {
-        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart failure callback']);
-        callback(null, new Error(noConnObjError));
-      }
-      return;
+    log.warn([peerId, 'RTCPeerConnection', null, 'Ignoring restart request as agent\'s SDK does not support it'],
+        notSupportedError);
+
+    if (typeof callback === 'function') {
+      log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart failure callback']);
+      callback(null, notSupportedError);
     }
+    return;
   }
 
   // This is when the state is stable and re-handshaking is possible
@@ -312,7 +237,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         lastRestart: lastRestart,
         // This will not be used based off the logic in _restartHandler
         weight: self._peerPriorityWeight,
-        receiveOnly: self._peerConnections[peerId].receiveOnly,
+        receiveOnly: self._peerConnections[peerId] && self._peerConnections[peerId].receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
         sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
@@ -339,8 +264,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
     // Let's check if the signalingState is stable first.
     // In another galaxy or universe, where the local description gets dropped..
     // In the offerHandler or answerHandler, do the appropriate flags to ignore or drop "extra" descriptions
-    if (pc.signalingState === self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER ||
-      pc.signalingState === self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
+    if (pc.signalingState === self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
       // Checks if the local description is defined first
       var hasLocalDescription = pc.localDescription && pc.localDescription.sdp;
       // By then it should have at least the local description..
@@ -479,6 +403,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.firefoxStreamId = '';
   pc.processingLocalSDP = false;
   pc.processingRemoteSDP = false;
+  pc.gathered = false;
 
   // datachannels
   self._dataChannels[targetMid] = {};
@@ -531,9 +456,16 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     }, timeout);
   };
   pc.onicecandidate = function(event) {
-    log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'],
-      event.candidate);
-    self._onIceCandidate(targetMid, event);
+    var candidate = event.candidate || event;
+
+    if (candidate.candidate) {
+      pc.gathered = false;
+    } else {
+      pc.gathered = true;
+    }
+
+    log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'], candidate);
+    self._onIceCandidate(targetMid, candidate);
   };
   pc.oniceconnectionstatechange = function(evt) {
     checkIceConnectionState(targetMid, pc.iceConnectionState,
@@ -557,17 +489,14 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
         self._ICEConnectionFailures[targetMid] = 0;
       }
 
-      if (self._ICEConnectionFailures[targetMid] > 2) {
-        self._peerIceTrickleDisabled[targetMid] = true;
-      }
-
       if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {
         self._ICEConnectionFailures[targetMid] += 1;
 
-        if (self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid]) {
+        if (self._enableIceTrickle) {
           self._trigger('iceConnectionState',
             self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
         }
+
         // refresh when failed. ignore for MCU case since restart is handled by MCU in this case
         if (!self._hasMCU) {
           self._restartPeerConnection(targetMid, true, true, null, false);
