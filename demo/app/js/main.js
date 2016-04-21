@@ -54,6 +54,34 @@ Demo.Methods.displayChatItemHTML = function (peerId, timestamp, content, isPriva
     (isPrivate ? '</i>' : '') + '</p></div>';
 };
 
+Demo.Methods.displayRecordingSessionHTML = function (recordingId) {
+  var timestamp = new Date(),
+      Hours, Minutes, Seconds;
+  if (timestamp.getHours() < 10)
+    Hours = '0' + timestamp.getHours();
+  else
+    Hours = timestamp.getHours();
+  if (timestamp.getMinutes() < 10)
+    Minutes = '0' + timestamp.getMinutes();
+  else
+    Minutes = timestamp.getMinutes();
+  if (timestamp.getSeconds() < 10)
+    Seconds = '0' + timestamp.getSeconds();
+  else
+    Seconds = timestamp.getSeconds();
+
+  $('#recording_log').append('<div class="chat-item list-group-item active">' +
+    '<p class="list-group-item-heading"><b><small><span id="recording_' + recordingId +
+    '_state_icon" class="glyphicon glyphicon-record"></span></small>&nbsp;&nbsp;' +
+    'Session ' + recordingId + '</b><em title="' + timestamp.toString() + '">' + Hours + ':' + Minutes + ':' + Seconds +
+    '</em></p><p class="list-group-item-text"></p><blockquote style="color:#888;font-size: 14px;padding: 2px 5px;">' +
+    '<small><b>STATUS:</b>&nbsp;&nbsp;<em id="recording_' + recordingId + '_state" style="font-style:normal;">STARTED</em></small></blockquote>' +
+    '<p><a id="recording_' + recordingId + '_btn" class="btn btn-default" ' +
+    'href="" style="width:100%;margin:7px 0;display:none;" download="' + recordingId + '.mp4">' +
+    '<span class="glyphicon glyphicon-cloud-download"></span> <b>Download Recording</b></a></p>' +
+    '<div id="recording_' + recordingId + '_error"></div><hr/></div>');
+};
+
 Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
   var timestamp = new Date();
   var isFile = typeof content === 'object';
@@ -485,6 +513,31 @@ Demo.Skylink.on('channelError', function (error) {
   Demo.Methods.displayChatMessage('System', 'Channel Error:<br>' + (error.message || error));
 });
 //---------------------------------------------------
+Demo.Skylink.on('recordingState', function (state, recordingId, url, error) {
+  console.info('recordingState', state, recordingId, url, error);
+
+  switch(state) {
+    case Demo.Skylink.RECORDING_STATE.START:
+      Demo.Methods.displayRecordingSessionHTML(recordingId);
+      break;
+    case Demo.Skylink.RECORDING_STATE.STOP:
+      $('#recording_' +recordingId + '_state_icon').attr('class', 'glyphicon glyphicon-refresh');
+      $('#recording_' + recordingId + '_state').html('STOPPED / PROCESSING VIDEO');
+      $('#recording_' + recordingId + '_error').html('');
+      break;
+    case Demo.Skylink.RECORDING_STATE.LINK:
+      $('#recording_' + recordingId + '_state_icon').attr('class', 'glyphicon glyphicon-ok');
+      $('#recording_' + recordingId + '_state').html('COMPLETED');
+      $('#recording_' + recordingId + '_btn').attr('href', url).show();
+      $('#recording_' + recordingId + '_error').html('');
+      break;
+    case Demo.Skylink.RECORDING_STATE.ERROR:
+      $('#recording_' + recordingId + '_state_icon').attr('class', 'glyphicon glyphicon-warning-sign');
+      $('#recording_' + recordingId + '_state').html('ERROR');
+      $('#recording_' + recordingId + '_error').html('Recording session error:<br>' + (error.message || error.toString()));
+  }
+});
+//---------------------------------------------------
 Demo.Skylink.on('mediaAccessError', function (error) {
   //alert((error.message || error));
 });
@@ -677,6 +730,12 @@ $(document).ready(function () {
   });
   $('#stop_screen_btn').click(function () {
     Demo.Skylink.stopScreen();
+  });
+  $('#start_recording_btn').click(function () {
+    Demo.Skylink.startRecording();
+  });
+  $('#stop_recording_btn').click(function () {
+    Demo.Skylink.stopRecording();
   });
 
   window.selectTargetPeer = function(dom) {

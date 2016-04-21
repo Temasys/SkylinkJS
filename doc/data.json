@@ -8701,7 +8701,40 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1320,
+            "line": 1319,
+            "description": "Event triggered when the current state of the recording session has changed.\n- See {{#crossLink \"Skylink/startRecording:method\"}}startRecording(){{/crossLink}} and\n  {{#crossLink \"Skylink/stopRecording:method\"}}stopRecording(){{/crossLink}}.",
+            "itemtype": "event",
+            "name": "recordingState",
+            "params": [
+                {
+                    "name": "state",
+                    "description": "The current recording state.\n  [Rel: Skylink.RECORDING_STATE]",
+                    "type": "Number"
+                },
+                {
+                    "name": "recordingId",
+                    "description": "The recording session ID.",
+                    "type": "String"
+                },
+                {
+                    "name": "link",
+                    "description": "The recording session URL compiled once the recording has mixing and completed.",
+                    "type": "String"
+                },
+                {
+                    "name": "error",
+                    "description": "The error object received when there's an exception for the recording session.",
+                    "type": "Object"
+                }
+            ],
+            "beta": 1,
+            "component": "Events",
+            "since": "0.6.-",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 1337,
             "description": "Stores the list of {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}}\n  event subscription handlers.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -8729,7 +8762,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1341,
+            "line": 1358,
             "description": "The throttling function datetime stamp in\n  [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601).",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -8743,7 +8776,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1357,
+            "line": 1374,
             "description": "Triggers event subscription handlers that is associated with the event name.\n{{#crossLink \"Skylink/on:method\"}}on() event subscription handlers{{/crossLink}}\n  will be triggered always, but\n  {{#crossLink \"Skylink/once:method\"}}once() event subscription hadlers{{/crossLink}}\n  will only be triggered once the condition is met.",
             "itemtype": "method",
             "name": "_trigger",
@@ -8762,7 +8795,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1416,
+            "line": 1433,
             "description": "Subscribes an event handler associated to the event name.\nThis event handler will always be triggered when the event name is triggered. If you\n  are looking for subscription event handler to be triggered once, check out\n  {{#crossLink \"Skylink/once:method\"}}once() event subscription{{/crossLink}}.",
             "itemtype": "method",
             "name": "on",
@@ -8787,7 +8820,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1443,
+            "line": 1460,
             "description": "Subscribes an event handler associated to the event name that\n   would only be triggered once the provided condition function has been met.",
             "itemtype": "method",
             "name": "once",
@@ -8825,7 +8858,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1492,
+            "line": 1509,
             "description": "Unsubscribes an event handler associated to the event name.",
             "itemtype": "method",
             "name": "off",
@@ -8851,7 +8884,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1539,
+            "line": 1556,
             "description": "Checks if the first condition is already met before doing an event\n  handler subscription to wait for the second condition to be met.\nThis method will do a event subscription with\n  {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}} as this\n  <code>_condition()</code> would only trigger once, unless <code>fireAlways</code>\n  is set to <code>true</code>.",
             "itemtype": "method",
             "name": "_condition",
@@ -8894,7 +8927,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1590,
+            "line": 1607,
             "description": "Starts the interval check for the condition provided to meet before clearing\n  the interval and triggering the callback provided.\nThis utilises <code>setInterval()</code> function.",
             "itemtype": "method",
             "name": "_wait",
@@ -8925,7 +8958,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1640,
+            "line": 1657,
             "description": "Returns a wrapper of the original function, which fires only once during\n a specified amount of time.",
             "itemtype": "method",
             "name": "_throttle",
@@ -9395,7 +9428,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 117,
+            "line": 120,
             "description": "The flag that indicates if MCU is enabled.",
             "itemtype": "attribute",
             "name": "_hasMCU",
@@ -9409,7 +9442,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 129,
+            "line": 132,
             "description": "Stores the list of types of socket messages that requires to be queued or bundled\n   before sending to the server to prevent platform signaling from dropping of socket messages.",
             "itemtype": "attribute",
             "name": "_groupMessageList",
@@ -9423,7 +9456,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 149,
+            "line": 152,
             "description": "The flag that indicates if MCU is in the room and is enabled.",
             "itemtype": "attribute",
             "name": "_hasMCU",
@@ -9438,7 +9471,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 163,
+            "line": 166,
             "description": "The flag that indicates that the current self connection\n  should only receive streaming Stream objects from other Peer connection\n  and not send streaming Stream objects to other Peer connection.",
             "itemtype": "attribute",
             "name": "_receiveOnly",
@@ -9453,7 +9486,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 179,
+            "line": 182,
             "description": "Parses any <code>GROUP</code> type of message received and split them up to\n  send them to {{#crossLink \"Skylink/_processSingleMessage:method\"}}_processSingleMessage(){{/crossLink}}\n  to handle the individual message object received.\nIf the message is not <code>GROUP</code> type of message received, it will send\n  it directly to {{#crossLink \"Skylink/_processSingleMessage:method\"}}_processSingleMessage(){{/crossLink}}",
             "itemtype": "method",
             "name": "_processSigMessage",
@@ -9472,7 +9505,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 204,
+            "line": 207,
             "description": "Routes the data received to the relevant Protocol handler based on the socket message received.",
             "itemtype": "method",
             "name": "_processingSingleMessage",
@@ -9491,7 +9524,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 292,
+            "line": 298,
             "description": "Handles the PEER_LIST message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_peerListEventHandler",
@@ -9527,7 +9560,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 312,
+            "line": 318,
             "description": "Handles the INTRODUCE_ERROR message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_introduceErrorEventHandler",
@@ -9568,7 +9601,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 332,
+            "line": 338,
             "description": "Handles the APPROACH message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_approachEventHandler",
@@ -9599,7 +9632,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 364,
+            "line": 370,
             "description": "Handles the REDIRECT message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_redirectHandler",
@@ -9646,7 +9679,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 400,
+            "line": 406,
             "description": "Handles the UPDATE_USER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
@@ -9688,7 +9721,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 428,
+            "line": 434,
             "description": "Handles the ROOM_LOCK Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
@@ -9730,7 +9763,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 450,
+            "line": 456,
             "description": "Handles the MUTE_AUDIO Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -9772,7 +9805,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 478,
+            "line": 484,
             "description": "Handles the MUTE_VIDEO Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -9814,7 +9847,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 506,
+            "line": 512,
             "description": "Handles the STREAM Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_streamEventHandler",
@@ -9866,7 +9899,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 554,
+            "line": 560,
             "description": "Handles the BYE Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -9903,7 +9936,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 580,
+            "line": 586,
             "description": "Handles the PRIVATE_MESSAGE Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -9955,7 +9988,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 610,
+            "line": 616,
             "description": "Handles the PUBLIC_MESSAGE Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -10002,7 +10035,41 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 640,
+            "line": 646,
+            "description": "Handles the RECORDING Protocol message event received from the platform signaling.",
+            "itemtype": "method",
+            "name": "_recordingEventHandler",
+            "params": [
+                {
+                    "name": "message",
+                    "description": "The message object received from platform signaling.\n   This should contain the <code>RECORDING</code> payload.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "url",
+                            "description": "The recording URL if mixing has completed.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "action",
+                            "description": "The recording action received.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "error",
+                            "description": "The recording error exception received.",
+                            "type": "String"
+                        }
+                    ]
+                }
+            ],
+            "access": "private",
+            "tagname": "",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/socket-message.js",
+            "line": 701,
             "description": "Handles the IN_ROOM Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -10050,7 +10117,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 705,
+            "line": 766,
             "description": "Handles the ENTER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -10225,7 +10292,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 841,
+            "line": 902,
             "description": "Handles the RESTART Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -10439,7 +10506,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1035,
+            "line": 1096,
             "description": "Handles the WELCOME Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -10636,7 +10703,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1203,
+            "line": 1264,
             "description": "Handles the OFFER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -10683,7 +10750,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1296,
+            "line": 1357,
             "description": "Handles the CANDIDATE Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -10739,7 +10806,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1405,
+            "line": 1466,
             "description": "Handles the ANSWER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -10786,7 +10853,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1515,
+            "line": 1576,
             "description": "Send a message object or string using the platform signaling socket connection\n  to the list of targeted PeerConnections.\nTo send message objects with DataChannel connections, see\n  {{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.",
             "itemtype": "method",
             "name": "sendMessage",
@@ -10809,6 +10876,26 @@
             "trigger": "incomingMessage",
             "component": "Message",
             "since": "0.4.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/socket-message.js",
+            "line": 1662,
+            "description": "Starts a recording session.\n- This can only be used for a recording enabled MCU key.",
+            "beta": 1,
+            "itemtype": "method",
+            "name": "startRecording",
+            "since": "0.6.-",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/socket-message.js",
+            "line": 1693,
+            "description": "Stops a recording session.\n- This can only be used for a recording enabled MCU key.",
+            "itemtype": "method",
+            "name": "stopRecording",
+            "beta": 1,
+            "since": "0.6.-",
             "class": "Skylink"
         },
         {
@@ -11014,6 +11101,52 @@
         {
             "file": "source/stream-media.js",
             "line": 162,
+            "description": "Contains the list of recording states.",
+            "itemtype": "attribute",
+            "name": "RECORDING_STATE",
+            "params": [
+                {
+                    "name": "START",
+                    "description": "Value <code>0</code></small>\n  The state when recording session has started.",
+                    "type": "Number"
+                },
+                {
+                    "name": "STOP",
+                    "description": "<small>Value <code>1</code></small>\n  The state when recording session has stopped. During this time, the recorded videos will go\n  throught the mixing server to compile the videos into one video link.",
+                    "type": "Number"
+                },
+                {
+                    "name": "LINK",
+                    "description": "<small>Value <code>2</code></small>\n  The state when recording session mixing for the video has been completed. At this stage,\n  the link to the mixin video is available.",
+                    "type": "Number"
+                },
+                {
+                    "name": "ERROR",
+                    "description": "<small>Value <code>-1</code></small>\n  The state when recording session has exception.",
+                    "type": "Number"
+                },
+                {
+                    "name": "UNKNOWN",
+                    "description": ""
+                }
+            ],
+            "type": "JSON",
+            "since": "0.6.-",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/stream-media.js",
+            "line": 187,
+            "description": "Stores the list of recordings.",
+            "itemtype": "attribute",
+            "name": "_recordings",
+            "type": "JSON",
+            "since": "0.6.-",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/stream-media.js",
+            "line": 196,
             "description": "Stores the self user media MediaStream object.",
             "itemtype": "attribute",
             "name": "_mediaStream",
@@ -11026,7 +11159,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 173,
+            "line": 207,
             "description": "Stores the self screensharing MediaStream.",
             "itemtype": "attribute",
             "name": "_mediaScreen",
@@ -11039,7 +11172,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 184,
+            "line": 218,
             "description": "Stores the self screensharing audio MediaStream\n  for browsers that do not support bundling of\n  screensharing MediaStream with <code>audio: true</code>.\nThe current {{#crossLink \"Skylink/_mediaScreen:attribute\"}}_mediaScreen{{/crossLink}}\n  clones this MediaStream object and <code>.addTrack()</code> with the\n  screensharing MediaStream object video MediaStreamTrack object.",
             "itemtype": "attribute",
             "name": "_mediaScreenClone",
@@ -11052,7 +11185,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 200,
+            "line": 234,
             "description": "Stores the Skylink default streaming settings.",
             "itemtype": "attribute",
             "name": "_defaultStreamSettings",
@@ -11124,7 +11257,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 250,
+            "line": 284,
             "description": "Stores self user media Stream streaming settings. If both audio and video\n  option is <code>false</code>, there should be no\n  receiving remote Stream object from self connection.",
             "itemtype": "attribute",
             "name": "_streamSettings",
@@ -11235,7 +11368,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 307,
+            "line": 341,
             "description": "Stores self screensharing Stream streaming settings.",
             "itemtype": "attribute",
             "name": "_screenSharingStreamSettings",
@@ -11286,7 +11419,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 338,
+            "line": 372,
             "description": "The flag that indicates if self browser supports the screensharing feature.\nCurrently, Opera does not support screensharing and only premium\n  Temasys plugins support this screensharing feature.",
             "itemtype": "attribute",
             "name": "_screenSharingAvailable",
@@ -11300,7 +11433,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 352,
+            "line": 386,
             "description": "Stores the\n  [getUserMedia MediaStreamConstraints](https://w3c.github.io/mediacapture-main/getusermedia.html#idl-def-MediaStreamConstraints)\n  parsed from {{#crossLink \"Skylink/_streamSettings:attribute\"}}_streamSettings{{/crossLink}}\n  for user media Stream object.",
             "itemtype": "attribute",
             "name": "_getUserMediaSettings",
@@ -11363,7 +11496,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 384,
+            "line": 418,
             "description": "Stores self Stream mute settings for both audio and video streamings.",
             "itemtype": "attribute",
             "name": "_mediaStreamsStatus",
@@ -11392,7 +11525,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 403,
+            "line": 437,
             "description": "The flag indicates that when Skylink tries to get both audio and video stream\n  but Skylink fails to retrieve the user media stream, it should fallback\n  to retrieve audio streaming for the user media stream only.",
             "itemtype": "attribute",
             "name": "_audioFallback",
@@ -11407,7 +11540,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 418,
+            "line": 452,
             "description": "Handles the event when access to self user media MediaStream is successful.",
             "itemtype": "method",
             "name": "_onUserMediaSuccess",
@@ -11434,7 +11567,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 528,
+            "line": 562,
             "description": "Handles the event when access to self user media MediaStream has failed.",
             "itemtype": "method",
             "name": "_onUserMediaError",
@@ -11468,7 +11601,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 584,
+            "line": 618,
             "description": "Handles the event when remote MediaStream is received from Peer connection.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -11500,7 +11633,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 631,
+            "line": 665,
             "description": "Parses the audio stream settings for self provided.",
             "itemtype": "method",
             "name": "_parseAudioStreamSettings",
@@ -11540,7 +11673,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 690,
+            "line": 724,
             "description": "Parses the video stream settings for self provided.",
             "itemtype": "method",
             "name": "_parseVideoStreamSettings",
@@ -11606,7 +11739,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 791,
+            "line": 825,
             "description": "Parses the streaming bandwidth settings for self provided.",
             "itemtype": "method",
             "name": "_parseBandwidthSettings",
@@ -11646,7 +11779,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 835,
+            "line": 869,
             "description": "Parses the <code>mediaStatus</code> settings for self provided.",
             "itemtype": "method",
             "name": "_parseMutedSettings",
@@ -11742,7 +11875,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 903,
+            "line": 937,
             "description": "Parses the default stream settings received from\n  the platform signaling.",
             "itemtype": "method",
             "name": "_parseDefaultMediaStreamSettings",
@@ -11775,7 +11908,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 937,
+            "line": 971,
             "description": "Parses the provided stream settings for self provided.",
             "itemtype": "method",
             "name": "_parseMediaStreamSettings",
@@ -11887,7 +12020,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1018,
+            "line": 1052,
             "description": "Sends self selected Stream object to current Peer connections.\nIf {{#crossLink \"Skylink/_mediaScreen:attribute\"}}_mediaScreen{{/crossLink}}\n  is not empty, it will send the screensharing stream, else it will\n  send the {{#crossLink \"Skylink/_mediaStream:attribute\"}}_mediaStream{{/crossLink}}\n  if is not empty.\nIf self does not have any Stream object to send, it will a connection without\n  any remote Stream sent to the Peer connection.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -11906,7 +12039,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1099,
+            "line": 1133,
             "description": "Stops self user media Stream object attached to Skylink.",
             "itemtype": "method",
             "name": "stopStream",
@@ -11919,7 +12052,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1115,
+            "line": 1149,
             "description": "Handles the muting of audio and video streams in\n  {{#crossLink \"Skylink/_mediaStream:attribute\"}}_mediaStream{{/crossLink}},\n  {{#crossLink \"Skylink/_mediaScreen:attribute\"}}_mediaScreen{{/crossLink}} and\n  {{#crossLink \"Skylink/_mediaScreenClone:attribute\"}}_mediaScreenClone{{/crossLink}},",
             "itemtype": "method",
             "name": "_muteLocalMediaStreams",
@@ -11934,7 +12067,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1227,
+            "line": 1261,
             "description": "Handles the stopping of audio and video streams.",
             "itemtype": "method",
             "name": "_stopLocalMediaStreams",
@@ -11968,7 +12101,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1330,
+            "line": 1364,
             "description": "Waits for self MediaStream object to be attached to Skylink based\n  on the options provided before firing the callback to indicate\n  that self Stream object is received.\nThis will stop any currently attached Stream object to Skylink.",
             "itemtype": "method",
             "name": "_waitForLocalMediaStream",
@@ -12107,7 +12240,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1465,
+            "line": 1499,
             "description": "Gets self user media Stream object to attach to Skylink.\nDo not invoke this function when user has already joined a room as\n  this may affect any currently attached stream. You may use\n {{#crossLink \"Skylink/sendStream:method\"}}sendStream(){{/crossLink}}\n instead if self is already in the room, and allows application to\n attach application own MediaStream object to Skylink.",
             "itemtype": "method",
             "name": "getUserMedia",
@@ -12225,7 +12358,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1700,
+            "line": 1734,
             "description": "Replaces the currently attached Stream object in Skylink and refreshes all\n  connection with Peer connections to send the updated Stream object.\nThe application may provide their own MediaStream object to send to\n  all PeerConnections connection.\nReference {{#crossLink \"Skylink/refreshConnection:method\"}}refreshConnection(){{/crossLink}}\n   on the events triggered and restart mechanism.",
             "itemtype": "method",
             "name": "sendStream",
@@ -12342,7 +12475,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1933,
+            "line": 1967,
             "description": "Mutes the currently attached Stream object in Skylink.",
             "itemtype": "method",
             "name": "muteStream",
@@ -12379,7 +12512,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2035,
+            "line": 2069,
             "description": "Unmutes the currently attached Stream object audio stream.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -12395,7 +12528,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2053,
+            "line": 2087,
             "description": "Mutes the currently attached Stream object audio stream.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -12411,7 +12544,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2071,
+            "line": 2105,
             "description": "Unmutes the currently attached Stream object video stream.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -12427,7 +12560,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2089,
+            "line": 2123,
             "description": "Mutes the currently attached Stream object video stream.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -12442,7 +12575,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2106,
+            "line": 2140,
             "description": "Shares the current screen with Peer connections and will refresh all\n   Peer connections to send the screensharing Stream object with\n   <code>HTTPS</code> protocol accessing application.\nReference {{#crossLink \"Skylink/refreshConnection:method\"}}refreshConnection(){{/crossLink}}\n   on the events triggered and restart mechanism.\nThis will require our own Temasys Skylink extension to do screensharing.\nFor screensharing feature in IE / Safari with our Temasys Plugin, please\n  [contact us](https://www.temasys.com.sg/contact-us).\nCurrently, Opera does not support screensharing feature.\nThis does not replace the currently attached user media Stream object in Skylink.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -12483,7 +12616,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2318,
+            "line": 2352,
             "description": "Stops self screensharing Stream object attached to Skylink.\nIf user media Stream object is available, Skylink will refresh all\n   Peer connections to send the user media Stream object.\nReference {{#crossLink \"Skylink/refreshConnection:method\"}}refreshConnection(){{/crossLink}}\n   on the events triggered and restart mechanism.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -13616,39 +13749,43 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1320"
+            "line": " source/skylink-events.js:1319"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1341"
+            "line": " source/skylink-events.js:1337"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1357"
+            "line": " source/skylink-events.js:1358"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1416"
+            "line": " source/skylink-events.js:1374"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1443"
+            "line": " source/skylink-events.js:1433"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1492"
+            "line": " source/skylink-events.js:1460"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1539"
+            "line": " source/skylink-events.js:1509"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1590"
+            "line": " source/skylink-events.js:1556"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1640"
+            "line": " source/skylink-events.js:1607"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/skylink-events.js:1657"
         },
         {
             "message": "unknown tag: component",
@@ -13728,179 +13865,179 @@
         },
         {
             "message": "unknown tag: development",
-            "line": " source/socket-message.js:117"
+            "line": " source/socket-message.js:120"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:117"
+            "line": " source/socket-message.js:120"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:129"
+            "line": " source/socket-message.js:132"
         },
         {
             "message": "unknown tag: development",
-            "line": " source/socket-message.js:149"
+            "line": " source/socket-message.js:152"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:149"
+            "line": " source/socket-message.js:152"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:163"
+            "line": " source/socket-message.js:166"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:179"
+            "line": " source/socket-message.js:182"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:204"
+            "line": " source/socket-message.js:207"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:292"
+            "line": " source/socket-message.js:298"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:312"
+            "line": " source/socket-message.js:318"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:332"
+            "line": " source/socket-message.js:338"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:364"
+            "line": " source/socket-message.js:370"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:364"
+            "line": " source/socket-message.js:370"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:400"
+            "line": " source/socket-message.js:406"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:400"
+            "line": " source/socket-message.js:406"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:428"
+            "line": " source/socket-message.js:434"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:428"
+            "line": " source/socket-message.js:434"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:450"
+            "line": " source/socket-message.js:456"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:450"
+            "line": " source/socket-message.js:456"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:478"
+            "line": " source/socket-message.js:484"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:478"
+            "line": " source/socket-message.js:484"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:506"
+            "line": " source/socket-message.js:512"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:506"
+            "line": " source/socket-message.js:512"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:554"
+            "line": " source/socket-message.js:560"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:554"
+            "line": " source/socket-message.js:560"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:580"
+            "line": " source/socket-message.js:586"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:580"
+            "line": " source/socket-message.js:586"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:610"
+            "line": " source/socket-message.js:616"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:610"
+            "line": " source/socket-message.js:616"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:640"
+            "line": " source/socket-message.js:701"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:640"
+            "line": " source/socket-message.js:701"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:705"
+            "line": " source/socket-message.js:766"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:705"
+            "line": " source/socket-message.js:766"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:841"
+            "line": " source/socket-message.js:902"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:841"
+            "line": " source/socket-message.js:902"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1035"
+            "line": " source/socket-message.js:1096"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1035"
+            "line": " source/socket-message.js:1096"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1203"
+            "line": " source/socket-message.js:1264"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1203"
+            "line": " source/socket-message.js:1264"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1296"
+            "line": " source/socket-message.js:1357"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1405"
+            "line": " source/socket-message.js:1466"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1405"
+            "line": " source/socket-message.js:1466"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1515"
+            "line": " source/socket-message.js:1576"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1515"
+            "line": " source/socket-message.js:1576"
         },
         {
             "message": "unknown tag: component",
@@ -13923,88 +14060,88 @@
             "line": " source/stream-media.js:80"
         },
         {
-            "message": "unknown tag: component",
+            "message": "param name missing: {}",
             "line": " source/stream-media.js:162"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:173"
+            "line": " source/stream-media.js:196"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:184"
+            "line": " source/stream-media.js:207"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:200"
+            "line": " source/stream-media.js:218"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:250"
+            "line": " source/stream-media.js:234"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:307"
+            "line": " source/stream-media.js:284"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:338"
+            "line": " source/stream-media.js:341"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:352"
+            "line": " source/stream-media.js:372"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:384"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/stream-media.js:403"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:418"
+            "line": " source/stream-media.js:386"
         },
         {
             "message": "unknown tag: component",
             "line": " source/stream-media.js:418"
         },
         {
-            "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:528"
-        },
-        {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:528"
+            "line": " source/stream-media.js:437"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:584"
+            "line": " source/stream-media.js:452"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:584"
+            "line": " source/stream-media.js:452"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/stream-media.js:562"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:631"
+            "line": " source/stream-media.js:562"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/stream-media.js:618"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:690"
+            "line": " source/stream-media.js:618"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:791"
+            "line": " source/stream-media.js:665"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:835"
+            "line": " source/stream-media.js:724"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:903"
+            "line": " source/stream-media.js:825"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/stream-media.js:869"
         },
         {
             "message": "unknown tag: component",
@@ -14012,103 +14149,107 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1018"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1099"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1330"
+            "line": " source/stream-media.js:971"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1330"
+            "line": " source/stream-media.js:1052"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1465"
+            "line": " source/stream-media.js:1133"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/stream-media.js:1364"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1465"
+            "line": " source/stream-media.js:1364"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1700"
+            "line": " source/stream-media.js:1499"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1700"
+            "line": " source/stream-media.js:1499"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1933"
+            "line": " source/stream-media.js:1734"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1933"
+            "line": " source/stream-media.js:1734"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2035"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2035"
+            "line": " source/stream-media.js:1967"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2035"
+            "line": " source/stream-media.js:1967"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2053"
+            "line": " source/stream-media.js:2069"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2053"
+            "line": " source/stream-media.js:2069"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2053"
+            "line": " source/stream-media.js:2069"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2071"
+            "line": " source/stream-media.js:2087"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2071"
+            "line": " source/stream-media.js:2087"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2071"
+            "line": " source/stream-media.js:2087"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/stream-media.js:2105"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/stream-media.js:2105"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/stream-media.js:2105"
         },
         {
             "message": "unknown tag: depcreated",
-            "line": " source/stream-media.js:2089"
+            "line": " source/stream-media.js:2123"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2089"
+            "line": " source/stream-media.js:2123"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2089"
+            "line": " source/stream-media.js:2123"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2106"
+            "line": " source/stream-media.js:2140"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2106"
+            "line": " source/stream-media.js:2140"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2318"
+            "line": " source/stream-media.js:2352"
         },
         {
             "message": "unknown tag: component",

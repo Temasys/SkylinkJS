@@ -202,7 +202,10 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   PEER_LIST: &#x27;peerList&#x27;,
   INTRODUCE: &#x27;introduce&#x27;,
   INTRODUCE_ERROR: &#x27;introduceError&#x27;,
-  APPROACH: &#x27;approach&#x27;
+  APPROACH: &#x27;approach&#x27;,
+  START_RECORDING: &#x27;startRecordingRoom&#x27;,
+  STOP_RECORDING: &#x27;stopRecordingRoom&#x27;,
+  RECORDING: &#x27;recordingEvent&#x27;
 };
 
 /**
@@ -373,6 +376,9 @@ Skylink.prototype._processSingleMessage = function(message) {
     break;
   case this._SIG_MESSAGE_TYPE.APPROACH:
     this._approachEventHandler(message);
+    break;
+  case this._SIG_MESSAGE_TYPE.RECORDING:
+    this._recordingEventHandler(message);
     break;
   default:
     log.error([message.mid, null, null, &#x27;Unsupported message -&gt;&#x27;], message.type);
@@ -726,6 +732,61 @@ Skylink.prototype._publicMessageHandler = function(message) {
     isDataChannel: false,
     senderPeerId: targetMid
   }, targetMid, this.getPeerInfo(targetMid), false);
+};
+
+/**
+ * Handles the RECORDING Protocol message event received from the platform signaling.
+ * @method _recordingEventHandler
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the &lt;code&gt;RECORDING&lt;/code&gt; payload.
+ * @param {String} message.url The recording URL if mixing has completed.
+ * @param {String} message.action The recording action received.
+ * @param {String} message.error The recording error exception received.
+ * @private
+ * @for Skylink
+ */
+Skylink.prototype._recordingEventHandler = function (message) {
+  log.debug([&#x27;MCU&#x27;, &#x27;Recording&#x27;, null, &#x27;Received recording message -&gt;&#x27;], message);
+  if (message.action === &#x27;on&#x27;) {
+    if (!this._recordings[message.recordingId]) {
+      log.debug([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Started recording&#x27;]);
+      this._recordings[message.recordingId] = {
+        isOn: true,
+        url: null,
+        error: null
+      };
+      this._trigger(&#x27;recordingState&#x27;, this.RECORDING_STATE.START, message.recordingId, null, null);
+    }
+  } else if (message.action === &#x27;off&#x27;) {
+    if (!this._recordings[message.recordingId]) {
+      log.error([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Received request of &quot;off&quot; but the session is empty&#x27;]);
+      return;
+    }
+    log.debug([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Stopped recording&#x27;]);
+    this._recordings[message.recordingId].isOn = false;
+    this._trigger(&#x27;recordingState&#x27;, this.RECORDING_STATE.STOP, message.recordingId, null, null);
+  } else if (message.action === &#x27;url&#x27;) {
+    if (!this._recordings[message.recordingId]) {
+      log.error([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Received URL but the session is empty&#x27;]);
+      return;
+    }
+    this._recordings[message.recordingId].url = message.url;
+    this._trigger(&#x27;recordingState&#x27;, this.RECORDING_STATE.LINK, message.recordingId, message.url, null);
+  } else {
+    var recordingError = new Error(message.error || &#x27;Unknown error&#x27;);
+    if (!this._recordings[message.recordingId]) {
+      log.error([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Received error but the session is empty -&gt;&#x27;], recordingError);
+      return;
+    }
+    log.error([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Recording failure -&gt;&#x27;], recordingError);
+    this._recordings[message.recordingId].error = recordingError;
+    this._trigger(&#x27;recordingState&#x27;, this.RECORDING_STATE.ERROR, message.recordingId, null, recordingError);
+    if (this._recordings[message.recordingId].isOn) {
+      log.debug([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Stopped recording abruptly&#x27;]);
+      this._recordings[message.recordingId].isOn = false;
+      this._trigger(&#x27;recordingState&#x27;, this.RECORDING_STATE.STOP, message.recordingId, null, recordingError);
+    }
+  }
 };
 
 /**
@@ -1689,6 +1750,67 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
   }, this._user.sid, this.getPeerInfo(), true);
 };
 
+/**
+ * Starts a recording session.
+ * - This can only be used for a recording enabled MCU key.
+ * @beta
+ * @method startRecording
+ * @for Skylink
+ * @since 0.6.-
+ */
+Skylink.prototype.startRecording = function () {
+  if (!this._hasMCU) {
+    log.error(&#x27;Unable to start recording as MCU is not connected&#x27;);
+    return;
+  }
+
+  // NOTE: Not sure if this is needed? just return as log.error?
+  /*if (this._isRecording) {
+    log.error(&#x27;Unable to start recording as there is an existing recording in-progress&#x27;);
+    return;
+  }*/
+
+  this._sendChannelMessage({
+
+    type: this._SIG_MESSAGE_TYPE.START_RECORDING,
+    rid: this._room.id,
+    target: &#x27;MCU&#x27;
+
+  });
+
+  log.debug([&#x27;MCU&#x27;, &#x27;Recording&#x27;, null, &#x27;Starting recording&#x27;]);
+};
+
+/**
+ * Stops a recording session.
+ * - This can only be used for a recording enabled MCU key.
+ * @method stopRecording
+ * @beta
+ * @for Skylink
+ * @since 0.6.-
+ */
+Skylink.prototype.stopRecording = function () {
+  if (!this._hasMCU) {
+    log.error(&#x27;Unable to stop recording as MCU is not connected&#x27;);
+    return;
+  }
+
+  // NOTE: Not sure if this is needed? just return as log.error?
+  /*if (!this._isRecording) {
+    log.error(&#x27;Unable to stop recording as there is no recording in-progress&#x27;);
+    return;
+  }*/
+
+  this._sendChannelMessage({
+
+    type: this._SIG_MESSAGE_TYPE.STOP_RECORDING,
+    rid: this._room.id,
+    target: &#x27;MCU&#x27;
+
+  });
+
+  log.debug([&#x27;MCU&#x27;, &#x27;Recording&#x27;, null, &#x27;Stopping recording&#x27;]);
+};
     </pre>
 </div>
 
