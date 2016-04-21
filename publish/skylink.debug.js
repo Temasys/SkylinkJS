@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.12 - Thu Apr 21 2016 16:56:26 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.12 - Thu Apr 21 2016 17:08:33 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9517,7 +9517,21 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.1
    */
-  introduceStateChange: []
+  introduceStateChange: [],
+
+  /**
+   * Event triggered when the current state of the recording session has changed.
+   * @event recordingState
+   * @param {Number} state The current recording state.
+   *   [Rel: Skylink.RECORDING_STATE]
+   * @param {String} recordingId The recording session ID.
+   * @param {String} link The recording session URL compiled once the recording has mixing and completed.
+   * @param {Object} error The error object received when there's an exception for the recording session.
+   * @component Events
+   * @for Skylink
+   * @since 0.6.-
+   */
+  recordingState: []
 };
 
 /**
@@ -11089,7 +11103,7 @@ Skylink.prototype._recordingEventHandler = function (message) {
         url: null,
         error: null
       };
-      this._trigger('recordingState', this.RECORDING_STATES.START, message.recordingId, null, null);
+      this._trigger('recordingState', this.RECORDING_STATE.START, message.recordingId, null, null);
     }
   } else if (message.action === 'off') {
     if (!this._recordings[message.recordingId]) {
@@ -11098,14 +11112,14 @@ Skylink.prototype._recordingEventHandler = function (message) {
     }
     log.debug(['MCU', 'Recording', message.recordingId, 'Stopped recording']);
     this._recordings[message.recordingId].isOn = false;
-    this._trigger('recordingState', this.RECORDING_STATES.STOP, message.recordingId, null, null);
+    this._trigger('recordingState', this.RECORDING_STATE.STOP, message.recordingId, null, null);
   } else if (message.action === 'url') {
     if (!this._recordings[message.recordingId]) {
       log.error(['MCU', 'Recording', message.recordingId, 'Received URL but the session is empty']);
       return;
     }
     this._recordings[message.recordingId].url = message.url;
-    this._trigger('recordingState', this.RECORDING_STATES.URL, message.recordingId, message.url, null);
+    this._trigger('recordingState', this.RECORDING_STATE.URL, message.recordingId, message.url, null);
   } else {
     var recordingError = new Error(message.error || 'Unknown error');
     if (!this._recordings[message.recordingId]) {
@@ -11114,11 +11128,11 @@ Skylink.prototype._recordingEventHandler = function (message) {
     }
     log.error(['MCU', 'Recording', message.recordingId, 'Recording failure ->'], recordingError);
     this._recordings[message.recordingId].error = recordingError;
-    this._trigger('recordingState', this.RECORDING_STATES.ERROR, message.recordingId, null, recordingError);
+    this._trigger('recordingState', this.RECORDING_STATE.ERROR, message.recordingId, null, recordingError);
     if (this._recordings[message.recordingId].isOn) {
       log.debug(['MCU', 'Recording', message.recordingId, 'Stopped recording abruptly']);
       this._recordings[message.recordingId].isOn = false;
-      this._trigger('recordingState', this.RECORDING_STATES.STOP, message.recordingId, null, recordingError);
+      this._trigger('recordingState', this.RECORDING_STATE.STOP, message.recordingId, null, recordingError);
     }
   }
 };
@@ -12223,6 +12237,40 @@ Skylink.prototype.VIDEO_RESOLUTION = {
   FUHD: { width: 7680, height: 4320, aspectRatio: '16:9' },
   QUHD: { width: 15360, height: 8640, aspectRatio: '16:9' }
 };
+
+/**
+ * Contains the list of recording states.
+ * @attribute RECORDING_STATE
+ * @param {Number} START Value <code>0</code></small>
+ *   The state when recording session has started.
+ * @param {Number} STOP <small>Value <code>1</code></small>
+ *   The state when recording session has stopped. During this time, the recorded videos will go
+ *   throught the mixing server to compile the videos into one video link.
+ * @param {Number} LINK <small>Value <code>2</code></small>
+ *   The state when recording session mixing for the video has been completed. At this stage,
+ *   the link to the mixin video is available.
+ * @param {Number} ERROR <small>Value <code>-1</code></small>
+ *   The state when recording session has exception.
+ * @param {}
+ * @type JSON
+ * @for Skylink
+ * @since 0.6.-
+ */
+Skylink.prototype.RECORDING_STATE = {
+  START: 0,
+  STOP: 1,
+  LINK: 2,
+  ERROR: -1
+};
+
+/**
+ * Stores the list of recordings.
+ * @attribute _recordings
+ * @type JSON
+ * @for Skylink
+ * @since 0.6.-
+ */
+Skylink.prototype._recordings = {};
 
 /**
  * Stores the self user media MediaStream object.

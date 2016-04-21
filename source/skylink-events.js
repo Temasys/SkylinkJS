@@ -1314,7 +1314,21 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.1
    */
-  introduceStateChange: []
+  introduceStateChange: [],
+
+  /**
+   * Event triggered when the current state of the recording session has changed.
+   * @event recordingState
+   * @param {Number} state The current recording state.
+   *   [Rel: Skylink.RECORDING_STATE]
+   * @param {String} recordingId The recording session ID.
+   * @param {String} link The recording session URL compiled once the recording has mixing and completed.
+   * @param {Object} error The error object received when there's an exception for the recording session.
+   * @component Events
+   * @for Skylink
+   * @since 0.6.-
+   */
+  recordingState: []
 };
 
 /**

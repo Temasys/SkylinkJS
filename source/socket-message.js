@@ -664,7 +664,7 @@ Skylink.prototype._recordingEventHandler = function (message) {
         url: null,
         error: null
       };
-      this._trigger('recordingState', this.RECORDING_STATES.START, message.recordingId, null, null);
+      this._trigger('recordingState', this.RECORDING_STATE.START, message.recordingId, null, null);
     }
   } else if (message.action === 'off') {
     if (!this._recordings[message.recordingId]) {
@@ -673,14 +673,14 @@ Skylink.prototype._recordingEventHandler = function (message) {
     }
     log.debug(['MCU', 'Recording', message.recordingId, 'Stopped recording']);
     this._recordings[message.recordingId].isOn = false;
-    this._trigger('recordingState', this.RECORDING_STATES.STOP, message.recordingId, null, null);
+    this._trigger('recordingState', this.RECORDING_STATE.STOP, message.recordingId, null, null);
   } else if (message.action === 'url') {
     if (!this._recordings[message.recordingId]) {
       log.error(['MCU', 'Recording', message.recordingId, 'Received URL but the session is empty']);
       return;
     }
     this._recordings[message.recordingId].url = message.url;
-    this._trigger('recordingState', this.RECORDING_STATES.URL, message.recordingId, message.url, null);
+    this._trigger('recordingState', this.RECORDING_STATE.URL, message.recordingId, message.url, null);
   } else {
     var recordingError = new Error(message.error || 'Unknown error');
     if (!this._recordings[message.recordingId]) {
@@ -689,11 +689,11 @@ Skylink.prototype._recordingEventHandler = function (message) {
     }
     log.error(['MCU', 'Recording', message.recordingId, 'Recording failure ->'], recordingError);
     this._recordings[message.recordingId].error = recordingError;
-    this._trigger('recordingState', this.RECORDING_STATES.ERROR, message.recordingId, null, recordingError);
+    this._trigger('recordingState', this.RECORDING_STATE.ERROR, message.recordingId, null, recordingError);
     if (this._recordings[message.recordingId].isOn) {
       log.debug(['MCU', 'Recording', message.recordingId, 'Stopped recording abruptly']);
       this._recordings[message.recordingId].isOn = false;
-      this._trigger('recordingState', this.RECORDING_STATES.STOP, message.recordingId, null, recordingError);
+      this._trigger('recordingState', this.RECORDING_STATE.STOP, message.recordingId, null, recordingError);
     }
   }
 };
