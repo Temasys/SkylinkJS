@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.12 - Thu Apr 21 2016 19:18:06 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.12 - Thu Apr 21 2016 19:48:51 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10461,7 +10461,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.12 - Thu Apr 21 2016 19:18:06 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.12 - Thu Apr 21 2016 19:48:51 GMT+0800 (SGT) */
 
 (function() {
 
@@ -10573,6 +10573,8 @@ var clone = function (obj) {
 
 /**
  * <h2>Before using Skylink</h2>
+ * <blockquote>This is SkylinkJS version <code>0.6.12</code> with recording beta changes</blockquote>
+ *
  * Please invoke {{#crossLink "Skylink/init:method"}}init(){{/crossLink}} method
  * first to initialise the Application Key before using any functionalities in Skylink.
  *
@@ -21557,7 +21559,9 @@ Skylink.prototype._publicMessageHandler = function(message) {
  * @param {String} message.action The recording action received.
  * @param {String} message.error The recording error exception received.
  * @private
+ * @beta
  * @for Skylink
+ * @since 0.6.-
  */
 Skylink.prototype._recordingEventHandler = function (message) {
   log.debug(['MCU', 'Recording', null, 'Received recording message ->'], message);
@@ -22778,7 +22782,7 @@ Skylink.prototype.VIDEO_RESOLUTION = {
  *   the link to the mixin video is available.
  * @param {Number} ERROR <small>Value <code>-1</code></small>
  *   The state when recording session has exception.
- * @param {}
+ * @beta
  * @type JSON
  * @for Skylink
  * @since 0.6.-
@@ -22794,6 +22798,8 @@ Skylink.prototype.RECORDING_STATE = {
  * Stores the list of recordings.
  * @attribute _recordings
  * @type JSON
+ * @private
+ * @beta
  * @for Skylink
  * @since 0.6.-
  */

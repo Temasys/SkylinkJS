@@ -172,7 +172,7 @@ Skylink.prototype.VIDEO_RESOLUTION = {
  *   the link to the mixin video is available.
  * @param {Number} ERROR <small>Value <code>-1</code></small>
  *   The state when recording session has exception.
- * @param {}
+ * @beta
  * @type JSON
  * @for Skylink
  * @since 0.6.-
@@ -188,6 +188,8 @@ Skylink.prototype.RECORDING_STATE = {
  * Stores the list of recordings.
  * @attribute _recordings
  * @type JSON
+ * @private
+ * @beta
  * @for Skylink
  * @since 0.6.-
  */

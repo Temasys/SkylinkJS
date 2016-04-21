@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.12</title>
+    <title>SkylinkJS 0.6.12 (recording beta)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.12</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.12 (recording beta)</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -743,7 +743,9 @@ Skylink.prototype._publicMessageHandler = function(message) {
  * @param {String} message.action The recording action received.
  * @param {String} message.error The recording error exception received.
  * @private
+ * @beta
  * @for Skylink
+ * @since 0.6.-
  */
 Skylink.prototype._recordingEventHandler = function (message) {
   log.debug([&#x27;MCU&#x27;, &#x27;Recording&#x27;, null, &#x27;Received recording message -&gt;&#x27;], message);

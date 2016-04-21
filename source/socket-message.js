@@ -652,7 +652,9 @@ Skylink.prototype._publicMessageHandler = function(message) {
  * @param {String} message.action The recording action received.
  * @param {String} message.error The recording error exception received.
  * @private
+ * @beta
  * @for Skylink
+ * @since 0.6.-
  */
 Skylink.prototype._recordingEventHandler = function (message) {
   log.debug(['MCU', 'Recording', null, 'Received recording message ->'], message);
