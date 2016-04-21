@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.12 - Thu Apr 21 2016 17:14:43 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.12 - Thu Apr 21 2016 19:16:38 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9529,6 +9529,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} recordingId The recording session ID.
    * @param {String} link The recording session URL compiled once the recording has mixing and completed.
    * @param {Object} error The error object received when there's an exception for the recording session.
+   * @beta
    * @component Events
    * @for Skylink
    * @since 0.6.-
@@ -11121,7 +11122,7 @@ Skylink.prototype._recordingEventHandler = function (message) {
       return;
     }
     this._recordings[message.recordingId].url = message.url;
-    this._trigger('recordingState', this.RECORDING_STATE.URL, message.recordingId, message.url, null);
+    this._trigger('recordingState', this.RECORDING_STATE.LINK, message.recordingId, message.url, null);
   } else {
     var recordingError = new Error(message.error || 'Unknown error');
     if (!this._recordings[message.recordingId]) {
@@ -12103,6 +12104,7 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
 /**
  * Starts a recording session.
  * - This can only be used for a recording enabled MCU key.
+ * @beta
  * @method startRecording
  * @for Skylink
  * @since 0.6.-
@@ -12134,6 +12136,7 @@ Skylink.prototype.startRecording = function () {
  * Stops a recording session.
  * - This can only be used for a recording enabled MCU key.
  * @method stopRecording
+ * @beta
  * @for Skylink
  * @since 0.6.-
  */

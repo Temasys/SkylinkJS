@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.12 - Thu Apr 21 2016 17:14:43 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.12 - Thu Apr 21 2016 19:16:38 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10461,7 +10461,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.12 - Thu Apr 21 2016 17:14:43 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.12 - Thu Apr 21 2016 19:16:38 GMT+0800 (SGT) */
 
 (function() {
 
@@ -19992,6 +19992,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} recordingId The recording session ID.
    * @param {String} link The recording session URL compiled once the recording has mixing and completed.
    * @param {Object} error The error object received when there's an exception for the recording session.
+   * @beta
    * @component Events
    * @for Skylink
    * @since 0.6.-
@@ -21584,7 +21585,7 @@ Skylink.prototype._recordingEventHandler = function (message) {
       return;
     }
     this._recordings[message.recordingId].url = message.url;
-    this._trigger('recordingState', this.RECORDING_STATE.URL, message.recordingId, message.url, null);
+    this._trigger('recordingState', this.RECORDING_STATE.LINK, message.recordingId, message.url, null);
   } else {
     var recordingError = new Error(message.error || 'Unknown error');
     if (!this._recordings[message.recordingId]) {
@@ -22566,6 +22567,7 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
 /**
  * Starts a recording session.
  * - This can only be used for a recording enabled MCU key.
+ * @beta
  * @method startRecording
  * @for Skylink
  * @since 0.6.-
@@ -22597,6 +22599,7 @@ Skylink.prototype.startRecording = function () {
  * Stops a recording session.
  * - This can only be used for a recording enabled MCU key.
  * @method stopRecording
+ * @beta
  * @for Skylink
  * @since 0.6.-
  */

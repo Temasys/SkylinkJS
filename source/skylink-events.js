@@ -1326,6 +1326,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} recordingId The recording session ID.
    * @param {String} link The recording session URL compiled once the recording has mixing and completed.
    * @param {Object} error The error object received when there's an exception for the recording session.
+   * @beta
    * @component Events
    * @for Skylink
    * @since 0.6.-

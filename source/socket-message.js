@@ -680,7 +680,7 @@ Skylink.prototype._recordingEventHandler = function (message) {
       return;
     }
     this._recordings[message.recordingId].url = message.url;
-    this._trigger('recordingState', this.RECORDING_STATE.URL, message.recordingId, message.url, null);
+    this._trigger('recordingState', this.RECORDING_STATE.LINK, message.recordingId, message.url, null);
   } else {
     var recordingError = new Error(message.error || 'Unknown error');
     if (!this._recordings[message.recordingId]) {
@@ -1662,6 +1662,7 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
 /**
  * Starts a recording session.
  * - This can only be used for a recording enabled MCU key.
+ * @beta
  * @method startRecording
  * @for Skylink
  * @since 0.6.-
@@ -1693,6 +1694,7 @@ Skylink.prototype.startRecording = function () {
  * Stops a recording session.
  * - This can only be used for a recording enabled MCU key.
  * @method stopRecording
+ * @beta
  * @for Skylink
  * @since 0.6.-
  */
