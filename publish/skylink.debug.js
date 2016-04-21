@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.12 - Thu Apr 21 2016 17:08:33 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.12 - Thu Apr 21 2016 17:14:43 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9521,6 +9521,8 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when the current state of the recording session has changed.
+   * - See {{#crossLink "Skylink/startRecording:method"}}startRecording(){{/crossLink}} and
+   *   {{#crossLink "Skylink/stopRecording:method"}}stopRecording(){{/crossLink}}.
    * @event recordingState
    * @param {Number} state The current recording state.
    *   [Rel: Skylink.RECORDING_STATE]
@@ -12098,6 +12100,65 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
   }, this._user.sid, this.getPeerInfo(), true);
 };
 
+/**
+ * Starts a recording session.
+ * - This can only be used for a recording enabled MCU key.
+ * @method startRecording
+ * @for Skylink
+ * @since 0.6.-
+ */
+Skylink.prototype.startRecording = function () {
+  if (!this._hasMCU) {
+    log.error('Unable to start recording as MCU is not connected');
+    return;
+  }
+
+  // NOTE: Not sure if this is needed? just return as log.error?
+  /*if (this._isRecording) {
+    log.error('Unable to start recording as there is an existing recording in-progress');
+    return;
+  }*/
+
+  this._sendChannelMessage({
+
+    type: this._SIG_MESSAGE_TYPE.START_RECORDING,
+    rid: this._room.id,
+    target: 'MCU'
+
+  });
+
+  log.debug(['MCU', 'Recording', null, 'Starting recording']);
+};
+
+/**
+ * Stops a recording session.
+ * - This can only be used for a recording enabled MCU key.
+ * @method stopRecording
+ * @for Skylink
+ * @since 0.6.-
+ */
+Skylink.prototype.stopRecording = function () {
+  if (!this._hasMCU) {
+    log.error('Unable to stop recording as MCU is not connected');
+    return;
+  }
+
+  // NOTE: Not sure if this is needed? just return as log.error?
+  /*if (!this._isRecording) {
+    log.error('Unable to stop recording as there is no recording in-progress');
+    return;
+  }*/
+
+  this._sendChannelMessage({
+
+    type: this._SIG_MESSAGE_TYPE.STOP_RECORDING,
+    rid: this._room.id,
+    target: 'MCU'
+
+  });
+
+  log.debug(['MCU', 'Recording', null, 'Stopping recording']);
+};
 Skylink.prototype.VIDEO_CODEC = {
   AUTO: 'auto',
   VP8: 'VP8',

@@ -1658,3 +1658,63 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
     senderPeerId: this._user.sid
   }, this._user.sid, this.getPeerInfo(), true);
 };
+
+/**
+ * Starts a recording session.
+ * - This can only be used for a recording enabled MCU key.
+ * @method startRecording
+ * @for Skylink
+ * @since 0.6.-
+ */
+Skylink.prototype.startRecording = function () {
+  if (!this._hasMCU) {
+    log.error('Unable to start recording as MCU is not connected');
+    return;
+  }
+
+  // NOTE: Not sure if this is needed? just return as log.error?
+  /*if (this._isRecording) {
+    log.error('Unable to start recording as there is an existing recording in-progress');
+    return;
+  }*/
+
+  this._sendChannelMessage({
+
+    type: this._SIG_MESSAGE_TYPE.START_RECORDING,
+    rid: this._room.id,
+    target: 'MCU'
+
+  });
+
+  log.debug(['MCU', 'Recording', null, 'Starting recording']);
+};
+
+/**
+ * Stops a recording session.
+ * - This can only be used for a recording enabled MCU key.
+ * @method stopRecording
+ * @for Skylink
+ * @since 0.6.-
+ */
+Skylink.prototype.stopRecording = function () {
+  if (!this._hasMCU) {
+    log.error('Unable to stop recording as MCU is not connected');
+    return;
+  }
+
+  // NOTE: Not sure if this is needed? just return as log.error?
+  /*if (!this._isRecording) {
+    log.error('Unable to stop recording as there is no recording in-progress');
+    return;
+  }*/
+
+  this._sendChannelMessage({
+
+    type: this._SIG_MESSAGE_TYPE.STOP_RECORDING,
+    rid: this._room.id,
+    target: 'MCU'
+
+  });
+
+  log.debug(['MCU', 'Recording', null, 'Stopping recording']);
+};

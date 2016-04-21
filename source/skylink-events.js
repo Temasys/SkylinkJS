@@ -1318,6 +1318,8 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when the current state of the recording session has changed.
+   * - See {{#crossLink "Skylink/startRecording:method"}}startRecording(){{/crossLink}} and
+   *   {{#crossLink "Skylink/stopRecording:method"}}stopRecording(){{/crossLink}}.
    * @event recordingState
    * @param {Number} state The current recording state.
    *   [Rel: Skylink.RECORDING_STATE]
