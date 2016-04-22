@@ -165,11 +165,12 @@ Skylink.prototype.VIDEO_RESOLUTION = {
  * @param {Number} START Value <code>0</code></small>
  *   The state when recording session has started.
  * @param {Number} STOP <small>Value <code>1</code></small>
- *   The state when recording session has stopped. During this time, the recorded videos will go
- *   throught the mixing server to compile the videos into one video link.
+ *   The state when recording session has stopped.<br>
+ *   During this time, the recorded videos will go
+ *   throught the mixin server to compile the videos into one video link.
  * @param {Number} LINK <small>Value <code>2</code></small>
- *   The state when recording session mixing for the video has been completed. At this stage,
- *   the link to the mixin video is available.
+ *   The state when recording session mixing for the video has been completed.<br>
+ *   At this stage, the link to the mixin video is available.
  * @param {Number} ERROR <small>Value <code>-1</code></small>
  *   The state when recording session has exception.
  * @beta

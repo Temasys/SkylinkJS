@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.12 - Thu Apr 21 2016 19:48:51 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.12 - Fri Apr 22 2016 11:45:29 GMT+0800 (SGT) */
 
 (function() {
 
@@ -110,7 +110,7 @@ var clone = function (obj) {
 
 /**
  * <h2>Before using Skylink</h2>
- * <blockquote>This is SkylinkJS version <code>0.6.12</code> with recording beta changes</blockquote>
+ * <blockquote class="info-panel">This is SkylinkJS version <code>0.6.12</code> with recording beta changes</blockquote>
  *
  * Please invoke {{#crossLink "Skylink/init:method"}}init(){{/crossLink}} method
  * first to initialise the Application Key before using any functionalities in Skylink.
@@ -12312,11 +12312,12 @@ Skylink.prototype.VIDEO_RESOLUTION = {
  * @param {Number} START Value <code>0</code></small>
  *   The state when recording session has started.
  * @param {Number} STOP <small>Value <code>1</code></small>
- *   The state when recording session has stopped. During this time, the recorded videos will go
- *   throught the mixing server to compile the videos into one video link.
+ *   The state when recording session has stopped.<br>
+ *   During this time, the recorded videos will go
+ *   throught the mixin server to compile the videos into one video link.
  * @param {Number} LINK <small>Value <code>2</code></small>
- *   The state when recording session mixing for the video has been completed. At this stage,
- *   the link to the mixin video is available.
+ *   The state when recording session mixing for the video has been completed.<br>
+ *   At this stage, the link to the mixin video is available.
  * @param {Number} ERROR <small>Value <code>-1</code></small>
  *   The state when recording session has exception.
  * @beta

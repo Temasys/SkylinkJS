@@ -108,7 +108,7 @@ var clone = function (obj) {
 
 /**
  * <h2>Before using Skylink</h2>
- * <blockquote>This is SkylinkJS version <code>0.6.12</code> with recording beta changes</blockquote>
+ * <blockquote class="info-panel">This is SkylinkJS version <code>0.6.12</code> with recording beta changes</blockquote>
  *
  * Please invoke {{#crossLink "Skylink/init:method"}}init(){{/crossLink}} method
  * first to initialise the Application Key before using any functionalities in Skylink.

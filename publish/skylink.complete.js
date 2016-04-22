@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.12 - Thu Apr 21 2016 19:48:51 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.12 - Fri Apr 22 2016 11:45:29 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7248,7 +7248,7 @@ function toArray(list, index) {
 },{}]},{},[31])(31)
 });
 
-/*! adapterjs - v0.13.3 - 2016-04-13 */
+/*! adapterjs - v0.13.2 - 2016-03-18 */
 
 // Adapter's interface.
 var AdapterJS = AdapterJS || {};
@@ -7267,7 +7267,7 @@ AdapterJS.options = AdapterJS.options || {};
 // AdapterJS.options.hidePluginInstallPrompt = true;
 
 // AdapterJS version
-AdapterJS.VERSION = '0.13.3';
+AdapterJS.VERSION = '0.13.2';
 
 // This function will be called when the WebRTC API is ready to be used
 // Whether it is the native implementation (Chrome, Firefox, Opera) or
@@ -9959,30 +9959,24 @@ if ( navigator.mozGetUserMedia ||
 
       // Call relevant PeerConnection constructor according to plugin version
       AdapterJS.WebRTCPlugin.WaitForPluginReady();
-
-      // RTCPeerConnection prototype from the old spec
-      var iceServers = null;
-      if (servers && Array.isArray(servers.iceServers)) {
-        iceServers = servers.iceServers;
-        for (var i = 0; i < iceServers.length; i++) {
-          // Legacy plugin versions compatibility
-          if (iceServers[i].urls && !iceServers[i].url) {
-            iceServers[i].url = iceServers[i].urls;
-          }
-          iceServers[i].hasCredentials = AdapterJS.
-            isDefined(iceServers[i].username) &&
-            AdapterJS.isDefined(iceServers[i].credential);
-        }
-      }
-
       if (AdapterJS.WebRTCPlugin.plugin.PEER_CONNECTION_VERSION &&
           AdapterJS.WebRTCPlugin.plugin.PEER_CONNECTION_VERSION > 1) {
         // RTCPeerConnection prototype from the new spec
-        if (iceServers) {
-          servers.iceServers = iceServers;
-        }
         return AdapterJS.WebRTCPlugin.plugin.PeerConnection(servers);
       } else {
+        // RTCPeerConnection prototype from the old spec
+        var iceServers = null;
+        if (servers && Array.isArray(servers.iceServers)) {
+          iceServers = servers.iceServers;
+          for (var i = 0; i < iceServers.length; i++) {
+            if (iceServers[i].urls && !iceServers[i].url) {
+              iceServers[i].url = iceServers[i].urls;
+            }
+            iceServers[i].hasCredentials = AdapterJS.
+              isDefined(iceServers[i].username) &&
+              AdapterJS.isDefined(iceServers[i].credential);
+          }
+        }
         var mandatory = (constraints && constraints.mandatory) ?
           constraints.mandatory : null;
         var optional = (constraints && constraints.optional) ?
@@ -10461,7 +10455,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.12 - Thu Apr 21 2016 19:48:51 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.12 - Fri Apr 22 2016 11:45:29 GMT+0800 (SGT) */
 
 (function() {
 
@@ -10573,7 +10567,7 @@ var clone = function (obj) {
 
 /**
  * <h2>Before using Skylink</h2>
- * <blockquote>This is SkylinkJS version <code>0.6.12</code> with recording beta changes</blockquote>
+ * <blockquote class="info-panel">This is SkylinkJS version <code>0.6.12</code> with recording beta changes</blockquote>
  *
  * Please invoke {{#crossLink "Skylink/init:method"}}init(){{/crossLink}} method
  * first to initialise the Application Key before using any functionalities in Skylink.
@@ -22775,11 +22769,12 @@ Skylink.prototype.VIDEO_RESOLUTION = {
  * @param {Number} START Value <code>0</code></small>
  *   The state when recording session has started.
  * @param {Number} STOP <small>Value <code>1</code></small>
- *   The state when recording session has stopped. During this time, the recorded videos will go
- *   throught the mixing server to compile the videos into one video link.
+ *   The state when recording session has stopped.<br>
+ *   During this time, the recorded videos will go
+ *   throught the mixin server to compile the videos into one video link.
  * @param {Number} LINK <small>Value <code>2</code></small>
- *   The state when recording session mixing for the video has been completed. At this stage,
- *   the link to the mixin video is available.
+ *   The state when recording session mixing for the video has been completed.<br>
+ *   At this stage, the link to the mixin video is available.
  * @param {Number} ERROR <small>Value <code>-1</code></small>
  *   The state when recording session has exception.
  * @beta

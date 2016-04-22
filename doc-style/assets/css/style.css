@@ -359,6 +359,15 @@ blockquote small:before,
 blockquote small:after {
   content: ""!important;
 }
+
+blockquote.info-panel {
+  border-left: solid 3px #ccc!important;
+  margin: 15px 0;
+  padding: 7px 17px!important;
+  background: #f8f8f8;
+  color: #888;
+}
+
 @media (max-width: 991px) {
   .section-doc-group .col-md-3 {
     display: none;
