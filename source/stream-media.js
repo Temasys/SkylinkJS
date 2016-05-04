@@ -598,34 +598,30 @@ Skylink.prototype._onUserMediaError = function(error, isScreenSharing, audioFall
 Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSharing) {
   var self = this;
 
-  if(targetMid !== 'MCU') {
-    if (!self._peerInformations[targetMid]) {
-      log.error([targetMid, 'MediaStream', stream.id,
-          'Received remote stream when peer is not connected. ' +
-          'Ignoring stream ->'], stream);
-      return;
-    }
-
-    if (!self._peerInformations[targetMid].settings.audio &&
-      !self._peerInformations[targetMid].settings.video && !isScreenSharing) {
-      log.log([targetMid, 'MediaStream', stream.id,
-        'Receive remote stream but ignoring stream as it is empty ->'
-        ], stream);
-      return;
-    }
-    log.log([targetMid, 'MediaStream', stream.id,
-      'Received remote stream ->'], stream);
-
-    if (isScreenSharing) {
-      log.log([targetMid, 'MediaStream', stream.id,
-        'Peer is having a screensharing session with user']);
-    }
-
-    self._trigger('incomingStream', targetMid, stream,
-      false, self.getPeerInfo(targetMid), !!isScreenSharing);
-  } else {
-    log.log([targetMid, null, null, 'MCU is listening']);
+  if (!self._peerInformations[targetMid]) {
+    log.error([targetMid, 'MediaStream', stream.id,
+        'Received remote stream when peer is not connected. ' +
+        'Ignoring stream ->'], stream);
+    return;
   }
+
+  if (!self._peerInformations[targetMid].settings.audio &&
+    !self._peerInformations[targetMid].settings.video && !isScreenSharing) {
+    log.log([targetMid, 'MediaStream', stream.id,
+      'Receive remote stream but ignoring stream as it is empty ->'
+      ], stream);
+    return;
+  }
+  log.log([targetMid, 'MediaStream', stream.id,
+    'Received remote stream ->'], stream);
+
+  if (isScreenSharing) {
+    log.log([targetMid, 'MediaStream', stream.id,
+      'Peer is having a screensharing session with user']);
+  }
+
+  self._trigger('incomingStream', targetMid, stream,
+    false, self.getPeerInfo(targetMid), !!isScreenSharing);
 };
 
 /**
