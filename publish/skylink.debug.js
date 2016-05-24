@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.12 - Wed May 04 2016 17:07:28 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.12 - Tue May 24 2016 17:20:56 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4990,9 +4990,11 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       return;
     }
 
-    self._dataChannels[targetMid].main =
-      self._createDataChannel(targetMid, self.DATA_CHANNEL_TYPE.MESSAGING, null, targetMid);
-    self._peerConnections[targetMid].hasMainChannel = true;
+    if (!self._dataChannels[targetMid].main) {
+      self._dataChannels[targetMid].main =
+        self._createDataChannel(targetMid, self.DATA_CHANNEL_TYPE.MESSAGING, null, targetMid);
+      self._peerConnections[targetMid].hasMainChannel = true;
+    }
   }
 
   log.debug([targetMid, null, null, 'Creating offer with config:'], offerConstraints);
