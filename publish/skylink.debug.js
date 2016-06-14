@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.12 - Tue Jun 14 2016 17:36:25 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.12 - Tue Jun 14 2016 18:15:13 GMT+0800 (SGT) */
 
 (function() {
 
@@ -10241,8 +10241,6 @@ Skylink.prototype._createSocket = function (type) {
 
     // re-refresh to long-polling port
     if (type === 'WebSocket') {
-      console.log(type, self._signalingServerPort);
-
       type = 'Polling';
       self._signalingServerPort = ports[0];
 
@@ -10413,6 +10411,8 @@ Skylink.prototype._openChannel = function() {
   if (!window.WebSocket) {
     socketType = 'Polling';
   }
+
+  self._signalingServerPort = null;
 
   // Begin with a websocket connection
   self._createSocket(socketType);
