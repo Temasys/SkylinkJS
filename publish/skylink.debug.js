@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.12 - Tue May 24 2016 17:20:56 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.12 - Tue Jun 14 2016 17:36:25 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6986,6 +6986,7 @@ Skylink.prototype._parseInfo = function(info) {
   this._appKeyOwner = info.apiOwner;
 
   this._signalingServer = info.ipSigserver;
+  this._signalingServerPort = null;
 
   this._isPrivileged = info.isPrivileged;
   this._autoIntroduce = info.autoIntroduce;

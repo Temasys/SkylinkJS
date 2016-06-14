@@ -564,6 +564,8 @@ Skylink.prototype._openChannel = function() {
     socketType = 'Polling';
   }
 
+  self._signalingServerPort = null;
+
   // Begin with a websocket connection
   self._createSocket(socketType);
 };
