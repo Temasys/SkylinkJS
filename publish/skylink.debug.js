@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.12 - Tue Jun 14 2016 18:15:13 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.12 - Tue Jun 14 2016 18:17:33 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9886,6 +9886,18 @@ Skylink.prototype.SOCKET_ERROR = {
 };
 
 /**
+ * Stores the socket connection session information.
+ * @attribute _socketSession
+ * @type JSON
+ * @private
+ * @required
+ * @component Socket
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._socketSession = [];
+
+/**
  * Stores the queued socket messages to sent to the platform signaling to
  *   prevent messages from being dropped due to messages being sent in
  *   less than a second interval.
@@ -10286,6 +10298,12 @@ Skylink.prototype._createSocket = function (type) {
     useXDR: self._socketUseXDR,
     options: options
   });
+
+  self._socketSession = {
+    type: type,
+    options: options,
+    url: url
+  };
 
   self._socket = io.connect(url, options);
 
