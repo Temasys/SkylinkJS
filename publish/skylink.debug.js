@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.12 - Tue Jun 14 2016 18:17:33 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.12 - Tue Jun 14 2016 18:20:32 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9893,9 +9893,9 @@ Skylink.prototype.SOCKET_ERROR = {
  * @required
  * @component Socket
  * @for Skylink
- * @since 0.5.8
+ * @since 0.6.13
  */
-Skylink.prototype._socketSession = [];
+Skylink.prototype._socketSession = {};
 
 /**
  * Stores the queued socket messages to sent to the platform signaling to

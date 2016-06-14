@@ -43,9 +43,9 @@ Skylink.prototype.SOCKET_ERROR = {
  * @required
  * @component Socket
  * @for Skylink
- * @since 0.5.8
+ * @since 0.6.13
  */
-Skylink.prototype._socketSession = [];
+Skylink.prototype._socketSession = {};
 
 /**
  * Stores the queued socket messages to sent to the platform signaling to
