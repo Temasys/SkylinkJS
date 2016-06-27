@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.12</title>
+    <title>SkylinkJS 0.6.13</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.12</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.13</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -689,34 +689,30 @@ Skylink.prototype._onUserMediaError = function(error, isScreenSharing, audioFall
 Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSharing) {
   var self = this;
 
-  if(targetMid !== &#x27;MCU&#x27;) {
-    if (!self._peerInformations[targetMid]) {
-      log.error([targetMid, &#x27;MediaStream&#x27;, stream.id,
-          &#x27;Received remote stream when peer is not connected. &#x27; +
-          &#x27;Ignoring stream -&gt;&#x27;], stream);
-      return;
-    }
-
-    if (!self._peerInformations[targetMid].settings.audio &amp;&amp;
-      !self._peerInformations[targetMid].settings.video &amp;&amp; !isScreenSharing) {
-      log.log([targetMid, &#x27;MediaStream&#x27;, stream.id,
-        &#x27;Receive remote stream but ignoring stream as it is empty -&gt;&#x27;
-        ], stream);
-      return;
-    }
-    log.log([targetMid, &#x27;MediaStream&#x27;, stream.id,
-      &#x27;Received remote stream -&gt;&#x27;], stream);
-
-    if (isScreenSharing) {
-      log.log([targetMid, &#x27;MediaStream&#x27;, stream.id,
-        &#x27;Peer is having a screensharing session with user&#x27;]);
-    }
-
-    self._trigger(&#x27;incomingStream&#x27;, targetMid, stream,
-      false, self.getPeerInfo(targetMid), !!isScreenSharing);
-  } else {
-    log.log([targetMid, null, null, &#x27;MCU is listening&#x27;]);
+  if (!self._peerInformations[targetMid]) {
+    log.error([targetMid, &#x27;MediaStream&#x27;, stream.id,
+        &#x27;Received remote stream when peer is not connected. &#x27; +
+        &#x27;Ignoring stream -&gt;&#x27;], stream);
+    return;
   }
+
+  if (!self._peerInformations[targetMid].settings.audio &amp;&amp;
+    !self._peerInformations[targetMid].settings.video &amp;&amp; !isScreenSharing) {
+    log.log([targetMid, &#x27;MediaStream&#x27;, stream.id,
+      &#x27;Receive remote stream but ignoring stream as it is empty -&gt;&#x27;
+      ], stream);
+    return;
+  }
+  log.log([targetMid, &#x27;MediaStream&#x27;, stream.id,
+    &#x27;Received remote stream -&gt;&#x27;], stream);
+
+  if (isScreenSharing) {
+    log.log([targetMid, &#x27;MediaStream&#x27;, stream.id,
+      &#x27;Peer is having a screensharing session with user&#x27;]);
+  }
+
+  self._trigger(&#x27;incomingStream&#x27;, targetMid, stream,
+    false, self.getPeerInfo(targetMid), !!isScreenSharing);
 };
 
 /**

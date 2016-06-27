@@ -2,10 +2,37 @@
     "project": {
         "name": "skylinkjs",
         "description": "SkylinkJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.12",
+        "version": "0.6.13",
         "url": "https://temasys.github.io/"
     },
     "files": {
+        "source/core/requires/constants.js": {
+            "name": "source/core/requires/constants.js",
+            "modules": {},
+            "classes": {},
+            "fors": {
+                "Skylink": 1
+            },
+            "namespaces": {}
+        },
+        "source/core/requires/events.js": {
+            "name": "source/core/requires/events.js",
+            "modules": {},
+            "classes": {},
+            "fors": {
+                "Skylink": 1
+            },
+            "namespaces": {}
+        },
+        "source/core/core.js": {
+            "name": "source/core/core.js",
+            "modules": {},
+            "classes": {},
+            "fors": {
+                "Skylink": 1
+            },
+            "namespaces": {}
+        },
         "source/template/header.js": {
             "name": "source/template/header.js",
             "modules": {},
@@ -188,10 +215,1117 @@
             "example": [
                 "\n  // Here's a simple example on how you can start using Skylink\n  var SkylinkDemo = new Skylink();\n\n  // Subscribe all events first before init()\n  SkylinkDemo.on(\"incomingStream\", function (peerId, stream, peerInfo, isSelf) {\n    if (isSelf) {\n      attachMediaStream(document.getElementById(\"selfVideo\"), stream);\n    } else {\n      var peerVideo = document.createElement(\"video\");\n      peerVideo.id = peerId;\n      peerVideo.autoplay = \"autoplay\";\n      document.getElementById(\"peersVideo\").appendChild(peerVideo);\n      attachMediaStream(peerVideo, stream);\n    }\n  });\n\n  SkylinkDemo.on(\"peerLeft\", function (peerId, peerInfo, isSelf) {\n    if (!isSelf) {\n      var peerVideo = document.getElementById(peerId);\n      // do a check if peerVideo exists first\n      if (peerVideo) {\n        document.getElementById(\"peersVideo\").removeChild(peerVideo);\n      } else {\n        console.error(\"Peer video for \" + peerId + \" is not found.\");\n      }\n    }\n  });\n\n // never call joinRoom in readyStateChange event subscription.\n // call joinRoom after init() callback if you want to joinRoom instantly.\n SkylinkDemo.on(\"readyStateChange\", function (state, room) {\n   console.log(\"Room (\" + room + \") state: \", room);\n })\n\n // always remember to call init()\n SkylinkDemo.init(\"YOUR_APP_KEY_HERE\", function (error, success) {\n   // do a check for error or success\n   if (error) {\n     console.error(\"Init failed: \", error);\n   } else {\n     SkylinkDemo.joinRoom(\"my_room\", {\n       userData: \"My Username\",\n       audio: true,\n       video: true\n     });\n   }\n });"
             ],
-            "since": "0.5.0"
+            "since": "0.7.0"
         }
     },
     "classitems": [
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 2,
+            "description": "<div class=\"panel-warning\">\n  Note that configuring these options might not necessarily result in the audio codec connection\n  as it is depends on the browser supports.\n</div>\nContains the list of audio codec configuration options to use during connection with audio streams.",
+            "itemtype": "attribute",
+            "name": "AUDIO_CODEC",
+            "params": [
+                {
+                    "name": "AUTO",
+                    "description": "<small><b>DEFAULT</b> | Value <code>\"auto\"</code></small>\n  The option to use the browser selected audio codec.",
+                    "type": "String"
+                },
+                {
+                    "name": "OPUS",
+                    "description": "<small>Value <code>\"opus\"</code></small>\n  The option to configure to use <a href=\"https://en.wikipedia.org/wiki/Opus_(audio_format)\">opus</a> audio codec.<br>\n  This is the commonly supported audio codec.",
+                    "type": "String"
+                },
+                {
+                    "name": "ISAC",
+                    "description": "<small>Value <code>\"ISAC\"</code></small>\n  The option to configure to use <a href=\"https://en.wikipedia.org/wiki/Internet_Speech_Audio_Codec\">iSAC</a> audio codec.",
+                    "type": "String"
+                },
+                {
+                    "name": "SILK",
+                    "description": "<small>Value <code>\"SILK\"</code></small>\n  The option to configure to use <a href=\"https://en.wikipedia.org/wiki/SILK\">SILK</a> audio codec.",
+                    "type": "String"
+                },
+                {
+                    "name": "ILBC",
+                    "description": "<small>Value <code>\"iLBC\"</code></small>\n  The option to configure to use <a href=\"https://en.wikipedia.org/wiki/Internet_Low_Bitrate_Codec\">iLBC</a> audio codec.",
+                    "type": "String"
+                },
+                {
+                    "name": "G722",
+                    "description": "<small>Value <code>\"G722\"</code></small>\n  The option to configure to use <a href=\"https://en.wikipedia.org/wiki/G.722\">G722</a> audio codec.<br>\n  <small>This is experimental, so try this at your own risk.</small>",
+                    "type": "String"
+                },
+                {
+                    "name": "G711",
+                    "description": "<small>Value <code>\"G711\"</code></small>\n  The option to configure to use <a href=\"https://en.wikipedia.org/wiki/G.711\">G711</a> audio codec.<br>\n  <small>This is experimental, so try this at your own risk.</small>",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 42,
+            "description": "Contains the list of ICE gathering states of a Peer connection.",
+            "itemtype": "attribute",
+            "name": "CANDIDATE_GENERATION_STATE",
+            "params": [
+                {
+                    "name": "NEW",
+                    "description": "<small>Value <code>\"new\"</code></small>\n  The state at the beginning before any ICE gathering.",
+                    "type": "String"
+                },
+                {
+                    "name": "GATHERING",
+                    "description": "<small>Value <code>\"gathering\"</code></small>\n  The state when ICE gathering has started.",
+                    "type": "String"
+                },
+                {
+                    "name": "COMPLETED",
+                    "description": "<small>Value <code>\"completed\"</code></small>\n  The state when ICE gathering has completed.",
+                    "type": "String"
+                }
+            ],
+            "link": "<a href=\"#x\">What is ICE and how it works</a>",
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 63,
+            "description": "Contains the list of Datachannel connection states.",
+            "itemtype": "attribute",
+            "name": "DATA_CHANNEL_STATE",
+            "params": [
+                {
+                    "name": "CONNECTING",
+                    "description": "<small>Value <code>\"connecting\"</code></small>\n  The state when the Datachannel is attempting to open a connection.",
+                    "type": "String"
+                },
+                {
+                    "name": "OPEN",
+                    "description": "<small>Value <code>\"open\"</code></small>\n  The state when the Datachannel connection has opened.",
+                    "type": "String"
+                },
+                {
+                    "name": "CLOSING",
+                    "description": "<small>Value <code>\"closing\"</code></small>\n  The state when the Datachannel connection is closing.<br>\n  This happens when a Peer has closed the Datachannel connection explicitly.",
+                    "type": "String"
+                },
+                {
+                    "name": "CLOSED",
+                    "description": "<small>Value <code>\"closed\"</code></small>\n  The state when the Datachannel connection has closed.",
+                    "type": "String"
+                },
+                {
+                    "name": "ERROR",
+                    "description": "<small>Value <code>\"error\"</code></small>\n  The state when the Datachannel connection has encountered an error.",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 90,
+            "description": "Contains the list of Datachannel types.",
+            "itemtype": "attribute",
+            "name": "DATA_CHANNEL_TYPE",
+            "params": [
+                {
+                    "name": "MESSAGING",
+                    "description": "<small><b>DEFAULT</b> | Value <code>\"messaging\"</code></small>\n  <blockquote class=\"panel-info\">If <a href=\"#method_init\"><u><code>init()</code> method</u></a>\n    <code>enableDataChannel</code> option is enabled for both Peers, there is\n    only one of this Datachannel type that can occur in the connection</blockquote>\n  The type where the Datachannel connection is primarily used for sending P2P messages.<br>\n  This connection is persistent until the Peer connection of the Datachannel is closed,\n    and can be used for data transfers when simultaneous transfers is not supported with\n    the connecting Peer connection.",
+                    "type": "String"
+                },
+                {
+                    "name": "DATA",
+                    "description": "<small>Value <code>\"data\"</code></small>\n  The type where the Datachannel connection is only used for data transfers.<br>\n  This connection is closed once the data transfer has completed or terminated.",
+                    "type": "String"
+                }
+            ],
+            "readonly": "",
+            "type": "JSON",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 114,
+            "description": "Contains the list of data transfer data types.",
+            "itemtype": "attribute",
+            "name": "DATA_TRANSFER_DATA_TYPE",
+            "params": [
+                {
+                    "name": "BINARY_STRING",
+                    "description": "<small>Value <code>\"binaryString\"</code></small>\n  The data type where binary data packets are converted to string over\n  the Datachannel connection for <kbd>Blob</kbd> data transfers.\n  [Rel: Skylink.attr.DATA_TRANSFER_SESSION_TYPE]",
+                    "type": "String"
+                },
+                {
+                    "name": "BINARY",
+                    "description": "<small>Value <code>\"binary\"</code></small>\n  The option to transfer binary data packets without conversion over\n  the Datachannel connection for <kbd>Blob</kbd> data transfers.\n  [Rel: Skylink.attr.DATA_TRANSFER_SESSION_TYPE]",
+                    "type": "String"
+                },
+                {
+                    "name": "STRING",
+                    "description": "<small>Value <code>\"string\"</code></small>\n  The option to transfer string data over Datachannel connection for <kbd>Data URL</kbd> data transfers.\n  [Rel: Skylink.attr.DATA_TRANSFER_SESSION_TYPE]",
+                    "type": "String"
+                }
+            ],
+            "readonly": "",
+            "type": "JSON",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 139,
+            "description": "<blockquote class=\"panel-warning\">\n  Note that for the next releases, this constant will be renamed as <code>DATA_TRANSFER_TYPE</code>.\n</blockquote>\nContains the list of data transfers transfer types.",
+            "itemtype": "attribute",
+            "name": "DATA_TRANSFER_SESSION_TYPE",
+            "params": [
+                {
+                    "name": "BLOB",
+                    "description": "<small>Value <code>\"blob\"</code></small>\n  The type of data transfer where it is transferring a Blob data.\n  [Rel: Skylink.method.sendBlobData]",
+                    "type": "String"
+                },
+                {
+                    "name": "DATAURL",
+                    "description": "<small>Value <code>\"dataURL\"</code></small>\n  The type of data transfer where it is transferring a DataURL string.\n  [Rel: Skylink.method.sendURLData]",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 161,
+            "description": "Contains the list of data transfer states.",
+            "itemtype": "attribute",
+            "name": "DATA_TRANSFER_STATE",
+            "params": [
+                {
+                    "name": "UPLOAD_REQUEST",
+                    "description": "<small>Value <code>\"request\"</code></small>\n  The state when request to start a downloading data transfer is received.\n  [Rel: Skylink.method.acceptDataTransfer]",
+                    "type": "String"
+                },
+                {
+                    "name": "UPLOAD_STARTED",
+                    "description": "<small>Value <code>\"uploadStarted\"</code></small>\n  The state when uploading data transfer has started.",
+                    "type": "String"
+                },
+                {
+                    "name": "DOWNLOAD_STARTED",
+                    "description": "<small>Value <code>\"downloadStarted\"</code></small>\n  The state when downloading data transfer has started.",
+                    "type": "String"
+                },
+                {
+                    "name": "REJECTED",
+                    "description": "<small>Value <code>\"rejected\"</code></small>\n  The state when downloading data transfer request is rejected.",
+                    "type": "String"
+                },
+                {
+                    "name": "UPLOADING",
+                    "description": "<small>Value <code>\"uploading\"</code></small>\n  The state when uploading data transfer is in-progress.",
+                    "type": "String"
+                },
+                {
+                    "name": "DOWNLOADING",
+                    "description": "<small>Value <code>\"downloading\"</code></small>\n  The state when downloading data transfer is in-progress.",
+                    "type": "String"
+                },
+                {
+                    "name": "UPLOAD_COMPLETED",
+                    "description": "<small>Value <code>\"uploadCompleted\"</code></small>\n  The state when uploading data transfer has completed.",
+                    "type": "String"
+                },
+                {
+                    "name": "DOWNLOAD_COMPLETED",
+                    "description": "<small>Value <code>\"downloadCompleted\"</code></small>\n  The state when downloading data transfer has completed.",
+                    "type": "String"
+                },
+                {
+                    "name": "CANCEL",
+                    "description": "<small>Value <code>\"cancel\"</code></small>\n  The state when data transfer has been cancelled and is terminated.\n  [Rel: Skylink.method.cancelDataTransfer]",
+                    "type": "String"
+                },
+                {
+                    "name": "ERROR",
+                    "description": "<small>Value <code>\"error\"</code></small>\n  The state when data transfer has failed with errors and is terminated.",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 204,
+            "description": "<blockquote class=\"panel-warning\">\n  Note that for the next releases, this constant will be renamed as <code>DATA_TRANSFER_DIRECTION</code>\n  before removal in the next releases.\n</blockquote>\nContains the list of data transfer directions.",
+            "itemtype": "attribute",
+            "name": "DATA_TRANSFER_TYPE",
+            "params": [
+                {
+                    "name": "UPLOAD",
+                    "description": "<small>Value <code>\"upload\"</code></small>\n  The type of data transfer direction where it is uploading to Peer.",
+                    "type": "String"
+                },
+                {
+                    "name": "DOWNLOAD",
+                    "description": "<small>Value <code>\"download\"</code></small>\n  The type of data transfer direction where is downloading from Peer.",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "deprecated": true,
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 226,
+            "description": "Contains the current DT Protocol version of SkylinkJS.<br>\n<blockquote class=\"sub\">Current version: <code>0.1.0</code></blockquote>",
+            "itemtype": "attribute",
+            "name": "DT_PROTOCOL_VERSION",
+            "type": "String",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 237,
+            "description": "Contains the list of <a href=\"#method_getPeers\"><u><code>getPeers()</code> method</u></a> retrieval states.",
+            "itemtype": "attribute",
+            "name": "GET_PEERS_STATE",
+            "type": "JSON",
+            "params": [
+                {
+                    "name": "ENQUIRED",
+                    "description": "<small>Value <code>\"enquired\"</code></small>\n  The state when SDK is attempting to retrieve the list of Peers and Rooms.",
+                    "type": "String"
+                },
+                {
+                    "name": "RECEIVED",
+                    "description": "<small>Value <code>\"received\"</code></small>\n  The state when SDK has retrieved the list of Peers and Rooms successfully.",
+                    "type": "String"
+                },
+                {
+                    "name": "ERROR",
+                    "description": "<small>Value <code>\"error\"</code></small>\n  The state when SDK has failed retrieving the list of Peers and Rooms.",
+                    "type": "String"
+                }
+            ],
+            "link": "<a href=\"http://support.temasys.com.sg\">What is the Privileged Key feature and how to utilise it</a>",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 257,
+            "description": "Contains the list of connection handshaking states of a Peer connection.",
+            "itemtype": "attribute",
+            "name": "HANDSHAKE_PROGRESS",
+            "params": [
+                {
+                    "name": "ENTER",
+                    "description": "<small>Value <code>\"enter\"</code></small>\n  The state when Peer has just entered the Room.<br>\n  As a response, <code>WELCOME</code> will be sent to notify of user existence.",
+                    "type": "String"
+                },
+                {
+                    "name": "WELCOME",
+                    "description": "<small>Value <code>\"welcome\"</code></small>\n  The state when user is notified of Peer that is already in the Room.<br>\n  As a response, <code>OFFER</code> will be sent to initiate connection handshaking.",
+                    "type": "String"
+                },
+                {
+                    "name": "OFFER",
+                    "description": "<small>Value <code>\"offer\"</code></small>\n  The state when connection handshaking has been initiated.<br>\n  As a response, <code>ANSWER</code> will be sent to complete the connection handshaking.\n  [Rel: Skylink.attr.PEER_CONNECTION_STATE]",
+                    "type": "String"
+                },
+                {
+                    "name": "ANSWER",
+                    "description": "<small>Value <code>\"answer\"</code></small>\n  The state when connection handshaking has been completed.\n  [Rel: Skylink.attr.PEER_CONNECTION_STATE]",
+                    "type": "String"
+                },
+                {
+                    "name": "ERROR",
+                    "description": "<small>Value <code>\"error\"</code></small>\n  The state when connection handshaking has encountered an error.\n  [Rel: Skylink.attr.PEER_CONNECTION_STATE]",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 289,
+            "description": "Contains the list of ICE connection states of a Peer connection.",
+            "itemtype": "attribute",
+            "name": "ICE_CONNECTION_STATE",
+            "params": [
+                {
+                    "name": "STARTING",
+                    "description": "<small>Value <code>\"starting\"</code></small>\n  The state when ICE agent is waiting for remote candidates supplied\n  from ICE gathering from Peer.",
+                    "type": "String"
+                },
+                {
+                    "name": "CHECKING",
+                    "description": "<small>Value <code>\"checking\"</code></small>\n  The state when ICE agent has received the remote candidates from Peer\n  and is checking for a usable candidate pair to start ICE connection.",
+                    "type": "String"
+                },
+                {
+                    "name": "CONNECTED",
+                    "description": "<small>Value <code>\"connected\"</code></small>\n  The state when ICE agent has found a usable connection but still\n  checking if there is a better candidate pair for better ICE connection.<br>\n  At this stage, ICE connection is already established and may not necessarily\n  go to <code>COMPLETED</code>.",
+                    "type": "String"
+                },
+                {
+                    "name": "COMPLETED",
+                    "description": "<small>Value <code>\"completed\"</code></small>\n  The state when ICE agent has finished checking for the best candidate pairs\n  for the best ICE connection.<br>\n  At this stage, ICE connection is has been already established.",
+                    "type": "String"
+                },
+                {
+                    "name": "FAILED",
+                    "description": "<small>Value <code>\"failed\"</code></small>\n  The state when ICE agent had failed to find a ICE connection from all candidate pairs.",
+                    "type": "String"
+                },
+                {
+                    "name": "DISCONNECTED",
+                    "description": "<small>Value <code>\"disconnected\"</code></small>\n  The state when ICE agent connection is disconnected abruptly and may happen on\n  a flaky network.",
+                    "type": "String"
+                },
+                {
+                    "name": "CLOSED",
+                    "description": "<small>Value <code>\"closed\"</code></small>\n  The state when ICE agent connection is closed and is no longer responding to any STUN requests.",
+                    "type": "String"
+                },
+                {
+                    "name": "TRICKLE_FAILED",
+                    "description": "<small>Value <code>\"trickeFailed\"</code></small>\n  The state when after ICE agent connection state had gone to <code>FAILED</code> and\n  <a href=\"#method_init\"><code><u>init()</code> method</u></a> <code>enableIceTrickle</code> option is enabled.",
+                    "type": "String"
+                }
+            ],
+            "readonly": "",
+            "type": "JSON",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 333,
+            "description": "Contains the list of <a href=\"#method_introducePeer\"><u><code>introducePeer()</code> method</u></a>\n  introduction states.",
+            "itemtype": "attribute",
+            "name": "INTRODUCE_STATE",
+            "params": [
+                {
+                    "name": "INTRODUCING",
+                    "description": "<small>Value <code>\"introducing\"</code></small>\n  The state when the SDK is attempting to introduce the Peer (Sender) to Peer (Receiver).",
+                    "type": "String"
+                },
+                {
+                    "name": "INTRODUCED",
+                    "description": "<small>Value <code>\"introduced\"</code></small>\n  The state when the SDK has introduced Peer (Sender) to Peer (Receiver) successfully.",
+                    "type": "String"
+                },
+                {
+                    "name": "ERROR",
+                    "description": "<small>Value <code>\"error\"</code></small>\n  The state when the SDK had failed to introduce Peer (Sender) to Peer (Receiver).",
+                    "type": "String"
+                }
+            ],
+            "link": "<a href=\"http://support.temasys.com.sg\">What is the Privileged Key feature and how to utilise it</a>",
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 355,
+            "description": "Contains the list of SDK log levels.",
+            "itemtype": "attribute",
+            "name": "LOG_LEVEL",
+            "params": [
+                {
+                    "name": "DEBUG",
+                    "description": "<small>Value <code>4</code></small>\n  The option to display additional logs for more code execution debugging state purposes.\n  <small>LOG OUTPUTS<br>\n  <code>DEBUG</code>, <code>LOG</code>, <code>INFO</code>, <code>WARN</code>, <code>ERROR</code></small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "LOG",
+                    "description": "<small>Value <code>3</code> | Level higher than <code>INFO</code></small>\n  The option to display additional logs for code execution state purposes.\n  <small>LOG OUTPUTS<br>\n  <code>LOG</code>, <code>INFO</code>, <code>WARN</code>, <code>ERROR</code></small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "INFO",
+                    "description": "<small>Value <code>2</code></small>\n  The option to display additional logs that are informative purposes.\n  <small>LOG OUTPUTS<br>\n  <code>INFO</code>, <code>WARN</code>, <code>ERROR</code></small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "WARN",
+                    "description": "<small>Value <code>1</code></small>\n  The option to display additional logs warning the user.\n  <small>LOG OUTPUTS<br>\n  <code>WARN</code>, <code>ERROR</code></small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "ERROR",
+                    "description": "<small><b>DEFAULT</b> | Value <code>0</code></small>\n  The option to display error logs.\n  <small>LOG OUTPUTS<br>\n  <code>ERROR</code></small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "NO_LOGS",
+                    "description": "<small>Value <code>-1</code></small>\n  The option to display no logs.\n  <small>LOG OUTPUTS<br>\n  <span>NONE</span></small>",
+                    "type": "Number"
+                }
+            ],
+            "readonly": "",
+            "type": "JSON",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 396,
+            "description": "Contains the list of signaling states of a Peer connection.",
+            "itemtype": "attribute",
+            "name": "PEER_CONNECTION_STATE",
+            "params": [
+                {
+                    "name": "STABLE",
+                    "description": "<small>Value <code>\"stable\"</code></small>\n  The state when there is currently no <code>OFFER</code> or <code>ANSWER</code> exchanged.",
+                    "type": "String"
+                },
+                {
+                    "name": "HAVE_LOCAL_OFFER",
+                    "description": "<small>Value <code>\"have-local-offer\"</code></small>\n  The state when there is a local <code>OFFER</code> sent to Peer.<br>\n  After receiving remote <code>ANSWER</code>, the state will go to <code>STABLE</code>.",
+                    "type": "String"
+                },
+                {
+                    "name": "HAVE_REMOTE_OFFER",
+                    "description": "<small>Value <code>\"have-remote-offer\"</code></small>\n  The state when there is a remote <code>OFFER</code> received from Peer.<br>\n  After sending local <code>ANSWER</code>, the state will go to <code>STABLE</code>.",
+                    "type": "String"
+                },
+                {
+                    "name": "CLOSED",
+                    "description": "<small>Value <code>\"closed\"</code></small>\n  The state when signaling is closed and there is no\n  <code>OFFER</code> or <code>ANSWER</code> exchanged anymore.",
+                    "type": "String"
+                },
+                {
+                    "name": "ERROR",
+                    "description": "<small>Value <code>\"error\"</code></small>\n  The state when setting local / remote <code>OFFER</code> or <code>ANSWER</code> fails and\n  might cause a failure in establishing Peer connection.",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 426,
+            "description": "Contains the list of <a href=\"#method_init\"><u><code>init()</code> method</u></a>\n  SDK initialization ready states.",
+            "itemtype": "attribute",
+            "name": "READY_STATE_CHANGE",
+            "params": [
+                {
+                    "name": "INIT",
+                    "description": "<small>Value <code>0</code></small>\n  The state when the SDK is initializing <code>init()</code> configuration settings.",
+                    "type": "Number"
+                },
+                {
+                    "name": "LOADING",
+                    "description": "<small>Value <code>1</code></small>\n  The state when the SDK is attempting to start connection session.",
+                    "type": "Number"
+                },
+                {
+                    "name": "COMPLETED",
+                    "description": "<small>Value <code>2</code></small>\n  The state when the SDK connection session has been state.",
+                    "type": "Number"
+                },
+                {
+                    "name": "ERROR",
+                    "description": "<small>Value <code>-1</code></small>\n  The state when the SDK has failed initializing <code>init()</code> configuration settings\n  or failed starting connection session.\n  [Rel: Skylink.attr.READY_STATE_CHANGE_ERROR]",
+                    "type": "Number"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 452,
+            "description": "<blockquote class=\"panel-warning\">\n  Note that for the next releases, the Keys and Values will change for a more\n  descriptive term.\n</blockquote>\nContains the list of <a href=\"#method_init\"><u><code>init()</code> method</u></a>\n  SDK initialization errors.",
+            "itemtype": "attribute",
+            "name": "READY_STATE_CHANGE_ERROR",
+            "params": [
+                {
+                    "name": "API_INVALID",
+                    "description": "<small>Value <code>4001</code></small>\n  The error when provided Application Key is does not exists.\n  <small>Resolve this by finding if Application Key exists in your\n    <a href=\"https://developer.temasys.com.sg\">Skylink Developer Account</a>.</small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "API_DOMAIN_NOT_MATCH",
+                    "description": "<small>Value <code>4002</code></small>\n  The error when accessing backend IP address does not match Application Key configured <var>domain</var>.\n  <small>Resolve this by seeking support in\n    <a href=\"http://support.temasys.com.sg\">Temasys Support Portal</a>.</small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "API_CORS_DOMAIN_NOT_MATCH",
+                    "description": "<small>Value <code>4003</code></small>\n  The error when accessing CORS domain does not match Application Key configured <var>corsurl</var>.\n  <small>Resolve this by configuring your Application Key <u>CORS Url</u> correctly in your\n    <a href=\"https://developer.temasys.com.sg\">Skylink Developer Account</a>.</small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "API_CREDENTIALS_INVALID",
+                    "description": "<small>Value <code>4004</code></small>\n  The error when credentials provided for Application Key is invalid.\n  <small>Resolve this by checking if credentials are generated correctly, or <u>Secret</u> used for\n     generating credentials is correct. See <a href=\"#method_init\"><u><code>init()</code> method</u></a>\n     on how to generate the credentials.</small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "API_CREDENTIALS_NOT_MATCH",
+                    "description": "<small>Value <code>4005</code></small>\n  The error when credentials provided for Application Key does not match provided <code>duration</code>\n     and <code>startDate</code> in generated credentials.\n  <small>Resolve this by checking if credentials are generated correctly.\n     See <a href=\"#method_init\"><u><code>init()</code> method</u></a> on how to generate the credentials.</small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "API_INVALID_PARENT_KEY",
+                    "description": "<small>Value <code>4006</code></small>\n  The error when provided Application Key has an invalid <var>parent</var> field value.\n  <small>Resolve this by providing another Application Key. You may check if it's valid by\n    accessing your <a href=\"https://developer.temasys.com.sg\">Skylink Developer Account</a>\n    and use any Application Keys from the displayed list of Application Keys.</small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "API_NO_MEETING_RECORD_FOUND",
+                    "description": "<small>Value <code>4010</code></small>\n  The error when provided Persistent Room enabled key does not have any meeting records that matches\n  the credentials provided in <a href=\"#method_init\"><u><code>init()</code> method</u></a>.\n  <small>See <a href=\"#article\">Persistent Rooms and how it works</a>.</small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "NO_SOCKET_IO",
+                    "description": "<small>Value <code>1</code></small>\n  The error when there is no <kbd>socket.io-client</kbd> dependency loaded before the SDK.\n  <small>Resolve this by loading the dependency based on the correct versions following\n    <a href=\"https://github.com/Temasys/SkylinkJS/releases\">SkylinkJS release versions</a>.</small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "NO_XMLHTTPREQUEST_SUPPORT",
+                    "description": "<small>Value <code>2</code></small>\n  The error when there is no <kbd>XMLHttpRequest</kbd> API interface supported in the browser.\n  <small>Resolve this by switching to one of our\n    <a href=\"https://github.com/Temasys/SkylinkJS#supported-browsers\">supported browsers list</a>.</small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "NO_WEBRTC_SUPPORT",
+                    "description": "<small>Value <code>3</code></small>\n  The error when there is no <kbd>RTCPeerConnection</kbd> API interface supported in the browser,\n  which the <a href=\"https://plugin.temasys.com.sg\">Temasys Plugin</a> does not support and is not\n  installed in the browser.\n  <small>Resolve this by switching to one of our\n    <a href=\"https://github.com/Temasys/SkylinkJS#supported-browsers\">supported browsers list</a>,\n    or if browser is Safari or IE in our supported browsers list, prompt users to install the Temasys Plugin.</small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "NO_PATH",
+                    "description": "<small>Value <code>4</code></small>\n  The error when invalid <a href=\"#method_init\"><u><code>init()</code> method</u></a> options are provided.\n  <small>Resolve this by ensuring correct <code>init()</code> method options are provided.</small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "ADAPTER_NO_LOADED",
+                    "description": "<small>Value <code>7</code></small>\n  The error when there is no <kbd>adapterjs</kbd> dependency loaded before the SDK.\n  <small>Resolve this by loading the dependency based on the correct versions following\n    <a href=\"https://github.com/Temasys/SkylinkJS/releases\">SkylinkJS release versions</a>.</small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "XML_HTTP_REQUEST_ERROR",
+                    "description": "<small>Value <code>-1</code></small>\n  The error when there is no response from server when requesting to start connection session.\n  <small>Resolve this by diagnosing network connections or refreshing the page. You may\n    report this to <a href=\"http://support.temasys.com.sg\">Temasys Support Portal</a>\n    if both solutions does not work.</small>",
+                    "type": "Number"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 539,
+            "description": "Contains the list of <a href=\"#method_init\"><u><code>init()</code> method</u></a>\n  SDK initialization errors current HTTP request status.",
+            "itemtype": "attribute",
+            "name": "READY_STATE_CHANGE_ERROR_STATUS",
+            "params": [
+                {
+                    "name": "NO_REQUEST_MADE",
+                    "description": "<small>Value <code>-2</code></small>\n  The status error when no HTTP request has been made due to invalid configuration passed in\n  <a href=\"#method_init\"><u><code>init()</code> method</u></a>.",
+                    "type": "Number"
+                },
+                {
+                    "name": "REQUEST_ERROR",
+                    "description": "<small>Value <code>-1</code></small>\n  The status error when HTTP request had failed due to request errors.",
+                    "type": "Number"
+                },
+                {
+                    "name": "REQUEST_EMPTY_RESULT",
+                    "description": "<small>Value <code>0</code></small>\n  The status error when HTTP request returns an empty response.",
+                    "type": "Number"
+                },
+                {
+                    "name": "REQUEST_FAILED",
+                    "description": "<small>Value <code>200</code></small>\n  The status error when HTTP request returns a response but authentication to start\n    connection session fails.",
+                    "type": "Number"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 565,
+            "description": "<div class=\"panel-warning\">\n  Note that configurating the regional server is no longer required as the automatic\n  selection for the nearest regional server is implemented based on load and latency.\n  Hence, this has been deprecated and will be removed in the next releases.\n</div>\nContains the list of regional server that the SDK can use to connect to.",
+            "itemtype": "attribute",
+            "name": "REGIONAL_SERVER",
+            "params": [
+                {
+                    "name": "APAC1",
+                    "description": "<small>Value <code>\"sg\"</code></small>\n  The option to connect to the Asia pacific 1 regional server.",
+                    "type": "String"
+                },
+                {
+                    "name": "US1",
+                    "description": "<small>Value <code>\"us2\"</code></small>\n  The option to connect to the US 1 regional server.",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "deprecated": true,
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 588,
+            "description": "Contains the list of connecting server Peer types.",
+            "itemtype": "attribute",
+            "name": "SERVER_PEER_TYPE",
+            "params": [
+                {
+                    "name": "MCU",
+                    "description": "<small>Value <code>\"mcu\"</code></small>\n  The type that indicates connecting server Peer is <kbd>MCU</kbd>.\n  <small>See: <a href=\"#\">What is MCU and how it works</a></small>",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 604,
+            "description": "Contains the current SM Protocol version of SkylinkJS.\n<blockquote class=\"sub\">Current version: <code>0.1.1</code></blockquote>",
+            "itemtype": "attribute",
+            "name": "SM_PROTOCOL_VERSION",
+            "type": "String",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 615,
+            "description": "Contains the list of Room socket connection error states.",
+            "itemtype": "attribute",
+            "name": "SOCKET_ERROR",
+            "params": [
+                {
+                    "name": "CONNECTION_FAILED",
+                    "description": "<small>Value <code>0</code></small>\n  The error state when socket has failed connecting in the first attempt.",
+                    "type": "Number"
+                },
+                {
+                    "name": "RECONNECTION_FAILED",
+                    "description": "<small>Value <code>-1</code></small>\n  The error state when socket has failed reconnecting.",
+                    "type": "String"
+                },
+                {
+                    "name": "CONNECTION_ABORTED",
+                    "description": "<small>Value <code>-2</code></small>\n  The error state when socket has aborted reconnections after\n  the first attempt failure in <code>CONNECTION FAILED</code>.",
+                    "type": "String"
+                },
+                {
+                    "name": "RECONNECTION_ABORTED",
+                    "description": "<small>Value <code>-3</code></small>\n  The error state when socket has aborted reconnections after\n  several attempts failures in <code>RECONNECTION_FAILED</code>.",
+                    "type": "String"
+                },
+                {
+                    "name": "RECONNECTION_ATTEMPT",
+                    "description": "<small>Value <code>-4</code></small>\n  The state when socket is attempting to reconnect to establish a succesful connection.",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 643,
+            "description": "<blockquote class=\"panel-warning\">\n  Note that for the next releases, the Keys and Values will change for a more\n  descriptive term.\n</blockquote>\nContains the list of Room socket fallback states for a successful reconnection.",
+            "itemtype": "attribute",
+            "name": "SOCKET_FALLBACK",
+            "params": [
+                {
+                    "name": "NON_FALLBACK",
+                    "description": "<small>Value <code>\"nonfallback\"</code></small>\n  <blockquote class=\"panel-info\">This has been deprecated and will be eventually be removed\n     or changed into other seperate states in next releases.</blockquote>\n  The state when socket is attempting to reconnect the first port and transports used that had failed.\n  <blockquote class=\"sub\">Protocol: <code>http:</code>, <code>https:</code><br>\n     Transports: <code>WebSocket</code>, <code>Polling</code></blockquote>",
+                    "type": "String"
+                },
+                {
+                    "name": "FALLBACK_PORT",
+                    "description": "<small>Value <code>\"fallbackPortNonSSL\"</code></small>\n  The state when socket is attempting to reconnect the next available fallback port.\n  <blockquote class=\"sub\">Protocol: <code>http:</code><br>Transports: <code>WebSocket</code></blockquote>",
+                    "type": "String"
+                },
+                {
+                    "name": "FALLBACK_PORT_SSL",
+                    "description": "<small>Value <code>\"fallbackPortSSL\"</code></small>\n  The state when socket is attempting to reconnect the next available fallback port.\n  <blockquote class=\"sub\">Protocol: <code>https:</code><br>Transports: <code>WebSocket</code></blockquote>",
+                    "type": "String"
+                },
+                {
+                    "name": "LONG_POLLING",
+                    "description": "<small>Value <code>\"fallbackLongPollingNonSSL\"</code></small>\n  The state when socket switches to <kbd>Polling</kbd> transports from <kbd>WebSocket</kbd> transports\n  for a better attempt at reconnectivity after all reconnection attempts with all available ports\n  has failed.<br>The socket will start the reconnect attempt with\n  next fallback port starting from the first port used.<br>\n  This state may occur directly after <code>NON_FALLBACK</code>\n  if <kbd>WebSocket</kbd> transports is not supported.\n  <blockquote class=\"sub\">Protocol: <code>http:</code><br>Transports: <code>Polling</code></blockquote>",
+                    "type": "String"
+                },
+                {
+                    "name": "LONG_POLLING_SSL",
+                    "description": "<small>Value <code>\"fallbackLongPollingSSL\"</code></small>\n  The state when socket switches to <kbd>Polling</kbd> transports from <kbd>WebSocket</kbd> transports\n  for a better attempt at reconnectivity after all reconnection attempts with all available ports\n  has failed.<br>The socket will start the reconnect attempt with\n  next fallback port starting from the first port used.<br>\n  This state may occur directly after <code>NON_FALLBACK</code>\n  if <kbd>WebSocket</kbd> transports is not supported.\n  <blockquote class=\"sub\">Protocol: <code>https:</code><br>Transports: <code>Polling</code></blockquote>",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 691,
+            "description": "Contains the list of SDK connection session actions.",
+            "itemtype": "attribute",
+            "name": "SYSTEM_ACTION",
+            "params": [
+                {
+                    "name": "WARNING",
+                    "description": "<small>Value <code>\"warning\"</code></small>\n  The action when SDK is warned that connection session may result in <code>REJECT</code> soon later.\n  [Rel: Skylink.attr.SYSTEM_ACTION_REASON]",
+                    "type": "String"
+                },
+                {
+                    "name": "REJECT",
+                    "description": "<small>Value <code>\"reject\"</code></small>\n  The action when SDK connection session has been rejected.\n  [Rel: Skylink.attr.SYSTEM_ACTION_REASON]",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 710,
+            "description": "Contains the list of SDK connection session actions reasons.",
+            "itemtype": "attribute",
+            "name": "SYSTEM_ACTION_REASON",
+            "params": [
+                {
+                    "name": "ROOM_LOCKED",
+                    "description": "<small>Value <code>\"locked\"</code></small>\n  The action reason when Room is locked and user is unable to join the Room.\n<blockquote class=\"sub\">Action associated: <code>REJECT</code></blockquote>",
+                    "type": "String"
+                },
+                {
+                    "name": "DUPLICATED_LOGIN",
+                    "description": "<small>Value <code>\"duplicatedLogin\"</code></small>\n  The action reason when Room connection has a duplicated connection session credentials.\n  <small>Resolve this by enquiring help from\n    <a href=\"http://support.temasys.com.sg\">Temasys Support Portal</a> if this occurs.</small>\n<blockquote class=\"sub\">Action associated: <code>REJECT</code></blockquote>",
+                    "type": "String"
+                },
+                {
+                    "name": "SERVER_ERROR",
+                    "description": "<small>Value <code>\"serverError\"</code></small>\n  The action reason when Room connection encountered an error.\n  <small>Resolve this by enquiring help from\n    <a href=\"http://support.temasys.com.sg\">Temasys Support Portal</a> if this occurs.</small>\n<blockquote class=\"sub\">Action associated: <code>REJECT</code></blockquote>",
+                    "type": "String"
+                },
+                {
+                    "name": "EXPIRED",
+                    "description": "<small>Value <code>\"expired\"</code></small>\n  The action reason when Persistent Room connection session has expired.\n  <small>See <a href=\"#article\">Persistent Rooms and how it works</a>.</small>\n<blockquote class=\"sub\">Action associated: <code>REJECT</code></blockquote>",
+                    "type": "String"
+                },
+                {
+                    "name": "ROOM_CLOSING",
+                    "description": "<small>Value <code>\"toclose\"</code></small>\n  The action reason when Room connection session is going to end soon.\n<blockquote class=\"sub\">Action associated: <code>WARNING</code></blockquote>",
+                    "type": "String"
+                },
+                {
+                    "name": "ROOM_CLOSED",
+                    "description": "<small>Value <code>\"roomclose\"</code></small>\n  The action reason when Room connection session has ended.\n<blockquote class=\"sub\">action associated: <code>REJECT</code></blockquote>",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 753,
+            "description": "<div class=\"panel-warning\">\n  Note that configuring these options might not necessarily result in the desired type (TCP/UDP) of connection\n  as it is depends on how the browser connects the connection.\n</div>\nContains the list of available TURN transports configuration options to pass when constructing a connection object.",
+            "itemtype": "attribute",
+            "name": "TURN_TRANSPORT",
+            "type": "JSON",
+            "params": [
+                {
+                    "name": "TCP",
+                    "description": "<small>Value <code>\"tcp\"</code></small>\n  The option to connect with setting only TCP transports.\n  <small>EXAMPLE TURN URLS OUTPUT<br>\n  <code>turn:turnurl:123?transport=tcp</code><br>\n  <code>turn:turnurl?transport=tcp</code><br>\n  <code>turn:turnurl:1234?transport=tcp</code></small>",
+                    "type": "String"
+                },
+                {
+                    "name": "UDP",
+                    "description": "<small>Value <code>\"udp\"</code></small>\n  The option to connect with setting only UDP transports.\n  <small>EXAMPLE TURN URLS OUTPUT<br>\n  <code>turn:turnurl:123?transport=udp</code><br>\n  <code>turn:turnurl?transport=udp</code><br>\n  <code>turn:turnurl:1234?transport=udp</code></small>",
+                    "type": "String"
+                },
+                {
+                    "name": "ANY",
+                    "description": "<small><b>DEFAULT</b> | Value <code>\"any\"</code></small>\n  The option to connect with any transports that is configured by the Skylink Platform.\n  <small>EXAMPLE TURN URLS OUTPUT<br>\n  <code>turn:turnurl:123?transport=tcp</code><br>\n  <code>turn:turnurl?transport=udp</code><br>\n  <code>turn:turnurl:1234</code><br>\n  <code>turn:turnurl</code></small>",
+                    "type": "String"
+                },
+                {
+                    "name": "NONE",
+                    "description": "<small>Value <code>\"none\"</code></small>\n  The option to connect without setting any transports.\n  <small>EXAMPLE TURN URLS OUTPUT<br>\n  <code>turn:turnurl:123</code><br>\n  <code>turn:turnurl</code><br>\n  <code>turn:turnurl:1234</code></small>",
+                    "type": "String"
+                },
+                {
+                    "name": "ALL",
+                    "description": "<small>Value <code>\"all\"</code></small>\n  The option to connect with setting both TCP and UDP transports.\n  <small>EXAMPLE TURN URLS OUTPUT<br>\n  <code>turn:turnurl:123?transport=tcp</code><br>\n  <code>turn:turnurl:123?transport=udp</code><br>\n  <code>turn:turnurl?transport=tcp</code><br>\n  <code>turn:turnurl?transport=udp</code><br>\n  <code>turn:turnurl:1234?transport=tcp</code><br>\n  <code>turn:turnurl:1234?transport=udp</code></small>",
+                    "type": "String"
+                }
+            ],
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 807,
+            "description": "Contains the current SDK version of SkylinkJS.\n  <blockquote class=\"sub\">Current version: <code>(See documentation version)</code></blockquote>",
+            "itemtype": "attribute",
+            "name": "VERSION",
+            "type": "String",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 818,
+            "description": "<div class=\"panel-warning\">\n  Note that configuring these options might not necessarily result in the video codec connection\n  as it is depends on the browser supports.\n</div>\nContains the list of video codec configuration options to use during connection with video streams.",
+            "itemtype": "attribute",
+            "name": "VIDEO_CODEC",
+            "params": [
+                {
+                    "name": "AUTO",
+                    "description": "<small><b>DEFAULT</b> | Value <code>\"auto\"</code></small>\n  The option to use the browser selected video codec.",
+                    "type": "String"
+                },
+                {
+                    "name": "VP8",
+                    "description": "<small>Value <code>\"VP8\"</code></small>\n  The option to configure to use <a href=\"https://en.wikipedia.org/wiki/VP8\">VP8</a> video codec.<br>\n  This is the commonly supported video codec in most browsers.",
+                    "type": "String"
+                },
+                {
+                    "name": "VP9",
+                    "description": "<small>Value <code>\"VP9\"</code></small>\n  The option to configure to use <a href=\"https://en.wikipedia.org/wiki/VP9\">VP9</a> video codec.",
+                    "type": "String"
+                },
+                {
+                    "name": "H264",
+                    "description": "<small>Value <code>\"H264\"</code></small>\n  The option to configure to use <a href=\"https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC\">H264</a> video codec.",
+                    "type": "String"
+                },
+                {
+                    "name": "H264UC",
+                    "description": "<small>Value <code>\"H264UC\"</code></small>\n  The option to configure to use <a href=\"https://en.wikipedia.org/wiki/Scalable_Video_Coding\">H264 SVC</a> video codec.",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/constants.js",
+            "line": 849,
+            "description": "<div class=\"panel-warning\">\n  Note that configuring these options might not necessarily result in the desired resolution as it\n  depends on how the browser renders the video stream resolution.\n</div>\nContains the list of video resolution default presets.",
+            "params": [
+                {
+                    "name": "QQVGA",
+                    "description": "<small>Value <code>{ width: 160, height: 120 }</code></small>\n  The option to use QQVGA video resolution.\n  <blockquote class=\"sub\">Aspect Ratio <code>4:3</code></blockquote>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "HQVGA",
+                    "description": "<small>Value <code>{ width: 240, height: 160 }</code></small>\n  The option to use HQVGA resolution.\n  <blockquote class=\"sub\">Aspect Ratio <code>3:2</code></blockquote>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "QVGA",
+                    "description": "<small>Value <code>{ width: 320, height: 240 }</code></small>\n  The option to use QVGA video resolution.\n  <blockquote class=\"sub\">Aspect Ratio <code>4:3</code></blockquote>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "WQVGA",
+                    "description": "<small>Value <code>{ width: 384, height: 240 }</code></small>\n  The option to use WQVGA video resolution.\n  <blockquote class=\"sub\">Aspect Ratio <code>16:10</code></blockquote>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "HVGA",
+                    "description": "<small>Value <code>{ width: 480, height: 320 }</code></small>\n  The option to use HVGA video resolution.\n  <blockquote class=\"sub\">Aspect Ratio <code>3:2</code></blockquote>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "VGA",
+                    "description": "<small><b>DEFAULT</b> | Value <code>{ width: 640, height: 480 }</code></small>\n  The option to use VGA video resolution.\n  <blockquote class=\"sub\">Aspect Ratio <code>4:3</code></blockquote>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "WVGA",
+                    "description": "<small>Value <code>{ width: 768, height: 480 }</code></small>\n  The option to use WVGA video resolution.\n  <blockquote class=\"sub\">Aspect Ratio <code>16:10</code></blockquote>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "FWVGA",
+                    "description": "<small>Value <code>{ width: 854, height: 480 }</code></small>\n  The option to use FWVGA video resolution.\n  <blockquote class=\"sub\">Aspect Ratio <code>16:9</code></blockquote>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "SVGA",
+                    "description": "<small>Value <code>{ width: 800, height: 600 }</code></small>\n  The option to use SVGA video resolution.\n  <blockquote class=\"sub\">Aspect Ratio <code>4:3</code></blockquote>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "DVGA",
+                    "description": "<small>Value <code>{ width: 960, height: 640 }</code></small>\n  The option to use DVGA video resolution.\n  <blockquote class=\"sub\">Aspect Ratio <code>3:2</code></blockquote>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "WSVGA",
+                    "description": "<small>Value <code>{ width: 1024, height: 576 }</code></small>\n  The option to use WSVGA video resolution.\n  <blockquote class=\"sub\">Aspect Ratio <code>16:9</code></blockquote>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "HD",
+                    "description": "<small>Value <code>{ width: 1280, height: 720 }</code></small>\n  The option to use HD video resolution.\n  <blockquote class=\"sub\">Aspect Ratio <code>16:9</code></blockquote>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "HDPLUS",
+                    "description": "<small>Value <code>{ width: 1600, height: 900 }</code></small>\n  The option to use HDPLUS video resolution.\n  <blockquote class=\"sub\">Aspect Ratio <code>16:9</code></blockquote>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "FHD",
+                    "description": "<small>Value <code>{ width: 1920, height: 1080 }</code></small>\n  The option to use FHD video resolution.\n  <blockquote class=\"sub\">Aspect Ratio <code>16:9</code></blockquote>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "QHD",
+                    "description": "<small>Value <code>{ width: 2560, height: 1440 }</code></small>\n  The option to use QHD video resolution.\n  <small>Note that this resolution may not be supported and may be unrealistic.</small>\n  <blockquote class=\"sub\">Aspect Ratio <code>16:9</code></blockquote>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "WQXGAPLUS",
+                    "description": "<small>Value <code>{ width: 3200, height: 1800 }</code></small>\n  The option to use WQXGAPLUS video resolution.\n  <small>Note that this resolution may not be supported and may be unrealistic.</small>\n  <blockquote class=\"sub\">Aspect Ratio <code>16:9</code></blockquote>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "UHD",
+                    "description": "<small>Value <code>{ width: 3840, height: 2160 }</code></small>\n  The option to use UHD video resolution.\n  <small>Note that this resolution may not be supported and may be unrealistic.</small>\n  <blockquote class=\"sub\">Aspect Ratio <code>16:9</code></blockquote>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "UHDPLUS",
+                    "description": "<small>Value <code>{ width: 5120, height: 2880 }</code></small>\n  The option to use UHDPLUS video resolution.\n  <small>Note that this resolution may not be supported and may be unrealistic.</small>\n  <blockquote class=\"sub\">Aspect Ratio <code>16:9</code></blockquote>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "FUHD",
+                    "description": "<small>Value <code>{ width: 7680, height: 4320 }</code></small>\n  The option to use FUHD video resolution.\n  <small>Note that this resolution may not be supported and may be unrealistic.</small>\n  <blockquote class=\"sub\">Aspect Ratio <code>16:9</code></blockquote>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "QUHD",
+                    "description": "<small>Value <code>{ width: 15360, height: 8640 }</code></small>\n  The option to use QUHD resolution.\n  <small>Note that this resolution may not be supported and may be unrealistic.</small>\n  <blockquote class=\"sub\">Aspect Ratio <code>16:9</code></blockquote>",
+                    "type": "JSON"
+                }
+            ],
+            "itemtype": "attribute",
+            "name": "VIDEO_RESOLUTION",
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.7.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/core/requires/events.js",
+            "line": 2,
+            "description": "Event triggered when room connection information is being retrieved from platform server.\n- This is also triggered when <a href=\"#method_init\">init()</a> is invoked, but\n  the socket connection events like <a href=\"#event_channelOpen\">channelOpen</a> does\n  not get triggered but stops at <u>readyStateChange</u> event.",
+            "itemtype": "event",
+            "name": "readyStateChange",
+            "params": [
+                {
+                    "name": "readyState",
+                    "description": "The current ready state of the retrieval when the event is triggered.\n  [Rel: Skylink.READY_STATE_CHANGE]",
+                    "type": "String"
+                },
+                {
+                    "name": "error",
+                    "description": "The error object thrown when there is a failure in retrieval.\n  If received as <code>null</code>, it means that there is no errors.",
+                    "type": "JSON",
+                    "optional": true,
+                    "optdefault": "null",
+                    "props": [
+                        {
+                            "name": "status",
+                            "description": "Http status when retrieving information.\n  May be empty for other errors.",
+                            "type": "Number"
+                        },
+                        {
+                            "name": "errorCode",
+                            "description": "The\n  <a href=\"#attr_READY_STATE_CHANGE_ERROR\">READY_STATE_CHANGE_ERROR</a>\n  if there is an <a href=\"#event_readyStateChange\">readyStateChange</a>\n  event error that caused the failure for initialising Skylink.\n  [Rel: Skylink.READY_STATE_CHANGE_ERROR]",
+                            "type": "Number"
+                        },
+                        {
+                            "name": "content",
+                            "description": "The exception thrown that caused the failure\n  for initialising Skylink.",
+                            "type": "Object"
+                        },
+                        {
+                            "name": "status",
+                            "description": "The XMLHttpRequest status code received\n  when exception is thrown that caused the failure for initialising Skylink.",
+                            "type": "Number"
+                        }
+                    ]
+                },
+                {
+                    "name": "room",
+                    "description": "The selected room connection information that Skylink is attempting\n  to retrieve the information for to start connection to.",
+                    "type": "String"
+                }
+            ],
+            "component": "Events",
+            "since": "0.4.0",
+            "class": "Skylink"
+        },
         {
             "file": "source/template/header.js",
             "line": 181,
@@ -2958,13 +4092,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 506,
+            "line": 513,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 569,
+            "line": 576,
             "description": "Refreshes a Peer connection.\n- This feature can be used to refresh a Peer connection when the\n  remote Stream received does not stream any audio/video stream.\n- If there are more than 1 refresh during 5 seconds\n  or refresh is less than 3 seconds since the last refresh\n  initiated by the other peer, it will be aborted.\n- As for MCU connection, the restart mechanism makes the self user\n   leave and join the currently connected room again.",
             "itemtype": "method",
             "name": "refreshConnection",
@@ -3028,7 +4162,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 728,
+            "line": 735,
             "description": "Restarts all Peers connection in a MCU connection environment.\nThis would require the current user to leave the room and restart all\n  current existing Peers connection.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -3512,7 +4646,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 259,
+            "line": 261,
             "description": "Responses to the <code>OFFER</code> session description received and\n   creates an <code>ANSWER</code> session description to sent\n  to the associated Peer to complete the WebRTC handshake layer.",
             "itemtype": "method",
             "name": "_doAnswer",
@@ -3531,7 +4665,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 302,
+            "line": 304,
             "description": "Starts the waiting timeout for a \"healthy\" connection\n  with associated Peer connection.\nIt waits for any existing Peer \"healthy\" state in successful\n  {{#crossLink \"Skylink/_peerConnectionHealth:attr\"}}_peerConnectionHealth{{/crossLink}}.\nIf timeout has reached it's limit and does not have any \"healthy\" connection state\n  with Peer connection, it will restart the connection again with\n  {{#crossLink \"Skylink/_restartPeerConnection:method\"}}_restartPeerConnection(){{/crossLink}}.\nThis sets the timeout object associated with the Peer into\n  {{#crossLink \"Skylink/_peerConnectionHealthTimers\"}}_peerConnectionHealthTimers(){{/crossLink}}.",
             "itemtype": "method",
             "name": "_startPeerConnectionHealthCheck",
@@ -3557,7 +4691,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 394,
+            "line": 396,
             "description": "Stops the waiting timeout for a \"healthy\" connection associated\n  with the Peer.",
             "itemtype": "method",
             "name": "_stopPeerConnectionHealthCheck",
@@ -3576,7 +4710,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 421,
+            "line": 423,
             "description": "Sets the WebRTC handshake layer session description into the\n  Peer <code>RTCPeerConnection</code> object <i><code>\n  RTCPeerConnection.setLocalDescription()</code></i> associated\n  with the Peer connection.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -5115,7 +6249,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 693,
+            "line": 694,
             "description": "Starts loading the required dependencies and then retrieve the required\n  connection information from the platform server.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -5129,7 +6263,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 788,
+            "line": 789,
             "description": "Starts loading the required connection information to start connection\n  based on the selected room in {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -5162,7 +6296,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 839,
+            "line": 840,
             "description": "Initialises and configures Skylink to begin any connection.\n<b>NOTE</b> that this is the first method that has to be called before\n  using any other functionalities other than debugging features like\n  {{#crossLink \"Skylink/setLogLevel:method\"}}setLogLevel(){{/crossLink}} and\n  {{#crossLink \"Skylink/setDebugMode:method\"}}setDebugMode(){{/crossLink}} and\n  after all event subscriptions like {{#crossLink \"Skylink/on:method\"}}on(){{/crossLink}}\n  or {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}} has been made.\nThis is where the Application Key is configured and attached to Skylink for usage.",
             "itemtype": "method",
             "name": "init",
@@ -8993,6 +10127,20 @@
         {
             "file": "source/socket-channel.js",
             "line": 38,
+            "description": "Stores the socket connection session information.",
+            "itemtype": "attribute",
+            "name": "_socketSession",
+            "type": "JSON",
+            "access": "private",
+            "tagname": "",
+            "required": 1,
+            "component": "Socket",
+            "since": "0.6.13",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/socket-channel.js",
+            "line": 50,
             "description": "Stores the queued socket messages to sent to the platform signaling to\n  prevent messages from being dropped due to messages being sent in\n  less than a second interval.",
             "itemtype": "attribute",
             "name": "_socketMessageQueue",
@@ -9006,7 +10154,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 52,
+            "line": 64,
             "description": "Limits the socket messages being sent in less than a second interval\n  using the <code>setTimeout</code> object to prevent messages being sent\n  in less than a second interval.\nThe messaegs are stored in\n  {{#crossLink \"Skylink/_socketMessageQueue:attribute\"}}_socketMessageQueue{{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_socketMessageTimeout",
@@ -9020,7 +10168,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 69,
+            "line": 81,
             "description": "Stores the list of fallback ports that Skylink can attempt\n  to establish a socket connection with platform signaling.",
             "itemtype": "attribute",
             "name": "_socketPorts",
@@ -9046,7 +10194,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 89,
+            "line": 101,
             "description": "These are the list of fallback attempt types that Skylink would attempt with.",
             "itemtype": "attribute",
             "name": "SOCKET_FALLBACK",
@@ -9085,7 +10233,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 139,
+            "line": 151,
             "description": "The flag that indicates if the current socket connection with\n  platform signaling is opened.",
             "itemtype": "attribute",
             "name": "_channelOpen",
@@ -9099,7 +10247,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 152,
+            "line": 164,
             "description": "Stores the platform signaling endpoint URI to open socket connection with.",
             "itemtype": "attribute",
             "name": "_signalingServer",
@@ -9112,7 +10260,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 163,
+            "line": 175,
             "description": "Stores the current platform signaling protocol to open socket connection with.",
             "itemtype": "attribute",
             "name": "_signalingServerProtocol",
@@ -9125,7 +10273,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 174,
+            "line": 186,
             "description": "Stores the current platform signaling port to open socket connection with.",
             "itemtype": "attribute",
             "name": "_signalingServerPort",
@@ -9138,7 +10286,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 185,
+            "line": 197,
             "description": "Stores the [socket.io-client <code>io</code> object](http://socket.io/docs/client-api/) that\n  handles the middleware socket connection with platform signaling.",
             "itemtype": "attribute",
             "name": "_socket",
@@ -9152,7 +10300,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 198,
+            "line": 210,
             "description": "Stores the timeout (in ms) set to await in seconds for response from platform signaling\n  before throwing a connection timeout exception when Skylink is attemtping\n  to establish a connection with platform signaling.\nIf the value is <code>0</code>, it will use the default timeout from\n  socket.io-client that is in <code>20000</code>.",
             "itemtype": "attribute",
             "name": "_socketTimeout",
@@ -9167,7 +10315,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 215,
+            "line": 227,
             "description": "The flag that indicates if the current socket connection for\n  transports types with <code>\"Polling\"</code> uses\n  [XDomainRequest](https://msdn.microsoft.com/en-us/library/cc288060(v=vs.85).aspx)\n  instead of [XMLHttpRequest](http://www.w3schools.com/Xml/dom_httprequest.asp)\n  due to the IE 8 / 9 <code>XMLHttpRequest</code> not supporting CORS access.",
             "itemtype": "attribute",
             "name": "_socketUseXDR",
@@ -9182,7 +10330,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 232,
+            "line": 244,
             "description": "Sends socket message over the platform signaling socket connection.",
             "itemtype": "method",
             "name": "_sendChannelMessage",
@@ -9208,7 +10356,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 356,
+            "line": 368,
             "description": "Starts a socket.io connection with the platform signaling.",
             "itemtype": "method",
             "name": "_createSocket",
@@ -9227,7 +10375,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 524,
+            "line": 540,
             "description": "Connects to the socket connection endpoint URI to platform signaling that is constructed with\n {{#crossLink \"Skylink/_signalingServerProtocol:attribute\"}}_signalingServerProtocol{{/crossLink}},\n {{#crossLink \"Skylink/_signalingServer:attribute\"}}_signalingServer{{/crossLink}} and\n {{#crossLink \"Skylink/_signalingServerPort:attribute\"}}_signalingServerPort{{/crossLink}}.\n <small>Example format: <code>protocol//serverUrl:port</code></small>.<br>\nOnce URI is formed, it will start a new socket.io connection with\n {{#crossLink \"Skylink/_createSocket:method\"}}_createSocket(){{/crossLink}}.",
             "itemtype": "method",
             "name": "_openChannel",
@@ -9240,7 +10388,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 571,
+            "line": 589,
             "description": "Disconnects the current socket connection with the platform signaling.",
             "itemtype": "method",
             "name": "_closeChannel",
@@ -11500,7 +12648,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 631,
+            "line": 627,
             "description": "Parses the audio stream settings for self provided.",
             "itemtype": "method",
             "name": "_parseAudioStreamSettings",
@@ -11540,7 +12688,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 690,
+            "line": 686,
             "description": "Parses the video stream settings for self provided.",
             "itemtype": "method",
             "name": "_parseVideoStreamSettings",
@@ -11606,7 +12754,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 791,
+            "line": 787,
             "description": "Parses the streaming bandwidth settings for self provided.",
             "itemtype": "method",
             "name": "_parseBandwidthSettings",
@@ -11646,7 +12794,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 835,
+            "line": 831,
             "description": "Parses the <code>mediaStatus</code> settings for self provided.",
             "itemtype": "method",
             "name": "_parseMutedSettings",
@@ -11742,7 +12890,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 903,
+            "line": 899,
             "description": "Parses the default stream settings received from\n  the platform signaling.",
             "itemtype": "method",
             "name": "_parseDefaultMediaStreamSettings",
@@ -11775,7 +12923,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 937,
+            "line": 933,
             "description": "Parses the provided stream settings for self provided.",
             "itemtype": "method",
             "name": "_parseMediaStreamSettings",
@@ -11887,7 +13035,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1018,
+            "line": 1014,
             "description": "Sends self selected Stream object to current Peer connections.\nIf {{#crossLink \"Skylink/_mediaScreen:attribute\"}}_mediaScreen{{/crossLink}}\n  is not empty, it will send the screensharing stream, else it will\n  send the {{#crossLink \"Skylink/_mediaStream:attribute\"}}_mediaStream{{/crossLink}}\n  if is not empty.\nIf self does not have any Stream object to send, it will a connection without\n  any remote Stream sent to the Peer connection.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -11906,7 +13054,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1099,
+            "line": 1095,
             "description": "Stops self user media Stream object attached to Skylink.",
             "itemtype": "method",
             "name": "stopStream",
@@ -11919,7 +13067,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1115,
+            "line": 1111,
             "description": "Handles the muting of audio and video streams in\n  {{#crossLink \"Skylink/_mediaStream:attribute\"}}_mediaStream{{/crossLink}},\n  {{#crossLink \"Skylink/_mediaScreen:attribute\"}}_mediaScreen{{/crossLink}} and\n  {{#crossLink \"Skylink/_mediaScreenClone:attribute\"}}_mediaScreenClone{{/crossLink}},",
             "itemtype": "method",
             "name": "_muteLocalMediaStreams",
@@ -11934,7 +13082,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1227,
+            "line": 1223,
             "description": "Handles the stopping of audio and video streams.",
             "itemtype": "method",
             "name": "_stopLocalMediaStreams",
@@ -11968,7 +13116,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1330,
+            "line": 1326,
             "description": "Waits for self MediaStream object to be attached to Skylink based\n  on the options provided before firing the callback to indicate\n  that self Stream object is received.\nThis will stop any currently attached Stream object to Skylink.",
             "itemtype": "method",
             "name": "_waitForLocalMediaStream",
@@ -12107,7 +13255,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1465,
+            "line": 1461,
             "description": "Gets self user media Stream object to attach to Skylink.\nDo not invoke this function when user has already joined a room as\n  this may affect any currently attached stream. You may use\n {{#crossLink \"Skylink/sendStream:method\"}}sendStream(){{/crossLink}}\n instead if self is already in the room, and allows application to\n attach application own MediaStream object to Skylink.",
             "itemtype": "method",
             "name": "getUserMedia",
@@ -12225,7 +13373,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1700,
+            "line": 1696,
             "description": "Replaces the currently attached Stream object in Skylink and refreshes all\n  connection with Peer connections to send the updated Stream object.\nThe application may provide their own MediaStream object to send to\n  all PeerConnections connection.\nReference {{#crossLink \"Skylink/refreshConnection:method\"}}refreshConnection(){{/crossLink}}\n   on the events triggered and restart mechanism.",
             "itemtype": "method",
             "name": "sendStream",
@@ -12342,7 +13490,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1933,
+            "line": 1929,
             "description": "Mutes the currently attached Stream object in Skylink.",
             "itemtype": "method",
             "name": "muteStream",
@@ -12379,7 +13527,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2035,
+            "line": 2031,
             "description": "Unmutes the currently attached Stream object audio stream.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -12395,7 +13543,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2053,
+            "line": 2049,
             "description": "Mutes the currently attached Stream object audio stream.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -12411,7 +13559,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2071,
+            "line": 2067,
             "description": "Unmutes the currently attached Stream object video stream.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -12427,7 +13575,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2089,
+            "line": 2085,
             "description": "Mutes the currently attached Stream object video stream.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -12442,7 +13590,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2106,
+            "line": 2102,
             "description": "Shares the current screen with Peer connections and will refresh all\n   Peer connections to send the screensharing Stream object with\n   <code>HTTPS</code> protocol accessing application.\nReference {{#crossLink \"Skylink/refreshConnection:method\"}}refreshConnection(){{/crossLink}}\n   on the events triggered and restart mechanism.\nThis will require our own Temasys Skylink extension to do screensharing.\nFor screensharing feature in IE / Safari with our Temasys Plugin, please\n  [contact us](https://www.temasys.com.sg/contact-us).\nCurrently, Opera does not support screensharing feature.\nThis does not replace the currently attached user media Stream object in Skylink.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -12483,7 +13631,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2318,
+            "line": 2314,
             "description": "Stops self screensharing Stream object attached to Skylink.\nIf user media Stream object is available, Skylink will refresh all\n   Peer connections to send the user media Stream object.\nReference {{#crossLink \"Skylink/refreshConnection:method\"}}refreshConnection(){{/crossLink}}\n   on the events triggered and restart mechanism.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -12662,6 +13810,22 @@
         }
     ],
     "warnings": [
+        {
+            "message": "unknown tag: link",
+            "line": " source/core/requires/constants.js:42"
+        },
+        {
+            "message": "unknown tag: link",
+            "line": " source/core/requires/constants.js:237"
+        },
+        {
+            "message": "unknown tag: link",
+            "line": " source/core/requires/constants.js:333"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/core/requires/events.js:2"
+        },
         {
             "message": "unknown tag: component",
             "line": " source/data-channel.js:1"
@@ -13020,19 +14184,19 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:569"
+            "line": " source/peer-connection.js:576"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:569"
+            "line": " source/peer-connection.js:576"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:728"
+            "line": " source/peer-connection.js:735"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:728"
+            "line": " source/peer-connection.js:735"
         },
         {
             "message": "unknown tag: component",
@@ -13084,23 +14248,23 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:259"
+            "line": " source/peer-handshake.js:261"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:302"
+            "line": " source/peer-handshake.js:304"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:394"
+            "line": " source/peer-handshake.js:396"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-handshake.js:421"
+            "line": " source/peer-handshake.js:423"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:421"
+            "line": " source/peer-handshake.js:423"
         },
         {
             "message": "unknown tag: component",
@@ -13284,27 +14448,27 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:693"
+            "line": " source/room-init.js:694"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:693"
+            "line": " source/room-init.js:694"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:788"
+            "line": " source/room-init.js:789"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:788"
+            "line": " source/room-init.js:789"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:839"
+            "line": " source/room-init.js:840"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:839"
+            "line": " source/room-init.js:840"
         },
         {
             "message": "unknown tag: component",
@@ -13660,63 +14824,67 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:52"
+            "line": " source/socket-channel.js:50"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:69"
+            "line": " source/socket-channel.js:64"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:89"
+            "line": " source/socket-channel.js:81"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:139"
+            "line": " source/socket-channel.js:101"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:152"
+            "line": " source/socket-channel.js:151"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:163"
+            "line": " source/socket-channel.js:164"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:174"
+            "line": " source/socket-channel.js:175"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:185"
+            "line": " source/socket-channel.js:186"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:198"
+            "line": " source/socket-channel.js:197"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:215"
+            "line": " source/socket-channel.js:210"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:232"
+            "line": " source/socket-channel.js:227"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:356"
+            "line": " source/socket-channel.js:244"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/socket-channel.js:368"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-channel.js:524"
+            "line": " source/socket-channel.js:540"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:524"
+            "line": " source/socket-channel.js:540"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:571"
+            "line": " source/socket-channel.js:589"
         },
         {
             "message": "unknown tag: component",
@@ -13988,127 +15156,127 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:631"
+            "line": " source/stream-media.js:627"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:690"
+            "line": " source/stream-media.js:686"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:791"
+            "line": " source/stream-media.js:787"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:835"
+            "line": " source/stream-media.js:831"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:903"
+            "line": " source/stream-media.js:899"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:937"
+            "line": " source/stream-media.js:933"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1018"
+            "line": " source/stream-media.js:1014"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1099"
+            "line": " source/stream-media.js:1095"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1330"
+            "line": " source/stream-media.js:1326"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1330"
+            "line": " source/stream-media.js:1326"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1465"
+            "line": " source/stream-media.js:1461"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1465"
+            "line": " source/stream-media.js:1461"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1700"
+            "line": " source/stream-media.js:1696"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1700"
+            "line": " source/stream-media.js:1696"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1933"
+            "line": " source/stream-media.js:1929"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1933"
+            "line": " source/stream-media.js:1929"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2035"
+            "line": " source/stream-media.js:2031"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2035"
+            "line": " source/stream-media.js:2031"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2035"
+            "line": " source/stream-media.js:2031"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2053"
+            "line": " source/stream-media.js:2049"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2053"
+            "line": " source/stream-media.js:2049"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2053"
+            "line": " source/stream-media.js:2049"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2071"
+            "line": " source/stream-media.js:2067"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2071"
+            "line": " source/stream-media.js:2067"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2071"
+            "line": " source/stream-media.js:2067"
         },
         {
             "message": "unknown tag: depcreated",
-            "line": " source/stream-media.js:2089"
+            "line": " source/stream-media.js:2085"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2089"
+            "line": " source/stream-media.js:2085"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2089"
+            "line": " source/stream-media.js:2085"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2106"
+            "line": " source/stream-media.js:2102"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:2106"
+            "line": " source/stream-media.js:2102"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:2318"
+            "line": " source/stream-media.js:2314"
         },
         {
             "message": "unknown tag: component",
@@ -14140,7 +15308,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:506"
+            "line": " source/peer-connection.js:513"
         }
     ]
 }
