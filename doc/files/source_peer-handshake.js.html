@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.12</title>
+    <title>SkylinkJS 0.6.13</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.12</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.13</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -327,9 +327,11 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       return;
     }
 
-    self._dataChannels[targetMid].main =
-      self._createDataChannel(targetMid, self.DATA_CHANNEL_TYPE.MESSAGING, null, targetMid);
-    self._peerConnections[targetMid].hasMainChannel = true;
+    if (!self._dataChannels[targetMid].main) {
+      self._dataChannels[targetMid].main =
+        self._createDataChannel(targetMid, self.DATA_CHANNEL_TYPE.MESSAGING, null, targetMid);
+      self._peerConnections[targetMid].hasMainChannel = true;
+    }
   }
 
   log.debug([targetMid, null, null, &#x27;Creating offer with config:&#x27;], offerConstraints);
