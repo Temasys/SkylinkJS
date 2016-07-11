@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.12 - Tue Jun 14 2016 18:20:32 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.12 - Mon Jul 11 2016 18:39:26 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5709,16 +5709,16 @@ Skylink.prototype._inRoom = false;
  *   Stream streaming video resolution height.
  * @param {Number} [options.video.frameRate=50] The self
  *   Stream streaming video maximum frameRate.
- * @param {String} [options.bandwidth] The configuration for
+ * @param {JSON} [options.bandwidth] The configuration for
  *   the maximum sending bandwidth. Setting the flags may or may not work depending
  *   on the browser implementations and how it handles it.
- * @param {String} [options.bandwidth.audio] The maximum
+ * @param {Number} [options.bandwidth.audio] The maximum
  *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the audio bitrate to the browser defaults.
- * @param {String} [options.bandwidth.video] The maximum
+ * @param {Number} [options.bandwidth.video] The maximum
  *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the video bitrate to the browser defaults.
- * @param {String} [options.bandwidth.data] The maximum
+ * @param {Number} [options.bandwidth.data] The maximum
  *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the data bitrate to the browser defaults.
  * @param {Boolean} [options.manualGetUserMedia] The flag that indicates if
@@ -5786,16 +5786,16 @@ Skylink.prototype._inRoom = false;
  * @param {Boolean} [callback.success.peerInfo.video.screenshare=false] The flag
  *   that indicates if the self connection Stream object sent
  *   is a screensharing stream or not.
- * @param {String} [callback.success.peerInfo.bandwidth] The configuration for
+ * @param {JSON} [callback.success.peerInfo.bandwidth] The configuration for
  *   the maximum sending bandwidth. Setting the flags may or may not work depending
  *   on the browser implementations and how it handles it.
- * @param {String} [callback.success.peerInfo.bandwidth.audio] The maximum
+ * @param {Number} [callback.success.peerInfo.bandwidth.audio] The maximum
  *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the audio bitrate to the browser defaults.
- * @param {String} [callback.success.peerInfo.bandwidth.video] The maximum
+ * @param {Number} [callback.success.peerInfo.bandwidth.video] The maximum
  *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the video bitrate to the browser defaults.
- * @param {String} [callback.success.peerInfo.bandwidth.data] The maximum
+ * @param {Number} [callback.success.peerInfo.bandwidth.data] The maximum
  *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the data bitrate to the browser defaults.
  * @param {JSON} callback.success.peerInfo.mediaStatus The self Stream mute
@@ -6134,16 +6134,16 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  *   Stream streaming video resolution height.
  * @param {Number} [options.video.frameRate=50] The self
  *   Stream streaming video maximum frameRate.
- * @param {String} [options.bandwidth] The configuration for
+ * @param {JSON} [options.bandwidth] The configuration for
  *   the maximum sending bandwidth. Setting the flags may or may not work depending
  *   on the browser implementations and how it handles it.
- * @param {String} [options.bandwidth.audio] The maximum
+ * @param {Number} [options.bandwidth.audio] The maximum
  *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the audio bitrate to the browser defaults.
- * @param {String} [options.bandwidth.video] The maximum
+ * @param {Number} [options.bandwidth.video] The maximum
  *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the video bitrate to the browser defaults.
- * @param {String} [options.bandwidth.data] The maximum
+ * @param {Number} [options.bandwidth.data] The maximum
  *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the data bitrate to the browser defaults.
  * @param {Boolean} [options.manualGetUserMedia] The flag that indicates if
@@ -6774,18 +6774,18 @@ Skylink.prototype._room = null;
  *   {{#crossLink "Skylink/_parseInfo:method"}}_parseInfo(){{/crossLink}}.
  *   The data is in JSON stringified string and requires converting the JSON string
  *      to an JSON object to use the object.
- * @param {String} callback.response.bandwidth For success state. The self
+ * @param {JSON} callback.response.bandwidth For success state. The self
  *   streaming bandwidth settings. Setting the bandwidth flags may not
  *   force set the bandwidth for each connection stream channels as it depends
  *   on how the browser handles the bandwidth bitrate. Values are configured
  *   in <var>kb/s</var>.
- * @param {String} callback.response.bandwidth.audio The default
+ * @param {Number} callback.response.bandwidth.audio The default
  *   audio stream channel for self Stream object bandwidth
  *   that audio streaming should use in <var>kb/s</var>.
- * @param {String} callback.response.bandwidth.video The default
+ * @param {Number} callback.response.bandwidth.video The default
  *   video stream channel for self Stream object bandwidth
  *   that video streaming should use in <var>kb/s</var>.
- * @param {String} callback.response.bandwidth.data The default
+ * @param {Number} callback.response.bandwidth.data The default
  *   datachannel channel for the DataChannel connection bandwidth
  *   that datachannel connection per packet should be able use in <var>kb/s</var>.
  * @param {String} callback.response.cid For success state. The Skylink server connection key for the
@@ -6922,18 +6922,18 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  * @param {String} info.offer_constraints The RTCPeerConnection RTCOfferOptions.
  *   The data is in JSON stringified string and requires converting the JSON string
  *      to an JSON object to use the object.
- * @param {String} info.bandwidth The self
+ * @param {JSON} info.bandwidth The self
  *   streaming bandwidth settings. Setting the bandwidth flags may not
  *   force set the bandwidth for each connection stream channels as it depends
  *   on how the browser handles the bandwidth bitrate. Values are configured
  *   in <var>kb/s</var>.
- * @param {String} info.bandwidth.audio The default
+ * @param {Number} info.bandwidth.audio The default
  *   audio stream channel for self Stream object bandwidth
  *   that audio streaming should use in <var>kb/s</var>.
- * @param {String} info.bandwidth.video The default
+ * @param {Number} info.bandwidth.video The default
  *   video stream channel for self Stream object bandwidth
  *   that video streaming should use in <var>kb/s</var>.
- * @param {String} info.bandwidth.data The default
+ * @param {Number} info.bandwidth.data The default
  *   datachannel channel for the DataChannel connection bandwidth
  *   that datachannel connection per packet should be able use in <var>kb/s</var>.
  * @param {String} info.cid The Skylink server connection key for starting the
@@ -12253,7 +12253,7 @@ Skylink.prototype._mediaScreenClone = null;
  *   streaming video resolution height.
  * @param {Number} [video.frameRate] The default
  *   streaming video maximum frameRate.
- * @param {String} [bandwidth] The configuration for
+ * @param {JSON} [bandwidth] The configuration for
  *   the maximum sending bandwidth. Setting the flags may or may not work depending
  *   on the browser implementations and how it handles it. By default, this is empty.
  * @private
@@ -12317,16 +12317,16 @@ Skylink.prototype._defaultStreamSettings = {
  *   in self user media Stream object. Some of the values are
  *   set by the <code>video.optional</code> setting in
  *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}.
- * @param {String} [bandwidth] The configuration for
+ * @param {JSON} [bandwidth] The configuration for
  *   the maximum sending bandwidth. The flags set may or may not work depending
  *   on the browser implementations and how it handles it.
- * @param {String} [bandwidth.audio] The maximum
+ * @param {Number} [bandwidth.audio] The maximum
  *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the audio bitrate to the browser defaults.
- * @param {String} [bandwidth.video] The maximum
+ * @param {Number} [bandwidth.video] The maximum
  *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the video bitrate to the browser defaults.
- * @param {String} [bandwidth.data] The maximum
+ * @param {Number} [bandwidth.data] The maximum
  *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the data bitrate to the browser defaults.
  * @private
@@ -12353,7 +12353,7 @@ Skylink.prototype._streamSettings = {};
  *   that indicates if the self connection Stream object sent
  *   is a screensharing stream or not. In this case, the
  *   value is <code>true</code> for screensharing Stream object.
- * @param {String} [bandwidth] The self
+ * @param {JSON} [bandwidth] The self
  *   streaming bandwidth settings. Setting the bandwidth flags may not
  *   force set the bandwidth for each connection stream channels as it depends
  *   on how the browser handles the bandwidth bitrate. Values are configured
@@ -12819,18 +12819,18 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
 /**
  * Parses the streaming bandwidth settings for self provided.
  * @method _parseBandwidthSettings
- * @param {String} [options] The self
+ * @param {JSON} [options] The self
  *   streaming bandwidth settings. Setting the bandwidth flags may not
  *   force set the bandwidth for each connection stream channels as it depends
  *   on how the browser handles the bandwidth bitrate. Values are configured
  *   in <var>kb/s</var>.
- * @param {String} [options.audio] The configured
+ * @param {Number} [options.audio] The configured
  *   audio stream channel for self connection Stream object bandwidth
  *   that audio streaming should use in <var>kb/s</var>.
- * @param {String} [options.video] The configured
+ * @param {Number} [options.video] The configured
  *   video stream channel for the self connection Stream object bandwidth
  *   that video streaming should use in <var>kb/s</var>.
- * @param {String} [options.data] The configured
+ * @param {Number} [options.data] The configured
  *   datachannel channel for self DataChannel connection bandwidth
  *   that datachannel connection per packet should be able use in <var>kb/s</var>.
  * @private
@@ -12997,16 +12997,16 @@ Skylink.prototype._parseDefaultMediaStreamSettings = function(options) {
  *   Stream streaming video resolution height.
  * @param {Number} [options.video.frameRate=50] The self
  *   Stream streaming video maximum frameRate.
- * @param {String} [options.bandwidth] The configuration for
+ * @param {JSON} [options.bandwidth] The configuration for
  *   the maximum sending bandwidth. Setting the flags may or may not work depending
  *   on the browser implementations and how it handles it.
- * @param {String} [options.bandwidth.audio] The maximum
+ * @param {Number} [options.bandwidth.audio] The maximum
  *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the audio bitrate to the browser defaults.
- * @param {String} [options.bandwidth.video] The maximum
+ * @param {Number} [options.bandwidth.video] The maximum
  *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the video bitrate to the browser defaults.
- * @param {String} [options.bandwidth.data] The maximum
+ * @param {Number} [options.bandwidth.data] The maximum
  *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the data bitrate to the browser defaults.
  * @private
@@ -13402,16 +13402,16 @@ Skylink.prototype._stopLocalMediaStreams = function (options) {
  *   Stream streaming video resolution height.
  * @param {Number} [options.video.frameRate=50] The self
  *   Stream streaming video maximum frameRate.
- * @param {String} [options.bandwidth] The configuration for
+ * @param {JSON} [options.bandwidth] The configuration for
  *   the maximum sending bandwidth. Setting the flags may or may not work depending
  *   on the browser implementations and how it handles it.
- * @param {String} [options.bandwidth.audio] The maximum
+ * @param {Number} [options.bandwidth.audio] The maximum
  *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the audio bitrate to the browser defaults.
- * @param {String} [options.bandwidth.video] The maximum
+ * @param {Number} [options.bandwidth.video] The maximum
  *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the video bitrate to the browser defaults.
- * @param {String} [options.bandwidth.data] The maximum
+ * @param {Number} [options.bandwidth.data] The maximum
  *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the data bitrate to the browser defaults.
  * @trigger mediaAccessSuccess, mediaAccessError, mediaAccessRequired

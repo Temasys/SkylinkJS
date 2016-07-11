@@ -532,6 +532,13 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   };
   pc.onaddstream = function(event) {
     var stream = event.stream || event;
+
+    if (targetMid === &#x27;MCU&#x27;) {
+      log.debug([targetMid, &#x27;MediaStream&#x27;, stream.id,
+        &#x27;Ignoring received remote stream from MCU -&gt;&#x27;], stream);
+      return;
+    }
+
     pc.hasStream = true;
 
     var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
