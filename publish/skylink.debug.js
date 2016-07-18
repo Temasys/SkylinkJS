@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.11 - Thu Mar 17 2016 11:13:43 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.11 - Mon Jul 18 2016 18:17:39 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4772,7 +4772,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
  * @trigger get
  * @component Peer
  * @for Skylink
- * @since 0.5.5
+ * @since 0.6.14
  */
 Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
   var self = this;
@@ -4839,30 +4839,129 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
   var statsFn = function (peerId) {
     log.debug([peerId, 'RTCStatsReport', null, 'Retrieivng connection status']);
 
-    self._peerConnections[peerId].getStats(null, function (stats) {
+    var pc = self._peerConnections[peerId];
+
+    pc.getStats(null, function (stats) {
       log.debug([peerId, 'RTCStatsReport', null, 'Retrieval success ->'], stats);
 
-      var receivedRemoteSDPType = null,
-          receivedLocalSDPType = null,
-          localDescription = self._peerConnections[peerId].localDescription,
-          remoteDescription = self._peerConnections[peerId].remoteDescription;
-
-      if (!!localDescription && !!localDescription.sdp) {
-        receivedLocalSDPType = localDescription.type;
-      }
-
-      if (!!remoteDescription && !!remoteDescription.sdp) {
-        receivedRemoteSDPType = remoteDescription.type;
-      }
-
-      listOfPeerStats[peerId] = {
-        stats: stats,
-        receivedRemoteSDPType: receivedRemoteSDPType,
-        receivedLocalSDPType: receivedLocalSDPType,
-        iceConnectionState: self._peerConnections[peerId].iceConnectionState,
-        candidateGenerationState: self._peerConnections[peerId].iceGatheringState,
-        peerConnectionState: self._peerConnections[peerId].signalingState
+      var outputStats = {
+        audioBytesSent: 0,
+        videoBytesSent: 0,
+        audioBytesReceived: 0,
+        videoBytesReceived: 0,
+        audioPacketsSent: 0,
+        videoPacketsSent: 0,
+        audioPacketsReceived: 0,
+        videoPacketsReceived: 0,
+        audioSendingSSRC: null,
+        videoSendingSSRC: null,
+        audioReceivingSSRC: null,
+        videoReceivingSSRC: null,
+        selectedCandidate: {
+          localAddress: null,
+          remoteAddress: null,
+          localType: null,
+          remoteType: null,
+          localPort: null,
+          remotePort: null,
+          localTransport: null,
+          remoteTransport: null
+        },
+        rawStats: stats,
+        candidates: {},
+        connection: {
+          localSdp: pc.localDescription,
+          remoteSdp: pc.remoteDescription,
+          iceConnectionState: pc.iceConnectionState,
+          iceGatheringState: pc.iceGatheringState,
+          signalingState: pc.signalingState
+        }
       };
+
+      var loopStatsFn = function (fn) {
+        for (var prop in stats) {
+          if (stats.hasOwnProperty(prop) && stats[prop]) {
+            fn(stats[prop], prop);
+          }
+        }
+      };
+
+      if (window.webrtcDetectedBrowser === 'firefox') {
+        loopStatsFn(function (obj, prop) {
+          // Receiving RTP packets
+          if (prop.indexOf('inbound_rtp') === 0) {
+            outputStats[obj.mediaType + 'BytesReceived'] = obj.bytesReceived;
+            outputStats[obj.mediaType + 'PacketsReceived'] = obj.packetsReceived;
+            outputStats[obj.mediaType + 'ReceivingSSRC'] = obj.ssrc;
+          
+          // Sending RTP packets
+          } else if (prop.indexOf('outbound_rtp') === 0) {
+            outputStats[obj.mediaType + 'BytesSent'] = obj.bytesSent;
+            outputStats[obj.mediaType + 'PacketsSent'] = obj.packetsSent;
+            outputStats[obj.mediaType + 'SendingSSRC'] = obj.ssrc;
+          
+          // Candidates
+          } else if (obj.nominated && obj.selected) {
+            var remote = stats[obj.remoteCandidateId];
+            var local = stats[obj.localCandidateId];
+
+            outputStats.selectedCandidate.localAddress = local.ipAddress;
+            outputStats.selectedCandidate.localType = local.candidateType;
+            outputStats.selectedCandidate.localPort = local.portNumber;
+            outputStats.selectedCandidate.localTransport = local.transport; 
+            outputStats.selectedCandidate.remoteAddress = remote.ipAddress;
+            outputStats.selectedCandidate.remoteType = remote.candidateType;
+            outputStats.selectedCandidate.remotePort = remote.portNumber;   
+            outputStats.selectedCandidate.remoteTransport = remote.transport; 
+          }
+        });
+
+      } else {
+        var reportedCandidate = false;
+
+        loopStatsFn(function (obj, prop) {
+          if (prop.indexOf('ssrc_') === 0) {
+            // Receiving RTP packets
+            if (prop.indexOf('_recv') > 0) {
+              outputStats[obj.mediaType + 'BytesReceived'] = parseInt(obj.bytesReceived || '0', 10);
+              outputStats[obj.mediaType + 'PacketsReceived'] = parseInt(obj.packetsReceived || '0', 10);
+              outputStats[obj.mediaType + 'ReceivingSSRC'] = obj.ssrc;
+
+            // Sending RTP packets
+            } else {
+              outputStats[obj.mediaType + 'BytesSent'] = parseInt(obj.bytesSent || '0', 10);
+              outputStats[obj.mediaType + 'PacketsSent'] = parseInt(obj.packetsSent || '0', 10);
+              outputStats[obj.mediaType + 'SendingSSRC'] = obj.ssrc;
+
+            }
+
+            if (!reportedCandidate) {
+              loopStatsFn(function (canObj, canProp) {
+                if (!reportedCandidate && canProp.indexOf('Conn-') === 0) {
+                  if (obj.transportId === canObj.googChannelId) {
+                    var local = stats[canObj.localCandidateId];
+                    var remote = stats[canObj.remoteCandidateId];
+
+                    outputStats.selectedCandidate.localAddress = local.ipAddress;
+                    outputStats.selectedCandidate.localType = local.candidateType;
+                    outputStats.selectedCandidate.localPort = parseInt(local.portNumber, 10);
+                    outputStats.selectedCandidate.localTransport = local.transport;
+                    outputStats.selectedCandidate.remoteAddress = remote.ipAddress;
+                    outputStats.selectedCandidate.remoteType = remote.candidateType;
+                    outputStats.selectedCandidate.remotePort = parseInt(remote.portNumber, 10);
+                    outputStats.selectedCandidate.remoteTransport = remote.transport;
+
+                    reportedCandidate = true;
+                  }
+                }
+              });
+            }
+          }
+        });
+      }
+
+
+      listOfPeerStats[peerId] = outputStats;
 
       self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,
         peerId, listOfPeerStats[peerId], null);

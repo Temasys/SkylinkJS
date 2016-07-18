@@ -13,7 +13,7 @@ var _peerId = null;
 
 var selectedPeers = [];
 
-//Demo.Skylink.setLogLevel(4);
+Demo.Skylink.setLogLevel(4);
 
 Demo.Methods.displayFileItemHTML = function (content) {
   return '<p>' + content.name + '<small style="float:right;color:#aaa;">' + content.size + ' B</small></p>' +
@@ -226,13 +226,17 @@ Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf){
       newListEntry += '<span class="glyphicon ' + glyphiconList[i] + ' circle ' +
         i + '" title="' + titleList[i] + '"></span>&nbsp;&nbsp;&nbsp;';
     }
-    newListEntry += '</td></tr>';
+    newListEntry += '<div id="user' + peerId + '_stats"></div></td></tr>';
     $('#presence_list').append(newListEntry);
     $('#user' + peerId + ' .0').css('color','green');
     $('#user' + peerId + ' .video').css('color',
       (peerInfo.mediaStatus.videoMuted) ? 'red' : 'green');
     $('#user' + peerId + ' .audio').css('color',
       (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
+
+    setInterval(function () {
+      Demo.Skylink.getConnectionStatus(peerId);
+    }, 1000);
   }
 });
 //---------------------------------------------------
@@ -503,7 +507,20 @@ Demo.Skylink.on('serverPeerRestart', function (serverPeerId, serverPeerType) {
 });
 
 Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats, error) {
-  console.info('getConnectionStatusStateChange', state, peerId, stats, error);
+  //console.info('getConnectionStatusStateChange', state, peerId, stats, error);
+
+  if (state === Demo.Skylink.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS) {
+    $('#user' + peerId + '_stats').html(
+      '<p><b>Sending audio</b>: ' + stats.audioBytesSent + 'bp/s | ' + stats.audioPacketsSent + 'pkts</p>' +
+      '<p><b>Sending video</b>: ' + stats.videoBytesSent + 'bp/s | ' + stats.videoPacketsSent + 'pkts</p>' +
+      '<p><b>Receiving audio</b>: ' + stats.audioBytesReceived + 'bp/s | ' + stats.audioPacketsReceived + 'pkts</p>' +
+      '<p><b>Receiving video</b>: ' + stats.videoBytesReceived + 'bp/s | ' + stats.videoPacketsReceived + 'pkts</p>' +
+      '<p><b>Local candidate</b>: ' + stats.selectedCandidate.localAddress + ':' + stats.selectedCandidate.localPort + ' | ' +
+        stats.selectedCandidate.localTransport + ' - ' + stats.selectedCandidate.localType + '</p>' +
+      '<p><b>Remote candidate</b>: ' + stats.selectedCandidate.remoteAddress + ':' + stats.selectedCandidate.remotePort + ' | ' +
+        stats.selectedCandidate.remoteTransport + ' - ' + stats.selectedCandidate.remoteType + '</p>'
+    );
+  }
 });
 
 Demo.Skylink.on('serverPeerRestart', function (serverPeerId, serverPeerType) {
