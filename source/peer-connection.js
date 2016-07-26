@@ -965,6 +965,47 @@ Skylink.prototype._restartMCUConnection = function(callback) {
  * @param {JSON} callback.success.connectionStats The list of Peers connection statuses.
  * @param {JSON} callback.success.connectionStats.(#peerId) The Peer ID that
  *   is associated with the connection status retrieved data.
+ * @param {JSON} callback.success.connectionStats.(#peerId).audio The Peer connection audio stats.
+ * @param {JSON} callback.success.connectionStats.(#peerId).audio.sending The Peer connection audio sending stats.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.bytes The Peer connection audio sending bytes.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.packets The Peer
+ *   connection audio sending packets.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.packetsLost The Peer
+ *   connection audio sending packets lost.
+ * @param {String|Number} callback.success.connectionStats.(#peerId).audio.sending.ssrc The Peer
+ *   connection audio sending ssrc ID.
+ * @param {JSON} callback.success.connectionStats.(#peerId).audio.receiving The Peer connection audio receiving stats.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.bytes The Peer connection audio receiving bytes.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.packets The Peer
+ *   connection audio receiving packets.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.packetsLost The Peer
+ *   connection audio receiving packets lost.
+ * @param {String|Number} callback.success.connectionStats.(#peerId).audio.receiving.ssrc The Peer
+ *   connection audio receiving ssrc ID.
+ * @param {JSON} callback.success.connectionStats.(#peerId).video The Peer connection video stats.
+ * @param {JSON} callback.success.connectionStats.(#peerId).video.sending The Peer connection video sending stats.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.sending.bytes The Peer connection video sending bytes.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.sending.packets The Peer
+ *   connection video sending packets.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.sending.packetsLost The Peer
+ *   connection video sending packets lost.
+ * @param {JSON} callback.success.connectionStats.(#peerId).video.sending.ssrc The Peer
+ *   connection video sending ssrc ID.
+ * @param {JSON} callback.success.connectionStats.(#peerId).video.receiving The Peer connection video receiving stats.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.bytes The Peer connection video receiving bytes.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.packets The Peer
+ *   connection video receiving packets.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.packetsLost The Peer
+ *   connection video receiving packets lost.
+ * @param {String|Number} callback.success.connectionStats.(#peerId).video.receiving.ssrc The Peer
+ *   connection video receiving ssrc ID.
+ 
+ * @param {JSON} callback.success.connectionStats.(#peerId).selectedCandidate The Peer connection selected candidate.
+ * @param {JSON} callback.success.connectionStats.(#peerId).selectedCandidate.local The Peer connection video sending stats.
+ * @param {JSON} callback.success.connectionStats.(#peerId).video.sending.bytes The Peer connection video sending bytes.
+ * @param {JSON} callback.success.connectionStats.(#peerId).video.sending.packets The Peer
+ *   connection video sending packets.
+
  * @example
  *   SkylinkDemo.getConnectionStatus(peerId, function (error, success) {
  *      if (error) {
@@ -1058,7 +1099,8 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           ssrc: null,
           bytes: 0,
           packets: 0,
-          packetsLost: 0
+          packetsLost: 0,
+          rtt: 0 // Google does not have..
         },
         receiving: {
           ssrc: null,
@@ -1072,7 +1114,8 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           ssrc: null,
           bytes: 0,
           packets: 0,
-          packetsLost: 0
+          packetsLost: 0,
+          rtt: 0
         },
         receiving: {
           ssrc: null,
@@ -1108,14 +1151,29 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
 
       if (window.webrtcDetectedBrowser === 'firefox') {
         loopFn(stats, function (obj, prop) {
+          var dirType = '';
+
           // Receiving/Sending RTP packets
           if (prop.indexOf('inbound_rtp') === 0 || prop.indexOf('outbound_rtp') === 0) {
-            var dirType = prop.indexOf('inbound_rtp') === 0 ? 'receiving' : 'sending';
+            dirType = prop.indexOf('inbound_rtp') === 0 ? 'receiving' : 'sending';
 
             result[obj.mediaType][dirType].bytes = dirType === 'sending' ? obj.bytesSent : obj.bytesReceived;
             result[obj.mediaType][dirType].packets = dirType === 'sending' ? obj.packetsSent : obj.packetsReceived;
-            result[obj.mediaType][dirType].packetsLost = obj.packetsLost || 0;
             result[obj.mediaType][dirType].ssrc = obj.ssrc;
+
+            if (dirType === 'receiving') {
+              result[obj.mediaType][dirType].packetsLost = obj.packetsLost || 0;
+            }
+
+          // Sending RTP packets lost
+          } else if (prop.indexOf('outbound_rtcp') === 0) {
+            dirType = prop.indexOf('inbound_rtp') === 0 ? 'receiving' : 'sending';
+
+            result[obj.mediaType][dirType].packetsLost = obj.packetsLost || 0;
+
+            if (dirType === 'sending') {
+              result[obj.mediaType].sending.rtt = obj.mozRtt || 0;
+            }
 
           // Candidates
           } else if (obj.nominated && obj.selected) {
@@ -1131,11 +1189,24 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           if (prop.indexOf('ssrc_') === 0) {
             var dirType = prop.indexOf('_recv') > 0 ? 'receiving' : 'sending';
 
+            // Polyfill fix for plugin. Plugin should fix this though
+            if (!obj.mediaType) {
+              obj.mediaType = obj.hasOwnProperty('audioOutputLevel') ||
+                obj.hasOwnProperty('audioInputLevel') ? 'audio' : 'video';
+            }
+
             // Receiving/Sending RTP packets
-            result[obj.mediaType][dirType].bytes = parseInt((dirType === 'receiving' ? obj.bytesReceived : obj.bytesSent) || '0', 10);
-            result[obj.mediaType][dirType].packets = parseInt((dirType === 'receiving' ? obj.packetsReceived : obj.packetsSent) || '0', 10);
-            result[obj.mediaType][dirType].ssrc = obj.ssrc;
+            result[obj.mediaType][dirType].bytes = parseInt((dirType === 'receiving' ?
+              obj.bytesReceived : obj.bytesSent) || '0', 10);
+            result[obj.mediaType][dirType].packets = parseInt((dirType === 'receiving' ?
+              obj.packetsReceived : obj.packetsSent) || '0', 10);
+            result[obj.mediaType][dirType].ssrc = parseInt(obj.ssrc || '0', 10);
             result[obj.mediaType][dirType].packetsLost = parseInt(obj.packetsLost || '0', 10);
+
+            if (dirType === 'sending') {
+              // NOTE: Chrome sending audio does have it but plugin has..
+              result[obj.mediaType].sending.rtt = parseInt(obj.googRtt || '0', 10);
+            }
 
             if (!reportedCandidate) {
               loopFn(stats, function (canObj, canProp) {

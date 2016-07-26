@@ -393,10 +393,8 @@ Demo.Skylink.on('iceConnectionState', function (state, peerId) {
       Demo.Stats[peerId] = true;
       var test = setInterval(function () {
         if (Demo.Stats[peerId]) {
-          console.info('ping', peerId);
           Demo.Skylink.getConnectionStatus(peerId);
         } else {
-          console.info('clear', peerId);
           clearInterval(test);
         }
       }, 1000);
@@ -533,6 +531,7 @@ Demo.Skylink.on('serverPeerRestart', function (serverPeerId, serverPeerType) {
   console.info('serverPeerRestart', serverPeerId, serverPeerType);
 });
 
+var ok = false;
 Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats, error) {
   //console.info('getConnectionStatusStateChange', state, peerId, stats, error);
 
@@ -547,6 +546,11 @@ Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats
         return (val / 1000000).toFixed(2) + ' mbps';
       }
     };
+
+    if (!ok) {
+      console.info('stats', stats);
+      ok = true;
+    }
 
     $(statsElm).find('.audio .upload').html(formatBitrate(stats.audio.sending.bytes) + ' - Packets (' +
       stats.audio.sending.packets + ' sent, ' + stats.audio.sending.packetsLost + ' lost)');

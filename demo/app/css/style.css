@@ -123,6 +123,7 @@ footer {
 .peervideo object {
   width: 100%;
   height: auto;
+  min-height: 350px;
   background: #000;
 }
 
