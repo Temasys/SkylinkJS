@@ -6,6 +6,7 @@ Demo.FILE_SIZE_LIMIT = 1024 * 1024 * 200;
 Demo.Peers = 0;
 Demo.Files = [];
 Demo.Streams = [];
+Demo.Stats = {};
 Demo.Methods = {};
 Demo.Skylink = new Skylink();
 
@@ -13,7 +14,7 @@ var _peerId = null;
 
 var selectedPeers = [];
 
-Demo.Skylink.setLogLevel(4);
+//Demo.Skylink.setLogLevel(4);
 
 Demo.Methods.displayFileItemHTML = function (content) {
   return '<p>' + content.name + '<small style="float:right;color:#aaa;">' + content.size + ' B</small></p>' +
@@ -226,17 +227,13 @@ Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf){
       newListEntry += '<span class="glyphicon ' + glyphiconList[i] + ' circle ' +
         i + '" title="' + titleList[i] + '"></span>&nbsp;&nbsp;&nbsp;';
     }
-    newListEntry += '<div id="user' + peerId + '_stats"></div></td></tr>';
+    newListEntry += '</td></tr>';
     $('#presence_list').append(newListEntry);
     $('#user' + peerId + ' .0').css('color','green');
     $('#user' + peerId + ' .video').css('color',
       (peerInfo.mediaStatus.videoMuted) ? 'red' : 'green');
     $('#user' + peerId + ' .audio').css('color',
       (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
-
-    setInterval(function () {
-      Demo.Skylink.getConnectionStatus(peerId);
-    }, 1000);
   }
 });
 //---------------------------------------------------
@@ -247,9 +244,12 @@ Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo){
   var peerVideo;
 
   if ($('#video' + peerId).length === 0) {
+    var peerElm = document.createElement('div');
+    peerElm.id = 'video' + peerId;
+    peerElm.className = 'col-md-6 peervideo';
+
     peerVideo = document.createElement('video');
-    peerVideo.id = 'video' + peerId;
-    peerVideo.className = 'col-md-6';
+
     if (window.webrtcDetectedBrowser !== 'IE') {
       peerVideo.autoplay = 'autoplay';
     }
@@ -258,9 +258,24 @@ Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo){
     if (isSelf && window.webrtcDetectedBrowser !== 'IE') {
       peerVideo.muted = 'muted';
     }
-    $('#peer_video_list').append(peerVideo);
+
+    $('#peer_video_list').append(peerElm);
+
+    peerElm.appendChild(peerVideo);
+
+    if (!isSelf) {
+      $(peerElm).append('<div class="connstats-wrapper"><button class="toggle-connstats">See Stats</button>' +
+        '<div class="row connstats">' +
+        '<div class="audio row"><b class="col-md-12">Audio</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
+          '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
+        '<div class="video row"><b class="col-md-12">Video</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
+          '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
+        '<div class="candidate row"><b class="col-md-12">Selected Candidate</b><p class="col-md-6">Local: <span class="local"></span></p>' +
+          '<p class="col-md-6">Remote: <span class="remote"></span></p></div></div></div>');
+    }
+
   } else {
-    peerVideo = document.getElementById('video' + peerId);
+    peerVideo = $('video' + peerId + ' video')[0];
   }
 
   attachMediaStream(peerVideo, stream);
@@ -324,6 +339,8 @@ Demo.Skylink.on('peerLeft', function (peerId, peerInfo, isSelf){
   if (index > -1) {
     selectedPeers.splice(index, 1);
   }
+
+  delete Demo.Stats[peerId];
 });
 
 Demo.Skylink.on('sessionDisconnect', function (peerId, peerInfo){
@@ -373,6 +390,16 @@ Demo.Skylink.on('iceConnectionState', function (state, peerId) {
     case Demo.Skylink.ICE_CONNECTION_STATE.CONNECTED:
     case Demo.Skylink.ICE_CONNECTION_STATE.COMPLETED:
       color = 'green';
+      Demo.Stats[peerId] = true;
+      var test = setInterval(function () {
+        if (Demo.Stats[peerId]) {
+          console.info('ping', peerId);
+          Demo.Skylink.getConnectionStatus(peerId);
+        } else {
+          console.info('clear', peerId);
+          clearInterval(test);
+        }
+      }, 1000);
       break;
     default:
       console.error('ICE State:', state, peerId);
@@ -510,16 +537,31 @@ Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats
   //console.info('getConnectionStatusStateChange', state, peerId, stats, error);
 
   if (state === Demo.Skylink.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS) {
-    $('#user' + peerId + '_stats').html(
-      '<p><b>Sending audio</b>: ' + stats.audioBytesSent + 'bp/s | ' + stats.audioPacketsSent + 'pkts</p>' +
-      '<p><b>Sending video</b>: ' + stats.videoBytesSent + 'bp/s | ' + stats.videoPacketsSent + 'pkts</p>' +
-      '<p><b>Receiving audio</b>: ' + stats.audioBytesReceived + 'bp/s | ' + stats.audioPacketsReceived + 'pkts</p>' +
-      '<p><b>Receiving video</b>: ' + stats.videoBytesReceived + 'bp/s | ' + stats.videoPacketsReceived + 'pkts</p>' +
-      '<p><b>Local candidate</b>: ' + stats.selectedCandidate.localAddress + ':' + stats.selectedCandidate.localPort + ' | ' +
-        stats.selectedCandidate.localTransport + ' - ' + stats.selectedCandidate.localType + '</p>' +
-      '<p><b>Remote candidate</b>: ' + stats.selectedCandidate.remoteAddress + ':' + stats.selectedCandidate.remotePort + ' | ' +
-        stats.selectedCandidate.remoteTransport + ' - ' + stats.selectedCandidate.remoteType + '</p>'
-    );
+    var statsElm = $('#video' + peerId).find('.connstats');
+    var formatBitrate = function (val) {
+      if (val < 1000) {
+        return val + ' bps';
+      } else if (val < 1000000) {
+        return (val / 1000).toFixed(2) + ' kbps';
+      } else {
+        return (val / 1000000).toFixed(2) + ' mbps';
+      }
+    };
+
+    $(statsElm).find('.audio .upload').html(formatBitrate(stats.audio.sending.bytes) + ' - Packets (' +
+      stats.audio.sending.packets + ' sent, ' + stats.audio.sending.packetsLost + ' lost)');
+    $(statsElm).find('.audio .download').html(formatBitrate(stats.audio.receiving.bytes) + ' - Packets (' +
+      stats.audio.receiving.packets + ' received, ' + stats.audio.receiving.packetsLost + ' lost)');
+    $(statsElm).find('.video .upload').html(formatBitrate(stats.video.sending.bytes) + ' - Packets (' +
+      stats.video.sending.packets + ' sent, ' + stats.video.sending.packetsLost + ' lost)');
+    $(statsElm).find('.video .download').html(formatBitrate(stats.video.receiving.bytes) + ' - Packets (' +
+      stats.video.receiving.packets + ' received, ' + stats.video.receiving.packetsLost + ' lost)');
+    $(statsElm).find('.candidate .local').html(stats.selectedCandidate.local.ipAddress + ':' +
+      stats.selectedCandidate.local.portNumber + ' - (transport: ' + stats.selectedCandidate.local.transport +
+      ', type: ' + stats.selectedCandidate.local.candidateType + ')');
+    $(statsElm).find('.candidate .remote').html(stats.selectedCandidate.remote.ipAddress + ':' +
+      stats.selectedCandidate.remote.portNumber + ' - (transport: ' + stats.selectedCandidate.remote.transport +
+      ', type: ' + stats.selectedCandidate.remote.candidateType + ')');
   }
 });
 
@@ -688,6 +730,11 @@ $(document).ready(function () {
   $('#stop_screen_btn').click(function () {
     Demo.Skylink.stopScreen();
   });
+  $('#peer_video_list').on('click', '.toggle-connstats', function () {
+    $(this).parent().find('.connstats').slideToggle();
+    $(this).attr('toggled', $(this).attr('toggled') ? '' : 'true');
+    $(this).html($(this).attr('toggled') ? 'Hide Stats' : 'Show Stats');
+  });
 
   window.selectTargetPeer = function(dom) {
     var peerId = $(dom).attr('target');
@@ -711,7 +758,7 @@ $(document).ready(function () {
       $(panelDom).find('.all').show();
       selectedPeers.push(peerId);
     }
-  }
+  };
 
   $('#clear-selected-users').click(function () {
     $('#selected_users_panel .selected-users').html('');
@@ -720,7 +767,7 @@ $(document).ready(function () {
     });
     $('#selected_users_panel .all').show();
     selectedPeers = [];
-  })
+  });
 });
 
 
