@@ -431,18 +431,18 @@ Skylink.prototype._room = null;
  *   {{#crossLink "Skylink/_parseInfo:method"}}_parseInfo(){{/crossLink}}.
  *   The data is in JSON stringified string and requires converting the JSON string
  *      to an JSON object to use the object.
- * @param {String} callback.response.bandwidth For success state. The self
+ * @param {JSON} callback.response.bandwidth For success state. The self
  *   streaming bandwidth settings. Setting the bandwidth flags may not
  *   force set the bandwidth for each connection stream channels as it depends
  *   on how the browser handles the bandwidth bitrate. Values are configured
  *   in <var>kb/s</var>.
- * @param {String} callback.response.bandwidth.audio The default
+ * @param {Number} callback.response.bandwidth.audio The default
  *   audio stream channel for self Stream object bandwidth
  *   that audio streaming should use in <var>kb/s</var>.
- * @param {String} callback.response.bandwidth.video The default
+ * @param {Number} callback.response.bandwidth.video The default
  *   video stream channel for self Stream object bandwidth
  *   that video streaming should use in <var>kb/s</var>.
- * @param {String} callback.response.bandwidth.data The default
+ * @param {Number} callback.response.bandwidth.data The default
  *   datachannel channel for the DataChannel connection bandwidth
  *   that datachannel connection per packet should be able use in <var>kb/s</var>.
  * @param {String} callback.response.cid For success state. The Skylink server connection key for the
@@ -579,18 +579,18 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  * @param {String} info.offer_constraints The RTCPeerConnection RTCOfferOptions.
  *   The data is in JSON stringified string and requires converting the JSON string
  *      to an JSON object to use the object.
- * @param {String} info.bandwidth The self
+ * @param {JSON} info.bandwidth The self
  *   streaming bandwidth settings. Setting the bandwidth flags may not
  *   force set the bandwidth for each connection stream channels as it depends
  *   on how the browser handles the bandwidth bitrate. Values are configured
  *   in <var>kb/s</var>.
- * @param {String} info.bandwidth.audio The default
+ * @param {Number} info.bandwidth.audio The default
  *   audio stream channel for self Stream object bandwidth
  *   that audio streaming should use in <var>kb/s</var>.
- * @param {String} info.bandwidth.video The default
+ * @param {Number} info.bandwidth.video The default
  *   video stream channel for self Stream object bandwidth
  *   that video streaming should use in <var>kb/s</var>.
- * @param {String} info.bandwidth.data The default
+ * @param {Number} info.bandwidth.data The default
  *   datachannel channel for the DataChannel connection bandwidth
  *   that datachannel connection per packet should be able use in <var>kb/s</var>.
  * @param {String} info.cid The Skylink server connection key for starting the
@@ -643,6 +643,7 @@ Skylink.prototype._parseInfo = function(info) {
   this._appKeyOwner = info.apiOwner;
 
   this._signalingServer = info.ipSigserver;
+  this._signalingServerPort = null;
 
   this._isPrivileged = info.isPrivileged;
   this._autoIntroduce = info.autoIntroduce;
@@ -884,6 +885,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   Tampering this flag may cause issues to connections, so set this value at your own risk.
  * @param {Boolean} [options.forceTURN=false] The flag that indicates if PeerConnections connection
  *   should only use TURN server connection which enables a quicker connectivity.
+ *   Note that this will not work if TURN is disabled for the Application Key provided.
  *   This configuration will override the settings for <code>enableTURNServer</code>
  *   and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and
  *   <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.
@@ -1022,6 +1024,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   if <code>turns:</code> protocol is supported, it will use <code>turns:</code> protocol.
  * @param {Boolean} callback.success.forceTURN The flag that indicates if PeerConnections connection
  *   should only use TURN server connection which enables a quicker connectivity.
+ *   Note that this will not work if TURN is disabled for the Application Key provided.
  *   This configuration will override the settings for <code>enableTURNServer</code>
  *   and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and
  *   <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.

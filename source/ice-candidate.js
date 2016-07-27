@@ -19,26 +19,6 @@
 Skylink.prototype._peerCandidatesQueue = {};
 
 /**
- * Stores the list of flags associated to the PeerConnections
- *   to disable trickle ICE as attempting to establish an
- *   ICE connection failed after many trickle ICE connection
- *   attempts. To ensure the stability and increase the chances
- *   of a successful ICE connection, track the Peer connection and store
- *   it as a flag in this list to disable trickling of ICE connections.
- * @attribute _peerIceTrickleDisabled
- * @param {Boolean} (#peerId) The Peer trickle ICE disabled flag.
- *   If value is <code>true</code>, it means that trickling of ICE is
- *   disabled for subsequent connection attempt.
- * @type JSON
- * @private
- * @required
- * @since 0.5.8
- * @component ICE
- * @for Skylink
- */
-Skylink.prototype._peerIceTrickleDisabled = {};
-
-/**
  * Stores the list of candidates sent <code>local</code> and added <code>remote</code> information.
  * @attribute _addedCandidates
  * @param {JSON} (#peerId) The list of candidates sent and added associated with the Peer ID.
@@ -87,58 +67,72 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
  * @method _onIceCandidate
  * @param {String} targetMid The Peer ID associated with the ICE
  *   candidate object received.
- * @param {Event} event The event object received in the <code>RTCPeerConnection.
- *   onicecandidate</code> to parse the ICE candidate and determine
- *   if gathering has completed.
+ * @param {RTCIceCandidate} candidate The local generated candidate object.
  * @trigger candidateGenerationState
  * @private
  * @since 0.1.0
  * @component ICE
  * @for Skylink
  */
-Skylink.prototype._onIceCandidate = function(targetMid, event) {
+Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
   var self = this;
-  if (event.candidate) {
-    if (self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid]) {
-      var messageCan = event.candidate.candidate.split(' ');
-      var candidateType = messageCan[7];
-      log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
-        candidateType + ' candidate:'], event);
 
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.CANDIDATE,
-        label: event.candidate.sdpMLineIndex,
-        id: event.candidate.sdpMid,
-        candidate: event.candidate.candidate,
-        mid: self._user.sid,
-        target: targetMid,
-        rid: self._room.id
-      });
+  if (candidate.candidate) {
+    var messageCan = candidate.candidate.split(' ');
+    var candidateType = messageCan[7];
+    log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
+      candidateType + ' candidate:'], candidate);
 
-      if (!self._addedCandidates[targetMid]) {
-        self._addedCandidates[targetMid] = {
-          relay: [],
-          host: [],
-          srflx: []
-        };
-      }
-
-      // shouldnt happen but just incase
-      if (!self._addedCandidates[targetMid][candidateType]) {
-        self._addedCandidates[targetMid][candidateType] = [];
-      }
-
-      self._addedCandidates[targetMid][candidateType].push('local:' + messageCan[4] +
-        (messageCan[5] !== '0' ? ':' + messageCan[5] : '') +
-        (messageCan[2] ? '?transport=' + messageCan[2].toLowerCase() : ''));
-
+    if (!self._enableIceTrickle) {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
+        '" candidate as trickle ICE is disabled'], candidate);
+      return;
     }
+
+    if (self._forceTURN && candidateType !== 'relay') {
+      if (!self._hasMCU) {
+        log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
+          '" candidate as TURN connections is forced'], candidate);
+        return;
+      }
+
+      log.warn([targetMid, 'RTCICECandidate', null, 'Not ignoring sending of "' + candidateType +
+        '" candidate although TURN connections is forced as MCU is present'], candidate);
+    }
+
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.CANDIDATE,
+      label: candidate.sdpMLineIndex,
+      id: candidate.sdpMid,
+      candidate: candidate.candidate,
+      mid: self._user.sid,
+      target: targetMid,
+      rid: self._room.id
+    });
+
+    if (!self._addedCandidates[targetMid]) {
+      self._addedCandidates[targetMid] = {
+        relay: [],
+        host: [],
+        srflx: []
+      };
+    }
+
+    // shouldnt happen but just incase
+    if (!self._addedCandidates[targetMid][candidateType]) {
+      self._addedCandidates[targetMid][candidateType] = [];
+    }
+
+    self._addedCandidates[targetMid][candidateType].push('local:' + messageCan[4] +
+      (messageCan[5] !== '0' ? ':' + messageCan[5] : '') +
+      (messageCan[2] ? '?transport=' + messageCan[2].toLowerCase() : ''));
+
   } else {
     log.debug([targetMid, 'RTCIceCandidate', null, 'End of gathering']);
     self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.COMPLETED,
       targetMid);
     // Disable Ice trickle option
-    if (!self._enableIceTrickle || self._peerIceTrickleDisabled[targetMid]) {
+    if (!self._enableIceTrickle) {
       var sessionDescription = self._peerConnections[targetMid].localDescription;
 
       // make checks for firefox session description

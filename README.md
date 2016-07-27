@@ -6,7 +6,7 @@ We've gone to great length to make this library work in as many browsers as poss
 You'll need a Temasys Developer Account and an App key to use this. [Register here to get your App key](https://developer.temasys.com.sg).
 
 #### Supported Browsers
-| Features       | Chrome<br>`45`-`50`+ | Firefox<br>`40`-`45`+ | Opera<br>`32`-`35`+ | IE<br>`9`-`11`+     | Safari<br>`7`-`9`  |
+| Features       | Chrome<br>`45`-`51`+ | Firefox<br>`40`-`48`+ | Opera<br>`32`-`36`+ | IE<br>`9`-`11`+     | Safari<br>`7`-`9`  |
 | -------------- | ---------- | ----------- | --------- | ---------- | ---------- |
 | **Screensharing**  | Yes with [Chrome Extension**](https://chrome.google.com/webstore/detail/skylink-webrtc-tools/ljckddiekopnnjoeaiofddfhgnbdoafc)  |  Yes with [Firefox Extension**](https://addons.mozilla.org/en-US/firefox/addon/skylink-webrtc-tools/) |     -     | Yes with [Commercial Temasys Plugin*](https://temasys.com.sg/plugin/#commercial-licensing)  | Yes with [Commercial Temasys Plugin*](https://temasys.com.sg/plugin/#commercial-licensing) |
 | **Video Call**     | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes [Temasys Plugin](http://skylink.io/plugin/)  |
@@ -21,7 +21,7 @@ You'll need a Temasys Developer Account and an App key to use this. [Register he
 ##### Installation
 Install SkylinkJS with [npm](https://www.npmjs.com/):
 ```
-npm install skylinkjs
+npm install skylinkjs@0.6.x
 ```
 Install SkylinkJS with [bower](http://bower.io/):
 ```
@@ -45,7 +45,7 @@ You can raise tickets on [our support portal](http://support.temasys.com.sg) or 
 ##### Current versions and stability
 Always use the latest versions of the SkylinkJS library as WebRTC is still evolving and we adapt to changes very frequently.
 
-[Latest version: `0.6.10`](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.10).
+[Latest version: `0.6.13`](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.13).
 
 #### Noted Issues and Solutions
 ##### Installing `0.6.3` - `0.6.10` versions in NPM

@@ -2,16 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.11</title>
+    <title>SkylinkJS 0.6.13</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
     <!-- styling -->
     <link rel="stylesheet" href="../assets/vendor/css/bootstrap.min.css">
     <link rel="stylesheet" href="../assets/vendor/css/bootstrap-theme.min.css">
-    <link href="../assets/vendor/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="../assets/css/style.css">
     <!-- scripts -->
     <script src="../assets/vendor/js/jquery.min.js"></script>
@@ -32,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.11</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.13</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -256,52 +257,76 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
 Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
   // Find if user has audioStream
   var bandwidth = this._streamSettings.bandwidth;
-  var hasAudio = !!(settings || {}).audio;
-  var hasVideo = !!(settings || {}).video;
 
-  var i, j, k;
+  // Prevent setting of bandwidth audio if not configured
+  if (typeof bandwidth.audio === &#x27;number&#x27; &amp;&amp; bandwidth.audio &gt; 0) {
+    var hasSetAudio = false;
 
-  var audioIndex = 0;
-  var videoIndex = 0;
-  var dataIndex = 0;
+    for (var i = 0; i &lt; sdpLines.length; i += 1) {
+      // set the audio bandwidth
+      if (sdpLines[i].indexOf(&#x27;m=audio&#x27;) === 0) {
+      //if (sdpLines[i].indexOf(&#x27;a=audio&#x27;) === 0 || sdpLines[i].indexOf(&#x27;m=audio&#x27;) === 0) {
+        sdpLines.splice(i + 1, 0, &#x27;b=AS:&#x27; + bandwidth.audio);
 
-  var audioLineFound = false;
-  var videoLineFound = false;
-  var dataLineFound = false;
-
-  for (i = 0; i &lt; sdpLines.length; i += 1) {
-    // set the audio bandwidth
-    if (sdpLines[i].indexOf(&#x27;a=audio&#x27;) === 0 || sdpLines[i].indexOf(&#x27;m=audio&#x27;) === 0) {
-
-      sdpLines.splice(i + 1, 0, &#x27;b=AS:&#x27; + bandwidth.audio);
-
-      log.debug([null, &#x27;SDP&#x27;, null, &#x27;Setting audio bitrate (&#x27; +
-        bandwidth.audio + &#x27;)&#x27;], i);
-      break;
+        log.info([null, &#x27;SDP&#x27;, null, &#x27;Setting maximum sending audio bandwidth bitrate @(index:&#x27; + i + &#x27;) -&gt; &#x27;], bandwidth.audio);
+        hasSetAudio = true;
+        break;
+      }
     }
+
+    if (!hasSetAudio) {
+      log.warn([null, &#x27;SDP&#x27;, null, &#x27;Not setting maximum sending audio bandwidth bitrate as m=audio line is not found&#x27;]);
+    }
+  } else {
+    log.warn([null, &#x27;SDP&#x27;, null, &#x27;Not setting maximum sending audio bandwidth bitrate and leaving to browser\&#x27;s defaults&#x27;]);
   }
 
-  for (j = 0; j &lt; sdpLines.length; j += 1) {
-    // set the video bandwidth
-    if (sdpLines[j].indexOf(&#x27;a=video&#x27;) === 0 || sdpLines[j].indexOf(&#x27;m=video&#x27;) === 0) {
-      sdpLines.splice(j + 1, 0, &#x27;b=AS:&#x27; + bandwidth.video);
+  // Prevent setting of bandwidth video if not configured
+  if (typeof bandwidth.video === &#x27;number&#x27; &amp;&amp; bandwidth.video &gt; 0) {
+    var hasSetVideo = false;
 
-      log.debug([null, &#x27;SDP&#x27;, null, &#x27;Setting video bitrate (&#x27; +
-        bandwidth.video + &#x27;)&#x27;], j);
-      break;
+    for (var j = 0; j &lt; sdpLines.length; j += 1) {
+      // set the video bandwidth
+      if (sdpLines[j].indexOf(&#x27;m=video&#x27;) === 0) {
+      //if (sdpLines[j].indexOf(&#x27;a=video&#x27;) === 0 || sdpLines[j].indexOf(&#x27;m=video&#x27;) === 0) {
+        sdpLines.splice(j + 1, 0, &#x27;b=AS:&#x27; + bandwidth.video);
+
+        log.info([null, &#x27;SDP&#x27;, null, &#x27;Setting maximum sending video bandwidth bitrate @(index:&#x27; + j + &#x27;) -&gt; &#x27;], bandwidth.video);
+        hasSetVideo = true;
+        break;
+      }
     }
+
+    if (!hasSetVideo) {
+      log.warn([null, &#x27;SDP&#x27;, null, &#x27;Not setting maximum sending video bandwidth bitrate as m=video line is not found&#x27;]);
+    }
+  } else {
+    log.warn([null, &#x27;SDP&#x27;, null, &#x27;Not setting maximum sending video bandwidth bitrate and leaving to browser\&#x27;s defaults&#x27;]);
   }
 
-  for (k = 0; k &lt; sdpLines.length; k += 1) {
-    // set the data bandwidth
-    if (sdpLines[k].indexOf(&#x27;a=application&#x27;) === 0 || sdpLines[k].indexOf(&#x27;m=application&#x27;) === 0) {
-      sdpLines.splice(k + 1, 0, &#x27;b=AS:&#x27; + bandwidth.data);
+  // Prevent setting of bandwidth data if not configured
+  if (typeof bandwidth.data === &#x27;number&#x27; &amp;&amp; bandwidth.data &gt; 0) {
+    var hasSetData = false;
 
-      log.debug([null, &#x27;SDP&#x27;, null, &#x27;Setting data bitrate (&#x27; +
-        bandwidth.data + &#x27;)&#x27;], k);
-      break;
+    for (var k = 0; k &lt; sdpLines.length; k += 1) {
+      // set the data bandwidth
+      if (sdpLines[k].indexOf(&#x27;m=application&#x27;) === 0) {
+      //if (sdpLines[k].indexOf(&#x27;a=application&#x27;) === 0 || sdpLines[k].indexOf(&#x27;m=application&#x27;) === 0) {
+        sdpLines.splice(k + 1, 0, &#x27;b=AS:&#x27; + bandwidth.data);
+
+        log.info([null, &#x27;SDP&#x27;, null, &#x27;Setting maximum sending data bandwidth bitrate @(index:&#x27; + k + &#x27;) -&gt; &#x27;], bandwidth.data);
+        hasSetData = true;
+        break;
+      }
     }
+
+    if (!hasSetData) {
+      log.warn([null, &#x27;SDP&#x27;, null, &#x27;Not setting maximum sending data bandwidth bitrate as m=application line is not found&#x27;]);
+    }
+  } else {
+    log.warn([null, &#x27;SDP&#x27;, null, &#x27;Not setting maximum sending data bandwidth bitrate and leaving to browser\&#x27;s defaults&#x27;]);
   }
+
   return sdpLines;
 };
 

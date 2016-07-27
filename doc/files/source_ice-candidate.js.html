@@ -2,16 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.11</title>
+    <title>SkylinkJS 0.6.13</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
     <!-- styling -->
     <link rel="stylesheet" href="../assets/vendor/css/bootstrap.min.css">
     <link rel="stylesheet" href="../assets/vendor/css/bootstrap-theme.min.css">
-    <link href="../assets/vendor/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="../assets/css/style.css">
     <!-- scripts -->
     <script src="../assets/vendor/js/jquery.min.js"></script>
@@ -32,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.11</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.13</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -109,26 +110,6 @@
 Skylink.prototype._peerCandidatesQueue = {};
 
 /**
- * Stores the list of flags associated to the PeerConnections
- *   to disable trickle ICE as attempting to establish an
- *   ICE connection failed after many trickle ICE connection
- *   attempts. To ensure the stability and increase the chances
- *   of a successful ICE connection, track the Peer connection and store
- *   it as a flag in this list to disable trickling of ICE connections.
- * @attribute _peerIceTrickleDisabled
- * @param {Boolean} (#peerId) The Peer trickle ICE disabled flag.
- *   If value is &lt;code&gt;true&lt;/code&gt;, it means that trickling of ICE is
- *   disabled for subsequent connection attempt.
- * @type JSON
- * @private
- * @required
- * @since 0.5.8
- * @component ICE
- * @for Skylink
- */
-Skylink.prototype._peerIceTrickleDisabled = {};
-
-/**
  * Stores the list of candidates sent &lt;code&gt;local&lt;/code&gt; and added &lt;code&gt;remote&lt;/code&gt; information.
  * @attribute _addedCandidates
  * @param {JSON} (#peerId) The list of candidates sent and added associated with the Peer ID.
@@ -177,58 +158,72 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
  * @method _onIceCandidate
  * @param {String} targetMid The Peer ID associated with the ICE
  *   candidate object received.
- * @param {Event} event The event object received in the &lt;code&gt;RTCPeerConnection.
- *   onicecandidate&lt;/code&gt; to parse the ICE candidate and determine
- *   if gathering has completed.
+ * @param {RTCIceCandidate} candidate The local generated candidate object.
  * @trigger candidateGenerationState
  * @private
  * @since 0.1.0
  * @component ICE
  * @for Skylink
  */
-Skylink.prototype._onIceCandidate = function(targetMid, event) {
+Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
   var self = this;
-  if (event.candidate) {
-    if (self._enableIceTrickle &amp;&amp; !self._peerIceTrickleDisabled[targetMid]) {
-      var messageCan = event.candidate.candidate.split(&#x27; &#x27;);
-      var candidateType = messageCan[7];
-      log.debug([targetMid, &#x27;RTCIceCandidate&#x27;, null, &#x27;Created and sending &#x27; +
-        candidateType + &#x27; candidate:&#x27;], event);
 
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.CANDIDATE,
-        label: event.candidate.sdpMLineIndex,
-        id: event.candidate.sdpMid,
-        candidate: event.candidate.candidate,
-        mid: self._user.sid,
-        target: targetMid,
-        rid: self._room.id
-      });
+  if (candidate.candidate) {
+    var messageCan = candidate.candidate.split(&#x27; &#x27;);
+    var candidateType = messageCan[7];
+    log.debug([targetMid, &#x27;RTCIceCandidate&#x27;, null, &#x27;Created and sending &#x27; +
+      candidateType + &#x27; candidate:&#x27;], candidate);
 
-      if (!self._addedCandidates[targetMid]) {
-        self._addedCandidates[targetMid] = {
-          relay: [],
-          host: [],
-          srflx: []
-        };
-      }
-
-      // shouldnt happen but just incase
-      if (!self._addedCandidates[targetMid][candidateType]) {
-        self._addedCandidates[targetMid][candidateType] = [];
-      }
-
-      self._addedCandidates[targetMid][candidateType].push(&#x27;local:&#x27; + messageCan[4] +
-        (messageCan[5] !== &#x27;0&#x27; ? &#x27;:&#x27; + messageCan[5] : &#x27;&#x27;) +
-        (messageCan[2] ? &#x27;?transport=&#x27; + messageCan[2].toLowerCase() : &#x27;&#x27;));
-
+    if (!self._enableIceTrickle) {
+      log.warn([targetMid, &#x27;RTCICECandidate&#x27;, null, &#x27;Ignoring sending of &quot;&#x27; + candidateType +
+        &#x27;&quot; candidate as trickle ICE is disabled&#x27;], candidate);
+      return;
     }
+
+    if (self._forceTURN &amp;&amp; candidateType !== &#x27;relay&#x27;) {
+      if (!self._hasMCU) {
+        log.warn([targetMid, &#x27;RTCICECandidate&#x27;, null, &#x27;Ignoring sending of &quot;&#x27; + candidateType +
+          &#x27;&quot; candidate as TURN connections is forced&#x27;], candidate);
+        return;
+      }
+
+      log.warn([targetMid, &#x27;RTCICECandidate&#x27;, null, &#x27;Not ignoring sending of &quot;&#x27; + candidateType +
+        &#x27;&quot; candidate although TURN connections is forced as MCU is present&#x27;], candidate);
+    }
+
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.CANDIDATE,
+      label: candidate.sdpMLineIndex,
+      id: candidate.sdpMid,
+      candidate: candidate.candidate,
+      mid: self._user.sid,
+      target: targetMid,
+      rid: self._room.id
+    });
+
+    if (!self._addedCandidates[targetMid]) {
+      self._addedCandidates[targetMid] = {
+        relay: [],
+        host: [],
+        srflx: []
+      };
+    }
+
+    // shouldnt happen but just incase
+    if (!self._addedCandidates[targetMid][candidateType]) {
+      self._addedCandidates[targetMid][candidateType] = [];
+    }
+
+    self._addedCandidates[targetMid][candidateType].push(&#x27;local:&#x27; + messageCan[4] +
+      (messageCan[5] !== &#x27;0&#x27; ? &#x27;:&#x27; + messageCan[5] : &#x27;&#x27;) +
+      (messageCan[2] ? &#x27;?transport=&#x27; + messageCan[2].toLowerCase() : &#x27;&#x27;));
+
   } else {
     log.debug([targetMid, &#x27;RTCIceCandidate&#x27;, null, &#x27;End of gathering&#x27;]);
     self._trigger(&#x27;candidateGenerationState&#x27;, self.CANDIDATE_GENERATION_STATE.COMPLETED,
       targetMid);
     // Disable Ice trickle option
-    if (!self._enableIceTrickle || self._peerIceTrickleDisabled[targetMid]) {
+    if (!self._enableIceTrickle) {
       var sessionDescription = self._peerConnections[targetMid].localDescription;
 
       // make checks for firefox session description

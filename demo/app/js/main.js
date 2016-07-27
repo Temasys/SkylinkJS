@@ -181,11 +181,17 @@ Demo.Skylink.on('peerRestart', function (peerId, peerInfo, isSelf){
     $('#user' + peerId + ' .name').html(peerInfo.userData);
   }
 
-  if ($('#video' + peerId).find('video').length > 0) {
-    if (peerInfo.mediaStatus.videoMuted) {
-      $('#video' + peerId)[0].src = '';
-    } else {
-      $('#video' + peerId)[0].src = Demo.Streams[peerId];
+  if ($('#video' + peerId).length > 0) {
+    if (!peerInfo.settings.video && !peerInfo.settings.audio) {
+      $('#video' + peerId + ' video').hide();
+      if (Demo.Streams[peerId]) {
+        delete Demo.Streams[peerId];
+      }
+      return;
+    }
+
+    if (peerInfo.settings.video && peerInfo.mediaStatus.videoMuted && Demo.Streams[peerId]) {
+      attachMediaStream($('#video' + peerId + ' video')[0], Demo.Streams[peerId]);
     }
   }
 });
@@ -279,8 +285,8 @@ Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo){
   }
 
   attachMediaStream(peerVideo, stream);
-  Demo.Streams[peerId] = Demo.Streams[peerId] || {};
-  Demo.Streams[peerId][stream.id] = peerVideo.src;
+  Demo.Streams[peerId] = stream;
+  $(peerVideo).show();
 
   if (isSelf) {
     $('#isAudioMuted').css('color',
@@ -295,11 +301,11 @@ Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo){
     $('#user' + peerId + ' .name').html(peerInfo.userData);
   }
 
-  if ($('#video' + peerId).find('video').length > 0) {
+  if ($('#video' + peerId + ' video').length > 0) {
     if (peerInfo.mediaStatus.videoMuted) {
-      $('#video' + peerId)[0].src = '';
+      $('#video' + peerId + ' video')[0].src = '';
     } else {
-      $('#video' + peerId)[0].src = Demo.Streams[peerId];
+      $('#video' + peerId + ' video')[0].src = Demo.Streams[peerId];
     }
   }
 });
@@ -432,7 +438,11 @@ Demo.Skylink.on('peerConnectionState', function (state, peerId) {
   $('#user' + peerId + ' .6' ).css('color', color);
 });
 //---------------------------------------------------
-Demo.Skylink.on('dataChannelState', function (state, peerId) {
+Demo.Skylink.on('dataChannelState', function (state, peerId, error, channelName, channelType) {
+  if (channelType !== Demo.Skylink.DATA_CHANNEL_TYPE.MESSAGING) {
+    return;
+  }
+
   var color = 'red';
   switch (state) {
     case Demo.Skylink.DATA_CHANNEL_STATE.ERROR:
@@ -462,11 +472,17 @@ Demo.Skylink.on('peerUpdated', function (peerId, peerInfo, isSelf) {
     $('#user' + peerId + ' .name').html(peerInfo.userData);
   }
 
-  if ($('#video' + peerId).find('video').length > 0) {
-    if (peerInfo.mediaStatus.videoMuted) {
-      $('#video' + peerId)[0].src = '';
-    } else {
-      $('#video' + peerId)[0].src = Demo.Streams[peerId];
+  if ($('#video' + peerId).length > 0) {
+    if (!peerInfo.settings.video && !peerInfo.settings.audio) {
+      $('#video' + peerId + ' video').hide();
+      if (Demo.Streams[peerId]) {
+        delete Demo.Streams[peerId];
+      }
+      return;
+    }
+
+    if (peerInfo.settings.video && peerInfo.mediaStatus.videoMuted && Demo.Streams[peerId]) {
+      attachMediaStream($('#video' + peerId)[0], Demo.Streams[peerId]);
     }
   }
 });
@@ -773,31 +789,3 @@ $(document).ready(function () {
     selectedPeers = [];
   });
 });
-
-
-/*(function(){
-
-  var data = {};
-  //window.candidatesCounter = {};
-
-  Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
-    data[peerId] = peerInfo;
-  });
-
-  Demo.Skylink.on('channelMessage', function (message, isSelf) {
-    //console.log('messaging', message, isSelf);
-  });
-
-  Demo.Skylink.on('peerJoined', function (peerId) {
-    //candidatesCounter[peerId] = [];
-  });
-
-  Demo.Skylink.on('iceConnectionState', function (state, peerId) {
-    if (state === 'connected') {
-      setTimeout(function () {
-        Demo.Skylink._restartPeerConnection(peerId, true, false, null, true);
-      }, 1);
-    }
-  });
-
-})();*/

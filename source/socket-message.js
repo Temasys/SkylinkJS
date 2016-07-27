@@ -356,7 +356,8 @@ Skylink.prototype._approachEventHandler = function(message){
     userInfo: self.getPeerInfo(),
     receiveOnly: self._receiveOnly,
     sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-    target: message.target
+    target: message.target,
+    weight: self._peerPriorityWeight
   });
 };
 
@@ -670,6 +671,13 @@ Skylink.prototype._inRoomHandler = function(message) {
     self._peerPriorityWeight = message.tieBreaker;
   }
 
+  // Make Firefox the answerer always when connecting with other browsers
+  if (window.webrtcDetectedBrowser === 'firefox') {
+    log.warn('Decreasing weight for Firefox browser connection');
+
+    self._peerPriorityWeight -= 100000000000;
+  }
+
   if (self._mediaScreen && self._mediaScreen !== null) {
     self._trigger('incomingStream', self._user.sid, self._mediaScreen, true, self.getPeerInfo());
   } else if (self._mediaStream && self._mediaStream !== null) {
@@ -689,7 +697,8 @@ Skylink.prototype._inRoomHandler = function(message) {
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     receiveOnly: self._receiveOnly,
-    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+    weight: self._peerPriorityWeight
   });
 };
 
@@ -734,20 +743,18 @@ Skylink.prototype._inRoomHandler = function(message) {
  * @param {Boolean} [message.userInfo.settings.video.screenshare=false] The flag
  *   that indicates if the Peer connection Stream object sent
  *   is a screensharing stream or not.
- * @param {String} [message.userInfo.settings.bandwidth] The Peer
- *   streaming bandwidth settings. Setting the bandwidth flags may not
- *   force set the bandwidth for each connection stream channels as it depends
- *   on how the browser handles the bandwidth bitrate. Values are configured
- *   in <var>kb/s</var>.
- * @param {String} [message.userInfo.settings.bandwidth.audio] The configured
- *   audio stream channel for the remote Stream object bandwidth
- *   that audio streaming should use in <var>kb/s</var>.
- * @param {String} [message.userInfo.settings.bandwidth.video] The configured
- *   video stream channel for the remote Stream object bandwidth
- *   that video streaming should use in <var>kb/s</var>.
- * @param {String} [message.userInfo.settings.bandwidth.data] The configured
- *   datachannel channel for the DataChannel connection bandwidth
- *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+ * @param {String} [message.userInfo.settings.bandwidth] The Peer configuration for
+ *   the maximum sending bandwidth. The flags set may or may not work depending
+ *   on the browser implementations and how it handles it.
+ * @param {String} [message.userInfo.settings.bandwidth.audio] The maximum
+ *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+ *   it will leave the audio bitrate to the browser defaults.
+ * @param {String} [message.userInfo.settings.bandwidth.video] The maximum
+ *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+ *   it will leave the video bitrate to the browser defaults.
+ * @param {String} [message.userInfo.settings.bandwidth.data] The maximum
+ *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+ *   it will leave the data bitrate to the browser defaults.
  * @param {JSON} message.userInfo.mediaStatus The Peer Stream mute
  *   settings for both audio and video streamings.
  * @param {Boolean} [message.userInfo.mediaStatus.audioMuted=true] The flag that
@@ -876,20 +883,18 @@ Skylink.prototype._enterHandler = function(message) {
  * @param {Boolean} [message.userInfo.settings.video.screenshare=false] The flag
  *   that indicates if the Peer connection Stream object sent
  *   is a screensharing stream or not.
- * @param {String} [message.userInfo.settings.bandwidth] The Peer
- *   streaming bandwidth settings. Setting the bandwidth flags may not
- *   force set the bandwidth for each connection stream channels as it depends
- *   on how the browser handles the bandwidth bitrate. Values are configured
- *   in <var>kb/s</var>.
- * @param {String} [message.userInfo.settings.bandwidth.audio] The configured
- *   audio stream channel for the remote Stream object bandwidth
- *   that audio streaming should use in <var>kb/s</var>.
- * @param {String} [message.userInfo.settings.bandwidth.video] The configured
- *   video stream channel for the remote Stream object bandwidth
- *   that video streaming should use in <var>kb/s</var>.
- * @param {String} [message.userInfo.settings.bandwidth.data] The configured
- *   datachannel channel for the DataChannel connection bandwidth
- *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+ * @param {String} [message.userInfo.settings.bandwidth] The Peer configuration for
+ *   the maximum sending bandwidth. The flags set may or may not work depending
+ *   on the browser implementations and how it handles it.
+ * @param {String} [message.userInfo.settings.bandwidth.audio] The maximum
+ *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+ *   it will leave the audio bitrate to the browser defaults.
+ * @param {String} [message.userInfo.settings.bandwidth.video] The maximum
+ *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+ *   it will leave the video bitrate to the browser defaults.
+ * @param {String} [message.userInfo.settings.bandwidth.data] The maximum
+ *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+ *   it will leave the data bitrate to the browser defaults.
  * @param {JSON} message.userInfo.mediaStatus The Peer Stream mute
  *   settings for both audio and video streamings.
  * @param {Boolean} [message.userInfo.mediaStatus.audioMuted=true] The flag that
@@ -963,10 +968,10 @@ Skylink.prototype._restartHandler = function(message){
   //self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
 
   message.agent = (!message.agent) ? 'chrome' : message.agent;
-  self._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
+  /*self._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
     message.enableIceTrickle : self._enableIceTrickle;
   self._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
-    message.enableDataChannel : self._enableDataChannel;
+    message.enableDataChannel : self._enableDataChannel;*/
 
   // re-add information
   self._peerInformations[targetMid] = message.userInfo || {};
@@ -989,23 +994,8 @@ Skylink.prototype._restartHandler = function(message){
     os: message.os
   }, true, true, message.receiveOnly, message.sessionType === 'screensharing');*/
 
-  //Only consider peer's restart weight if self also sent a restart which cause a potential conflict
-  //Otherwise go ahead with peer's restart
-  var beOfferer = false;
-
-  // Works in this matter.. no idea why.
-  if (window.webrtcDetectedBrowser !== 'firefox' && message.agent === 'firefox') {
-    log.debug([targetMid, 'RTCPeerConnection', null, 'Restarting as offerer as peer cannot be offerer'], agent);
-    beOfferer = true;
-  } else {
-    // Checks if weight is lesser than peer's weight
-    // If lesser, always do the restart mechanism
-    if (self._peerPriorityWeight < message.weight) {
-      beOfferer = true;
-    }
-  }
-
-  if (beOfferer) {
+  // Make peer with highest weight do the offer
+  if (self._peerPriorityWeight > message.weight) {
     log.debug([targetMid, 'RTCPeerConnection', null, 'Restarting negotiation'], agent);
     self._doOffer(targetMid, {
       agent: agent.name,
@@ -1016,7 +1006,7 @@ Skylink.prototype._restartHandler = function(message){
   } else {
     log.debug([targetMid, 'RTCPeerConnection', null, 'Waiting for peer to start re-negotiation'], agent);
     self._sendChannelMessage({
-      type: self._SIG_MESSAGE_TYPE.WELCOME,
+      type: self._SIG_MESSAGE_TYPE.RESTART,
       mid: self._user.sid,
       rid: self._room.id,
       agent: window.webrtcDetectedBrowser,
@@ -1024,8 +1014,15 @@ Skylink.prototype._restartHandler = function(message){
       os: window.navigator.platform,
       userInfo: self.getPeerInfo(),
       target: targetMid,
-      weight: -1,
-      sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+      weight: self._peerPriorityWeight,
+      enableIceTrickle: self._enableIceTrickle,
+      enableDataChannel: self._enableDataChannel,
+      receiveOnly: self._peerConnections[targetMid] && self._peerConnections[targetMid].receiveOnly,
+      sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+      // SkylinkJS parameters (copy the parameters from received message parameters)
+      isConnectionRestart: !!message.isConnectionRestart,
+      lastRestart: message.lastRestart,
+      explicit: !!message.explicit
     });
   }
 
@@ -1078,20 +1075,18 @@ Skylink.prototype._restartHandler = function(message){
  * @param {Boolean} [message.userInfo.settings.video.screenshare=false] The flag
  *   that indicates if the Peer connection Stream object sent
  *   is a screensharing stream or not.
- * @param {String} [message.userInfo.settings.bandwidth] The Peer
- *   streaming bandwidth settings. Setting the bandwidth flags may not
- *   force set the bandwidth for each connection stream channels as it depends
- *   on how the browser handles the bandwidth bitrate. Values are configured
- *   in <var>kb/s</var>.
- * @param {String} [message.userInfo.settings.bandwidth.audio] The configured
- *   audio stream channel for the remote Stream object bandwidth
- *   that audio streaming should use in <var>kb/s</var>.
- * @param {String} [message.userInfo.settings.bandwidth.video] The configured
- *   video stream channel for the remote Stream object bandwidth
- *   that video streaming should use in <var>kb/s</var>.
- * @param {String} [message.userInfo.settings.bandwidth.data] The configured
- *   datachannel channel for the DataChannel connection bandwidth
- *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+ * @param {String} [message.userInfo.settings.bandwidth] The Peer configuration for
+ *   the maximum sending bandwidth. The flags set may or may not work depending
+ *   on the browser implementations and how it handles it.
+ * @param {String} [message.userInfo.settings.bandwidth.audio] The maximum
+ *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+ *   it will leave the audio bitrate to the browser defaults.
+ * @param {String} [message.userInfo.settings.bandwidth.video] The maximum
+ *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+ *   it will leave the video bitrate to the browser defaults.
+ * @param {String} [message.userInfo.settings.bandwidth.data] The maximum
+ *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
+ *   it will leave the data bitrate to the browser defaults.
  * @param {JSON} message.userInfo.mediaStatus The Peer Stream mute
  *   settings for both audio and video streamings.
  * @param {Boolean} [message.userInfo.mediaStatus.audioMuted=true] The flag that
@@ -1123,49 +1118,16 @@ Skylink.prototype._restartHandler = function(message){
 Skylink.prototype._welcomeHandler = function(message) {
   var targetMid = message.mid;
   var restartConn = false;
-  var beOfferer = this._peerPriorityWeight < message.weight;
+  var beOfferer = this._peerPriorityWeight > message.weight;
 
   log.log([targetMid, null, message.type, 'Received peer\'s response ' +
     'to handshake initiation. Peer\'s information:'], message.userInfo);
 
-  if (this._peerConnections[targetMid]) {
-    if (!this._peerConnections[targetMid].setOffer || message.weight < 0) {
-      if (message.weight < 0) {
-        log.log([targetMid, null, message.type, 'Peer\'s weight is lower ' +
-          'than 0. Proceeding with offer'], message.weight);
-        restartConn = true;
-        beOfferer = true;
-
-        // -2: hard restart of connection
-        if (message.weight === -2) {
-          this._restartHandler(message);
-          return;
-        }
-
-      } else if (beOfferer) {
-        log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
-          'is higher than user\'s. Proceeding with offer'
-          ], this._peerPriorityWeight + ' < ' + message.weight);
-        restartConn = true;
-
-      } else {
-        log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
-          'is lesser than user\'s. Ignoring message'
-          ], this._peerPriorityWeight + ' > ' + message.weight);
-        return;
-      }
-    } else {
-      log.warn([targetMid, null, message.type,
-        'Ignoring message as peer is already added']);
-      return;
-    }
-  }
-
   message.agent = (!message.agent) ? 'chrome' : message.agent;
-  this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
+  /*this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
     message.enableIceTrickle : this._enableIceTrickle;
   this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
-    message.enableDataChannel : this._enableDataChannel;
+    message.enableDataChannel : this._enableDataChannel;*/
 
   // mcu has joined
   if (targetMid === 'MCU') {
@@ -1177,11 +1139,6 @@ Skylink.prototype._welcomeHandler = function(message) {
     this._trigger('serverPeerJoined', targetMid, this.SERVER_PEER_TYPE.MCU);
     log.log([targetMid, null, message.type, 'Always setting as offerer because peer is MCU']);
     beOfferer = true;
-  } else {
-    // if it is not MCU and P2P make sure that beOfferer is false for firefox -> chrome/opera/ie/safari
-    if (window.webrtcDetectedBrowser === 'firefox' && message.agent !== 'firefox') {
-      beOfferer = false;
-    }
   }
 
   if (this._hasMCU) {
@@ -1211,14 +1168,22 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   log.debug([targetMid, 'RTCPeerConnection', null, 'Should peer start the connection'], beOfferer);
 
-  this._addPeer(targetMid, {
+  var agent = {
     agent: message.agent,
-		version: message.version,
-		os: message.os
-  }, beOfferer, restartConn, message.receiveOnly, message.sessionType === 'screensharing');
+    version: message.version,
+    os: message.os
+  };
 
-  if (!beOfferer) {
-    log.debug([targetMid, 'RTCPeerConnection', null, 'Peer has to start the connection. Sending restart message'], beOfferer);
+  if (!this._peerConnections[targetMid]) {
+    this._addPeer(targetMid, agent, false, restartConn, message.receiveOnly, message.sessionType === 'screensharing');
+  }
+
+  if (beOfferer) {
+    log.debug([targetMid, 'RTCPeerConnection', null, 'Starting negotiation'], agent);
+    this._doOffer(targetMid, agent);
+
+  } else {
+    log.debug([targetMid, 'RTCPeerConnection', null, 'Peer has to start the connection. Resending message'], beOfferer);
 
     this._sendChannelMessage({
       type: this._SIG_MESSAGE_TYPE.WELCOME,
@@ -1229,7 +1194,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       os: window.navigator.platform,
       userInfo: this.getPeerInfo(),
       target: targetMid,
-      weight: -1,
+      weight: this._peerPriorityWeight,
       sessionType: !!this._mediaScreen ? 'screensharing' : 'stream'
     });
   }
@@ -1276,6 +1241,20 @@ Skylink.prototype._offerHandler = function(message) {
   });
   log.log([targetMid, 'RTCSessionDescription', message.type,
     'Session description object created'], offer);
+
+  // Configure it to force TURN connections by removing non-"relay" candidates
+  if (self._forceTURN && !self._enableIceTrickle) {
+    if (!self._hasMCU) {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from offer ' +
+        ' as TURN connections is forced']);
+
+      offer.sdp = offer.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
+
+    } else {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Not removing non-"relay"' +
+        '" candidates although TURN connections is forced as MCU is present']);
+    }
+  }
 
   // This is always the initial state. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
@@ -1359,10 +1338,22 @@ Skylink.prototype._candidateHandler = function(message) {
     sdpMid: message.id
     //label: index
   });
+
+  if (this._forceTURN && canType !== 'relay') {
+    if (!this._hasMCU) {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring adding of "' + canType +
+        '" candidate as TURN connections is forced'], candidate);
+      return;
+    }
+
+    log.warn([targetMid, 'RTCICECandidate', null, 'Not ignoring adding of "' + canType +
+      '" candidate although TURN connections is forced as MCU is present'], candidate);
+  }
+
   if (pc) {
   	if (pc.signalingState === this.PEER_CONNECTION_STATE.CLOSED) {
   		log.warn([targetMid, null, message.type, 'Peer connection state ' +
-  			'is closed. Not adding candidate']);
+  			'is closed. Not adding candidate'], candidate);
 	    return;
   	}
     /*if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
@@ -1387,7 +1378,7 @@ Skylink.prototype._candidateHandler = function(message) {
   } else {
     // Added ice candidate to queue because it may be received before sending the offer
     log.debug([targetMid, 'RTCIceCandidate', message.type,
-      'Not adding candidate as peer connection not present']);
+      'Not adding candidate as peer connection not present'], candidate);
     // NOTE ALEX: if the offer was slow, this can happen
     // we might keep a buffer of candidates to replay after receiving an offer.
     this._addIceCandidateToQueue(targetMid, candidate);
@@ -1466,6 +1457,20 @@ Skylink.prototype._answerHandler = function(message) {
   if (window.webrtcDetectedType === 'moz' && targetMid === 'MCU') {
     answer.sdp = answer.sdp.replace(/ generation 0/g, '');
     answer.sdp = answer.sdp.replace(/ udp /g, ' UDP ');
+  }
+
+  // Configure it to force TURN connections by removing non-"relay" candidates
+  if (self._forceTURN && !self._enableIceTrickle) {
+    if (!self._hasMCU) {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from answer ' +
+        ' as TURN connections is forced']);
+
+      answer.sdp = answer.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
+
+    } else {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Not removing non-"relay"' +
+        '" candidates although TURN connections is forced as MCU is present']);
+    }
   }
 
   // This should be the state after offer is received. or even after negotiation is successful

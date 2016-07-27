@@ -2,16 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.11</title>
+    <title>SkylinkJS 0.6.13</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
     <!-- styling -->
     <link rel="stylesheet" href="../assets/vendor/css/bootstrap.min.css">
     <link rel="stylesheet" href="../assets/vendor/css/bootstrap-theme.min.css">
-    <link href="../assets/vendor/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="../assets/css/style.css">
     <!-- scripts -->
     <script src="../assets/vendor/js/jquery.min.js"></script>
@@ -32,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.11</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.13</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -122,20 +123,18 @@
  * @param {Boolean} [(#peerId).settings.video.screenshare=false] The flag
  *   that indicates if the Peer connection Stream object sent
  *   is a screensharing stream or not.
- * @param {String} [(#peerId).settings.bandwidth] The Peer
- *   streaming bandwidth settings. Setting the bandwidth flags may not
- *   force set the bandwidth for each connection stream channels as it depends
- *   on how the browser handles the bandwidth bitrate. Values are configured
- *   in &lt;var&gt;kb/s&lt;/var&gt;.
- * @param {String} [(#peerId).settings.bandwidth.audio] The configured
- *   audio stream channel for the remote Stream object bandwidth
- *   that audio streaming should use in &lt;var&gt;kb/s&lt;/var&gt;.
- * @param {String} [(#peerId).settings.bandwidth.video] The configured
- *   video stream channel for the remote Stream object bandwidth
- *   that video streaming should use in &lt;var&gt;kb/s&lt;/var&gt;.
- * @param {String} [(#peerId).settings.bandwidth.data] The configured
- *   datachannel channel for the DataChannel connection bandwidth
- *   that datachannel connection per packet should be able use in &lt;var&gt;kb/s&lt;/var&gt;.
+ * @param {String} [(#peerId).settings.bandwidth] The Peer configuration for
+ *   the maximum sending bandwidth. The flags set may or may not work depending
+ *   on the browser implementations and how it handles it.
+ * @param {String} [(#peerId).settings.bandwidth.audio] The maximum
+ *   sending audio bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
+ *   it will leave the audio bitrate to the browser defaults.
+ * @param {String} [(#peerId).settings.bandwidth.video] The maximum
+ *   sending video bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
+ *   it will leave the video bitrate to the browser defaults.
+ * @param {String} [(#peerId).settings.bandwidth.data] The maximum
+ *   sending data bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
+ *   it will leave the data bitrate to the browser defaults.
  * @param {JSON} (#peerId).mediaStatus The Peer Stream mute
  *   settings for both audio and video streamings.
  * @param {Boolean} [(#peerId).mediaStatus.audioMuted=true] The flag that

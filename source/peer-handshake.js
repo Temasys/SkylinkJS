@@ -223,10 +223,24 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
   if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1) {
     offerConstraints = {
       mandatory: {
-        offerToReceiveAudio: true,
-        offerToReceiveVideo: true
+        OfferToReceiveAudio: true,
+        OfferToReceiveVideo: true
       }
     };
+  }
+
+  if (self._enableDataChannel) {
+    if (typeof self._dataChannels[targetMid] !== 'object') {
+      log.error([targetMid, 'RTCDataChannel', null, 'Create offer error as unable to create datachannel ' +
+        'as datachannels array is undefined'], self._dataChannels[targetMid]);
+      return;
+    }
+
+    if (!self._dataChannels[targetMid].main) {
+      self._dataChannels[targetMid].main =
+        self._createDataChannel(targetMid, self.DATA_CHANNEL_TYPE.MESSAGING, null, targetMid);
+      self._peerConnections[targetMid].hasMainChannel = true;
+    }
   }
 
   log.debug([targetMid, null, null, 'Creating offer with config:'], offerConstraints);
@@ -308,8 +322,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
  */
 Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var self = this;
-  var timer = (self._enableIceTrickle && !self._peerIceTrickleDisabled[peerId]) ?
-    (toOffer ? 12500 : 10000) : 50000;
+  var timer = self._enableIceTrickle ? (toOffer ? 12500 : 10000) : 50000;
   timer = (self._hasMCU) ? 105000 : timer;
 
   // increase timeout for android/ios
@@ -503,20 +516,20 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
   self._streamSettings.video = self._streamSettings.video || false;
 
-  log.info([targetMid, null, null, 'Custom bandwidth settings:'], {
+  /*log.info([targetMid, null, null, 'Custom bandwidth settings:'], {
     audio: (self._streamSettings.bandwidth.audio || 'Not set') + ' kB/s',
     video: (self._streamSettings.bandwidth.video || 'Not set') + ' kB/s',
     data: (self._streamSettings.bandwidth.data || 'Not set') + ' kB/s'
-  });
+  });*/
 
-  if (self._streamSettings.video.hasOwnProperty('frameRate') &&
+  /*if (self._streamSettings.video.hasOwnProperty('frameRate') &&
     self._streamSettings.video.hasOwnProperty('resolution')){
     log.info([targetMid, null, null, 'Custom resolution settings:'], {
       frameRate: (self._streamSettings.video.frameRate || 'Not set') + ' fps',
       width: (self._streamSettings.video.resolution.width || 'Not set') + ' px',
       height: (self._streamSettings.video.resolution.height || 'Not set') + ' px'
     });
-  }
+  }*/
 
   // set video codec
   if (self._selectedVideoCodec !== self.VIDEO_CODEC.AUTO) {
@@ -533,6 +546,24 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   }
 
   sessionDescription.sdp = sdpLines.join('\r\n');
+
+  // Remove REMB packet for MCU connection consistent video quality
+  // NOTE: This is a temporary solution. This is bad to modify from the client since REMB packet
+  //   is required to control quality based on network conditions.
+  if (self._hasMCU && ['chrome', 'opera', 'safari', 'IE'].indexOf(window.webrtcDetectedBrowser) > -1) {
+    log.warn([targetMid, null, null, 'Removing REMB packet for streaming quality in MCU environment']);
+
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtcp-fb:100 goog-remb\r\n/g, '');
+  }
+
+  // Remove rtx or apt= lines that prevent connections for browsers without VP8 or VP9 support
+  // See: https://bugs.chromium.org/p/webrtc/issues/detail?id=3962
+  if (['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1) {
+    log.warn([targetMid, null, null, 'Removing apt= and rtx payload lines causing connectivity issues']);
+
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\n/g, '');
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=fmtp:\d+ apt=\d+\r\n/g, '');
+  }
 
   // NOTE ALEX: opus should not be used for mobile
   // Set Opus as the preferred codec in SDP if Opus is present.
@@ -563,32 +594,26 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     } else {
       pc.setOffer = 'local';
     }
-    var shouldWaitForCandidates = false;
 
-    if (!(self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid])) {
-      shouldWaitForCandidates = true;
-      // there is no sessiondescription created at first go
-      if (pc.setOffer === 'remote' || pc.setAnswer === 'remote') {
-        shouldWaitForCandidates = false;
-      }
-    }
-    if (!shouldWaitForCandidates) {
-      // make checks for firefox session description
-      if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && window.webrtcDetectedBrowser === 'firefox') {
-        sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
-      }
-
-      self._sendChannelMessage({
-        type: sessionDescription.type,
-        sdp: sessionDescription.sdp,
-        mid: self._user.sid,
-        target: targetMid,
-        rid: self._room.id
-      });
-    } else {
+    if (!self._enableIceTrickle && !pc.gathered) {
       log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
         'Waiting for Ice gathering to complete to prevent Ice trickle']);
+      return;
     }
+
+    // make checks for firefox session description
+    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && window.webrtcDetectedBrowser === 'firefox') {
+      sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
+    }
+
+    self._sendChannelMessage({
+      type: sessionDescription.type,
+      sdp: sessionDescription.sdp,
+      mid: self._user.sid,
+      target: targetMid,
+      rid: self._room.id
+    });
+
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 

@@ -2,16 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.11</title>
+    <title>SkylinkJS 0.6.13</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
     <!-- styling -->
     <link rel="stylesheet" href="../assets/vendor/css/bootstrap.min.css">
     <link rel="stylesheet" href="../assets/vendor/css/bootstrap-theme.min.css">
-    <link href="../assets/vendor/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="../assets/css/style.css">
     <!-- scripts -->
     <script src="../assets/vendor/js/jquery.min.js"></script>
@@ -32,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.11</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.13</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -131,9 +132,7 @@
  * This state occurs after Peer connection has been disconnected &lt;em&gt;(closed)&lt;/em&gt;.
  * @param {String} TRICKLE_FAILED &lt;small&gt;Value &lt;code&gt;&quot;trickeFailed&quot;&lt;/code&gt;&lt;/small&gt;
  *   The state when attempting to connect successfully with ICE connection fails
- *    with trickle ICE connections.&lt;br&gt;
- * Trickle ICE would be disabled after &lt;code&gt;3&lt;/code&gt; attempts to have a better
- *   successful ICE connection.
+ *    with trickle ICE connections.
  * @readOnly
  * @since 0.1.0
  * @component ICE
