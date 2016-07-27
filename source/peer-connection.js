@@ -1159,6 +1159,33 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           }
         });
 
+      } else if (window.webrtcDetectedBrowser === 'edge') {
+        if (pc.getRemoteStreams().length > 0) {
+          var tracks = pc.getRemoteStreams()[0].getTracks();
+
+          loopFn(tracks, function (track) {
+            loopFn(stats, function (obj, prop) {
+              if (obj.type === 'track' && obj.trackIdentifier === track.id) {
+                loopFn(stats, function (streamObj) {
+                  if (streamObj.associateStatsId === obj.id &&
+                    ['outboundrtp', 'inboundrtp'].indexOf(streamObj.type) > -1) {
+                    var dirType = streamObj.type === 'outboundrtp' ? 'sending' : 'receiving';
+
+                    result[track.kind][dirType].bytes = dirType === 'sending' ? streamObj.bytesSent : streamObj.bytesReceived;
+                    result[track.kind][dirType].packets = dirType === 'sending' ? streamObj.packetsSent : streamObj.packetsReceived;
+                    result[track.kind][dirType].packetsLost = streamObj.packetsLost || 0;
+                    result[track.kind][dirType].ssrc = parseInt(streamObj.ssrc || '0', 10);
+
+                    if (dirType === 'sending') {
+                      result[track.kind].sending.rtt = obj.roundTripTime || 0;
+                    }
+                  }
+                });
+              }
+            });
+          });
+        }
+
       } else {
         var reportedCandidate = false;
 

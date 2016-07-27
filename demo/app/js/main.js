@@ -183,7 +183,7 @@ Demo.Skylink.on('peerRestart', function (peerId, peerInfo, isSelf){
 
   if ($('#video' + peerId).length > 0) {
     if (!peerInfo.settings.video && !peerInfo.settings.audio) {
-      $('#video' + peerId + ' video').hide();
+      $('#video' + peerId + ' .video-obj').hide();
       if (Demo.Streams[peerId]) {
         delete Demo.Streams[peerId];
       }
@@ -191,7 +191,7 @@ Demo.Skylink.on('peerRestart', function (peerId, peerInfo, isSelf){
     }
 
     if (peerInfo.settings.video && peerInfo.mediaStatus.videoMuted && Demo.Streams[peerId]) {
-      attachMediaStream($('#video' + peerId + ' video')[0], Demo.Streams[peerId]);
+      attachMediaStream($('#video' + peerId + ' .video-obj')[0], Demo.Streams[peerId]);
     }
   }
 });
@@ -255,6 +255,7 @@ Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo){
     peerElm.className = 'col-md-6 peervideo';
 
     peerVideo = document.createElement('video');
+    peerVideo.className = 'video-obj';
 
     if (window.webrtcDetectedBrowser !== 'IE') {
       peerVideo.autoplay = 'autoplay';
@@ -281,7 +282,7 @@ Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo){
     }
 
   } else {
-    peerVideo = $('video' + peerId + ' video')[0];
+    peerVideo = $('video' + peerId + ' .video-obj')[0];
   }
 
   attachMediaStream(peerVideo, stream);
@@ -301,11 +302,11 @@ Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo){
     $('#user' + peerId + ' .name').html(peerInfo.userData);
   }
 
-  if ($('#video' + peerId + ' video').length > 0) {
+  if ($('#video' + peerId + ' .video-obj').length > 0) {
     if (peerInfo.mediaStatus.videoMuted) {
-      $('#video' + peerId + ' video')[0].src = '';
+      $('#video' + peerId + ' .video-obj')[0].src = '';
     } else {
-      $('#video' + peerId + ' video')[0].src = Demo.Streams[peerId];
+      $('#video' + peerId + ' .video-obj')[0].src = Demo.Streams[peerId];
     }
   }
 });
@@ -474,7 +475,7 @@ Demo.Skylink.on('peerUpdated', function (peerId, peerInfo, isSelf) {
 
   if ($('#video' + peerId).length > 0) {
     if (!peerInfo.settings.video && !peerInfo.settings.audio) {
-      $('#video' + peerId + ' video').hide();
+      $('#video' + peerId + ' .video-obj').hide();
       if (Demo.Streams[peerId]) {
         delete Demo.Streams[peerId];
       }

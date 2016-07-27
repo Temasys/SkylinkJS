@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.13 - Wed Jul 27 2016 19:16:52 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.13 - Wed Jul 27 2016 19:51:31 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10461,7 +10461,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.13 - Wed Jul 27 2016 19:16:52 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.13 - Wed Jul 27 2016 19:51:31 GMT+0800 (SGT) */
 
 (function() {
 
@@ -15379,6 +15379,9 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
 
       result.raw = stats;
 
+      console.info('stats', stats, pc.getRemoteStreams().length > 0 ? pc.getRemoteStreams()[0].getTracks() : [],
+        pc.getRemoteStreams().length > 0 ? pc.getRemoteStreams()[0] : null);
+
       if (window.webrtcDetectedBrowser === 'firefox') {
         loopFn(stats, function (obj, prop) {
           var dirType = '';
@@ -15411,6 +15414,33 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
             formatCandidateFn('local', stats[obj.localCandidateId]);
           }
         });
+
+      } else if (window.webrtcDetectedBrowser === 'edge') {
+        if (pc.getRemoteStreams().length > 0) {
+          var tracks = pc.getRemoteStreams()[0].getTracks();
+
+          loopFn(tracks, function (track) {
+            loopFn(stats, function (obj, prop) {
+              if (obj.type === 'track' && obj.trackIdentifier === track.id) {
+                loopFn(stats, function (streamObj) {
+                  if (streamObj.associateStatsId === obj.id &&
+                    ['outboundrtp', 'inboundrtp'].indexOf(streamObj.type) > -1) {
+                    var dirType = streamObj.type === 'outboundrtp' ? 'sending' : 'receiving';
+
+                    result[track.kind][dirType].bytes = dirType === 'sending' ? streamObj.bytesSent : streamObj.bytesReceived;
+                    result[track.kind][dirType].packets = dirType === 'sending' ? streamObj.packetsSent : streamObj.packetsReceived;
+                    result[track.kind][dirType].packetsLost = streamObj.packetsLost || 0;
+                    result[track.kind][dirType].ssrc = parseInt(streamObj.ssrc || '0', 10);
+
+                    if (dirType === 'sending') {
+                      result[track.kind].sending.rtt = obj.roundTripTime || 0;
+                    }
+                  }
+                });
+              }
+            });
+          });
+        }
 
       } else {
         var reportedCandidate = false;
@@ -15843,7 +15873,8 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       return;
     }
 
-    if (!self._dataChannels[targetMid].main) {
+    // Edge doesn't support datachannels yet
+    if (!self._dataChannels[targetMid].main && window.webrtcDetectedBrowser !== 'edge') {
       self._dataChannels[targetMid].main =
         self._createDataChannel(targetMid, self.DATA_CHANNEL_TYPE.MESSAGING, null, targetMid);
       self._peerConnections[targetMid].hasMainChannel = true;
