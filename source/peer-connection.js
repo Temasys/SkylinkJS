@@ -892,7 +892,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
  * @param {Object|String} callback.error.retrievalErrors.(#peerId) The Peer ID that
  *   is associated with the error that occurred when retrieving the connection status.
  * @param {JSON} callback.error.connectionStats The list of Peers connection statuses.
- * @param {JSON} callback.error.connectionStats.(#peerId) The Peer ID that
+ * @param {Error} callback.error.connectionStats.(#peerId) The Peer ID that
  *   is associated with the connection status retrieved data.
  * @param {JSON} callback.success The success object received in the callback.
  *   If received as <code>null</code>, it means that there are errors.
@@ -900,7 +900,8 @@ Skylink.prototype._restartMCUConnection = function(callback) {
  *   to retrieve.
  * @param {JSON} callback.success.connectionStats The list of Peers connection statuses.
  * @param {JSON} callback.success.connectionStats.(#peerId) The Peer ID that
- *   is associated with the connection status retrieved data.
+ *   is associated with the retrieved connection stats
+ * @param {JSON} callback.success.raw The received raw connection stats data before parsing.
  * @param {JSON} callback.success.connectionStats.(#peerId).audio The Peer connection audio stats.
  * @param {JSON} callback.success.connectionStats.(#peerId).audio.sending The Peer connection audio sending stats.
  * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.bytes The Peer connection audio sending bytes.
@@ -908,16 +909,19 @@ Skylink.prototype._restartMCUConnection = function(callback) {
  *   connection audio sending packets.
  * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.packetsLost The Peer
  *   connection audio sending packets lost.
- * @param {String|Number} callback.success.connectionStats.(#peerId).audio.sending.ssrc The Peer
- *   connection audio sending ssrc ID.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.ssrc The Peer
+ *   connection audio sending ssrc.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.rtt The Peer
+ *   connection audio sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not
+ *   defined in the original raw stats data.
  * @param {JSON} callback.success.connectionStats.(#peerId).audio.receiving The Peer connection audio receiving stats.
  * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.bytes The Peer connection audio receiving bytes.
  * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.packets The Peer
  *   connection audio receiving packets.
  * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.packetsLost The Peer
  *   connection audio receiving packets lost.
- * @param {String|Number} callback.success.connectionStats.(#peerId).audio.receiving.ssrc The Peer
- *   connection audio receiving ssrc ID.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.ssrc The Peer
+ *   connection audio receiving ssrc.
  * @param {JSON} callback.success.connectionStats.(#peerId).video The Peer connection video stats.
  * @param {JSON} callback.success.connectionStats.(#peerId).video.sending The Peer connection video sending stats.
  * @param {Number} callback.success.connectionStats.(#peerId).video.sending.bytes The Peer connection video sending bytes.
@@ -927,21 +931,58 @@ Skylink.prototype._restartMCUConnection = function(callback) {
  *   connection video sending packets lost.
  * @param {JSON} callback.success.connectionStats.(#peerId).video.sending.ssrc The Peer
  *   connection video sending ssrc ID.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.sending.rtt The Peer
+ *   connection video sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not
+ *   defined in the original raw stats data.
  * @param {JSON} callback.success.connectionStats.(#peerId).video.receiving The Peer connection video receiving stats.
  * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.bytes The Peer connection video receiving bytes.
  * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.packets The Peer
  *   connection video receiving packets.
  * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.packetsLost The Peer
  *   connection video receiving packets lost.
- * @param {String|Number} callback.success.connectionStats.(#peerId).video.receiving.ssrc The Peer
- *   connection video receiving ssrc ID.
- 
- * @param {JSON} callback.success.connectionStats.(#peerId).selectedCandidate The Peer connection selected candidate.
- * @param {JSON} callback.success.connectionStats.(#peerId).selectedCandidate.local The Peer connection video sending stats.
- * @param {JSON} callback.success.connectionStats.(#peerId).video.sending.bytes The Peer connection video sending bytes.
- * @param {JSON} callback.success.connectionStats.(#peerId).video.sending.packets The Peer
- *   connection video sending packets.
-
+ * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.ssrc The Peer
+ *   connection video receiving ssrc.
+ * @param {JSON} callback.success.connectionStats.(#peerId).selectedCandidate The Peer connection selected candidate
+ *   pair details.
+ * @param {JSON} callback.success.connectionStats.(#peerId).selectedCandidate.local The Peer connection
+ *   selected local candidate.
+ * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.local.ipAddress The Peer connection
+ *   selected local candidate IP address.
+ * @param {Number} callback.success.connectionStats.(#peerId).selectedCandidate.local.portNumber The Peer connection
+ *   selected local candidate port number.
+ * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.local.transport The Peer connection
+ *   selected local candidate transport.
+ * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.local.candidateType The Peer connection
+ *   selected local candidate candidate type.
+ * @param {JSON} callback.success.connectionStats.(#peerId).selectedCandidate.remote The Peer connection
+ *   selected remote candidate.
+ * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.remote.ipAddress The Peer connection
+ *   selected remote candidate IP address.
+ * @param {Number} callback.success.connectionStats.(#peerId).selectedCandidate.remote.portNumber The Peer connection
+ *   selected remote candidate port number.
+ * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.remote.transport The Peer connection
+ *   selected remote candidate transport.
+ * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.remote.candidateType The Peer connection
+ *   selected remote candidate candidate type.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection The Peer connection details.
+ * @param {String} callback.success.connectionStats.(#peerId).connection.iceConnectionState The Peer connection ICE
+ *   connection state.
+ * @param {String} callback.success.connectionStats.(#peerId).connection.iceGatheringState The Peer connection ICE
+ *   gathering state.
+ * @param {String} callback.success.connectionStats.(#peerId).connection.signalingState The Peer connection
+ *   signaling state.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.localDescription The Peer connection
+ *   local session description.
+ * @param {String} callback.success.connectionStats.(#peerId).connection.localDescription.type The Peer connection
+ *   local session description type.
+ * @param {String} callback.success.connectionStats.(#peerId).connection.localDescription.sdp The Peer connection
+ *   local session description sdp.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.remoteDescription The Peer connection
+ *   remote session description.
+ * @param {String} callback.success.connectionStats.(#peerId).connection.remoteDescription.type The Peer connection
+ *   remote session description type.
+ * @param {String} callback.success.connectionStats.(#peerId).connection.remoteDescription.sdp The Peer connection
+ *   remote session description sdp.
  * @example
  *   SkylinkDemo.getConnectionStatus(peerId, function (error, success) {
  *      if (error) {
@@ -950,7 +991,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
  *        print(success.connectionStats);
  *      }
  *   });
- * @trigger get
+ * @trigger getConnectionStatusStateChange
  * @component Peer
  * @for Skylink
  * @since 0.6.14
@@ -1036,7 +1077,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           bytes: 0,
           packets: 0,
           packetsLost: 0,
-          rtt: 0 // Google does not have..
+          rtt: 0
         },
         receiving: {
           ssrc: null,
