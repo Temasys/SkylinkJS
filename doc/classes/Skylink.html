@@ -91,7 +91,7 @@
       Skylink <span>Class</span>
       
         <small>
-          <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l109"><code>source&#x2F;template&#x2F;header.js:109</code></a>
+          <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l120"><code>source&#x2F;template&#x2F;header.js:120</code></a>
         </small>
       
       
@@ -103,16 +103,29 @@
 </div>
 <div class="page container">
   <section id="infodocs">
-    <p><p><h2>Before using Skylink</h2>
-Please invoke <a href="../classes/Skylink.html#method_init" class="crosslink">init()</a> method
-first to initialise the Application Key before using any functionalities in Skylink.</p>
-<p>If you do not have an Application Key, you may register for a Skylink platform developer account
-  <a href="http://developer.temasys.com.sg/register">to create one</a>.</p>
-<p>To get started you may <a href="https://temasys.github.io/how-to/2014/08/08/
-Getting_started_with_WebRTC_and_SkylinkJS/">visit the getting started page</a>, or alternatively fork a ready made demo application
-that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
-<p>For tips on using skylink and troubleshooting you can visit
-  <a href="http://support.temasys.com.sg/support/solutions/folders/5000267498">our support portal</a>.</p>
+    <p><p><h2>Prerequisites on using Skylink</h2>
+Before using any Skylink functionalities, you will need to authenticate your App Key using
+  the <a href="#method_init"><code>init()</code> method</a>.</p>
+<p>To manage or create App Keys, you may access the <a href="http://developer.temasys.com.sg/">Skylink Developer Portal here</a>.</p>
+<p>To view the list of supported browsers, visit <a href="https://github.com/Temasys/SkylinkJS#supported-browsers">the list here</a>.</p>
+<p>Here are some articles to help you get started:</p>
+<ul>
+<li><a href="https://temasys.github.io/how-to/2014/08/08/
+Getting_started_with_WebRTC_and_SkylinkJS/">How to setup a simple video call</a></li>
+<li><a href="https://temasys.com.sg/screensharing-with-skylinkjs/">How to setup screensharing</a></li>
+<li><a href="https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/">How to create a chatroom like feature</a></li>
+</ul>
+<p>Here are some demos you may use to aid your development:</p>
+<ul>
+<li>Getaroom.io [<a href="https://getaroom.io">Demo</a> / <a href="https://github.com/Temasys/getaroom">Source code</a>]</li>
+<li>Creating a component [<a href="https://github.com/Temasys/skylink-call-button">Link</a>]</li>
+</ul>
+<p>You may see the example below in the <a href="#">Constructor tab</a> to have a general idea how event subscription
+  and the ordering of <a href="#method_init"><code>init()</code></a> and
+  <a href="#method_joinRoom"><code>joinRoom()</code></a> method should be called.</p>
+<p>If you have any issues, you may find answers to your questions in the FAQ section on <a href="http://support.temasys.com.sg">our support portal</a>, asks questions, request features or raise bug tickets as well.</p>
+<p>If you would like to contribute to our SkylinkJS codebase, see <a href="https://github.com/Temasys/SkylinkJS/blob/master/CONTRIBUTING.md">the contributing README</a>.</p>
+<p><a href="https://github.com/Temasys/SkylinkJS/blob/master/LICENSE">See License (Apache 2.0)</a></p>
 </p>
     <hr>
   </section>
@@ -2589,7 +2602,7 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l109"><code>source&#x2F;template&#x2F;header.js:109</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l120"><code>source&#x2F;template&#x2F;header.js:120</code></a>
       </small>
     
 
@@ -2616,10 +2629,10 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
     <div class="code-item-section">
       <h4>Example:</h4>
       <pre class="example-content prettyprint">
-        <p>  // Here&#39;s a simple example on how you can start using Skylink
-  var SkylinkDemo = new Skylink();</p>
-<p>  // Subscribe all events first before init()
-  SkylinkDemo.on(&quot;incomingStream&quot;, function (peerId, stream, peerInfo, isSelf) {
+        <p>  // Here&#39;s a simple example on how you can start using Skylink.
+  var skylinkDemo = new Skylink();</p>
+<p>  // Subscribe all events first as a general guideline
+  skylinkDemo.on(&quot;incomingStream&quot;, function (peerId, stream, peerInfo, isSelf) {
     if (isSelf) {
       attachMediaStream(document.getElementById(&quot;selfVideo&quot;), stream);
     } else {
@@ -2630,7 +2643,7 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
       attachMediaStream(peerVideo, stream);
     }
   });</p>
-<p>  SkylinkDemo.on(&quot;peerLeft&quot;, function (peerId, peerInfo, isSelf) {
+<p>  skylinkDemo.on(&quot;peerLeft&quot;, function (peerId, peerInfo, isSelf) {
     if (!isSelf) {
       var peerVideo = document.getElementById(peerId);
       // do a check if peerVideo exists first
@@ -2641,18 +2654,10 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
       }
     }
   });</p>
-<p> // never call joinRoom in readyStateChange event subscription.
- // call joinRoom after init() callback if you want to joinRoom instantly.
- SkylinkDemo.on(&quot;readyStateChange&quot;, function (state, room) {
-   console.log(&quot;Room (&quot; + room + &quot;) state: &quot;, room);
- })</p>
-<p> // always remember to call init()
- SkylinkDemo.init(&quot;YOUR_APP_KEY_HERE&quot;, function (error, success) {
-   // do a check for error or success
-   if (error) {
-     console.error(&quot;Init failed: &quot;, error);
-   } else {
-     SkylinkDemo.joinRoom(&quot;my_room&quot;, {
+<p> // init() should always be called first before other methods other than event methods like on() or off().
+ skylinkDemo.init(&quot;YOUR_APP_KEY_HERE&quot;, function (error, success) {
+   if (success) {
+     skylinkDemo.joinRoom(&quot;my_room&quot;, {
        userData: &quot;My Username&quot;,
        audio: true,
        video: true
@@ -21865,7 +21870,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l191"><code>source&#x2F;template&#x2F;header.js:191</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l212"><code>source&#x2F;template&#x2F;header.js:212</code></a>
       </small>
     
 
@@ -21879,7 +21884,7 @@ This will stop any currently attached Stream object to Skylink.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Helper function that generates an Unique ID (UUID) string.</p>
+    <p>Function that generates an <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">UUID</a> (Unique ID).</p>
 
   </div>
 
@@ -21896,7 +21901,7 @@ This will stop any currently attached Stream object to Skylink.</p>
           
             <span class="type"><b>{</b>String<b>}</b></span>:
           
-          <p>Generated Unique ID (UUID) string.</p>
+          <p>Returns a generated UUID (Unique ID).</p>
 
         
       </div>
@@ -21907,8 +21912,10 @@ This will stop any currently attached Stream object to Skylink.</p>
     <div class="code-item-section">
       <h4>Example:</h4>
       <pre class="example-content prettyprint">
-        <p>   // Get Unique ID (UUID)
-   var uuid = SkylinkDemo.generateUUID();</p>
+        <p>  // Here&#39;s an example use-case
+  var skylink = new Skylink();
+  var uniqueRoom = skylink.generateUUID();</p>
+<p>  skylink.joinRoom(uniqueRoom);</p>
 
       </pre>
     </div>
@@ -45229,7 +45236,7 @@ these are list of TURN servers given by the platform signaling:<br>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l181"><code>source&#x2F;template&#x2F;header.js:181</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l202"><code>source&#x2F;template&#x2F;header.js:202</code></a>
       </small>
     
 

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.13 - Thu Jul 28 2016 18:08:20 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.13 - Thu Jul 28 2016 19:07:35 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10461,14 +10461,16 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.13 - Thu Jul 28 2016 18:08:20 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.13 - Thu Jul 28 2016 19:07:35 GMT+0800 (SGT) */
 
 (function() {
 
 'use strict';
 
-/* IE < 10 Polyfills */
-// Mozilla provided polyfill for Object.keys()
+/**
+ * Polyfill for Object.keys() from Mozilla
+ * From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
+ */
 if (!Object.keys) {
   Object.keys = (function() {
     var hasOwnProperty = Object.prototype.hasOwnProperty,
@@ -10505,7 +10507,10 @@ if (!Object.keys) {
   })()
 }
 
-// Mozilla provided polyfill for Date.getISOString()
+/**
+ * Polyfill for Date.getISOString() from Mozilla
+ * From https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString
+ */
 (function() {
   function pad(number) {
     if (number < 10) {
@@ -10526,7 +10531,11 @@ if (!Object.keys) {
   };
 })();
 
-// addEventListener polyfill 1.0 / Eirik Backer / MIT Licence
+/**
+ * Polyfill for addEventListener() from Eirik Backer @eirikbacker (github.com).
+ * From https://gist.github.com/eirikbacker/2864711
+ * MIT Licensed
+ */
 (function(win, doc){
   if(win.addEventListener) return; //No need to polyfill
 
@@ -10556,7 +10565,9 @@ if (!Object.keys) {
   }
 })(window, document);
 
-// global clone function
+/**
+ * Global function that clones an object.
+ */
 var clone = function (obj) {
   if (obj === null || typeof obj !== 'object') {
     return obj;
@@ -10573,18 +10584,34 @@ var clone = function (obj) {
 
 /**
  * <h2>Before using Skylink</h2>
- * Please invoke {{#crossLink "Skylink/init:method"}}init(){{/crossLink}} method
- * first to initialise the Application Key before using any functionalities in Skylink.
+ * Before using any Skylink functionalities, you will need to authenticate your App Key using
+ *   the <a href="#method_init">`init()` method</a>.<br>You can readup on
+ *   the various methods to authenticate your Skylink <a href="http://support.temasys.com.sg/support/
+ * solutions/articles/12000002712-authenticating-your-application-key-to-start-a-connection">in this article here</a>.
  *
- * If you do not have an Application Key, you may register for a Skylink platform developer account
- *   [to create one](http://developer.temasys.com.sg/register).
+ * To manage or create App Keys, you may access the [Skylink Developer Portal here](http://developer.temasys.com.sg/).
  *
- * To get started you may [visit the getting started page](https://temasys.github.io/how-to/2014/08/08/
- * Getting_started_with_WebRTC_and_SkylinkJS/), or alternatively fork a ready made demo application
- * that uses Skylink Web SDK at [getaroom.io](http://getaroom.io/).
+ * To view the list of supported browsers to prevent "Opps why this browser didn't work" issues, visit [the list here](
+ * https://github.com/Temasys/SkylinkJS#supported-browsers).
  *
- * For tips on using skylink and troubleshooting you can visit
- *   [our support portal](http://support.temasys.com.sg/support/solutions/folders/5000267498).
+ * Here are some articles to help you get started:
+ * - [How to setup a simple video call](https://temasys.github.io/how-to/2014/08/08/
+ * Getting_started_with_WebRTC_and_SkylinkJS/)
+ * - [How to setup screensharing](https://temasys.com.sg/screensharing-with-skylinkjs/)
+ * - [How to create a chatroom like feature](https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/)
+ *
+ * Here are some demos you may use to aid your development:
+ * - Getaroom.io ([Demo](https://getaroom.io) / [Source code](https://github.com/Temasys/getaroom)
+ * - Creating a component ([Link](https://github.com/Temasys/skylink-call-button))
+ * 
+ * If you have any issues, you may find answers to your questions in the FAQ section on [our support portal](
+ * http://support.temasys.com.sg), asks questions, request features or raise bug tickets as well.
+ *
+ * If you would like to contribute to our SkylinkJS codebase, see [the contributing README](
+ * https://github.com/Temasys/SkylinkJS/blob/master/CONTRIBUTING.md).
+ *
+ * License: [Apache 2.0 License](https://github.com/Temasys/SkylinkJS/blob/master/LICENSE)
+ *
  * @class Skylink
  * @constructor
  * @example
@@ -10642,38 +10669,37 @@ function Skylink() {
   if (!(this instanceof Skylink)) {
     return new Skylink();
   }
-
-  /**
-   * The current version of Skylink Web SDK.
-   * @attribute VERSION
-   * @type String
-   * @readOnly
-   * @for Skylink
-   * @since 0.1.0
-   */
-  this.VERSION = '0.6.13';
-
-  /**
-   * Helper function that generates an Unique ID (UUID) string.
-   * @method generateUUID
-   * @return {String} Generated Unique ID (UUID) string.
-   * @example
-   *    // Get Unique ID (UUID)
-   *    var uuid = SkylinkDemo.generateUUID();
-   * @for Skylink
-   * @since 0.5.9
-   */
-  this.generateUUID = function() {
-    var d = new Date().getTime();
-    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = (d + Math.random() * 16) % 16 | 0;
-      d = Math.floor(d / 16);
-      return (c == 'x' ? r : (r & 0x7 | 0x8)).toString(16);
-    });
-    return uuid;
-  };
 }
-this.Skylink = Skylink;
+
+/**
+ * The current version of Skylink Web SDK.
+ * @attribute VERSION
+ * @type String
+ * @readOnly
+ * @for Skylink
+ * @since 0.1.0
+ */
+Skylink.prototype.VERSION = '0.6.13';
+
+/**
+ * Helper function that generates an Unique ID (UUID) string.
+ * @method generateUUID
+ * @return {String} Generated Unique ID (UUID) string.
+ * @example
+ *    // Get Unique ID (UUID)
+ *    var uuid = SkylinkDemo.generateUUID();
+ * @for Skylink
+ * @since 0.5.9
+ */
+Skylink.prototype.generateUUID = function() {
+  var d = new Date().getTime();
+  var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = (d + Math.random() * 16) % 16 | 0;
+    d = Math.floor(d / 16);
+    return (c == 'x' ? r : (r & 0x7 | 0x8)).toString(16);
+  });
+  return uuid;
+};
 
 Skylink.prototype.DATA_CHANNEL_STATE = {
   CONNECTING: 'connecting',
@@ -25879,5 +25905,6 @@ Skylink.prototype._addSDPSsrcFirefoxAnswer = function (targetMid, sdp) {
 
   return updatedSdp;
 };
+this.Skylink = Skylink;
 window.Skylink = Skylink;
 }).call(this);
