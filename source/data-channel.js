@@ -34,7 +34,7 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
  *   Peer does not support multiple simultaneous data transfers.
  *   The connection will only close when the Peer connection is closed.
  * @param {String} DATA <small>Value <code>"data"</code></small>
- *   The Datachannel type that is used for only for a data transfer.
+ *   The Datachannel type that is used only for a data transfer.
  *   This Datachannel type may exists multiple times depending on the number of data transfers that
  *   is currently going on. The connection will close after the data transfer has been completed or terminated.
  * @type JSON
@@ -62,7 +62,7 @@ Skylink.prototype._enableDataChannel = true;
  * Stores the list of Peer Datachannel connections.
  * @attribute _dataChannels
  * @param {JSON} (#peerId) The list of Datachannels associated with Peer ID.
- * @param {RTCDataChannel} (#peerId).[#channelName] The Datachannel connection.
+ * @param {RTCDataChannel} (#peerId).<#channelLabel> The Datachannel connection.
  *   The property name <code>"main"</code> is reserved for messaging Datachannel type.
  * @type JSON
  * @private

@@ -295,7 +295,7 @@
                 },
                 {
                     "name": "DATA",
-                    "description": "<small>Value <code>\"data\"</code></small>\n  The Datachannel type that is used for only for a data transfer.\n  This Datachannel type may exists multiple times depending on the number of data transfers that\n  is currently going on. The connection will close after the data transfer has been completed or terminated.",
+                    "description": "<small>Value <code>\"data\"</code></small>\n  The Datachannel type that is used only for a data transfer.\n  This Datachannel type may exists multiple times depending on the number of data transfers that\n  is currently going on. The connection will close after the data transfer has been completed or terminated.",
                     "type": "String"
                 }
             ],
@@ -327,13 +327,14 @@
                 {
                     "name": "(#peerId)",
                     "description": "The list of Datachannels associated with Peer ID.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "#channelName",
-                    "description": "The Datachannel connection.\n  The property name <code>\"main\"</code> is reserved for messaging Datachannel type.",
-                    "type": "RTCDataChannel",
-                    "optional": true
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "<#channelLabel>",
+                            "description": "The Datachannel connection.\n  The property name <code>\"main\"</code> is reserved for messaging Datachannel type.",
+                            "type": "RTCDataChannel"
+                        }
+                    ]
                 }
             ],
             "type": "JSON",
@@ -384,7 +385,7 @@
             "params": [
                 {
                     "name": "BINARY_STRING",
-                    "description": "<small>Value <code>\"binaryString\"</code></small>\n  The option that sends all data packets as string (or converts them into string) when\n  transferring data over the Datachannel connection.",
+                    "description": "<small>Value <code>\"binaryString\"</code></small>\n  The type that sends all data packets as string (or converts them into string) when\n  transferring data over the Datachannel connection.",
                     "type": "String"
                 }
             ],
@@ -490,786 +491,344 @@
         {
             "file": "source/data-transfer.js",
             "line": 1,
-            "description": "The current version of the internal <u>Data Transfer (DT)</u> Protocol that Skylink is using.<br>\n- This is not a feature for developers to use but rather for SDK developers to\n  see the Protocol version used in this Skylink version.\n- In some cases, this information may be used for reporting issues with Skylink.\n- DT_PROTOCOL VERSION: <code>0.1.0</code>.",
+            "description": "<blockquote class=\"info\">\n  Current version: <code>0.1.0</code>\n</blockquote>\nContains the current version of the data transfer protocol.\nThis is used only for debugging purposes.",
             "itemtype": "attribute",
             "name": "DT_PROTOCOL_VERSION",
             "type": "String",
             "readonly": "",
-            "component": "DataTransfer",
             "since": "0.5.10",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 16,
-            "description": "The fixed delimiter that is used in Skylink to\n  concat the DataChannel channelName and the actual\n  transfer ID together based on the transfer ID provided in\n  {{#crossLink \"Skylink/dataTransferState:event\"}}dataTransferState{{/crossLink}}.",
-            "itemtype": "attribute",
-            "name": "_TRANSFER_DELIMITER",
-            "type": "String",
-            "final": 1,
-            "access": "private",
-            "tagname": "",
-            "component": "DataTransfer",
-            "since": "0.5.10",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/data-transfer.js",
-            "line": 31,
-            "description": "The list of Protocol types that is used for transfers and messaging using\n  the DataChannel connection.",
-            "itemtype": "attribute",
-            "name": "_DC_PROTOCOL_TYPE",
-            "type": "JSON",
-            "params": [
-                {
-                    "name": "WRQ",
-                    "description": "Protocol to initiate a transfer request on the current\n  DataChannel connection. Data transfer step 1.",
-                    "type": "String"
-                },
-                {
-                    "name": "ACK",
-                    "description": "Protocol to accept or reject the transfer request.\n  Data transfer step 2.",
-                    "type": "String"
-                },
-                {
-                    "name": "DATA",
-                    "description": "Actual binary data or string send based on the\n  <code>ackN</code> in the <code>ACK</code> packet received.\n  Data transfer step 3. This may not occur is step 2 is rejected.",
-                    "type": "String"
-                },
-                {
-                    "name": "CANCEL",
-                    "description": "Protocol to terminate an ongoing transfer.\n  This data transfer step can happen after step 2 or 3.",
-                    "type": "String"
-                },
-                {
-                    "name": "ERROR",
-                    "description": "Protocol that is sent when a transfer occurs an exception\n  which using causes it to be terminated.\n  This data transfer step can happen after step 2 or 3.",
-                    "type": "String"
-                },
-                {
-                    "name": "MESSAGE",
-                    "description": "Protocol that is used to send P2P message objects\n  over the DataChannel connection.\n  This is not related to any data transfer step, but for messaging purposes.",
-                    "type": "String"
-                }
-            ],
-            "final": 1,
-            "access": "private",
-            "tagname": "",
-            "component": "DataTransfer",
-            "since": "0.5.2",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/data-transfer.js",
-            "line": 65,
-            "description": "The list of platforms that Skylink should fallback to use the\n  {{#crossLink \"Skylink/DATA_CHANNEL_TYPE:attr\"}}<code>\n  DATA_CHANNEL_TYPE.MESSAGING</code>{{/crossLink}}\n  channel for transfers instead of using multi-transfers\n  due to the lack of support in the platform implementations.",
-            "itemtype": "attribute",
-            "name": "_INTEROP_MULTI_TRANSFERS",
-            "type": "Array",
-            "final": 1,
-            "access": "private",
-            "tagname": "",
-            "component": "DataTransfer",
-            "since": "0.6.1",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/data-transfer.js",
-            "line": 81,
-            "description": "These are the types of data transfers that indicates if transfer is an\n  outgoing <small><em>(uploading)</em></small> or incoming <small><em>(downloding)</em></small> transfers.",
+            "line": 15,
+            "description": "Contains the list of data transfers directions.",
             "itemtype": "attribute",
             "name": "DATA_TRANSFER_TYPE",
-            "type": "JSON",
             "params": [
                 {
                     "name": "UPLOAD",
-                    "description": "<small>Value <code>\"upload\"</code></small>\n  This data transfer is an outgoing <em>(uploading)</em> transfer.<br>\n  Data is sent to the receiving Peer using the associated DataChannel connection.",
+                    "description": "<small>Value <code>\"upload\"</code></small>\n  The direction that indicates that transfer is uploading data to Peer.",
                     "type": "String"
                 },
                 {
                     "name": "DOWNLOAD",
-                    "description": "<small>Value <code>\"download\"</code></small>\n  The data transfer is an incoming <em>(downloading)</em> transfer.<br>\n  Data is received from the sending Peer using the associated DataChannel connection.",
+                    "description": "<small>Value <code>\"download\"</code></small>\n  The direction that indicates that transfer is downloading data from Peer.",
                     "type": "String"
                 }
             ],
+            "type": "JSON",
             "readonly": "",
-            "component": "DataTransfer",
             "since": "0.1.0",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 102,
-            "description": "These are the list of data transfer states that Skylink would trigger.",
+            "line": 32,
+            "description": "Contains the list of data transfer states.",
             "itemtype": "attribute",
             "name": "DATA_TRANSFER_STATE",
-            "type": "JSON",
             "params": [
                 {
                     "name": "UPLOAD_REQUEST",
-                    "description": "<small>Value <code>\"request\"</code></small>\n  The state when a data transfer request has been received from Peer.\nThis happens after Peer starts a data transfer using\n  {{#crossLink \"Skylink/sendBlobData:method\"}}sendBlobData(){{/crossLink}} or\n  {{#crossLink \"Skylink/sendURLData:method\"}}sendURLData(){{/crossLink}}.",
+                    "description": "<small>Value <code>\"request\"</code></small>\n  The state when receiving a data transfer request from Peer.",
                     "type": "String"
                 },
                 {
                     "name": "UPLOAD_STARTED",
-                    "description": "<small>Value <code>\"uploadStarted\"</code></small>\n  The state when the data transfer will begin and start to upload the first data\n  packets to receiving Peer.<br>\nThis happens after receiving Peer accepts a data transfer using\n  {{#crossLink \"Skylink/acceptDataTransfer:method\"}}acceptDataTransfer(){{/crossLink}}.",
+                    "description": "<small>Value <code>\"uploadStarted\"</code></small>\n  The state when Peer has accepted data transfer request and data is transferring to Peer.",
                     "type": "String"
                 },
                 {
                     "name": "DOWNLOAD_STARTED",
-                    "description": "<small>Value <code>\"downloadStarted\"</code></small>\n  The state when the data transfer has begin and associated DataChannel connection is\n  expected to receive the first data packet from sending Peer.<br>\nThis happens after self accepts a data transfer using\n  {{#crossLink \"Skylink/acceptDataTransfer:method\"}}acceptDataTransfer(){{/crossLink}} upon\n  the triggered state of <code>UPLOAD_REQUEST</code>.",
+                    "description": "<small>Value <code>\"downloadStarted\"</code></small>\n  The state when data transfer request from Peer has been accepted and data is transferring from Peer.",
                     "type": "String"
                 },
                 {
                     "name": "REJECTED",
-                    "description": "<small>Value <code>\"rejected\"</code></small>\n  The state when the data transfer has been rejected by receiving Peer and data transfer is\n  terminated.<br>\nThis happens after Peer rejects a data transfer using\n  {{#crossLink \"Skylink/acceptDataTransfer:method\"}}acceptDataTransfer(){{/crossLink}}.",
+                    "description": "<small>Value <code>\"rejected\"</code></small>\n  The state when data transfer request has been rejected from Peer.",
                     "type": "String"
                 },
                 {
                     "name": "UPLOADING",
-                    "description": "<small>Value <code>\"uploading\"</code></small>\n  The state when the data transfer is still being transferred to receiving Peer.<br>\nThis happens after state <code>UPLOAD_STARTED</code>.",
+                    "description": "<small>Value <code>\"uploading\"</code></small>\n  The state when data transfer is transferring in progress to Peer.",
                     "type": "String"
                 },
                 {
                     "name": "DOWNLOADING",
-                    "description": "<small>Value <code>\"downloading\"</code></small>\n  The state when the data transfer is still being transferred from sending Peer.<br>\nThis happens after state <code>DOWNLOAD_STARTED</code>.",
+                    "description": "<small>Value <code>\"downloading\"</code></small>\n  The state when data transfer is transferring in progress from Peer.",
                     "type": "String"
                 },
                 {
                     "name": "UPLOAD_COMPLETED",
-                    "description": "<small>Value <code>\"uploadCompleted\"</code></small>\n  The state when the data transfer has been transferred to receiving Peer successfully.<br>\nThis happens after state <code>UPLOADING</code> or <code>UPLOAD_STARTED</code>, depending\n  on how huge the data being transferred is.",
+                    "description": "<small>Value <code>\"uploadCompleted\"</code></small>\n  The state when data transfer to Peer has completed.",
                     "type": "String"
                 },
                 {
                     "name": "DOWNLOAD_COMPLETED",
-                    "description": "<small>Value <code>\"downloadCompleted\"</code></small>\n  The state when the data transfer has been transferred from sending Peer successfully.<br>\nThis happens after state <code>DOWNLOADING</code> or <code>DOWNLOAD_STARTED</code>, depending\n  on how huge the data being transferred is.",
+                    "description": "<small>Value <code>\"downloadCompleted\"</code></small>\n  The state when data transfer from Peer has completed.",
                     "type": "String"
                 },
                 {
                     "name": "CANCEL",
-                    "description": "<small>Value <code>\"cancel\"</code></small>\n  The state when the data transfer has been terminated by Peer.<br>\nThis happens after state <code>DOWNLOAD_STARTED</code> or <code>UPLOAD_STARTED</code>.",
+                    "description": "<small>Value <code>\"cancel\"</code></small>\n  The state when data transfer from/to Peer has been terminated.",
                     "type": "String"
                 },
                 {
                     "name": "ERROR",
-                    "description": "<small>Value <code>\"error\"</code></small>\n  The state when the data transfer has occurred an exception.<br>\nAt this stage, the data transfer would usually be terminated and may lead to state <code>CANCEL</code>.",
+                    "description": "<small>Value <code>\"error\"</code></small>\n  The state when data transfer has errors and terminated.",
                     "type": "String"
                 }
             ],
+            "type": "JSON",
             "readonly": "",
-            "component": "DataTransfer",
             "since": "0.4.0",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 165,
-            "description": "Stores the list of ongoing data transfers data packets (chunks) to be sent to receiving end\n  in a DataChannel connection based on the associated DataChannel ID.",
+            "line": 73,
+            "description": "Stores the fixed delimiter that concats the Datachannel label and actual transfer ID.",
+            "itemtype": "attribute",
+            "name": "_TRANSFER_DELIMITER",
+            "type": "String",
+            "readonly": "",
+            "access": "private",
+            "tagname": "",
+            "since": "0.5.10",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-transfer.js",
+            "line": 84,
+            "description": "Stores the list of data transfer protocols.",
+            "itemtype": "attribute",
+            "name": "_DC_PROTOCOL_TYPE",
+            "params": [
+                {
+                    "name": "WRQ",
+                    "description": "The protocol to initiate data transfer.",
+                    "type": "String"
+                },
+                {
+                    "name": "ACK",
+                    "description": "The protocol to request for data transfer chunk.\n  Give <code>-1</code> to reject the request at the beginning and <code>0</code> to accept\n  the data transfer request.",
+                    "type": "String"
+                },
+                {
+                    "name": "CANCEL",
+                    "description": "The protocol to terminate data transfer.",
+                    "type": "String"
+                },
+                {
+                    "name": "ERROR",
+                    "description": "The protocol when data transfer has errors and has to be terminated.",
+                    "type": "String"
+                },
+                {
+                    "name": "MESSAGE",
+                    "description": "The protocol that is used to send P2P messages.",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "access": "private",
+            "tagname": "",
+            "since": "0.5.2",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-transfer.js",
+            "line": 108,
+            "description": "Stores the list of types of SDKs that do not support simultaneous multi-transfers.",
+            "itemtype": "attribute",
+            "name": "_INTEROP_MULTI_TRANSFERS",
+            "type": "Array",
+            "readonly": "",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.1",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-transfer.js",
+            "line": 119,
+            "description": "Stores the list of uploading data transfers chunks to Peers.",
             "itemtype": "attribute",
             "name": "_uploadDataTransfers",
             "params": [
                 {
-                    "name": "(#channelName)",
-                    "description": "The ongoing data transfer packets to be sent to\n  receiving end associated with the DataChannel connection.",
-                    "type": "Array",
-                    "props": [
-                        {
-                            "name": "(#index)",
-                            "description": "The packet index of chunked Blob data object or\n  dataURL string (base64 binary string) to be sent to received end.",
-                            "type": "Blob|String"
-                        }
-                    ]
+                    "name": "<#transferId>",
+                    "description": "The uploading data transfer chunks.",
+                    "type": "Array"
                 }
             ],
             "type": "JSON",
             "access": "private",
             "tagname": "",
-            "required": 1,
-            "component": "DataTransfer",
             "since": "0.4.1",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 182,
-            "description": "Stores the list of ongoing data transfer state informations that is sent to receiving end\n  in a DataChannel connection based on the associated DataChannel ID.",
+            "line": 130,
+            "description": "Stores the list of uploading data transfer sessions to Peers.",
             "itemtype": "attribute",
             "name": "_uploadDataSessions",
             "params": [
                 {
-                    "name": "(#channelName)",
-                    "description": "The ongoing data transfer information that is sent\n  to receiving end associated with the DataChannel connection.",
-                    "type": "JSON",
-                    "props": [
-                        {
-                            "name": "name",
-                            "description": "The data transfer name.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "size",
-                            "description": "The expected data size of the\n  completed data transfer.",
-                            "type": "Number"
-                        },
-                        {
-                            "name": "isUpload",
-                            "description": "The flag that indicates if the\n  transfer is an upload data transfer.\n  In this case, the value should be <code>true</code>.",
-                            "type": "Boolean"
-                        },
-                        {
-                            "name": "senderPeerId",
-                            "description": "The Peer uploader ID.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "transferId",
-                            "description": "The data transfer ID.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "percentage",
-                            "description": "The data transfer percentage.",
-                            "type": "Number"
-                        },
-                        {
-                            "name": "timeout",
-                            "description": "The data transfer timeout.",
-                            "type": "Number"
-                        },
-                        {
-                            "name": "chunkSize",
-                            "description": "The data transfer packet (chunk) size.",
-                            "type": "Number"
-                        },
-                        {
-                            "name": "dataType",
-                            "description": "The data transfer packet (chunk) data type.",
-                            "type": "String"
-                        }
-                    ]
+                    "name": "<#transferId>",
+                    "description": "The uploading data transfer session.",
+                    "type": "JSON"
                 }
             ],
             "type": "JSON",
             "access": "private",
             "tagname": "",
-            "required": 1,
-            "component": "DataTransfer",
             "since": "0.4.1",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 209,
-            "description": "Stores the list of ongoing data transfers data packets (chunks) to be received from\n  sending point in a DataChannel connection based on the associated DataChannel ID.",
+            "line": 141,
+            "description": "Stores the list of downloading data transfers chunks to Peers.",
             "itemtype": "attribute",
             "name": "_downloadDataTransfers",
             "params": [
                 {
-                    "name": "(#channelName)",
-                    "description": "The ongoing data transfer packets received\n  associated with DataChannel.",
-                    "type": "Array",
-                    "props": [
-                        {
-                            "name": "(#index)",
-                            "description": "The packet index of chunked Blob data object or\n  dataURL string (base64 binary string) received from sending point.",
-                            "type": "Blob|String"
-                        }
-                    ]
+                    "name": "<#transferId>",
+                    "description": "The downloading data transfer chunks.",
+                    "type": "Array"
                 }
             ],
             "type": "JSON",
             "access": "private",
             "tagname": "",
-            "required": 1,
-            "component": "DataTransfer",
             "since": "0.4.1",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 226,
-            "description": "Stores the list of ongoing data transfer state informations that is received from\n  the sender point in a DataChannel connection based on the associated DataChannel ID.",
+            "line": 152,
+            "description": "Stores the list of downloading data transfer sessions to Peers.",
             "itemtype": "attribute",
             "name": "_downloadDataSessions",
             "params": [
                 {
-                    "name": "(#channelName)",
-                    "description": "The ongoing data transfer information that is sent\n  to receiving end associated with the DataChannel connection.",
-                    "type": "JSON",
-                    "props": [
-                        {
-                            "name": "name",
-                            "description": "The data transfer name.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "size",
-                            "description": "The expected data size of the\n  completed data transfer.",
-                            "type": "Number"
-                        },
-                        {
-                            "name": "isUpload",
-                            "description": "The flag that indicates if the\n  transfer is an upload data transfer.\n  In this case, the value should be <code>false</code>.",
-                            "type": "Boolean"
-                        },
-                        {
-                            "name": "senderPeerId",
-                            "description": "The Peer uploader ID.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "transferId",
-                            "description": "The data transfer ID.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "percentage",
-                            "description": "The data transfer percentage.",
-                            "type": "Number"
-                        },
-                        {
-                            "name": "timeout",
-                            "description": "The data transfer timeout to wait for response\n  before throwing a timeout error.",
-                            "type": "Number"
-                        },
-                        {
-                            "name": "chunkSize",
-                            "description": "The data transfer packet (chunk) size.",
-                            "type": "Number"
-                        },
-                        {
-                            "name": "dataType",
-                            "description": "The data transfer packet (chunk) data type.",
-                            "type": "String"
-                        }
-                    ]
+                    "name": "<#transferId>",
+                    "description": "The downloading data transfer session.",
+                    "type": "JSON"
                 }
             ],
             "type": "JSON",
             "access": "private",
             "tagname": "",
-            "required": 1,
-            "component": "DataTransfer",
             "since": "0.4.1",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 254,
-            "description": "Stores the list of ongoing data transfer timeouts using the\n  <code>setTimeout</code> objects for each DataChannel connection transfer.",
+            "line": 163,
+            "description": "Stores the list of data transfer \"wait-for-response\" timeouts.",
             "itemtype": "attribute",
             "name": "_dataTransfersTimeout",
             "params": [
                 {
-                    "name": "(#channelName)",
-                    "description": "The timeout for the associated DataChannel\n  connection.",
+                    "name": "<#transferId>",
+                    "description": "The data transfer session \"wait-for-response\" timeout.",
                     "type": "Object"
                 }
             ],
             "type": "JSON",
             "access": "private",
             "tagname": "",
-            "required": 1,
-            "component": "DataTransfer",
             "since": "0.4.1",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 269,
-            "description": "Sets a waiting timeout for every response sent to DataChannel connection receiving\n  end. Once the timeout has ended, a timeout error will be thrown and\n  data transfer will be terminated.",
+            "line": 174,
+            "description": "Function that sets the data transfer \"wait-for-response\" timeout.\nWhen there is not response after timeout, the data transfer will be terminated.",
             "itemtype": "method",
             "name": "_setDataChannelTimeout",
-            "params": [
-                {
-                    "name": "peerId",
-                    "description": "The Peer ID associated with the DataChannel connection.",
-                    "type": "String"
-                },
-                {
-                    "name": "timeout",
-                    "description": "The waiting timeout in seconds.",
-                    "type": "Number"
-                },
-                {
-                    "name": "isSender",
-                    "description": "The flag thats indicates if the response\n  is related to a downloading or uploading data transfer.",
-                    "type": "Boolean",
-                    "optional": true,
-                    "optdefault": "false"
-                },
-                {
-                    "name": "channelName",
-                    "description": "The DataChannel connection ID.",
-                    "type": "String"
-                }
-            ],
             "access": "private",
             "tagname": "",
-            "component": "DataTransfer",
             "since": "0.5.0",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 322,
-            "description": "Stops and clears the waitig timeout for the associated DataChannel connection.",
+            "line": 220,
+            "description": "Function that stops and clears the data transfer \"wait-for-response\" timeout.",
             "itemtype": "method",
             "name": "_clearDataChannelTimeout",
-            "params": [
-                {
-                    "name": "peerId",
-                    "description": "The Peer ID associated with the DataChannel connection.",
-                    "type": "String"
-                },
-                {
-                    "name": "isSender",
-                    "description": "The flag thats indicates if the response\n  is related to a downloading or uploading data transfer.",
-                    "type": "Boolean",
-                    "optional": true,
-                    "optdefault": "false"
-                },
-                {
-                    "name": "channelName",
-                    "description": "The DataChannel connection ID.",
-                    "type": "String"
-                }
-            ],
             "access": "private",
             "tagname": "",
-            "component": "DataTransfer",
             "since": "0.5.0",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 345,
-            "description": "Starts a data transfer with a Peer. If multi-transfer is supported,\n  Skylink would open a new DataChannel connection with Peer to start\n  data transfer. If mutli-transfer is not supported in\n  {{#crossLink \"Skylink/_INTEROP_MULTI_TRANSFERS:attr\"}}_INTEROP_MULTI_TRANSFERS{{/crossLink}},\n  the data transfer would start in the {{#crossLink \"Skylink/DATA_CHANNEL_TYPE:attr\"}}<code>\n  DATA_CHANNEL_TYPE.MESSAGING</code>{{/crossLink}} channel instead.",
+            "line": 238,
+            "description": "Function that starts a data transfer to Peer.\nThis will open a new data type of Datachannel connection with Peer if\n  simultaneous multi-transfers is supported by Peer.",
             "itemtype": "method",
             "name": "_sendBlobDataToPeer",
-            "params": [
-                {
-                    "name": "data",
-                    "description": "The Blob data object to send.",
-                    "type": "Blob"
-                },
-                {
-                    "name": "dataInfo",
-                    "description": "The data transfer information.",
-                    "type": "JSON",
-                    "props": [
-                        {
-                            "name": "transferId",
-                            "description": "The transfer ID of the data transfer.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "name",
-                            "description": "The transfer Blob data object name.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "timeout",
-                            "description": "The timeout set to await in seconds\n  for response from DataChannel connection.",
-                            "type": "Number",
-                            "optional": true,
-                            "optdefault": "60"
-                        },
-                        {
-                            "name": "size",
-                            "description": "The Blob data binary size expected to be received in the receiving end.",
-                            "type": "Number"
-                        },
-                        {
-                            "name": "isPrivate",
-                            "description": "The flag to indicate if the data transfer is a private\n  transfer to the Peer directly and not broadcasted to all Peers.",
-                            "type": "Boolean",
-                            "optional": true,
-                            "optdefault": "false"
-                        }
-                    ]
-                },
-                {
-                    "name": "targetPeerId",
-                    "description": "The receiving Peer ID. Array is used for\n  MCU connection where multi-targeted Peers are used. By default, the\n  value is <code>null</code>, which indicates that the data transfer is requested with all\n  connected Peers.",
-                    "type": "String|Array",
-                    "optional": true,
-                    "optdefault": "null"
-                }
-            ],
-            "return": {
-                "description": "The DataChannel connection ID associated with the transfer. If returned\n  as <code>null</code> or empty, it indicates an error.",
-                "type": "String"
-            },
             "access": "private",
             "tagname": "",
-            "component": "DataTransfer",
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 580,
-            "description": "Routes the data received to the relevant Protocol handler based on the data received.",
+            "line": 454,
+            "description": "Function that handles the data received from Datachannel and\n  routes to the relevant data transfer protocol handler.",
             "itemtype": "method",
             "name": "_dataChannelProtocolHandler",
-            "params": [
-                {
-                    "name": "data",
-                    "description": "The data received from the DataChannel connection.",
-                    "type": "String|Object"
-                },
-                {
-                    "name": "senderPeerId",
-                    "description": "The Peer ID associated with the DataChannel connection.",
-                    "type": "String"
-                },
-                {
-                    "name": "channelName",
-                    "description": "The DataChannel connection ID.",
-                    "type": "String"
-                },
-                {
-                    "name": "channelType",
-                    "description": "The DataChannel connection functionality type.\n  [Rel: Skylink.DATA_CHANNEL_TYPE]",
-                    "type": "String"
-                }
-            ],
             "access": "private",
             "tagname": "",
-            "component": "DataTransfer",
             "since": "0.5.2",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 652,
-            "description": "Handles the WRQ Protocol request received from the DataChannel connection.",
+            "line": 521,
+            "description": "Function that handles the \"WRQ\" data transfer protocol.",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
-            "params": [
-                {
-                    "name": "senderPeerId",
-                    "description": "The Peer ID associated with the DataChannel connection.",
-                    "type": "String"
-                },
-                {
-                    "name": "data",
-                    "description": "The data object received from the DataChannel connection.\n  This should contain the <code>WRQ</code> payload.",
-                    "type": "JSON",
-                    "props": [
-                        {
-                            "name": "agent",
-                            "description": "The sender Peer platform browser or agent name.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "version",
-                            "description": "The sender Peer platform browser or agent version.",
-                            "type": "Number"
-                        },
-                        {
-                            "name": "name",
-                            "description": "The transfer data object name.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "size",
-                            "description": "The transfer data object expected received size.",
-                            "type": "Number"
-                        },
-                        {
-                            "name": "chunkSize",
-                            "description": "The expected data transfer packet (chunk) size.",
-                            "type": "Number"
-                        },
-                        {
-                            "name": "timeout",
-                            "description": "The timeout set to await in seconds\n  for response from DataChannel connection.",
-                            "type": "Number"
-                        },
-                        {
-                            "name": "isPrivate",
-                            "description": "The flag to indicate if the data transfer is a private\n  transfer to the Peer connection directly and not broadcasted to all Peers conneciton.",
-                            "type": "Boolean"
-                        },
-                        {
-                            "name": "sender",
-                            "description": "The Peer ID of the sender.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "type",
-                            "description": "Protocol step <code>\"WRQ\"</code>.",
-                            "type": "String"
-                        }
-                    ]
-                },
-                {
-                    "name": "channelName",
-                    "description": "The DataChannel connection ID associated with the transfer.",
-                    "type": "String"
-                }
-            ],
-            "trigger": "dataTransferState",
             "access": "private",
             "tagname": "",
-            "component": "DataTransfer",
             "since": "0.5.2",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 723,
-            "description": "Handles the ACK Protocol request received from the DataChannel connection.",
+            "line": 575,
+            "description": "Function that handles the \"ACK\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
-            "params": [
-                {
-                    "name": "peerId",
-                    "description": "The Peer ID associated with the DataChannel connection.",
-                    "type": "String"
-                },
-                {
-                    "name": "data",
-                    "description": "The data object received from the DataChannel connection.\n  This should contain the <code>ACK</code> payload.",
-                    "type": "JSON",
-                    "props": [
-                        {
-                            "name": "ackN",
-                            "description": "The ACK response of the current data transfer.\n  If <code>0</code>, it means that the request has been accepted and the sending Peer\n  has to send the first data transfer packet (chunk). If it's greater than <code>0</code>,\n  it means that the previous data transfer packet (chunk) has been received and is expecting\n  for the next data transfer packet. The number always increment based on the number of data\n  packets the receiving end has received. If it's <code>-1</code>, it means that the data\n  transfer request has been rejected and the data transfer will be terminated.",
-                            "type": "Number"
-                        },
-                        {
-                            "name": "sender",
-                            "description": "The Peer ID of sender.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "type",
-                            "description": "Protocol step <code>\"ACK\"</code>.",
-                            "type": "String"
-                        }
-                    ]
-                },
-                {
-                    "name": "channelName",
-                    "description": "The DataChannel connection ID associated with the transfer.",
-                    "type": "String"
-                }
-            ],
-            "trigger": "dataTransferState",
             "access": "private",
             "tagname": "",
-            "component": "DataTransfer",
             "since": "0.5.2",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 885,
-            "description": "Handles the MESSAGE Protocol request received from the DataChannel connection.",
+            "line": 722,
+            "description": "Function that handles the \"MESSAGE\" data transfer protocol.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
-            "params": [
-                {
-                    "name": "peerId",
-                    "description": "The Peer ID associated with the DataChannel connection.",
-                    "type": "String"
-                },
-                {
-                    "name": "data",
-                    "description": "The data object received from the DataChannel connection.\n  This should contain the <code>MESSAGE</code> payload.",
-                    "type": "JSON",
-                    "props": [
-                        {
-                            "name": "target",
-                            "description": "The targeted Peer ID to receive the message object.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "data",
-                            "description": "The message object.",
-                            "type": "String|JSON"
-                        },
-                        {
-                            "name": "sender",
-                            "description": "The Peer ID of the sender.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "type",
-                            "description": "Protocol step <code>\"MESSAGE\"</code>.",
-                            "type": "String"
-                        }
-                    ]
-                },
-                {
-                    "name": "channelName",
-                    "description": "The DataChannel connection ID associated with the transfer.",
-                    "type": "String"
-                }
-            ],
-            "trigger": "incomingMessage",
             "access": "private",
             "tagname": "",
-            "component": "DataTransfer",
             "since": "0.5.2",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 915,
-            "description": "Handles the ERROR Protocol request received from the DataChannel connection.",
+            "line": 742,
+            "description": "Function that handles the \"ERROR\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
-            "params": [
-                {
-                    "name": "senderPeerId",
-                    "description": "The Peer ID associated with the DataChannel connection.",
-                    "type": "String"
-                },
-                {
-                    "name": "data",
-                    "description": "The data object received from the DataChannel connection.\n  This should contain the <code>ERROR</code> payload.",
-                    "type": "JSON",
-                    "props": [
-                        {
-                            "name": "name",
-                            "description": "The transfer data object name.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "content",
-                            "description": "The error message.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "isUploadError",
-                            "description": "The flag thats indicates if the response\n  is related to a downloading or uploading data transfer.",
-                            "type": "Boolean",
-                            "optional": true,
-                            "optdefault": "false"
-                        },
-                        {
-                            "name": "sender",
-                            "description": "The Peer ID of the sender.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "type",
-                            "description": "Protocol step <code>\"ERROR\"</code>.",
-                            "type": "String"
-                        }
-                    ]
-                },
-                {
-                    "name": "channelName",
-                    "description": "The DataChannel connection ID associated with the transfer.",
-                    "type": "String"
-                }
-            ],
-            "trigger": "dataTransferState",
             "access": "private",
             "tagname": "",
             "since": "0.5.2",
@@ -1277,188 +836,118 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 966,
-            "description": "Handles the CANCEL Protocol request received from the DataChannel connection.",
+            "line": 782,
+            "description": "Function that handles the \"CANCEL\" data transfer protocol.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
-            "params": [
-                {
-                    "name": "senderPeerId",
-                    "description": "The Peer ID associated with the DataChannel connection.",
-                    "type": "String"
-                },
-                {
-                    "name": "data",
-                    "description": "The data object received from the DataChannel connection.\n  This should contain the <code>CANCEL</code> payload.",
-                    "type": "JSON",
-                    "props": [
-                        {
-                            "name": "name",
-                            "description": "The transfer data object name.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "content",
-                            "description": "The reason for termination as a message.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "sender",
-                            "description": "The Peer ID of the sender.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "type",
-                            "description": "Protocol step <code>\"CANCEL\"</code>.",
-                            "type": "String"
-                        }
-                    ]
-                },
-                {
-                    "name": "channelName",
-                    "description": "The DataChannel connection ID associated with the transfer.",
-                    "type": "String"
-                }
-            ],
-            "trigger": "dataTransferState",
             "access": "private",
             "tagname": "",
-            "component": "DataTransfer",
             "since": "0.5.0",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1055,
-            "description": "Handles the DATA Protocol request received from the DataChannel connection.\nIn this handler, it actually handles and manipulates the received data transfer packet.",
+            "line": 861,
+            "description": "Function that handles the data transfer chunk received.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
-            "params": [
-                {
-                    "name": "senderPeerId",
-                    "description": "The Peer ID associated with the DataChannel connection.",
-                    "type": "String"
-                },
-                {
-                    "name": "dataString",
-                    "description": "The data transfer packet (chunk) received.",
-                    "type": "ArrayBuffer|Blob|String"
-                },
-                {
-                    "name": "dataType",
-                    "description": "The data transfer packet (chunk) data type received.\n  [Rel: Skylink.DATA_TRANSFER_DATA_TYPE]",
-                    "type": "String"
-                },
-                {
-                    "name": "channelName",
-                    "description": "The DataChannel connection ID associated with the transfer.",
-                    "type": "String"
-                }
-            ],
-            "trigger": "dataTransferState",
             "access": "private",
             "tagname": "",
-            "component": "DataTransfer",
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1288,
-            "description": "Starts a data transfer with Peers using the DataChannel connections with\n  [Blob](https://developer.mozilla.org/en/docs/Web/API/Blob datas).\n- You can transfer files using the <code>input</code> [fileupload object](\n  http://www.w3schools.com/jsref/dom_obj_fileupload.asp) and accessing the receiving\n  files using [FileUpload files property](http://www.w3schools.com/jsref/prop_fileupload_files.asp).\n- The [File](https://developer.mozilla.org/en/docs/Web/API/File) object inherits from\n  the Blob interface which is passable in this method as a Blob object.\n- The receiving Peers have the option to accept or reject the data transfer with\n  <a href=\"#method_acceptDataTransfer\">acceptDataTransfer()</a>.\n- For Peers connecting from our mobile platforms\n  (<a href=\"http://skylink.io/ios/\">iOS</a> / <a href=\"http://skylink.io/android/\">Android</a>),\n  the DataChannel connection channel type would be <code>DATA_CHANNEL_TYPE.MESSAGING</code>.<br>\n  For Peers connecting from the Web platform, the DataChannel connection channel type would be\n <code>DATA_CHANNEL_TYPE.DATA</code>.",
+            "line": 1086,
+            "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have been broken as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.<br>\n  Additionally, the Android and iOS SDKs do not support simultaneous multi-transfers.\n</blockquote>\nFunction that starts a data transfer to Peers.<br>\nUse the <a href=\"http://www.w3schools.com/tags/att_input_type.asp\"><code>input type=\"file\"</code></a>\n  to transfer files as the returning <a href=\"https://developer.mozilla.org/en/docs/Web/API/File\">\n<code>File</code> object</a> is a type of <code>Blob</code>.",
             "itemtype": "method",
             "name": "sendBlobData",
             "params": [
                 {
                     "name": "data",
-                    "description": "The Blob data object to transfer to Peer.",
+                    "description": "The Blob object to transfer to Peer.",
                     "type": "Blob"
                 },
                 {
                     "name": "timeout",
-                    "description": "The waiting timeout in seconds that the DataChannel connection\n  data transfer should wait before throwing an exception and terminating the data transfer.",
+                    "description": "The timeout to wait for response from Peer. Once timeout is reached without\n  response, the data transfer is terminated.",
                     "type": "Number",
                     "optional": true,
                     "optdefault": "60"
                 },
                 {
                     "name": "targetPeerId",
-                    "description": "The array of targeted Peers to transfer the\n  data object to. Alternatively, you may provide this parameter as a string to a specific\n  targeted Peer to transfer the data object.",
+                    "description": "The target Peer ID to only start the data transfer with.<br>\n  When provided as an Array, it will start the transfers with all the Peer IDs provided.<br>\n  When not provided, it will start the transfers with all the currently connection Peers.",
                     "type": "String|Array",
                     "optional": true
                 },
                 {
                     "name": "callback",
-                    "description": "The callback fired after all the data transfers is completed\n  successfully or met with an exception. The callback signature is <code>function (error, success)</code>.",
+                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>",
                     "type": "Function",
                     "optional": true,
                     "props": [
                         {
                             "name": "error",
-                            "description": "The error object received in the callback.\n  If received as <code>null</code>, it means that there is no errors.",
+                            "description": "The error result in request.\n  <small>Defined as <code>null</code> when there are no errors in request</small>",
                             "type": "JSON",
                             "props": [
                                 {
                                     "name": "state",
-                                    "description": "<i>Deprecated</i>. The\n  <a href=\"#event_dataTransferState\">dataTransferState</a>\n  when the error has occurred. This only triggers for a single targeted Peer data transfer.",
+                                    "description": "<blockquote class=\"info\">\n  This has been deprecated and will only be defined for single targeted Peer data transfer.\n  </blockquote>\n  The data transfer state that resulted in error. [Rel: Skylink.DATA_TRANSFER_STATE]",
                                     "type": "String",
-                                    "optional": true,
-                                    "optdefault": "null"
+                                    "optional": true
                                 },
                                 {
                                     "name": "error",
-                                    "description": "<i>Deprecated</i>. The error received when the\n  data transfer fails. This only triggers for single targeted Peer data transfer.",
-                                    "type": "Object|String",
-                                    "optional": true,
-                                    "optdefault": "null"
-                                },
-                                {
-                                    "name": "transferId",
-                                    "description": "The transfer ID of the failed data transfer.",
-                                    "type": "String"
+                                    "description": "<blockquote class=\"info\">\n  This has been deprecated and will only be defined for single targeted Peer data transfer.\n  </blockquote>\n  The error received that resulted in error",
+                                    "type": "Error|String",
+                                    "optional": true
                                 },
                                 {
                                     "name": "peerId",
-                                    "description": "The single targeted Peer ID for the data transfer.\n  This only triggers for single targeted Peer data transfer.",
+                                    "description": "<blockquote class=\"info\">\n  This has been deprecated and will only be defined for single targeted Peer data transfer.\n  </blockquote>\n  The targeted Peer ID.",
                                     "type": "String",
-                                    "optional": true,
-                                    "optdefault": "null"
+                                    "optional": true
+                                },
+                                {
+                                    "name": "transferId",
+                                    "description": "The data transfer ID.",
+                                    "type": "String"
                                 },
                                 {
                                     "name": "listOfPeers",
-                                    "description": "The list of Peer that the data transfer has been\n  initiated with.",
+                                    "description": "The list Peer IDs for the data transfer.",
                                     "type": "Array"
                                 },
                                 {
                                     "name": "isPrivate",
-                                    "description": "The flag to indicate if the data transfer is a private\n  transfer to the Peer directly and not broadcasted to all Peers.",
+                                    "description": "The flag that indicates if data transfer is targeted or not, basing\n  off the <code>targetPeerId</code> parameter being defined.",
                                     "type": "Boolean"
                                 },
                                 {
                                     "name": "transferErrors",
-                                    "description": "The list of errors occurred based on per Peer\n  basis.",
+                                    "description": "The list of data transfer errors.",
                                     "type": "JSON"
                                 },
                                 {
-                                    "name": "transferErrors.(#peerId)",
-                                    "description": "The error that occurred when having\n  a DataChannel connection data transfer with associated Peer.",
+                                    "name": "transferErrors.<#peerId>",
+                                    "description": "The data transfer error associated\n  with the Peer ID property name.",
                                     "type": "Object|String"
                                 },
                                 {
                                     "name": "transferInfo",
-                                    "description": "The transfer data object information.",
+                                    "description": "The data transfer information.\n  <small>Object signature is found in the <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event\n   <code>transferInfo</code> payload</a></small>",
                                     "type": "JSON"
                                 },
                                 {
                                     "name": "transferInfo.name",
-                                    "description": "The transfer data object name.\n  If there is no name based on the Blob given, the name would be the transfer ID.",
-                                    "type": "String",
-                                    "optional": true,
-                                    "optdefault": "transferId"
+                                    "description": "The data transfer name.\n  It uses the Blob <code>name</code> property, but if it's not defined or is a\n  string transfer, the value will be the data transfer ID.",
+                                    "type": "String"
                                 },
                                 {
                                     "name": "transferInfo.size",
-                                    "description": "The transfer data size.",
+                                    "description": "The data transfer data size.",
                                     "type": "Number"
                                 },
                                 {
@@ -1468,12 +957,12 @@
                                 },
                                 {
                                     "name": "transferInfo.dataType",
-                                    "description": "The type of data transfer initiated.\n  Available types are <code>\"dataURL\"</code> and <code>\"blob\"</code>.",
+                                    "description": "The type of data transfer.\n  The value of this should be <code>\"blob\"</code>.",
                                     "type": "String"
                                 },
                                 {
                                     "name": "transferInfo.timeout",
-                                    "description": "The waiting timeout in seconds that the DataChannel\n  connection data transfer should wait before throwing an exception and terminating the data transfer.",
+                                    "description": "The response timeout as provided in the <code>timeout</code>\n  parameter.",
                                     "type": "String"
                                 },
                                 {
@@ -1569,7 +1058,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1537,
+            "line": 1336,
             "description": "Starts the actual data transfers with the array of Peers provided\n  and based on the data transfer type to start the DataChannel connection data transfer.",
             "itemtype": "method",
             "name": "_startDataTransfer",
@@ -1804,7 +1293,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1865,
+            "line": 1664,
             "description": "Responds to a data transfer request by a Peer.",
             "itemtype": "method",
             "name": "respondBlobRequest",
@@ -1836,7 +1325,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1881,
+            "line": 1680,
             "description": "Responds to a data transfer request by a Peer.",
             "itemtype": "method",
             "name": "acceptDataTransfer",
@@ -1866,7 +1355,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1968,
+            "line": 1767,
             "description": "Terminates a current data transfer with Peer.",
             "itemtype": "method",
             "name": "cancelBlobTransfer",
@@ -1891,7 +1380,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1981,
+            "line": 1780,
             "description": "Terminates a current data transfer with Peer.",
             "itemtype": "method",
             "name": "cancelDataTransfer",
@@ -1914,7 +1403,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2068,
+            "line": 1867,
             "description": "Send a message object or string using the DataChannel connection\n  associated with the list of targeted Peers.\n- The maximum size for the message object would be<code>16Kb</code>.<br>\n- To send a string length longer than <code>16kb</code>, please considered\n  to use {{#crossLink \"Skylink/sendURLData:method\"}}sendURLData(){{/crossLink}}\n  to send longer strings (for that instance base64 binary strings are long).\n- To send message objects with platform signaling socket connection, see\n  {{#crossLink \"Skylink/sendMessage:method\"}}sendMessage(){{/crossLink}}.",
             "itemtype": "method",
             "name": "sendP2PMessage",
@@ -1941,7 +1430,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2168,
+            "line": 1967,
             "description": "Starts a [data URI](https://developer.mozilla.org/en-US/docs/Web/API/FileReader\n  /readAsDataURL) transfer with Peers using the DataChannel connection.\n- The receiving Peers have the option to accept or reject the data transfer with\n  <a href=\"#method_acceptDataTransfer\">acceptDataTransfer()</a>.\n- For Peers connecting from our mobile platforms\n  (<a href=\"http://skylink.io/ios/\">iOS</a> / <a href=\"http://skylink.io/android/\">Android</a>),\n  the DataChannel connection channel type would be <code>DATA_CHANNEL_TYPE.MESSAGING</code>.<br>\n  For Peers connecting from the Web platform, the DataChannel connection channel type would be\n <code>DATA_CHANNEL_TYPE.DATA</code>.",
             "itemtype": "method",
             "name": "sendURLData",
@@ -13327,168 +12816,64 @@
     ],
     "warnings": [
         {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1"
+            "message": "unknown tag: trigger",
+            "line": " source/data-transfer.js:1086"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:16"
+            "line": " source/data-transfer.js:1086"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:31"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:65"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:81"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:102"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:165"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:182"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:209"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:226"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:254"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:269"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:322"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:345"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:580"
+            "line": " source/data-transfer.js:1336"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:652"
+            "line": " source/data-transfer.js:1664"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:652"
+            "line": " source/data-transfer.js:1664"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:723"
+            "line": " source/data-transfer.js:1680"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:723"
+            "line": " source/data-transfer.js:1680"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:885"
+            "line": " source/data-transfer.js:1767"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:885"
+            "line": " source/data-transfer.js:1767"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:915"
+            "line": " source/data-transfer.js:1780"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/data-transfer.js:1780"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:966"
+            "line": " source/data-transfer.js:1867"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:966"
+            "line": " source/data-transfer.js:1867"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1055"
+            "line": " source/data-transfer.js:1967"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1055"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1288"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1288"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1537"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1865"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1865"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1881"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1881"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1968"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1968"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1981"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1981"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:2068"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:2068"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:2168"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-transfer.js:2168"
+            "line": " source/data-transfer.js:1967"
         },
         {
             "message": "unknown tag: component",
