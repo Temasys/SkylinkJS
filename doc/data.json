@@ -2319,29 +2319,58 @@
         {
             "file": "source/ice-candidate.js",
             "line": 21,
-            "description": "Stores the list of candidates sent <code>local</code> and added <code>remote</code> information.",
+            "description": "Stores the list of local and remote candidates sent and received.",
             "itemtype": "attribute",
-            "name": "_addedCandidates",
+            "name": "_gatheredCandidates",
             "params": [
                 {
                     "name": "(#peerId)",
-                    "description": "The list of candidates sent and added associated with the Peer ID.",
+                    "description": "The list of candidates associated with the Peer ID.",
                     "type": "JSON",
                     "props": [
                         {
-                            "name": "relay",
-                            "description": "The number of relay candidates added and sent.",
-                            "type": "Array"
+                            "name": "sending",
+                            "description": "The list of local candidates gathered for Peer sent.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "host",
+                                    "description": "The list of local <code>\"host\"</code> type of candidates sent.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "srflx",
+                                    "description": "The list of local <code>\"srflx\"</code> type of candidates sent.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "relay",
+                                    "description": "The list of local <code>\"relay\"</code> type of candidates sent.",
+                                    "type": "JSON"
+                                }
+                            ]
                         },
                         {
-                            "name": "srflx",
-                            "description": "The number of server reflexive candidates added and sent.",
-                            "type": "Array"
-                        },
-                        {
-                            "name": "host",
-                            "description": "The number of host candidates added and sent.",
-                            "type": "Array"
+                            "name": "receiving",
+                            "description": "The list of remote candidates gathered for Peer received.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "host",
+                                    "description": "The list of remote <code>\"host\"</code> type of candidates received.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "srflx",
+                                    "description": "The list of remote <code>\"srflx\"</code> type of candidates received.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "relay",
+                                    "description": "The list of remote <code>\"relay\"</code> type of candidates received.",
+                                    "type": "JSON"
+                                }
+                            ]
                         }
                     ]
                 }
@@ -2350,13 +2379,13 @@
             "access": "private",
             "tagname": "",
             "required": 1,
-            "since": "0.6.4",
+            "since": "0.6.14",
             "component": "ICE",
             "class": "Skylink"
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 37,
+            "line": 42,
             "description": "The list of Peer connection ICE candidate generation states that Skylink would trigger.\n- These states references the [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState).",
             "itemtype": "attribute",
             "name": "CANDIDATE_GENERATION_STATE",
@@ -2385,7 +2414,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 63,
+            "line": 68,
             "description": "Handles the ICE candidate object received from associated Peer connection\n  to send the ICE candidate object or wait for all gathering to complete\n  before sending the candidate to prevent trickle ICE.",
             "itemtype": "method",
             "name": "_onIceCandidate",
@@ -2410,7 +2439,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 175,
+            "line": 176,
             "description": "Buffers an ICE candidate object associated with a Peer connection\n  to prevent disruption to ICE connection when ICE candidate\n  is received before <code>RTCPeerConnection.setRemoteDescription</code>\n  is called.",
             "itemtype": "method",
             "name": "_addIceCandidateToQueue",
@@ -2434,7 +2463,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 197,
+            "line": 198,
             "description": "Handles the event when adding an ICE candidate has been added\n  successfully. This is mainly to prevent JShint errors.",
             "itemtype": "method",
             "name": "_onAddIceCandidateSuccess",
@@ -2446,7 +2475,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 210,
+            "line": 211,
             "description": "Handles the event when adding an ICE candidate has failed.\nThis is mainly to prevent JShint errors.",
             "itemtype": "method",
             "name": "_onAddIceCandidateFailure",
@@ -2465,7 +2494,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 225,
+            "line": 226,
             "description": "Adds the list of ICE candidates bufferred before <code>RTCPeerConnection.setRemoteDescription\n  </code> is called associated with the Peer connection.",
             "itemtype": "method",
             "name": "_addIceCandidateFromQueue",
@@ -2731,6 +2760,35 @@
         {
             "file": "source/peer-connection.js",
             "line": 33,
+            "description": "These are the list of Peer connection status retrieval ready states that Skylink would trigger.\n- These states are triggered when\n  {{#crossLink \"Skylink/getConnectionStatus:method\"}}getConnectionStatus(){{/crossLink}} is invoked.",
+            "itemtype": "attribute",
+            "name": "GET_CONNECTION_STATUS_STATE",
+            "type": "JSON",
+            "params": [
+                {
+                    "name": "RETRIEVING",
+                    "description": "<small>Value <code>0</code></small>\n  The state when Skylink is retrieving the Peer connection status.",
+                    "type": "Number"
+                },
+                {
+                    "name": "RETRIEVE_SUCCESS",
+                    "description": "<small>Value <code>1</code></small>\n  The state when Skylink has retrieved the Peer connection status succesfully.",
+                    "type": "Number"
+                },
+                {
+                    "name": "RETRIEVE_ERROR",
+                    "description": "<small>Value <code>-1</code></small>\n  The state when Skylink has failed retrieving the Peer connection status.",
+                    "type": "Number"
+                }
+            ],
+            "readonly": "",
+            "component": "Room",
+            "since": "0.1.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-connection.js",
+            "line": 56,
             "description": "These are the types of server Peers that Skylink would connect with.\n- Different server Peers that serves different functionalities.\n- The server Peers functionalities are only available depending on the\n  Application Key configuration.\n- Eventually, this list will be populated as there are more server Peer\n  functionalities provided by the Skylink platform.",
             "itemtype": "attribute",
             "name": "SERVER_PEER_TYPE",
@@ -2749,7 +2807,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 54,
+            "line": 77,
             "description": "Stores the timestamp of the moment when the last Peers connection\n  restarts has happened. Used for the restart Peers connection functionality.",
             "itemtype": "attribute",
             "name": "_lastRestart",
@@ -2763,7 +2821,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 67,
+            "line": 90,
             "description": "Stores the counter of the number of consecutive\n  Peers connection restarts retries.",
             "itemtype": "attribute",
             "name": "_retryCount",
@@ -2777,7 +2835,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 80,
+            "line": 103,
             "description": "Stores the list of Peers connection.",
             "itemtype": "attribute",
             "name": "_peerConnections",
@@ -2798,7 +2856,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 93,
+            "line": 116,
             "description": "Connects to the Peer.",
             "itemtype": "method",
             "name": "_addPeer",
@@ -2867,7 +2925,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 158,
+            "line": 181,
             "description": "Restarts a Peer connection in a P2P environment.\nThis is usually done for replacing the previous Stream attached and restarting\n  the connection with a new one, or when the ICE connection has issues\n  streaming video/audio stream in the remote Stream which requires\n  a refresh in the ICE connection.",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -2908,7 +2966,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 304,
+            "line": 327,
             "description": "Disconnects the Peer connection and remove object references associated.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -2928,7 +2986,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 363,
+            "line": 386,
             "description": "Creates a Peer connection. This does not start the handshake connection\n  but creates the Peer connection object ready for connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -2958,13 +3016,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 513,
+            "line": 533,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 576,
+            "line": 596,
             "description": "Refreshes a Peer connection.\n- This feature can be used to refresh a Peer connection when the\n  remote Stream received does not stream any audio/video stream.\n- If there are more than 1 refresh during 5 seconds\n  or refresh is less than 3 seconds since the last refresh\n  initiated by the other peer, it will be aborted.\n- As for MCU connection, the restart mechanism makes the self user\n   leave and join the currently connected room again.",
             "itemtype": "method",
             "name": "refreshConnection",
@@ -3028,7 +3086,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 735,
+            "line": 755,
             "description": "Restarts all Peers connection in a MCU connection environment.\nThis would require the current user to leave the room and restart all\n  current existing Peers connection.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -3081,6 +3139,395 @@
             "trigger": "peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined",
             "component": "Peer",
             "since": "0.6.1",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-connection.js",
+            "line": 877,
+            "description": "Gets the Peer connection status.",
+            "itemtype": "method",
+            "name": "getConnectionStatus",
+            "params": [
+                {
+                    "name": "targetPeerId",
+                    "description": "The array of targeted Peers connection to refresh\n  the connection with.",
+                    "type": "String|Array",
+                    "optional": true
+                },
+                {
+                    "name": "callback",
+                    "description": "The callback fired after all targeted Peers connection has\n  connection status retrieved or have met with an exception.\n  The callback signature is <code>function (error, success)</code>.",
+                    "type": "Function",
+                    "optional": true,
+                    "props": [
+                        {
+                            "name": "error",
+                            "description": "The error object received in the callback.\n  If received as <code>null</code>, it means that there is no errors.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "listOfPeers",
+                                    "description": "The list of Peers which connection statuses\n  to retrieve.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "retrievalErrors",
+                                    "description": "The list of errors occurred\n  based on per Peer basis. It returns the Error to an ID of <code>\"self\"</code> if there is no Peers.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "retrievalErrors.(#peerId)",
+                                    "description": "The Peer ID that\n  is associated with the error that occurred when retrieving the connection status.",
+                                    "type": "Object|String"
+                                },
+                                {
+                                    "name": "connectionStats",
+                                    "description": "The list of Peers connection statuses.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId)",
+                                    "description": "The Peer ID that\n  is associated with the connection status retrieved data.",
+                                    "type": "Error"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "success",
+                            "description": "The success object received in the callback.\n  If received as <code>null</code>, it means that there are errors.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "listOfPeers",
+                                    "description": "The list of Peers which connection statuses\n  to retrieve.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "connectionStats",
+                                    "description": "The list of Peers connection statuses.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId)",
+                                    "description": "The Peer ID that\n  is associated with the retrieved connection stats",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "raw",
+                                    "description": "The received raw connection stats data before parsing.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).audio",
+                                    "description": "The Peer connection audio stats.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).audio.sending",
+                                    "description": "The Peer connection audio sending stats.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).audio.sending.bytes",
+                                    "description": "The Peer connection audio sending bytes.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).audio.sending.packets",
+                                    "description": "The Peer\n  connection audio sending packets.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).audio.sending.packetsLost",
+                                    "description": "The Peer\n  connection audio sending packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).audio.sending.ssrc",
+                                    "description": "The Peer\n  connection audio sending ssrc.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).audio.sending.rtt",
+                                    "description": "The Peer\n  connection audio sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not\n  defined in the original raw stats data.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).audio.receiving",
+                                    "description": "The Peer connection audio receiving stats.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).audio.receiving.bytes",
+                                    "description": "The Peer connection audio receiving bytes.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).audio.receiving.packets",
+                                    "description": "The Peer\n  connection audio receiving packets.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).audio.receiving.packetsLost",
+                                    "description": "The Peer\n  connection audio receiving packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).audio.receiving.ssrc",
+                                    "description": "The Peer\n  connection audio receiving ssrc.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).video",
+                                    "description": "The Peer connection video stats.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).video.sending",
+                                    "description": "The Peer connection video sending stats.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).video.sending.bytes",
+                                    "description": "The Peer connection video sending bytes.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).video.sending.packets",
+                                    "description": "The Peer\n  connection video sending packets.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).video.sending.packetsLost",
+                                    "description": "The Peer\n  connection video sending packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).video.sending.ssrc",
+                                    "description": "The Peer\n  connection video sending ssrc ID.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).video.sending.rtt",
+                                    "description": "The Peer\n  connection video sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not\n  defined in the original raw stats data.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).video.receiving",
+                                    "description": "The Peer connection video receiving stats.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).video.receiving.bytes",
+                                    "description": "The Peer connection video receiving bytes.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).video.receiving.packets",
+                                    "description": "The Peer\n  connection video receiving packets.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).video.receiving.packetsLost",
+                                    "description": "The Peer\n  connection video receiving packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).video.receiving.ssrc",
+                                    "description": "The Peer\n  connection video receiving ssrc.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).selectedCandidate",
+                                    "description": "The Peer connection selected candidate\n  pair details.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).selectedCandidate.local",
+                                    "description": "The Peer connection\n  selected local candidate.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).selectedCandidate.local.ipAddress",
+                                    "description": "The Peer connection\n  selected local candidate IP address.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).selectedCandidate.local.portNumber",
+                                    "description": "The Peer connection\n  selected local candidate port number.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).selectedCandidate.local.transport",
+                                    "description": "The Peer connection\n  selected local candidate transport.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).selectedCandidate.local.candidateType",
+                                    "description": "The Peer connection\n  selected local candidate candidate type.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).selectedCandidate.remote",
+                                    "description": "The Peer connection\n  selected remote candidate.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).selectedCandidate.remote.ipAddress",
+                                    "description": "The Peer connection\n  selected remote candidate IP address.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).selectedCandidate.remote.portNumber",
+                                    "description": "The Peer connection\n  selected remote candidate port number.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).selectedCandidate.remote.transport",
+                                    "description": "The Peer connection\n  selected remote candidate transport.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).selectedCandidate.remote.candidateType",
+                                    "description": "The Peer connection\n  selected remote candidate candidate type.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection",
+                                    "description": "The Peer connection details.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.iceConnectionState",
+                                    "description": "The Peer connection ICE\n  connection state.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.iceGatheringState",
+                                    "description": "The Peer connection ICE\n  gathering state.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.signalingState",
+                                    "description": "The Peer connection\n  signaling state.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.localDescription",
+                                    "description": "The Peer connection\n  local session description.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.localDescription.type",
+                                    "description": "The Peer connection\n  local session description type.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.localDescription.sdp",
+                                    "description": "The Peer connection\n  local session description sdp.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.remoteDescription",
+                                    "description": "The Peer connection\n  remote session description.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.remoteDescription.type",
+                                    "description": "The Peer connection\n  remote session description type.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.remoteDescription.sdp",
+                                    "description": "The Peer connection\n  remote session description sdp.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.candidates",
+                                    "description": "The Peer connection list of\n  candidates received or sent.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.candidates.sending",
+                                    "description": "The Peer connection list of\n  candidates sent.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.candidates.sending.host",
+                                    "description": "The Peer connection list of\n  <code>\"host\"</code> candidates sent.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.candidates.sending.host.(#index)",
+                                    "description": "The <code>\"host\"</code>\n  candidate sent.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.candidates.sending.srflx",
+                                    "description": "The Peer connection list of\n  <code>\"srflx\"</code> candidates sent.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.candidates.sending.srflx.(#index)",
+                                    "description": "The <code>\"srflx\"</code>\n  candidate sent.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.candidates.sending.relay",
+                                    "description": "The Peer connection list of\n  <code>\"relay\"</code> candidates sent.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.candidates.sending.relay.(#index)",
+                                    "description": "The <code>\"relay\"</code>\n  candidate sent.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.candidates.receiving",
+                                    "description": "The Peer connection list of\n  candidates received.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.candidates.receiving.host",
+                                    "description": "The Peer connection list of\n  <code>\"host\"</code> candidates received.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.candidates.receiving.host.(#index)",
+                                    "description": "The <code>\"host\"</code>\n  candidate received.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.candidates.receiving.srflx",
+                                    "description": "The Peer connection list of\n  <code>\"srflx\"</code> candidates received.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.candidates.receiving.srflx.(#index)",
+                                    "description": "The <code>\"srflx\"</code>\n  candidate received.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.candidates.receiving.relay",
+                                    "description": "The Peer connection list of\n  <code>\"relay\"</code> candidates received.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "connectionStats.(#peerId).connection.candidates.receiving.relay.(#index)",
+                                    "description": "The <code>\"relay\"</code>\n  candidate received.",
+                                    "type": "JSON"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "example": [
+                "\n  SkylinkDemo.getConnectionStatus(peerId, function (error, success) {\n     if (error) {\n       console.error(\"Failed retrieving connection status for peer \", peerId);\n     } else {\n       print(success.connectionStats);\n     }\n  });"
+            ],
+            "trigger": "getConnectionStatusStateChange",
+            "component": "Peer",
+            "since": "0.6.14",
             "class": "Skylink"
         },
         {
@@ -3512,7 +3959,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 261,
+            "line": 262,
             "description": "Responses to the <code>OFFER</code> session description received and\n   creates an <code>ANSWER</code> session description to sent\n  to the associated Peer to complete the WebRTC handshake layer.",
             "itemtype": "method",
             "name": "_doAnswer",
@@ -3531,7 +3978,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 304,
+            "line": 305,
             "description": "Starts the waiting timeout for a \"healthy\" connection\n  with associated Peer connection.\nIt waits for any existing Peer \"healthy\" state in successful\n  {{#crossLink \"Skylink/_peerConnectionHealth:attr\"}}_peerConnectionHealth{{/crossLink}}.\nIf timeout has reached it's limit and does not have any \"healthy\" connection state\n  with Peer connection, it will restart the connection again with\n  {{#crossLink \"Skylink/_restartPeerConnection:method\"}}_restartPeerConnection(){{/crossLink}}.\nThis sets the timeout object associated with the Peer into\n  {{#crossLink \"Skylink/_peerConnectionHealthTimers\"}}_peerConnectionHealthTimers(){{/crossLink}}.",
             "itemtype": "method",
             "name": "_startPeerConnectionHealthCheck",
@@ -3557,7 +4004,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 396,
+            "line": 397,
             "description": "Stops the waiting timeout for a \"healthy\" connection associated\n  with the Peer.",
             "itemtype": "method",
             "name": "_stopPeerConnectionHealthCheck",
@@ -3576,7 +4023,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 423,
+            "line": 424,
             "description": "Sets the WebRTC handshake layer session description into the\n  Peer <code>RTCPeerConnection</code> object <i><code>\n  RTCPeerConnection.setLocalDescription()</code></i> associated\n  with the Peer connection.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -8644,7 +9091,7 @@
             "params": [
                 {
                     "name": "state",
-                    "description": "The retrieval current status.",
+                    "description": "The retrieval current status.\n  [Rel: Skylink.GET_PEERS_STATE]",
                     "type": "String"
                 },
                 {
@@ -8664,14 +9111,14 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1299,
+            "line": 1300,
             "description": "Event triggered when introductory state of two Peer peers to each other\n  selected by the privileged Peer state has changed.\n- This requires that the provided alias Application Key has privileged feature configured.",
             "itemtype": "event",
             "name": "introduceStateChange",
             "params": [
                 {
                     "name": "state",
-                    "description": "The Peer introduction state.",
+                    "description": "The Peer introduction state.\n  [Rel: Skylink.INTRODUCE_STATE]",
                     "type": "String"
                 },
                 {
@@ -8701,7 +9148,354 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1320,
+            "line": 1321,
+            "description": "Event triggered when the retrieval of the Peer connection status state has changed.",
+            "itemtype": "event",
+            "name": "getConnectionStatusStateChange",
+            "params": [
+                {
+                    "name": "state",
+                    "description": "The retrieval state of the Peer connection status.\n  [Rel: Skylink.GET_CONNECTION_STATUS_STATE]",
+                    "type": "Number"
+                },
+                {
+                    "name": "peerId",
+                    "description": "The Peer ID of the peer connection status.",
+                    "type": "String"
+                },
+                {
+                    "name": "stats",
+                    "description": "The Peer retrieved connection stats.\n  Returned as <code>null</code> unless <code>RETRIEVE_SUCCESS</code> state.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "raw",
+                            "description": "The received raw connection stats data before parsing.",
+                            "type": "JSON"
+                        },
+                        {
+                            "name": "audio",
+                            "description": "The Peer connection audio stats.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "sending",
+                                    "description": "The Peer connection audio sending stats.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "sending.bytes",
+                                    "description": "The Peer connection audio sending bytes.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.packets",
+                                    "description": "The Peer\n  connection audio sending packets.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.packetsLost",
+                                    "description": "The Peer\n  connection audio sending packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.ssrc",
+                                    "description": "The Peer\n  connection audio sending ssrc.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.rtt",
+                                    "description": "The Peer\n  connection audio sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not\n  defined in the original raw stats data.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving",
+                                    "description": "The Peer connection audio receiving stats.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "receiving.bytes",
+                                    "description": "The Peer connection audio receiving bytes.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.packets",
+                                    "description": "The Peer\n  connection audio receiving packets.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.packetsLost",
+                                    "description": "The Peer\n  connection audio receiving packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.ssrc",
+                                    "description": "The Peer\n  connection audio receiving ssrc.",
+                                    "type": "Number"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "video",
+                            "description": "The Peer connection video stats.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "sending",
+                                    "description": "The Peer connection video sending stats.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "sending.bytes",
+                                    "description": "The Peer connection video sending bytes.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.packets",
+                                    "description": "The Peer\n  connection video sending packets.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.packetsLost",
+                                    "description": "The Peer\n  connection video sending packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.ssrc",
+                                    "description": "The Peer\n  connection video sending ssrc ID.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "sending.rtt",
+                                    "description": "The Peer\n  connection video sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not\n  defined in the original raw stats data.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving",
+                                    "description": "The Peer connection video receiving stats.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "receiving.bytes",
+                                    "description": "The Peer connection video receiving bytes.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.packets",
+                                    "description": "The Peer\n  connection video receiving packets.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.packetsLost",
+                                    "description": "The Peer\n  connection video receiving packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.ssrc",
+                                    "description": "The Peer\n  connection video receiving ssrc.",
+                                    "type": "Number"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "selectedCandidate",
+                            "description": "The Peer connection selected candidate\n  pair details.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "local",
+                                    "description": "The Peer connection\n  selected local candidate.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "local.ipAddress",
+                                    "description": "The Peer connection\n  selected local candidate IP address.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "local.portNumber",
+                                    "description": "The Peer connection\n  selected local candidate port number.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "local.transport",
+                                    "description": "The Peer connection\n  selected local candidate transport.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "local.candidateType",
+                                    "description": "The Peer connection\n  selected local candidate candidate type.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "remote",
+                                    "description": "The Peer connection\n  selected remote candidate.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "remote.ipAddress",
+                                    "description": "The Peer connection\n  selected remote candidate IP address.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "remote.portNumber",
+                                    "description": "The Peer connection\n  selected remote candidate port number.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "remote.transport",
+                                    "description": "The Peer connection\n  selected remote candidate transport.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "remote.candidateType",
+                                    "description": "The Peer connection\n  selected remote candidate candidate type.",
+                                    "type": "String"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "connection",
+                            "description": "The Peer connection details.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "iceConnectionState",
+                                    "description": "The Peer connection ICE\n  connection state.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "iceGatheringState",
+                                    "description": "The Peer connection ICE\n  gathering state.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "signalingState",
+                                    "description": "The Peer connection\n  signaling state.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "localDescription",
+                                    "description": "The Peer connection\n  local session description.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "localDescription.type",
+                                    "description": "The Peer connection\n  local session description type.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "localDescription.sdp",
+                                    "description": "The Peer connection\n  local session description sdp.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "remoteDescription",
+                                    "description": "The Peer connection\n  remote session description.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "remoteDescription.type",
+                                    "description": "The Peer connection\n  remote session description type.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "remoteDescription.sdp",
+                                    "description": "The Peer connection\n  remote session description sdp.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates",
+                                    "description": "The Peer connection list of\n  candidates received or sent.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.sending",
+                                    "description": "The Peer connection list of\n  candidates sent.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.sending.host",
+                                    "description": "The Peer connection list of\n  <code>\"host\"</code> candidates sent.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "candidates.sending.host.(#index)",
+                                    "description": "The <code>\"host\"</code>\n  candidate sent.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.sending.srflx",
+                                    "description": "The Peer connection list of\n  <code>\"srflx\"</code> candidates sent.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "candidates.sending.srflx.(#index)",
+                                    "description": "The <code>\"srflx\"</code>\n  candidate sent.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.sending.relay",
+                                    "description": "The Peer connection list of\n  <code>\"relay\"</code> candidates sent.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "candidates.sending.relay.(#index)",
+                                    "description": "The <code>\"relay\"</code>\n  candidate sent.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.receiving",
+                                    "description": "The Peer connection list of\n  candidates received.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.receiving.host",
+                                    "description": "The Peer connection list of\n  <code>\"host\"</code> candidates received.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "candidates.receiving.host.(#index)",
+                                    "description": "The <code>\"host\"</code>\n  candidate received.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.receiving.srflx",
+                                    "description": "The Peer connection list of\n  <code>\"srflx\"</code> candidates received.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "candidates.receiving.srflx.(#index)",
+                                    "description": "The <code>\"srflx\"</code>\n  candidate received.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.receiving.relay",
+                                    "description": "The Peer connection list of\n  <code>\"relay\"</code> candidates received.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "candidates.receiving.relay.(#index)",
+                                    "description": "The <code>\"relay\"</code>\n  candidate received.",
+                                    "type": "JSON"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "error",
+                    "description": "The Error object received when failed retrieving the\n  Peer connection status.",
+                    "type": "Error"
+                }
+            ],
+            "component": "Events",
+            "since": "0.6.14",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 1450,
             "description": "Stores the list of {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}}\n  event subscription handlers.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -8729,7 +9523,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1341,
+            "line": 1471,
             "description": "The throttling function datetime stamp in\n  [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601).",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -8743,7 +9537,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1357,
+            "line": 1487,
             "description": "Triggers event subscription handlers that is associated with the event name.\n{{#crossLink \"Skylink/on:method\"}}on() event subscription handlers{{/crossLink}}\n  will be triggered always, but\n  {{#crossLink \"Skylink/once:method\"}}once() event subscription hadlers{{/crossLink}}\n  will only be triggered once the condition is met.",
             "itemtype": "method",
             "name": "_trigger",
@@ -8762,7 +9556,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1416,
+            "line": 1546,
             "description": "Subscribes an event handler associated to the event name.\nThis event handler will always be triggered when the event name is triggered. If you\n  are looking for subscription event handler to be triggered once, check out\n  {{#crossLink \"Skylink/once:method\"}}once() event subscription{{/crossLink}}.",
             "itemtype": "method",
             "name": "on",
@@ -8787,7 +9581,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1443,
+            "line": 1573,
             "description": "Subscribes an event handler associated to the event name that\n   would only be triggered once the provided condition function has been met.",
             "itemtype": "method",
             "name": "once",
@@ -8825,7 +9619,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1492,
+            "line": 1622,
             "description": "Unsubscribes an event handler associated to the event name.",
             "itemtype": "method",
             "name": "off",
@@ -8851,7 +9645,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1539,
+            "line": 1669,
             "description": "Checks if the first condition is already met before doing an event\n  handler subscription to wait for the second condition to be met.\nThis method will do a event subscription with\n  {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}} as this\n  <code>_condition()</code> would only trigger once, unless <code>fireAlways</code>\n  is set to <code>true</code>.",
             "itemtype": "method",
             "name": "_condition",
@@ -8894,7 +9688,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1590,
+            "line": 1720,
             "description": "Starts the interval check for the condition provided to meet before clearing\n  the interval and triggering the callback provided.\nThis utilises <code>setInterval()</code> function.",
             "itemtype": "method",
             "name": "_wait",
@@ -8925,7 +9719,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1640,
+            "line": 1770,
             "description": "Returns a wrapper of the original function, which fires only once during\n a specified amount of time.",
             "itemtype": "method",
             "name": "_throttle",
@@ -10753,7 +11547,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1405,
+            "line": 1401,
             "description": "Handles the ANSWER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -10800,7 +11594,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1515,
+            "line": 1511,
             "description": "Send a message object or string using the platform signaling socket connection\n  to the list of targeted PeerConnections.\nTo send message objects with DataChannel connections, see\n  {{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.",
             "itemtype": "method",
             "name": "sendMessage",
@@ -12930,31 +13724,31 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:37"
+            "line": " source/ice-candidate.js:42"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/ice-candidate.js:63"
+            "line": " source/ice-candidate.js:68"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:63"
+            "line": " source/ice-candidate.js:68"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:175"
+            "line": " source/ice-candidate.js:176"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:197"
+            "line": " source/ice-candidate.js:198"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:210"
+            "line": " source/ice-candidate.js:211"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:225"
+            "line": " source/ice-candidate.js:226"
         },
         {
             "message": "unknown tag: component",
@@ -13002,51 +13796,63 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:54"
+            "line": " source/peer-connection.js:56"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:67"
+            "line": " source/peer-connection.js:77"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:80"
+            "line": " source/peer-connection.js:90"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:93"
+            "line": " source/peer-connection.js:103"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:158"
+            "line": " source/peer-connection.js:116"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/peer-connection.js:181"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:304"
+            "line": " source/peer-connection.js:327"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:304"
+            "line": " source/peer-connection.js:327"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:363"
+            "line": " source/peer-connection.js:386"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:576"
+            "line": " source/peer-connection.js:596"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:576"
+            "line": " source/peer-connection.js:596"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:735"
+            "line": " source/peer-connection.js:755"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:735"
+            "line": " source/peer-connection.js:755"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/peer-connection.js:877"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/peer-connection.js:877"
         },
         {
             "message": "unknown tag: component",
@@ -13098,23 +13904,23 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:261"
+            "line": " source/peer-handshake.js:262"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:304"
+            "line": " source/peer-handshake.js:305"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:396"
+            "line": " source/peer-handshake.js:397"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-handshake.js:423"
+            "line": " source/peer-handshake.js:424"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:423"
+            "line": " source/peer-handshake.js:424"
         },
         {
             "message": "unknown tag: component",
@@ -13626,43 +14432,47 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1299"
+            "line": " source/skylink-events.js:1300"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1320"
+            "line": " source/skylink-events.js:1321"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1341"
+            "line": " source/skylink-events.js:1450"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1357"
+            "line": " source/skylink-events.js:1471"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1416"
+            "line": " source/skylink-events.js:1487"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1443"
+            "line": " source/skylink-events.js:1546"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1492"
+            "line": " source/skylink-events.js:1573"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1539"
+            "line": " source/skylink-events.js:1622"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1590"
+            "line": " source/skylink-events.js:1669"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1640"
+            "line": " source/skylink-events.js:1720"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/skylink-events.js:1770"
         },
         {
             "message": "unknown tag: component",
@@ -13906,19 +14716,19 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1405"
+            "line": " source/socket-message.js:1401"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1405"
+            "line": " source/socket-message.js:1401"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1515"
+            "line": " source/socket-message.js:1511"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1515"
+            "line": " source/socket-message.js:1511"
         },
         {
             "message": "unknown tag: component",
@@ -14158,7 +14968,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:513"
+            "line": " source/peer-connection.js:533"
         }
     ]
 }

@@ -110,20 +110,25 @@
 Skylink.prototype._peerCandidatesQueue = {};
 
 /**
- * Stores the list of candidates sent &lt;code&gt;local&lt;/code&gt; and added &lt;code&gt;remote&lt;/code&gt; information.
- * @attribute _addedCandidates
- * @param {JSON} (#peerId) The list of candidates sent and added associated with the Peer ID.
- * @param {Array} (#peerId).relay The number of relay candidates added and sent.
- * @param {Array} (#peerId).srflx The number of server reflexive candidates added and sent.
- * @param {Array} (#peerId).host The number of host candidates added and sent.
+ * Stores the list of local and remote candidates sent and received.
+ * @attribute _gatheredCandidates
+ * @param {JSON} (#peerId) The list of candidates associated with the Peer ID.
+ * @param {JSON} (#peerId).sending The list of local candidates gathered for Peer sent.
+ * @param {JSON} (#peerId).sending.host The list of local &lt;code&gt;&quot;host&quot;&lt;/code&gt; type of candidates sent.
+ * @param {JSON} (#peerId).sending.srflx The list of local &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; type of candidates sent.
+ * @param {JSON} (#peerId).sending.relay The list of local &lt;code&gt;&quot;relay&quot;&lt;/code&gt; type of candidates sent.
+ * @param {JSON} (#peerId).receiving The list of remote candidates gathered for Peer received.
+ * @param {JSON} (#peerId).receiving.host The list of remote &lt;code&gt;&quot;host&quot;&lt;/code&gt; type of candidates received.
+ * @param {JSON} (#peerId).receiving.srflx The list of remote &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; type of candidates received.
+ * @param {JSON} (#peerId).receiving.relay The list of remote &lt;code&gt;&quot;relay&quot;&lt;/code&gt; type of candidates received.
  * @type JSON
  * @private
  * @required
- * @since 0.6.4
+ * @since 0.6.14
  * @component ICE
  * @for Skylink
  */
-Skylink.prototype._addedCandidates = {};
+Skylink.prototype._gatheredCandidates = {};
 
 /**
  * The list of Peer connection ICE candidate generation states that Skylink would trigger.
@@ -174,12 +179,6 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
     log.debug([targetMid, &#x27;RTCIceCandidate&#x27;, null, &#x27;Created and sending &#x27; +
       candidateType + &#x27; candidate:&#x27;], candidate);
 
-    if (!self._enableIceTrickle) {
-      log.warn([targetMid, &#x27;RTCICECandidate&#x27;, null, &#x27;Ignoring sending of &quot;&#x27; + candidateType +
-        &#x27;&quot; candidate as trickle ICE is disabled&#x27;], candidate);
-      return;
-    }
-
     if (self._forceTURN &amp;&amp; candidateType !== &#x27;relay&#x27;) {
       if (!self._hasMCU) {
         log.warn([targetMid, &#x27;RTCICECandidate&#x27;, null, &#x27;Ignoring sending of &quot;&#x27; + candidateType +
@@ -191,6 +190,25 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
         &#x27;&quot; candidate although TURN connections is forced as MCU is present&#x27;], candidate);
     }
 
+    if (!self._gatheredCandidates[targetMid]) {
+      self._gatheredCandidates[targetMid] = {
+        sending: { host: [], srflx: [], relay: [] },
+        receiving: { host: [], srflx: [], relay: [] }
+      };
+    }
+
+    self._gatheredCandidates[targetMid].sending[candidateType].push({
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex,
+      candidate: candidate.candidate
+    });
+
+    if (!self._enableIceTrickle) {
+      log.warn([targetMid, &#x27;RTCICECandidate&#x27;, null, &#x27;Ignoring sending of &quot;&#x27; + candidateType +
+        &#x27;&quot; candidate as trickle ICE is disabled&#x27;], candidate);
+      return;
+    }
+
     self._sendChannelMessage({
       type: self._SIG_MESSAGE_TYPE.CANDIDATE,
       label: candidate.sdpMLineIndex,
@@ -200,23 +218,6 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       target: targetMid,
       rid: self._room.id
     });
-
-    if (!self._addedCandidates[targetMid]) {
-      self._addedCandidates[targetMid] = {
-        relay: [],
-        host: [],
-        srflx: []
-      };
-    }
-
-    // shouldnt happen but just incase
-    if (!self._addedCandidates[targetMid][candidateType]) {
-      self._addedCandidates[targetMid][candidateType] = [];
-    }
-
-    self._addedCandidates[targetMid][candidateType].push(&#x27;local:&#x27; + messageCan[4] +
-      (messageCan[5] !== &#x27;0&#x27; ? &#x27;:&#x27; + messageCan[5] : &#x27;&#x27;) +
-      (messageCan[2] ? &#x27;?transport=&#x27; + messageCan[2].toLowerCase() : &#x27;&#x27;));
 
   } else {
     log.debug([targetMid, &#x27;RTCIceCandidate&#x27;, null, &#x27;End of gathering&#x27;]);
