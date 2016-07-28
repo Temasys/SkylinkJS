@@ -122,7 +122,7 @@ Getting_started_with_WebRTC_and_SkylinkJS/">How to setup a simple video call</a>
 </ul>
 <p>You may see the example below in the <a href="#">Constructor tab</a> to have a general idea how event subscription
   and the ordering of <a href="#method_init"><code>init()</code></a> and
-  <a href="#method_joinRoom"><code>joinRoom()</code></a> method should be called.</p>
+  <a href="#method_joinRoom"><code>joinRoom()</code></a> methods should be called.</p>
 <p>If you have any issues, you may find answers to your questions in the FAQ section on <a href="http://support.temasys.com.sg">our support portal</a>, asks questions, request features or raise bug tickets as well.</p>
 <p>If you would like to contribute to our SkylinkJS codebase, see <a href="https://github.com/Temasys/SkylinkJS/blob/master/CONTRIBUTING.md">the contributing README</a>.</p>
 <p><a href="https://github.com/Temasys/SkylinkJS/blob/master/LICENSE">See License (Apache 2.0)</a></p>
@@ -5788,21 +5788,7 @@ If provided dataURL binary string (base64)
               <div id="method__closeDataChannel" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_closeDataChannel</code></h3>
   
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code>peerId</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code class="optional">[channelName]</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
+    <span class="paren">()</span>
   
 
   <div class="code-item-properties">
@@ -5846,7 +5832,7 @@ If provided dataURL binary string (base64)
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l362"><code>source&#x2F;data-channel.js:362</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l297"><code>source&#x2F;data-channel.js:297</code></a>
       </small>
     
 
@@ -5860,61 +5846,12 @@ If provided dataURL binary string (base64)
   </div>
 
   <div class="code-item-description">
-    <p>Stops DataChannel connections associated with a Peer connection
-  and remove any object references to the DataChannel connection(s).</p>
+    <p>Function that stops the Datachannel connection and removes object references.</p>
 
   </div>
 
   
-  <div class="code-item-section">
-    <h4>Triggers:</h4>
-    <span class="code-item-trigger">dataChannelState</span>
-  </div>
-  
 
-  
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">peerId</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The Peer ID associated with the DataChannel
-  connection(s) to close.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">channelName</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            <span class="label">Optional</span>
-            
-
-            <div class="param-description">
-              
-              <p>The targeted DataChannel <code>channelName</code>
-  to close the connection with. If <code>channelName</code> is not provided,
-  all associated DataChannel connections with the Peer connection would be closed.</p>
-
-            </div>
-
-            
-          </li>
-      
-      </ul>
-    </div>
   
 
   
@@ -6138,31 +6075,7 @@ This method will do a event subscription with
               <div id="method__createDataChannel" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_createDataChannel</code></h3>
   
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code>peerId</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code>channelType</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code class="optional">[dataChannel]</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code>customChannelName</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
+    <span class="paren">()</span>
   
 
   <div class="code-item-properties">
@@ -6206,7 +6119,7 @@ This method will do a event subscription with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l108"><code>source&#x2F;data-channel.js:108</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l74"><code>source&#x2F;data-channel.js:74</code></a>
       </small>
     
 
@@ -6220,113 +6133,14 @@ This method will do a event subscription with
   </div>
 
   <div class="code-item-description">
-    <p>Starts a DataChannel connection with a Peer connection. If the
-  DataChannel is provided in the parameter, it simply appends
-  event handlers to check the current state of the DataChannel.</p>
+    <p>Function that starts a Datachannel connection with Peer.</p>
 
   </div>
 
   
-  <div class="code-item-section">
-    <h4>Triggers:</h4>
-    <span class="code-item-trigger">dataChannelState</span>
-  </div>
-  
 
   
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
 
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">peerId</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The Peer ID to start the
-  DataChannel with or associate the provided DataChannel object
-  connection with.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">channelType</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The DataChannel functionality type.
-  [Rel: Skylink.DATA_CHANNEL_TYPE]</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">dataChannel</code>
-            <span class="type"><b>{</b>Object<b>}</b></span>
-
-            <span class="label">Optional</span>
-            
-
-            <div class="param-description">
-              
-              <p>The RTCDataChannel object received
-  in the Peer connection <code>.ondatachannel</code> event.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">customChannelName</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The custom RTCDataChannel label
-  name to identify the different opened channels.</p>
-
-            </div>
-
-            
-          </li>
-      
-      </ul>
-    </div>
-  
-
-  
-    <div class="code-item-section">
-      <h4>Returns:</h4>
-
-      <div class="returns-description">
-        
-          
-            <span class="type"><b>{</b>Object<b>}</b></span>:
-          
-          <p>The DataChannel connection object associated with
-  the provided Peer ID.</p>
-
-        
-      </div>
-    </div>
   
 
   
@@ -16229,26 +16043,7 @@ This is usually done for replacing the previous Stream attached and restarting
               <div id="method__sendDataChannelMessage" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_sendDataChannelMessage</code></h3>
   
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code>peerId</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code>data</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code class="optional">[channelName=&quot;main&quot;]</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
+    <span class="paren">()</span>
   
 
   <div class="code-item-properties">
@@ -16292,7 +16087,7 @@ This is usually done for replacing the previous Stream attached and restarting
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l288"><code>source&#x2F;data-channel.js:288</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l239"><code>source&#x2F;data-channel.js:239</code></a>
       </small>
     
 
@@ -16306,84 +16101,12 @@ This is usually done for replacing the previous Stream attached and restarting
   </div>
 
   <div class="code-item-description">
-    <p>Sends data over the DataChannel connection associated
-   with the Peer connection.
-The current supported data type is <code>string</code>. <code>Blob</code>,
-  <code>ArrayBuffer</code> types support is not yet currently handled or
-  implemented.</p>
+    <p>Function that sends data over the Datachannel connection.</p>
 
   </div>
 
   
-  <div class="code-item-section">
-    <h4>Triggers:</h4>
-    <span class="code-item-trigger">dataChannelState</span>
-  </div>
-  
 
-  
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">peerId</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The Peer ID to send the data to the
-  associated DataChannel connection.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">data</code>
-            <span class="type"><b>{</b>JSON | String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The data to send over. <code>string</code> is only
-  used to send binary data string over. <code>JSON</code> is primarily used
-  for the <a href="../classes/Skylink.html#attr_DT_PROTOCOL_VERSION" class="crosslink">DT Protocol</a>
-  that Skylink follows for P2P messaging and transfers.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">channelName</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            <span class="label">Optional</span>
-            
-
-            <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>&quot;main&quot;</small>
-              <p>The DataChannel channelName of the connection
-  to send the data over to. The datachannel to send messages to. By default,
-  if the DataChannel <code>channelName</code> is not provided,
-  the DataChannel connection associated with the channelName <code>&quot;main&quot;</code> would be used.</p>
-
-            </div>
-
-            
-          </li>
-      
-      </ul>
-    </div>
   
 
   
@@ -31885,7 +31608,7 @@ must be set as <code>true</code> to enable the storage of logs.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l82"><code>source&#x2F;data-channel.js:82</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l61"><code>source&#x2F;data-channel.js:61</code></a>
       </small>
     
 
@@ -31895,7 +31618,7 @@ must be set as <code>true</code> to enable the storage of logs.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Stores the list of DataChannel connections.</p>
+    <p>Stores the list of Peer Datachannel connections.</p>
 
   </div>
 
@@ -31911,62 +31634,32 @@ must be set as <code>true</code> to enable the storage of logs.</li>
       
           <li class="param">
             <code class="param-name">(#peerId)</code>
-            <span class="type"><b>{</b>Array<b>}</b></span>
+            <span class="type"><b>{</b>JSON<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>The Peer ID associated with the list of
-  DataChannel connections.</p>
+                <p>The list of Datachannels associated with Peer ID.</p>
 
             </div>
 
             
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">main</code>
-                    <span class="type"><b>{</b>Object<b>}</b></span>
+          </li>
+      
+          <li class="param">
+            <code class="param-name">#channelName</code>
+            <span class="type"><b>{</b>RTCDataChannel<b>}</b></span>
 
-                    
-                    
+            <span class="label">Optional</span>
+            
 
-                    <div class="param-description">
-                      <p>The DataChannel connection object
-  that is used for messaging only associated with the Peer connection.
-  This is the sole channel for sending P2P messages in
-  <a href="../classes/Skylink.html#method_sendP2PMessage" class="crosslink">sendP2PMessage()</a>.
-  This connection will always be kept alive until the Peer connection has
-  ended. The <code>channelName</code> for this reserved key is <code>"main"</code>.</p>
+            <div class="param-description">
+                <p>The Datachannel connection.
+  The property name <code>&quot;main&quot;</code> is reserved for messaging Datachannel type.</p>
 
-                    </div>
+            </div>
 
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">(#channelName)</code>
-                    <span class="type"><b>{</b>Object<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>The DataChannel connection
-  object that is used temporarily for a data transfer associated with the
-  Peer connection. This is using caused by methods
-  <a href="../classes/Skylink.html#method_sendBlobData" class="crosslink">sendBlobData()</a>
-  and <a href="../classes/Skylink.html#method_sendURLData" class="crosslink">sendURLData()</a>.
-  This connection will be closed once the transfer has completed or terminated.
-  The <code>channelName</code> is usually the data transfer ID.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -32986,7 +32679,7 @@ If the value is not provided in <a href="../classes/Skylink.html#method_init" cl
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l69"><code>source&#x2F;data-channel.js:69</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l50"><code>source&#x2F;data-channel.js:50</code></a>
       </small>
     
 
@@ -32996,8 +32689,7 @@ If the value is not provided in <a href="../classes/Skylink.html#method_init" cl
   </div>
 
   <div class="code-item-description">
-    <p>The flag that indicates if Peers connection should have any
-  DataChannel connections.</p>
+    <p>Stores the flag if Peers should have any Datachannel connections.</p>
 
   </div>
 
@@ -41267,12 +40959,7 @@ This state occurs after <code>GATHERING</code> state and means ICE gathering has
   </div>
 
   <div class="code-item-description">
-    <p>These are the list of DataChannel connection states that Skylink would trigger.</p>
-<ul>
-<li>Some of the state references the <a href="http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState">w3c WebRTC Specification Draft</a>,
-except the <code>ERROR</code> state, which is an addition provided state by Skylink
-to inform exception during the DataChannel connection with Peers.</li>
-</ul>
+    <p>Contains the list of Datachannel connection states.</p>
 
   </div>
 
@@ -41295,8 +40982,7 @@ to inform exception during the DataChannel connection with Peers.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;connecting&quot;</code></small>
-  The state when DataChannel is attempting to establish a connection.<br>
-  This is the initial state when a DataChannel connection is created.</p>
+  The state when Datachannel is attempting to establish a connection.</p>
 
             </div>
 
@@ -41312,9 +40998,7 @@ to inform exception during the DataChannel connection with Peers.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;open&quot;</code></small>
-  The state when DataChannel connection is established.<br>
-  This happens usually after <code>CONNECTING</code> state, or not when DataChannel connection
-  is from initializing Peer (the one who begins the DataChannel connection).</p>
+  The state when Datachannel has established a connection.</p>
 
             </div>
 
@@ -41330,8 +41014,7 @@ to inform exception during the DataChannel connection with Peers.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;closing&quot;</code></small>
-  The state when DataChannel connection is closing.<br>
-  This happens when DataChannel connection is closing and happens after <code>OPEN</code>.</p>
+  The state when Datachannel connection is closing.</p>
 
             </div>
 
@@ -41347,9 +41030,7 @@ to inform exception during the DataChannel connection with Peers.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;closed&quot;</code></small>
-  The state when DataChannel connection is closed.<br>
-  This happens when DataChannel connection has closed and happens after <code>CLOSING</code>
-  (or sometimes <code>OPEN</code> depending on the browser implementation).</p>
+  The state when Datachannel connection has closed.</p>
 
             </div>
 
@@ -41365,8 +41046,7 @@ to inform exception during the DataChannel connection with Peers.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;error&quot;</code></small>
-  The state when DataChannel connection have met with an exception.<br>
-  This may happen during any state not after <code>CLOSED</code>.</p>
+  The state when Datachannel connection has errors.</p>
 
             </div>
 
@@ -41431,7 +41111,7 @@ to inform exception during the DataChannel connection with Peers.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l38"><code>source&#x2F;data-channel.js:38</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l27"><code>source&#x2F;data-channel.js:27</code></a>
       </small>
     
 
@@ -41441,10 +41121,7 @@ to inform exception during the DataChannel connection with Peers.</li>
   </div>
 
   <div class="code-item-description">
-    <p>These are the types of DataChannel connection that Skylink provides.</p>
-<ul>
-<li>Different channels serves different functionalities.</li>
-</ul>
+    <p>Contains the list of Datachannel types.</p>
 
   </div>
 
@@ -41466,15 +41143,12 @@ to inform exception during the DataChannel connection with Peers.</li>
             
 
             <div class="param-description">
-                <p><small><b>MAIN connection</b> | Value <code>"messaging"</code></small>
-  This DataChannel connection is used for P2P messaging only, as used in
-  <a href="../classes/Skylink.html#method_sendP2PMessage" class="crosslink">sendP2PMessage()</a>.<br>
-Unless if self connects with Peers connecting from the mobile SDK platform applications,
-  this connection would be used for data transfers as used in
-  <a href="../classes/Skylink.html#method_sendBlobData" class="crosslink">sendBlobData()</a> and
-  and <a href="../classes/Skylink.html#method_sendURLData" class="crosslink">sendURLData()</a>, which allows
-  only one outgoing and incoming data transfer one at a time (no multi-transfer support).<br>
-  This connection will always be kept alive until the Peer connection has ended.</p>
+                <p><small>Value <code>&quot;messaging&quot;</code></small>
+  The Datachannel type that is used for messaging in
+  <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>.
+  This Datachannel type exists only once and may be used for data transfers (1 simultaneously) when
+  Peer does not support multiple simultaneous data transfers.
+  The connection will only close when the Peer connection is closed.</p>
 
             </div>
 
@@ -41489,13 +41163,10 @@ Unless if self connects with Peers connecting from the mobile SDK platform appli
             
 
             <div class="param-description">
-                <p><small>Value <code>"data"</code></small>
-  This DataChannel connection is used for a data transfer, as used in
-  <a href="../classes/Skylink.html#method_sendBlobData" class="crosslink">sendBlobData()</a>
-  and <a href="../classes/Skylink.html#method_sendURLData" class="crosslink">sendURLData()</a>.<br>
-If self connects with Peers with DataChannel connections of this type,
-  it indicates that multi-transfer is supported.<br>
-  This connection will be closed once the data transfer has completed or terminated.</p>
+                <p><small>Value <code>&quot;data&quot;</code></small>
+  The Datachannel type that is used for only for a data transfer.
+  This Datachannel type may exists multiple times depending on the number of data transfers that
+  is currently going on. The connection will close after the data transfer has been completed or terminated.</p>
 
             </div>
 
@@ -45246,7 +44917,7 @@ these are list of TURN servers given by the platform signaling:<br>
   </div>
 
   <div class="code-item-description">
-    <p>The current version of Skylink Web SDK.</p>
+    <p>Contains the current version of Skylink Web SDK.</p>
 
   </div>
 

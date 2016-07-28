@@ -139,7 +139,7 @@ var clone = function (obj) {
  *
  * You may see the example below in the <a href="#">Constructor tab</a> to have a general idea how event subscription
  *   and the ordering of <a href="#method_init"><code>init()</code></a> and
- *   <a href="#method_joinRoom"><code>joinRoom()</code></a> method should be called.
+ *   <a href="#method_joinRoom"><code>joinRoom()</code></a> methods should be called.
  *
  * If you have any issues, you may find answers to your questions in the FAQ section on [our support portal](
  * http://support.temasys.com.sg), asks questions, request features or raise bug tickets as well.
@@ -200,7 +200,7 @@ function Skylink() {
 }
 
 /**
- * The current version of Skylink Web SDK.
+ * Contains the current version of Skylink Web SDK.
  * @attribute VERSION
  * @type String
  * @readOnly

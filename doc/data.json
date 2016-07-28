@@ -183,7 +183,7 @@
             "extension_for": [],
             "file": "source/template/header.js",
             "line": 120,
-            "description": "<h2>Prerequisites on using Skylink</h2>\nBefore using any Skylink functionalities, you will need to authenticate your App Key using\n  the <a href=\"#method_init\">`init()` method</a>.\n\nTo manage or create App Keys, you may access the [Skylink Developer Portal here](http://developer.temasys.com.sg/).\n\nTo view the list of supported browsers, visit [the list here](\nhttps://github.com/Temasys/SkylinkJS#supported-browsers).\n\nHere are some articles to help you get started:\n- [How to setup a simple video call](https://temasys.github.io/how-to/2014/08/08/\nGetting_started_with_WebRTC_and_SkylinkJS/)\n- [How to setup screensharing](https://temasys.com.sg/screensharing-with-skylinkjs/)\n- [How to create a chatroom like feature](https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/)\n\nHere are some demos you may use to aid your development:\n- Getaroom.io [[Demo](https://getaroom.io) / [Source code](https://github.com/Temasys/getaroom)]\n- Creating a component [[Link](https://github.com/Temasys/skylink-call-button)]\n\nYou may see the example below in the <a href=\"#\">Constructor tab</a> to have a general idea how event subscription\n  and the ordering of <a href=\"#method_init\"><code>init()</code></a> and\n  <a href=\"#method_joinRoom\"><code>joinRoom()</code></a> method should be called.\n\nIf you have any issues, you may find answers to your questions in the FAQ section on [our support portal](\nhttp://support.temasys.com.sg), asks questions, request features or raise bug tickets as well.\n\nIf you would like to contribute to our SkylinkJS codebase, see [the contributing README](\nhttps://github.com/Temasys/SkylinkJS/blob/master/CONTRIBUTING.md).\n\n[See License (Apache 2.0)](https://github.com/Temasys/SkylinkJS/blob/master/LICENSE)",
+            "description": "<h2>Prerequisites on using Skylink</h2>\nBefore using any Skylink functionalities, you will need to authenticate your App Key using\n  the <a href=\"#method_init\">`init()` method</a>.\n\nTo manage or create App Keys, you may access the [Skylink Developer Portal here](http://developer.temasys.com.sg/).\n\nTo view the list of supported browsers, visit [the list here](\nhttps://github.com/Temasys/SkylinkJS#supported-browsers).\n\nHere are some articles to help you get started:\n- [How to setup a simple video call](https://temasys.github.io/how-to/2014/08/08/\nGetting_started_with_WebRTC_and_SkylinkJS/)\n- [How to setup screensharing](https://temasys.com.sg/screensharing-with-skylinkjs/)\n- [How to create a chatroom like feature](https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/)\n\nHere are some demos you may use to aid your development:\n- Getaroom.io [[Demo](https://getaroom.io) / [Source code](https://github.com/Temasys/getaroom)]\n- Creating a component [[Link](https://github.com/Temasys/skylink-call-button)]\n\nYou may see the example below in the <a href=\"#\">Constructor tab</a> to have a general idea how event subscription\n  and the ordering of <a href=\"#method_init\"><code>init()</code></a> and\n  <a href=\"#method_joinRoom\"><code>joinRoom()</code></a> methods should be called.\n\nIf you have any issues, you may find answers to your questions in the FAQ section on [our support portal](\nhttp://support.temasys.com.sg), asks questions, request features or raise bug tickets as well.\n\nIf you would like to contribute to our SkylinkJS codebase, see [the contributing README](\nhttps://github.com/Temasys/SkylinkJS/blob/master/CONTRIBUTING.md).\n\n[See License (Apache 2.0)](https://github.com/Temasys/SkylinkJS/blob/master/LICENSE)",
             "is_constructor": 1,
             "example": [
                 "\n  // Here's a simple example on how you can start using Skylink.\n  var skylinkDemo = new Skylink();\n\n  // Subscribe all events first as a general guideline\n  skylinkDemo.on(\"incomingStream\", function (peerId, stream, peerInfo, isSelf) {\n    if (isSelf) {\n      attachMediaStream(document.getElementById(\"selfVideo\"), stream);\n    } else {\n      var peerVideo = document.createElement(\"video\");\n      peerVideo.id = peerId;\n      peerVideo.autoplay = \"autoplay\";\n      document.getElementById(\"peersVideo\").appendChild(peerVideo);\n      attachMediaStream(peerVideo, stream);\n    }\n  });\n\n  skylinkDemo.on(\"peerLeft\", function (peerId, peerInfo, isSelf) {\n    if (!isSelf) {\n      var peerVideo = document.getElementById(peerId);\n      // do a check if peerVideo exists first\n      if (peerVideo) {\n        document.getElementById(\"peersVideo\").removeChild(peerVideo);\n      } else {\n        console.error(\"Peer video for \" + peerId + \" is not found.\");\n      }\n    }\n  });\n\n // init() should always be called first before other methods other than event methods like on() or off().\n skylinkDemo.init(\"YOUR_APP_KEY_HERE\", function (error, success) {\n   if (success) {\n     skylinkDemo.joinRoom(\"my_room\", {\n       userData: \"My Username\",\n       audio: true,\n       video: true\n     });\n   }\n });"
@@ -219,7 +219,7 @@
         {
             "file": "source/template/header.js",
             "line": 202,
-            "description": "The current version of Skylink Web SDK.",
+            "description": "Contains the current version of Skylink Web SDK.",
             "itemtype": "attribute",
             "name": "VERSION",
             "type": "String",
@@ -246,207 +246,132 @@
         {
             "file": "source/data-channel.js",
             "line": 1,
-            "description": "These are the list of DataChannel connection states that Skylink would trigger.\n- Some of the state references the [w3c WebRTC Specification Draft](http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState),\n  except the <code>ERROR</code> state, which is an addition provided state by Skylink\n  to inform exception during the DataChannel connection with Peers.",
+            "description": "Contains the list of Datachannel connection states.",
             "itemtype": "attribute",
             "name": "DATA_CHANNEL_STATE",
-            "type": "JSON",
             "params": [
                 {
                     "name": "CONNECTING",
-                    "description": "<small>Value <code>\"connecting\"</code></small>\n  The state when DataChannel is attempting to establish a connection.<br>\n  This is the initial state when a DataChannel connection is created.",
+                    "description": "<small>Value <code>\"connecting\"</code></small>\n  The state when Datachannel is attempting to establish a connection.",
                     "type": "String"
                 },
                 {
                     "name": "OPEN",
-                    "description": "<small>Value <code>\"open\"</code></small>\n  The state when DataChannel connection is established.<br>\n  This happens usually after <code>CONNECTING</code> state, or not when DataChannel connection\n  is from initializing Peer (the one who begins the DataChannel connection).",
+                    "description": "<small>Value <code>\"open\"</code></small>\n  The state when Datachannel has established a connection.",
                     "type": "String"
                 },
                 {
                     "name": "CLOSING",
-                    "description": "<small>Value <code>\"closing\"</code></small>\n  The state when DataChannel connection is closing.<br>\n  This happens when DataChannel connection is closing and happens after <code>OPEN</code>.",
+                    "description": "<small>Value <code>\"closing\"</code></small>\n  The state when Datachannel connection is closing.",
                     "type": "String"
                 },
                 {
                     "name": "CLOSED",
-                    "description": "<small>Value <code>\"closed\"</code></small>\n  The state when DataChannel connection is closed.<br>\n  This happens when DataChannel connection has closed and happens after <code>CLOSING</code>\n  (or sometimes <code>OPEN</code> depending on the browser implementation).",
+                    "description": "<small>Value <code>\"closed\"</code></small>\n  The state when Datachannel connection has closed.",
                     "type": "String"
                 },
                 {
                     "name": "ERROR",
-                    "description": "<small>Value <code>\"error\"</code></small>\n  The state when DataChannel connection have met with an exception.<br>\n  This may happen during any state not after <code>CLOSED</code>.",
+                    "description": "<small>Value <code>\"error\"</code></small>\n  The state when Datachannel connection has errors.",
                     "type": "String"
                 }
             ],
+            "type": "JSON",
             "readonly": "",
-            "component": "DataChannel",
             "since": "0.1.0",
             "class": "Skylink"
         },
         {
             "file": "source/data-channel.js",
-            "line": 38,
-            "description": "These are the types of DataChannel connection that Skylink provides.\n- Different channels serves different functionalities.",
+            "line": 27,
+            "description": "Contains the list of Datachannel types.",
             "itemtype": "attribute",
             "name": "DATA_CHANNEL_TYPE",
-            "type": "JSON",
             "params": [
                 {
                     "name": "MESSAGING",
-                    "description": "<small><b>MAIN connection</b> | Value <code>\"messaging\"</code></small>\n  This DataChannel connection is used for P2P messaging only, as used in\n  {{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.<br>\nUnless if self connects with Peers connecting from the mobile SDK platform applications,\n  this connection would be used for data transfers as used in\n  {{#crossLink \"Skylink/sendBlobData:method\"}}sendBlobData(){{/crossLink}} and\n  and {{#crossLink \"Skylink/sendURLData:method\"}}sendURLData(){{/crossLink}}, which allows\n  only one outgoing and incoming data transfer one at a time (no multi-transfer support).<br>\n  This connection will always be kept alive until the Peer connection has ended.",
+                    "description": "<small>Value <code>\"messaging\"</code></small>\n  The Datachannel type that is used for messaging in\n  <a href=\"#method_sendP2PMessage\"><code>sendP2PMessage()</code> method</a>.\n  This Datachannel type exists only once and may be used for data transfers (1 simultaneously) when\n  Peer does not support multiple simultaneous data transfers.\n  The connection will only close when the Peer connection is closed.",
                     "type": "String"
                 },
                 {
                     "name": "DATA",
-                    "description": "<small>Value <code>\"data\"</code></small>\n  This DataChannel connection is used for a data transfer, as used in\n  {{#crossLink \"Skylink/sendBlobData:method\"}}sendBlobData(){{/crossLink}}\n  and {{#crossLink \"Skylink/sendURLData:method\"}}sendURLData(){{/crossLink}}.<br>\nIf self connects with Peers with DataChannel connections of this type,\n  it indicates that multi-transfer is supported.<br>\n  This connection will be closed once the data transfer has completed or terminated.",
+                    "description": "<small>Value <code>\"data\"</code></small>\n  The Datachannel type that is used for only for a data transfer.\n  This Datachannel type may exists multiple times depending on the number of data transfers that\n  is currently going on. The connection will close after the data transfer has been completed or terminated.",
                     "type": "String"
                 }
             ],
+            "type": "JSON",
             "readonly": "",
-            "component": "DataChannel",
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/data-channel.js",
-            "line": 69,
-            "description": "The flag that indicates if Peers connection should have any\n  DataChannel connections.",
+            "line": 50,
+            "description": "Stores the flag if Peers should have any Datachannel connections.",
             "itemtype": "attribute",
             "name": "_enableDataChannel",
-            "type": "Boolean",
             "default": "true",
+            "type": "Boolean",
             "access": "private",
             "tagname": "",
-            "component": "DataChannel",
             "since": "0.3.0",
             "class": "Skylink"
         },
         {
             "file": "source/data-channel.js",
-            "line": 82,
-            "description": "Stores the list of DataChannel connections.",
+            "line": 61,
+            "description": "Stores the list of Peer Datachannel connections.",
             "itemtype": "attribute",
             "name": "_dataChannels",
             "params": [
                 {
                     "name": "(#peerId)",
-                    "description": "The Peer ID associated with the list of\n  DataChannel connections.",
-                    "type": "Array",
-                    "props": [
-                        {
-                            "name": "main",
-                            "description": "The DataChannel connection object\n  that is used for messaging only associated with the Peer connection.\n  This is the sole channel for sending P2P messages in\n  {{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.\n  This connection will always be kept alive until the Peer connection has\n  ended. The <code>channelName</code> for this reserved key is <code>\"main\"</code>.",
-                            "type": "Object"
-                        },
-                        {
-                            "name": "(#channelName)",
-                            "description": "The DataChannel connection\n  object that is used temporarily for a data transfer associated with the\n  Peer connection. This is using caused by methods\n  {{#crossLink \"Skylink/sendBlobData:method\"}}sendBlobData(){{/crossLink}}\n  and {{#crossLink \"Skylink/sendURLData:method\"}}sendURLData(){{/crossLink}}.\n  This connection will be closed once the transfer has completed or terminated.\n  The <code>channelName</code> is usually the data transfer ID.",
-                            "type": "Object"
-                        }
-                    ]
+                    "description": "The list of Datachannels associated with Peer ID.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "#channelName",
+                    "description": "The Datachannel connection.\n  The property name <code>\"main\"</code> is reserved for messaging Datachannel type.",
+                    "type": "RTCDataChannel",
+                    "optional": true
                 }
             ],
             "type": "JSON",
             "access": "private",
             "tagname": "",
-            "component": "DataChannel",
             "since": "0.2.0",
             "class": "Skylink"
         },
         {
             "file": "source/data-channel.js",
-            "line": 108,
-            "description": "Starts a DataChannel connection with a Peer connection. If the\n  DataChannel is provided in the parameter, it simply appends\n  event handlers to check the current state of the DataChannel.",
+            "line": 74,
+            "description": "Function that starts a Datachannel connection with Peer.",
             "itemtype": "method",
             "name": "_createDataChannel",
-            "params": [
-                {
-                    "name": "peerId",
-                    "description": "The Peer ID to start the\n  DataChannel with or associate the provided DataChannel object\n  connection with.",
-                    "type": "String"
-                },
-                {
-                    "name": "channelType",
-                    "description": "The DataChannel functionality type.\n  [Rel: Skylink.DATA_CHANNEL_TYPE]",
-                    "type": "String"
-                },
-                {
-                    "name": "dataChannel",
-                    "description": "The RTCDataChannel object received\n  in the Peer connection <code>.ondatachannel</code> event.",
-                    "type": "Object",
-                    "optional": true
-                },
-                {
-                    "name": "customChannelName",
-                    "description": "The custom RTCDataChannel label\n  name to identify the different opened channels.",
-                    "type": "String"
-                }
-            ],
-            "trigger": "dataChannelState",
-            "return": {
-                "description": "The DataChannel connection object associated with\n  the provided Peer ID.",
-                "type": "Object"
-            },
             "access": "private",
             "tagname": "",
-            "component": "DataChannel",
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/data-channel.js",
-            "line": 288,
-            "description": "Sends data over the DataChannel connection associated\n   with the Peer connection.\nThe current supported data type is <code>string</code>. <code>Blob</code>,\n  <code>ArrayBuffer</code> types support is not yet currently handled or\n  implemented.",
+            "line": 239,
+            "description": "Function that sends data over the Datachannel connection.",
             "itemtype": "method",
             "name": "_sendDataChannelMessage",
-            "params": [
-                {
-                    "name": "peerId",
-                    "description": "The Peer ID to send the data to the\n  associated DataChannel connection.",
-                    "type": "String"
-                },
-                {
-                    "name": "data",
-                    "description": "The data to send over. <code>string</code> is only\n  used to send binary data string over. <code>JSON</code> is primarily used\n  for the {{#crossLink \"Skylink/DT_PROTOCOL_VERSION:attribute\"}}DT Protocol{{/crossLink}}\n  that Skylink follows for P2P messaging and transfers.",
-                    "type": "JSON|String"
-                },
-                {
-                    "name": "channelName",
-                    "description": "The DataChannel channelName of the connection\n  to send the data over to. The datachannel to send messages to. By default,\n  if the DataChannel <code>channelName</code> is not provided,\n  the DataChannel connection associated with the channelName <code>\"main\"</code> would be used.",
-                    "type": "String",
-                    "optional": true,
-                    "optdefault": "\"main\""
-                }
-            ],
-            "trigger": "dataChannelState",
             "access": "private",
             "tagname": "",
-            "component": "DataChannel",
             "since": "0.5.2",
             "class": "Skylink"
         },
         {
             "file": "source/data-channel.js",
-            "line": 362,
-            "description": "Stops DataChannel connections associated with a Peer connection\n  and remove any object references to the DataChannel connection(s).",
+            "line": 297,
+            "description": "Function that stops the Datachannel connection and removes object references.",
             "itemtype": "method",
             "name": "_closeDataChannel",
-            "params": [
-                {
-                    "name": "peerId",
-                    "description": "The Peer ID associated with the DataChannel\n  connection(s) to close.",
-                    "type": "String"
-                },
-                {
-                    "name": "channelName",
-                    "description": "The targeted DataChannel <code>channelName</code>\n  to close the connection with. If <code>channelName</code> is not provided,\n  all associated DataChannel connections with the Peer connection would be closed.",
-                    "type": "String",
-                    "optional": true
-                }
-            ],
-            "trigger": "dataChannelState",
             "access": "private",
             "tagname": "",
-            "component": "DataChannel",
             "since": "0.1.0",
             "class": "Skylink"
         },
@@ -13494,46 +13419,6 @@
         }
     ],
     "warnings": [
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-channel.js:1"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-channel.js:38"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-channel.js:69"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-channel.js:82"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/data-channel.js:108"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-channel.js:108"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/data-channel.js:288"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-channel.js:288"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/data-channel.js:362"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-channel.js:362"
-        },
         {
             "message": "unknown tag: component",
             "line": " source/data-process.js:1"
