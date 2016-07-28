@@ -378,205 +378,112 @@
         {
             "file": "source/data-process.js",
             "line": 1,
-            "description": "The fixed data chunk size for\n  [<code>Blob</code>](https://developer.mozilla.org/en/docs/Web/API/Blob)\n  data transfers using DataChannel connection.",
+            "description": "<blockquote class=\"info\">\n  Currently, we do not support Blob or ArrayBuffer data type of transfers, but we\n  look into implementing it in the future.\n</blockquote>\nContains the list of supported data transfer data types.",
+            "itemtype": "attribute",
+            "name": "DATA_TRANSFER_DATA_TYPE",
+            "params": [
+                {
+                    "name": "BINARY_STRING",
+                    "description": "<small>Value <code>\"binaryString\"</code></small>\n  The option that sends all data packets as string (or converts them into string) when\n  transferring data over the Datachannel connection.",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.1.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-process.js",
+            "line": 22,
+            "description": "Stores the data chunk size for Blob transfers.",
             "itemtype": "attribute",
             "name": "_CHUNK_FILE_SIZE",
             "type": "Number",
             "access": "private",
             "tagname": "",
-            "final": 1,
-            "component": "DataProcess",
+            "readonly": "",
             "since": "0.5.2",
             "class": "Skylink"
         },
         {
             "file": "source/data-process.js",
-            "line": 15,
-            "description": "The fixed data chunk size for\n  [<code>dataURL</code>](https://developer.mozilla.org/en-US/docs/Web/HTTP/data_URIs)\n  (which is a binary string (base64) and known as data URIs)\n  data transfers using DataChannel connection.",
-            "itemtype": "attribute",
-            "name": "_CHUNK_DATAURL_SIZE",
-            "type": "Number",
-            "access": "private",
-            "tagname": "",
-            "final": 1,
-            "component": "DataProcess",
-            "since": "0.5.2",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/data-process.js",
-            "line": 30,
-            "description": "The fixed data chunk size for\n  [<code>Blob</code>](https://developer.mozilla.org/en/docs/Web/API/Blob)\n  data type for transfers using DataChanel connection on\n  Firefox based browsers.\nLimitations is different for Firefox as tested in some PCs (linux predominantly)\n  that sending a packet size of <code>49152</code>kb from another browser\n  reflects as <code>16384</code>kb packet size when received.",
+            "line": 33,
+            "description": "Stores the data chunk size for Blob transfers transferring from/to\n  Firefox browsers due to limitation tested in the past in some PCs (linx predominatly).",
             "itemtype": "attribute",
             "name": "_MOZ_CHUNK_FILE_SIZE",
             "type": "Number",
             "access": "private",
             "tagname": "",
-            "final": 1,
-            "component": "DataProcess",
+            "readonly": "",
             "since": "0.5.2",
             "class": "Skylink"
         },
         {
             "file": "source/data-process.js",
-            "line": 48,
-            "description": "These are the list of available transfer encodings that would be used by Skylink during a data transfer.\n- The currently supported data type is <code>BINARY_STRING</code>.\n- Support for data types <code>BLOB</code> and <code>ARRAY_BUFFER</code> is still in implementation.",
+            "line": 45,
+            "description": "Stores the data chunk size for data URI string transfers.",
             "itemtype": "attribute",
-            "name": "DATA_TRANSFER_DATA_TYPE",
-            "type": "JSON",
-            "params": [
-                {
-                    "name": "BINARY_STRING",
-                    "description": "<small><b>DEFAULT</b> | Value <code>\"binaryString\"</code></small>\n  The option to let Skylink encode data packets using\n  [binary converted strings](https://developer.mozilla.org/en-US/docs/Web/HTTP/data_URIs)\n  when sending the data packets through the DataChannel connection during data transfers.",
-                    "type": "String"
-                },
-                {
-                    "name": "ARRAY_BUFFER",
-                    "description": "<small><em>IN IMPLEMENTATION</em> | Value <code>\"arrayBuffer\"</code></small>\n  The option to let Skylink encode data packets using\n  [ArrayBuffers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)\n  when sending the data packets through the DataChannel connection during data transfers.",
-                    "type": "String"
-                },
-                {
-                    "name": "BLOB",
-                    "description": "<small><em>IN IMPLEMENTATION</em> | Value <code>\"blob\"</code></small>\n  The option to let Skylink encode data packets using\n  [Blobs](https://developer.mozilla.org/en/docs/Web/API/Blob)\n  when sending the data packets through the DataChannel connection during data transfers.",
-                    "type": "String"
-                }
-            ],
+            "name": "_CHUNK_DATAURL_SIZE",
+            "type": "Number",
+            "access": "private",
+            "tagname": "",
             "readonly": "",
-            "component": "DataProcess",
-            "partof": "DATA TRANSFER FUNCTIONALITY",
-            "since": "0.1.0",
+            "since": "0.5.2",
             "class": "Skylink"
         },
         {
             "file": "source/data-process.js",
-            "line": 78,
-            "description": "Converts a binary string (base64) derived from\n [dataURL conversion](https://developer.mozilla.org/en-US\n  /docs/Web/API/FileReader/readAsDataURL)\n  to a Blob data object.<br>\n<small>Author: devnull69@stackoverflow.com #6850276</small>",
+            "line": 56,
+            "description": "Function that converts Base64 string into Blob object.\nThis is referenced from devnull69@stackoverflow.com #6850276.",
             "itemtype": "method",
             "name": "_base64ToBlob",
-            "params": [
-                {
-                    "name": "dataURL",
-                    "description": "The binary string (base64) to convert.",
-                    "type": "String"
-                }
-            ],
-            "return": {
-                "description": "The converted Blob data object.",
-                "type": "Blob"
-            },
             "access": "private",
             "tagname": "",
-            "component": "DataProcess",
             "since": "0.1.0",
             "class": "Skylink"
         },
         {
             "file": "source/data-process.js",
-            "line": 104,
-            "description": "Converts a Blob data object into a binary string (base64) using\n  [dataURL conversion](https://developer.mozilla.org/en-US\n  /docs/Web/API/FileReader/readAsDataURL)",
+            "line": 76,
+            "description": "Function that converts a Blob object into Base64 string.",
             "itemtype": "method",
             "name": "_blobToBase64",
-            "params": [
-                {
-                    "name": "data",
-                    "description": "The Blob data object to convert.",
-                    "type": "Blob"
-                },
-                {
-                    "name": "callback",
-                    "description": "The callback triggered when Blob data\n  conversion to binary string (base64) has completed.",
-                    "type": "Function",
-                    "props": [
-                        {
-                            "name": "data",
-                            "description": "The converted binary string (base64).",
-                            "type": "String"
-                        }
-                    ]
-                }
-            ],
             "access": "private",
             "tagname": "",
-            "component": "DataProcess",
             "since": "0.1.0",
             "class": "Skylink"
         },
         {
             "file": "source/data-process.js",
-            "line": 128,
-            "description": "Chunks a huge Blob data object into smaller Blob data object chunks\n  based on the chunk sizes provided.\nIf provided Blob data object is smaller than chunk sizes, it will return an array\n  length of <code>1</code> with the Blob data object.",
+            "line": 93,
+            "description": "Function that chunks Blob object based on the data chunk size provided.\nIf provided Blob object size is lesser than or equals to the chunk size, it should return an array\n  of length of <code>1</code>.",
             "itemtype": "method",
             "name": "_chunkBlobData",
-            "params": [
-                {
-                    "name": "blob",
-                    "description": "The huge Blob binary data object.",
-                    "type": "Blob"
-                },
-                {
-                    "name": "chunkSize",
-                    "description": "The chunk size that the Blob binary data should be cut\n  into.",
-                    "type": "Number"
-                }
-            ],
-            "return": {
-                "description": "The array of chunked Blob data objects based on the Blob data\n  object provided.",
-                "type": "Array"
-            },
             "access": "private",
             "tagname": "",
-            "component": "DataProcess",
             "since": "0.5.2",
             "class": "Skylink"
         },
         {
             "file": "source/data-process.js",
-            "line": 167,
-            "description": "Chunks a huge dataURL binary string (base64)\n  into smaller strings based on the chunk length provided.\nIf provided dataURL binary string (base64)\n  is smaller than chunk length, it will return an array\n  length of <code>1</code> with the dataURL string.",
+            "line": 125,
+            "description": "Function that chunks large string into string chunks based on the data chunk size provided.\nIf provided string length is lesser than or equals to the chunk size, it should return an array\n  of length of <code>1</code>.",
             "itemtype": "method",
             "name": "_chunkDataURL",
-            "params": [
-                {
-                    "name": "dataURL",
-                    "description": "The huge dataURL binary string (base64).",
-                    "type": "String"
-                },
-                {
-                    "name": "chunkSize",
-                    "description": "The string (chunk) length that the dataURL\n  binary string (base64) should be cut into.",
-                    "type": "Number"
-                }
-            ],
-            "return": {
-                "description": "The array of chunked dataURL binary strings\n  (base64) based on the dataURL string provided.",
-                "type": "Array"
-            },
             "access": "private",
             "tagname": "",
-            "component": "DataProcess",
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/data-process.js",
-            "line": 209,
-            "description": "Assembles the data string chunks of a chunked dataURL\n  binary string (base64) into the original dataURL binary string (base64).",
+            "line": 159,
+            "description": "Function that assembles the data string chunks into a large string.",
             "itemtype": "method",
             "name": "_assembleDataURL",
-            "params": [
-                {
-                    "name": "dataURLArray",
-                    "description": "The array of chunked dataURL binary strings\n  (base64) based on the dataURL string provided.",
-                    "type": "Array"
-                }
-            ],
-            "return": {
-                "description": "The original huge dataURL binary string (base64).",
-                "type": "String"
-            },
             "access": "private",
             "tagname": "",
-            "component": "DataProcess",
             "since": "0.6.1",
             "class": "Skylink"
         },
@@ -13419,46 +13326,6 @@
         }
     ],
     "warnings": [
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-process.js:1"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-process.js:15"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-process.js:30"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-process.js:48"
-        },
-        {
-            "message": "unknown tag: partof",
-            "line": " source/data-process.js:48"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-process.js:78"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-process.js:104"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-process.js:128"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-process.js:167"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/data-process.js:209"
-        },
         {
             "message": "unknown tag: component",
             "line": " source/data-transfer.js:1"
