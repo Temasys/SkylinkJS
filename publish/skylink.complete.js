@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.13 - Wed Jul 27 2016 19:51:31 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.13 - Thu Jul 28 2016 18:08:20 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10461,7 +10461,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.13 - Wed Jul 27 2016 19:51:31 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.13 - Thu Jul 28 2016 18:08:20 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13680,20 +13680,25 @@ Skylink.prototype.sendURLData = function(data, timeout, targetPeerId, callback) 
 Skylink.prototype._peerCandidatesQueue = {};
 
 /**
- * Stores the list of candidates sent <code>local</code> and added <code>remote</code> information.
- * @attribute _addedCandidates
- * @param {JSON} (#peerId) The list of candidates sent and added associated with the Peer ID.
- * @param {Array} (#peerId).relay The number of relay candidates added and sent.
- * @param {Array} (#peerId).srflx The number of server reflexive candidates added and sent.
- * @param {Array} (#peerId).host The number of host candidates added and sent.
+ * Stores the list of local and remote candidates sent and received.
+ * @attribute _gatheredCandidates
+ * @param {JSON} (#peerId) The list of candidates associated with the Peer ID.
+ * @param {JSON} (#peerId).sending The list of local candidates gathered for Peer sent.
+ * @param {JSON} (#peerId).sending.host The list of local <code>"host"</code> type of candidates sent.
+ * @param {JSON} (#peerId).sending.srflx The list of local <code>"srflx"</code> type of candidates sent.
+ * @param {JSON} (#peerId).sending.relay The list of local <code>"relay"</code> type of candidates sent.
+ * @param {JSON} (#peerId).receiving The list of remote candidates gathered for Peer received.
+ * @param {JSON} (#peerId).receiving.host The list of remote <code>"host"</code> type of candidates received.
+ * @param {JSON} (#peerId).receiving.srflx The list of remote <code>"srflx"</code> type of candidates received.
+ * @param {JSON} (#peerId).receiving.relay The list of remote <code>"relay"</code> type of candidates received.
  * @type JSON
  * @private
  * @required
- * @since 0.6.4
+ * @since 0.6.14
  * @component ICE
  * @for Skylink
  */
-Skylink.prototype._addedCandidates = {};
+Skylink.prototype._gatheredCandidates = {};
 
 /**
  * The list of Peer connection ICE candidate generation states that Skylink would trigger.
@@ -13744,12 +13749,6 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
     log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
       candidateType + ' candidate:'], candidate);
 
-    if (!self._enableIceTrickle) {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
-        '" candidate as trickle ICE is disabled'], candidate);
-      return;
-    }
-
     if (self._forceTURN && candidateType !== 'relay') {
       if (!self._hasMCU) {
         log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
@@ -13761,6 +13760,25 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
         '" candidate although TURN connections is forced as MCU is present'], candidate);
     }
 
+    if (!self._gatheredCandidates[targetMid]) {
+      self._gatheredCandidates[targetMid] = {
+        sending: { host: [], srflx: [], relay: [] },
+        receiving: { host: [], srflx: [], relay: [] }
+      };
+    }
+
+    self._gatheredCandidates[targetMid].sending[candidateType].push({
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex,
+      candidate: candidate.candidate
+    });
+
+    if (!self._enableIceTrickle) {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
+        '" candidate as trickle ICE is disabled'], candidate);
+      return;
+    }
+
     self._sendChannelMessage({
       type: self._SIG_MESSAGE_TYPE.CANDIDATE,
       label: candidate.sdpMLineIndex,
@@ -13770,23 +13788,6 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       target: targetMid,
       rid: self._room.id
     });
-
-    if (!self._addedCandidates[targetMid]) {
-      self._addedCandidates[targetMid] = {
-        relay: [],
-        host: [],
-        srflx: []
-      };
-    }
-
-    // shouldnt happen but just incase
-    if (!self._addedCandidates[targetMid][candidateType]) {
-      self._addedCandidates[targetMid][candidateType] = [];
-    }
-
-    self._addedCandidates[targetMid][candidateType].push('local:' + messageCan[4] +
-      (messageCan[5] !== '0' ? ':' + messageCan[5] : '') +
-      (messageCan[2] ? '?transport=' + messageCan[2].toLowerCase() : ''));
 
   } else {
     log.debug([targetMid, 'RTCIceCandidate', null, 'End of gathering']);
@@ -14682,10 +14683,9 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   // datachannels
   self._dataChannels[targetMid] = {};
   // candidates
-  self._addedCandidates[targetMid] = {
-    relay: [],
-    host: [],
-    srflx: []
+  self._gatheredCandidates[targetMid] = {
+    sending: { host: [], srflx: [], relay: [] },
+    receiving: { host: [], srflx: [], relay: [] }
   };
 
   // callbacks
@@ -15236,6 +15236,36 @@ Skylink.prototype._restartMCUConnection = function(callback) {
  *   remote session description type.
  * @param {String} callback.success.connectionStats.(#peerId).connection.remoteDescription.sdp The Peer connection
  *   remote session description sdp.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates The Peer connection list of
+ *   candidates received or sent.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending The Peer connection list of
+ *   candidates sent.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.sending.host The Peer connection list of
+ *   <code>"host"</code> candidates sent.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending.host.(#index) The <code>"host"</code>
+ *   candidate sent.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.sending.srflx The Peer connection list of
+ *   <code>"srflx"</code> candidates sent.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending.srflx.(#index) The <code>"srflx"</code>
+ *   candidate sent.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.sending.relay The Peer connection list of
+ *   <code>"relay"</code> candidates sent.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending.relay.(#index) The <code>"relay"</code>
+ *   candidate sent.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving The Peer connection list of
+ *   candidates received.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.receiving.host The Peer connection list of
+ *   <code>"host"</code> candidates received.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving.host.(#index) The <code>"host"</code>
+ *   candidate received.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.receiving.srflx The Peer connection list of
+ *   <code>"srflx"</code> candidates received.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving.srflx.(#index) The <code>"srflx"</code>
+ *   candidate received.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.receiving.relay The Peer connection list of
+ *   <code>"relay"</code> candidates received.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving.relay.(#index) The <code>"relay"</code>
+ *   candidate received.
  * @example
  *   SkylinkDemo.getConnectionStatus(peerId, function (error, success) {
  *      if (error) {
@@ -15322,7 +15352,11 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
         iceGatheringState: pc.iceGatheringState,
         signalingState: pc.signalingState,
         remoteDescription: pc.remoteDescription,
-        localDescription: pc.localDescription
+        localDescription: pc.localDescription,
+        candidates: clone(self._gatheredCandidates[peerId] || {
+          sending: { host: [], srflx: [], relay: [] },
+          receiving: { host: [], srflx: [], relay: [] }
+        })
       },
       audio: {
         sending: {
@@ -15378,9 +15412,6 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
       log.debug([peerId, 'RTCStatsReport', null, 'Retrieval success ->'], stats);
 
       result.raw = stats;
-
-      console.info('stats', stats, pc.getRemoteStreams().length > 0 ? pc.getRemoteStreams()[0].getTracks() : [],
-        pc.getRemoteStreams().length > 0 ? pc.getRemoteStreams()[0] : null);
 
       if (window.webrtcDetectedBrowser === 'firefox') {
         loopFn(stats, function (obj, prop) {
@@ -20505,6 +20536,36 @@ Skylink.prototype._EVENTS = {
    *   remote session description type.
    * @param {String} stats.connection.remoteDescription.sdp The Peer connection
    *   remote session description sdp.
+   * @param {JSON} stats.connection.candidates The Peer connection list of
+   *   candidates received or sent.
+   * @param {JSON} stats.connection.candidates.sending The Peer connection list of
+   *   candidates sent.
+   * @param {Array} stats.connection.candidates.sending.host The Peer connection list of
+   *   <code>"host"</code> candidates sent.
+   * @param {JSON} stats.connection.candidates.sending.host.(#index) The <code>"host"</code>
+   *   candidate sent.
+   * @param {Array} stats.connection.candidates.sending.srflx The Peer connection list of
+   *   <code>"srflx"</code> candidates sent.
+   * @param {JSON} stats.connection.candidates.sending.srflx.(#index) The <code>"srflx"</code>
+   *   candidate sent.
+   * @param {Array} stats.connection.candidates.sending.relay The Peer connection list of
+   *   <code>"relay"</code> candidates sent.
+   * @param {JSON} stats.connection.candidates.sending.relay.(#index) The <code>"relay"</code>
+   *   candidate sent.
+   * @param {JSON} stats.connection.candidates.receiving The Peer connection list of
+   *   candidates received.
+   * @param {Array} stats.connection.candidates.receiving.host The Peer connection list of
+   *   <code>"host"</code> candidates received.
+   * @param {JSON} stats.connection.candidates.receiving.host.(#index) The <code>"host"</code>
+   *   candidate received.
+   * @param {Array} stats.connection.candidates.receiving.srflx The Peer connection list of
+   *   <code>"srflx"</code> candidates received.
+   * @param {JSON} stats.connection.candidates.receiving.srflx.(#index) The <code>"srflx"</code>
+   *   candidate received.
+   * @param {Array} stats.connection.candidates.receiving.relay The Peer connection list of
+   *   <code>"relay"</code> candidates received.
+   * @param {JSON} stats.connection.candidates.receiving.relay.(#index) The <code>"relay"</code>
+   *   candidate received.
    * @param {Error} error The Error object received when failed retrieving the
    *   Peer connection status.
    * @component Events
@@ -22821,22 +22882,18 @@ Skylink.prototype._candidateHandler = function(message) {
     this._addIceCandidateToQueue(targetMid, candidate);
   }
 
-  if (!this._addedCandidates[targetMid]) {
-    this._addedCandidates[targetMid] = {
-      relay: [],
-      host: [],
-      srflx: []
+  if (!this._gatheredCandidates[targetMid]) {
+    this._gatheredCandidates[targetMid] = {
+      sending: { host: [], srflx: [], relay: [] },
+      receiving: { host: [], srflx: [], relay: [] }
     };
   }
 
-  // shouldnt happen but just incase
-  if (!this._addedCandidates[targetMid][canType]) {
-    this._addedCandidates[targetMid][canType] = [];
-  }
-
-  this._addedCandidates[targetMid][canType].push('remote:' + messageCan[4] +
-    (messageCan[5] !== '0' ? ':' + messageCan[5] : '') +
-    (messageCan[2] ? '?transport=' + messageCan[2].toLowerCase() : ''));
+  this._gatheredCandidates[targetMid].receiving[canType].push({
+    sdpMid: candidate.sdpMid,
+    sdpMLineIndex: candidate.sdpMLineIndex,
+    candidate: candidate.candidate
+  });
 };
 
 /**

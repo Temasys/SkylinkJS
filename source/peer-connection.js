@@ -429,10 +429,9 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   // datachannels
   self._dataChannels[targetMid] = {};
   // candidates
-  self._addedCandidates[targetMid] = {
-    relay: [],
-    host: [],
-    srflx: []
+  self._gatheredCandidates[targetMid] = {
+    sending: { host: [], srflx: [], relay: [] },
+    receiving: { host: [], srflx: [], relay: [] }
   };
 
   // callbacks
@@ -983,6 +982,36 @@ Skylink.prototype._restartMCUConnection = function(callback) {
  *   remote session description type.
  * @param {String} callback.success.connectionStats.(#peerId).connection.remoteDescription.sdp The Peer connection
  *   remote session description sdp.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates The Peer connection list of
+ *   candidates received or sent.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending The Peer connection list of
+ *   candidates sent.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.sending.host The Peer connection list of
+ *   <code>"host"</code> candidates sent.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending.host.(#index) The <code>"host"</code>
+ *   candidate sent.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.sending.srflx The Peer connection list of
+ *   <code>"srflx"</code> candidates sent.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending.srflx.(#index) The <code>"srflx"</code>
+ *   candidate sent.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.sending.relay The Peer connection list of
+ *   <code>"relay"</code> candidates sent.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending.relay.(#index) The <code>"relay"</code>
+ *   candidate sent.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving The Peer connection list of
+ *   candidates received.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.receiving.host The Peer connection list of
+ *   <code>"host"</code> candidates received.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving.host.(#index) The <code>"host"</code>
+ *   candidate received.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.receiving.srflx The Peer connection list of
+ *   <code>"srflx"</code> candidates received.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving.srflx.(#index) The <code>"srflx"</code>
+ *   candidate received.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.receiving.relay The Peer connection list of
+ *   <code>"relay"</code> candidates received.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving.relay.(#index) The <code>"relay"</code>
+ *   candidate received.
  * @example
  *   SkylinkDemo.getConnectionStatus(peerId, function (error, success) {
  *      if (error) {
@@ -1069,7 +1098,11 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
         iceGatheringState: pc.iceGatheringState,
         signalingState: pc.signalingState,
         remoteDescription: pc.remoteDescription,
-        localDescription: pc.localDescription
+        localDescription: pc.localDescription,
+        candidates: clone(self._gatheredCandidates[peerId] || {
+          sending: { host: [], srflx: [], relay: [] },
+          receiving: { host: [], srflx: [], relay: [] }
+        })
       },
       audio: {
         sending: {

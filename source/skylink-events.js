@@ -1408,6 +1408,36 @@ Skylink.prototype._EVENTS = {
    *   remote session description type.
    * @param {String} stats.connection.remoteDescription.sdp The Peer connection
    *   remote session description sdp.
+   * @param {JSON} stats.connection.candidates The Peer connection list of
+   *   candidates received or sent.
+   * @param {JSON} stats.connection.candidates.sending The Peer connection list of
+   *   candidates sent.
+   * @param {Array} stats.connection.candidates.sending.host The Peer connection list of
+   *   <code>"host"</code> candidates sent.
+   * @param {JSON} stats.connection.candidates.sending.host.(#index) The <code>"host"</code>
+   *   candidate sent.
+   * @param {Array} stats.connection.candidates.sending.srflx The Peer connection list of
+   *   <code>"srflx"</code> candidates sent.
+   * @param {JSON} stats.connection.candidates.sending.srflx.(#index) The <code>"srflx"</code>
+   *   candidate sent.
+   * @param {Array} stats.connection.candidates.sending.relay The Peer connection list of
+   *   <code>"relay"</code> candidates sent.
+   * @param {JSON} stats.connection.candidates.sending.relay.(#index) The <code>"relay"</code>
+   *   candidate sent.
+   * @param {JSON} stats.connection.candidates.receiving The Peer connection list of
+   *   candidates received.
+   * @param {Array} stats.connection.candidates.receiving.host The Peer connection list of
+   *   <code>"host"</code> candidates received.
+   * @param {JSON} stats.connection.candidates.receiving.host.(#index) The <code>"host"</code>
+   *   candidate received.
+   * @param {Array} stats.connection.candidates.receiving.srflx The Peer connection list of
+   *   <code>"srflx"</code> candidates received.
+   * @param {JSON} stats.connection.candidates.receiving.srflx.(#index) The <code>"srflx"</code>
+   *   candidate received.
+   * @param {Array} stats.connection.candidates.receiving.relay The Peer connection list of
+   *   <code>"relay"</code> candidates received.
+   * @param {JSON} stats.connection.candidates.receiving.relay.(#index) The <code>"relay"</code>
+   *   candidate received.
    * @param {Error} error The Error object received when failed retrieving the
    *   Peer connection status.
    * @component Events
