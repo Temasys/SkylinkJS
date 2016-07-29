@@ -90,20 +90,13 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * Stores the list of {{#crossLink &quot;Skylink/on:method&quot;}}on(){{/crossLink}}
- *   event subscription handlers.
+ * Stores the list of event subscription handlers from the
+ *   &lt;a href=&quot;#method_on&quot;&gt;&lt;code&gt;on() method&lt;/code&gt;&lt;/a&gt;.
  * @attribute _EVENTS
- * @param {Array} (#eventName) The array of event subscription handlers that is
- *   subscribed using {{#crossLink &quot;Skylink/on:method&quot;}}on() method{{/crossLink}}
- *   associated with the event name.
- * @param {Function} (#eventName).(#index) The event subscription handler
- *   associated with the event name. This is to be triggered multiple times
- *   until {{#crossLink &quot;Skylink/off:method&quot;}}off(){{/crossLink}} is invoked for
- *   this event subscription handler.
+ * @param {Array} &lt;#event&gt; The list of the event subscription handlers.
+ * @param {Function} &lt;#event&gt;.&lt;#index&gt; The event subscription handler.
  * @type JSON
  * @private
- * @required
- * @component Events
  * @for Skylink
  * @since 0.5.2
  */
@@ -1117,44 +1110,37 @@ Skylink.prototype._EVENTS = {
   dataChannelState: [],
 
   /**
-   * Event triggered when a data transfer state has changed.
-   * - This event triggers more extensive states like the outgoing and incoming
-   *   data transfer progress and rejection of data transfer requests.
-   *   For simplified events, you may subscribe to the
-   *   &lt;a href=&quot;#event_incomingDataRequest&quot;&gt;incomingDataRequest&lt;/a&gt; and
-   *   &lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt; events.
-   * - If &lt;code&gt;enableDataChannel&lt;/code&gt; disabled in &lt;a href=&quot;#method_init&quot;&gt;init() configuration
-   *   settings&lt;/a&gt;, this event will not be triggered at all.
+   * The event triggered when a data transfer state has changed.
    * @event dataTransferState
-   * @param {String} state The data transfer made to Peer
-   *   in a DataChannel connection state.
-   *   [Rel: Skylink.DATA_TRANSFER_STATE]
-   * @param {String} transferId The transfer ID of the completed data transfer.
-   * @param {String} peerId The Peer ID associated with the data transfer.
-   * @param {JSON} transferInfo The transfer data object information.
-   * @param {Blob|String} transferInfo.data The transfer data object. This is defined
-   *   only after the transfer data is completed, when the state is
-   *   &lt;code&gt;DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED&lt;/code&gt; and
-   *   &lt;code&gt;DATA_TRANSFER_STATE.UPLOAD_STARTED&lt;/code&gt;&lt;br&gt;
-   *   For Blob data object, see the
-   *   [createObjectURL](https://developer.mozilla.org/en-US/docs/Web/API/URL.createObjectURL)
-   *   method on how you can convert the Blob data object to a download link.
-   * @param {String} [transferInfo.name=transferId] The transfer data object name.
-   *   If there is no name based on the Blob given, the name would be the transfer ID.
-   * @param {Number} transferInfo.size The transfer data size.
-   * @param {String} transferInfo.dataType The type of data transfer initiated.
-   *   Available types are &lt;code&gt;&quot;dataURL&quot;&lt;/code&gt; and &lt;code&gt;&quot;blob&quot;&lt;/code&gt;.
-   * @param {String} transferInfo.timeout The waiting timeout in seconds that the DataChannel
-   *   connection data transfer should wait before throwing an exception and terminating the data transfer.
-   * @param {Boolean} transferInfo.isPrivate The flag to indicate if the data transferred
-   *   targeted Peer peers and not broadcasted to all Peer peers.
-   * @param {JSON} [error] The error object thrown when there is a failure in transferring data.
-   * @param {Object} error.message The exception thrown that caused the failure
-   *   for transferring data.
-   * @param {String} error.transferType The data transfer type to indicate if the DataChannel is
-   *   uploading or downloading the data transfer when the exception occurred.
-   *   [Rel: Skylink.DATA_TRANSFER_TYPE]
-   * @component Events
+   * @param {String} state The data transfer state. [Rel: Skylink.DATA_TRANSFER_STATE]
+   * @param {String} transferId The data transfer ID.
+   * @param {String} peerId The Peer ID targeted for the data transfer.
+   * @param {JSON} transferInfo The data transfer information.
+   * @param {Blob|String} transferInfo.data &lt;blockquote class=&quot;info&quot;&gt;
+   *    Use [&lt;code&gt;URL.createObjectURL()&lt;/code&gt; method](https://developer.mozilla.org/en-US/docs/Web/API/URL.createObjectURL)
+   *    to append Blob data as a download link &lt;code&gt;&amp;lt;a href=&quot;&lt;blobURL&gt;&quot; download=&quot;blobName&quot;&amp;gt;
+   * Download File&amp;lt;/a&amp;gt;.&lt;/code&gt;&lt;/blockquote&gt;
+   *   The data transfer data based off the &lt;code&gt;data&lt;/code&gt; parameter in method used to start data transfer.
+   *   &lt;small&gt;Defined when &lt;code&gt;state&lt;/code&gt; payload parameter value is &lt;code&gt;DOWNLOAD_COMPLETED&lt;/code&gt; and
+   *     &lt;code&gt;UPLOAD_STARTED&lt;/code&gt;, else its value is &lt;code&gt;null&lt;/code&gt;.&lt;/small&gt;
+   * @param {String} transferInfo.name The data transfer &lt;code&gt;data&lt;/code&gt; Blob name.
+   *   If data transfer data type is String or Blob name is not defined, the value will
+   *   be the same as of the &lt;code&gt;transferId&lt;/code&gt; value.
+   * @param {Number} transferInfo.size The data transfer Blob size or String length.
+   * @param {String} transferInfo.dataType The data transfer transfer type.
+   *   &lt;ul&gt;
+   *     &lt;li&gt;&lt;code&gt;&quot;dataURL&quot;&lt;/code&gt;: The data transfer was made using &lt;a href=&quot;#method_sendURLData&quot;&gt;
+   * &lt;code&gt;sendURLData()&lt;/code&gt; method&lt;/a&gt;&lt;/li&gt;
+   *     &lt;li&gt;&lt;code&gt;&quot;blob&quot;&lt;/code&gt;: The data transfer was made using &lt;a href=&quot;#method_sendBlobData&quot;&gt;
+   * &lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt;&lt;/li&gt;
+   *   &lt;/ul&gt;
+   * @param {Number} transferInfo.timeout The response timeout as provided in the &lt;code&gt;timeout&lt;/code&gt;
+   *   parameter in method used to start data transfer.
+   * @param {Boolean} transferInfo.isPrivate The flag that indicates if data transfer is targeted or not, based
+   *   off the &lt;code&gt;targetPeerId&lt;/code&gt; parameter being defined in method used to start data transfer.
+   * @param {JSON} [error] The error result when data transfer results in failure.
+   * @param {Error|String} error.message The error message.
+   * @param {String} error.transferType The direction of the failure. [Rel: Skylink.DATA_TRANSFER_TYPE]
    * @for Skylink
    * @since 0.4.1
    */

@@ -1,18 +1,11 @@
 /**
- * Stores the list of {{#crossLink "Skylink/on:method"}}on(){{/crossLink}}
- *   event subscription handlers.
+ * Stores the list of event subscription handlers from the
+ *   <a href="#method_on"><code>on() method</code></a>.
  * @attribute _EVENTS
- * @param {Array} (#eventName) The array of event subscription handlers that is
- *   subscribed using {{#crossLink "Skylink/on:method"}}on() method{{/crossLink}}
- *   associated with the event name.
- * @param {Function} (#eventName).(#index) The event subscription handler
- *   associated with the event name. This is to be triggered multiple times
- *   until {{#crossLink "Skylink/off:method"}}off(){{/crossLink}} is invoked for
- *   this event subscription handler.
+ * @param {Array} <#event> The list of the event subscription handlers.
+ * @param {Function} <#event>.<#index> The event subscription handler.
  * @type JSON
  * @private
- * @required
- * @component Events
  * @for Skylink
  * @since 0.5.2
  */
@@ -1026,44 +1019,37 @@ Skylink.prototype._EVENTS = {
   dataChannelState: [],
 
   /**
-   * Event triggered when a data transfer state has changed.
-   * - This event triggers more extensive states like the outgoing and incoming
-   *   data transfer progress and rejection of data transfer requests.
-   *   For simplified events, you may subscribe to the
-   *   <a href="#event_incomingDataRequest">incomingDataRequest</a> and
-   *   <a href="#event_incomingData">incomingData</a> events.
-   * - If <code>enableDataChannel</code> disabled in <a href="#method_init">init() configuration
-   *   settings</a>, this event will not be triggered at all.
+   * The event triggered when a data transfer state has changed.
    * @event dataTransferState
-   * @param {String} state The data transfer made to Peer
-   *   in a DataChannel connection state.
-   *   [Rel: Skylink.DATA_TRANSFER_STATE]
-   * @param {String} transferId The transfer ID of the completed data transfer.
-   * @param {String} peerId The Peer ID associated with the data transfer.
-   * @param {JSON} transferInfo The transfer data object information.
-   * @param {Blob|String} transferInfo.data The transfer data object. This is defined
-   *   only after the transfer data is completed, when the state is
-   *   <code>DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED</code> and
-   *   <code>DATA_TRANSFER_STATE.UPLOAD_STARTED</code><br>
-   *   For Blob data object, see the
-   *   [createObjectURL](https://developer.mozilla.org/en-US/docs/Web/API/URL.createObjectURL)
-   *   method on how you can convert the Blob data object to a download link.
-   * @param {String} [transferInfo.name=transferId] The transfer data object name.
-   *   If there is no name based on the Blob given, the name would be the transfer ID.
-   * @param {Number} transferInfo.size The transfer data size.
-   * @param {String} transferInfo.dataType The type of data transfer initiated.
-   *   Available types are <code>"dataURL"</code> and <code>"blob"</code>.
-   * @param {String} transferInfo.timeout The waiting timeout in seconds that the DataChannel
-   *   connection data transfer should wait before throwing an exception and terminating the data transfer.
-   * @param {Boolean} transferInfo.isPrivate The flag to indicate if the data transferred
-   *   targeted Peer peers and not broadcasted to all Peer peers.
-   * @param {JSON} [error] The error object thrown when there is a failure in transferring data.
-   * @param {Object} error.message The exception thrown that caused the failure
-   *   for transferring data.
-   * @param {String} error.transferType The data transfer type to indicate if the DataChannel is
-   *   uploading or downloading the data transfer when the exception occurred.
-   *   [Rel: Skylink.DATA_TRANSFER_TYPE]
-   * @component Events
+   * @param {String} state The data transfer state. [Rel: Skylink.DATA_TRANSFER_STATE]
+   * @param {String} transferId The data transfer ID.
+   * @param {String} peerId The Peer ID targeted for the data transfer.
+   * @param {JSON} transferInfo The data transfer information.
+   * @param {Blob|String} transferInfo.data <blockquote class="info">
+   *    Use [<code>URL.createObjectURL()</code> method](https://developer.mozilla.org/en-US/docs/Web/API/URL.createObjectURL)
+   *    to append Blob data as a download link <code>&lt;a href="<blobURL>" download="blobName"&gt;
+   * Download File&lt;/a&gt;.</code></blockquote>
+   *   The data transfer data based off the <code>data</code> parameter in method used to start data transfer.
+   *   <small>Defined when <code>state</code> payload parameter value is <code>DOWNLOAD_COMPLETED</code> and
+   *     <code>UPLOAD_STARTED</code>, else its value is <code>null</code>.</small>
+   * @param {String} transferInfo.name The data transfer <code>data</code> Blob name.
+   *   If data transfer data type is String or Blob name is not defined, the value will
+   *   be the same as of the <code>transferId</code> value.
+   * @param {Number} transferInfo.size The data transfer Blob size or String length.
+   * @param {String} transferInfo.dataType The data transfer transfer type.
+   *   <ul>
+   *     <li><code>"dataURL"</code>: The data transfer was made using <a href="#method_sendURLData">
+   * <code>sendURLData()</code> method</a></li>
+   *     <li><code>"blob"</code>: The data transfer was made using <a href="#method_sendBlobData">
+   * <code>sendBlobData()</code> method</a></li>
+   *   </ul>
+   * @param {Number} transferInfo.timeout The response timeout as provided in the <code>timeout</code>
+   *   parameter in method used to start data transfer.
+   * @param {Boolean} transferInfo.isPrivate The flag that indicates if data transfer is targeted or not, based
+   *   off the <code>targetPeerId</code> parameter being defined in method used to start data transfer.
+   * @param {JSON} [error] The error result when data transfer results in failure.
+   * @param {Error|String} error.message The error message.
+   * @param {String} error.transferType The direction of the failure. [Rel: Skylink.DATA_TRANSFER_TYPE]
    * @for Skylink
    * @since 0.4.1
    */

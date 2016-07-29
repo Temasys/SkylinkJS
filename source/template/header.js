@@ -213,13 +213,6 @@ Skylink.prototype.VERSION = '@@version';
  * Function that generates an <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">UUID</a> (Unique ID).
  * @method generateUUID
  * @return {String} Returns a generated UUID (Unique ID).
- * @example
- *   // Here's an example use-case
- *   var skylink = new Skylink();
- *   var uniqueRoom = skylink.generateUUID();
- *
- *   skylink.joinRoom(uniqueRoom);
- *
  * @for Skylink
  * @since 0.5.9
  */
