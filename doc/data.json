@@ -1260,18 +1260,46 @@
         {
             "file": "source/ice-candidate.js",
             "line": 1,
-            "description": "Stores the list of buffered ICE candidates received\n  before <code>RTCPeerConnection.setRemoteDescription</code> is\n  called. Adding ICE candidates before receiving the remote\n  session description causes an ICE connection failures in a\n  number of instances.",
+            "description": "Contains the list of Peer connection ICE candidate generation states.",
+            "itemtype": "attribute",
+            "name": "CANDIDATE_GENERATION_STATE",
+            "params": [
+                {
+                    "name": "NEW",
+                    "description": "<small>Value <code>\"new\"</code></small>\n  The state when Peer connection is at initial stage.",
+                    "type": "String"
+                },
+                {
+                    "name": "GATHERING",
+                    "description": "<small>Value <code>\"gathering\"</code></small>\n  The state when Peer connection is gathering ICE candidates.",
+                    "type": "String"
+                },
+                {
+                    "name": "COMPLETED",
+                    "description": "<small>Value <code>\"completed\"</code></small>\n  The state when Peer connection has completed gathering ICE candidates.",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.4.1",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/ice-candidate.js",
+            "line": 21,
+            "description": "Stores the list of buffered ICE candidates to be added remoteDescription is received and set.",
             "itemtype": "attribute",
             "name": "_peerCandidatesQueue",
             "params": [
                 {
-                    "name": "(#peerId)",
-                    "description": "The Peer ID associated with the\n  list of buffered ICE candidates.",
+                    "name": "<#peerId>",
+                    "description": "The Peer buffered ICE candidates.",
                     "type": "Array",
                     "props": [
                         {
-                            "name": "(#index)",
-                            "description": "The buffered RTCIceCandidate\n  object associated with the Peer.",
+                            "name": "<#index>",
+                            "description": "The buffered ICE candidate.",
                             "type": "Object"
                         }
                     ]
@@ -1280,66 +1308,30 @@
             "type": "JSON",
             "access": "private",
             "tagname": "",
-            "required": 1,
             "since": "0.5.1",
-            "component": "ICE",
             "class": "Skylink"
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 21,
+            "line": 33,
             "description": "Stores the list of local and remote candidates sent and received.",
             "itemtype": "attribute",
             "name": "_gatheredCandidates",
             "params": [
                 {
-                    "name": "(#peerId)",
+                    "name": "<#peerId>",
                     "description": "The list of candidates associated with the Peer ID.",
                     "type": "JSON",
                     "props": [
                         {
                             "name": "sending",
                             "description": "The list of local candidates gathered for Peer sent.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "host",
-                                    "description": "The list of local <code>\"host\"</code> type of candidates sent.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "srflx",
-                                    "description": "The list of local <code>\"srflx\"</code> type of candidates sent.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "relay",
-                                    "description": "The list of local <code>\"relay\"</code> type of candidates sent.",
-                                    "type": "JSON"
-                                }
-                            ]
+                            "type": "JSON"
                         },
                         {
                             "name": "receiving",
                             "description": "The list of remote candidates gathered for Peer received.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "host",
-                                    "description": "The list of remote <code>\"host\"</code> type of candidates received.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "srflx",
-                                    "description": "The list of remote <code>\"srflx\"</code> type of candidates received.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "relay",
-                                    "description": "The list of remote <code>\"relay\"</code> type of candidates received.",
-                                    "type": "JSON"
-                                }
-                            ]
+                            "type": "JSON"
                         }
                     ]
                 }
@@ -1347,137 +1339,62 @@
             "type": "JSON",
             "access": "private",
             "tagname": "",
-            "required": 1,
             "since": "0.6.14",
-            "component": "ICE",
             "class": "Skylink"
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 42,
-            "description": "The list of Peer connection ICE candidate generation states that Skylink would trigger.\n- These states references the [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState).",
-            "itemtype": "attribute",
-            "name": "CANDIDATE_GENERATION_STATE",
-            "type": "JSON",
-            "params": [
-                {
-                    "name": "NEW",
-                    "description": "<small>Value <code>\"new\"</code></small>\n  The state when the object was just created, and no networking has occurred yet.<br>\nThis state occurs when Peer connection has just been initialised.",
-                    "type": "String"
-                },
-                {
-                    "name": "GATHERING",
-                    "description": "<small>Value <code>\"gathering\"</code></small>\n  The state when the ICE engine is in the process of gathering candidates for connection.<br>\nThis state occurs after <code>NEW</code> state.",
-                    "type": "String"
-                },
-                {
-                    "name": "COMPLETED",
-                    "description": "<small>Value <code>\"completed\"</code></small>\n  The ICE engine has completed gathering. Events such as adding a\n  new interface or a new TURN server will cause the state to go back to gathering.<br>\nThis state occurs after <code>GATHERING</code> state and means ICE gathering has been done.",
-                    "type": "String"
-                }
-            ],
-            "readonly": "",
-            "since": "0.4.1",
-            "component": "ICE",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/ice-candidate.js",
-            "line": 68,
-            "description": "Handles the ICE candidate object received from associated Peer connection\n  to send the ICE candidate object or wait for all gathering to complete\n  before sending the candidate to prevent trickle ICE.",
+            "line": 46,
+            "description": "Function that handles the ICE candidate gathered to be sent to Peer.",
             "itemtype": "method",
             "name": "_onIceCandidate",
-            "params": [
-                {
-                    "name": "targetMid",
-                    "description": "The Peer ID associated with the ICE\n  candidate object received.",
-                    "type": "String"
-                },
-                {
-                    "name": "candidate",
-                    "description": "The local generated candidate object.",
-                    "type": "RTCIceCandidate"
-                }
-            ],
-            "trigger": "candidateGenerationState",
             "access": "private",
             "tagname": "",
             "since": "0.1.0",
-            "component": "ICE",
             "class": "Skylink"
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 176,
-            "description": "Buffers an ICE candidate object associated with a Peer connection\n  to prevent disruption to ICE connection when ICE candidate\n  is received before <code>RTCPeerConnection.setRemoteDescription</code>\n  is called.",
+            "line": 147,
+            "description": "Function that buffers an ICE candidate to queue when received before remoteDescription is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateToQueue",
-            "params": [
-                {
-                    "name": "targetMid",
-                    "description": "The Peer ID associated with the ICE\n  candidate object.",
-                    "type": "String"
-                },
-                {
-                    "name": "candidate",
-                    "description": "The constructed ICE candidate object.",
-                    "type": "Object"
-                }
-            ],
             "access": "private",
             "tagname": "",
             "since": "0.5.2",
-            "component": "ICE",
             "class": "Skylink"
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 198,
-            "description": "Handles the event when adding an ICE candidate has been added\n  successfully. This is mainly to prevent JShint errors.",
+            "line": 162,
+            "description": "Function that handles when an ICE candidate has been added or processed successfully.\nSeparated in a function to prevent jshint errors.",
             "itemtype": "method",
             "name": "_onAddIceCandidateSuccess",
             "access": "private",
             "tagname": "",
             "since": "0.5.9",
-            "component": "ICE",
             "class": "Skylink"
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 211,
-            "description": "Handles the event when adding an ICE candidate has failed.\nThis is mainly to prevent JShint errors.",
+            "line": 174,
+            "description": "Function that handles when an ICE candidate has failed adding or processing.\nSeparated in a function to prevent jshint errors.",
             "itemtype": "method",
             "name": "_onAddIceCandidateFailure",
-            "params": [
-                {
-                    "name": "error",
-                    "description": "The error received in the failure callback\n  in <code>RTCPeerConnection.addIceCandidate(candidate, successCb, failureCb)</code>.",
-                    "type": "Object"
-                }
-            ],
             "access": "private",
             "tagname": "",
             "since": "0.5.9",
-            "component": "ICE",
             "class": "Skylink"
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 226,
-            "description": "Adds the list of ICE candidates bufferred before <code>RTCPeerConnection.setRemoteDescription\n  </code> is called associated with the Peer connection.",
+            "line": 186,
+            "description": "Function that adds all the buffered ICE candidates.\nThis should be called after remoteDescription is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateFromQueue",
-            "params": [
-                {
-                    "name": "targetMid",
-                    "description": "The Peer ID to add the associated bufferred\n  ICE candidates.",
-                    "type": "String"
-                }
-            ],
             "access": "private",
             "tagname": "",
             "since": "0.5.2",
-            "component": "ICE",
             "class": "Skylink"
         },
         {
@@ -12461,42 +12378,6 @@
         {
             "message": "unknown tag: trigger",
             "line": " source/data-transfer.js:1869"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:1"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:21"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:42"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/ice-candidate.js:68"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:68"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:176"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:198"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:211"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:226"
         },
         {
             "message": "unknown tag: component",

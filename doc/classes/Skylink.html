@@ -2755,16 +2755,7 @@ Getting_started_with_WebRTC_and_SkylinkJS/">How to setup a simple video call</a>
               <div id="method__addIceCandidateFromQueue" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_addIceCandidateFromQueue</code></h3>
   
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code>targetMid</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
+    <span class="paren">()</span>
   
 
   <div class="code-item-properties">
@@ -2808,7 +2799,7 @@ Getting_started_with_WebRTC_and_SkylinkJS/">How to setup a simple video call</a>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l226"><code>source&#x2F;ice-candidate.js:226</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l186"><code>source&#x2F;ice-candidate.js:186</code></a>
       </small>
     
 
@@ -2822,38 +2813,13 @@ Getting_started_with_WebRTC_and_SkylinkJS/">How to setup a simple video call</a>
   </div>
 
   <div class="code-item-description">
-    <p>Adds the list of ICE candidates bufferred before <code>RTCPeerConnection.setRemoteDescription
-  </code> is called associated with the Peer connection.</p>
+    <p>Function that adds all the buffered ICE candidates.
+This should be called after remoteDescription is received and set.</p>
 
   </div>
 
   
 
-  
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">targetMid</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The Peer ID to add the associated bufferred
-  ICE candidates.</p>
-
-            </div>
-
-            
-          </li>
-      
-      </ul>
-    </div>
   
 
   
@@ -2865,21 +2831,7 @@ Getting_started_with_WebRTC_and_SkylinkJS/">How to setup a simple video call</a>
               <div id="method__addIceCandidateToQueue" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_addIceCandidateToQueue</code></h3>
   
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code>targetMid</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code>candidate</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
+    <span class="paren">()</span>
   
 
   <div class="code-item-properties">
@@ -2923,7 +2875,7 @@ Getting_started_with_WebRTC_and_SkylinkJS/">How to setup a simple video call</a>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l176"><code>source&#x2F;ice-candidate.js:176</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l147"><code>source&#x2F;ice-candidate.js:147</code></a>
       </small>
     
 
@@ -2937,56 +2889,12 @@ Getting_started_with_WebRTC_and_SkylinkJS/">How to setup a simple video call</a>
   </div>
 
   <div class="code-item-description">
-    <p>Buffers an ICE candidate object associated with a Peer connection
-  to prevent disruption to ICE connection when ICE candidate
-  is received before <code>RTCPeerConnection.setRemoteDescription</code>
-  is called.</p>
+    <p>Function that buffers an ICE candidate to queue when received before remoteDescription is received and set.</p>
 
   </div>
 
   
 
-  
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">targetMid</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The Peer ID associated with the ICE
-  candidate object.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">candidate</code>
-            <span class="type"><b>{</b>Object<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The constructed ICE candidate object.</p>
-
-            </div>
-
-            
-          </li>
-      
-      </ul>
-    </div>
   
 
   
@@ -8516,16 +8424,7 @@ The offerer status may be shifted to the other peer depending on
               <div id="method__onAddIceCandidateFailure" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_onAddIceCandidateFailure</code></h3>
   
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code>error</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
+    <span class="paren">()</span>
   
 
   <div class="code-item-properties">
@@ -8569,7 +8468,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l211"><code>source&#x2F;ice-candidate.js:211</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l174"><code>source&#x2F;ice-candidate.js:174</code></a>
       </small>
     
 
@@ -8583,38 +8482,13 @@ The offerer status may be shifted to the other peer depending on
   </div>
 
   <div class="code-item-description">
-    <p>Handles the event when adding an ICE candidate has failed.
-This is mainly to prevent JShint errors.</p>
+    <p>Function that handles when an ICE candidate has failed adding or processing.
+Separated in a function to prevent jshint errors.</p>
 
   </div>
 
   
 
-  
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">error</code>
-            <span class="type"><b>{</b>Object<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The error received in the failure callback
-  in <code>RTCPeerConnection.addIceCandidate(candidate, successCb, failureCb)</code>.</p>
-
-            </div>
-
-            
-          </li>
-      
-      </ul>
-    </div>
   
 
   
@@ -8670,7 +8544,7 @@ This is mainly to prevent JShint errors.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l198"><code>source&#x2F;ice-candidate.js:198</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l162"><code>source&#x2F;ice-candidate.js:162</code></a>
       </small>
     
 
@@ -8684,8 +8558,8 @@ This is mainly to prevent JShint errors.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Handles the event when adding an ICE candidate has been added
-  successfully. This is mainly to prevent JShint errors.</p>
+    <p>Function that handles when an ICE candidate has been added or processed successfully.
+Separated in a function to prevent jshint errors.</p>
 
   </div>
 
@@ -8702,21 +8576,7 @@ This is mainly to prevent JShint errors.</p>
               <div id="method__onIceCandidate" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_onIceCandidate</code></h3>
   
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code>targetMid</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code>candidate</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
+    <span class="paren">()</span>
   
 
   <div class="code-item-properties">
@@ -8760,7 +8620,7 @@ This is mainly to prevent JShint errors.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l68"><code>source&#x2F;ice-candidate.js:68</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l46"><code>source&#x2F;ice-candidate.js:46</code></a>
       </small>
     
 
@@ -8774,60 +8634,12 @@ This is mainly to prevent JShint errors.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Handles the ICE candidate object received from associated Peer connection
-  to send the ICE candidate object or wait for all gathering to complete
-  before sending the candidate to prevent trickle ICE.</p>
+    <p>Function that handles the ICE candidate gathered to be sent to Peer.</p>
 
   </div>
 
   
-  <div class="code-item-section">
-    <h4>Triggers:</h4>
-    <span class="code-item-trigger">candidateGenerationState</span>
-  </div>
-  
 
-  
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">targetMid</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The Peer ID associated with the ICE
-  candidate object received.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">candidate</code>
-            <span class="type"><b>{</b>RTCIceCandidate<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The local generated candidate object.</p>
-
-            </div>
-
-            
-          </li>
-      
-      </ul>
-    </div>
   
 
   
@@ -30698,8 +30510,6 @@ This will configure TURN server connection using port <code>443</code> only and
       
 
       
-        <span class="label label-warning" title="This attribute is required for communication.">required</span>
-      
 
       
 
@@ -30736,7 +30546,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l21"><code>source&#x2F;ice-candidate.js:21</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l33"><code>source&#x2F;ice-candidate.js:33</code></a>
       </small>
     
 
@@ -30761,7 +30571,7 @@ This will configure TURN server connection using port <code>443</code> only and
       <ul class="params-list">
       
           <li class="param">
-            <code class="param-name">(#peerId)</code>
+            <code class="param-name">&lt;#peerId&gt;</code>
             <span class="type"><b>{</b>JSON<b>}</b></span>
 
             
@@ -30788,46 +30598,6 @@ This will configure TURN server connection using port <code>443</code> only and
                     </div>
 
                     
-                      <ul class="params-list">
-                        
-                          <li class="param">
-                            <code class="param-name">host</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              The list of local <code>"host"</code> type of candidates sent.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">srflx</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              The list of local <code>"srflx"</code> type of candidates sent.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">relay</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              The list of local <code>"relay"</code> type of candidates sent.
-                            </div>
-                          </li>
-                        
-                      </ul>
-                    
                   </li>
                 
                   <li class="param">
@@ -30842,46 +30612,6 @@ This will configure TURN server connection using port <code>443</code> only and
 
                     </div>
 
-                    
-                      <ul class="params-list">
-                        
-                          <li class="param">
-                            <code class="param-name">host</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              The list of remote <code>"host"</code> type of candidates received.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">srflx</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              The list of remote <code>"srflx"</code> type of candidates received.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">relay</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              The list of remote <code>"relay"</code> type of candidates received.
-                            </div>
-                          </li>
-                        
-                      </ul>
                     
                   </li>
                 
@@ -32622,8 +32352,6 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
       
 
       
-        <span class="label label-warning" title="This attribute is required for communication.">required</span>
-      
 
       
 
@@ -32660,7 +32388,7 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l1"><code>source&#x2F;ice-candidate.js:1</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l21"><code>source&#x2F;ice-candidate.js:21</code></a>
       </small>
     
 
@@ -32670,11 +32398,7 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
   </div>
 
   <div class="code-item-description">
-    <p>Stores the list of buffered ICE candidates received
-  before <code>RTCPeerConnection.setRemoteDescription</code> is
-  called. Adding ICE candidates before receiving the remote
-  session description causes an ICE connection failures in a
-  number of instances.</p>
+    <p>Stores the list of buffered ICE candidates to be added remoteDescription is received and set.</p>
 
   </div>
 
@@ -32689,15 +32413,14 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
       <ul class="params-list">
       
           <li class="param">
-            <code class="param-name">(#peerId)</code>
+            <code class="param-name">&lt;#peerId&gt;</code>
             <span class="type"><b>{</b>Array<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>The Peer ID associated with the
-  list of buffered ICE candidates.</p>
+                <p>The Peer buffered ICE candidates.</p>
 
             </div>
 
@@ -32705,15 +32428,14 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
               <ul class="params-list">
                 
                   <li class="param">
-                    <code class="param-name">(#index)</code>
+                    <code class="param-name">&lt;#index&gt;</code>
                     <span class="type"><b>{</b>Object<b>}</b></span>
 
                     
                     
 
                     <div class="param-description">
-                      <p>The buffered RTCIceCandidate
-  object associated with the Peer.</p>
+                      <p>The buffered ICE candidate.</p>
 
                     </div>
 
@@ -37725,7 +37447,7 @@ used by default.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l42"><code>source&#x2F;ice-candidate.js:42</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l1"><code>source&#x2F;ice-candidate.js:1</code></a>
       </small>
     
 
@@ -37735,10 +37457,7 @@ used by default.</li>
   </div>
 
   <div class="code-item-description">
-    <p>The list of Peer connection ICE candidate generation states that Skylink would trigger.</p>
-<ul>
-<li>These states references the <a href="http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState">w3c WebRTC Specification Draft</a>.</li>
-</ul>
+    <p>Contains the list of Peer connection ICE candidate generation states.</p>
 
   </div>
 
@@ -37761,8 +37480,7 @@ used by default.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;new&quot;</code></small>
-  The state when the object was just created, and no networking has occurred yet.<br>
-This state occurs when Peer connection has just been initialised.</p>
+  The state when Peer connection is at initial stage.</p>
 
             </div>
 
@@ -37778,8 +37496,7 @@ This state occurs when Peer connection has just been initialised.</p>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;gathering&quot;</code></small>
-  The state when the ICE engine is in the process of gathering candidates for connection.<br>
-This state occurs after <code>NEW</code> state.</p>
+  The state when Peer connection is gathering ICE candidates.</p>
 
             </div>
 
@@ -37795,9 +37512,7 @@ This state occurs after <code>NEW</code> state.</p>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;completed&quot;</code></small>
-  The ICE engine has completed gathering. Events such as adding a
-  new interface or a new TURN server will cause the state to go back to gathering.<br>
-This state occurs after <code>GATHERING</code> state and means ICE gathering has been done.</p>
+  The state when Peer connection has completed gathering ICE candidates.</p>
 
             </div>
 
