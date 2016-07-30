@@ -90,22 +90,21 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * These are the list of platform signaling system actions that Skylink would be given with.
- * - Upon receiving from the signaling, the application has to reflect the
- *   relevant actions given.
- * - You may refer to {{#crossLink &quot;Skylink/SYSTEM_ACTION_REASON:attribute&quot;}}SYSTEM_ACTION_REASON{{/crossLink}}
- *   for the types of system action reasons that would be given.
+ * Contains the list of Signaling action states.
  * @attribute SYSTEM_ACTION
- * @type JSON
  * @param {String} WARNING &lt;small&gt;Value &lt;code&gt;&quot;warning&quot;&lt;/code&gt;&lt;/small&gt;
- *   This action serves a warning to self. Usually if
- *   warning is not heeded, it may result in an &lt;code&gt;REJECT&lt;/code&gt; action.
+ *   The action state where Signaling might end the connection session.
+ *   Sometimes, it is served as a warning like for an instance when a Peer is
+ *   overloading and jamming the Signaling with loads of messages abnormally, the Signaling
+ *   would end the Peer&#x27;s connection from the Room to prevent disruption for other Peers in Room.
+ *   &lt;small&gt;See &lt;a href=&quot;#attr_SYSTEM_ACTION_REASON&quot;&gt;&lt;code&gt;SYSTEM_ACTION_REASON&lt;/code&gt;&lt;/a&gt; for the
+ *     list of reasons that would result in this action state.&lt;/small&gt;
  * @param {String} REJECT &lt;small&gt;Value &lt;code&gt;&quot;reject&quot;&lt;/code&gt;&lt;/small&gt;
- *   This action means that self has been kicked out
- *   of the current signaling room connection, and subsequent Peer connections
- *   would be disconnected.
+ *   The action state where the Signaling has ended the Peer&#x27;s session.
+ *   &lt;small&gt;See &lt;a href=&quot;#attr_SYSTEM_ACTION_REASON&quot;&gt;&lt;code&gt;SYSTEM_ACTION_REASON&lt;/code&gt;&lt;/a&gt; for the
+ *     list of reasons that would result in this action state.&lt;/small&gt;
+ * @type JSON
  * @readOnly
- * @component Room
  * @for Skylink
  * @since 0.5.1
  */

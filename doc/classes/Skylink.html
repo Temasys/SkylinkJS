@@ -2799,7 +2799,7 @@ Getting_started_with_WebRTC_and_SkylinkJS/">How to setup a simple video call</a>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l186"><code>source&#x2F;ice-candidate.js:186</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l190"><code>source&#x2F;ice-candidate.js:190</code></a>
       </small>
     
 
@@ -2813,8 +2813,8 @@ Getting_started_with_WebRTC_and_SkylinkJS/">How to setup a simple video call</a>
   </div>
 
   <div class="code-item-description">
-    <p>Function that adds all the buffered ICE candidates.
-This should be called after remoteDescription is received and set.</p>
+    <p>Function that adds all the Peer connection buffered ICE candidates received.
+This should be called only after the remote session description is received and set.</p>
 
   </div>
 
@@ -2875,7 +2875,7 @@ This should be called after remoteDescription is received and set.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l147"><code>source&#x2F;ice-candidate.js:147</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l148"><code>source&#x2F;ice-candidate.js:148</code></a>
       </small>
     
 
@@ -2889,7 +2889,8 @@ This should be called after remoteDescription is received and set.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Function that buffers an ICE candidate to queue when received before remoteDescription is received and set.</p>
+    <p>Function that buffers the Peer connection ICE candidate when received
+  before remote session description is received and set.</p>
 
   </div>
 
@@ -8468,7 +8469,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l174"><code>source&#x2F;ice-candidate.js:174</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l177"><code>source&#x2F;ice-candidate.js:177</code></a>
       </small>
     
 
@@ -8482,7 +8483,8 @@ The offerer status may be shifted to the other peer depending on
   </div>
 
   <div class="code-item-description">
-    <p>Function that handles when an ICE candidate has failed adding or processing.
+    <p>Function that handles when the Peer connection received ICE candidate
+  has failed adding or processing.
 Separated in a function to prevent jshint errors.</p>
 
   </div>
@@ -8544,7 +8546,7 @@ Separated in a function to prevent jshint errors.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l162"><code>source&#x2F;ice-candidate.js:162</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l164"><code>source&#x2F;ice-candidate.js:164</code></a>
       </small>
     
 
@@ -8558,7 +8560,8 @@ Separated in a function to prevent jshint errors.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Function that handles when an ICE candidate has been added or processed successfully.
+    <p>Function that handles when the Peer connection received ICE candidate
+  has been added or processed successfully.
 Separated in a function to prevent jshint errors.</p>
 
   </div>
@@ -8620,7 +8623,7 @@ Separated in a function to prevent jshint errors.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l46"><code>source&#x2F;ice-candidate.js:46</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l47"><code>source&#x2F;ice-candidate.js:47</code></a>
       </small>
     
 
@@ -8634,7 +8637,7 @@ Separated in a function to prevent jshint errors.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Function that handles the ICE candidate gathered to be sent to Peer.</p>
+    <p>Function that handles the Peer connection gathered ICE candidate to be sent.</p>
 
   </div>
 
@@ -14627,16 +14630,7 @@ When there is not response after timeout, the data transfer will be terminated.<
               <div id="method__setIceServers" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_setIceServers</code></h3>
   
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code>config</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
+    <span class="paren">()</span>
   
 
   <div class="code-item-properties">
@@ -14680,7 +14674,7 @@ When there is not response after timeout, the data transfer will be terminated.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l204"><code>source&#x2F;ice-connection.js:204</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l154"><code>source&#x2F;ice-connection.js:154</code></a>
       </small>
     
 
@@ -14694,61 +14688,16 @@ When there is not response after timeout, the data transfer will be terminated.<
   </div>
 
   <div class="code-item-description">
-    <p>Reconfigures the <code>RTCConfiguration.iceServers</code> that is
-  to be passed in constructing the new <code>RTCPeerConnection</code>
-  object to remove (disable) STUN or remove TURN (disable) server
-  connections based on the
-  <a href="../classes/Skylink.html#method_init" class="crosslink">init()</a>
-  configuration passed in.</p>
+    <p>Function that filters and configures the ICE servers received from Signaling
+  based on the <code>init()</code> configuration and returns the updated
+  list of ICE servers to be used when constructing Peer connection.</p>
 
   </div>
 
   
 
   
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
 
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">config</code>
-            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The RTCConfiguration that is to be passed for
-  constructing the new RTCPeerConnection object.</p>
-
-            </div>
-
-            
-          </li>
-      
-      </ul>
-    </div>
-  
-
-  
-    <div class="code-item-section">
-      <h4>Returns:</h4>
-
-      <div class="returns-description">
-        
-          
-            <span class="type"><b>{</b>JSON<b>}</b></span>:
-          
-          <p>The updated RTCConfiguration object based on the
-  configuration settings in the
-  <a href="../classes/Skylink.html#method_init" class="crosslink">init()</a>
-  method.</p>
-
-        
-      </div>
-    </div>
   
 
   
@@ -17173,7 +17122,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l560"><code>source&#x2F;room-connection.js:560</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l559"><code>source&#x2F;room-connection.js:559</code></a>
       </small>
     
 
@@ -22294,7 +22243,7 @@ This will only work if self is a privileged Peer.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l112"><code>source&#x2F;room-connection.js:112</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l111"><code>source&#x2F;room-connection.js:111</code></a>
       </small>
     
 
@@ -23274,7 +23223,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l662"><code>source&#x2F;room-connection.js:662</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l661"><code>source&#x2F;room-connection.js:661</code></a>
       </small>
     
 
@@ -23525,7 +23474,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l790"><code>source&#x2F;room-connection.js:790</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l789"><code>source&#x2F;room-connection.js:789</code></a>
       </small>
     
 
@@ -27064,7 +27013,7 @@ Reference <a href="../classes/Skylink.html#method_refreshConnection" class="cros
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l814"><code>source&#x2F;room-connection.js:814</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l813"><code>source&#x2F;room-connection.js:813</code></a>
       </small>
     
 
@@ -29892,8 +29841,6 @@ If <code>console.trace()</code> is not supported, it will fallback and
       
 
       
-        <span class="label label-warning" title="This attribute is required for communication.">required</span>
-      
 
       
 
@@ -29930,7 +29877,7 @@ If <code>console.trace()</code> is not supported, it will fallback and
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l119"><code>source&#x2F;ice-connection.js:119</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l86"><code>source&#x2F;ice-connection.js:86</code></a>
       </small>
     
 
@@ -29940,8 +29887,7 @@ If <code>console.trace()</code> is not supported, it will fallback and
   </div>
 
   <div class="code-item-description">
-    <p>The flag that indicates if PeerConnections should enable
-   trickling of ICE to connect the ICE connection.</p>
+    <p>Stores the flag that indicates if Peer connections should trickle ICE.</p>
 
   </div>
 
@@ -29974,8 +29920,6 @@ If <code>console.trace()</code> is not supported, it will fallback and
       
 
       
-        <span class="label label-warning" title="This attribute is required for communication.">required</span>
-      
 
       
 
@@ -30012,7 +29956,7 @@ If <code>console.trace()</code> is not supported, it will fallback and
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l133"><code>source&#x2F;ice-connection.js:133</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l97"><code>source&#x2F;ice-connection.js:97</code></a>
       </small>
     
 
@@ -30022,8 +29966,7 @@ If <code>console.trace()</code> is not supported, it will fallback and
   </div>
 
   <div class="code-item-description">
-    <p>The flag that indicates if PeerConnections ICE gathering
-  should use STUN server connection.</p>
+    <p>Stores the flag that indicates if STUN ICE servers should be used when constructing Peer connection.</p>
 
   </div>
 
@@ -30056,8 +29999,6 @@ If <code>console.trace()</code> is not supported, it will fallback and
       
 
       
-        <span class="label label-warning" title="This attribute is required for communication.">required</span>
-      
 
       
 
@@ -30094,7 +30035,7 @@ If <code>console.trace()</code> is not supported, it will fallback and
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l146"><code>source&#x2F;ice-connection.js:146</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l108"><code>source&#x2F;ice-connection.js:108</code></a>
       </small>
     
 
@@ -30104,10 +30045,7 @@ If <code>console.trace()</code> is not supported, it will fallback and
   </div>
 
   <div class="code-item-description">
-    <p>The flag that indicates if PeerConnections ICE gathering
-  should use TURN server connection.
-Tampering this flag may disable any successful Peer connection
-  that is behind any firewalls.</p>
+    <p>Stores the flag that indicates if TURN ICE servers should be used when constructing Peer connection.</p>
 
   </div>
 
@@ -30546,7 +30484,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l33"><code>source&#x2F;ice-candidate.js:33</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l34"><code>source&#x2F;ice-candidate.js:34</code></a>
       </small>
     
 
@@ -30556,7 +30494,7 @@ This will configure TURN server connection using port <code>443</code> only and
   </div>
 
   <div class="code-item-description">
-    <p>Stores the list of local and remote candidates sent and received.</p>
+    <p>Stores the list of Peer connection ICE candidates.</p>
 
   </div>
 
@@ -30578,7 +30516,7 @@ This will configure TURN server connection using port <code>443</code> only and
             
 
             <div class="param-description">
-                <p>The list of candidates associated with the Peer ID.</p>
+                <p>The list of the Peer connection ICE candidates.</p>
 
             </div>
 
@@ -30593,7 +30531,7 @@ This will configure TURN server connection using port <code>443</code> only and
                     
 
                     <div class="param-description">
-                      <p>The list of local candidates gathered for Peer sent.</p>
+                      <p>The list of the Peer connection ICE candidates sent.</p>
 
                     </div>
 
@@ -30608,7 +30546,7 @@ This will configure TURN server connection using port <code>443</code> only and
                     
 
                     <div class="param-description">
-                      <p>The list of remote candidates gathered for Peer received.</p>
+                      <p>The list of the Peer connection ICE candidates received.</p>
 
                     </div>
 
@@ -31084,8 +31022,6 @@ This will configure TURN server connection using port <code>443</code> only and
       
 
       
-        <span class="label label-warning" title="This attribute is required for communication.">required</span>
-      
 
       
 
@@ -31122,7 +31058,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l188"><code>source&#x2F;ice-connection.js:188</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l143"><code>source&#x2F;ice-connection.js:143</code></a>
       </small>
     
 
@@ -31132,9 +31068,7 @@ This will configure TURN server connection using port <code>443</code> only and
   </div>
 
   <div class="code-item-description">
-    <p>Stores the list of Peer connection ICE connection failures.
-After an third attempt of ICE connection failure, the
-  trickling of ICE would be disabled.</p>
+    <p>Stores the list of Peer connections ICE failures counter.</p>
 
   </div>
 
@@ -31149,15 +31083,14 @@ After an third attempt of ICE connection failure, the
       <ul class="params-list">
       
           <li class="param">
-            <code class="param-name">(#peerId)</code>
+            <code class="param-name">&lt;#peerId&gt;</code>
             <span class="type"><b>{</b>Number<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>The Peer ID associated with the
-  number of Peer connection ICE connection attempt failures.</p>
+                <p>The Peer connection ICE failures counter.</p>
 
             </div>
 
@@ -31222,7 +31155,7 @@ After an third attempt of ICE connection failure, the
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l101"><code>source&#x2F;room-connection.js:101</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l100"><code>source&#x2F;room-connection.js:100</code></a>
       </small>
     
 
@@ -32398,7 +32331,8 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
   </div>
 
   <div class="code-item-description">
-    <p>Stores the list of buffered ICE candidates to be added remoteDescription is received and set.</p>
+    <p>Stores the list of buffered ICE candidates that is received before
+  remote session description is received and set.</p>
 
   </div>
 
@@ -32420,7 +32354,7 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
             
 
             <div class="param-description">
-                <p>The Peer buffered ICE candidates.</p>
+                <p>The list of the Peer connection buffered ICE candidates received.</p>
 
             </div>
 
@@ -32435,7 +32369,7 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
                     
 
                     <div class="param-description">
-                      <p>The buffered ICE candidate.</p>
+                      <p>The Peer connection buffered ICE candidate received.</p>
 
                     </div>
 
@@ -34053,7 +33987,7 @@ The persistent room feature is configurable in the Application Key
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l90"><code>source&#x2F;room-connection.js:90</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l89"><code>source&#x2F;room-connection.js:89</code></a>
       </small>
     
 
@@ -34630,7 +34564,7 @@ Currently, Opera does not support screensharing and only premium
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l74"><code>source&#x2F;room-connection.js:74</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l73"><code>source&#x2F;room-connection.js:73</code></a>
       </small>
     
 
@@ -36724,7 +36658,7 @@ If the value is <code>0</code>, it will use the default timeout from
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l174"><code>source&#x2F;ice-connection.js:174</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l130"><code>source&#x2F;ice-connection.js:130</code></a>
       </small>
     
 
@@ -36734,15 +36668,15 @@ If the value is <code>0</code>, it will use the default timeout from
   </div>
 
   <div class="code-item-description">
-    <p>Stores the TURN server transport to enable for TURN server connections.
-[Rel: Skylink.TURN_TRANSPORT]</p>
+    <p>Stores the option for the TURN protocols to use.
+This should configure the TURN ICE servers urls <code>?transport=protocol</code> flag.</p>
 
   </div>
 
   
     <div class="code-item-section">
       <h4>Default value:</h4>
-      <code class="prettyprint">Skylink.TURN_TRANSPORT.ANY</code>
+      <code class="prettyprint">&quot;any&quot;</code>
     </div>
   
 
@@ -36962,8 +36896,6 @@ If the value is <code>0</code>, it will use the default timeout from
       
 
       
-        <span class="label label-warning" title="This attribute is required for communication.">required</span>
-      
 
       
 
@@ -37000,7 +36932,7 @@ If the value is <code>0</code>, it will use the default timeout from
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l161"><code>source&#x2F;ice-connection.js:161</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l119"><code>source&#x2F;ice-connection.js:119</code></a>
       </small>
     
 
@@ -37010,7 +36942,7 @@ If the value is <code>0</code>, it will use the default timeout from
   </div>
 
   <div class="code-item-description">
-    <p>The flag to enable using of public STUN server connections.</p>
+    <p>Stores the flag that indicates if public STUN ICE servers should be used when constructing Peer connection.</p>
 
   </div>
 
@@ -37457,7 +37389,7 @@ used by default.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Contains the list of Peer connection ICE candidate generation states.</p>
+    <p>Contains the list of Peer connection ICE gathering states.</p>
 
   </div>
 
@@ -37472,22 +37404,6 @@ used by default.</li>
       <ul class="params-list">
       
           <li class="param">
-            <code class="param-name">NEW</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-                <p><small>Value <code>&quot;new&quot;</code></small>
-  The state when Peer connection is at initial stage.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
             <code class="param-name">GATHERING</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
@@ -37496,7 +37412,9 @@ used by default.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;gathering&quot;</code></small>
-  The state when Peer connection is gathering ICE candidates.</p>
+  The state when Peer connection ICE is gathering candidates. The ICE
+  candidates that are gathered would be sent to the Peers so that the ICE
+  connection may be established after a suitable matching pair is found.</p>
 
             </div>
 
@@ -37512,7 +37430,7 @@ used by default.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;completed&quot;</code></small>
-  The state when Peer connection has completed gathering ICE candidates.</p>
+  The state when Peer connection ICE has completed gathering candidates.</p>
 
             </div>
 
@@ -38900,12 +38818,7 @@ At this state, self would set the remote <code>ANSWER</code> session description
   </div>
 
   <div class="code-item-description">
-    <p>These are the list of Peer connection ICE connection states that Skylink would trigger.</p>
-<ul>
-<li>These states references the <a href="http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState">w3c WebRTC Specification Draft</a>,
-except the <code>TRICKLE_FAILED</code> state, which is an addition provided state by Skylink
-to inform that trickle ICE has failed.</li>
-</ul>
+    <p>Contains the list of Peer connection ICE connection states.</p>
 
   </div>
 
@@ -38920,24 +38833,6 @@ to inform that trickle ICE has failed.</li>
       <ul class="params-list">
       
           <li class="param">
-            <code class="param-name">STARTING</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-                <p><small>Value <code>&quot;starting&quot;</code></small>
-  The state when the ICE agent is gathering addresses and/or waiting
-  for remote candidates to be supplied.<br>
-This state occurs when Peer connection has just been initialised.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
             <code class="param-name">CHECKING</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
@@ -38946,11 +38841,8 @@ This state occurs when Peer connection has just been initialised.</p>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;checking&quot;</code></small>
-  The state when the ICE agent has received remote candidates
-  on at least one component, and is checking candidate pairs but has
-  not yet found a connection. In addition to checking, it may also
-  still be gathering.<br>
-This state occurs after <code>STARTING</code> state.</p>
+  The state when Peer connection is still checking for a suitable matching ICE
+  candidate pair sent and received.</p>
 
             </div>
 
@@ -38966,10 +38858,11 @@ This state occurs after <code>STARTING</code> state.</p>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;connected&quot;</code></small>
- The state when the ICE agent has found a usable connection
-  for all components but is still checking other candidate pairs to see
-  if there is a better connection. It may also still be gathering.<br>
-This state occurs after <code>CHECKING</code>.</p>
+  The state when Peer connection has found a suitable matching ICE candidate pair
+  sent and received but is actively looking for other ICE candidates sent and received
+  for better ICE connection.
+  <small>At this stage, the ICE connection is established already and
+    media is streaming with Datachannel starting connections.</small></p>
 
             </div>
 
@@ -38985,9 +38878,9 @@ This state occurs after <code>CHECKING</code>.</p>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;completed&quot;</code></small>
-  The state when the ICE agent has finished gathering and
-  checking and found a connection for all components.<br>
-This state occurs after <code>CONNECTED</code> (or sometimes after <code>CHECKING</code>).</p>
+  The state when Peer connection had found the best ICE connection.
+  <small>At this stage, the ICE connection is established already and
+    media is streaming with Datachannel starting connections.</small></p>
 
             </div>
 
@@ -39003,10 +38896,12 @@ This state occurs after <code>CONNECTED</code> (or sometimes after <code>CHECKIN
 
             <div class="param-description">
                 <p><small>Value <code>&quot;failed&quot;</code></small>
-  The state when the ICE agent is finished checking all
-  candidate pairs and failed to find a connection for at least one
-  component.<br>
-This state occurs during the ICE connection attempt after <code>STARTING</code> state.</p>
+  The state when Peer connection has failed to find a suitable matching ICE candidate pair
+  for a connection.
+  <small>As a workaround, you may just simply invoke
+    <a href="#method_joinRoom"><code>joinRoom()</code></a> again when this state happens to reconnect to
+    the room again to retrieve new ICE credentials and see if it helps the Peer to establish a
+    successful ICE connection.</small></p>
 
             </div>
 
@@ -39022,11 +38917,8 @@ This state occurs during the ICE connection attempt after <code>STARTING</code> 
 
             <div class="param-description">
                 <p><small>Value <code>&quot;disconnected&quot;</code></small>
-  The state when liveness checks have failed for one or
-  more components. This is more aggressive than &quot;failed&quot;, and may
-  trigger intermittently (and resolve itself without action) on
-  a flaky network.<br>
-This state occurs after <code>CONNECTED</code> or <code>COMPLETED</code> state.</p>
+  The state when Peer connection ICE connection has been disconnected.
+  This may be caused by a flaky network connection.</p>
 
             </div>
 
@@ -39042,9 +38934,8 @@ This state occurs after <code>CONNECTED</code> or <code>COMPLETED</code> state.<
 
             <div class="param-description">
                 <p><small>Value <code>&quot;closed&quot;</code></small>
-  The state when the ICE agent has shut down and is no
-  longer responding to STUN requests.<br>
-This state occurs after Peer connection has been disconnected <em>(closed)</em>.</p>
+  The state when Peer connection ICE connection has closed and no media could be streamed from
+  the Peer connection nor any Datachannel connection could be established.</p>
 
             </div>
 
@@ -39060,8 +38951,10 @@ This state occurs after Peer connection has been disconnected <em>(closed)</em>.
 
             <div class="param-description">
                 <p><small>Value <code>&quot;trickeFailed&quot;</code></small>
-  The state when attempting to connect successfully with ICE connection fails
-   with trickle ICE connections.</p>
+  The state is the same as <code>FAILED</code> state except that the failure occurs with
+  trickle ICE enabled.
+  <small>To disable trickle ICE, configure the <code>enableIceTrickle</code> option in
+    the <a href="#method_init"><code>init()</code> method</a>.</small></p>
 
             </div>
 
@@ -40975,13 +40868,7 @@ see the Protocol version used in this Skylink version.</li>
   </div>
 
   <div class="code-item-description">
-    <p>These are the list of platform signaling system actions that Skylink would be given with.</p>
-<ul>
-<li>Upon receiving from the signaling, the application has to reflect the
-relevant actions given.</li>
-<li>You may refer to <a href="../classes/Skylink.html#attr_SYSTEM_ACTION_REASON" class="crosslink">SYSTEM_ACTION_REASON</a>
-for the types of system action reasons that would be given.</li>
-</ul>
+    <p>Contains the list of Signaling action states.</p>
 
   </div>
 
@@ -41004,8 +40891,12 @@ for the types of system action reasons that would be given.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;warning&quot;</code></small>
-  This action serves a warning to self. Usually if
-  warning is not heeded, it may result in an <code>REJECT</code> action.</p>
+  The action state where Signaling might end the connection session.
+  Sometimes, it is served as a warning like for an instance when a Peer is
+  overloading and jamming the Signaling with loads of messages abnormally, the Signaling
+  would end the Peer&#39;s connection from the Room to prevent disruption for other Peers in Room.
+  <small>See <a href="#attr_SYSTEM_ACTION_REASON"><code>SYSTEM_ACTION_REASON</code></a> for the
+    list of reasons that would result in this action state.</small></p>
 
             </div>
 
@@ -41021,9 +40912,9 @@ for the types of system action reasons that would be given.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;reject&quot;</code></small>
-  This action means that self has been kicked out
-  of the current signaling room connection, and subsequent Peer connections
-  would be disconnected.</p>
+  The action state where the Signaling has ended the Peer&#39;s session.
+  <small>See <a href="#attr_SYSTEM_ACTION_REASON"><code>SYSTEM_ACTION_REASON</code></a> for the
+    list of reasons that would result in this action state.</small></p>
 
             </div>
 
@@ -41088,7 +40979,7 @@ for the types of system action reasons that would be given.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l26"><code>source&#x2F;room-connection.js:26</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l25"><code>source&#x2F;room-connection.js:25</code></a>
       </small>
     
 
@@ -41283,7 +41174,7 @@ This relates to the persistent room feature configured in the Application Key.</
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l61"><code>source&#x2F;ice-connection.js:61</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l51"><code>source&#x2F;ice-connection.js:51</code></a>
       </small>
     
 
@@ -41293,16 +41184,14 @@ This relates to the persistent room feature configured in the Application Key.</
   </div>
 
   <div class="code-item-description">
-    <p>These are the list of available transports that
-  Skylink would use to connect to the TURN servers with.</p>
-<ul>
-<li>For example as explanation how these options works below, let&#39;s take that
-these are list of TURN servers given by the platform signaling:<br>
-<small><code>turn:turnurl:123?transport=tcp</code><br>
-<code>turn:turnurl?transport=udp</code><br>
-<code>turn:turnurl:1234</code><br>
-<code>turn:turnurl</code></small></li>
-</ul>
+    <p><blockquote class="info">
+  Note that configuring the protocol may not necessarily result in the desired protocol
+  used in the actual TURN IP traffic as it depends which protocol the browser selects and connects with.<br>
+  For an advanced explaination, this configures the ICE server urls passed in <code?transport=<protocol></code>
+  when constructing the Peer connection. When both protocols are selected, the ICE servers urls are duplicated
+  with both protocols.
+</blockquote>
+Contains the list of configurations to use when Peer connection ICE connection using the TURN server.</p>
 
   </div>
 
@@ -41325,11 +41214,7 @@ these are list of TURN servers given by the platform signaling:<br>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;tcp&quot;</code></small>
-  The option to connect using only TCP transports.
-  <small>EXAMPLE OUTPUT<br>
-  <code>turn:turnurl:123?transport=tcp</code><br>
-  <code>turn:turnurl?transport=tcp</code><br>
-  <code>turn:turnurl:1234?transport=tcp</code></small></p>
+  The option to configure using only TCP protocol.</p>
 
             </div>
 
@@ -41345,11 +41230,7 @@ these are list of TURN servers given by the platform signaling:<br>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;udp&quot;</code></small>
-  The option to connect using only UDP transports.
-  <small>EXAMPLE OUTPUT<br>
-  <code>turn:turnurl:123?transport=udp</code><br>
-  <code>turn:turnurl?transport=udp</code><br>
-  <code>turn:turnurl:1234?transport=udp</code></small></p>
+  The option to configure using only UDP protocol.</p>
 
             </div>
 
@@ -41365,12 +41246,7 @@ these are list of TURN servers given by the platform signaling:<br>
 
             <div class="param-description">
                 <p><small><b>DEFAULT</b> | Value <code>&quot;any&quot;</code></small>
-  This option to use any transports that is preconfigured by provided by the platform signaling.
-  <small>EXAMPLE OUTPUT<br>
-  <code>turn:turnurl:123?transport=tcp</code><br>
-  <code>turn:turnurl?transport=udp</code><br>
-  <code>turn:turnurl:1234</code><br>
-  <code>turn:turnurl</code></small></p>
+  The option to configure using any protocols provided by default.</p>
 
             </div>
 
@@ -41386,11 +41262,9 @@ these are list of TURN servers given by the platform signaling:<br>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;none&quot;</code></small>
-  This option to set no transports.
-  <small>EXAMPLE OUTPUT<br>
-  <code>turn:turnurl:123</code><br>
-  <code>turn:turnurl</code><br>
-  <code>turn:turnurl:1234</code></small></p>
+  The option to not configure using only protocols.
+  <small>Configuring this does not mean that no protocols will be used, but
+    rather removing <code>?transport</code> flags in the ICE server urls when constructing the Peer connection.</small></p>
 
             </div>
 
@@ -41406,14 +41280,7 @@ these are list of TURN servers given by the platform signaling:<br>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;all&quot;</code></small>
-  This option to use both TCP and UDP transports.
-  <small>EXAMPLE OUTPUT<br>
-  <code>turn:turnurl:123?transport=tcp</code><br>
-  <code>turn:turnurl:123?transport=udp</code><br>
-  <code>turn:turnurl?transport=tcp</code><br>
-  <code>turn:turnurl?transport=udp</code><br>
-  <code>turn:turnurl:1234?transport=tcp</code><br>
-  <code>turn:turnurl:1234?transport=udp</code></small></p>
+  The option to configure using both TCP and UDP protocols.</p>
 
             </div>
 

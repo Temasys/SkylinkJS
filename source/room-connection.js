@@ -1,20 +1,19 @@
 /**
- * These are the list of platform signaling system actions that Skylink would be given with.
- * - Upon receiving from the signaling, the application has to reflect the
- *   relevant actions given.
- * - You may refer to {{#crossLink "Skylink/SYSTEM_ACTION_REASON:attribute"}}SYSTEM_ACTION_REASON{{/crossLink}}
- *   for the types of system action reasons that would be given.
+ * Contains the list of Signaling action states.
  * @attribute SYSTEM_ACTION
- * @type JSON
  * @param {String} WARNING <small>Value <code>"warning"</code></small>
- *   This action serves a warning to self. Usually if
- *   warning is not heeded, it may result in an <code>REJECT</code> action.
+ *   The action state where Signaling might end the connection session.
+ *   Sometimes, it is served as a warning like for an instance when a Peer is
+ *   overloading and jamming the Signaling with loads of messages abnormally, the Signaling
+ *   would end the Peer's connection from the Room to prevent disruption for other Peers in Room.
+ *   <small>See <a href="#attr_SYSTEM_ACTION_REASON"><code>SYSTEM_ACTION_REASON</code></a> for the
+ *     list of reasons that would result in this action state.</small>
  * @param {String} REJECT <small>Value <code>"reject"</code></small>
- *   This action means that self has been kicked out
- *   of the current signaling room connection, and subsequent Peer connections
- *   would be disconnected.
+ *   The action state where the Signaling has ended the Peer's session.
+ *   <small>See <a href="#attr_SYSTEM_ACTION_REASON"><code>SYSTEM_ACTION_REASON</code></a> for the
+ *     list of reasons that would result in this action state.</small>
+ * @type JSON
  * @readOnly
- * @component Room
  * @for Skylink
  * @since 0.5.1
  */

@@ -1260,23 +1260,18 @@
         {
             "file": "source/ice-candidate.js",
             "line": 1,
-            "description": "Contains the list of Peer connection ICE candidate generation states.",
+            "description": "Contains the list of Peer connection ICE gathering states.",
             "itemtype": "attribute",
             "name": "CANDIDATE_GENERATION_STATE",
             "params": [
                 {
-                    "name": "NEW",
-                    "description": "<small>Value <code>\"new\"</code></small>\n  The state when Peer connection is at initial stage.",
-                    "type": "String"
-                },
-                {
                     "name": "GATHERING",
-                    "description": "<small>Value <code>\"gathering\"</code></small>\n  The state when Peer connection is gathering ICE candidates.",
+                    "description": "<small>Value <code>\"gathering\"</code></small>\n  The state when Peer connection ICE is gathering candidates. The ICE\n  candidates that are gathered would be sent to the Peers so that the ICE\n  connection may be established after a suitable matching pair is found.",
                     "type": "String"
                 },
                 {
                     "name": "COMPLETED",
-                    "description": "<small>Value <code>\"completed\"</code></small>\n  The state when Peer connection has completed gathering ICE candidates.",
+                    "description": "<small>Value <code>\"completed\"</code></small>\n  The state when Peer connection ICE has completed gathering candidates.",
                     "type": "String"
                 }
             ],
@@ -1288,18 +1283,18 @@
         {
             "file": "source/ice-candidate.js",
             "line": 21,
-            "description": "Stores the list of buffered ICE candidates to be added remoteDescription is received and set.",
+            "description": "Stores the list of buffered ICE candidates that is received before\n  remote session description is received and set.",
             "itemtype": "attribute",
             "name": "_peerCandidatesQueue",
             "params": [
                 {
                     "name": "<#peerId>",
-                    "description": "The Peer buffered ICE candidates.",
+                    "description": "The list of the Peer connection buffered ICE candidates received.",
                     "type": "Array",
                     "props": [
                         {
                             "name": "<#index>",
-                            "description": "The buffered ICE candidate.",
+                            "description": "The Peer connection buffered ICE candidate received.",
                             "type": "Object"
                         }
                     ]
@@ -1313,24 +1308,24 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 33,
-            "description": "Stores the list of local and remote candidates sent and received.",
+            "line": 34,
+            "description": "Stores the list of Peer connection ICE candidates.",
             "itemtype": "attribute",
             "name": "_gatheredCandidates",
             "params": [
                 {
                     "name": "<#peerId>",
-                    "description": "The list of candidates associated with the Peer ID.",
+                    "description": "The list of the Peer connection ICE candidates.",
                     "type": "JSON",
                     "props": [
                         {
                             "name": "sending",
-                            "description": "The list of local candidates gathered for Peer sent.",
+                            "description": "The list of the Peer connection ICE candidates sent.",
                             "type": "JSON"
                         },
                         {
                             "name": "receiving",
-                            "description": "The list of remote candidates gathered for Peer received.",
+                            "description": "The list of the Peer connection ICE candidates received.",
                             "type": "JSON"
                         }
                     ]
@@ -1344,8 +1339,8 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 46,
-            "description": "Function that handles the ICE candidate gathered to be sent to Peer.",
+            "line": 47,
+            "description": "Function that handles the Peer connection gathered ICE candidate to be sent.",
             "itemtype": "method",
             "name": "_onIceCandidate",
             "access": "private",
@@ -1355,8 +1350,8 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 147,
-            "description": "Function that buffers an ICE candidate to queue when received before remoteDescription is received and set.",
+            "line": 148,
+            "description": "Function that buffers the Peer connection ICE candidate when received\n  before remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateToQueue",
             "access": "private",
@@ -1366,8 +1361,8 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 162,
-            "description": "Function that handles when an ICE candidate has been added or processed successfully.\nSeparated in a function to prevent jshint errors.",
+            "line": 164,
+            "description": "Function that handles when the Peer connection received ICE candidate\n  has been added or processed successfully.\nSeparated in a function to prevent jshint errors.",
             "itemtype": "method",
             "name": "_onAddIceCandidateSuccess",
             "access": "private",
@@ -1377,8 +1372,8 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 174,
-            "description": "Function that handles when an ICE candidate has failed adding or processing.\nSeparated in a function to prevent jshint errors.",
+            "line": 177,
+            "description": "Function that handles when the Peer connection received ICE candidate\n  has failed adding or processing.\nSeparated in a function to prevent jshint errors.",
             "itemtype": "method",
             "name": "_onAddIceCandidateFailure",
             "access": "private",
@@ -1388,8 +1383,8 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 186,
-            "description": "Function that adds all the buffered ICE candidates.\nThis should be called after remoteDescription is received and set.",
+            "line": 190,
+            "description": "Function that adds all the Peer connection buffered ICE candidates received.\nThis should be called only after the remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateFromQueue",
             "access": "private",
@@ -1400,213 +1395,183 @@
         {
             "file": "source/ice-connection.js",
             "line": 1,
-            "description": "These are the list of Peer connection ICE connection states that Skylink would trigger.\n- These states references the [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState),\n  except the <code>TRICKLE_FAILED</code> state, which is an addition provided state by Skylink\n  to inform that trickle ICE has failed.",
+            "description": "Contains the list of Peer connection ICE connection states.",
             "itemtype": "attribute",
             "name": "ICE_CONNECTION_STATE",
             "type": "JSON",
             "params": [
                 {
-                    "name": "STARTING",
-                    "description": "<small>Value <code>\"starting\"</code></small>\n  The state when the ICE agent is gathering addresses and/or waiting\n  for remote candidates to be supplied.<br>\nThis state occurs when Peer connection has just been initialised.",
-                    "type": "String"
-                },
-                {
                     "name": "CHECKING",
-                    "description": "<small>Value <code>\"checking\"</code></small>\n  The state when the ICE agent has received remote candidates\n  on at least one component, and is checking candidate pairs but has\n  not yet found a connection. In addition to checking, it may also\n  still be gathering.<br>\nThis state occurs after <code>STARTING</code> state.",
+                    "description": "<small>Value <code>\"checking\"</code></small>\n  The state when Peer connection is still checking for a suitable matching ICE\n  candidate pair sent and received.",
                     "type": "String"
                 },
                 {
                     "name": "CONNECTED",
-                    "description": "<small>Value <code>\"connected\"</code></small>\n The state when the ICE agent has found a usable connection\n  for all components but is still checking other candidate pairs to see\n  if there is a better connection. It may also still be gathering.<br>\nThis state occurs after <code>CHECKING</code>.",
+                    "description": "<small>Value <code>\"connected\"</code></small>\n  The state when Peer connection has found a suitable matching ICE candidate pair\n  sent and received but is actively looking for other ICE candidates sent and received\n  for better ICE connection.\n  <small>At this stage, the ICE connection is established already and\n    media is streaming with Datachannel starting connections.</small>",
                     "type": "String"
                 },
                 {
                     "name": "COMPLETED",
-                    "description": "<small>Value <code>\"completed\"</code></small>\n  The state when the ICE agent has finished gathering and\n  checking and found a connection for all components.<br>\nThis state occurs after <code>CONNECTED</code> (or sometimes after <code>CHECKING</code>).",
+                    "description": "<small>Value <code>\"completed\"</code></small>\n  The state when Peer connection had found the best ICE connection.\n  <small>At this stage, the ICE connection is established already and\n    media is streaming with Datachannel starting connections.</small>",
                     "type": "String"
                 },
                 {
                     "name": "FAILED",
-                    "description": "<small>Value <code>\"failed\"</code></small>\n  The state when the ICE agent is finished checking all\n  candidate pairs and failed to find a connection for at least one\n  component.<br>\nThis state occurs during the ICE connection attempt after <code>STARTING</code> state.",
+                    "description": "<small>Value <code>\"failed\"</code></small>\n  The state when Peer connection has failed to find a suitable matching ICE candidate pair\n  for a connection.\n  <small>As a workaround, you may just simply invoke\n    <a href=\"#method_joinRoom\"><code>joinRoom()</code></a> again when this state happens to reconnect to\n    the room again to retrieve new ICE credentials and see if it helps the Peer to establish a\n    successful ICE connection.</small>",
                     "type": "String"
                 },
                 {
                     "name": "DISCONNECTED",
-                    "description": "<small>Value <code>\"disconnected\"</code></small>\n  The state when liveness checks have failed for one or\n  more components. This is more aggressive than \"failed\", and may\n  trigger intermittently (and resolve itself without action) on\n  a flaky network.<br>\nThis state occurs after <code>CONNECTED</code> or <code>COMPLETED</code> state.",
+                    "description": "<small>Value <code>\"disconnected\"</code></small>\n  The state when Peer connection ICE connection has been disconnected.\n  This may be caused by a flaky network connection.",
                     "type": "String"
                 },
                 {
                     "name": "CLOSED",
-                    "description": "<small>Value <code>\"closed\"</code></small>\n  The state when the ICE agent has shut down and is no\n  longer responding to STUN requests.<br>\nThis state occurs after Peer connection has been disconnected <em>(closed)</em>.",
+                    "description": "<small>Value <code>\"closed\"</code></small>\n  The state when Peer connection ICE connection has closed and no media could be streamed from\n  the Peer connection nor any Datachannel connection could be established.",
                     "type": "String"
                 },
                 {
                     "name": "TRICKLE_FAILED",
-                    "description": "<small>Value <code>\"trickeFailed\"</code></small>\n  The state when attempting to connect successfully with ICE connection fails\n   with trickle ICE connections.",
+                    "description": "<small>Value <code>\"trickeFailed\"</code></small>\n  The state is the same as <code>FAILED</code> state except that the failure occurs with\n  trickle ICE enabled.\n  <small>To disable trickle ICE, configure the <code>enableIceTrickle</code> option in\n    the <a href=\"#method_init\"><code>init()</code> method</a>.</small>",
                     "type": "String"
                 }
             ],
             "readonly": "",
             "since": "0.1.0",
-            "component": "ICE",
             "class": "Skylink"
         },
         {
             "file": "source/ice-connection.js",
-            "line": 61,
-            "description": "These are the list of available transports that\n  Skylink would use to connect to the TURN servers with.\n- For example as explanation how these options works below, let's take that\n  these are list of TURN servers given by the platform signaling:<br>\n  <small><code>turn:turnurl:123?transport=tcp</code><br>\n  <code>turn:turnurl?transport=udp</code><br>\n  <code>turn:turnurl:1234</code><br>\n  <code>turn:turnurl</code></small>",
+            "line": 51,
+            "description": "<blockquote class=\"info\">\n  Note that configuring the protocol may not necessarily result in the desired protocol\n  used in the actual TURN IP traffic as it depends which protocol the browser selects and connects with.<br>\n  For an advanced explaination, this configures the ICE server urls passed in <code?transport=<protocol></code>\n  when constructing the Peer connection. When both protocols are selected, the ICE servers urls are duplicated\n  with both protocols.\n</blockquote>\nContains the list of configurations to use when Peer connection ICE connection using the TURN server.",
             "itemtype": "attribute",
             "name": "TURN_TRANSPORT",
-            "type": "JSON",
             "params": [
                 {
                     "name": "TCP",
-                    "description": "<small>Value <code>\"tcp\"</code></small>\n  The option to connect using only TCP transports.\n  <small>EXAMPLE OUTPUT<br>\n  <code>turn:turnurl:123?transport=tcp</code><br>\n  <code>turn:turnurl?transport=tcp</code><br>\n  <code>turn:turnurl:1234?transport=tcp</code></small>",
+                    "description": "<small>Value <code>\"tcp\"</code></small>\n  The option to configure using only TCP protocol.",
                     "type": "String"
                 },
                 {
                     "name": "UDP",
-                    "description": "<small>Value <code>\"udp\"</code></small>\n  The option to connect using only UDP transports.\n  <small>EXAMPLE OUTPUT<br>\n  <code>turn:turnurl:123?transport=udp</code><br>\n  <code>turn:turnurl?transport=udp</code><br>\n  <code>turn:turnurl:1234?transport=udp</code></small>",
+                    "description": "<small>Value <code>\"udp\"</code></small>\n  The option to configure using only UDP protocol.",
                     "type": "String"
                 },
                 {
                     "name": "ANY",
-                    "description": "<small><b>DEFAULT</b> | Value <code>\"any\"</code></small>\n  This option to use any transports that is preconfigured by provided by the platform signaling.\n  <small>EXAMPLE OUTPUT<br>\n  <code>turn:turnurl:123?transport=tcp</code><br>\n  <code>turn:turnurl?transport=udp</code><br>\n  <code>turn:turnurl:1234</code><br>\n  <code>turn:turnurl</code></small>",
+                    "description": "<small><b>DEFAULT</b> | Value <code>\"any\"</code></small>\n  The option to configure using any protocols provided by default.",
                     "type": "String"
                 },
                 {
                     "name": "NONE",
-                    "description": "<small>Value <code>\"none\"</code></small>\n  This option to set no transports.\n  <small>EXAMPLE OUTPUT<br>\n  <code>turn:turnurl:123</code><br>\n  <code>turn:turnurl</code><br>\n  <code>turn:turnurl:1234</code></small>",
+                    "description": "<small>Value <code>\"none\"</code></small>\n  The option to not configure using only protocols.\n  <small>Configuring this does not mean that no protocols will be used, but\n    rather removing <code>?transport</code> flags in the ICE server urls when constructing the Peer connection.</small>",
                     "type": "String"
                 },
                 {
                     "name": "ALL",
-                    "description": "<small>Value <code>\"all\"</code></small>\n  This option to use both TCP and UDP transports.\n  <small>EXAMPLE OUTPUT<br>\n  <code>turn:turnurl:123?transport=tcp</code><br>\n  <code>turn:turnurl:123?transport=udp</code><br>\n  <code>turn:turnurl?transport=tcp</code><br>\n  <code>turn:turnurl?transport=udp</code><br>\n  <code>turn:turnurl:1234?transport=tcp</code><br>\n  <code>turn:turnurl:1234?transport=udp</code></small>",
+                    "description": "<small>Value <code>\"all\"</code></small>\n  The option to configure using both TCP and UDP protocols.",
                     "type": "String"
                 }
             ],
+            "type": "JSON",
             "readonly": "",
             "since": "0.5.4",
-            "component": "ICE",
             "class": "Skylink"
         },
         {
             "file": "source/ice-connection.js",
-            "line": 119,
-            "description": "The flag that indicates if PeerConnections should enable\n   trickling of ICE to connect the ICE connection.",
+            "line": 86,
+            "description": "Stores the flag that indicates if Peer connections should trickle ICE.",
             "itemtype": "attribute",
             "name": "_enableIceTrickle",
             "type": "Boolean",
             "default": "true",
             "access": "private",
             "tagname": "",
-            "required": 1,
             "since": "0.3.0",
-            "component": "ICE",
             "class": "Skylink"
         },
         {
             "file": "source/ice-connection.js",
-            "line": 133,
-            "description": "The flag that indicates if PeerConnections ICE gathering\n  should use STUN server connection.",
+            "line": 97,
+            "description": "Stores the flag that indicates if STUN ICE servers should be used when constructing Peer connection.",
             "itemtype": "attribute",
             "name": "_enableSTUN",
             "type": "Boolean",
             "default": "true",
             "access": "private",
             "tagname": "",
-            "required": 1,
-            "component": "ICE",
             "since": "0.5.4",
             "class": "Skylink"
         },
         {
             "file": "source/ice-connection.js",
-            "line": 146,
-            "description": "The flag that indicates if PeerConnections ICE gathering\n  should use TURN server connection.\nTampering this flag may disable any successful Peer connection\n  that is behind any firewalls.",
+            "line": 108,
+            "description": "Stores the flag that indicates if TURN ICE servers should be used when constructing Peer connection.",
             "itemtype": "attribute",
             "name": "_enableTURN",
             "type": "Boolean",
             "default": "true",
             "access": "private",
             "tagname": "",
-            "required": 1,
-            "component": "ICE",
             "since": "0.5.4",
             "class": "Skylink"
         },
         {
             "file": "source/ice-connection.js",
-            "line": 161,
-            "description": "The flag to enable using of public STUN server connections.",
+            "line": 119,
+            "description": "Stores the flag that indicates if public STUN ICE servers should be used when constructing Peer connection.",
             "itemtype": "attribute",
             "name": "_usePublicSTUN",
             "type": "Boolean",
             "default": "true",
-            "required": 1,
             "access": "private",
             "tagname": "",
-            "component": "ICE",
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/ice-connection.js",
-            "line": 174,
-            "description": "Stores the TURN server transport to enable for TURN server connections.\n[Rel: Skylink.TURN_TRANSPORT]",
+            "line": 130,
+            "description": "Stores the option for the TURN protocols to use.\nThis should configure the TURN ICE servers urls <code>?transport=protocol</code> flag.",
             "itemtype": "attribute",
             "name": "_TURNTransport",
             "type": "String",
-            "default": "Skylink.TURN_TRANSPORT.ANY",
+            "default": "\"any\"",
             "access": "private",
             "tagname": "",
             "required": 1,
             "since": "0.5.4",
-            "component": "ICE",
             "class": "Skylink"
         },
         {
             "file": "source/ice-connection.js",
-            "line": 188,
-            "description": "Stores the list of Peer connection ICE connection failures.\nAfter an third attempt of ICE connection failure, the\n  trickling of ICE would be disabled.",
+            "line": 143,
+            "description": "Stores the list of Peer connections ICE failures counter.",
             "itemtype": "attribute",
             "name": "_ICEConnectionFailures",
             "params": [
                 {
-                    "name": "(#peerId)",
-                    "description": "The Peer ID associated with the\n  number of Peer connection ICE connection attempt failures.",
+                    "name": "<#peerId>",
+                    "description": "The Peer connection ICE failures counter.",
                     "type": "Number"
                 }
             ],
             "type": "JSON",
             "access": "private",
             "tagname": "",
-            "required": 1,
-            "component": "Peer",
             "since": "0.5.8",
             "class": "Skylink"
         },
         {
             "file": "source/ice-connection.js",
-            "line": 204,
-            "description": "Reconfigures the <code>RTCConfiguration.iceServers</code> that is\n  to be passed in constructing the new <code>RTCPeerConnection</code>\n  object to remove (disable) STUN or remove TURN (disable) server\n  connections based on the\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  configuration passed in.",
+            "line": 154,
+            "description": "Function that filters and configures the ICE servers received from Signaling\n  based on the <code>init()</code> configuration and returns the updated\n  list of ICE servers to be used when constructing Peer connection.",
             "itemtype": "method",
             "name": "_setIceServers",
-            "params": [
-                {
-                    "name": "config",
-                    "description": "The RTCConfiguration that is to be passed for\n  constructing the new RTCPeerConnection object.",
-                    "type": "JSON"
-                }
-            ],
-            "return": {
-                "description": "The updated RTCConfiguration object based on the\n  configuration settings in the\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  method.",
-                "type": "JSON"
-            },
             "access": "private",
             "tagname": "",
             "since": "0.5.4",
-            "component": "ICE",
             "class": "Skylink"
         },
         {
@@ -3089,30 +3054,29 @@
         {
             "file": "source/room-connection.js",
             "line": 1,
-            "description": "These are the list of platform signaling system actions that Skylink would be given with.\n- Upon receiving from the signaling, the application has to reflect the\n  relevant actions given.\n- You may refer to {{#crossLink \"Skylink/SYSTEM_ACTION_REASON:attribute\"}}SYSTEM_ACTION_REASON{{/crossLink}}\n  for the types of system action reasons that would be given.",
+            "description": "Contains the list of Signaling action states.",
             "itemtype": "attribute",
             "name": "SYSTEM_ACTION",
-            "type": "JSON",
             "params": [
                 {
                     "name": "WARNING",
-                    "description": "<small>Value <code>\"warning\"</code></small>\n  This action serves a warning to self. Usually if\n  warning is not heeded, it may result in an <code>REJECT</code> action.",
+                    "description": "<small>Value <code>\"warning\"</code></small>\n  The action state where Signaling might end the connection session.\n  Sometimes, it is served as a warning like for an instance when a Peer is\n  overloading and jamming the Signaling with loads of messages abnormally, the Signaling\n  would end the Peer's connection from the Room to prevent disruption for other Peers in Room.\n  <small>See <a href=\"#attr_SYSTEM_ACTION_REASON\"><code>SYSTEM_ACTION_REASON</code></a> for the\n    list of reasons that would result in this action state.</small>",
                     "type": "String"
                 },
                 {
                     "name": "REJECT",
-                    "description": "<small>Value <code>\"reject\"</code></small>\n  This action means that self has been kicked out\n  of the current signaling room connection, and subsequent Peer connections\n  would be disconnected.",
+                    "description": "<small>Value <code>\"reject\"</code></small>\n  The action state where the Signaling has ended the Peer's session.\n  <small>See <a href=\"#attr_SYSTEM_ACTION_REASON\"><code>SYSTEM_ACTION_REASON</code></a> for the\n    list of reasons that would result in this action state.</small>",
                     "type": "String"
                 }
             ],
+            "type": "JSON",
             "readonly": "",
-            "component": "Room",
             "since": "0.5.1",
             "class": "Skylink"
         },
         {
             "file": "source/room-connection.js",
-            "line": 26,
+            "line": 25,
             "description": "These are the list of Skylink platform signaling codes as the reason\n  for the system action given by the platform signaling that Skylink would receive.\n- You may refer to {{#crossLink \"Skylink/SYSTEM_ACTION:attribute\"}}SYSTEM_ACTION{{/crossLink}}\n  for the types of system actions that would be given.\n- Reason codes like <code>FAST_MESSAGE</code>, <code>ROOM_FULL</code>, <code>VERIFICATION</code> and\n  <code>OVER_SEAT_LIMIT</code> has been removed as they are no longer supported.",
             "itemtype": "attribute",
             "name": "SYSTEM_ACTION_REASON",
@@ -3156,7 +3120,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 74,
+            "line": 73,
             "description": "Stores the current room self is joined to.\nThe selected room will be usually defaulted to\n  {{#crossLink \"Skylink/_defaultRoom:attribute\"}}_defaultRoom{{/crossLink}}\n  if there is no selected room in\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_selectedRoom",
@@ -3170,7 +3134,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 90,
+            "line": 89,
             "description": "The flag that indicates if the currently joined room is locked.",
             "itemtype": "attribute",
             "name": "_roomLocked",
@@ -3183,7 +3147,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 101,
+            "line": 100,
             "description": "The flag that indicates if self is currently joined in a room.",
             "itemtype": "attribute",
             "name": "_inRoom",
@@ -3196,7 +3160,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 112,
+            "line": 111,
             "description": "Connects self to the selected room.\nBy default, if room parameter is not provided, it will\n  connect to the default room provided in\n  {{#crossLink \"Skylink/init:method\"}}init() <code>defaultRoom</code> settings{{/crossLink}}.\nIf any existing user media streams attached in Skylink, like for an example, calling\n  {{#crossLink \"Skylink/getUserMedia:method\"}}getUserMedia(){{/crossLink}} or\n  {{#crossLink \"Skylink/sendStream:method\"}}sendStream(){{/crossLink}} before\n  <code>joinRoom()</code>, self would actually send the current attached user media stream\n  attached. To stop the current attached Stream, please invoke\n  {{#crossLink \"Skylink/stopStream:method\"}}stopStream(){{/crossLink}} before\n  <code>joinRoom()</code> is invoked.",
             "itemtype": "method",
             "name": "joinRoom",
@@ -3516,7 +3480,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 560,
+            "line": 559,
             "description": "Waits for the signaling socket channel connection to be ready before\n  starting the room connection with the Skylink signaling platform.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -3652,7 +3616,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 662,
+            "line": 661,
             "description": "Disconnects self from current connected room.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -3721,7 +3685,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 790,
+            "line": 789,
             "description": "Locks the currently connected room to prevent other peers\n  from joining the room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -3735,7 +3699,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 814,
+            "line": 813,
             "description": "Unlocks the currently connected room to allow other peers\n  to join the room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -12381,42 +12345,6 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:1"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/ice-connection.js:61"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/ice-connection.js:119"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/ice-connection.js:133"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/ice-connection.js:146"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/ice-connection.js:161"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/ice-connection.js:174"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/ice-connection.js:188"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/ice-connection.js:204"
-        },
-        {
-            "message": "unknown tag: component",
             "line": " source/peer-connection.js:1"
         },
         {
@@ -12589,63 +12517,59 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:1"
+            "line": " source/room-connection.js:25"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:26"
+            "line": " source/room-connection.js:73"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:74"
+            "line": " source/room-connection.js:89"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:90"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/room-connection.js:101"
+            "line": " source/room-connection.js:100"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:112"
+            "line": " source/room-connection.js:111"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:112"
+            "line": " source/room-connection.js:111"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:560"
+            "line": " source/room-connection.js:559"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:560"
+            "line": " source/room-connection.js:559"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:662"
+            "line": " source/room-connection.js:661"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:662"
+            "line": " source/room-connection.js:661"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:790"
+            "line": " source/room-connection.js:789"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:790"
+            "line": " source/room-connection.js:789"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:814"
+            "line": " source/room-connection.js:813"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:814"
+            "line": " source/room-connection.js:813"
         },
         {
             "message": "unknown tag: component",
