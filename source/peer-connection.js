@@ -11,7 +11,7 @@
  *   The Peer connection would then generate a local session description and send to Peer,
  *   which would result in the <code>STABLE</code> state afterwards.
  * @param {String} CLOSED <small>Value <code>"closed"</code></small>
- *   The state when Peer connection is closed and session description would no longer be exchanged.
+ *   The state when Peer connection is closed and no session description would be exchanged.
  * @readOnly
  * @for Skylink
  * @since 0.5.0
@@ -24,19 +24,17 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 };
 
 /**
- * These are the list of Peer connection status retrieval ready states that Skylink would trigger.
- * - These states are triggered when
- *   {{#crossLink "Skylink/getConnectionStatus:method"}}getConnectionStatus(){{/crossLink}} is invoked.
+ * Contains the list of <a href="#method_getConnectionStatus"><code>getConnectionStatus()</code>
+ *   method</a> retrieval states.
  * @attribute GET_CONNECTION_STATUS_STATE
  * @type JSON
  * @param {Number} RETRIEVING <small>Value <code>0</code></small>
- *   The state when Skylink is retrieving the Peer connection status.
+ *   The state when <code>getConnectionStatus()</code> is retrieving the Peer connection stats.
  * @param {Number} RETRIEVE_SUCCESS <small>Value <code>1</code></small>
- *   The state when Skylink has retrieved the Peer connection status succesfully.
+ *   The state when <code>getConnectionStatus()</code> has retrieved the Peer connection stats.
  * @param {Number} RETRIEVE_ERROR <small>Value <code>-1</code></small>
- *   The state when Skylink has failed retrieving the Peer connection status.
+ *   The state when <code>getConnectionStatus()</code> has failed retrieving the Peer connection stats.
  * @readOnly
- * @component Room
  * @for Skylink
  * @since 0.1.0
  */
@@ -47,18 +45,17 @@ Skylink.prototype.GET_CONNECTION_STATUS_STATE = {
 };
 
 /**
- * These are the types of server Peers that Skylink would connect with.
- * - Different server Peers that serves different functionalities.
- * - The server Peers functionalities are only available depending on the
- *   Application Key configuration.
- * - Eventually, this list will be populated as there are more server Peer
- *   functionalities provided by the Skylink platform.
+ * <blockquote class="info">
+ *  As there are more features getting implemented, there will be eventually more different types of
+ *  server Peers.
+ * </blockquote>
+ * Contains the list of different types of server Peer connections.
  * @attribute SERVER_PEER_TYPE
  * @param {String} MCU <small>Value <code>"mcu"</code></small>
- *   This server Peer is a MCU server connection.
+ *   The server Peer type that is used for MCU connection.
+ * <small>Read more about what is a MCU <a href="#">here</a>.</small>
  * @type JSON
  * @readOnly
- * @component Peer
  * @for Skylink
  * @since 0.6.1
  */
@@ -105,6 +102,594 @@ Skylink.prototype._retryCount = 0;
  * @since 0.1.0
  */
 Skylink.prototype._peerConnections = {};
+
+/**
+ * Refreshes a Peer connection.
+ * - This feature can be used to refresh a Peer connection when the
+ *   remote Stream received does not stream any audio/video stream.
+ * - If there are more than 1 refresh during 5 seconds
+ *   or refresh is less than 3 seconds since the last refresh
+ *   initiated by the other peer, it will be aborted.
+ * - As for MCU connection, the restart mechanism makes the self user
+ *    leave and join the currently connected room again.
+ * @method refreshConnection
+ * @param {String|Array} [targetPeerId] The array of targeted Peers connection to refresh
+ *   the connection with.
+ * @param {Function} [callback] The callback fired after all targeted Peers connection has
+ *   been initiated with refresh or have met with an exception.
+ *   The callback signature is <code>function (error, success)</code>.
+ * @param {JSON} callback.error The error object received in the callback.
+ *   If received as <code>null</code>, it means that there is no errors.
+ * @param {Array} callback.error.listOfPeers The list of Peers that the
+ *   refresh connection had been initiated with.
+ * @param {JSON} callback.error.refreshErrors The list of errors occurred
+ *   based on per Peer basis.
+ * @param {Object|String} callback.error.refreshErrors.(#peerId) The Peer ID that
+ *   is associated with the error that occurred when refreshing the connection.
+ * @param {JSON} callback.success The success object received in the callback.
+ *   If received as <code>null</code>, it means that there are errors.
+ * @param {Array} callback.success.listOfPeers The list of Peers that the
+ *   refresh connection had been initiated with.
+ * @example
+ *   SkylinkDemo.on("iceConnectionState", function (state, peerId)) {
+ *     if (iceConnectionState === SkylinkDemo.ICE_CONNECTION_STATE.FAILED) {
+ *       // Do a refresh
+ *       SkylinkDemo.refreshConnection(peerId);
+ *     }
+ *   });
+ * @trigger peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined, serverPeerLeft
+ * @component Peer
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
+  var self = this;
+
+  var listOfPeers = Object.keys(self._peerConnections);
+  var listOfPeerRestarts = [];
+  var error = '';
+  var listOfPeerRestartErrors = {};
+
+  if(Array.isArray(targetPeerId)) {
+    listOfPeers = targetPeerId;
+
+  } else if (typeof targetPeerId === 'string') {
+    listOfPeers = [targetPeerId];
+  } else if (typeof targetPeerId === 'function') {
+    callback = targetPeerId;
+  }
+
+  if (listOfPeers.length === 0) {
+    error = 'There is currently no peer connections to restart';
+    log.warn([null, 'PeerConnection', null, error]);
+
+    listOfPeerRestartErrors.self = new Error(error);
+
+    if (typeof callback === 'function') {
+      callback({
+        refreshErrors: listOfPeerRestartErrors,
+        listOfPeers: listOfPeers
+      }, null);
+    }
+    return;
+  }
+
+  // To fix jshint dont put functions within a loop
+  var refreshSinglePeerCallback = function (peerId) {
+    return function (error, success) {
+      if (listOfPeerRestarts.indexOf(peerId) === -1) {
+        if (error) {
+          log.error([peerId, 'RTCPeerConnection', null, 'Failed restarting for peer'], error);
+          listOfPeerRestartErrors[peerId] = error;
+        }
+        listOfPeerRestarts.push(peerId);
+      }
+
+      if (listOfPeerRestarts.length === listOfPeers.length) {
+        if (typeof callback === 'function') {
+          log.log([null, 'PeerConnection', null, 'Invoked all peers to restart. Firing callback']);
+
+          if (Object.keys(listOfPeerRestartErrors).length > 0) {
+            callback({
+              refreshErrors: listOfPeerRestartErrors,
+              listOfPeers: listOfPeers
+            }, null);
+          } else {
+            callback(null, {
+              listOfPeers: listOfPeers
+            });
+          }
+        }
+      }
+    };
+  };
+
+  var refreshSinglePeer = function(peerId, peerCallback){
+    if (!self._peerConnections[peerId]) {
+      error = 'There is currently no existing peer connection made ' +
+        'with the peer. Unable to restart connection';
+      log.error([peerId, null, null, error]);
+      listOfPeerRestartErrors[peerId] = new Error(error);
+      return;
+    }
+
+    var now = Date.now() || function() { return +new Date(); };
+
+    if (now - self.lastRestart < 3000) {
+      error = 'Last restart was so tight. Aborting.';
+      log.error([peerId, null, null, error]);
+      listOfPeerRestartErrors[peerId] = new Error(error);
+      return;
+    }
+
+    log.log([peerId, 'PeerConnection', null, 'Restarting peer connection']);
+
+    // do a hard reset on variable object
+    self._restartPeerConnection(peerId, true, false, peerCallback, true);
+  };
+
+  var toRefresh = function() {
+    if(!self._hasMCU) {
+      var i;
+
+      for (i = 0; i < listOfPeers.length; i++) {
+        var peerId = listOfPeers[i];
+
+        if (Object.keys(self._peerConnections).indexOf(peerId) > -1) {
+          refreshSinglePeer(peerId, refreshSinglePeerCallback(peerId));
+        } else {
+          error = 'Peer connection with peer does not exists. Unable to restart';
+          log.error([peerId, 'PeerConnection', null, error]);
+          listOfPeerRestartErrors[peerId] = new Error(error);
+        }
+
+        // there's an error to trigger for
+        if (i === listOfPeers.length - 1 && Object.keys(listOfPeerRestartErrors).length > 0) {
+          if (typeof callback === 'function') {
+            callback({
+              refreshErrors: listOfPeerRestartErrors,
+              listOfPeers: listOfPeers
+            }, null);
+          }
+        }
+      }
+    } else {
+      self._restartMCUConnection(callback);
+    }
+  };
+
+  self._throttle(toRefresh,5000)();
+
+};
+
+/**
+ * Gets the Peer connection status.
+ * @method getConnectionStatus
+ * @param {String|Array} [targetPeerId] The array of targeted Peers connection to refresh
+ *   the connection with.
+ * @param {Function} [callback] The callback fired after all targeted Peers connection has
+ *   connection status retrieved or have met with an exception.
+ *   The callback signature is <code>function (error, success)</code>.
+ * @param {JSON} callback.error The error object received in the callback.
+ *   If received as <code>null</code>, it means that there is no errors.
+ * @param {Array} callback.error.listOfPeers The list of Peers which connection statuses
+ *   to retrieve.
+ * @param {JSON} callback.error.retrievalErrors The list of errors occurred
+ *   based on per Peer basis. It returns the Error to an ID of <code>"self"</code> if there is no Peers.
+ * @param {Object|String} callback.error.retrievalErrors.(#peerId) The Peer ID that
+ *   is associated with the error that occurred when retrieving the connection status.
+ * @param {JSON} callback.error.connectionStats The list of Peers connection statuses.
+ * @param {Error} callback.error.connectionStats.(#peerId) The Peer ID that
+ *   is associated with the connection status retrieved data.
+ * @param {JSON} callback.success The success object received in the callback.
+ *   If received as <code>null</code>, it means that there are errors.
+ * @param {Array} callback.success.listOfPeers The list of Peers which connection statuses
+ *   to retrieve.
+ * @param {JSON} callback.success.connectionStats The list of Peers connection statuses.
+ * @param {JSON} callback.success.connectionStats.(#peerId) The Peer ID that
+ *   is associated with the retrieved connection stats
+ * @param {JSON} callback.success.raw The received raw connection stats data before parsing.
+ * @param {JSON} callback.success.connectionStats.(#peerId).audio The Peer connection audio stats.
+ * @param {JSON} callback.success.connectionStats.(#peerId).audio.sending The Peer connection audio sending stats.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.bytes The Peer connection audio sending bytes.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.packets The Peer
+ *   connection audio sending packets.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.packetsLost The Peer
+ *   connection audio sending packets lost.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.ssrc The Peer
+ *   connection audio sending ssrc.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.rtt The Peer
+ *   connection audio sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not
+ *   defined in the original raw stats data.
+ * @param {JSON} callback.success.connectionStats.(#peerId).audio.receiving The Peer connection audio receiving stats.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.bytes The Peer connection audio receiving bytes.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.packets The Peer
+ *   connection audio receiving packets.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.packetsLost The Peer
+ *   connection audio receiving packets lost.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.ssrc The Peer
+ *   connection audio receiving ssrc.
+ * @param {JSON} callback.success.connectionStats.(#peerId).video The Peer connection video stats.
+ * @param {JSON} callback.success.connectionStats.(#peerId).video.sending The Peer connection video sending stats.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.sending.bytes The Peer connection video sending bytes.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.sending.packets The Peer
+ *   connection video sending packets.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.sending.packetsLost The Peer
+ *   connection video sending packets lost.
+ * @param {JSON} callback.success.connectionStats.(#peerId).video.sending.ssrc The Peer
+ *   connection video sending ssrc ID.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.sending.rtt The Peer
+ *   connection video sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not
+ *   defined in the original raw stats data.
+ * @param {JSON} callback.success.connectionStats.(#peerId).video.receiving The Peer connection video receiving stats.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.bytes The Peer connection video receiving bytes.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.packets The Peer
+ *   connection video receiving packets.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.packetsLost The Peer
+ *   connection video receiving packets lost.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.ssrc The Peer
+ *   connection video receiving ssrc.
+ * @param {JSON} callback.success.connectionStats.(#peerId).selectedCandidate The Peer connection selected candidate
+ *   pair details.
+ * @param {JSON} callback.success.connectionStats.(#peerId).selectedCandidate.local The Peer connection
+ *   selected local candidate.
+ * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.local.ipAddress The Peer connection
+ *   selected local candidate IP address.
+ * @param {Number} callback.success.connectionStats.(#peerId).selectedCandidate.local.portNumber The Peer connection
+ *   selected local candidate port number.
+ * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.local.transport The Peer connection
+ *   selected local candidate transport.
+ * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.local.candidateType The Peer connection
+ *   selected local candidate candidate type.
+ * @param {JSON} callback.success.connectionStats.(#peerId).selectedCandidate.remote The Peer connection
+ *   selected remote candidate.
+ * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.remote.ipAddress The Peer connection
+ *   selected remote candidate IP address.
+ * @param {Number} callback.success.connectionStats.(#peerId).selectedCandidate.remote.portNumber The Peer connection
+ *   selected remote candidate port number.
+ * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.remote.transport The Peer connection
+ *   selected remote candidate transport.
+ * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.remote.candidateType The Peer connection
+ *   selected remote candidate candidate type.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection The Peer connection details.
+ * @param {String} callback.success.connectionStats.(#peerId).connection.iceConnectionState The Peer connection ICE
+ *   connection state.
+ * @param {String} callback.success.connectionStats.(#peerId).connection.iceGatheringState The Peer connection ICE
+ *   gathering state.
+ * @param {String} callback.success.connectionStats.(#peerId).connection.signalingState The Peer connection
+ *   signaling state.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.localDescription The Peer connection
+ *   local session description.
+ * @param {String} callback.success.connectionStats.(#peerId).connection.localDescription.type The Peer connection
+ *   local session description type.
+ * @param {String} callback.success.connectionStats.(#peerId).connection.localDescription.sdp The Peer connection
+ *   local session description sdp.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.remoteDescription The Peer connection
+ *   remote session description.
+ * @param {String} callback.success.connectionStats.(#peerId).connection.remoteDescription.type The Peer connection
+ *   remote session description type.
+ * @param {String} callback.success.connectionStats.(#peerId).connection.remoteDescription.sdp The Peer connection
+ *   remote session description sdp.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates The Peer connection list of
+ *   candidates received or sent.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending The Peer connection list of
+ *   candidates sent.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.sending.host The Peer connection list of
+ *   <code>"host"</code> candidates sent.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending.host.(#index) The <code>"host"</code>
+ *   candidate sent.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.sending.srflx The Peer connection list of
+ *   <code>"srflx"</code> candidates sent.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending.srflx.(#index) The <code>"srflx"</code>
+ *   candidate sent.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.sending.relay The Peer connection list of
+ *   <code>"relay"</code> candidates sent.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending.relay.(#index) The <code>"relay"</code>
+ *   candidate sent.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving The Peer connection list of
+ *   candidates received.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.receiving.host The Peer connection list of
+ *   <code>"host"</code> candidates received.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving.host.(#index) The <code>"host"</code>
+ *   candidate received.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.receiving.srflx The Peer connection list of
+ *   <code>"srflx"</code> candidates received.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving.srflx.(#index) The <code>"srflx"</code>
+ *   candidate received.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.receiving.relay The Peer connection list of
+ *   <code>"relay"</code> candidates received.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving.relay.(#index) The <code>"relay"</code>
+ *   candidate received.
+ * @example
+ *   SkylinkDemo.getConnectionStatus(peerId, function (error, success) {
+ *      if (error) {
+ *        console.error("Failed retrieving connection status for peer ", peerId);
+ *      } else {
+ *        print(success.connectionStats);
+ *      }
+ *   });
+ * @trigger getConnectionStatusStateChange
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.14
+ */
+Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
+  var self = this;
+  var listOfPeers = Object.keys(self._peerConnections);
+  var listOfPeerStats = {};
+  var listOfPeerErrors = {};
+
+  // getConnectionStatus([])
+  if (Array.isArray(targetPeerId)) {
+    listOfPeers = targetPeerId;
+
+  // getConnectionStatus('...')
+  } else if (typeof targetPeerId === 'string' && !!targetPeerId) {
+    listOfPeers = [targetPeerId];
+
+  // getConnectionStatus(function () {})
+  } else if (typeof targetPeerId === 'function') {
+    callback = targetPeerId;
+    targetPeerId = undefined;
+  }
+
+  // Check if Peers list is empty, in which we throw an Error if there isn't any
+  if (listOfPeers.length === 0) {
+    listOfPeerErrors.self = new Error('There is currently no peer connections to retrieve connection status');
+
+    log.error([null, 'RTCStatsReport', null, 'Retrieving request failure ->'], listOfPeerErrors.self);
+
+    if (typeof callback === 'function') {
+      callback({
+        listOfPeers: listOfPeers,
+        retrievalErrors: listOfPeerErrors,
+        connectionStats: listOfPeerStats
+      }, null);
+    }
+    return;
+  }
+
+  var completedTaskCounter = [];
+
+  var checkCompletedFn = function (peerId) {
+    if (completedTaskCounter.indexOf(peerId) === -1) {
+      completedTaskCounter.push(peerId);
+    }
+
+    if (completedTaskCounter.length === listOfPeers.length) {
+      if (typeof callback === 'function') {
+        if (Object.keys(listOfPeerErrors).length > 0) {
+          callback({
+            listOfPeers: listOfPeers,
+            retrievalErrors: listOfPeerErrors,
+            connectionStats: listOfPeerStats
+          }, null);
+
+        } else {
+          callback(null, {
+            listOfPeers: listOfPeers,
+            connectionStats: listOfPeerStats
+          });
+        }
+      }
+    }
+  };
+
+  var statsFn = function (peerId) {
+    log.debug([peerId, 'RTCStatsReport', null, 'Retrieivng connection status']);
+
+    var pc = self._peerConnections[peerId];
+    var result = {
+      raw: null,
+      connection: {
+        iceConnectionState: pc.iceConnectionState,
+        iceGatheringState: pc.iceGatheringState,
+        signalingState: pc.signalingState,
+        remoteDescription: pc.remoteDescription,
+        localDescription: pc.localDescription,
+        candidates: clone(self._gatheredCandidates[peerId] || {
+          sending: { host: [], srflx: [], relay: [] },
+          receiving: { host: [], srflx: [], relay: [] }
+        })
+      },
+      audio: {
+        sending: {
+          ssrc: null,
+          bytes: 0,
+          packets: 0,
+          packetsLost: 0,
+          rtt: 0
+        },
+        receiving: {
+          ssrc: null,
+          bytes: 0,
+          packets: 0,
+          packetsLost: 0
+        }
+      },
+      video: {
+        sending: {
+          ssrc: null,
+          bytes: 0,
+          packets: 0,
+          packetsLost: 0,
+          rtt: 0
+        },
+        receiving: {
+          ssrc: null,
+          bytes: 0,
+          packets: 0,
+          packetsLost: 0
+        }
+      },
+      selectedCandidate: {
+        local: { ipAddress: null, candidateType: null, portNumber: null, transport: null },
+        remote: { ipAddress: null, candidateType: null, portNumber: null, transport: null }
+      }
+    };
+    var loopFn = function (obj, fn) {
+      for (var prop in obj) {
+        if (obj.hasOwnProperty(prop) && obj[prop]) {
+          fn(obj[prop], prop);
+        }
+      }
+    };
+    var formatCandidateFn = function (candidateDirType, candidate) {
+      result.selectedCandidate[candidateDirType].ipAddress = candidate.ipAddress;
+      result.selectedCandidate[candidateDirType].candidateType = candidate.candidateType;
+      result.selectedCandidate[candidateDirType].portNumber = typeof candidate.portNumber !== 'number' ?
+        parseInt(candidate.portNumber, 10) || null : candidate.portNumber;
+      result.selectedCandidate[candidateDirType].transport = candidate.transport;
+    };
+
+    pc.getStats(null, function (stats) {
+      log.debug([peerId, 'RTCStatsReport', null, 'Retrieval success ->'], stats);
+
+      result.raw = stats;
+
+      if (window.webrtcDetectedBrowser === 'firefox') {
+        loopFn(stats, function (obj, prop) {
+          var dirType = '';
+
+          // Receiving/Sending RTP packets
+          if (prop.indexOf('inbound_rtp') === 0 || prop.indexOf('outbound_rtp') === 0) {
+            dirType = prop.indexOf('inbound_rtp') === 0 ? 'receiving' : 'sending';
+
+            result[obj.mediaType][dirType].bytes = dirType === 'sending' ? obj.bytesSent : obj.bytesReceived;
+            result[obj.mediaType][dirType].packets = dirType === 'sending' ? obj.packetsSent : obj.packetsReceived;
+            result[obj.mediaType][dirType].ssrc = obj.ssrc;
+
+            if (dirType === 'receiving') {
+              result[obj.mediaType][dirType].packetsLost = obj.packetsLost || 0;
+            }
+
+          // Sending RTP packets lost
+          } else if (prop.indexOf('outbound_rtcp') === 0) {
+            dirType = prop.indexOf('inbound_rtp') === 0 ? 'receiving' : 'sending';
+
+            result[obj.mediaType][dirType].packetsLost = obj.packetsLost || 0;
+
+            if (dirType === 'sending') {
+              result[obj.mediaType].sending.rtt = obj.mozRtt || 0;
+            }
+
+          // Candidates
+          } else if (obj.nominated && obj.selected) {
+            formatCandidateFn('remote', stats[obj.remoteCandidateId]);
+            formatCandidateFn('local', stats[obj.localCandidateId]);
+          }
+        });
+
+      } else if (window.webrtcDetectedBrowser === 'edge') {
+        if (pc.getRemoteStreams().length > 0) {
+          var tracks = pc.getRemoteStreams()[0].getTracks();
+
+          loopFn(tracks, function (track) {
+            loopFn(stats, function (obj, prop) {
+              if (obj.type === 'track' && obj.trackIdentifier === track.id) {
+                loopFn(stats, function (streamObj) {
+                  if (streamObj.associateStatsId === obj.id &&
+                    ['outboundrtp', 'inboundrtp'].indexOf(streamObj.type) > -1) {
+                    var dirType = streamObj.type === 'outboundrtp' ? 'sending' : 'receiving';
+
+                    result[track.kind][dirType].bytes = dirType === 'sending' ? streamObj.bytesSent : streamObj.bytesReceived;
+                    result[track.kind][dirType].packets = dirType === 'sending' ? streamObj.packetsSent : streamObj.packetsReceived;
+                    result[track.kind][dirType].packetsLost = streamObj.packetsLost || 0;
+                    result[track.kind][dirType].ssrc = parseInt(streamObj.ssrc || '0', 10);
+
+                    if (dirType === 'sending') {
+                      result[track.kind].sending.rtt = obj.roundTripTime || 0;
+                    }
+                  }
+                });
+              }
+            });
+          });
+        }
+
+      } else {
+        var reportedCandidate = false;
+
+        loopFn(stats, function (obj, prop) {
+          if (prop.indexOf('ssrc_') === 0) {
+            var dirType = prop.indexOf('_recv') > 0 ? 'receiving' : 'sending';
+
+            // Polyfill fix for plugin. Plugin should fix this though
+            if (!obj.mediaType) {
+              obj.mediaType = obj.hasOwnProperty('audioOutputLevel') ||
+                obj.hasOwnProperty('audioInputLevel') ? 'audio' : 'video';
+            }
+
+            // Receiving/Sending RTP packets
+            result[obj.mediaType][dirType].bytes = parseInt((dirType === 'receiving' ?
+              obj.bytesReceived : obj.bytesSent) || '0', 10);
+            result[obj.mediaType][dirType].packets = parseInt((dirType === 'receiving' ?
+              obj.packetsReceived : obj.packetsSent) || '0', 10);
+            result[obj.mediaType][dirType].ssrc = parseInt(obj.ssrc || '0', 10);
+            result[obj.mediaType][dirType].packetsLost = parseInt(obj.packetsLost || '0', 10);
+
+            if (dirType === 'sending') {
+              // NOTE: Chrome sending audio does have it but plugin has..
+              result[obj.mediaType].sending.rtt = parseInt(obj.googRtt || '0', 10);
+            }
+
+            if (!reportedCandidate) {
+              loopFn(stats, function (canObj, canProp) {
+                if (!reportedCandidate && canProp.indexOf('Conn-') === 0) {
+                  if (obj.transportId === canObj.googChannelId) {
+                    formatCandidateFn('local', stats[canObj.localCandidateId]);
+                    formatCandidateFn('remote', stats[canObj.remoteCandidateId]);
+                    reportedCandidate = true;
+                  }
+                }
+              });
+            }
+          }
+        });
+      }
+
+      listOfPeerStats[peerId] = result;
+
+      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,
+        peerId, listOfPeerStats[peerId], null);
+
+      checkCompletedFn(peerId);
+
+    }, function (error) {
+      log.error([peerId, 'RTCStatsReport', null, 'Retrieval failure ->'], error);
+
+      listOfPeerErrors[peerId] = error;
+
+      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR,
+        peerId, null, error);
+
+      checkCompletedFn(peerId);
+    });
+  };
+
+  // Loop through all the list of Peers selected to retrieve connection status
+  for (var i = 0; i < listOfPeers.length; i++) {
+    var peerId = listOfPeers[i];
+
+    self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVING,
+      peerId, null, null);
+
+    // Check if the Peer connection exists first
+    if (self._peerConnections.hasOwnProperty(peerId) && self._peerConnections[peerId]) {
+      statsFn(peerId);
+
+    } else {
+      listOfPeerErrors[peerId] = new Error('The peer connection object does not exists');
+
+      log.error([peerId, 'RTCStatsReport', null, 'Retrieval failure ->'], listOfPeerErrors[peerId]);
+
+      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR,
+        peerId, null, listOfPeerErrors[peerId]);
+
+      checkCompletedFn(peerId);
+    }
+  }
+};
 
 /**
  * Connects to the Peer.
@@ -587,165 +1172,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 };
 
 /**
- * Refreshes a Peer connection.
- * - This feature can be used to refresh a Peer connection when the
- *   remote Stream received does not stream any audio/video stream.
- * - If there are more than 1 refresh during 5 seconds
- *   or refresh is less than 3 seconds since the last refresh
- *   initiated by the other peer, it will be aborted.
- * - As for MCU connection, the restart mechanism makes the self user
- *    leave and join the currently connected room again.
- * @method refreshConnection
- * @param {String|Array} [targetPeerId] The array of targeted Peers connection to refresh
- *   the connection with.
- * @param {Function} [callback] The callback fired after all targeted Peers connection has
- *   been initiated with refresh or have met with an exception.
- *   The callback signature is <code>function (error, success)</code>.
- * @param {JSON} callback.error The error object received in the callback.
- *   If received as <code>null</code>, it means that there is no errors.
- * @param {Array} callback.error.listOfPeers The list of Peers that the
- *   refresh connection had been initiated with.
- * @param {JSON} callback.error.refreshErrors The list of errors occurred
- *   based on per Peer basis.
- * @param {Object|String} callback.error.refreshErrors.(#peerId) The Peer ID that
- *   is associated with the error that occurred when refreshing the connection.
- * @param {JSON} callback.success The success object received in the callback.
- *   If received as <code>null</code>, it means that there are errors.
- * @param {Array} callback.success.listOfPeers The list of Peers that the
- *   refresh connection had been initiated with.
- * @example
- *   SkylinkDemo.on("iceConnectionState", function (state, peerId)) {
- *     if (iceConnectionState === SkylinkDemo.ICE_CONNECTION_STATE.FAILED) {
- *       // Do a refresh
- *       SkylinkDemo.refreshConnection(peerId);
- *     }
- *   });
- * @trigger peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined, serverPeerLeft
- * @component Peer
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
-  var self = this;
-
-  var listOfPeers = Object.keys(self._peerConnections);
-  var listOfPeerRestarts = [];
-  var error = '';
-  var listOfPeerRestartErrors = {};
-
-  if(Array.isArray(targetPeerId)) {
-    listOfPeers = targetPeerId;
-
-  } else if (typeof targetPeerId === 'string') {
-    listOfPeers = [targetPeerId];
-  } else if (typeof targetPeerId === 'function') {
-    callback = targetPeerId;
-  }
-
-  if (listOfPeers.length === 0) {
-    error = 'There is currently no peer connections to restart';
-    log.warn([null, 'PeerConnection', null, error]);
-
-    listOfPeerRestartErrors.self = new Error(error);
-
-    if (typeof callback === 'function') {
-      callback({
-        refreshErrors: listOfPeerRestartErrors,
-        listOfPeers: listOfPeers
-      }, null);
-    }
-    return;
-  }
-
-  // To fix jshint dont put functions within a loop
-  var refreshSinglePeerCallback = function (peerId) {
-    return function (error, success) {
-      if (listOfPeerRestarts.indexOf(peerId) === -1) {
-        if (error) {
-          log.error([peerId, 'RTCPeerConnection', null, 'Failed restarting for peer'], error);
-          listOfPeerRestartErrors[peerId] = error;
-        }
-        listOfPeerRestarts.push(peerId);
-      }
-
-      if (listOfPeerRestarts.length === listOfPeers.length) {
-        if (typeof callback === 'function') {
-          log.log([null, 'PeerConnection', null, 'Invoked all peers to restart. Firing callback']);
-
-          if (Object.keys(listOfPeerRestartErrors).length > 0) {
-            callback({
-              refreshErrors: listOfPeerRestartErrors,
-              listOfPeers: listOfPeers
-            }, null);
-          } else {
-            callback(null, {
-              listOfPeers: listOfPeers
-            });
-          }
-        }
-      }
-    };
-  };
-
-  var refreshSinglePeer = function(peerId, peerCallback){
-    if (!self._peerConnections[peerId]) {
-      error = 'There is currently no existing peer connection made ' +
-        'with the peer. Unable to restart connection';
-      log.error([peerId, null, null, error]);
-      listOfPeerRestartErrors[peerId] = new Error(error);
-      return;
-    }
-
-    var now = Date.now() || function() { return +new Date(); };
-
-    if (now - self.lastRestart < 3000) {
-      error = 'Last restart was so tight. Aborting.';
-      log.error([peerId, null, null, error]);
-      listOfPeerRestartErrors[peerId] = new Error(error);
-      return;
-    }
-
-    log.log([peerId, 'PeerConnection', null, 'Restarting peer connection']);
-
-    // do a hard reset on variable object
-    self._restartPeerConnection(peerId, true, false, peerCallback, true);
-  };
-
-  var toRefresh = function() {
-    if(!self._hasMCU) {
-      var i;
-
-      for (i = 0; i < listOfPeers.length; i++) {
-        var peerId = listOfPeers[i];
-
-        if (Object.keys(self._peerConnections).indexOf(peerId) > -1) {
-          refreshSinglePeer(peerId, refreshSinglePeerCallback(peerId));
-        } else {
-          error = 'Peer connection with peer does not exists. Unable to restart';
-          log.error([peerId, 'PeerConnection', null, error]);
-          listOfPeerRestartErrors[peerId] = new Error(error);
-        }
-
-        // there's an error to trigger for
-        if (i === listOfPeers.length - 1 && Object.keys(listOfPeerRestartErrors).length > 0) {
-          if (typeof callback === 'function') {
-            callback({
-              refreshErrors: listOfPeerRestartErrors,
-              listOfPeers: listOfPeers
-            }, null);
-          }
-        }
-      }
-    } else {
-      self._restartMCUConnection(callback);
-    }
-  };
-
-  self._throttle(toRefresh,5000)();
-
-};
-
-/**
  * Restarts all Peers connection in a MCU connection environment.
  * This would require the current user to leave the room and restart all
  *   current existing Peers connection.
@@ -865,433 +1291,4 @@ Skylink.prototype._restartMCUConnection = function(callback) {
       self.joinRoom(self._selectedRoom);
     }
   });
-};
-
-/**
- * Gets the Peer connection status.
- * @method getConnectionStatus
- * @param {String|Array} [targetPeerId] The array of targeted Peers connection to refresh
- *   the connection with.
- * @param {Function} [callback] The callback fired after all targeted Peers connection has
- *   connection status retrieved or have met with an exception.
- *   The callback signature is <code>function (error, success)</code>.
- * @param {JSON} callback.error The error object received in the callback.
- *   If received as <code>null</code>, it means that there is no errors.
- * @param {Array} callback.error.listOfPeers The list of Peers which connection statuses
- *   to retrieve.
- * @param {JSON} callback.error.retrievalErrors The list of errors occurred
- *   based on per Peer basis. It returns the Error to an ID of <code>"self"</code> if there is no Peers.
- * @param {Object|String} callback.error.retrievalErrors.(#peerId) The Peer ID that
- *   is associated with the error that occurred when retrieving the connection status.
- * @param {JSON} callback.error.connectionStats The list of Peers connection statuses.
- * @param {Error} callback.error.connectionStats.(#peerId) The Peer ID that
- *   is associated with the connection status retrieved data.
- * @param {JSON} callback.success The success object received in the callback.
- *   If received as <code>null</code>, it means that there are errors.
- * @param {Array} callback.success.listOfPeers The list of Peers which connection statuses
- *   to retrieve.
- * @param {JSON} callback.success.connectionStats The list of Peers connection statuses.
- * @param {JSON} callback.success.connectionStats.(#peerId) The Peer ID that
- *   is associated with the retrieved connection stats
- * @param {JSON} callback.success.raw The received raw connection stats data before parsing.
- * @param {JSON} callback.success.connectionStats.(#peerId).audio The Peer connection audio stats.
- * @param {JSON} callback.success.connectionStats.(#peerId).audio.sending The Peer connection audio sending stats.
- * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.bytes The Peer connection audio sending bytes.
- * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.packets The Peer
- *   connection audio sending packets.
- * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.packetsLost The Peer
- *   connection audio sending packets lost.
- * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.ssrc The Peer
- *   connection audio sending ssrc.
- * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.rtt The Peer
- *   connection audio sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not
- *   defined in the original raw stats data.
- * @param {JSON} callback.success.connectionStats.(#peerId).audio.receiving The Peer connection audio receiving stats.
- * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.bytes The Peer connection audio receiving bytes.
- * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.packets The Peer
- *   connection audio receiving packets.
- * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.packetsLost The Peer
- *   connection audio receiving packets lost.
- * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.ssrc The Peer
- *   connection audio receiving ssrc.
- * @param {JSON} callback.success.connectionStats.(#peerId).video The Peer connection video stats.
- * @param {JSON} callback.success.connectionStats.(#peerId).video.sending The Peer connection video sending stats.
- * @param {Number} callback.success.connectionStats.(#peerId).video.sending.bytes The Peer connection video sending bytes.
- * @param {Number} callback.success.connectionStats.(#peerId).video.sending.packets The Peer
- *   connection video sending packets.
- * @param {Number} callback.success.connectionStats.(#peerId).video.sending.packetsLost The Peer
- *   connection video sending packets lost.
- * @param {JSON} callback.success.connectionStats.(#peerId).video.sending.ssrc The Peer
- *   connection video sending ssrc ID.
- * @param {Number} callback.success.connectionStats.(#peerId).video.sending.rtt The Peer
- *   connection video sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not
- *   defined in the original raw stats data.
- * @param {JSON} callback.success.connectionStats.(#peerId).video.receiving The Peer connection video receiving stats.
- * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.bytes The Peer connection video receiving bytes.
- * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.packets The Peer
- *   connection video receiving packets.
- * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.packetsLost The Peer
- *   connection video receiving packets lost.
- * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.ssrc The Peer
- *   connection video receiving ssrc.
- * @param {JSON} callback.success.connectionStats.(#peerId).selectedCandidate The Peer connection selected candidate
- *   pair details.
- * @param {JSON} callback.success.connectionStats.(#peerId).selectedCandidate.local The Peer connection
- *   selected local candidate.
- * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.local.ipAddress The Peer connection
- *   selected local candidate IP address.
- * @param {Number} callback.success.connectionStats.(#peerId).selectedCandidate.local.portNumber The Peer connection
- *   selected local candidate port number.
- * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.local.transport The Peer connection
- *   selected local candidate transport.
- * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.local.candidateType The Peer connection
- *   selected local candidate candidate type.
- * @param {JSON} callback.success.connectionStats.(#peerId).selectedCandidate.remote The Peer connection
- *   selected remote candidate.
- * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.remote.ipAddress The Peer connection
- *   selected remote candidate IP address.
- * @param {Number} callback.success.connectionStats.(#peerId).selectedCandidate.remote.portNumber The Peer connection
- *   selected remote candidate port number.
- * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.remote.transport The Peer connection
- *   selected remote candidate transport.
- * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.remote.candidateType The Peer connection
- *   selected remote candidate candidate type.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection The Peer connection details.
- * @param {String} callback.success.connectionStats.(#peerId).connection.iceConnectionState The Peer connection ICE
- *   connection state.
- * @param {String} callback.success.connectionStats.(#peerId).connection.iceGatheringState The Peer connection ICE
- *   gathering state.
- * @param {String} callback.success.connectionStats.(#peerId).connection.signalingState The Peer connection
- *   signaling state.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.localDescription The Peer connection
- *   local session description.
- * @param {String} callback.success.connectionStats.(#peerId).connection.localDescription.type The Peer connection
- *   local session description type.
- * @param {String} callback.success.connectionStats.(#peerId).connection.localDescription.sdp The Peer connection
- *   local session description sdp.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.remoteDescription The Peer connection
- *   remote session description.
- * @param {String} callback.success.connectionStats.(#peerId).connection.remoteDescription.type The Peer connection
- *   remote session description type.
- * @param {String} callback.success.connectionStats.(#peerId).connection.remoteDescription.sdp The Peer connection
- *   remote session description sdp.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates The Peer connection list of
- *   candidates received or sent.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending The Peer connection list of
- *   candidates sent.
- * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.sending.host The Peer connection list of
- *   <code>"host"</code> candidates sent.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending.host.(#index) The <code>"host"</code>
- *   candidate sent.
- * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.sending.srflx The Peer connection list of
- *   <code>"srflx"</code> candidates sent.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending.srflx.(#index) The <code>"srflx"</code>
- *   candidate sent.
- * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.sending.relay The Peer connection list of
- *   <code>"relay"</code> candidates sent.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending.relay.(#index) The <code>"relay"</code>
- *   candidate sent.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving The Peer connection list of
- *   candidates received.
- * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.receiving.host The Peer connection list of
- *   <code>"host"</code> candidates received.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving.host.(#index) The <code>"host"</code>
- *   candidate received.
- * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.receiving.srflx The Peer connection list of
- *   <code>"srflx"</code> candidates received.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving.srflx.(#index) The <code>"srflx"</code>
- *   candidate received.
- * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.receiving.relay The Peer connection list of
- *   <code>"relay"</code> candidates received.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving.relay.(#index) The <code>"relay"</code>
- *   candidate received.
- * @example
- *   SkylinkDemo.getConnectionStatus(peerId, function (error, success) {
- *      if (error) {
- *        console.error("Failed retrieving connection status for peer ", peerId);
- *      } else {
- *        print(success.connectionStats);
- *      }
- *   });
- * @trigger getConnectionStatusStateChange
- * @component Peer
- * @for Skylink
- * @since 0.6.14
- */
-Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
-  var self = this;
-  var listOfPeers = Object.keys(self._peerConnections);
-  var listOfPeerStats = {};
-  var listOfPeerErrors = {};
-
-  // getConnectionStatus([])
-  if (Array.isArray(targetPeerId)) {
-    listOfPeers = targetPeerId;
-
-  // getConnectionStatus('...')
-  } else if (typeof targetPeerId === 'string' && !!targetPeerId) {
-    listOfPeers = [targetPeerId];
-
-  // getConnectionStatus(function () {})
-  } else if (typeof targetPeerId === 'function') {
-    callback = targetPeerId;
-    targetPeerId = undefined;
-  }
-
-  // Check if Peers list is empty, in which we throw an Error if there isn't any
-  if (listOfPeers.length === 0) {
-    listOfPeerErrors.self = new Error('There is currently no peer connections to retrieve connection status');
-
-    log.error([null, 'RTCStatsReport', null, 'Retrieving request failure ->'], listOfPeerErrors.self);
-
-    if (typeof callback === 'function') {
-      callback({
-        listOfPeers: listOfPeers,
-        retrievalErrors: listOfPeerErrors,
-        connectionStats: listOfPeerStats
-      }, null);
-    }
-    return;
-  }
-
-  var completedTaskCounter = [];
-
-  var checkCompletedFn = function (peerId) {
-    if (completedTaskCounter.indexOf(peerId) === -1) {
-      completedTaskCounter.push(peerId);
-    }
-
-    if (completedTaskCounter.length === listOfPeers.length) {
-      if (typeof callback === 'function') {
-        if (Object.keys(listOfPeerErrors).length > 0) {
-          callback({
-            listOfPeers: listOfPeers,
-            retrievalErrors: listOfPeerErrors,
-            connectionStats: listOfPeerStats
-          }, null);
-
-        } else {
-          callback(null, {
-            listOfPeers: listOfPeers,
-            connectionStats: listOfPeerStats
-          });
-        }
-      }
-    }
-  };
-
-  var statsFn = function (peerId) {
-    log.debug([peerId, 'RTCStatsReport', null, 'Retrieivng connection status']);
-
-    var pc = self._peerConnections[peerId];
-    var result = {
-      raw: null,
-      connection: {
-        iceConnectionState: pc.iceConnectionState,
-        iceGatheringState: pc.iceGatheringState,
-        signalingState: pc.signalingState,
-        remoteDescription: pc.remoteDescription,
-        localDescription: pc.localDescription,
-        candidates: clone(self._gatheredCandidates[peerId] || {
-          sending: { host: [], srflx: [], relay: [] },
-          receiving: { host: [], srflx: [], relay: [] }
-        })
-      },
-      audio: {
-        sending: {
-          ssrc: null,
-          bytes: 0,
-          packets: 0,
-          packetsLost: 0,
-          rtt: 0
-        },
-        receiving: {
-          ssrc: null,
-          bytes: 0,
-          packets: 0,
-          packetsLost: 0
-        }
-      },
-      video: {
-        sending: {
-          ssrc: null,
-          bytes: 0,
-          packets: 0,
-          packetsLost: 0,
-          rtt: 0
-        },
-        receiving: {
-          ssrc: null,
-          bytes: 0,
-          packets: 0,
-          packetsLost: 0
-        }
-      },
-      selectedCandidate: {
-        local: { ipAddress: null, candidateType: null, portNumber: null, transport: null },
-        remote: { ipAddress: null, candidateType: null, portNumber: null, transport: null }
-      }
-    };
-    var loopFn = function (obj, fn) {
-      for (var prop in obj) {
-        if (obj.hasOwnProperty(prop) && obj[prop]) {
-          fn(obj[prop], prop);
-        }
-      }
-    };
-    var formatCandidateFn = function (candidateDirType, candidate) {
-      result.selectedCandidate[candidateDirType].ipAddress = candidate.ipAddress;
-      result.selectedCandidate[candidateDirType].candidateType = candidate.candidateType;
-      result.selectedCandidate[candidateDirType].portNumber = typeof candidate.portNumber !== 'number' ?
-        parseInt(candidate.portNumber, 10) || null : candidate.portNumber;
-      result.selectedCandidate[candidateDirType].transport = candidate.transport;
-    };
-
-    pc.getStats(null, function (stats) {
-      log.debug([peerId, 'RTCStatsReport', null, 'Retrieval success ->'], stats);
-
-      result.raw = stats;
-
-      if (window.webrtcDetectedBrowser === 'firefox') {
-        loopFn(stats, function (obj, prop) {
-          var dirType = '';
-
-          // Receiving/Sending RTP packets
-          if (prop.indexOf('inbound_rtp') === 0 || prop.indexOf('outbound_rtp') === 0) {
-            dirType = prop.indexOf('inbound_rtp') === 0 ? 'receiving' : 'sending';
-
-            result[obj.mediaType][dirType].bytes = dirType === 'sending' ? obj.bytesSent : obj.bytesReceived;
-            result[obj.mediaType][dirType].packets = dirType === 'sending' ? obj.packetsSent : obj.packetsReceived;
-            result[obj.mediaType][dirType].ssrc = obj.ssrc;
-
-            if (dirType === 'receiving') {
-              result[obj.mediaType][dirType].packetsLost = obj.packetsLost || 0;
-            }
-
-          // Sending RTP packets lost
-          } else if (prop.indexOf('outbound_rtcp') === 0) {
-            dirType = prop.indexOf('inbound_rtp') === 0 ? 'receiving' : 'sending';
-
-            result[obj.mediaType][dirType].packetsLost = obj.packetsLost || 0;
-
-            if (dirType === 'sending') {
-              result[obj.mediaType].sending.rtt = obj.mozRtt || 0;
-            }
-
-          // Candidates
-          } else if (obj.nominated && obj.selected) {
-            formatCandidateFn('remote', stats[obj.remoteCandidateId]);
-            formatCandidateFn('local', stats[obj.localCandidateId]);
-          }
-        });
-
-      } else if (window.webrtcDetectedBrowser === 'edge') {
-        if (pc.getRemoteStreams().length > 0) {
-          var tracks = pc.getRemoteStreams()[0].getTracks();
-
-          loopFn(tracks, function (track) {
-            loopFn(stats, function (obj, prop) {
-              if (obj.type === 'track' && obj.trackIdentifier === track.id) {
-                loopFn(stats, function (streamObj) {
-                  if (streamObj.associateStatsId === obj.id &&
-                    ['outboundrtp', 'inboundrtp'].indexOf(streamObj.type) > -1) {
-                    var dirType = streamObj.type === 'outboundrtp' ? 'sending' : 'receiving';
-
-                    result[track.kind][dirType].bytes = dirType === 'sending' ? streamObj.bytesSent : streamObj.bytesReceived;
-                    result[track.kind][dirType].packets = dirType === 'sending' ? streamObj.packetsSent : streamObj.packetsReceived;
-                    result[track.kind][dirType].packetsLost = streamObj.packetsLost || 0;
-                    result[track.kind][dirType].ssrc = parseInt(streamObj.ssrc || '0', 10);
-
-                    if (dirType === 'sending') {
-                      result[track.kind].sending.rtt = obj.roundTripTime || 0;
-                    }
-                  }
-                });
-              }
-            });
-          });
-        }
-
-      } else {
-        var reportedCandidate = false;
-
-        loopFn(stats, function (obj, prop) {
-          if (prop.indexOf('ssrc_') === 0) {
-            var dirType = prop.indexOf('_recv') > 0 ? 'receiving' : 'sending';
-
-            // Polyfill fix for plugin. Plugin should fix this though
-            if (!obj.mediaType) {
-              obj.mediaType = obj.hasOwnProperty('audioOutputLevel') ||
-                obj.hasOwnProperty('audioInputLevel') ? 'audio' : 'video';
-            }
-
-            // Receiving/Sending RTP packets
-            result[obj.mediaType][dirType].bytes = parseInt((dirType === 'receiving' ?
-              obj.bytesReceived : obj.bytesSent) || '0', 10);
-            result[obj.mediaType][dirType].packets = parseInt((dirType === 'receiving' ?
-              obj.packetsReceived : obj.packetsSent) || '0', 10);
-            result[obj.mediaType][dirType].ssrc = parseInt(obj.ssrc || '0', 10);
-            result[obj.mediaType][dirType].packetsLost = parseInt(obj.packetsLost || '0', 10);
-
-            if (dirType === 'sending') {
-              // NOTE: Chrome sending audio does have it but plugin has..
-              result[obj.mediaType].sending.rtt = parseInt(obj.googRtt || '0', 10);
-            }
-
-            if (!reportedCandidate) {
-              loopFn(stats, function (canObj, canProp) {
-                if (!reportedCandidate && canProp.indexOf('Conn-') === 0) {
-                  if (obj.transportId === canObj.googChannelId) {
-                    formatCandidateFn('local', stats[canObj.localCandidateId]);
-                    formatCandidateFn('remote', stats[canObj.remoteCandidateId]);
-                    reportedCandidate = true;
-                  }
-                }
-              });
-            }
-          }
-        });
-      }
-
-      listOfPeerStats[peerId] = result;
-
-      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,
-        peerId, listOfPeerStats[peerId], null);
-
-      checkCompletedFn(peerId);
-
-    }, function (error) {
-      log.error([peerId, 'RTCStatsReport', null, 'Retrieval failure ->'], error);
-
-      listOfPeerErrors[peerId] = error;
-
-      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR,
-        peerId, null, error);
-
-      checkCompletedFn(peerId);
-    });
-  };
-
-  // Loop through all the list of Peers selected to retrieve connection status
-  for (var i = 0; i < listOfPeers.length; i++) {
-    var peerId = listOfPeers[i];
-
-    self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVING,
-      peerId, null, null);
-
-    // Check if the Peer connection exists first
-    if (self._peerConnections.hasOwnProperty(peerId) && self._peerConnections[peerId]) {
-      statsFn(peerId);
-
-    } else {
-      listOfPeerErrors[peerId] = new Error('The peer connection object does not exists');
-
-      log.error([peerId, 'RTCStatsReport', null, 'Retrieval failure ->'], listOfPeerErrors[peerId]);
-
-      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR,
-        peerId, null, listOfPeerErrors[peerId]);
-
-      checkCompletedFn(peerId);
-    }
-  }
 };

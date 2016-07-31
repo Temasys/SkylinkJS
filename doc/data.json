@@ -1395,7 +1395,7 @@
         {
             "file": "source/ice-connection.js",
             "line": 1,
-            "description": "Contains the list of Peer connection ICE connection states.",
+            "description": "Contains the list of Peer connection ICE connection states.\n- <b>What is an <a href=\"#attr_CANDIDATE_GENERATION_STATE\">ICE candidate</a>?</b><br>\n  It is the object that contains the IP addresses and port to allow ICE connection.\n- <b>What is an <a href=\"#attr_ICE_CONNECTION_STATE\">ICE connection</a>?</b><br>\n  It is the connection used for establishing media and Datachannel connections.\n- <b>What is the <a href=\"#attr_PEER_CONNECTION_STATE\">session description</a> for?</b><br>\n  It is the data where it stores the information to map the ICE candidates to the relevant\n  media type (audio/video/Datachannel).",
             "itemtype": "attribute",
             "name": "ICE_CONNECTION_STATE",
             "type": "JSON",
@@ -1442,7 +1442,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 51,
+            "line": 58,
             "description": "<blockquote class=\"info\">\n  Note that configuring the protocol may not necessarily result in the desired protocol\n  used in the actual TURN IP traffic as it depends which protocol the browser selects and connects with.<br>\n  For an advanced explaination, this configures the ICE server urls passed in <code?transport=<protocol></code>\n  when constructing the Peer connection. When both protocols are selected, the ICE servers urls are duplicated\n  with both protocols.\n</blockquote>\nContains the list of configurations to use when Peer connection ICE connection using the TURN server.",
             "itemtype": "attribute",
             "name": "TURN_TRANSPORT",
@@ -1480,7 +1480,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 86,
+            "line": 93,
             "description": "Stores the flag that indicates if Peer connections should trickle ICE.",
             "itemtype": "attribute",
             "name": "_enableIceTrickle",
@@ -1493,7 +1493,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 97,
+            "line": 104,
             "description": "Stores the flag that indicates if STUN ICE servers should be used when constructing Peer connection.",
             "itemtype": "attribute",
             "name": "_enableSTUN",
@@ -1506,7 +1506,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 108,
+            "line": 115,
             "description": "Stores the flag that indicates if TURN ICE servers should be used when constructing Peer connection.",
             "itemtype": "attribute",
             "name": "_enableTURN",
@@ -1519,7 +1519,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 119,
+            "line": 126,
             "description": "Stores the flag that indicates if public STUN ICE servers should be used when constructing Peer connection.",
             "itemtype": "attribute",
             "name": "_usePublicSTUN",
@@ -1532,7 +1532,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 130,
+            "line": 137,
             "description": "Stores the option for the TURN protocols to use.\nThis should configure the TURN ICE servers urls <code>?transport=protocol</code> flag.",
             "itemtype": "attribute",
             "name": "_TURNTransport",
@@ -1546,7 +1546,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 143,
+            "line": 150,
             "description": "Stores the list of Peer connections ICE failures counter.",
             "itemtype": "attribute",
             "name": "_ICEConnectionFailures",
@@ -1565,7 +1565,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 154,
+            "line": 161,
             "description": "Function that filters and configures the ICE servers received from Signaling\n  based on the <code>init()</code> configuration and returns the updated\n  list of ICE servers to be used when constructing Peer connection.",
             "itemtype": "method",
             "name": "_setIceServers",
@@ -1599,7 +1599,7 @@
                 },
                 {
                     "name": "CLOSED",
-                    "description": "<small>Value <code>\"closed\"</code></small>\n  The state when Peer connection is closed and session description would no longer be exchanged.",
+                    "description": "<small>Value <code>\"closed\"</code></small>\n  The state when Peer connection is closed and no session description would be exchanged.",
                     "type": "String"
                 }
             ],
@@ -1610,54 +1610,52 @@
         {
             "file": "source/peer-connection.js",
             "line": 26,
-            "description": "These are the list of Peer connection status retrieval ready states that Skylink would trigger.\n- These states are triggered when\n  {{#crossLink \"Skylink/getConnectionStatus:method\"}}getConnectionStatus(){{/crossLink}} is invoked.",
+            "description": "Contains the list of <a href=\"#method_getConnectionStatus\"><code>getConnectionStatus()</code>\n  method</a> retrieval states.",
             "itemtype": "attribute",
             "name": "GET_CONNECTION_STATUS_STATE",
             "type": "JSON",
             "params": [
                 {
                     "name": "RETRIEVING",
-                    "description": "<small>Value <code>0</code></small>\n  The state when Skylink is retrieving the Peer connection status.",
+                    "description": "<small>Value <code>0</code></small>\n  The state when <code>getConnectionStatus()</code> is retrieving the Peer connection stats.",
                     "type": "Number"
                 },
                 {
                     "name": "RETRIEVE_SUCCESS",
-                    "description": "<small>Value <code>1</code></small>\n  The state when Skylink has retrieved the Peer connection status succesfully.",
+                    "description": "<small>Value <code>1</code></small>\n  The state when <code>getConnectionStatus()</code> has retrieved the Peer connection stats.",
                     "type": "Number"
                 },
                 {
                     "name": "RETRIEVE_ERROR",
-                    "description": "<small>Value <code>-1</code></small>\n  The state when Skylink has failed retrieving the Peer connection status.",
+                    "description": "<small>Value <code>-1</code></small>\n  The state when <code>getConnectionStatus()</code> has failed retrieving the Peer connection stats.",
                     "type": "Number"
                 }
             ],
             "readonly": "",
-            "component": "Room",
             "since": "0.1.0",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 49,
-            "description": "These are the types of server Peers that Skylink would connect with.\n- Different server Peers that serves different functionalities.\n- The server Peers functionalities are only available depending on the\n  Application Key configuration.\n- Eventually, this list will be populated as there are more server Peer\n  functionalities provided by the Skylink platform.",
+            "line": 47,
+            "description": "<blockquote class=\"info\">\n As there are more features getting implemented, there will be eventually more different types of\n server Peers.\n</blockquote>\nContains the list of different types of server Peer connections.",
             "itemtype": "attribute",
             "name": "SERVER_PEER_TYPE",
             "params": [
                 {
                     "name": "MCU",
-                    "description": "<small>Value <code>\"mcu\"</code></small>\n  This server Peer is a MCU server connection.",
+                    "description": "<small>Value <code>\"mcu\"</code></small>\n  The server Peer type that is used for MCU connection.\n<small>Read more about what is a MCU <a href=\"#\">here</a>.</small>",
                     "type": "String"
                 }
             ],
             "type": "JSON",
             "readonly": "",
-            "component": "Peer",
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 70,
+            "line": 67,
             "description": "Stores the timestamp of the moment when the last Peers connection\n  restarts has happened. Used for the restart Peers connection functionality.",
             "itemtype": "attribute",
             "name": "_lastRestart",
@@ -1671,7 +1669,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 83,
+            "line": 80,
             "description": "Stores the counter of the number of consecutive\n  Peers connection restarts retries.",
             "itemtype": "attribute",
             "name": "_retryCount",
@@ -1685,7 +1683,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 96,
+            "line": 93,
             "description": "Stores the list of Peers connection.",
             "itemtype": "attribute",
             "name": "_peerConnections",
@@ -1706,173 +1704,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 109,
-            "description": "Connects to the Peer.",
-            "itemtype": "method",
-            "name": "_addPeer",
-            "params": [
-                {
-                    "name": "targetMid",
-                    "description": "The Peer ID to connect to.",
-                    "type": "String"
-                },
-                {
-                    "name": "peerBrowser",
-                    "description": "The Peer platform agent information.",
-                    "type": "JSON",
-                    "props": [
-                        {
-                            "name": "agent",
-                            "description": "The Peer platform browser or agent name.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "version",
-                            "description": "The Peer platform browser or agent version.",
-                            "type": "Number"
-                        },
-                        {
-                            "name": "os",
-                            "description": "The Peer platform name.",
-                            "type": "Number"
-                        }
-                    ]
-                },
-                {
-                    "name": "toOffer",
-                    "description": "The flag that indicates if the Peer connection\n  should be start connection as an offerer or as an answerer.",
-                    "type": "Boolean",
-                    "optional": true,
-                    "optdefault": "false"
-                },
-                {
-                    "name": "restartConn",
-                    "description": "The flag that indicates if the Peer\n  connection is part of restart functionality use-case.",
-                    "type": "Boolean",
-                    "optional": true,
-                    "optdefault": "false"
-                },
-                {
-                    "name": "receiveOnly",
-                    "description": "The flag that indicates if the Peer\n  connection would send Stream or not (receive only).",
-                    "type": "Boolean",
-                    "optional": true,
-                    "optdefault": "false"
-                },
-                {
-                    "name": "isSS",
-                    "description": "The flag that indicates if the Peer\n  connection Stream sent is a screensharing stream or not.",
-                    "type": "Boolean",
-                    "optional": true,
-                    "optdefault": "false"
-                }
-            ],
-            "access": "private",
-            "tagname": "",
-            "component": "Peer",
-            "since": "0.5.4",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/peer-connection.js",
-            "line": 174,
-            "description": "Restarts a Peer connection in a P2P environment.\nThis is usually done for replacing the previous Stream attached and restarting\n  the connection with a new one, or when the ICE connection has issues\n  streaming video/audio stream in the remote Stream which requires\n  a refresh in the ICE connection.",
-            "itemtype": "method",
-            "name": "_restartPeerConnection",
-            "params": [
-                {
-                    "name": "peerId",
-                    "description": "The Peer ID to restart the connection with.",
-                    "type": "String"
-                },
-                {
-                    "name": "isSelfInitiatedRestart",
-                    "description": "The flag that indicates if the restart action\n   was caused by self.",
-                    "type": "Boolean"
-                },
-                {
-                    "name": "isConnectionRestart",
-                    "description": "The flag that indicates whether the restarting action\n  is caused by ICE connection or handshake connection failure. Currently, this feature works the same as\n  <code>explict</code> parameter.",
-                    "type": "Boolean"
-                },
-                {
-                    "name": "callback",
-                    "description": "The callback fired after the Peer connection has\n  been succesfully initiated with a restart. Set this value to <code>null</code> if you\n  do not want to pass in any callbacks.",
-                    "type": "Function"
-                },
-                {
-                    "name": "explict",
-                    "description": "The flag that indicates whether the restart functionality\n  is invoked by the application or by Skylink when the ICE connection fails to establish\n  a \"healthy\" connection state. Currently, this feature works the same as\n  <code>isConnectionRestart</code> parameter.",
-                    "type": "Boolean",
-                    "optional": true,
-                    "optdefault": "false"
-                }
-            ],
-            "access": "private",
-            "tagname": "",
-            "component": "Peer",
-            "since": "0.5.8",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/peer-connection.js",
-            "line": 320,
-            "description": "Disconnects the Peer connection and remove object references associated.",
-            "itemtype": "method",
-            "name": "_removePeer",
-            "params": [
-                {
-                    "name": "peerId",
-                    "description": "The Peer ID to disconnect the connection with.",
-                    "type": "String"
-                }
-            ],
-            "trigger": "peerLeft",
-            "access": "private",
-            "tagname": "",
-            "component": "Peer",
-            "since": "0.5.5",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/peer-connection.js",
-            "line": 379,
-            "description": "Creates a Peer connection. This does not start the handshake connection\n  but creates the Peer connection object ready for connection.",
-            "itemtype": "method",
-            "name": "_createPeerConnection",
-            "params": [
-                {
-                    "name": "targetMid",
-                    "description": "The Peer ID to create the connection object\n  with.",
-                    "type": "String"
-                },
-                {
-                    "name": "isScreenSharing",
-                    "description": "The flag that indicates if the Peer\n  connection Stream sent is a screensharing stream or not.",
-                    "type": "Boolean",
-                    "optional": true,
-                    "optdefault": "false"
-                }
-            ],
-            "return": {
-                "description": "The Peer connection object associated with\n  the provided ID.",
-                "type": "Object"
-            },
-            "access": "private",
-            "tagname": "",
-            "component": "Peer",
-            "since": "0.5.1",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/peer-connection.js",
-            "line": 526,
-            "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/peer-connection.js",
-            "line": 589,
+            "line": 106,
             "description": "Refreshes a Peer connection.\n- This feature can be used to refresh a Peer connection when the\n  remote Stream received does not stream any audio/video stream.\n- If there are more than 1 refresh during 5 seconds\n  or refresh is less than 3 seconds since the last refresh\n  initiated by the other peer, it will be aborted.\n- As for MCU connection, the restart mechanism makes the self user\n   leave and join the currently connected room again.",
             "itemtype": "method",
             "name": "refreshConnection",
@@ -1936,64 +1768,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 748,
-            "description": "Restarts all Peers connection in a MCU connection environment.\nThis would require the current user to leave the room and restart all\n  current existing Peers connection.",
-            "itemtype": "method",
-            "name": "_restartMCUConnection",
-            "params": [
-                {
-                    "name": "callback",
-                    "description": "The callback fired after all targeted Peers connection has\n  been initiated with refresh or have met with an exception.\n  The callback signature is <code>function (error, success)</code>.",
-                    "type": "Function",
-                    "optional": true,
-                    "props": [
-                        {
-                            "name": "error",
-                            "description": "The error object received in the callback.\n  If received as <code>null</code>, it means that there is no errors.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "listOfPeers",
-                                    "description": "The list of Peers that the\n  refresh connection had been initiated with.",
-                                    "type": "Array"
-                                },
-                                {
-                                    "name": "refreshErrors",
-                                    "description": "The list of errors occurred\n  based on per Peer basis.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "refreshErrors.(#peerId)",
-                                    "description": "The Peer ID associated\n  with the error that occurred when refreshing the connection.",
-                                    "type": "Object|String"
-                                }
-                            ]
-                        },
-                        {
-                            "name": "success",
-                            "description": "The success object received in the callback.\n  If received as <code>null</code>, it means that there are errors.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "listOfPeers",
-                                    "description": "The list of Peers that the\n  refresh connection had been initiated with.",
-                                    "type": "Array"
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ],
-            "access": "private",
-            "tagname": "",
-            "trigger": "peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined",
-            "component": "Peer",
-            "since": "0.6.1",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/peer-connection.js",
-            "line": 870,
+            "line": 265,
             "description": "Gets the Peer connection status.",
             "itemtype": "method",
             "name": "getConnectionStatus",
@@ -2378,6 +2153,229 @@
             "trigger": "getConnectionStatusStateChange",
             "component": "Peer",
             "since": "0.6.14",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-connection.js",
+            "line": 694,
+            "description": "Connects to the Peer.",
+            "itemtype": "method",
+            "name": "_addPeer",
+            "params": [
+                {
+                    "name": "targetMid",
+                    "description": "The Peer ID to connect to.",
+                    "type": "String"
+                },
+                {
+                    "name": "peerBrowser",
+                    "description": "The Peer platform agent information.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "agent",
+                            "description": "The Peer platform browser or agent name.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "version",
+                            "description": "The Peer platform browser or agent version.",
+                            "type": "Number"
+                        },
+                        {
+                            "name": "os",
+                            "description": "The Peer platform name.",
+                            "type": "Number"
+                        }
+                    ]
+                },
+                {
+                    "name": "toOffer",
+                    "description": "The flag that indicates if the Peer connection\n  should be start connection as an offerer or as an answerer.",
+                    "type": "Boolean",
+                    "optional": true,
+                    "optdefault": "false"
+                },
+                {
+                    "name": "restartConn",
+                    "description": "The flag that indicates if the Peer\n  connection is part of restart functionality use-case.",
+                    "type": "Boolean",
+                    "optional": true,
+                    "optdefault": "false"
+                },
+                {
+                    "name": "receiveOnly",
+                    "description": "The flag that indicates if the Peer\n  connection would send Stream or not (receive only).",
+                    "type": "Boolean",
+                    "optional": true,
+                    "optdefault": "false"
+                },
+                {
+                    "name": "isSS",
+                    "description": "The flag that indicates if the Peer\n  connection Stream sent is a screensharing stream or not.",
+                    "type": "Boolean",
+                    "optional": true,
+                    "optdefault": "false"
+                }
+            ],
+            "access": "private",
+            "tagname": "",
+            "component": "Peer",
+            "since": "0.5.4",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-connection.js",
+            "line": 759,
+            "description": "Restarts a Peer connection in a P2P environment.\nThis is usually done for replacing the previous Stream attached and restarting\n  the connection with a new one, or when the ICE connection has issues\n  streaming video/audio stream in the remote Stream which requires\n  a refresh in the ICE connection.",
+            "itemtype": "method",
+            "name": "_restartPeerConnection",
+            "params": [
+                {
+                    "name": "peerId",
+                    "description": "The Peer ID to restart the connection with.",
+                    "type": "String"
+                },
+                {
+                    "name": "isSelfInitiatedRestart",
+                    "description": "The flag that indicates if the restart action\n   was caused by self.",
+                    "type": "Boolean"
+                },
+                {
+                    "name": "isConnectionRestart",
+                    "description": "The flag that indicates whether the restarting action\n  is caused by ICE connection or handshake connection failure. Currently, this feature works the same as\n  <code>explict</code> parameter.",
+                    "type": "Boolean"
+                },
+                {
+                    "name": "callback",
+                    "description": "The callback fired after the Peer connection has\n  been succesfully initiated with a restart. Set this value to <code>null</code> if you\n  do not want to pass in any callbacks.",
+                    "type": "Function"
+                },
+                {
+                    "name": "explict",
+                    "description": "The flag that indicates whether the restart functionality\n  is invoked by the application or by Skylink when the ICE connection fails to establish\n  a \"healthy\" connection state. Currently, this feature works the same as\n  <code>isConnectionRestart</code> parameter.",
+                    "type": "Boolean",
+                    "optional": true,
+                    "optdefault": "false"
+                }
+            ],
+            "access": "private",
+            "tagname": "",
+            "component": "Peer",
+            "since": "0.5.8",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-connection.js",
+            "line": 905,
+            "description": "Disconnects the Peer connection and remove object references associated.",
+            "itemtype": "method",
+            "name": "_removePeer",
+            "params": [
+                {
+                    "name": "peerId",
+                    "description": "The Peer ID to disconnect the connection with.",
+                    "type": "String"
+                }
+            ],
+            "trigger": "peerLeft",
+            "access": "private",
+            "tagname": "",
+            "component": "Peer",
+            "since": "0.5.5",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-connection.js",
+            "line": 964,
+            "description": "Creates a Peer connection. This does not start the handshake connection\n  but creates the Peer connection object ready for connection.",
+            "itemtype": "method",
+            "name": "_createPeerConnection",
+            "params": [
+                {
+                    "name": "targetMid",
+                    "description": "The Peer ID to create the connection object\n  with.",
+                    "type": "String"
+                },
+                {
+                    "name": "isScreenSharing",
+                    "description": "The flag that indicates if the Peer\n  connection Stream sent is a screensharing stream or not.",
+                    "type": "Boolean",
+                    "optional": true,
+                    "optdefault": "false"
+                }
+            ],
+            "return": {
+                "description": "The Peer connection object associated with\n  the provided ID.",
+                "type": "Object"
+            },
+            "access": "private",
+            "tagname": "",
+            "component": "Peer",
+            "since": "0.5.1",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-connection.js",
+            "line": 1111,
+            "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-connection.js",
+            "line": 1174,
+            "description": "Restarts all Peers connection in a MCU connection environment.\nThis would require the current user to leave the room and restart all\n  current existing Peers connection.",
+            "itemtype": "method",
+            "name": "_restartMCUConnection",
+            "params": [
+                {
+                    "name": "callback",
+                    "description": "The callback fired after all targeted Peers connection has\n  been initiated with refresh or have met with an exception.\n  The callback signature is <code>function (error, success)</code>.",
+                    "type": "Function",
+                    "optional": true,
+                    "props": [
+                        {
+                            "name": "error",
+                            "description": "The error object received in the callback.\n  If received as <code>null</code>, it means that there is no errors.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "listOfPeers",
+                                    "description": "The list of Peers that the\n  refresh connection had been initiated with.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "refreshErrors",
+                                    "description": "The list of errors occurred\n  based on per Peer basis.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "refreshErrors.(#peerId)",
+                                    "description": "The Peer ID associated\n  with the error that occurred when refreshing the connection.",
+                                    "type": "Object|String"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "success",
+                            "description": "The success object received in the callback.\n  If received as <code>null</code>, it means that there are errors.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "listOfPeers",
+                                    "description": "The list of Peers that the\n  refresh connection had been initiated with.",
+                                    "type": "Array"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "access": "private",
+            "tagname": "",
+            "trigger": "peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined",
+            "component": "Peer",
+            "since": "0.6.1",
             "class": "Skylink"
         },
         {
@@ -12344,67 +12342,59 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:26"
+            "line": " source/peer-connection.js:67"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:49"
+            "line": " source/peer-connection.js:80"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:70"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-connection.js:83"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-connection.js:96"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-connection.js:109"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-connection.js:174"
+            "line": " source/peer-connection.js:93"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:320"
+            "line": " source/peer-connection.js:106"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:320"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-connection.js:379"
+            "line": " source/peer-connection.js:106"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:589"
+            "line": " source/peer-connection.js:265"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:589"
+            "line": " source/peer-connection.js:265"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/peer-connection.js:694"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/peer-connection.js:759"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:748"
+            "line": " source/peer-connection.js:905"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:748"
+            "line": " source/peer-connection.js:905"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/peer-connection.js:964"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:870"
+            "line": " source/peer-connection.js:1174"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:870"
+            "line": " source/peer-connection.js:1174"
         },
         {
             "message": "unknown tag: component",
@@ -13524,7 +13514,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:526"
+            "line": " source/peer-connection.js:1111"
         }
     ]
 }
