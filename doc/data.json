@@ -746,116 +746,6 @@
         {
             "file": "source/data-transfer.js",
             "line": 180,
-            "description": "Function that sets the data transfer \"wait-for-response\" timeout.\nWhen there is not response after timeout, the data transfer will be terminated.",
-            "itemtype": "method",
-            "name": "_setDataChannelTimeout",
-            "access": "private",
-            "tagname": "",
-            "since": "0.5.0",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/data-transfer.js",
-            "line": 226,
-            "description": "Function that stops and clears the data transfer \"wait-for-response\" timeout.",
-            "itemtype": "method",
-            "name": "_clearDataChannelTimeout",
-            "access": "private",
-            "tagname": "",
-            "since": "0.5.0",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/data-transfer.js",
-            "line": 244,
-            "description": "Function that starts a data transfer to Peer.\nThis will open a new data type of Datachannel connection with Peer if\n  simultaneous multi-transfers is supported by Peer.",
-            "itemtype": "method",
-            "name": "_sendBlobDataToPeer",
-            "access": "private",
-            "tagname": "",
-            "since": "0.5.5",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/data-transfer.js",
-            "line": 460,
-            "description": "Function that handles the data received from Datachannel and\n  routes to the relevant data transfer protocol handler.",
-            "itemtype": "method",
-            "name": "_dataChannelProtocolHandler",
-            "access": "private",
-            "tagname": "",
-            "since": "0.5.2",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/data-transfer.js",
-            "line": 527,
-            "description": "Function that handles the \"WRQ\" data transfer protocol.",
-            "itemtype": "method",
-            "name": "_WRQProtocolHandler",
-            "access": "private",
-            "tagname": "",
-            "since": "0.5.2",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/data-transfer.js",
-            "line": 581,
-            "description": "Function that handles the \"ACK\" data transfer protocol.",
-            "itemtype": "method",
-            "name": "_ACKProtocolHandler",
-            "access": "private",
-            "tagname": "",
-            "since": "0.5.2",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/data-transfer.js",
-            "line": 728,
-            "description": "Function that handles the \"MESSAGE\" data transfer protocol.",
-            "itemtype": "method",
-            "name": "_MESSAGEProtocolHandler",
-            "access": "private",
-            "tagname": "",
-            "since": "0.5.2",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/data-transfer.js",
-            "line": 748,
-            "description": "Function that handles the \"ERROR\" data transfer protocol.",
-            "itemtype": "method",
-            "name": "_ERRORProtocolHandler",
-            "access": "private",
-            "tagname": "",
-            "since": "0.5.2",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/data-transfer.js",
-            "line": 788,
-            "description": "Function that handles the \"CANCEL\" data transfer protocol.",
-            "itemtype": "method",
-            "name": "_CANCELProtocolHandler",
-            "access": "private",
-            "tagname": "",
-            "since": "0.5.0",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/data-transfer.js",
-            "line": 867,
-            "description": "Function that handles the data transfer chunk received.",
-            "itemtype": "method",
-            "name": "_DATAProtocolHandler",
-            "access": "private",
-            "tagname": "",
-            "since": "0.5.5",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/data-transfer.js",
-            "line": 1092,
             "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have been broken as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.<br>\n  Additionally, the Android and iOS SDKs do not support simultaneous multi-transfers.\n</blockquote>\nFunction that starts a data transfer to Peers.<br>\nUse the <a href=\"http://www.w3schools.com/tags/att_input_type.asp\"><code>&lt;input type=\"file\"&gt;</code></a>\n  to transfer files as the returning <a href=\"https://developer.mozilla.org/en/docs/Web/API/File\">\n  File object</a> is a type of Blob.",
             "itemtype": "method",
             "name": "sendBlobData",
@@ -987,18 +877,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1306,
-            "description": "Function that start the data transfer with the list of targeted Peer IDs provided.\nAt this stage, it will open a new Datachannel connection if simultaneous multi-transfers is\n  supported by Peer, or it will using the messaging type Datachannel connection.\nNote that 1 data transfer can occur at a time in 1 Datachannel connection.",
-            "itemtype": "method",
-            "name": "_startDataTransfer",
-            "access": "private",
-            "tagname": "",
-            "since": "0.6.1",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/data-transfer.js",
-            "line": 1566,
+            "line": 393,
             "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have been broken as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.<br>\n  <b>Deprecation Warning!</b> This method has been deprecated, please use <a href=\"#method_acceptDataTransfer\">\n  <code>acceptDataTransfer()</code> method</a> instead.\n</blockquote>\nFunction that accepts or rejects a data transfer request from Peer.",
             "itemtype": "method",
             "name": "respondBlobRequest",
@@ -1029,7 +908,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1584,
+            "line": 411,
             "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have been broken as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.\n</blockquote>\nFunction that accepts or rejects a data transfer request from Peer.",
             "itemtype": "method",
             "name": "acceptDataTransfer",
@@ -1058,7 +937,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1670,
+            "line": 497,
             "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have been broken as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.<br>\n  <b>Deprecation Warning!</b> This method has been deprecated, please use <a href=\"#method_cancelDataTransfer\">\n  <code>method_cancelDataTransfer()</code> method</a> instead.\n</blockquote>\nFunction that terminates a data transfer.",
             "itemtype": "method",
             "name": "cancelBlobTransfer",
@@ -1082,7 +961,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1687,
+            "line": 514,
             "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have been broken as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.\n</blockquote>\nFunction that terminates a data transfer.",
             "itemtype": "method",
             "name": "cancelDataTransfer",
@@ -1104,7 +983,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1776,
+            "line": 603,
             "description": "<blockquote class=\"info\">\n  Note that message Datachannel type connection MUST be opened first before this\n  functionality would work.<br>\n  The estimated maximum size for the string to be sent over is about <code>16 kB</code>. If\n  you are considering to send large string to Peers, please use the <a href=\"#method_sendURLData\">\n<code>sendURLData()</code> method</a>.\n</blockquote>\nFunction that sends a P2P message using the Datachannel connection.",
             "itemtype": "method",
             "name": "sendP2PMessage",
@@ -1127,7 +1006,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1869,
+            "line": 696,
             "description": "<blockquote class=\"info\">\n  Currently, the Android and iOS SDKs do not support this type of data transfer.\n</blockquote>\nFunction that starts a string data transfer to Peers.",
             "itemtype": "method",
             "name": "sendURLData",
@@ -1254,6 +1133,127 @@
                 }
             ],
             "trigger": "incomingData, incomingDataRequest, dataTransferState, dataChannelState",
+            "since": "0.6.1",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-transfer.js",
+            "line": 904,
+            "description": "Function that sets the data transfer \"wait-for-response\" timeout.\nWhen there is not response after timeout, the data transfer will be terminated.",
+            "itemtype": "method",
+            "name": "_setDataChannelTimeout",
+            "access": "private",
+            "tagname": "",
+            "since": "0.5.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-transfer.js",
+            "line": 950,
+            "description": "Function that stops and clears the data transfer \"wait-for-response\" timeout.",
+            "itemtype": "method",
+            "name": "_clearDataChannelTimeout",
+            "access": "private",
+            "tagname": "",
+            "since": "0.5.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-transfer.js",
+            "line": 968,
+            "description": "Function that starts a data transfer to Peer.\nThis will open a new data type of Datachannel connection with Peer if\n  simultaneous multi-transfers is supported by Peer.",
+            "itemtype": "method",
+            "name": "_sendBlobDataToPeer",
+            "access": "private",
+            "tagname": "",
+            "since": "0.5.5",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-transfer.js",
+            "line": 1184,
+            "description": "Function that handles the data received from Datachannel and\n  routes to the relevant data transfer protocol handler.",
+            "itemtype": "method",
+            "name": "_dataChannelProtocolHandler",
+            "access": "private",
+            "tagname": "",
+            "since": "0.5.2",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-transfer.js",
+            "line": 1251,
+            "description": "Function that handles the \"WRQ\" data transfer protocol.",
+            "itemtype": "method",
+            "name": "_WRQProtocolHandler",
+            "access": "private",
+            "tagname": "",
+            "since": "0.5.2",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-transfer.js",
+            "line": 1305,
+            "description": "Function that handles the \"ACK\" data transfer protocol.",
+            "itemtype": "method",
+            "name": "_ACKProtocolHandler",
+            "access": "private",
+            "tagname": "",
+            "since": "0.5.2",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-transfer.js",
+            "line": 1452,
+            "description": "Function that handles the \"MESSAGE\" data transfer protocol.",
+            "itemtype": "method",
+            "name": "_MESSAGEProtocolHandler",
+            "access": "private",
+            "tagname": "",
+            "since": "0.5.2",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-transfer.js",
+            "line": 1472,
+            "description": "Function that handles the \"ERROR\" data transfer protocol.",
+            "itemtype": "method",
+            "name": "_ERRORProtocolHandler",
+            "access": "private",
+            "tagname": "",
+            "since": "0.5.2",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-transfer.js",
+            "line": 1512,
+            "description": "Function that handles the \"CANCEL\" data transfer protocol.",
+            "itemtype": "method",
+            "name": "_CANCELProtocolHandler",
+            "access": "private",
+            "tagname": "",
+            "since": "0.5.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-transfer.js",
+            "line": 1591,
+            "description": "Function that handles the data transfer chunk received.",
+            "itemtype": "method",
+            "name": "_DATAProtocolHandler",
+            "access": "private",
+            "tagname": "",
+            "since": "0.5.5",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-transfer.js",
+            "line": 1816,
+            "description": "Function that start the data transfer with the list of targeted Peer IDs provided.\nAt this stage, it will open a new Datachannel connection if simultaneous multi-transfers is\n  supported by Peer, or it will using the messaging type Datachannel connection.\nNote that 1 data transfer can occur at a time in 1 Datachannel connection.",
+            "itemtype": "method",
+            "name": "_startDataTransfer",
+            "access": "private",
+            "tagname": "",
             "since": "0.6.1",
             "class": "Skylink"
         },
@@ -1577,40 +1577,39 @@
         {
             "file": "source/peer-connection.js",
             "line": 1,
-            "description": "These are the list of Peer connection signaling states that Skylink would trigger.\n- Some of the state references the [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCSignalingState).",
+            "description": "Contains the list of Peer connection session description exchanging states.",
             "itemtype": "attribute",
             "name": "PEER_CONNECTION_STATE",
             "type": "JSON",
             "params": [
                 {
                     "name": "STABLE",
-                    "description": "<small>Value <code>\"stable\"</code></small>\n  The state when there is no handshaking in progress and when\n  handshaking has just started or close.<br>\nThis state occurs when Peer connection has just been initialised and after\n  <code>HAVE_LOCAL_OFFER</code> or <code>HAVE_REMOTE_OFFER</code>.",
+                    "description": "<small>Value <code>\"stable\"</code></small>\n  The state when there is no session description being exchanged with Peer connection.",
                     "type": "String"
                 },
                 {
                     "name": "HAVE_LOCAL_OFFER",
-                    "description": "<small>Value <code>\"have-local-offer\"</code></small>\n  The state when the local session description <code>\"offer\"</code> is generated and to be sent.<br>\nThis state occurs after <code>STABLE</code> state.",
+                    "description": "<small>Value <code>\"have-local-offer\"</code></small>\n  The state when offer session description is generated from Peer connection and is sent.",
                     "type": "String"
                 },
                 {
                     "name": "HAVE_REMOTE_OFFER",
-                    "description": "<small>Value <code>\"have-remote-offer\"</code></small>\n  The state when the remote session description <code>\"offer\"</code> is received.<br>\nAt this stage, this indicates that the Peer connection signaling handshaking has been completed, and\n  likely would go back to <code>STABLE</code> after local <code>\"answer\"</code> is received by Peer.",
+                    "description": "<small>Value <code>\"have-remote-offer\"</code></small>\n  The state when offer session description is received from Peer connection.\n  The Peer connection would then generate a local session description and send to Peer,\n  which would result in the <code>STABLE</code> state afterwards.",
                     "type": "String"
                 },
                 {
                     "name": "CLOSED",
-                    "description": "<small>Value <code>\"closed\"</code></small>\n  The state when the Peer connection is closed.<br>\nThis state occurs when connection with Peer has been closed, usually when Peer leaves the room.",
+                    "description": "<small>Value <code>\"closed\"</code></small>\n  The state when Peer connection is closed and session description would no longer be exchanged.",
                     "type": "String"
                 }
             ],
             "readonly": "",
-            "component": "Peer",
             "since": "0.5.0",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 33,
+            "line": 26,
             "description": "These are the list of Peer connection status retrieval ready states that Skylink would trigger.\n- These states are triggered when\n  {{#crossLink \"Skylink/getConnectionStatus:method\"}}getConnectionStatus(){{/crossLink}} is invoked.",
             "itemtype": "attribute",
             "name": "GET_CONNECTION_STATUS_STATE",
@@ -1639,7 +1638,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 56,
+            "line": 49,
             "description": "These are the types of server Peers that Skylink would connect with.\n- Different server Peers that serves different functionalities.\n- The server Peers functionalities are only available depending on the\n  Application Key configuration.\n- Eventually, this list will be populated as there are more server Peer\n  functionalities provided by the Skylink platform.",
             "itemtype": "attribute",
             "name": "SERVER_PEER_TYPE",
@@ -1658,7 +1657,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 77,
+            "line": 70,
             "description": "Stores the timestamp of the moment when the last Peers connection\n  restarts has happened. Used for the restart Peers connection functionality.",
             "itemtype": "attribute",
             "name": "_lastRestart",
@@ -1672,7 +1671,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 90,
+            "line": 83,
             "description": "Stores the counter of the number of consecutive\n  Peers connection restarts retries.",
             "itemtype": "attribute",
             "name": "_retryCount",
@@ -1686,7 +1685,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 103,
+            "line": 96,
             "description": "Stores the list of Peers connection.",
             "itemtype": "attribute",
             "name": "_peerConnections",
@@ -1707,7 +1706,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 116,
+            "line": 109,
             "description": "Connects to the Peer.",
             "itemtype": "method",
             "name": "_addPeer",
@@ -1776,7 +1775,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 181,
+            "line": 174,
             "description": "Restarts a Peer connection in a P2P environment.\nThis is usually done for replacing the previous Stream attached and restarting\n  the connection with a new one, or when the ICE connection has issues\n  streaming video/audio stream in the remote Stream which requires\n  a refresh in the ICE connection.",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -1817,7 +1816,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 327,
+            "line": 320,
             "description": "Disconnects the Peer connection and remove object references associated.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -1837,7 +1836,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 386,
+            "line": 379,
             "description": "Creates a Peer connection. This does not start the handshake connection\n  but creates the Peer connection object ready for connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -1867,13 +1866,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 533,
+            "line": 526,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 596,
+            "line": 589,
             "description": "Refreshes a Peer connection.\n- This feature can be used to refresh a Peer connection when the\n  remote Stream received does not stream any audio/video stream.\n- If there are more than 1 refresh during 5 seconds\n  or refresh is less than 3 seconds since the last refresh\n  initiated by the other peer, it will be aborted.\n- As for MCU connection, the restart mechanism makes the self user\n   leave and join the currently connected room again.",
             "itemtype": "method",
             "name": "refreshConnection",
@@ -1937,7 +1936,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 755,
+            "line": 748,
             "description": "Restarts all Peers connection in a MCU connection environment.\nThis would require the current user to leave the room and restart all\n  current existing Peers connection.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -1994,7 +1993,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 877,
+            "line": 870,
             "description": "Gets the Peer connection status.",
             "itemtype": "method",
             "name": "getConnectionStatus",
@@ -12317,99 +12316,95 @@
     "warnings": [
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1092"
+            "line": " source/data-transfer.js:180"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1566"
+            "line": " source/data-transfer.js:393"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1584"
+            "line": " source/data-transfer.js:411"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1670"
+            "line": " source/data-transfer.js:497"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1687"
+            "line": " source/data-transfer.js:514"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1776"
+            "line": " source/data-transfer.js:603"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1869"
+            "line": " source/data-transfer.js:696"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:1"
+            "line": " source/peer-connection.js:26"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:33"
+            "line": " source/peer-connection.js:49"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:56"
+            "line": " source/peer-connection.js:70"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:77"
+            "line": " source/peer-connection.js:83"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:90"
+            "line": " source/peer-connection.js:96"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:103"
+            "line": " source/peer-connection.js:109"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:116"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-connection.js:181"
+            "line": " source/peer-connection.js:174"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:327"
+            "line": " source/peer-connection.js:320"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:327"
+            "line": " source/peer-connection.js:320"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:386"
+            "line": " source/peer-connection.js:379"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:596"
+            "line": " source/peer-connection.js:589"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:596"
+            "line": " source/peer-connection.js:589"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:755"
+            "line": " source/peer-connection.js:748"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:755"
+            "line": " source/peer-connection.js:748"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:877"
+            "line": " source/peer-connection.js:870"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:877"
+            "line": " source/peer-connection.js:870"
         },
         {
             "message": "unknown tag: component",
@@ -13529,7 +13524,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:533"
+            "line": " source/peer-connection.js:526"
         }
     ]
 }

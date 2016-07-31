@@ -1,25 +1,18 @@
 /**
- * These are the list of Peer connection signaling states that Skylink would trigger.
- * - Some of the state references the [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCSignalingState).
+ * Contains the list of Peer connection session description exchanging states.
  * @attribute PEER_CONNECTION_STATE
  * @type JSON
  * @param {String} STABLE <small>Value <code>"stable"</code></small>
- *   The state when there is no handshaking in progress and when
- *   handshaking has just started or close.<br>
- * This state occurs when Peer connection has just been initialised and after
- *   <code>HAVE_LOCAL_OFFER</code> or <code>HAVE_REMOTE_OFFER</code>.
+ *   The state when there is no session description being exchanged with Peer connection.
  * @param {String} HAVE_LOCAL_OFFER <small>Value <code>"have-local-offer"</code></small>
- *   The state when the local session description <code>"offer"</code> is generated and to be sent.<br>
- * This state occurs after <code>STABLE</code> state.
+ *   The state when offer session description is generated from Peer connection and is sent.
  * @param {String} HAVE_REMOTE_OFFER <small>Value <code>"have-remote-offer"</code></small>
- *   The state when the remote session description <code>"offer"</code> is received.<br>
- * At this stage, this indicates that the Peer connection signaling handshaking has been completed, and
- *   likely would go back to <code>STABLE</code> after local <code>"answer"</code> is received by Peer.
+ *   The state when offer session description is received from Peer connection.
+ *   The Peer connection would then generate a local session description and send to Peer,
+ *   which would result in the <code>STABLE</code> state afterwards.
  * @param {String} CLOSED <small>Value <code>"closed"</code></small>
- *   The state when the Peer connection is closed.<br>
- * This state occurs when connection with Peer has been closed, usually when Peer leaves the room.
+ *   The state when Peer connection is closed and session description would no longer be exchanged.
  * @readOnly
- * @component Peer
  * @for Skylink
  * @since 0.5.0
  */
