@@ -128,8 +128,7 @@ var clone = function (obj) {
  * https://github.com/Temasys/SkylinkJS#supported-browsers).
  *
  * Here are some articles to help you get started:
- * - [How to setup a simple video call](https://temasys.github.io/how-to/2014/08/08/
- * Getting_started_with_WebRTC_and_SkylinkJS/)
+ * - [How to setup a simple video call](https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/)
  * - [How to setup screensharing](https://temasys.com.sg/screensharing-with-skylinkjs/)
  * - [How to create a chatroom like feature](https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/)
  *
