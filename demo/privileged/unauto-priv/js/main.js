@@ -13,7 +13,7 @@ var _peerId = null;
 
 var selectedPeers = [];
 
-//Demo.Skylink.setLogLevel(4);
+Demo.Skylink.setLogLevel(4);
 
 
 Demo.Methods.displayFileItemHTML = function (content) {
@@ -463,7 +463,10 @@ Demo.Skylink.on('serverPeerRestart', function (serverPeerId, serverPeerType) {
 //------------- join room ---------------------------
 var displayName = 'name_' + 'user_' + Math.floor((Math.random() * 1000) + 1);
 
-Demo.Skylink.init(config.privKey, function (error, success) {
+Demo.Skylink.init({
+  appKey: config.privKey,
+  defaultRoom: 'test'
+}, function (error, success) {
   if (success) {
     Demo.Skylink.joinRoom({
       userData: displayName,

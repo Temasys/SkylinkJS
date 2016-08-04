@@ -1,15 +1,17 @@
 /**
- * These are the list of Peer list retrieval states that Skylink would trigger.
- * - This relates to and requires the Privileged Key feature where Peers using
- *   that Privileged alias Key becomes a privileged Peer with privileged functionalities.
+ * <blockquote class="info">
+ *   Note that this feature requires <code>"isPrivileged"</code> flag to be enabled for the App Key, as
+ *   only Users connecting using the App Key with this flag enabled (which we call Privileged Users / Peers)
+ *   can retrieve the list of Peer IDs from Rooms within the same App space.
+ * </blockquote>
+ * Contains the list of <a href="#method_getPeers"><code>getPeers()</code> method</a> retrieval states.
  * @attribute GET_PEERS_STATE
- * @type JSON
  * @param {String} ENQUIRED <small>Value <code>"enquired"</code></small>
- *   The state when the privileged Peer already enquired signaling for list of peers.
+ *   The state when retrieving the list of Peer IDs from Signaling.
  * @param {String} RECEIVED <small>Value <code>"received"</code></small>
- *   The state when the privileged Peer received list of peers from signaling.
+ *   The state when successfully retrieved the list of Peer IDs from Signaling.
+ * @type JSON
  * @readOnly
- * @component Peer
  * @for Skylink
  * @since 0.6.1
  */
@@ -19,17 +21,20 @@ Skylink.prototype.GET_PEERS_STATE = {
 };
 
 /**
- * These are the list of Peer introduction states that Skylink would trigger.
- * - This relates to and requires the Privileged Key feature where Peers using
- *   that Privileged alias Key becomes a privileged Peer with privileged functionalities.
+ * <blockquote class="info">
+ *   Note that this feature requires <code>"isPrivileged"</code> flag to be enabled and
+ *   <code>"autoIntroduce"</code> flag to be disabled for the App Key, as only Users connecting
+ *   using the App Key with this flag enabled (which we call Privileged Users / Peers)
+ *   can introduce Peers in the same App space from other Rooms.
+ * </blockquote>
+ * Contains the list of <a href="#method_introducePeer"><code>introducePeer</code> method</a> introduction states.
  * @attribute INTRODUCE_STATE
- * @type JSON
  * @param {String} INTRODUCING <small>Value <code>"enquired"</code></small>
  *   The state when the privileged Peer have sent the introduction signal.
  * @param {String} ERROR <small>Value <code>"error"</code></small>
  *   The state when the Peer introduction has occurred an exception.
+ * @type JSON
  * @readOnly
- * @component Peer
  * @for Skylink
  * @since 0.6.1
  */
