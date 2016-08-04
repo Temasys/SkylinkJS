@@ -2079,190 +2079,105 @@
         {
             "file": "source/peer-handshake.js",
             "line": 102,
-            "description": "Stores the list of Peer connection health timeout objects that\n  waits for any existing Peer \"healthy\" state in successful\n  {{#crossLink \"Skylink/_peerConnectionHealth:attr\"}}_peerConnectionHealth{{/crossLink}}.\n  If timeout has reached it's limit and does not have any \"healthy\" connection state\n  with Peer connection, it will restart the connection again with\n  {{#crossLink \"Skylink/_restartPeerConnection:method\"}}_restartPeerConnection(){{/crossLink}}.",
+            "description": "Stores the list of Peer connection health timers.\nThis timers sets a timeout which checks and waits if Peer connection is successfully established,\n  or else it will attempt to re-negotiate with the Peer connection again.",
             "itemtype": "attribute",
             "name": "_peerConnectionHealthTimers",
             "params": [
                 {
-                    "name": "(#peerId)",
-                    "description": "The timeout object set using <code>setTimeout()</code> that\n  does the wait for any \"healthy\" state connection associated with the Peer connection.\n  This will be removed when the Peer connection has ended or when the Peer\n  connection has been met with a \"healthy\" state.",
+                    "name": "<#peerId>",
+                    "description": "The Peer connection health timer.",
                     "type": "Object"
                 }
             ],
             "type": "JSON",
             "access": "private",
             "tagname": "",
-            "required": 1,
-            "component": "Peer",
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 123,
-            "description": "Stores the list of Peer connections that has connection\n  established successfully. When the Peer connection has a\n  successful ICE connection state of <code>\"completed\"</code>,\n  it stores the Peer connection as \"healthy\".",
+            "line": 115,
+            "description": "Stores the list of Peer connection \"healthy\" flags, which indicates if Peer connection is\n  successfully established, and when the health timers expires, it will clear the timer\n  and not attempt to re-negotiate with the Peer connection again.",
             "itemtype": "attribute",
             "name": "_peerConnectionHealth",
             "params": [
                 {
-                    "name": "(#peerId)",
-                    "description": "The flag that indicates if the associated Peer\n  connection is in a \"healthy\" state. If the value is <code>true</code>, it means\n  that the Peer connectin is in a \"healthy\" state.",
+                    "name": "<#peerId>",
+                    "description": "The flag that indicates if Peer connection has been successfully established.",
                     "type": "Boolean"
                 }
             ],
             "type": "JSON",
             "access": "private",
             "tagname": "",
-            "required": 1,
-            "component": "Peer",
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 140,
-            "description": "Stores the peer connection priority weight.",
+            "line": 127,
+            "description": "Stores the User connection priority weight.\nIf Peer has a higher connection weight, it will do the offer from its Peer connection first.",
             "itemtype": "attribute",
             "name": "_peerPriorityWeight",
             "type": "Number",
             "access": "private",
             "tagname": "",
-            "required": 1,
             "since": "0.5.0",
             "class": "Skylink"
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 151,
-            "description": "Starts to initiate the WebRTC layer of handshake connection by\n  creating the <code>OFFER</code> session description and then\n  sending it to the associated Peer.\nThe offerer status may be shifted to the other peer depending on\n  when version of browser that is initiating the connection\n  to what version of browser to.",
+            "line": 138,
+            "description": "Function that creates the Peer connection offer session description.",
             "itemtype": "method",
             "name": "_doOffer",
-            "params": [
-                {
-                    "name": "targetMid",
-                    "description": "The Peer ID to send the <code>OFFER</code> to.",
-                    "type": "String"
-                },
-                {
-                    "name": "peerBrowser",
-                    "description": "The Peer platform agent information.",
-                    "type": "JSON",
-                    "props": [
-                        {
-                            "name": "name",
-                            "description": "The Peer platform browser or agent name.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "version",
-                            "description": "The Peer platform browser or agent version.",
-                            "type": "Number"
-                        },
-                        {
-                            "name": "os",
-                            "description": "The Peer platform name.",
-                            "type": "Number"
-                        }
-                    ]
-                },
-                {
-                    "name": "renegoCallback",
-                    "description": "The callback function that triggers after\n  the offer has been created or responsed.",
-                    "type": "Function"
-                }
-            ],
             "access": "private",
             "tagname": "",
-            "component": "Peer",
             "since": "0.5.2",
             "class": "Skylink"
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 262,
-            "description": "Responses to the <code>OFFER</code> session description received and\n   creates an <code>ANSWER</code> session description to sent\n  to the associated Peer to complete the WebRTC handshake layer.",
+            "line": 236,
+            "description": "Function that creates the Peer connection answer session description.\nThis comes after receiving and setting the offer session description.",
             "itemtype": "method",
             "name": "_doAnswer",
-            "params": [
-                {
-                    "name": "targetMid",
-                    "description": "The Peer ID to send the <code>ANSWER</code> to.",
-                    "type": "String"
-                }
-            ],
             "access": "private",
             "tagname": "",
-            "component": "Peer",
             "since": "0.1.0",
             "class": "Skylink"
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 305,
-            "description": "Starts the waiting timeout for a \"healthy\" connection\n  with associated Peer connection.\nIt waits for any existing Peer \"healthy\" state in successful\n  {{#crossLink \"Skylink/_peerConnectionHealth:attr\"}}_peerConnectionHealth{{/crossLink}}.\nIf timeout has reached it's limit and does not have any \"healthy\" connection state\n  with Peer connection, it will restart the connection again with\n  {{#crossLink \"Skylink/_restartPeerConnection:method\"}}_restartPeerConnection(){{/crossLink}}.\nThis sets the timeout object associated with the Peer into\n  {{#crossLink \"Skylink/_peerConnectionHealthTimers\"}}_peerConnectionHealthTimers(){{/crossLink}}.",
+            "line": 276,
+            "description": "Function that starts the Peer connection health timer.\nTo count as a \"healthy\" successful established Peer connection, the\n  ICE connection state has to be \"connected\" or \"completed\",\n  messaging Datachannel type state has to be \"opened\" (if Datachannel is enabled)\n  and Signaling state has to be \"stable\".\nShould consider dropping of counting messaging Datachannel type being opened as\n  it should not involve the actual Peer connection for media (audio/video) streaming.",
             "itemtype": "method",
             "name": "_startPeerConnectionHealthCheck",
-            "params": [
-                {
-                    "name": "peerId",
-                    "description": "The Peer ID to start a waiting timeout for a \"healthy\" connection.",
-                    "type": "String"
-                },
-                {
-                    "name": "toOffer",
-                    "description": "The flag that indicates if Peer connection\n  is an offerer or an answerer for an accurate timeout waiting time.",
-                    "type": "Boolean",
-                    "optional": true,
-                    "optdefault": "false"
-                }
-            ],
             "access": "private",
             "tagname": "",
-            "component": "Peer",
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 397,
-            "description": "Stops the waiting timeout for a \"healthy\" connection associated\n  with the Peer.",
+            "line": 362,
+            "description": "Function that stops the Peer connection health timer.\nThis happens when Peer connection has been successfully established or when\n  Peer leaves the Room.",
             "itemtype": "method",
             "name": "_stopPeerConnectionHealthCheck",
-            "params": [
-                {
-                    "name": "peerId",
-                    "description": "The Peer ID to stop a waiting\n  timeout for a \"healthy\" connection.",
-                    "type": "String"
-                }
-            ],
             "access": "private",
             "tagname": "",
-            "component": "Peer",
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 424,
-            "description": "Sets the WebRTC handshake layer session description into the\n  Peer <code>RTCPeerConnection</code> object <i><code>\n  RTCPeerConnection.setLocalDescription()</code></i> associated\n  with the Peer connection.",
+            "line": 387,
+            "description": "Function that sets the local session description and sends to Peer.\nIf trickle ICE is disabled, the local session description will be sent after\n  ICE gathering has been completed.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
-            "params": [
-                {
-                    "name": "targetMid",
-                    "description": "The Peer ID to send the session description to\n  after setting into the associated <code>RTCPeerConnection</code> object.",
-                    "type": "String"
-                },
-                {
-                    "name": "sessionDescription",
-                    "description": "The <code>OFFER</code> or an <code>ANSWER</code>\n  session description to set to the associated Peer after setting into\n  the <code>RTCPeerConnection</code> object.",
-                    "type": "JSON"
-                }
-            ],
-            "trigger": "handshakeProgress",
             "access": "private",
             "tagname": "",
-            "component": "Peer",
             "since": "0.5.2",
             "class": "Skylink"
         },
@@ -11727,38 +11642,6 @@
         {
             "message": "unknown tag: component",
             "line": " source/peer-handshake.js:1"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:102"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:123"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:151"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:262"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:305"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:397"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/peer-handshake.js:424"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:424"
         },
         {
             "message": "unknown tag: component",

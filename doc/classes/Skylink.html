@@ -5084,7 +5084,7 @@ This method will do a event subscription with
             
 
             <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
+              <small class="default"><span>DEFAULT: </span><code>false</code></small>
               <p>The flag that indicates if Skylink should interrupt the
   second condition function once the function has been triggered to not unsubscribe the
   event handler but to always trigger when the second condition has been met.</p>
@@ -5521,16 +5521,7 @@ This method will do a event subscription with
               <div id="method__doAnswer" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_doAnswer</code></h3>
   
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code>targetMid</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
+    <span class="paren">()</span>
   
 
   <div class="code-item-properties">
@@ -5574,7 +5565,7 @@ This method will do a event subscription with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l262"><code>source&#x2F;peer-handshake.js:262</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l236"><code>source&#x2F;peer-handshake.js:236</code></a>
       </small>
     
 
@@ -5588,38 +5579,13 @@ This method will do a event subscription with
   </div>
 
   <div class="code-item-description">
-    <p>Responses to the <code>OFFER</code> session description received and
-   creates an <code>ANSWER</code> session description to sent
-  to the associated Peer to complete the WebRTC handshake layer.</p>
+    <p>Function that creates the Peer connection answer session description.
+This comes after receiving and setting the offer session description.</p>
 
   </div>
 
   
 
-  
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">targetMid</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The Peer ID to send the <code>ANSWER</code> to.</p>
-
-            </div>
-
-            
-          </li>
-      
-      </ul>
-    </div>
   
 
   
@@ -5631,26 +5597,7 @@ This method will do a event subscription with
               <div id="method__doOffer" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_doOffer</code></h3>
   
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code>targetMid</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code>peerBrowser</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code>renegoCallback</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
+    <span class="paren">()</span>
   
 
   <div class="code-item-properties">
@@ -5694,7 +5641,7 @@ This method will do a event subscription with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l151"><code>source&#x2F;peer-handshake.js:151</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l138"><code>source&#x2F;peer-handshake.js:138</code></a>
       </small>
     
 
@@ -5708,126 +5655,12 @@ This method will do a event subscription with
   </div>
 
   <div class="code-item-description">
-    <p>Starts to initiate the WebRTC layer of handshake connection by
-  creating the <code>OFFER</code> session description and then
-  sending it to the associated Peer.
-The offerer status may be shifted to the other peer depending on
-  when version of browser that is initiating the connection
-  to what version of browser to.</p>
+    <p>Function that creates the Peer connection offer session description.</p>
 
   </div>
 
   
 
-  
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">targetMid</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The Peer ID to send the <code>OFFER</code> to.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">peerBrowser</code>
-            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The Peer platform agent information.</p>
-
-            </div>
-
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">name</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The Peer platform browser or agent name.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">version</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The Peer platform browser or agent version.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">os</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The Peer platform name.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">renegoCallback</code>
-            <span class="type"><b>{</b>Function<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The callback function that triggers after
-  the offer has been created or responsed.</p>
-
-            </div>
-
-            
-          </li>
-      
-      </ul>
-    </div>
   
 
   
@@ -5980,7 +5813,7 @@ The offerer status may be shifted to the other peer depending on
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The flag that indicates if the Peer
   connection would send Stream or not (receive only).</p>
 
@@ -6045,7 +5878,7 @@ The offerer status may be shifted to the other peer depending on
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The
   Peer Stream streaming audio settings. If
   <code>false</code>, it means that audio streaming is disabled in
@@ -6076,7 +5909,7 @@ The offerer status may be shifted to the other peer depending on
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The Peer
   Stream streaming video settings. If <code>false</code>, it means that
   video streaming is disabled in the remote Stream of the Peer.
@@ -6149,7 +5982,7 @@ The offerer status may be shifted to the other peer depending on
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The flag
   that indicates if the Peer connection Stream object sent
   is a screensharing stream or not.
@@ -6238,7 +6071,7 @@ The offerer status may be shifted to the other peer depending on
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>true</small>
+                              <small class="default"><span>DEFAULT: </span><code>true</code></small>
                               The flag that
   indicates if the remote Stream object audio streaming is muted. If
   there is no audio streaming enabled for the Peer, by default,
@@ -6254,7 +6087,7 @@ The offerer status may be shifted to the other peer depending on
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>true</small>
+                              <small class="default"><span>DEFAULT: </span><code>true</code></small>
                               The flag that
   indicates if the remote Stream object video streaming is muted. If
   there is no video streaming enabled for the Peer, by default,
@@ -8523,7 +8356,7 @@ Separated in a function to prevent jshint errors.</p>
             
 
             <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
+              <small class="default"><span>DEFAULT: </span><code>false</code></small>
               <p>The flag that indicates if Peer connection
    Stream object is a screensharing stream or not.</p>
 
@@ -8663,7 +8496,7 @@ Separated in a function to prevent jshint errors.</p>
             
 
             <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
+              <small class="default"><span>DEFAULT: </span><code>false</code></small>
               <p>The flag that indicates if self
    Stream object is a screensharing stream or not.</p>
 
@@ -8680,7 +8513,7 @@ Separated in a function to prevent jshint errors.</p>
             
 
             <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
+              <small class="default"><span>DEFAULT: </span><code>false</code></small>
               <p>The flag that indicates if stage
    of stream media error should do an audio fallback.</p>
 
@@ -8815,7 +8648,7 @@ Separated in a function to prevent jshint errors.</p>
             
 
             <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
+              <small class="default"><span>DEFAULT: </span><code>false</code></small>
               <p>The flag that indicates if self
    Stream object is a screensharing stream or not.</p>
 
@@ -9010,7 +8843,7 @@ Once URI is formed, it will start a new socket.io connection with
             
 
             <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
+              <small class="default"><span>DEFAULT: </span><code>false</code></small>
               <p>The flag that indicates if self user media
   MediaStream would have audio streaming.</p>
 
@@ -9027,7 +8860,7 @@ Once URI is formed, it will start a new socket.io connection with
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The flag that
   indicates if the self Stream object audio streaming is muted.</p>
 
@@ -9980,7 +9813,7 @@ Once URI is formed, it will start a new socket.io connection with
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The self Stream streaming audio settings.
   If <code>false</code>, it means that audio streaming is disabled in
   the self Stream. If this option is set to <code>true</code> or is defined with
@@ -10001,7 +9834,7 @@ Once URI is formed, it will start a new socket.io connection with
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The flag that indicates if
   stereo should be enabled in self connection Stream
   audio streaming.
@@ -10016,7 +9849,7 @@ Once URI is formed, it will start a new socket.io connection with
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The flag that
   indicates if the self Stream object audio streaming is muted.
                             </div>
@@ -10034,7 +9867,7 @@ Once URI is formed, it will start a new socket.io connection with
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The self Stream streaming video settings.
   If <code>false</code>, it means that video streaming is disabled in
   the self Stream. If this option is set to <code>true</code> or is defined with
@@ -10055,7 +9888,7 @@ Once URI is formed, it will start a new socket.io connection with
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The flag that
   indicates if the self Stream object video streaming is muted.
                             </div>
@@ -10113,7 +9946,7 @@ Once URI is formed, it will start a new socket.io connection with
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>50</small>
+                              <small class="default"><span>DEFAULT: </span><code>50</code></small>
                               The self
   Stream streaming video maximum frameRate.
                             </div>
@@ -10333,7 +10166,7 @@ Once URI is formed, it will start a new socket.io connection with
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The self Stream streaming audio settings.
   If <code>false</code>, it means that audio streaming is disabled in
   the self Stream. If this option is set to <code>true</code> or is defined with
@@ -10354,7 +10187,7 @@ Once URI is formed, it will start a new socket.io connection with
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The flag that
   indicates if the self Stream object audio streaming is muted.
                             </div>
@@ -10372,7 +10205,7 @@ Once URI is formed, it will start a new socket.io connection with
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The self Stream streaming video settings.
   If <code>false</code>, it means that video streaming is disabled in
   the self Stream. If this option is set to <code>true</code> or is defined with
@@ -10393,7 +10226,7 @@ Once URI is formed, it will start a new socket.io connection with
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The flag that
   indicates if the self Stream object video streaming is muted.
                             </div>
@@ -10451,7 +10284,7 @@ Once URI is formed, it will start a new socket.io connection with
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>50</small>
+                              <small class="default"><span>DEFAULT: </span><code>50</code></small>
                               The self
   Stream streaming video maximum frameRate.
                             </div>
@@ -10473,7 +10306,7 @@ Once URI is formed, it will start a new socket.io connection with
             
 
             <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
+              <small class="default"><span>DEFAULT: </span><code>false</code></small>
               <p>The default flag that indicates if
   stereo should be enabled in self connection Stream
   audio streaming.</p>
@@ -10682,7 +10515,7 @@ Once URI is formed, it will start a new socket.io connection with
             
 
             <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
+              <small class="default"><span>DEFAULT: </span><code>false</code></small>
               <p>The self
   Stream streaming video settings. If <code>false</code>, it means that
   video streaming is disabled in the remote Stream of self connection.</p>
@@ -10768,7 +10601,7 @@ Once URI is formed, it will start a new socket.io connection with
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The flag that
   indicates if the self Stream object video streaming is muted.</p>
 
@@ -12822,7 +12655,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The flag that indicates if the Peer
   connection would send Stream or not (receive only).</p>
 
@@ -12839,7 +12672,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The flag that indicates
    if PeerConnections should enable trickling of ICE to connect the ICE connection.</p>
 
@@ -12856,7 +12689,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The flag that indicates if
   Peer connection should have any DataChannel connections.</p>
 
@@ -12921,7 +12754,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The
   Peer Stream streaming audio settings. If
   <code>false</code>, it means that audio streaming is disabled in
@@ -12952,7 +12785,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The Peer
   Stream streaming video settings. If <code>false</code>, it means that
   video streaming is disabled in the remote Stream of the Peer.
@@ -13025,7 +12858,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The flag
   that indicates if the Peer connection Stream object sent
   is a screensharing stream or not.
@@ -13114,7 +12947,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>true</small>
+                              <small class="default"><span>DEFAULT: </span><code>true</code></small>
                               The flag that
   indicates if the remote Stream object audio streaming is muted. If
   there is no audio streaming enabled for the Peer, by default,
@@ -13130,7 +12963,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>true</small>
+                              <small class="default"><span>DEFAULT: </span><code>true</code></small>
                               The flag that
   indicates if the remote Stream object video streaming is muted. If
   there is no video streaming enabled for the Peer, by default,
@@ -14101,21 +13934,7 @@ When there is not response after timeout, the data transfer will be terminated.<
               <div id="method__setLocalAndSendMessage" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_setLocalAndSendMessage</code></h3>
   
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code>targetMid</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code>sessionDescription</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
+    <span class="paren">()</span>
   
 
   <div class="code-item-properties">
@@ -14159,7 +13978,7 @@ When there is not response after timeout, the data transfer will be terminated.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l424"><code>source&#x2F;peer-handshake.js:424</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l387"><code>source&#x2F;peer-handshake.js:387</code></a>
       </small>
     
 
@@ -14173,63 +13992,14 @@ When there is not response after timeout, the data transfer will be terminated.<
   </div>
 
   <div class="code-item-description">
-    <p>Sets the WebRTC handshake layer session description into the
-  Peer <code>RTCPeerConnection</code> object <i><code>
-  RTCPeerConnection.setLocalDescription()</code></i> associated
-  with the Peer connection.</p>
+    <p>Function that sets the local session description and sends to Peer.
+If trickle ICE is disabled, the local session description will be sent after
+  ICE gathering has been completed.</p>
 
   </div>
 
   
-  <div class="code-item-section">
-    <h4>Triggers:</h4>
-    <span class="code-item-trigger">handshakeProgress</span>
-  </div>
-  
 
-  
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">targetMid</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The Peer ID to send the session description to
-  after setting into the associated <code>RTCPeerConnection</code> object.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">sessionDescription</code>
-            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The <code>OFFER</code> or an <code>ANSWER</code>
-  session description to set to the associated Peer after setting into
-  the <code>RTCPeerConnection</code> object.</p>
-
-            </div>
-
-            
-          </li>
-      
-      </ul>
-    </div>
   
 
   
@@ -14818,21 +14588,7 @@ Note that 1 data transfer can occur at a time in 1 Datachannel connection.</p>
               <div id="method__startPeerConnectionHealthCheck" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_startPeerConnectionHealthCheck</code></h3>
   
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code>peerId</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code class="optional">[toOffer=false]</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
+    <span class="paren">()</span>
   
 
   <div class="code-item-properties">
@@ -14876,7 +14632,7 @@ Note that 1 data transfer can occur at a time in 1 Datachannel connection.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l305"><code>source&#x2F;peer-handshake.js:305</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l276"><code>source&#x2F;peer-handshake.js:276</code></a>
       </small>
     
 
@@ -14890,61 +14646,18 @@ Note that 1 data transfer can occur at a time in 1 Datachannel connection.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Starts the waiting timeout for a "healthy" connection
-  with associated Peer connection.
-It waits for any existing Peer "healthy" state in successful
-  <a href="../classes/Skylink.html#attr__peerConnectionHealth" class="crosslink">_peerConnectionHealth</a>.
-If timeout has reached it&#39;s limit and does not have any "healthy" connection state
-  with Peer connection, it will restart the connection again with
-  <a href="../classes/Skylink.html#method__restartPeerConnection" class="crosslink">_restartPeerConnection()</a>.
-This sets the timeout object associated with the Peer into
-  Skylink/_peerConnectionHealthTimers.</p>
+    <p>Function that starts the Peer connection health timer.
+To count as a &quot;healthy&quot; successful established Peer connection, the
+  ICE connection state has to be &quot;connected&quot; or &quot;completed&quot;,
+  messaging Datachannel type state has to be &quot;opened&quot; (if Datachannel is enabled)
+  and Signaling state has to be &quot;stable&quot;.
+Should consider dropping of counting messaging Datachannel type being opened as
+  it should not involve the actual Peer connection for media (audio/video) streaming.</p>
 
   </div>
 
   
 
-  
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">peerId</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The Peer ID to start a waiting timeout for a &quot;healthy&quot; connection.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">toOffer</code>
-            <span class="type"><b>{</b>Boolean<b>}</b></span>
-
-            <span class="label">Optional</span>
-            
-
-            <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
-              <p>The flag that indicates if Peer connection
-  is an offerer or an answerer for an accurate timeout waiting time.</p>
-
-            </div>
-
-            
-          </li>
-      
-      </ul>
-    </div>
   
 
   
@@ -15060,7 +14773,7 @@ This sets the timeout object associated with the Peer into
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The flag that indicates if leaving the room
   should automatically stop and clear the existing user media stream attached to skylink.
   This would trigger <code>mediaAccessStopped</code> for this Stream if available.</p>
@@ -15078,7 +14791,7 @@ This sets the timeout object associated with the Peer into
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The flag that indicates if leaving the room
   should automatically stop and clear the existing screensharing stream attached to skylink.
   This would trigger <code>mediaAccessStopped</code> for this Stream if available.</p>
@@ -15105,16 +14818,7 @@ This sets the timeout object associated with the Peer into
               <div id="method__stopPeerConnectionHealthCheck" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_stopPeerConnectionHealthCheck</code></h3>
   
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code>peerId</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
+    <span class="paren">()</span>
   
 
   <div class="code-item-properties">
@@ -15158,7 +14862,7 @@ This sets the timeout object associated with the Peer into
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l397"><code>source&#x2F;peer-handshake.js:397</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l362"><code>source&#x2F;peer-handshake.js:362</code></a>
       </small>
     
 
@@ -15172,38 +14876,14 @@ This sets the timeout object associated with the Peer into
   </div>
 
   <div class="code-item-description">
-    <p>Stops the waiting timeout for a &quot;healthy&quot; connection associated
-  with the Peer.</p>
+    <p>Function that stops the Peer connection health timer.
+This happens when Peer connection has been successfully established or when
+  Peer leaves the Room.</p>
 
   </div>
 
   
 
-  
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">peerId</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The Peer ID to stop a waiting
-  timeout for a &quot;healthy&quot; connection.</p>
-
-            </div>
-
-            
-          </li>
-      
-      </ul>
-    </div>
   
 
   
@@ -16008,7 +15688,7 @@ This utilises <code>setInterval()</code> function.</p>
             
 
             <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>50</small>
+              <small class="default"><span>DEFAULT: </span><code>50</code></small>
               <p>The interval loop timeout that the interval
   check should iterate based on the timeout provided (in ms).
   By default, if the value is not configured, it is <code>50</code>ms.</p>
@@ -16153,7 +15833,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>null</small>
+                      <small class="default"><span>DEFAULT: </span><code>null</code></small>
                       <p>The callback error that is defined
   when there&#39;s an error.</p>
 
@@ -16231,7 +15911,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The self Stream streaming audio settings.
   If <code>false</code>, it means that audio streaming is disabled in
   the self Stream. If this option is set to <code>true</code> or is defined with
@@ -16252,7 +15932,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The flag that indicates if
   stereo should be enabled in self connection Stream
   audio streaming.
@@ -16267,7 +15947,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The flag that
   indicates if the self Stream object audio streaming is muted.
                             </div>
@@ -16285,7 +15965,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The self Stream streaming video settings.
   If <code>false</code>, it means that video streaming is disabled in
   the self Stream. If this option is set to <code>true</code> or is defined with
@@ -16306,7 +15986,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The flag that
   indicates if the self Stream object video streaming is muted.
                             </div>
@@ -16364,7 +16044,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>50</small>
+                              <small class="default"><span>DEFAULT: </span><code>50</code></small>
                               The self
   Stream streaming video maximum frameRate.
                             </div>
@@ -16593,7 +16273,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The self Stream streaming audio settings.
   If <code>false</code>, it means that audio streaming is disabled in
   the self Stream. If this option is set to <code>true</code> or is defined with
@@ -16629,7 +16309,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The flag that
   indicates if the self Stream object audio streaming is muted.
                             </div>
@@ -16647,7 +16327,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The self Stream streaming video settings.
   If <code>false</code>, it means that video streaming is disabled in
   the self Stream. If this option is set to <code>true</code> or is defined with
@@ -16668,7 +16348,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The flag that
   indicates if the self Stream object video streaming is muted.
                             </div>
@@ -16726,7 +16406,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>50</small>
+                              <small class="default"><span>DEFAULT: </span><code>50</code></small>
                               The self
   Stream streaming video maximum frameRate.
                             </div>
@@ -17023,7 +16703,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The flag that indicates if the Peer
   connection would send Stream or not (receive only).</p>
 
@@ -17040,7 +16720,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The flag that indicates
    if PeerConnections should enable trickling of ICE to connect the ICE connection.</p>
 
@@ -17057,7 +16737,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The flag that indicates if
   Peer connection should have any DataChannel connections.</p>
 
@@ -17111,7 +16791,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The
   Peer Stream streaming audio settings. If
   <code>false</code>, it means that audio streaming is disabled in
@@ -17148,7 +16828,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The Peer
   Stream streaming video settings. If <code>false</code>, it means that
   video streaming is disabled in the remote Stream of the Peer.</p>
@@ -17236,7 +16916,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The flag
   that indicates if the Peer connection Stream object sent
   is a screensharing stream or not.</p>
@@ -17343,7 +17023,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>true</small>
+                      <small class="default"><span>DEFAULT: </span><code>true</code></small>
                       <p>The flag that
   indicates if the remote Stream object audio streaming is muted. If
   there is no audio streaming enabled for the Peer, by default,
@@ -17362,7 +17042,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>true</small>
+                      <small class="default"><span>DEFAULT: </span><code>true</code></small>
                       <p>The flag that
   indicates if the remote Stream object video streaming is muted. If
   there is no video streaming enabled for the Peer, by default,
@@ -17733,7 +17413,7 @@ Function that accepts or rejects a data transfer request from Peer.</p>
             
 
             <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
+              <small class="default"><span>DEFAULT: </span><code>false</code></small>
               <p>The flag to accept or reject the data transfer request from Peer.</p>
 
             </div>
@@ -18991,7 +18671,7 @@ This will only work if self is a privileged Peer.</p>
             
 
             <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
+              <small class="default"><span>DEFAULT: </span><code>false</code></small>
               <p>The flag that indicates if returned list should
   also include privileged and standard in the list. By default, the value is <code>false</code>.
   Which means only unprivileged peers&#39; ID (isPrivileged = autoIntroduce = false) is included.</p>
@@ -19305,7 +18985,7 @@ Do not invoke this function when user has already joined a room as
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The self Stream streaming audio settings.
   If <code>false</code>, it means that audio streaming is disabled in
   the self Stream. If this option is set to <code>true</code> or is defined with
@@ -19326,7 +19006,7 @@ Do not invoke this function when user has already joined a room as
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The flag that indicates if
   stereo should be enabled in self connection Stream
   audio streaming.
@@ -19341,7 +19021,7 @@ Do not invoke this function when user has already joined a room as
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The flag that
   indicates if the self Stream object audio streaming is muted.
                             </div>
@@ -19376,7 +19056,7 @@ Do not invoke this function when user has already joined a room as
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The self Stream streaming video settings.
   If <code>false</code>, it means that video streaming is disabled in
   the self Stream. If this option is set to <code>true</code> or is defined with
@@ -19397,7 +19077,7 @@ Do not invoke this function when user has already joined a room as
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The flag that
   indicates if the self Stream object video streaming is muted.
                             </div>
@@ -19459,7 +19139,7 @@ Do not invoke this function when user has already joined a room as
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>50</small>
+                              <small class="default"><span>DEFAULT: </span><code>50</code></small>
                               The self
   Stream streaming video maximum frameRate.
   <i>This sets the <code>maxFramerate</code> of the <code>video</code>
@@ -19740,7 +19420,7 @@ This is where the Application Key is configured and attached to Skylink for usag
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>options.appKey</small>
+                      <small class="default"><span>DEFAULT: </span><code>options.appKey</code></small>
                       <p>The default room that
   Skylink should connect to if there is no room provided in
   <a href="../classes/Skylink.html#method_joinRoom" class="crosslink">joinRoom()</a>.
@@ -19796,7 +19476,7 @@ This is where the Application Key is configured and attached to Skylink for usag
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>true</small>
+                      <small class="default"><span>DEFAULT: </span><code>true</code></small>
                       <p><i>Debugging Feature</i>.
    The flag that indicates if PeerConnections
    should enable trickling of ICE to connect the ICE connection. Configuring
@@ -19816,7 +19496,7 @@ This is where the Application Key is configured and attached to Skylink for usag
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>true</small>
+                      <small class="default"><span>DEFAULT: </span><code>true</code></small>
                       <p><i>Debugging feature</i>.
   The flag that indicates if PeerConnections
   should have any DataChannel connections. Configuring this value to <code>false</code>
@@ -19839,7 +19519,7 @@ This is where the Application Key is configured and attached to Skylink for usag
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>true</small>
+                      <small class="default"><span>DEFAULT: </span><code>true</code></small>
                       <p><i>Debugging feature</i>.
   The flag that indicates if PeerConnections connection should use any TURN server connection.
   Tampering this flag may disable any successful Peer connection
@@ -19858,7 +19538,7 @@ This is where the Application Key is configured and attached to Skylink for usag
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>true</small>
+                      <small class="default"><span>DEFAULT: </span><code>true</code></small>
                       <p><i>Debugging feature</i>.
   The flag that indicates if PeerConnections connection should use any STUN server connection.
   Tampering this flag may cause issues to connections, so set this value at your own risk.</p>
@@ -19876,7 +19556,7 @@ This is where the Application Key is configured and attached to Skylink for usag
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The flag that indicates if PeerConnections connection
   should only use TURN server connection which enables a quicker connectivity.
   Note that this will not work if TURN is disabled for the Application Key provided.
@@ -19897,7 +19577,7 @@ This is where the Application Key is configured and attached to Skylink for usag
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>true</small>
+                      <small class="default"><span>DEFAULT: </span><code>true</code></small>
                       <p>The flag that indicates if PeerConnections connection
   should enable usage of public STUN server connection connectivity.
   This configuration would not work if <code>enableSTUNServer</code> is set to <code>false</code>
@@ -19916,7 +19596,7 @@ This is where the Application Key is configured and attached to Skylink for usag
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>Skylink.TURN_TRANSPORT.ANY</small>
+                      <small class="default"><span>DEFAULT: </span><code>Skylink.TURN_TRANSPORT.ANY</code></small>
                       <p><i>Debugging feature</i>.
   The TURN server transport to enable for TURN server connections.
   Tampering this flag may cause issues to connections, so set this value at your own risk.
@@ -20030,7 +19710,7 @@ This is where the Application Key is configured and attached to Skylink for usag
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The flag that indicates if there is a failure in
   <a href="../classes/Skylink.html#method_getUserMedia" class="crosslink">getUserMedia()</a> in retrieving user media
   video stream, it should fallback to retrieve audio stream only. This would not work for
@@ -20050,7 +19730,7 @@ This is where the Application Key is configured and attached to Skylink for usag
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The flag to enforce an SSL platform signaling and platform server connection.
   If self domain accessing protocol is <code>https:</code>, SSL connections
   would be automatically used. This flag is mostly used for self domain accessing protocol
@@ -20070,7 +19750,7 @@ This is where the Application Key is configured and attached to Skylink for usag
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>Skylink.AUDIO_CODEC.AUTO</small>
+                      <small class="default"><span>DEFAULT: </span><code>Skylink.AUDIO_CODEC.AUTO</code></small>
                       <p><i>Debugging Feature</i>.
   The preferred audio codec that Peer connection
   streaming audio codec should use in the connection when available. If not available, the default
@@ -20089,7 +19769,7 @@ This is where the Application Key is configured and attached to Skylink for usag
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>Skylink.VIDEO_CODEC.AUTO</small>
+                      <small class="default"><span>DEFAULT: </span><code>Skylink.VIDEO_CODEC.AUTO</code></small>
                       <p><i>Debugging Feature</i>.
   The preferred video codec that Peer connection
   streaming video codec should use in the connection when available. If not available, the default
@@ -20108,7 +19788,7 @@ This is where the Application Key is configured and attached to Skylink for usag
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>20000</small>
+                      <small class="default"><span>DEFAULT: </span><code>20000</code></small>
                       <p>The timeout that the socket connection should throw a
   timeout exception when socket fails to receive a response from connection. Depending on
   the max retries left based on the availability of ports given by the platform server,
@@ -20128,7 +19808,7 @@ This is where the Application Key is configured and attached to Skylink for usag
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The flag to enforce an SSL TURN server connection.
   If self domain accessing protocol is <code>https:</code>, SSL connections
   would be automatically used. This flag is mostly used for self domain accessing protocol
@@ -20860,7 +20540,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The self Stream streaming audio settings.
   If <code>false</code>, it means that audio streaming is disabled in
   the self Stream. If this option is set to <code>true</code> or is defined with
@@ -20896,7 +20576,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The flag that
   indicates if the self Stream object audio streaming is muted.
                             </div>
@@ -20931,7 +20611,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The self Stream streaming video settings.
   If <code>false</code>, it means that video streaming is disabled in
   the self Stream. If this option is set to <code>true</code> or is defined with
@@ -20952,7 +20632,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The flag that
   indicates if the self Stream object video streaming is muted.
                             </div>
@@ -21027,7 +20707,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>50</small>
+                              <small class="default"><span>DEFAULT: </span><code>50</code></small>
                               The self
   Stream streaming video maximum frameRate.
                             </div>
@@ -21299,7 +20979,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The self Stream
   streaming audio settings. If <code>false</code>, it means that audio
   streaming is disabled in the self Stream. If this option is set to
@@ -21333,7 +21013,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The self Stream
   streaming video settings. If <code>false</code>, it means that video
   streaming is disabled in the self Stream. If this option is set to
@@ -21396,7 +21076,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>50</small>
+                              <small class="default"><span>DEFAULT: </span><code>50</code></small>
                               The self
   Stream streaming video maximum frameRate.
                             </div>
@@ -21410,7 +21090,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The flag
   that indicates if the self connection Stream object sent
   is a screensharing stream or not.
@@ -21499,7 +21179,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>true</small>
+                              <small class="default"><span>DEFAULT: </span><code>true</code></small>
                               The flag that
   indicates if the self Stream object audio streaming is muted. If
   there is no audio streaming enabled for the self, by default,
@@ -21515,7 +21195,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>true</small>
+                              <small class="default"><span>DEFAULT: </span><code>true</code></small>
                               The flag that
   indicates if the self Stream object video streaming is muted. If
   there is no video streaming enabled for the Peer connection, by default,
@@ -21774,7 +21454,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
             
 
             <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>true</small>
+              <small class="default"><span>DEFAULT: </span><code>true</code></small>
               <p>The stop attached Stream options for
   Skylink when leaving the room. If provided options is a
   <var>typeof</var> <code>boolean</code>, it will be interpreted as both
@@ -21793,7 +21473,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>true</small>
+                      <small class="default"><span>DEFAULT: </span><code>true</code></small>
                       <p>The flag that indicates if leaving the room
   should automatically stop and clear the existing user media stream attached to skylink.
   This would trigger <code>mediaAccessStopped</code> for this Stream if available.</p>
@@ -21811,7 +21491,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>true</small>
+                      <small class="default"><span>DEFAULT: </span><code>true</code></small>
                       <p>The flag that indicates if leaving the room
   should automatically stop and clear the existing screensharing stream attached to skylink.
   This would trigger <code>mediaAccessStopped</code> for this Stream if available.</p>
@@ -22137,7 +21817,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>true</small>
+                      <small class="default"><span>DEFAULT: </span><code>true</code></small>
                       <p>The flag that
   indicates if self connection Stream object audio streaming is muted. If
   there is no audio streaming enabled for self connection, by default,
@@ -22156,7 +21836,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>true</small>
+                      <small class="default"><span>DEFAULT: </span><code>true</code></small>
                       <p>The flag that
   indicates if self connection Stream object video streaming is muted. If
   there is no video streaming enabled for self connection, by default,
@@ -22632,7 +22312,7 @@ This event handler will always be triggered when the event name is triggered. If
             
 
             <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
+              <small class="default"><span>DEFAULT: </span><code>false</code></small>
               <p>The flag that indicates if Skylink should interrupt this
   <code>once()</code> function once the function has been triggered to not unsubscribe the
   event handler but to always trigger when the condition has been met.</p>
@@ -23050,7 +22730,7 @@ Function that accepts or rejects a data transfer request from Peer.</p>
             
 
             <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
+              <small class="default"><span>DEFAULT: </span><code>false</code></small>
               <p>The flag to accept or reject the data transfer request from Peer.</p>
 
             </div>
@@ -23200,7 +22880,7 @@ Use the <a href="http://www.w3schools.com/tags/att_input_type.asp"><code>&lt;inp
             
 
             <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>60</small>
+              <small class="default"><span>DEFAULT: </span><code>60</code></small>
               <p>The timeout to wait for response from Peer. Once timeout is reached without
   response, the data transfer is terminated.</p>
 
@@ -23950,7 +23630,7 @@ Reference <a href="../classes/Skylink.html#method_refreshConnection" class="cros
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The self Stream streaming audio settings.
   If <code>false</code>, it means that audio streaming is disabled in
   the self Stream. If this option is set to <code>true</code> or is defined with
@@ -23971,7 +23651,7 @@ Reference <a href="../classes/Skylink.html#method_refreshConnection" class="cros
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The flag that indicates if
   stereo should be enabled in self connection Stream
   audio streaming.
@@ -23986,7 +23666,7 @@ Reference <a href="../classes/Skylink.html#method_refreshConnection" class="cros
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The flag that
   indicates if the self Stream object audio streaming is muted.
                             </div>
@@ -24021,7 +23701,7 @@ Reference <a href="../classes/Skylink.html#method_refreshConnection" class="cros
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The self Stream streaming video settings.
   If <code>false</code>, it means that video streaming is disabled in
   the self Stream. If this option is set to <code>true</code> or is defined with
@@ -24042,7 +23722,7 @@ Reference <a href="../classes/Skylink.html#method_refreshConnection" class="cros
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
+                              <small class="default"><span>DEFAULT: </span><code>false</code></small>
                               The flag that
   indicates if the self Stream object video streaming is muted.
                             </div>
@@ -24100,7 +23780,7 @@ Reference <a href="../classes/Skylink.html#method_refreshConnection" class="cros
                             
 
                             <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>50</small>
+                              <small class="default"><span>DEFAULT: </span><code>50</code></small>
                               The self
   Stream streaming video maximum frameRate.
                             </div>
@@ -24363,7 +24043,7 @@ Function that starts a string data transfer to Peers.</p>
             
 
             <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>60</small>
+              <small class="default"><span>DEFAULT: </span><code>60</code></small>
               <p>The timeout to wait for response from Peer. Once timeout is reached without
   response, the data transfer is terminated.</p>
 
@@ -24789,7 +24469,7 @@ Function that starts a string data transfer to Peers.</p>
             
 
             <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
+              <small class="default"><span>DEFAULT: </span><code>false</code></small>
               <p>The debugging settings for Skylink.
   If provided options is a <var>typeof</var> <code>boolean</code>,
   <code>storeLogs</code> and <code>trace</code> will be set to <code>true</code>.</p>
@@ -24807,7 +24487,7 @@ Function that starts a string data transfer to Peers.</p>
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The flag that indicates if Skylink console
   logs should all output as <code>console.trace()</code>.
   If <code>console.trace()</code> is not supported, it will fallback and
@@ -24826,7 +24506,7 @@ Function that starts a string data transfer to Peers.</p>
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p>The flag that indicates if
   Skylink should store the logs in
   <a href="../classes/Skylink.html#property_SkylinkLogs" class="crosslink">SkylinkLogs</a>.</p>
@@ -25200,7 +24880,7 @@ This does not replace the currently attached user media Stream object in Skylink
             
 
             <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
+              <small class="default"><span>DEFAULT: </span><code>false</code></small>
               <p>The flag that indicates if self screensharing
   Stream streaming should have audio. If
   <code>false</code>, it means that audio streaming is disabled in
@@ -30906,8 +30586,6 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
       
 
       
-        <span class="label label-warning" title="This attribute is required for communication.">required</span>
-      
 
       
 
@@ -30944,7 +30622,7 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l123"><code>source&#x2F;peer-handshake.js:123</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l115"><code>source&#x2F;peer-handshake.js:115</code></a>
       </small>
     
 
@@ -30954,10 +30632,9 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
   </div>
 
   <div class="code-item-description">
-    <p>Stores the list of Peer connections that has connection
-  established successfully. When the Peer connection has a
-  successful ICE connection state of <code>&quot;completed&quot;</code>,
-  it stores the Peer connection as &quot;healthy&quot;.</p>
+    <p>Stores the list of Peer connection &quot;healthy&quot; flags, which indicates if Peer connection is
+  successfully established, and when the health timers expires, it will clear the timer
+  and not attempt to re-negotiate with the Peer connection again.</p>
 
   </div>
 
@@ -30972,16 +30649,14 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
       <ul class="params-list">
       
           <li class="param">
-            <code class="param-name">(#peerId)</code>
+            <code class="param-name">&lt;#peerId&gt;</code>
             <span class="type"><b>{</b>Boolean<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>The flag that indicates if the associated Peer
-  connection is in a &quot;healthy&quot; state. If the value is <code>true</code>, it means
-  that the Peer connectin is in a &quot;healthy&quot; state.</p>
+                <p>The flag that indicates if Peer connection has been successfully established.</p>
 
             </div>
 
@@ -31009,8 +30684,6 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
 
       
 
-      
-        <span class="label label-warning" title="This attribute is required for communication.">required</span>
       
 
       
@@ -31058,12 +30731,9 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
   </div>
 
   <div class="code-item-description">
-    <p>Stores the list of Peer connection health timeout objects that
-  waits for any existing Peer "healthy" state in successful
-  <a href="../classes/Skylink.html#attr__peerConnectionHealth" class="crosslink">_peerConnectionHealth</a>.
-  If timeout has reached it&#39;s limit and does not have any "healthy" connection state
-  with Peer connection, it will restart the connection again with
-  <a href="../classes/Skylink.html#method__restartPeerConnection" class="crosslink">_restartPeerConnection()</a>.</p>
+    <p>Stores the list of Peer connection health timers.
+This timers sets a timeout which checks and waits if Peer connection is successfully established,
+  or else it will attempt to re-negotiate with the Peer connection again.</p>
 
   </div>
 
@@ -31078,17 +30748,14 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
       <ul class="params-list">
       
           <li class="param">
-            <code class="param-name">(#peerId)</code>
+            <code class="param-name">&lt;#peerId&gt;</code>
             <span class="type"><b>{</b>Object<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>The timeout object set using <code>setTimeout()</code> that
-  does the wait for any &quot;healthy&quot; state connection associated with the Peer connection.
-  This will be removed when the Peer connection has ended or when the Peer
-  connection has been met with a &quot;healthy&quot; state.</p>
+                <p>The Peer connection health timer.</p>
 
             </div>
 
@@ -31454,8 +31121,6 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
       
 
       
-        <span class="label label-warning" title="This attribute is required for communication.">required</span>
-      
 
       
 
@@ -31492,7 +31157,7 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l140"><code>source&#x2F;peer-handshake.js:140</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l127"><code>source&#x2F;peer-handshake.js:127</code></a>
       </small>
     
 
@@ -31502,7 +31167,8 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
   </div>
 
   <div class="code-item-description">
-    <p>Stores the peer connection priority weight.</p>
+    <p>Stores the User connection priority weight.
+If Peer has a higher connection weight, it will do the offer from its Peer connection first.</p>
 
   </div>
 

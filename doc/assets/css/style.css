@@ -241,12 +241,22 @@ h3 code {
   display: block;
 }
 .param .param-description small.default {
-  border-left: solid 2px #ccc;
-  padding-left: 15px;
+  border-left: solid 3px #eee;
+  display: inline-block;
+  margin: 5px 0;
+  padding: 5px 7px;
 }
 .param .param-description small.default span {
   margin-right: 8px;
   font-weight: 600;
+  color: #a8a8a8;
+}
+.param .param-description small.default code {
+  background: none;
+  color: #868686;
+  font-weight: 600;
+  padding: 0 5px 0 0;
+  font-size: 12px;
 }
 .returns-description span,
 .returns-description p {

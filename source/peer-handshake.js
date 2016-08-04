@@ -100,72 +100,46 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
 };
 
 /**
- * Stores the list of Peer connection health timeout objects that
- *   waits for any existing Peer "healthy" state in successful
- *   {{#crossLink "Skylink/_peerConnectionHealth:attr"}}_peerConnectionHealth{{/crossLink}}.
- *   If timeout has reached it's limit and does not have any "healthy" connection state
- *   with Peer connection, it will restart the connection again with
- *   {{#crossLink "Skylink/_restartPeerConnection:method"}}_restartPeerConnection(){{/crossLink}}.
+ * Stores the list of Peer connection health timers.
+ * This timers sets a timeout which checks and waits if Peer connection is successfully established,
+ *   or else it will attempt to re-negotiate with the Peer connection again.
  * @attribute _peerConnectionHealthTimers
- * @param {Object} (#peerId) The timeout object set using <code>setTimeout()</code> that
- *   does the wait for any "healthy" state connection associated with the Peer connection.
- *   This will be removed when the Peer connection has ended or when the Peer
- *   connection has been met with a "healthy" state.
+ * @param {Object} <#peerId> The Peer connection health timer.
  * @type JSON
  * @private
- * @required
- * @component Peer
  * @for Skylink
  * @since 0.5.5
  */
 Skylink.prototype._peerConnectionHealthTimers = {};
 
 /**
- * Stores the list of Peer connections that has connection
- *   established successfully. When the Peer connection has a
- *   successful ICE connection state of <code>"completed"</code>,
- *   it stores the Peer connection as "healthy".
+ * Stores the list of Peer connection "healthy" flags, which indicates if Peer connection is
+ *   successfully established, and when the health timers expires, it will clear the timer
+ *   and not attempt to re-negotiate with the Peer connection again.
  * @attribute _peerConnectionHealth
- * @param {Boolean} (#peerId) The flag that indicates if the associated Peer
- *   connection is in a "healthy" state. If the value is <code>true</code>, it means
- *   that the Peer connectin is in a "healthy" state.
+ * @param {Boolean} <#peerId> The flag that indicates if Peer connection has been successfully established.
  * @type JSON
  * @private
- * @required
- * @component Peer
  * @since 0.5.5
  */
 Skylink.prototype._peerConnectionHealth = {};
 
 /**
- * Stores the peer connection priority weight.
+ * Stores the User connection priority weight.
+ * If Peer has a higher connection weight, it will do the offer from its Peer connection first.
  * @attribute _peerPriorityWeight
  * @type Number
  * @private
- * @required
  * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype._peerPriorityWeight = 0;
 
 /**
- * Starts to initiate the WebRTC layer of handshake connection by
- *   creating the <code>OFFER</code> session description and then
- *   sending it to the associated Peer.
- * The offerer status may be shifted to the other peer depending on
- *   when version of browser that is initiating the connection
- *   to what version of browser to.
+ * Function that creates the Peer connection offer session description.
  * @method _doOffer
- * @param {String} targetMid The Peer ID to send the <code>OFFER</code> to.
- * @param {JSON} peerBrowser The Peer platform agent information.
- * @param {String} peerBrowser.name The Peer platform browser or agent name.
- * @param {Number} peerBrowser.version The Peer platform browser or agent version.
- * @param {Number} peerBrowser.os The Peer platform name.
- * @param {Function} renegoCallback The callback function that triggers after
- *   the offer has been created or responsed.
  * @private
  * @for Skylink
- * @component Peer
  * @since 0.5.2
  */
 Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
@@ -260,14 +234,11 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
 };
 
 /**
- * Responses to the <code>OFFER</code> session description received and
- *    creates an <code>ANSWER</code> session description to sent
- *   to the associated Peer to complete the WebRTC handshake layer.
+ * Function that creates the Peer connection answer session description.
+ * This comes after receiving and setting the offer session description.
  * @method _doAnswer
- * @param {String} targetMid The Peer ID to send the <code>ANSWER</code> to.
  * @private
  * @for Skylink
- * @component Peer
  * @since 0.1.0
  */
 Skylink.prototype._doAnswer = function(targetMid) {
@@ -303,21 +274,15 @@ Skylink.prototype._doAnswer = function(targetMid) {
 };
 
 /**
- * Starts the waiting timeout for a "healthy" connection
- *   with associated Peer connection.
- * It waits for any existing Peer "healthy" state in successful
- *   {{#crossLink "Skylink/_peerConnectionHealth:attr"}}_peerConnectionHealth{{/crossLink}}.
- * If timeout has reached it's limit and does not have any "healthy" connection state
- *   with Peer connection, it will restart the connection again with
- *   {{#crossLink "Skylink/_restartPeerConnection:method"}}_restartPeerConnection(){{/crossLink}}.
- * This sets the timeout object associated with the Peer into
- *   {{#crossLink "Skylink/_peerConnectionHealthTimers"}}_peerConnectionHealthTimers(){{/crossLink}}.
+ * Function that starts the Peer connection health timer.
+ * To count as a "healthy" successful established Peer connection, the
+ *   ICE connection state has to be "connected" or "completed",
+ *   messaging Datachannel type state has to be "opened" (if Datachannel is enabled)
+ *   and Signaling state has to be "stable".
+ * Should consider dropping of counting messaging Datachannel type being opened as
+ *   it should not involve the actual Peer connection for media (audio/video) streaming. 
  * @method _startPeerConnectionHealthCheck
- * @param {String} peerId The Peer ID to start a waiting timeout for a "healthy" connection.
- * @param {Boolean} [toOffer=false] The flag that indicates if Peer connection
- *   is an offerer or an answerer for an accurate timeout waiting time.
  * @private
- * @component Peer
  * @for Skylink
  * @since 0.5.5
  */
@@ -395,13 +360,11 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
 };
 
 /**
- * Stops the waiting timeout for a "healthy" connection associated
- *   with the Peer.
+ * Function that stops the Peer connection health timer.
+ * This happens when Peer connection has been successfully established or when
+ *   Peer leaves the Room.
  * @method _stopPeerConnectionHealthCheck
- * @param {String} peerId The Peer ID to stop a waiting
- *   timeout for a "healthy" connection.
  * @private
- * @component Peer
  * @for Skylink
  * @since 0.5.5
  */
@@ -422,19 +385,11 @@ Skylink.prototype._stopPeerConnectionHealthCheck = function (peerId) {
 };
 
 /**
- * Sets the WebRTC handshake layer session description into the
- *   Peer <code>RTCPeerConnection</code> object <i><code>
- *   RTCPeerConnection.setLocalDescription()</code></i> associated
- *   with the Peer connection.
+ * Function that sets the local session description and sends to Peer.
+ * If trickle ICE is disabled, the local session description will be sent after
+ *   ICE gathering has been completed.
  * @method _setLocalAndSendMessage
- * @param {String} targetMid The Peer ID to send the session description to
- *   after setting into the associated <code>RTCPeerConnection</code> object.
- * @param {JSON} sessionDescription The <code>OFFER</code> or an <code>ANSWER</code>
- *   session description to set to the associated Peer after setting into
- *   the <code>RTCPeerConnection</code> object.
- * @trigger handshakeProgress
  * @private
- * @component Peer
  * @for Skylink
  * @since 0.5.2
  */
