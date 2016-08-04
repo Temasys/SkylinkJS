@@ -183,7 +183,7 @@
             "extension_for": [],
             "file": "source/template/header.js",
             "line": 120,
-            "description": "<h2>Prerequisites on using Skylink</h2>\nBefore using any Skylink functionalities, you will need to authenticate your App Key using\n  the <a href=\"#method_init\">`init()` method</a>.\n\nTo manage or create App Keys, you may access the [Skylink Developer Portal here](http://developer.temasys.com.sg/).\n\nTo view the list of supported browsers, visit [the list here](\nhttps://github.com/Temasys/SkylinkJS#supported-browsers).\n\nHere are some articles to help you get started:\n- [How to setup a simple video call](https://temasys.github.io/how-to/2014/08/08/\nGetting_started_with_WebRTC_and_SkylinkJS/)\n- [How to setup screensharing](https://temasys.com.sg/screensharing-with-skylinkjs/)\n- [How to create a chatroom like feature](https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/)\n\nHere are some demos you may use to aid your development:\n- Getaroom.io [[Demo](https://getaroom.io) / [Source code](https://github.com/Temasys/getaroom)]\n- Creating a component [[Link](https://github.com/Temasys/skylink-call-button)]\n\nYou may see the example below in the <a href=\"#\">Constructor tab</a> to have a general idea how event subscription\n  and the ordering of <a href=\"#method_init\"><code>init()</code></a> and\n  <a href=\"#method_joinRoom\"><code>joinRoom()</code></a> methods should be called.\n\nIf you have any issues, you may find answers to your questions in the FAQ section on [our support portal](\nhttp://support.temasys.com.sg), asks questions, request features or raise bug tickets as well.\n\nIf you would like to contribute to our SkylinkJS codebase, see [the contributing README](\nhttps://github.com/Temasys/SkylinkJS/blob/master/CONTRIBUTING.md).\n\n[See License (Apache 2.0)](https://github.com/Temasys/SkylinkJS/blob/master/LICENSE)",
+            "description": "<h2>Prerequisites on using Skylink</h2>\nBefore using any Skylink functionalities, you will need to authenticate your App Key using\n  the <a href=\"#method_init\">`init()` method</a>.\n\nTo manage or create App Keys, you may access the [Skylink Developer Portal here](http://developer.temasys.com.sg/).\n\nTo view the list of supported browsers, visit [the list here](\nhttps://github.com/Temasys/SkylinkJS#supported-browsers).\n\nHere are some articles to help you get started:\n- [How to setup a simple video call](https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/)\n- [How to setup screensharing](https://temasys.com.sg/screensharing-with-skylinkjs/)\n- [How to create a chatroom like feature](https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/)\n\nHere are some demos you may use to aid your development:\n- Getaroom.io [[Demo](https://getaroom.io) / [Source code](https://github.com/Temasys/getaroom)]\n- Creating a component [[Link](https://github.com/Temasys/skylink-call-button)]\n\nYou may see the example below in the <a href=\"#\">Constructor tab</a> to have a general idea how event subscription\n  and the ordering of <a href=\"#method_init\"><code>init()</code></a> and\n  <a href=\"#method_joinRoom\"><code>joinRoom()</code></a> methods should be called.\n\nIf you have any issues, you may find answers to your questions in the FAQ section on [our support portal](\nhttp://support.temasys.com.sg), asks questions, request features or raise bug tickets as well.\n\nIf you would like to contribute to our SkylinkJS codebase, see [the contributing README](\nhttps://github.com/Temasys/SkylinkJS/blob/master/CONTRIBUTING.md).\n\n[See License (Apache 2.0)](https://github.com/Temasys/SkylinkJS/blob/master/LICENSE)",
             "is_constructor": 1,
             "example": [
                 "\n  // Here's a simple example on how you can start using Skylink.\n  var skylinkDemo = new Skylink();\n\n  // Subscribe all events first as a general guideline\n  skylinkDemo.on(\"incomingStream\", function (peerId, stream, peerInfo, isSelf) {\n    if (isSelf) {\n      attachMediaStream(document.getElementById(\"selfVideo\"), stream);\n    } else {\n      var peerVideo = document.createElement(\"video\");\n      peerVideo.id = peerId;\n      peerVideo.autoplay = \"autoplay\";\n      document.getElementById(\"peersVideo\").appendChild(peerVideo);\n      attachMediaStream(peerVideo, stream);\n    }\n  });\n\n  skylinkDemo.on(\"peerLeft\", function (peerId, peerInfo, isSelf) {\n    if (!isSelf) {\n      var peerVideo = document.getElementById(peerId);\n      // do a check if peerVideo exists first\n      if (peerVideo) {\n        document.getElementById(\"peersVideo\").removeChild(peerVideo);\n      } else {\n        console.error(\"Peer video for \" + peerId + \" is not found.\");\n      }\n    }\n  });\n\n // init() should always be called first before other methods other than event methods like on() or off().\n skylinkDemo.init(\"YOUR_APP_KEY_HERE\", function (error, success) {\n   if (success) {\n     skylinkDemo.joinRoom(\"my_room\", {\n       userData: \"My Username\",\n       audio: true,\n       video: true\n     });\n   }\n });"
@@ -218,7 +218,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 202,
+            "line": 201,
             "description": "Contains the current version of Skylink Web SDK.",
             "itemtype": "attribute",
             "name": "VERSION",
@@ -229,7 +229,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 212,
+            "line": 211,
             "description": "Function that generates an <a href=\"https://en.wikipedia.org/wiki/Universally_unique_identifier\">UUID</a> (Unique ID).",
             "itemtype": "method",
             "name": "generateUUID",
@@ -764,7 +764,7 @@
                 },
                 {
                     "name": "targetPeerId",
-                    "description": "The target Peer ID to only start the data transfer with.<br>\n  When provided as an Array, it will start the data transfers with all the Peer IDs provided.<br>\n  When not provided, it will start the data transfers with all the currently connection Peers.",
+                    "description": "The target Peer ID to only start the data transfer with.<br>\n&#8594; When provided as an Array, it will start the data transfers with all the Peer IDs provided.<br>\n&#8594; When not provided, it will start the data transfers with all the currently connected Peers.",
                     "type": "String|Array",
                     "optional": true
                 },
@@ -781,31 +781,28 @@
                             "props": [
                                 {
                                     "name": "transferId",
-                                    "description": "<blockquote class=\"info\">\n  This has been deprecated and will only be defined for single targeted Peer data transfer.\n  </blockquote> The data transfer ID.",
+                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <code>callback.error.transferInfo.transferId</code> instead.\n  </blockquote> The data transfer ID.\n  <small>Defined only for single targeted Peer data transfer.</small>",
                                     "type": "String"
                                 },
                                 {
                                     "name": "state",
-                                    "description": "<blockquote class=\"info\">\n  This has been deprecated and will only be defined for single targeted Peer data transfer.\n  </blockquote> The data transfer state that resulted in error. [Rel: Skylink.DATA_TRANSFER_STATE]",
-                                    "type": "String",
-                                    "optional": true
+                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <a href=\"#event_dataTransferState\"><code>dataTransferState</code>\n  event</a> instead. </blockquote> The data transfer state that resulted in error.\n  <small>Defined only for single targeted Peer data transfer.</small> [Rel: Skylink.DATA_TRANSFER_STATE]",
+                                    "type": "String"
                                 },
                                 {
                                     "name": "peerId",
-                                    "description": "<blockquote class=\"info\">\n  This has been deprecated and will only be defined for single targeted Peer data transfer.\n  </blockquote> The targeted Peer ID for data transfer.",
-                                    "type": "String",
-                                    "optional": true
+                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <code>callback.error.listOfPeers</code> instead.\n  </blockquote> The targeted Peer ID for data transfer.\n  <small>Defined only for single targeted Peer data transfer.</small>",
+                                    "type": "String"
                                 },
                                 {
                                     "name": "isPrivate",
-                                    "description": "<blockquote class=\"info\">\n  This has been deprecated and will only be defined for single targeted Peer data transfer.\n  </blockquote> The flag that indicates if data transfer is targeted or not, basing\n  off the <code>targetPeerId</code> parameter being defined.",
+                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <code>callback.error.transferInfo.isPrivate</code> instead.\n  </blockquote> The flag that indicates if data transfer is targeted or not, basing\n  off the <code>targetPeerId</code> parameter being defined.\n  <small>Defined only for single targeted Peer data transfer.</small>",
                                     "type": "Boolean"
                                 },
                                 {
                                     "name": "error",
-                                    "description": "<blockquote class=\"info\">\n  This has been deprecated and will only be defined for single targeted Peer data transfer.\n  </blockquote> The error received that resulted in error.",
-                                    "type": "Error|String",
-                                    "optional": true
+                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <code>callback.error.transferErrors</code> instead.\n  </blockquote> The error received that resulted in error.\n  <small>Defined only for single targeted Peer data transfer.</small>",
+                                    "type": "Error|String"
                                 },
                                 {
                                     "name": "listOfPeers",
@@ -814,13 +811,13 @@
                                 },
                                 {
                                     "name": "transferErrors",
-                                    "description": "The list of data transfer errors.",
+                                    "description": "The list of data transfer errors.\n<small>If there is <code>\"self\"</code> property, it's likely due to having no Peers to start data transfers with.</small>",
                                     "type": "JSON"
                                 },
                                 {
                                     "name": "transferErrors.<#peerId>",
                                     "description": "The data transfer error associated\n  with the Peer ID property name.",
-                                    "type": "Object|String"
+                                    "type": "Error|String"
                                 },
                                 {
                                     "name": "transferInfo",
@@ -836,24 +833,22 @@
                             "props": [
                                 {
                                     "name": "transferId",
-                                    "description": "<blockquote class=\"info\">\n  This has been deprecated and will only be defined for single targeted Peer data transfer.\n  </blockquote> The data transfer ID.",
+                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <code>callback.success.transferInfo.transferId</code> instead.\n  </blockquote> The data transfer ID.",
                                     "type": "String"
                                 },
                                 {
                                     "name": "state",
-                                    "description": "<blockquote class=\"info\">\n  This has been deprecated and will only be defined for single targeted Peer data transfer.\n  </blockquote> The data transfer state that resulted in error. [Rel: Skylink.DATA_TRANSFER_STATE]",
-                                    "type": "String",
-                                    "optional": true
+                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <a href=\"#event_dataTransferState\"><code>dataTransferState</code>\n  event</a> instead. </blockquote> The data transfer state that resulted in error.\n  <small>Defined only for single targeted Peer data transfer.</small> [Rel: Skylink.DATA_TRANSFER_STATE]",
+                                    "type": "String"
                                 },
                                 {
                                     "name": "peerId",
-                                    "description": "<blockquote class=\"info\">\n  This has been deprecated and will only be defined for single targeted Peer data transfer.\n  </blockquote> The targeted Peer ID for data transfer.",
-                                    "type": "String",
-                                    "optional": true
+                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <code>callback.success.listOfPeers</code> instead.\n  </blockquote> The targeted Peer ID for data transfer.\n  <small>Defined only for single targeted Peer data transfer.</small>",
+                                    "type": "String"
                                 },
                                 {
                                     "name": "isPrivate",
-                                    "description": "<blockquote class=\"info\">\n  This has been deprecated and will only be defined for single targeted Peer data transfer.\n  </blockquote> The flag that indicates if data transfer is targeted or not, basing\n  off the <code>targetPeerId</code> parameter being defined.",
+                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <code>callback.success.transferInfo.isPrivate</code> instead.\n  </blockquote> The flag that indicates if data transfer is targeted or not, basing\n  off the <code>targetPeerId</code> parameter being defined.\n  <small>Defined only for single targeted Peer data transfer.</small>",
                                     "type": "Boolean"
                                 },
                                 {
@@ -877,7 +872,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 393,
+            "line": 411,
             "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have been broken as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.<br>\n  <b>Deprecation Warning!</b> This method has been deprecated, please use <a href=\"#method_acceptDataTransfer\">\n  <code>acceptDataTransfer()</code> method</a> instead.\n</blockquote>\nFunction that accepts or rejects a data transfer request from Peer.",
             "itemtype": "method",
             "name": "respondBlobRequest",
@@ -908,7 +903,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 411,
+            "line": 429,
             "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have been broken as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.\n</blockquote>\nFunction that accepts or rejects a data transfer request from Peer.",
             "itemtype": "method",
             "name": "acceptDataTransfer",
@@ -937,7 +932,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 497,
+            "line": 515,
             "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have been broken as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.<br>\n  <b>Deprecation Warning!</b> This method has been deprecated, please use <a href=\"#method_cancelDataTransfer\">\n  <code>method_cancelDataTransfer()</code> method</a> instead.\n</blockquote>\nFunction that terminates a data transfer.",
             "itemtype": "method",
             "name": "cancelBlobTransfer",
@@ -961,7 +956,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 514,
+            "line": 532,
             "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have been broken as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.\n</blockquote>\nFunction that terminates a data transfer.",
             "itemtype": "method",
             "name": "cancelDataTransfer",
@@ -983,7 +978,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 603,
+            "line": 621,
             "description": "<blockquote class=\"info\">\n  Note that message Datachannel type connection MUST be opened first before this\n  functionality would work.<br>\n  The estimated maximum size for the string to be sent over is about <code>16 kB</code>. If\n  you are considering to send large string to Peers, please use the <a href=\"#method_sendURLData\">\n<code>sendURLData()</code> method</a>.\n</blockquote>\nFunction that sends a P2P message using the Datachannel connection.",
             "itemtype": "method",
             "name": "sendP2PMessage",
@@ -995,7 +990,7 @@
                 },
                 {
                     "name": "targetPeerId",
-                    "description": "The target Peer ID to only send the P2P message to.<br>\n  When provided as an Array, it will send the P2P message to all the Peer IDs provided.<br>\n  When not provided, it will send the P2P message to all the currently connection Peers.",
+                    "description": "The target Peer ID to only send the P2P message to.<br>\n&#8594; When provided as an Array, it will send the P2P message to all the Peer IDs provided.<br>\n&#8594; When not provided, it will send the P2P message to all the currently connected Peers.",
                     "type": "String|Array",
                     "optional": true
                 }
@@ -1006,7 +1001,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 696,
+            "line": 714,
             "description": "<blockquote class=\"info\">\n  Currently, the Android and iOS SDKs do not support this type of data transfer.\n</blockquote>\nFunction that starts a string data transfer to Peers.",
             "itemtype": "method",
             "name": "sendURLData",
@@ -1025,7 +1020,7 @@
                 },
                 {
                     "name": "targetPeerId",
-                    "description": "The target Peer ID to only start the data transfer with.<br>\n  When provided as an Array, it will start the data transfers with all the Peer IDs provided.<br>\n  When not provided, it will start the data transfers with all the currently connection Peers.",
+                    "description": "The target Peer ID to only start the data transfer with.<br>\n&#8594; When provided as an Array, it will start the data transfers with all the Peer IDs provided.<br>\n&#8594; When not provided, it will start the data transfers with all the currently connected Peers.",
                     "type": "String|Array",
                     "optional": true
                 },
@@ -1042,31 +1037,28 @@
                             "props": [
                                 {
                                     "name": "transferId",
-                                    "description": "<blockquote class=\"info\">\n  This has been deprecated and will only be defined for single targeted Peer data transfer.\n  </blockquote> The data transfer ID.",
+                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <code>callback.error.transferInfo.transferId</code> instead.\n  </blockquote> The data transfer ID.\n  <small>Defined only for single targeted Peer data transfer.</small>",
                                     "type": "String"
                                 },
                                 {
                                     "name": "state",
-                                    "description": "<blockquote class=\"info\">\n  This has been deprecated and will only be defined for single targeted Peer data transfer.\n  </blockquote> The data transfer state that resulted in error. [Rel: Skylink.DATA_TRANSFER_STATE]",
-                                    "type": "String",
-                                    "optional": true
+                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <a href=\"#event_dataTransferState\"><code>dataTransferState</code>\n  event</a> instead. </blockquote> The data transfer state that resulted in error.\n  <small>Defined only for single targeted Peer data transfer.</small> [Rel: Skylink.DATA_TRANSFER_STATE]",
+                                    "type": "String"
                                 },
                                 {
                                     "name": "peerId",
-                                    "description": "<blockquote class=\"info\">\n  This has been deprecated and will only be defined for single targeted Peer data transfer.\n  </blockquote> The targeted Peer ID for data transfer.",
-                                    "type": "String",
-                                    "optional": true
+                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <code>callback.error.listOfPeers</code> instead.\n  </blockquote> The targeted Peer ID for data transfer.\n  <small>Defined only for single targeted Peer data transfer.</small>",
+                                    "type": "String"
                                 },
                                 {
                                     "name": "isPrivate",
-                                    "description": "<blockquote class=\"info\">\n  This has been deprecated and will only be defined for single targeted Peer data transfer.\n  </blockquote> The flag that indicates if data transfer is targeted or not, basing\n  off the <code>targetPeerId</code> parameter being defined.",
+                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <code>callback.error.transferInfo.isPrivate</code> instead.\n  </blockquote> The flag that indicates if data transfer is targeted or not, basing\n  off the <code>targetPeerId</code> parameter being defined.\n  <small>Defined only for single targeted Peer data transfer.</small>",
                                     "type": "Boolean"
                                 },
                                 {
                                     "name": "error",
-                                    "description": "<blockquote class=\"info\">\n  This has been deprecated and will only be defined for single targeted Peer data transfer.\n  </blockquote> The error received that resulted in error.",
-                                    "type": "Error|String",
-                                    "optional": true
+                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <code>callback.error.transferErrors</code> instead.\n  </blockquote> The error received that resulted in error.\n  <small>Defined only for single targeted Peer data transfer.</small>",
+                                    "type": "Error|String"
                                 },
                                 {
                                     "name": "listOfPeers",
@@ -1075,13 +1067,13 @@
                                 },
                                 {
                                     "name": "transferErrors",
-                                    "description": "The list of data transfer errors.",
+                                    "description": "The list of data transfer errors.\n  <small>If there is <code>\"self\"</code> property, it's likely due to having no Peers to start data transfer with.</small>",
                                     "type": "JSON"
                                 },
                                 {
                                     "name": "transferErrors.<#peerId>",
                                     "description": "The data transfer error associated\n  with the Peer ID property name.",
-                                    "type": "Object|String"
+                                    "type": "Error|String"
                                 },
                                 {
                                     "name": "transferInfo",
@@ -1097,24 +1089,22 @@
                             "props": [
                                 {
                                     "name": "transferId",
-                                    "description": "<blockquote class=\"info\">\n  This has been deprecated and will only be defined for single targeted Peer data transfer.\n  </blockquote> The data transfer ID.",
+                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <code>callback.success.transferInfo.transferId</code> instead.\n  </blockquote> The data transfer ID.",
                                     "type": "String"
                                 },
                                 {
                                     "name": "state",
-                                    "description": "<blockquote class=\"info\">\n  This has been deprecated and will only be defined for single targeted Peer data transfer.\n  </blockquote> The data transfer state that resulted in error. [Rel: Skylink.DATA_TRANSFER_STATE]",
-                                    "type": "String",
-                                    "optional": true
+                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <a href=\"#event_dataTransferState\"><code>dataTransferState</code>\n  event</a> instead. </blockquote> The data transfer state that resulted in error.\n  <small>Defined only for single targeted Peer data transfer.</small> [Rel: Skylink.DATA_TRANSFER_STATE]",
+                                    "type": "String"
                                 },
                                 {
                                     "name": "peerId",
-                                    "description": "<blockquote class=\"info\">\n  This has been deprecated and will only be defined for single targeted Peer data transfer.\n  </blockquote> The targeted Peer ID for data transfer.",
-                                    "type": "String",
-                                    "optional": true
+                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <code>callback.success.listOfPeers</code> instead.\n  </blockquote> The targeted Peer ID for data transfer.\n  <small>Defined only for single targeted Peer data transfer.</small>",
+                                    "type": "String"
                                 },
                                 {
                                     "name": "isPrivate",
-                                    "description": "<blockquote class=\"info\">\n  This has been deprecated and will only be defined for single targeted Peer data transfer.\n  </blockquote> The flag that indicates if data transfer is targeted or not, basing\n  off the <code>targetPeerId</code> parameter being defined.",
+                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <code>callback.success.transferInfo.isPrivate</code> instead.\n  </blockquote> The flag that indicates if data transfer is targeted or not, basing\n  off the <code>targetPeerId</code> parameter being defined.\n  <small>Defined only for single targeted Peer data transfer.</small>",
                                     "type": "Boolean"
                                 },
                                 {
@@ -1138,7 +1128,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 904,
+            "line": 940,
             "description": "Function that sets the data transfer \"wait-for-response\" timeout.\nWhen there is not response after timeout, the data transfer will be terminated.",
             "itemtype": "method",
             "name": "_setDataChannelTimeout",
@@ -1149,7 +1139,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 950,
+            "line": 986,
             "description": "Function that stops and clears the data transfer \"wait-for-response\" timeout.",
             "itemtype": "method",
             "name": "_clearDataChannelTimeout",
@@ -1160,7 +1150,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 968,
+            "line": 1004,
             "description": "Function that starts a data transfer to Peer.\nThis will open a new data type of Datachannel connection with Peer if\n  simultaneous multi-transfers is supported by Peer.",
             "itemtype": "method",
             "name": "_sendBlobDataToPeer",
@@ -1171,7 +1161,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1184,
+            "line": 1220,
             "description": "Function that handles the data received from Datachannel and\n  routes to the relevant data transfer protocol handler.",
             "itemtype": "method",
             "name": "_dataChannelProtocolHandler",
@@ -1182,7 +1172,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1251,
+            "line": 1287,
             "description": "Function that handles the \"WRQ\" data transfer protocol.",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
@@ -1193,7 +1183,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1305,
+            "line": 1341,
             "description": "Function that handles the \"ACK\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
@@ -1204,7 +1194,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1452,
+            "line": 1488,
             "description": "Function that handles the \"MESSAGE\" data transfer protocol.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -1215,7 +1205,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1472,
+            "line": 1508,
             "description": "Function that handles the \"ERROR\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -1226,7 +1216,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1512,
+            "line": 1548,
             "description": "Function that handles the \"CANCEL\" data transfer protocol.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -1237,7 +1227,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1591,
+            "line": 1627,
             "description": "Function that handles the data transfer chunk received.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
@@ -1248,7 +1238,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1816,
+            "line": 1852,
             "description": "Function that start the data transfer with the list of targeted Peer IDs provided.\nAt this stage, it will open a new Datachannel connection if simultaneous multi-transfers is\n  supported by Peer, or it will using the messaging type Datachannel connection.\nNote that 1 data transfer can occur at a time in 1 Datachannel connection.",
             "itemtype": "method",
             "name": "_startDataTransfer",
@@ -1395,7 +1385,7 @@
         {
             "file": "source/ice-connection.js",
             "line": 1,
-            "description": "Contains the list of Peer connection ICE connection states.\n- <b>What is an <a href=\"#attr_CANDIDATE_GENERATION_STATE\">ICE candidate</a>?</b><br>\n  It is the object that contains the IP addresses and port to allow ICE connection.\n- <b>What is an <a href=\"#attr_ICE_CONNECTION_STATE\">ICE connection</a>?</b><br>\n  It is the connection used for establishing media and Datachannel connections.\n- <b>What is the <a href=\"#attr_PEER_CONNECTION_STATE\">session description</a> for?</b><br>\n  It is the data where it stores the information to map the ICE candidates to the relevant\n  media type (audio/video/Datachannel).",
+            "description": "Contains the list of Peer connection ICE connection states.",
             "itemtype": "attribute",
             "name": "ICE_CONNECTION_STATE",
             "type": "JSON",
@@ -1442,7 +1432,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 58,
+            "line": 51,
             "description": "<blockquote class=\"info\">\n  Note that configuring the protocol may not necessarily result in the desired protocol\n  used in the actual TURN IP traffic as it depends which protocol the browser selects and connects with.<br>\n  For an advanced explaination, this configures the ICE server urls passed in <code?transport=<protocol></code>\n  when constructing the Peer connection. When both protocols are selected, the ICE servers urls are duplicated\n  with both protocols.\n</blockquote>\nContains the list of configurations to use when Peer connection ICE connection using the TURN server.",
             "itemtype": "attribute",
             "name": "TURN_TRANSPORT",
@@ -1480,7 +1470,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 93,
+            "line": 86,
             "description": "Stores the flag that indicates if Peer connections should trickle ICE.",
             "itemtype": "attribute",
             "name": "_enableIceTrickle",
@@ -1493,7 +1483,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 104,
+            "line": 97,
             "description": "Stores the flag that indicates if STUN ICE servers should be used when constructing Peer connection.",
             "itemtype": "attribute",
             "name": "_enableSTUN",
@@ -1506,7 +1496,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 115,
+            "line": 108,
             "description": "Stores the flag that indicates if TURN ICE servers should be used when constructing Peer connection.",
             "itemtype": "attribute",
             "name": "_enableTURN",
@@ -1519,7 +1509,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 126,
+            "line": 119,
             "description": "Stores the flag that indicates if public STUN ICE servers should be used when constructing Peer connection.",
             "itemtype": "attribute",
             "name": "_usePublicSTUN",
@@ -1532,7 +1522,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 137,
+            "line": 130,
             "description": "Stores the option for the TURN protocols to use.\nThis should configure the TURN ICE servers urls <code>?transport=protocol</code> flag.",
             "itemtype": "attribute",
             "name": "_TURNTransport",
@@ -1546,7 +1536,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 150,
+            "line": 143,
             "description": "Stores the list of Peer connections ICE failures counter.",
             "itemtype": "attribute",
             "name": "_ICEConnectionFailures",
@@ -1565,7 +1555,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 161,
+            "line": 154,
             "description": "Function that filters and configures the ICE servers received from Signaling\n  based on the <code>init()</code> configuration and returns the updated\n  list of ICE servers to be used when constructing Peer connection.",
             "itemtype": "method",
             "name": "_setIceServers",
@@ -1656,101 +1646,95 @@
         {
             "file": "source/peer-connection.js",
             "line": 67,
-            "description": "Stores the timestamp of the moment when the last Peers connection\n  restarts has happened. Used for the restart Peers connection functionality.",
+            "description": "Stores the restart initiated timestamp to throttle the <code>refreshConnection</code> functionality.",
             "itemtype": "attribute",
             "name": "_lastRestart",
             "type": "Object",
-            "required": 1,
             "access": "private",
             "tagname": "",
-            "component": "Peer",
             "since": "0.5.9",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 80,
-            "description": "Stores the counter of the number of consecutive\n  Peers connection restarts retries.",
+            "line": 77,
+            "description": "Stores the global number of Peer connection retries that would increase the wait-for-response timeout\n  for the Peer connection health timer.",
             "itemtype": "attribute",
             "name": "_retryCount",
             "type": "Number",
-            "required": 1,
             "access": "private",
             "tagname": "",
-            "component": "Peer",
             "since": "0.5.10",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 93,
-            "description": "Stores the list of Peers connection.",
+            "line": 88,
+            "description": "Stores the list of the Peer connections.",
             "itemtype": "attribute",
             "name": "_peerConnections",
             "params": [
                 {
-                    "name": "(#peerId)",
-                    "description": "The Peer ID associated to the RTCPeerConnection object.",
+                    "name": "<#peerId>",
+                    "description": "The Peer connection.",
                     "type": "Object"
                 }
             ],
             "type": "JSON",
-            "required": 1,
             "access": "private",
             "tagname": "",
-            "component": "Peer",
             "since": "0.1.0",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 106,
-            "description": "Refreshes a Peer connection.\n- This feature can be used to refresh a Peer connection when the\n  remote Stream received does not stream any audio/video stream.\n- If there are more than 1 refresh during 5 seconds\n  or refresh is less than 3 seconds since the last refresh\n  initiated by the other peer, it will be aborted.\n- As for MCU connection, the restart mechanism makes the self user\n   leave and join the currently connected room again.",
+            "line": 99,
+            "description": "<blockquote class=\"info\">\n  For MCU enabled Peer connections, the restart functionality may differ.\n  <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002853\">Read this article here</a>.<br>\n  Note that the functionality is throttled when invoked many times in less than 3 seconds interval. \n</blockquote>\nFunction that refreshes Peer connections.",
             "itemtype": "method",
             "name": "refreshConnection",
             "params": [
                 {
                     "name": "targetPeerId",
-                    "description": "The array of targeted Peers connection to refresh\n  the connection with.",
+                    "description": "The target Peer ID to only refresh the Peer connection.<br>\n&#8594; When provided as an Array, it will refresh the Peer connections with all the Peer IDs provided.<br>\n&#8594; When not provided, it will refresh the Peer connections with all the currently connected Peers.",
                     "type": "String|Array",
                     "optional": true
                 },
                 {
                     "name": "callback",
-                    "description": "The callback fired after all targeted Peers connection has\n  been initiated with refresh or have met with an exception.\n  The callback signature is <code>function (error, success)</code>.",
+                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>",
                     "type": "Function",
                     "optional": true,
                     "props": [
                         {
                             "name": "error",
-                            "description": "The error object received in the callback.\n  If received as <code>null</code>, it means that there is no errors.",
+                            "description": "The error result in request.\n  <small>Defined as <code>null</code> when there are no errors in request</small>",
                             "type": "JSON",
                             "props": [
                                 {
                                     "name": "listOfPeers",
-                                    "description": "The list of Peers that the\n  refresh connection had been initiated with.",
+                                    "description": "The list Peer IDs targeted for refreshing the Peer connections.",
                                     "type": "Array"
                                 },
                                 {
                                     "name": "refreshErrors",
-                                    "description": "The list of errors occurred\n  based on per Peer basis.",
+                                    "description": "The list of Peer connection refresh errors.\n  <small>If there is <code>\"self\"</code> property, it's likely due to having no Peers to refresh the\n    Peer connections with.</small>",
                                     "type": "JSON"
                                 },
                                 {
-                                    "name": "refreshErrors.(#peerId)",
-                                    "description": "The Peer ID that\n  is associated with the error that occurred when refreshing the connection.",
-                                    "type": "Object|String"
+                                    "name": "refreshErrors.<#peerId>",
+                                    "description": "The Peer connection refresh error associated\n  with the Peer ID property name.",
+                                    "type": "Error|String"
                                 }
                             ]
                         },
                         {
                             "name": "success",
-                            "description": "The success object received in the callback.\n  If received as <code>null</code>, it means that there are errors.",
+                            "description": "The success result in request.\n  <small>Defined as <code>null</code> when there are errors in request</small>",
                             "type": "JSON",
                             "props": [
                                 {
                                     "name": "listOfPeers",
-                                    "description": "The list of Peers that the\n  refresh connection had been initiated with.",
+                                    "description": "The list Peer IDs targeted for refreshing the Peer connections.",
                                     "type": "Array"
                                 }
                             ]
@@ -1758,388 +1742,79 @@
                     ]
                 }
             ],
-            "example": [
-                "\n  SkylinkDemo.on(\"iceConnectionState\", function (state, peerId)) {\n    if (iceConnectionState === SkylinkDemo.ICE_CONNECTION_STATE.FAILED) {\n      // Do a refresh\n      SkylinkDemo.refreshConnection(peerId);\n    }\n  });"
-            ],
             "trigger": "peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined, serverPeerLeft",
-            "component": "Peer",
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 265,
-            "description": "Gets the Peer connection status.",
+            "line": 247,
+            "description": "Function that retrieves the Peer connection stats.",
             "itemtype": "method",
             "name": "getConnectionStatus",
             "params": [
                 {
                     "name": "targetPeerId",
-                    "description": "The array of targeted Peers connection to refresh\n  the connection with.",
+                    "description": "The target Peer ID to only retrieve the Peer connection stats.<br>\n&#8594; When provided as an Array, it will retrieve the Peer connections stats with all the Peer IDs provided.<br>\n&#8594; When not provided, it will retrieve the Peer connections stats with all the currently connected Peers.",
                     "type": "String|Array",
                     "optional": true
                 },
                 {
                     "name": "callback",
-                    "description": "The callback fired after all targeted Peers connection has\n  connection status retrieved or have met with an exception.\n  The callback signature is <code>function (error, success)</code>.",
+                    "description": "he callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>",
                     "type": "Function",
                     "optional": true,
                     "props": [
                         {
                             "name": "error",
-                            "description": "The error object received in the callback.\n  If received as <code>null</code>, it means that there is no errors.",
+                            "description": "The error result in request.\n  <small>Defined as <code>null</code> when there are no errors in request</small>",
                             "type": "JSON",
                             "props": [
                                 {
                                     "name": "listOfPeers",
-                                    "description": "The list of Peers which connection statuses\n  to retrieve.",
+                                    "description": "The list Peer IDs targeted for retrieving the Peer connections stats.",
                                     "type": "Array"
                                 },
                                 {
                                     "name": "retrievalErrors",
-                                    "description": "The list of errors occurred\n  based on per Peer basis. It returns the Error to an ID of <code>\"self\"</code> if there is no Peers.",
+                                    "description": "The list of retrieval of Peer connection stats errors.\n  <small>If there is <code>\"self\"</code> property, it's likely due to having no Peers to retrieve the\n    Peer connections stats from.</small>",
                                     "type": "JSON"
                                 },
                                 {
-                                    "name": "retrievalErrors.(#peerId)",
-                                    "description": "The Peer ID that\n  is associated with the error that occurred when retrieving the connection status.",
-                                    "type": "Object|String"
+                                    "name": "retrievalErrors.<#peerId>",
+                                    "description": "The Peer connection stats retrieval error associated\n  with the Peer ID property name.",
+                                    "type": "Error|String"
                                 },
                                 {
                                     "name": "connectionStats",
-                                    "description": "The list of Peers connection statuses.",
+                                    "description": "The list of Peer connection stats that has been successfully retrieved.",
                                     "type": "JSON"
                                 },
                                 {
-                                    "name": "connectionStats.(#peerId)",
-                                    "description": "The Peer ID that\n  is associated with the connection status retrieved data.",
-                                    "type": "Error"
+                                    "name": "connectionStats.<#peerId>",
+                                    "description": "The Peer connection stats associated\n  with the Peer ID property name.\n<small>Object signature matches the <code>stats</code> parameter payload received in the\n  <a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>.</small>",
+                                    "type": "JSON"
                                 }
                             ]
                         },
                         {
                             "name": "success",
-                            "description": "The success object received in the callback.\n  If received as <code>null</code>, it means that there are errors.",
+                            "description": "The success result in request.\n  <small>Defined as <code>null</code> when there are errors in request</small>",
                             "type": "JSON",
                             "props": [
                                 {
                                     "name": "listOfPeers",
-                                    "description": "The list of Peers which connection statuses\n  to retrieve.",
+                                    "description": "The list Peer IDs targeted for retrieving the Peer connections stats.",
                                     "type": "Array"
                                 },
                                 {
                                     "name": "connectionStats",
-                                    "description": "The list of Peers connection statuses.",
+                                    "description": "The list of Peer connection stats.",
                                     "type": "JSON"
                                 },
                                 {
-                                    "name": "connectionStats.(#peerId)",
-                                    "description": "The Peer ID that\n  is associated with the retrieved connection stats",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "raw",
-                                    "description": "The received raw connection stats data before parsing.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).audio",
-                                    "description": "The Peer connection audio stats.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).audio.sending",
-                                    "description": "The Peer connection audio sending stats.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).audio.sending.bytes",
-                                    "description": "The Peer connection audio sending bytes.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).audio.sending.packets",
-                                    "description": "The Peer\n  connection audio sending packets.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).audio.sending.packetsLost",
-                                    "description": "The Peer\n  connection audio sending packets lost.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).audio.sending.ssrc",
-                                    "description": "The Peer\n  connection audio sending ssrc.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).audio.sending.rtt",
-                                    "description": "The Peer\n  connection audio sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not\n  defined in the original raw stats data.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).audio.receiving",
-                                    "description": "The Peer connection audio receiving stats.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).audio.receiving.bytes",
-                                    "description": "The Peer connection audio receiving bytes.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).audio.receiving.packets",
-                                    "description": "The Peer\n  connection audio receiving packets.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).audio.receiving.packetsLost",
-                                    "description": "The Peer\n  connection audio receiving packets lost.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).audio.receiving.ssrc",
-                                    "description": "The Peer\n  connection audio receiving ssrc.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).video",
-                                    "description": "The Peer connection video stats.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).video.sending",
-                                    "description": "The Peer connection video sending stats.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).video.sending.bytes",
-                                    "description": "The Peer connection video sending bytes.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).video.sending.packets",
-                                    "description": "The Peer\n  connection video sending packets.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).video.sending.packetsLost",
-                                    "description": "The Peer\n  connection video sending packets lost.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).video.sending.ssrc",
-                                    "description": "The Peer\n  connection video sending ssrc ID.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).video.sending.rtt",
-                                    "description": "The Peer\n  connection video sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not\n  defined in the original raw stats data.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).video.receiving",
-                                    "description": "The Peer connection video receiving stats.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).video.receiving.bytes",
-                                    "description": "The Peer connection video receiving bytes.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).video.receiving.packets",
-                                    "description": "The Peer\n  connection video receiving packets.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).video.receiving.packetsLost",
-                                    "description": "The Peer\n  connection video receiving packets lost.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).video.receiving.ssrc",
-                                    "description": "The Peer\n  connection video receiving ssrc.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).selectedCandidate",
-                                    "description": "The Peer connection selected candidate\n  pair details.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).selectedCandidate.local",
-                                    "description": "The Peer connection\n  selected local candidate.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).selectedCandidate.local.ipAddress",
-                                    "description": "The Peer connection\n  selected local candidate IP address.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).selectedCandidate.local.portNumber",
-                                    "description": "The Peer connection\n  selected local candidate port number.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).selectedCandidate.local.transport",
-                                    "description": "The Peer connection\n  selected local candidate transport.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).selectedCandidate.local.candidateType",
-                                    "description": "The Peer connection\n  selected local candidate candidate type.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).selectedCandidate.remote",
-                                    "description": "The Peer connection\n  selected remote candidate.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).selectedCandidate.remote.ipAddress",
-                                    "description": "The Peer connection\n  selected remote candidate IP address.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).selectedCandidate.remote.portNumber",
-                                    "description": "The Peer connection\n  selected remote candidate port number.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).selectedCandidate.remote.transport",
-                                    "description": "The Peer connection\n  selected remote candidate transport.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).selectedCandidate.remote.candidateType",
-                                    "description": "The Peer connection\n  selected remote candidate candidate type.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection",
-                                    "description": "The Peer connection details.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.iceConnectionState",
-                                    "description": "The Peer connection ICE\n  connection state.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.iceGatheringState",
-                                    "description": "The Peer connection ICE\n  gathering state.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.signalingState",
-                                    "description": "The Peer connection\n  signaling state.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.localDescription",
-                                    "description": "The Peer connection\n  local session description.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.localDescription.type",
-                                    "description": "The Peer connection\n  local session description type.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.localDescription.sdp",
-                                    "description": "The Peer connection\n  local session description sdp.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.remoteDescription",
-                                    "description": "The Peer connection\n  remote session description.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.remoteDescription.type",
-                                    "description": "The Peer connection\n  remote session description type.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.remoteDescription.sdp",
-                                    "description": "The Peer connection\n  remote session description sdp.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.candidates",
-                                    "description": "The Peer connection list of\n  candidates received or sent.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.candidates.sending",
-                                    "description": "The Peer connection list of\n  candidates sent.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.candidates.sending.host",
-                                    "description": "The Peer connection list of\n  <code>\"host\"</code> candidates sent.",
-                                    "type": "Array"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.candidates.sending.host.(#index)",
-                                    "description": "The <code>\"host\"</code>\n  candidate sent.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.candidates.sending.srflx",
-                                    "description": "The Peer connection list of\n  <code>\"srflx\"</code> candidates sent.",
-                                    "type": "Array"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.candidates.sending.srflx.(#index)",
-                                    "description": "The <code>\"srflx\"</code>\n  candidate sent.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.candidates.sending.relay",
-                                    "description": "The Peer connection list of\n  <code>\"relay\"</code> candidates sent.",
-                                    "type": "Array"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.candidates.sending.relay.(#index)",
-                                    "description": "The <code>\"relay\"</code>\n  candidate sent.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.candidates.receiving",
-                                    "description": "The Peer connection list of\n  candidates received.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.candidates.receiving.host",
-                                    "description": "The Peer connection list of\n  <code>\"host\"</code> candidates received.",
-                                    "type": "Array"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.candidates.receiving.host.(#index)",
-                                    "description": "The <code>\"host\"</code>\n  candidate received.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.candidates.receiving.srflx",
-                                    "description": "The Peer connection list of\n  <code>\"srflx\"</code> candidates received.",
-                                    "type": "Array"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.candidates.receiving.srflx.(#index)",
-                                    "description": "The <code>\"srflx\"</code>\n  candidate received.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.candidates.receiving.relay",
-                                    "description": "The Peer connection list of\n  <code>\"relay\"</code> candidates received.",
-                                    "type": "Array"
-                                },
-                                {
-                                    "name": "connectionStats.(#peerId).connection.candidates.receiving.relay.(#index)",
-                                    "description": "The <code>\"relay\"</code>\n  candidate received.",
+                                    "name": "connectionStats.<#peerId>",
+                                    "description": "The Peer connection stats associated\n  with the Peer ID property name.\n<small>Object signature matches the <code>stats</code> parameter payload received in the\n  <a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>.</small>",
                                     "type": "JSON"
                                 }
                             ]
@@ -2147,234 +1822,68 @@
                     ]
                 }
             ],
-            "example": [
-                "\n  SkylinkDemo.getConnectionStatus(peerId, function (error, success) {\n     if (error) {\n       console.error(\"Failed retrieving connection status for peer \", peerId);\n     } else {\n       print(success.connectionStats);\n     }\n  });"
-            ],
             "trigger": "getConnectionStatusStateChange",
-            "component": "Peer",
             "since": "0.6.14",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 694,
-            "description": "Connects to the Peer.",
+            "line": 558,
+            "description": "Function that starts the Peer connection session.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_addPeer",
-            "params": [
-                {
-                    "name": "targetMid",
-                    "description": "The Peer ID to connect to.",
-                    "type": "String"
-                },
-                {
-                    "name": "peerBrowser",
-                    "description": "The Peer platform agent information.",
-                    "type": "JSON",
-                    "props": [
-                        {
-                            "name": "agent",
-                            "description": "The Peer platform browser or agent name.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "version",
-                            "description": "The Peer platform browser or agent version.",
-                            "type": "Number"
-                        },
-                        {
-                            "name": "os",
-                            "description": "The Peer platform name.",
-                            "type": "Number"
-                        }
-                    ]
-                },
-                {
-                    "name": "toOffer",
-                    "description": "The flag that indicates if the Peer connection\n  should be start connection as an offerer or as an answerer.",
-                    "type": "Boolean",
-                    "optional": true,
-                    "optdefault": "false"
-                },
-                {
-                    "name": "restartConn",
-                    "description": "The flag that indicates if the Peer\n  connection is part of restart functionality use-case.",
-                    "type": "Boolean",
-                    "optional": true,
-                    "optdefault": "false"
-                },
-                {
-                    "name": "receiveOnly",
-                    "description": "The flag that indicates if the Peer\n  connection would send Stream or not (receive only).",
-                    "type": "Boolean",
-                    "optional": true,
-                    "optdefault": "false"
-                },
-                {
-                    "name": "isSS",
-                    "description": "The flag that indicates if the Peer\n  connection Stream sent is a screensharing stream or not.",
-                    "type": "Boolean",
-                    "optional": true,
-                    "optdefault": "false"
-                }
-            ],
             "access": "private",
             "tagname": "",
-            "component": "Peer",
             "since": "0.5.4",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 759,
-            "description": "Restarts a Peer connection in a P2P environment.\nThis is usually done for replacing the previous Stream attached and restarting\n  the connection with a new one, or when the ICE connection has issues\n  streaming video/audio stream in the remote Stream which requires\n  a refresh in the ICE connection.",
+            "line": 610,
+            "description": "Function that re-negotiates a Peer connection.\nWe currently do not implement the ICE restart functionality.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
-            "params": [
-                {
-                    "name": "peerId",
-                    "description": "The Peer ID to restart the connection with.",
-                    "type": "String"
-                },
-                {
-                    "name": "isSelfInitiatedRestart",
-                    "description": "The flag that indicates if the restart action\n   was caused by self.",
-                    "type": "Boolean"
-                },
-                {
-                    "name": "isConnectionRestart",
-                    "description": "The flag that indicates whether the restarting action\n  is caused by ICE connection or handshake connection failure. Currently, this feature works the same as\n  <code>explict</code> parameter.",
-                    "type": "Boolean"
-                },
-                {
-                    "name": "callback",
-                    "description": "The callback fired after the Peer connection has\n  been succesfully initiated with a restart. Set this value to <code>null</code> if you\n  do not want to pass in any callbacks.",
-                    "type": "Function"
-                },
-                {
-                    "name": "explict",
-                    "description": "The flag that indicates whether the restart functionality\n  is invoked by the application or by Skylink when the ICE connection fails to establish\n  a \"healthy\" connection state. Currently, this feature works the same as\n  <code>isConnectionRestart</code> parameter.",
-                    "type": "Boolean",
-                    "optional": true,
-                    "optdefault": "false"
-                }
-            ],
             "access": "private",
             "tagname": "",
-            "component": "Peer",
             "since": "0.5.8",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 905,
-            "description": "Disconnects the Peer connection and remove object references associated.",
+            "line": 740,
+            "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
-            "params": [
-                {
-                    "name": "peerId",
-                    "description": "The Peer ID to disconnect the connection with.",
-                    "type": "String"
-                }
-            ],
-            "trigger": "peerLeft",
             "access": "private",
             "tagname": "",
-            "component": "Peer",
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 964,
-            "description": "Creates a Peer connection. This does not start the handshake connection\n  but creates the Peer connection object ready for connection.",
+            "line": 796,
+            "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
-            "params": [
-                {
-                    "name": "targetMid",
-                    "description": "The Peer ID to create the connection object\n  with.",
-                    "type": "String"
-                },
-                {
-                    "name": "isScreenSharing",
-                    "description": "The flag that indicates if the Peer\n  connection Stream sent is a screensharing stream or not.",
-                    "type": "Boolean",
-                    "optional": true,
-                    "optdefault": "false"
-                }
-            ],
-            "return": {
-                "description": "The Peer connection object associated with\n  the provided ID.",
-                "type": "Object"
-            },
             "access": "private",
             "tagname": "",
-            "component": "Peer",
             "since": "0.5.1",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1111,
+            "line": 935,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1174,
-            "description": "Restarts all Peers connection in a MCU connection environment.\nThis would require the current user to leave the room and restart all\n  current existing Peers connection.",
+            "line": 998,
+            "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
-            "params": [
-                {
-                    "name": "callback",
-                    "description": "The callback fired after all targeted Peers connection has\n  been initiated with refresh or have met with an exception.\n  The callback signature is <code>function (error, success)</code>.",
-                    "type": "Function",
-                    "optional": true,
-                    "props": [
-                        {
-                            "name": "error",
-                            "description": "The error object received in the callback.\n  If received as <code>null</code>, it means that there is no errors.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "listOfPeers",
-                                    "description": "The list of Peers that the\n  refresh connection had been initiated with.",
-                                    "type": "Array"
-                                },
-                                {
-                                    "name": "refreshErrors",
-                                    "description": "The list of errors occurred\n  based on per Peer basis.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "refreshErrors.(#peerId)",
-                                    "description": "The Peer ID associated\n  with the error that occurred when refreshing the connection.",
-                                    "type": "Object|String"
-                                }
-                            ]
-                        },
-                        {
-                            "name": "success",
-                            "description": "The success object received in the callback.\n  If received as <code>null</code>, it means that there are errors.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "listOfPeers",
-                                    "description": "The list of Peers that the\n  refresh connection had been initiated with.",
-                                    "type": "Array"
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ],
             "access": "private",
             "tagname": "",
-            "trigger": "peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined",
-            "component": "Peer",
             "since": "0.6.1",
             "class": "Skylink"
         },
@@ -12318,83 +11827,35 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:393"
-        },
-        {
-            "message": "unknown tag: trigger",
             "line": " source/data-transfer.js:411"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:497"
+            "line": " source/data-transfer.js:429"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:514"
+            "line": " source/data-transfer.js:515"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:603"
+            "line": " source/data-transfer.js:532"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:696"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-connection.js:67"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-connection.js:80"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-connection.js:93"
+            "line": " source/data-transfer.js:621"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:106"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-connection.js:106"
+            "line": " source/data-transfer.js:714"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:265"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-connection.js:265"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-connection.js:694"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-connection.js:759"
+            "line": " source/peer-connection.js:99"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:905"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-connection.js:905"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-connection.js:964"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:1174"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-connection.js:1174"
+            "line": " source/peer-connection.js:247"
         },
         {
             "message": "unknown tag: component",
@@ -13514,7 +12975,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:1111"
+            "line": " source/peer-connection.js:935"
         }
     ]
 }

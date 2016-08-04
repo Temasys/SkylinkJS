@@ -1,14 +1,5 @@
 /**
  * Contains the list of Peer connection ICE connection states.
- * - ICE connection is used for streaming media like audio and video and Datachannel connections.
- * - ICE candidates
- * - <b>What is an <a href="#attr_CANDIDATE_GENERATION_STATE">ICE candidate</a>?</b><br>
- *   It is the object that contains the IP addresses and port to allow ICE connection.
- * - <b>What is an <a href="#attr_ICE_CONNECTION_STATE">ICE connection</a>?</b><br>
- *   It is the connection used for establishing media and Datachannel connections.
- * - <b>What is the <a href="#attr_PEER_CONNECTION_STATE">session description</a> for?</b><br>
- *   It is the data where it stores the information to map the ICE candidates to the relevant
- *   media type (audio/video/Datachannel).
  * @attribute ICE_CONNECTION_STATE
  * @type JSON
  * @param {String} CHECKING <small>Value <code>"checking"</code></small>

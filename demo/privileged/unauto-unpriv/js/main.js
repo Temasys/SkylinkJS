@@ -463,7 +463,7 @@ Demo.Skylink.on('serverPeerRestart', function (serverPeerId, serverPeerType) {
 //------------- join room ---------------------------
 var displayName = 'name_' + 'user_' + Math.floor((Math.random() * 1000) + 1);
 
-Demo.Skylink.init(config, function (error, success) {
+Demo.Skylink.init(config.unprivKey, function (error, success) {
   if (success) {
     Demo.Skylink.joinRoom({
       userData: displayName,

@@ -65,80 +65,62 @@ Skylink.prototype.SERVER_PEER_TYPE = {
 };
 
 /**
- * Stores the timestamp of the moment when the last Peers connection
- *   restarts has happened. Used for the restart Peers connection functionality.
+ * Stores the restart initiated timestamp to throttle the <code>refreshConnection</code> functionality.
  * @attribute _lastRestart
  * @type Object
- * @required
  * @private
- * @component Peer
  * @for Skylink
  * @since 0.5.9
  */
 Skylink.prototype._lastRestart = null;
 
 /**
- * Stores the counter of the number of consecutive
- *   Peers connection restarts retries.
+ * Stores the global number of Peer connection retries that would increase the wait-for-response timeout
+ *   for the Peer connection health timer.
  * @attribute _retryCount
  * @type Number
- * @required
  * @private
- * @component Peer
  * @for Skylink
  * @since 0.5.10
  */
 Skylink.prototype._retryCount = 0;
 
 /**
- * Stores the list of Peers connection.
+ * Stores the list of the Peer connections.
  * @attribute _peerConnections
- * @param {Object} (#peerId) The Peer ID associated to the RTCPeerConnection object.
+ * @param {Object} <#peerId> The Peer connection.
  * @type JSON
- * @required
  * @private
- * @component Peer
  * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._peerConnections = {};
 
 /**
- * Refreshes a Peer connection.
- * - This feature can be used to refresh a Peer connection when the
- *   remote Stream received does not stream any audio/video stream.
- * - If there are more than 1 refresh during 5 seconds
- *   or refresh is less than 3 seconds since the last refresh
- *   initiated by the other peer, it will be aborted.
- * - As for MCU connection, the restart mechanism makes the self user
- *    leave and join the currently connected room again.
+ * <blockquote class="info">
+ *   For MCU enabled Peer connections, the restart functionality may differ.
+ *   <a href="http://support.temasys.com.sg/support/discussions/topics/12000002853">Read this article here</a>.<br>
+ *   Note that the functionality is throttled when invoked many times in less than 3 seconds interval. 
+ * </blockquote>
+ * Function that refreshes Peer connections.
  * @method refreshConnection
- * @param {String|Array} [targetPeerId] The array of targeted Peers connection to refresh
- *   the connection with.
- * @param {Function} [callback] The callback fired after all targeted Peers connection has
- *   been initiated with refresh or have met with an exception.
- *   The callback signature is <code>function (error, success)</code>.
- * @param {JSON} callback.error The error object received in the callback.
- *   If received as <code>null</code>, it means that there is no errors.
- * @param {Array} callback.error.listOfPeers The list of Peers that the
- *   refresh connection had been initiated with.
- * @param {JSON} callback.error.refreshErrors The list of errors occurred
- *   based on per Peer basis.
- * @param {Object|String} callback.error.refreshErrors.(#peerId) The Peer ID that
- *   is associated with the error that occurred when refreshing the connection.
- * @param {JSON} callback.success The success object received in the callback.
- *   If received as <code>null</code>, it means that there are errors.
- * @param {Array} callback.success.listOfPeers The list of Peers that the
- *   refresh connection had been initiated with.
- * @example
- *   SkylinkDemo.on("iceConnectionState", function (state, peerId)) {
- *     if (iceConnectionState === SkylinkDemo.ICE_CONNECTION_STATE.FAILED) {
- *       // Do a refresh
- *       SkylinkDemo.refreshConnection(peerId);
- *     }
- *   });
+ * @param {String|Array} [targetPeerId] The target Peer ID to only refresh the Peer connection.<br>
+ * &#8594; When provided as an Array, it will refresh the Peer connections with all the Peer IDs provided.<br>
+ * &#8594; When not provided, it will refresh the Peer connections with all the currently connected Peers.
+ * @param {Function} [callback] The callback function fired when request has completed.
+ *   <small>Function parameters signature is <code>function (error, success)</code></small>
+ * @param {JSON} callback.error The error result in request.
+ *   <small>Defined as <code>null</code> when there are no errors in request</small>
+ * @param {Array} callback.error.listOfPeers The list Peer IDs targeted for refreshing the Peer connections.
+ * @param {JSON} callback.error.refreshErrors The list of Peer connection refresh errors.
+ *   <small>If there is <code>"self"</code> property, it's likely due to having no Peers to refresh the
+ *     Peer connections with.</small>
+ * @param {Error|String} callback.error.refreshErrors.<#peerId> The Peer connection refresh error associated
+ *   with the Peer ID property name.
+ * @param {JSON} callback.success The success result in request.
+ *   <small>Defined as <code>null</code> when there are errors in request</small>
+ * @param {Array} callback.success.listOfPeers The list Peer IDs targeted for refreshing the Peer connections.
  * @trigger peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined, serverPeerLeft
- * @component Peer
  * @for Skylink
  * @since 0.5.5
  */
@@ -263,153 +245,35 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
 };
 
 /**
- * Gets the Peer connection status.
+ * Function that retrieves the Peer connection stats.
  * @method getConnectionStatus
- * @param {String|Array} [targetPeerId] The array of targeted Peers connection to refresh
- *   the connection with.
- * @param {Function} [callback] The callback fired after all targeted Peers connection has
- *   connection status retrieved or have met with an exception.
- *   The callback signature is <code>function (error, success)</code>.
- * @param {JSON} callback.error The error object received in the callback.
- *   If received as <code>null</code>, it means that there is no errors.
- * @param {Array} callback.error.listOfPeers The list of Peers which connection statuses
- *   to retrieve.
- * @param {JSON} callback.error.retrievalErrors The list of errors occurred
- *   based on per Peer basis. It returns the Error to an ID of <code>"self"</code> if there is no Peers.
- * @param {Object|String} callback.error.retrievalErrors.(#peerId) The Peer ID that
- *   is associated with the error that occurred when retrieving the connection status.
- * @param {JSON} callback.error.connectionStats The list of Peers connection statuses.
- * @param {Error} callback.error.connectionStats.(#peerId) The Peer ID that
- *   is associated with the connection status retrieved data.
- * @param {JSON} callback.success The success object received in the callback.
- *   If received as <code>null</code>, it means that there are errors.
- * @param {Array} callback.success.listOfPeers The list of Peers which connection statuses
- *   to retrieve.
- * @param {JSON} callback.success.connectionStats The list of Peers connection statuses.
- * @param {JSON} callback.success.connectionStats.(#peerId) The Peer ID that
- *   is associated with the retrieved connection stats
- * @param {JSON} callback.success.raw The received raw connection stats data before parsing.
- * @param {JSON} callback.success.connectionStats.(#peerId).audio The Peer connection audio stats.
- * @param {JSON} callback.success.connectionStats.(#peerId).audio.sending The Peer connection audio sending stats.
- * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.bytes The Peer connection audio sending bytes.
- * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.packets The Peer
- *   connection audio sending packets.
- * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.packetsLost The Peer
- *   connection audio sending packets lost.
- * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.ssrc The Peer
- *   connection audio sending ssrc.
- * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.rtt The Peer
- *   connection audio sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not
- *   defined in the original raw stats data.
- * @param {JSON} callback.success.connectionStats.(#peerId).audio.receiving The Peer connection audio receiving stats.
- * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.bytes The Peer connection audio receiving bytes.
- * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.packets The Peer
- *   connection audio receiving packets.
- * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.packetsLost The Peer
- *   connection audio receiving packets lost.
- * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.ssrc The Peer
- *   connection audio receiving ssrc.
- * @param {JSON} callback.success.connectionStats.(#peerId).video The Peer connection video stats.
- * @param {JSON} callback.success.connectionStats.(#peerId).video.sending The Peer connection video sending stats.
- * @param {Number} callback.success.connectionStats.(#peerId).video.sending.bytes The Peer connection video sending bytes.
- * @param {Number} callback.success.connectionStats.(#peerId).video.sending.packets The Peer
- *   connection video sending packets.
- * @param {Number} callback.success.connectionStats.(#peerId).video.sending.packetsLost The Peer
- *   connection video sending packets lost.
- * @param {JSON} callback.success.connectionStats.(#peerId).video.sending.ssrc The Peer
- *   connection video sending ssrc ID.
- * @param {Number} callback.success.connectionStats.(#peerId).video.sending.rtt The Peer
- *   connection video sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not
- *   defined in the original raw stats data.
- * @param {JSON} callback.success.connectionStats.(#peerId).video.receiving The Peer connection video receiving stats.
- * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.bytes The Peer connection video receiving bytes.
- * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.packets The Peer
- *   connection video receiving packets.
- * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.packetsLost The Peer
- *   connection video receiving packets lost.
- * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.ssrc The Peer
- *   connection video receiving ssrc.
- * @param {JSON} callback.success.connectionStats.(#peerId).selectedCandidate The Peer connection selected candidate
- *   pair details.
- * @param {JSON} callback.success.connectionStats.(#peerId).selectedCandidate.local The Peer connection
- *   selected local candidate.
- * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.local.ipAddress The Peer connection
- *   selected local candidate IP address.
- * @param {Number} callback.success.connectionStats.(#peerId).selectedCandidate.local.portNumber The Peer connection
- *   selected local candidate port number.
- * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.local.transport The Peer connection
- *   selected local candidate transport.
- * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.local.candidateType The Peer connection
- *   selected local candidate candidate type.
- * @param {JSON} callback.success.connectionStats.(#peerId).selectedCandidate.remote The Peer connection
- *   selected remote candidate.
- * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.remote.ipAddress The Peer connection
- *   selected remote candidate IP address.
- * @param {Number} callback.success.connectionStats.(#peerId).selectedCandidate.remote.portNumber The Peer connection
- *   selected remote candidate port number.
- * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.remote.transport The Peer connection
- *   selected remote candidate transport.
- * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.remote.candidateType The Peer connection
- *   selected remote candidate candidate type.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection The Peer connection details.
- * @param {String} callback.success.connectionStats.(#peerId).connection.iceConnectionState The Peer connection ICE
- *   connection state.
- * @param {String} callback.success.connectionStats.(#peerId).connection.iceGatheringState The Peer connection ICE
- *   gathering state.
- * @param {String} callback.success.connectionStats.(#peerId).connection.signalingState The Peer connection
- *   signaling state.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.localDescription The Peer connection
- *   local session description.
- * @param {String} callback.success.connectionStats.(#peerId).connection.localDescription.type The Peer connection
- *   local session description type.
- * @param {String} callback.success.connectionStats.(#peerId).connection.localDescription.sdp The Peer connection
- *   local session description sdp.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.remoteDescription The Peer connection
- *   remote session description.
- * @param {String} callback.success.connectionStats.(#peerId).connection.remoteDescription.type The Peer connection
- *   remote session description type.
- * @param {String} callback.success.connectionStats.(#peerId).connection.remoteDescription.sdp The Peer connection
- *   remote session description sdp.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates The Peer connection list of
- *   candidates received or sent.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending The Peer connection list of
- *   candidates sent.
- * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.sending.host The Peer connection list of
- *   <code>"host"</code> candidates sent.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending.host.(#index) The <code>"host"</code>
- *   candidate sent.
- * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.sending.srflx The Peer connection list of
- *   <code>"srflx"</code> candidates sent.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending.srflx.(#index) The <code>"srflx"</code>
- *   candidate sent.
- * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.sending.relay The Peer connection list of
- *   <code>"relay"</code> candidates sent.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending.relay.(#index) The <code>"relay"</code>
- *   candidate sent.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving The Peer connection list of
- *   candidates received.
- * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.receiving.host The Peer connection list of
- *   <code>"host"</code> candidates received.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving.host.(#index) The <code>"host"</code>
- *   candidate received.
- * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.receiving.srflx The Peer connection list of
- *   <code>"srflx"</code> candidates received.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving.srflx.(#index) The <code>"srflx"</code>
- *   candidate received.
- * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.receiving.relay The Peer connection list of
- *   <code>"relay"</code> candidates received.
- * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving.relay.(#index) The <code>"relay"</code>
- *   candidate received.
- * @example
- *   SkylinkDemo.getConnectionStatus(peerId, function (error, success) {
- *      if (error) {
- *        console.error("Failed retrieving connection status for peer ", peerId);
- *      } else {
- *        print(success.connectionStats);
- *      }
- *   });
+ * @param {String|Array} [targetPeerId] The target Peer ID to only retrieve the Peer connection stats.<br>
+ * &#8594; When provided as an Array, it will retrieve the Peer connections stats with all the Peer IDs provided.<br>
+ * &#8594; When not provided, it will retrieve the Peer connections stats with all the currently connected Peers.
+ * @param {Function} [callback] he callback function fired when request has completed.
+ *   <small>Function parameters signature is <code>function (error, success)</code></small>
+ * @param {JSON} callback.error The error result in request.
+ *   <small>Defined as <code>null</code> when there are no errors in request</small>
+ * @param {Array} callback.error.listOfPeers The list Peer IDs targeted for retrieving the Peer connections stats.
+ * @param {JSON} callback.error.retrievalErrors The list of retrieval of Peer connection stats errors.
+ *   <small>If there is <code>"self"</code> property, it's likely due to having no Peers to retrieve the
+ *     Peer connections stats from.</small>
+ * @param {Error|String} callback.error.retrievalErrors.<#peerId> The Peer connection stats retrieval error associated
+ *   with the Peer ID property name.
+ * @param {JSON} callback.error.connectionStats The list of Peer connection stats that has been successfully retrieved.
+ * @param {JSON} callback.error.connectionStats.<#peerId> The Peer connection stats associated
+ *   with the Peer ID property name.
+ * <small>Object signature matches the <code>stats</code> parameter payload received in the
+ *   <a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>.</small>
+ * @param {JSON} callback.success The success result in request.
+ *   <small>Defined as <code>null</code> when there are errors in request</small>
+ * @param {Array} callback.success.listOfPeers The list Peer IDs targeted for retrieving the Peer connections stats.
+ * @param {JSON} callback.success.connectionStats The list of Peer connection stats.
+ * @param {JSON} callback.success.connectionStats.<#peerId> The Peer connection stats associated
+ *   with the Peer ID property name.
+ * <small>Object signature matches the <code>stats</code> parameter payload received in the
+ *   <a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>.</small>
  * @trigger getConnectionStatusStateChange
- * @component Peer
  * @for Skylink
  * @since 0.6.14
  */
@@ -692,23 +556,10 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
 };
 
 /**
- * Connects to the Peer.
+ * Function that starts the Peer connection session.
+ * Remember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).
  * @method _addPeer
- * @param {String} targetMid The Peer ID to connect to.
- * @param {JSON} peerBrowser The Peer platform agent information.
- * @param {String} peerBrowser.agent The Peer platform browser or agent name.
- * @param {Number} peerBrowser.version The Peer platform browser or agent version.
- * @param {Number} peerBrowser.os The Peer platform name.
- * @param {Boolean} [toOffer=false] The flag that indicates if the Peer connection
- *   should be start connection as an offerer or as an answerer.
- * @param {Boolean} [restartConn=false] The flag that indicates if the Peer
- *   connection is part of restart functionality use-case.
- * @param {Boolean} [receiveOnly=false] The flag that indicates if the Peer
- *   connection would send Stream or not (receive only).
- * @param {Boolean} [isSS=false] The flag that indicates if the Peer
- *   connection Stream sent is a screensharing stream or not.
  * @private
- * @component Peer
  * @for Skylink
  * @since 0.5.4
  */
@@ -757,27 +608,11 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
 };
 
 /**
- * Restarts a Peer connection in a P2P environment.
- * This is usually done for replacing the previous Stream attached and restarting
- *   the connection with a new one, or when the ICE connection has issues
- *   streaming video/audio stream in the remote Stream which requires
- *   a refresh in the ICE connection.
+ * Function that re-negotiates a Peer connection.
+ * We currently do not implement the ICE restart functionality.
+ * Remember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).
  * @method _restartPeerConnection
- * @param {String} peerId The Peer ID to restart the connection with.
- * @param {Boolean} isSelfInitiatedRestart The flag that indicates if the restart action
- *    was caused by self.
- * @param {Boolean} isConnectionRestart The flag that indicates whether the restarting action
- *   is caused by ICE connection or handshake connection failure. Currently, this feature works the same as
- *   <code>explict</code> parameter.
- * @param {Function} callback The callback fired after the Peer connection has
- *   been succesfully initiated with a restart. Set this value to <code>null</code> if you
- *   do not want to pass in any callbacks.
- * @param {Boolean} [explict=false] The flag that indicates whether the restart functionality
- *   is invoked by the application or by Skylink when the ICE connection fails to establish
- *   a "healthy" connection state. Currently, this feature works the same as
- *   <code>isConnectionRestart</code> parameter.
  * @private
- * @component Peer
  * @for Skylink
  * @since 0.5.8
  */
@@ -903,12 +738,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 };
 
 /**
- * Disconnects the Peer connection and remove object references associated.
+ * Function that ends the Peer connection session.
  * @method _removePeer
- * @param {String} peerId The Peer ID to disconnect the connection with.
- * @trigger peerLeft
  * @private
- * @component Peer
  * @for Skylink
  * @since 0.5.5
  */
@@ -962,17 +794,9 @@ Skylink.prototype._removePeer = function(peerId) {
 };
 
 /**
- * Creates a Peer connection. This does not start the handshake connection
- *   but creates the Peer connection object ready for connection.
+ * Function that creates the Peer connection.
  * @method _createPeerConnection
- * @param {String} targetMid The Peer ID to create the connection object
- *   with.
- * @param {Boolean} [isScreenSharing=false] The flag that indicates if the Peer
- *   connection Stream sent is a screensharing stream or not.
- * @return {Object} The Peer connection object associated with
- *   the provided ID.
  * @private
- * @component Peer
  * @for Skylink
  * @since 0.5.1
  */
@@ -1172,28 +996,12 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 };
 
 /**
- * Restarts all Peers connection in a MCU connection environment.
- * This would require the current user to leave the room and restart all
- *   current existing Peers connection.
+ * Function that handles the <code>_restartPeerConnection</code> scenario
+ *   for MCU enabled Peer connections.
+ * This is implemented currently by making the user leave and join the Room again.
+ * The Peer ID will not stay the same though.
  * @method _restartMCUConnection
- * @param {Function} [callback] The callback fired after all targeted Peers connection has
- *   been initiated with refresh or have met with an exception.
- *   The callback signature is <code>function (error, success)</code>.
- * @param {JSON} callback.error The error object received in the callback.
- *   If received as <code>null</code>, it means that there is no errors.
- * @param {Array} callback.error.listOfPeers The list of Peers that the
- *   refresh connection had been initiated with.
- * @param {JSON} callback.error.refreshErrors The list of errors occurred
- *   based on per Peer basis.
- * @param {Object|String} callback.error.refreshErrors.(#peerId) The Peer ID associated
- *   with the error that occurred when refreshing the connection.
- * @param {JSON} callback.success The success object received in the callback.
- *   If received as <code>null</code>, it means that there are errors.
- * @param {Array} callback.success.listOfPeers The list of Peers that the
- *   refresh connection had been initiated with.
  * @private
- * @trigger peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined
- * @component Peer
  * @for Skylink
  * @since 0.6.1
  */

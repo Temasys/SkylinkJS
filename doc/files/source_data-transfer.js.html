@@ -283,31 +283,42 @@ Skylink.prototype._dataTransfersTimeout = {};
  * @param {Number} [timeout=60] The timeout to wait for response from Peer. Once timeout is reached without
  *   response, the data transfer is terminated.
  * @param {String|Array} [targetPeerId] The target Peer ID to only start the data transfer with.&lt;br&gt;
- *   When provided as an Array, it will start the data transfers with all the Peer IDs provided.&lt;br&gt;
- *   When not provided, it will start the data transfers with all the currently connection Peers.
+ * &amp;#8594; When provided as an Array, it will start the data transfers with all the Peer IDs provided.&lt;br&gt;
+ * &amp;#8594; When not provided, it will start the data transfers with all the currently connected Peers.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  * @param {JSON} callback.error The error result in request.
  *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are no errors in request&lt;/small&gt;
  * @param {String} callback.error.transferId &lt;blockquote class=&quot;info&quot;&gt;
- *   This has been deprecated and will only be defined for single targeted Peer data transfer.
+ *   &lt;b&gt;Deprecation Warning!&lt;/b&gt; This property has been deprecated.
+ *   Please use &lt;code&gt;callback.error.transferInfo.transferId&lt;/code&gt; instead.
  *   &lt;/blockquote&gt; The data transfer ID.
- * @param {String} [callback.error.state] &lt;blockquote class=&quot;info&quot;&gt;
- *   This has been deprecated and will only be defined for single targeted Peer data transfer.
- *   &lt;/blockquote&gt; The data transfer state that resulted in error. [Rel: Skylink.DATA_TRANSFER_STATE]
- * @param {String} [callback.error.peerId] &lt;blockquote class=&quot;info&quot;&gt;
- *   This has been deprecated and will only be defined for single targeted Peer data transfer.
+ *   &lt;small&gt;Defined only for single targeted Peer data transfer.&lt;/small&gt;
+ * @param {String} callback.error.state &lt;blockquote class=&quot;info&quot;&gt;
+ *   &lt;b&gt;Deprecation Warning!&lt;/b&gt; This property has been deprecated.
+ *   Please use &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt;
+ *   event&lt;/a&gt; instead. &lt;/blockquote&gt; The data transfer state that resulted in error.
+ *   &lt;small&gt;Defined only for single targeted Peer data transfer.&lt;/small&gt; [Rel: Skylink.DATA_TRANSFER_STATE]
+ * @param {String} callback.error.peerId &lt;blockquote class=&quot;info&quot;&gt;
+ *   &lt;b&gt;Deprecation Warning!&lt;/b&gt; This property has been deprecated.
+ *   Please use &lt;code&gt;callback.error.listOfPeers&lt;/code&gt; instead.
  *   &lt;/blockquote&gt; The targeted Peer ID for data transfer.
+ *   &lt;small&gt;Defined only for single targeted Peer data transfer.&lt;/small&gt;
  * @param {Boolean} callback.error.isPrivate &lt;blockquote class=&quot;info&quot;&gt;
- *   This has been deprecated and will only be defined for single targeted Peer data transfer.
+ *   &lt;b&gt;Deprecation Warning!&lt;/b&gt; This property has been deprecated.
+ *   Please use &lt;code&gt;callback.error.transferInfo.isPrivate&lt;/code&gt; instead.
  *   &lt;/blockquote&gt; The flag that indicates if data transfer is targeted or not, basing
  *   off the &lt;code&gt;targetPeerId&lt;/code&gt; parameter being defined.
- * @param {Error|String} [callback.error.error] &lt;blockquote class=&quot;info&quot;&gt;
- *   This has been deprecated and will only be defined for single targeted Peer data transfer.
+ *   &lt;small&gt;Defined only for single targeted Peer data transfer.&lt;/small&gt;
+ * @param {Error|String} callback.error.error &lt;blockquote class=&quot;info&quot;&gt;
+ *   &lt;b&gt;Deprecation Warning!&lt;/b&gt; This property has been deprecated.
+ *   Please use &lt;code&gt;callback.error.transferErrors&lt;/code&gt; instead.
  *   &lt;/blockquote&gt; The error received that resulted in error.
+ *   &lt;small&gt;Defined only for single targeted Peer data transfer.&lt;/small&gt;
  * @param {Array} callback.error.listOfPeers The list Peer IDs targeted for the data transfer.
  * @param {JSON} callback.error.transferErrors The list of data transfer errors.
- * @param {Object|String} callback.error.transferErrors.&lt;#peerId&gt; The data transfer error associated
+ * &lt;small&gt;If there is &lt;code&gt;&quot;self&quot;&lt;/code&gt; property, it&#x27;s likely due to having no Peers to start data transfers with.&lt;/small&gt;
+ * @param {Error|String} callback.error.transferErrors.&lt;#peerId&gt; The data transfer error associated
  *   with the Peer ID property name.
  * @param {JSON} callback.error.transferInfo The data transfer information.
  *   &lt;small&gt;Object signature matches the &lt;code&gt;transferInfo&lt;/code&gt; parameter payload received in the
@@ -315,18 +326,25 @@ Skylink.prototype._dataTransfersTimeout = {};
  * @param {JSON} callback.success The success result in request.
  *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are errors in request&lt;/small&gt;
  * @param {String} callback.success.transferId &lt;blockquote class=&quot;info&quot;&gt;
- *   This has been deprecated and will only be defined for single targeted Peer data transfer.
+ *   &lt;b&gt;Deprecation Warning!&lt;/b&gt; This property has been deprecated.
+ *   Please use &lt;code&gt;callback.success.transferInfo.transferId&lt;/code&gt; instead.
  *   &lt;/blockquote&gt; The data transfer ID.
- * @param {String} [callback.success.state] &lt;blockquote class=&quot;info&quot;&gt;
- *   This has been deprecated and will only be defined for single targeted Peer data transfer.
- *   &lt;/blockquote&gt; The data transfer state that resulted in error. [Rel: Skylink.DATA_TRANSFER_STATE]
- * @param {String} [callback.success.peerId] &lt;blockquote class=&quot;info&quot;&gt;
- *   This has been deprecated and will only be defined for single targeted Peer data transfer.
+ * @param {String} callback.success.state &lt;blockquote class=&quot;info&quot;&gt;
+ *   &lt;b&gt;Deprecation Warning!&lt;/b&gt; This property has been deprecated.
+ *   Please use &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt;
+ *   event&lt;/a&gt; instead. &lt;/blockquote&gt; The data transfer state that resulted in error.
+ *   &lt;small&gt;Defined only for single targeted Peer data transfer.&lt;/small&gt; [Rel: Skylink.DATA_TRANSFER_STATE]
+ * @param {String} callback.success.peerId &lt;blockquote class=&quot;info&quot;&gt;
+ *   &lt;b&gt;Deprecation Warning!&lt;/b&gt; This property has been deprecated.
+ *   Please use &lt;code&gt;callback.success.listOfPeers&lt;/code&gt; instead.
  *   &lt;/blockquote&gt; The targeted Peer ID for data transfer.
+ *   &lt;small&gt;Defined only for single targeted Peer data transfer.&lt;/small&gt;
  * @param {Boolean} callback.success.isPrivate &lt;blockquote class=&quot;info&quot;&gt;
- *   This has been deprecated and will only be defined for single targeted Peer data transfer.
+ *   &lt;b&gt;Deprecation Warning!&lt;/b&gt; This property has been deprecated.
+ *   Please use &lt;code&gt;callback.success.transferInfo.isPrivate&lt;/code&gt; instead.
  *   &lt;/blockquote&gt; The flag that indicates if data transfer is targeted or not, basing
  *   off the &lt;code&gt;targetPeerId&lt;/code&gt; parameter being defined.
+ *   &lt;small&gt;Defined only for single targeted Peer data transfer.&lt;/small&gt;
  * @param {Array} callback.success.listOfPeers The list Peer IDs targeted for the data transfer.
  * @param {JSON} callback.success.transferInfo The data transfer information.
  *   &lt;small&gt;Object signature matches the &lt;code&gt;transferInfo&lt;/code&gt; parameter payload received in the
@@ -703,8 +721,8 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
  * @method sendP2PMessage
  * @param {String|JSON} message The message.
  * @param {String|Array} [targetPeerId] The target Peer ID to only send the P2P message to.&lt;br&gt;
- *   When provided as an Array, it will send the P2P message to all the Peer IDs provided.&lt;br&gt;
- *   When not provided, it will send the P2P message to all the currently connection Peers.
+ * &amp;#8594; When provided as an Array, it will send the P2P message to all the Peer IDs provided.&lt;br&gt;
+ * &amp;#8594; When not provided, it will send the P2P message to all the currently connected Peers.
  * @trigger incomingMessage
  * @for Skylink
  * @since 0.5.5
@@ -794,31 +812,42 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
  * @param {Number} [timeout=60] The timeout to wait for response from Peer. Once timeout is reached without
  *   response, the data transfer is terminated.
  * @param {String|Array} [targetPeerId] The target Peer ID to only start the data transfer with.&lt;br&gt;
- *   When provided as an Array, it will start the data transfers with all the Peer IDs provided.&lt;br&gt;
- *   When not provided, it will start the data transfers with all the currently connection Peers.
+ * &amp;#8594; When provided as an Array, it will start the data transfers with all the Peer IDs provided.&lt;br&gt;
+ * &amp;#8594; When not provided, it will start the data transfers with all the currently connected Peers.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  * @param {JSON} callback.error The error result in request.
  *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are no errors in request&lt;/small&gt;
  * @param {String} callback.error.transferId &lt;blockquote class=&quot;info&quot;&gt;
- *   This has been deprecated and will only be defined for single targeted Peer data transfer.
+ *   &lt;b&gt;Deprecation Warning!&lt;/b&gt; This property has been deprecated.
+ *   Please use &lt;code&gt;callback.error.transferInfo.transferId&lt;/code&gt; instead.
  *   &lt;/blockquote&gt; The data transfer ID.
- * @param {String} [callback.error.state] &lt;blockquote class=&quot;info&quot;&gt;
- *   This has been deprecated and will only be defined for single targeted Peer data transfer.
- *   &lt;/blockquote&gt; The data transfer state that resulted in error. [Rel: Skylink.DATA_TRANSFER_STATE]
- * @param {String} [callback.error.peerId] &lt;blockquote class=&quot;info&quot;&gt;
- *   This has been deprecated and will only be defined for single targeted Peer data transfer.
+ *   &lt;small&gt;Defined only for single targeted Peer data transfer.&lt;/small&gt;
+ * @param {String} callback.error.state &lt;blockquote class=&quot;info&quot;&gt;
+ *   &lt;b&gt;Deprecation Warning!&lt;/b&gt; This property has been deprecated.
+ *   Please use &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt;
+ *   event&lt;/a&gt; instead. &lt;/blockquote&gt; The data transfer state that resulted in error.
+ *   &lt;small&gt;Defined only for single targeted Peer data transfer.&lt;/small&gt; [Rel: Skylink.DATA_TRANSFER_STATE]
+ * @param {String} callback.error.peerId &lt;blockquote class=&quot;info&quot;&gt;
+ *   &lt;b&gt;Deprecation Warning!&lt;/b&gt; This property has been deprecated.
+ *   Please use &lt;code&gt;callback.error.listOfPeers&lt;/code&gt; instead.
  *   &lt;/blockquote&gt; The targeted Peer ID for data transfer.
+ *   &lt;small&gt;Defined only for single targeted Peer data transfer.&lt;/small&gt;
  * @param {Boolean} callback.error.isPrivate &lt;blockquote class=&quot;info&quot;&gt;
- *   This has been deprecated and will only be defined for single targeted Peer data transfer.
+ *   &lt;b&gt;Deprecation Warning!&lt;/b&gt; This property has been deprecated.
+ *   Please use &lt;code&gt;callback.error.transferInfo.isPrivate&lt;/code&gt; instead.
  *   &lt;/blockquote&gt; The flag that indicates if data transfer is targeted or not, basing
  *   off the &lt;code&gt;targetPeerId&lt;/code&gt; parameter being defined.
- * @param {Error|String} [callback.error.error] &lt;blockquote class=&quot;info&quot;&gt;
- *   This has been deprecated and will only be defined for single targeted Peer data transfer.
+ *   &lt;small&gt;Defined only for single targeted Peer data transfer.&lt;/small&gt;
+ * @param {Error|String} callback.error.error &lt;blockquote class=&quot;info&quot;&gt;
+ *   &lt;b&gt;Deprecation Warning!&lt;/b&gt; This property has been deprecated.
+ *   Please use &lt;code&gt;callback.error.transferErrors&lt;/code&gt; instead.
  *   &lt;/blockquote&gt; The error received that resulted in error.
+ *   &lt;small&gt;Defined only for single targeted Peer data transfer.&lt;/small&gt;
  * @param {Array} callback.error.listOfPeers The list Peer IDs targeted for the data transfer.
  * @param {JSON} callback.error.transferErrors The list of data transfer errors.
- * @param {Object|String} callback.error.transferErrors.&lt;#peerId&gt; The data transfer error associated
+ *   &lt;small&gt;If there is &lt;code&gt;&quot;self&quot;&lt;/code&gt; property, it&#x27;s likely due to having no Peers to start data transfer with.&lt;/small&gt;
+ * @param {Error|String} callback.error.transferErrors.&lt;#peerId&gt; The data transfer error associated
  *   with the Peer ID property name.
  * @param {JSON} callback.error.transferInfo The data transfer information.
  *   &lt;small&gt;Object signature matches the &lt;code&gt;transferInfo&lt;/code&gt; parameter payload received in the
@@ -826,18 +855,25 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
  * @param {JSON} callback.success The success result in request.
  *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are errors in request&lt;/small&gt;
  * @param {String} callback.success.transferId &lt;blockquote class=&quot;info&quot;&gt;
- *   This has been deprecated and will only be defined for single targeted Peer data transfer.
+ *   &lt;b&gt;Deprecation Warning!&lt;/b&gt; This property has been deprecated.
+ *   Please use &lt;code&gt;callback.success.transferInfo.transferId&lt;/code&gt; instead.
  *   &lt;/blockquote&gt; The data transfer ID.
- * @param {String} [callback.success.state] &lt;blockquote class=&quot;info&quot;&gt;
- *   This has been deprecated and will only be defined for single targeted Peer data transfer.
- *   &lt;/blockquote&gt; The data transfer state that resulted in error. [Rel: Skylink.DATA_TRANSFER_STATE]
- * @param {String} [callback.success.peerId] &lt;blockquote class=&quot;info&quot;&gt;
- *   This has been deprecated and will only be defined for single targeted Peer data transfer.
+ * @param {String} callback.success.state &lt;blockquote class=&quot;info&quot;&gt;
+ *   &lt;b&gt;Deprecation Warning!&lt;/b&gt; This property has been deprecated.
+ *   Please use &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt;
+ *   event&lt;/a&gt; instead. &lt;/blockquote&gt; The data transfer state that resulted in error.
+ *   &lt;small&gt;Defined only for single targeted Peer data transfer.&lt;/small&gt; [Rel: Skylink.DATA_TRANSFER_STATE]
+ * @param {String} callback.success.peerId &lt;blockquote class=&quot;info&quot;&gt;
+ *   &lt;b&gt;Deprecation Warning!&lt;/b&gt; This property has been deprecated.
+ *   Please use &lt;code&gt;callback.success.listOfPeers&lt;/code&gt; instead.
  *   &lt;/blockquote&gt; The targeted Peer ID for data transfer.
+ *   &lt;small&gt;Defined only for single targeted Peer data transfer.&lt;/small&gt;
  * @param {Boolean} callback.success.isPrivate &lt;blockquote class=&quot;info&quot;&gt;
- *   This has been deprecated and will only be defined for single targeted Peer data transfer.
+ *   &lt;b&gt;Deprecation Warning!&lt;/b&gt; This property has been deprecated.
+ *   Please use &lt;code&gt;callback.success.transferInfo.isPrivate&lt;/code&gt; instead.
  *   &lt;/blockquote&gt; The flag that indicates if data transfer is targeted or not, basing
  *   off the &lt;code&gt;targetPeerId&lt;/code&gt; parameter being defined.
+ *   &lt;small&gt;Defined only for single targeted Peer data transfer.&lt;/small&gt;
  * @param {Array} callback.success.listOfPeers The list Peer IDs targeted for the data transfer.
  * @param {JSON} callback.success.transferInfo The data transfer information.
  *   &lt;small&gt;Object signature matches the &lt;code&gt;transferInfo&lt;/code&gt; parameter payload received in the

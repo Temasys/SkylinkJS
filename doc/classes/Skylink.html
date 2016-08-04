@@ -110,8 +110,7 @@ Before using any Skylink functionalities, you will need to authenticate your App
 <p>To view the list of supported browsers, visit <a href="https://github.com/Temasys/SkylinkJS#supported-browsers">the list here</a>.</p>
 <p>Here are some articles to help you get started:</p>
 <ul>
-<li><a href="https://temasys.github.io/how-to/2014/08/08/
-Getting_started_with_WebRTC_and_SkylinkJS/">How to setup a simple video call</a></li>
+<li><a href="https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/">How to setup a simple video call</a></li>
 <li><a href="https://temasys.com.sg/screensharing-with-skylinkjs/">How to setup screensharing</a></li>
 <li><a href="https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/">How to create a chatroom like feature</a></li>
 </ul>
@@ -2724,7 +2723,7 @@ Getting_started_with_WebRTC_and_SkylinkJS/">How to setup a simple video call</a>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1305"><code>source&#x2F;data-transfer.js:1305</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1341"><code>source&#x2F;data-transfer.js:1341</code></a>
       </small>
     
 
@@ -3022,41 +3021,7 @@ If self does not have any Stream object to send, it will a connection without
               <div id="method__addPeer" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_addPeer</code></h3>
   
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code>targetMid</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code>peerBrowser</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code class="optional">[toOffer=false]</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code class="optional">[restartConn=false]</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code class="optional">[receiveOnly=false]</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code class="optional">[isSS=false]</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
+    <span class="paren">()</span>
   
 
   <div class="code-item-properties">
@@ -3100,7 +3065,7 @@ If self does not have any Stream object to send, it will a connection without
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l694"><code>source&#x2F;peer-connection.js:694</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l558"><code>source&#x2F;peer-connection.js:558</code></a>
       </small>
     
 
@@ -3114,172 +3079,13 @@ If self does not have any Stream object to send, it will a connection without
   </div>
 
   <div class="code-item-description">
-    <p>Connects to the Peer.</p>
+    <p>Function that starts the Peer connection session.
+Remember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).</p>
 
   </div>
 
   
 
-  
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">targetMid</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The Peer ID to connect to.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">peerBrowser</code>
-            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The Peer platform agent information.</p>
-
-            </div>
-
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">agent</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The Peer platform browser or agent name.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">version</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The Peer platform browser or agent version.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">os</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The Peer platform name.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">toOffer</code>
-            <span class="type"><b>{</b>Boolean<b>}</b></span>
-
-            <span class="label">Optional</span>
-            
-
-            <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
-              <p>The flag that indicates if the Peer connection
-  should be start connection as an offerer or as an answerer.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">restartConn</code>
-            <span class="type"><b>{</b>Boolean<b>}</b></span>
-
-            <span class="label">Optional</span>
-            
-
-            <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
-              <p>The flag that indicates if the Peer
-  connection is part of restart functionality use-case.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">receiveOnly</code>
-            <span class="type"><b>{</b>Boolean<b>}</b></span>
-
-            <span class="label">Optional</span>
-            
-
-            <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
-              <p>The flag that indicates if the Peer
-  connection would send Stream or not (receive only).</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">isSS</code>
-            <span class="type"><b>{</b>Boolean<b>}</b></span>
-
-            <span class="label">Optional</span>
-            
-
-            <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
-              <p>The flag that indicates if the Peer
-  connection Stream sent is a screensharing stream or not.</p>
-
-            </div>
-
-            
-          </li>
-      
-      </ul>
-    </div>
   
 
   
@@ -4336,7 +4142,7 @@ This is referenced from devnull69@stackoverflow.com #6850276.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1512"><code>source&#x2F;data-transfer.js:1512</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1548"><code>source&#x2F;data-transfer.js:1548</code></a>
       </small>
     
 
@@ -4908,7 +4714,7 @@ If provided string length is lesser than or equals to the chunk size, it should 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l950"><code>source&#x2F;data-transfer.js:950</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l986"><code>source&#x2F;data-transfer.js:986</code></a>
       </small>
     
 
@@ -5376,21 +5182,7 @@ This method will do a event subscription with
               <div id="method__createPeerConnection" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_createPeerConnection</code></h3>
   
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code>targetMid</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code class="optional">[isScreenSharing=false]</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
+    <span class="paren">()</span>
   
 
   <div class="code-item-properties">
@@ -5434,7 +5226,7 @@ This method will do a event subscription with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l964"><code>source&#x2F;peer-connection.js:964</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l796"><code>source&#x2F;peer-connection.js:796</code></a>
       </small>
     
 
@@ -5448,72 +5240,14 @@ This method will do a event subscription with
   </div>
 
   <div class="code-item-description">
-    <p>Creates a Peer connection. This does not start the handshake connection
-  but creates the Peer connection object ready for connection.</p>
+    <p>Function that creates the Peer connection.</p>
 
   </div>
 
   
 
   
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
 
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">targetMid</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The Peer ID to create the connection object
-  with.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">isScreenSharing</code>
-            <span class="type"><b>{</b>Boolean<b>}</b></span>
-
-            <span class="label">Optional</span>
-            
-
-            <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
-              <p>The flag that indicates if the Peer
-  connection Stream sent is a screensharing stream or not.</p>
-
-            </div>
-
-            
-          </li>
-      
-      </ul>
-    </div>
-  
-
-  
-    <div class="code-item-section">
-      <h4>Returns:</h4>
-
-      <div class="returns-description">
-        
-          
-            <span class="type"><b>{</b>Object<b>}</b></span>:
-          
-          <p>The Peer connection object associated with
-  the provided ID.</p>
-
-        
-      </div>
-    </div>
   
 
   
@@ -5680,7 +5414,7 @@ This method will do a event subscription with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1184"><code>source&#x2F;data-transfer.js:1184</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1220"><code>source&#x2F;data-transfer.js:1220</code></a>
       </small>
     
 
@@ -5756,7 +5490,7 @@ This method will do a event subscription with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1591"><code>source&#x2F;data-transfer.js:1591</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1627"><code>source&#x2F;data-transfer.js:1627</code></a>
       </small>
     
 
@@ -6676,7 +6410,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1472"><code>source&#x2F;data-transfer.js:1472</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1508"><code>source&#x2F;data-transfer.js:1508</code></a>
       </small>
     
 
@@ -7731,7 +7465,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1452"><code>source&#x2F;data-transfer.js:1452</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1488"><code>source&#x2F;data-transfer.js:1488</code></a>
       </small>
     
 
@@ -12211,16 +11945,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
               <div id="method__removePeer" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_removePeer</code></h3>
   
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code>peerId</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
+    <span class="paren">()</span>
   
 
   <div class="code-item-properties">
@@ -12264,7 +11989,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l905"><code>source&#x2F;peer-connection.js:905</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l740"><code>source&#x2F;peer-connection.js:740</code></a>
       </small>
     
 
@@ -12278,41 +12003,12 @@ If the message is not <code>GROUP</code> type of message received, it will send
   </div>
 
   <div class="code-item-description">
-    <p>Disconnects the Peer connection and remove object references associated.</p>
+    <p>Function that ends the Peer connection session.</p>
 
   </div>
 
   
-  <div class="code-item-section">
-    <h4>Triggers:</h4>
-    <span class="code-item-trigger">peerLeft</span>
-  </div>
-  
 
-  
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">peerId</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The Peer ID to disconnect the connection with.</p>
-
-            </div>
-
-            
-          </li>
-      
-      </ul>
-    </div>
   
 
   
@@ -13669,16 +13365,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
               <div id="method__restartMCUConnection" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_restartMCUConnection</code></h3>
   
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code class="optional">[callback]</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
+    <span class="paren">()</span>
   
 
   <div class="code-item-properties">
@@ -13722,7 +13409,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l1174"><code>source&#x2F;peer-connection.js:1174</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l998"><code>source&#x2F;peer-connection.js:998</code></a>
       </small>
     
 
@@ -13736,147 +13423,15 @@ If the message is not <code>GROUP</code> type of message received, it will send
   </div>
 
   <div class="code-item-description">
-    <p>Restarts all Peers connection in a MCU connection environment.
-This would require the current user to leave the room and restart all
-  current existing Peers connection.</p>
+    <p>Function that handles the <code>_restartPeerConnection</code> scenario
+  for MCU enabled Peer connections.
+This is implemented currently by making the user leave and join the Room again.
+The Peer ID will not stay the same though.</p>
 
   </div>
 
   
-  <div class="code-item-section">
-    <h4>Triggers:</h4>
-    <span class="code-item-trigger">peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined</span>
-  </div>
-  
 
-  
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">callback</code>
-            <span class="type"><b>{</b>Function<b>}</b></span>
-
-            <span class="label">Optional</span>
-            
-
-            <div class="param-description">
-              
-              <p>The callback fired after all targeted Peers connection has
-  been initiated with refresh or have met with an exception.
-  The callback signature is <code>function (error, success)</code>.</p>
-
-            </div>
-
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">error</code>
-                    <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The error object received in the callback.
-  If received as <code>null</code>, it means that there is no errors.</p>
-
-                    </div>
-
-                    
-                      <ul class="params-list">
-                        
-                          <li class="param">
-                            <code class="param-name">listOfPeers</code>
-                            <span class="type"><b>{</b>Array<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The list of Peers that the
-  refresh connection had been initiated with.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">refreshErrors</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The list of errors occurred
-  based on per Peer basis.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">refreshErrors.(#peerId)</code>
-                            <span class="type"><b>{</b>Object | String<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer ID associated
-  with the error that occurred when refreshing the connection.
-                            </div>
-                          </li>
-                        
-                      </ul>
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">success</code>
-                    <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The success object received in the callback.
-  If received as <code>null</code>, it means that there are errors.</p>
-
-                    </div>
-
-                    
-                      <ul class="params-list">
-                        
-                          <li class="param">
-                            <code class="param-name">listOfPeers</code>
-                            <span class="type"><b>{</b>Array<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The list of Peers that the
-  refresh connection had been initiated with.
-                            </div>
-                          </li>
-                        
-                      </ul>
-                    
-                  </li>
-                
-              </ul>
-            
-          </li>
-      
-      </ul>
-    </div>
   
 
   
@@ -13888,36 +13443,7 @@ This would require the current user to leave the room and restart all
               <div id="method__restartPeerConnection" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_restartPeerConnection</code></h3>
   
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code>peerId</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code>isSelfInitiatedRestart</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code>isConnectionRestart</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code>callback</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code class="optional">[explict=false]</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
+    <span class="paren">()</span>
   
 
   <div class="code-item-properties">
@@ -13961,7 +13487,7 @@ This would require the current user to leave the room and restart all
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l759"><code>source&#x2F;peer-connection.js:759</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l610"><code>source&#x2F;peer-connection.js:610</code></a>
       </small>
     
 
@@ -13975,112 +13501,14 @@ This would require the current user to leave the room and restart all
   </div>
 
   <div class="code-item-description">
-    <p>Restarts a Peer connection in a P2P environment.
-This is usually done for replacing the previous Stream attached and restarting
-  the connection with a new one, or when the ICE connection has issues
-  streaming video/audio stream in the remote Stream which requires
-  a refresh in the ICE connection.</p>
+    <p>Function that re-negotiates a Peer connection.
+We currently do not implement the ICE restart functionality.
+Remember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).</p>
 
   </div>
 
   
 
-  
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">peerId</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The Peer ID to restart the connection with.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">isSelfInitiatedRestart</code>
-            <span class="type"><b>{</b>Boolean<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The flag that indicates if the restart action
-   was caused by self.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">isConnectionRestart</code>
-            <span class="type"><b>{</b>Boolean<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The flag that indicates whether the restarting action
-  is caused by ICE connection or handshake connection failure. Currently, this feature works the same as
-  <code>explict</code> parameter.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">callback</code>
-            <span class="type"><b>{</b>Function<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The callback fired after the Peer connection has
-  been succesfully initiated with a restart. Set this value to <code>null</code> if you
-  do not want to pass in any callbacks.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">explict</code>
-            <span class="type"><b>{</b>Boolean<b>}</b></span>
-
-            <span class="label">Optional</span>
-            
-
-            <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
-              <p>The flag that indicates whether the restart functionality
-  is invoked by the application or by Skylink when the ICE connection fails to establish
-  a &quot;healthy&quot; connection state. Currently, this feature works the same as
-  <code>isConnectionRestart</code> parameter.</p>
-
-            </div>
-
-            
-          </li>
-      
-      </ul>
-    </div>
   
 
   
@@ -14318,7 +13746,7 @@ This is usually done for replacing the previous Stream attached and restarting
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l968"><code>source&#x2F;data-transfer.js:968</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1004"><code>source&#x2F;data-transfer.js:1004</code></a>
       </small>
     
 
@@ -14598,7 +14026,7 @@ This will open a new data type of Datachannel connection with Peer if
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l904"><code>source&#x2F;data-transfer.js:904</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l940"><code>source&#x2F;data-transfer.js:940</code></a>
       </small>
     
 
@@ -14674,7 +14102,7 @@ When there is not response after timeout, the data transfer will be terminated.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l161"><code>source&#x2F;ice-connection.js:161</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l154"><code>source&#x2F;ice-connection.js:154</code></a>
       </small>
     
 
@@ -15390,7 +14818,7 @@ Setting the bandwidth flags may not
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1816"><code>source&#x2F;data-transfer.js:1816</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1852"><code>source&#x2F;data-transfer.js:1852</code></a>
       </small>
     
 
@@ -18172,7 +17600,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1251"><code>source&#x2F;data-transfer.js:1251</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1287"><code>source&#x2F;data-transfer.js:1287</code></a>
       </small>
     
 
@@ -18264,7 +17692,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l411"><code>source&#x2F;data-transfer.js:411</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l429"><code>source&#x2F;data-transfer.js:429</code></a>
       </small>
     
 
@@ -18420,7 +17848,7 @@ Function that accepts or rejects a data transfer request from Peer.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l497"><code>source&#x2F;data-transfer.js:497</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l515"><code>source&#x2F;data-transfer.js:515</code></a>
       </small>
     
 
@@ -18558,7 +17986,7 @@ Function that terminates a data transfer.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l514"><code>source&#x2F;data-transfer.js:514</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l532"><code>source&#x2F;data-transfer.js:532</code></a>
       </small>
     
 
@@ -19036,7 +18464,7 @@ Function that terminates a data transfer.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l212"><code>source&#x2F;template&#x2F;header.js:212</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l211"><code>source&#x2F;template&#x2F;header.js:211</code></a>
       </small>
     
 
@@ -19137,7 +18565,7 @@ Function that terminates a data transfer.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l265"><code>source&#x2F;peer-connection.js:265</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l247"><code>source&#x2F;peer-connection.js:247</code></a>
       </small>
     
 
@@ -19151,7 +18579,7 @@ Function that terminates a data transfer.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Gets the Peer connection status.</p>
+    <p>Function that retrieves the Peer connection stats.</p>
 
   </div>
 
@@ -19177,8 +18605,9 @@ Function that terminates a data transfer.</p>
 
             <div class="param-description">
               
-              <p>The array of targeted Peers connection to refresh
-  the connection with.</p>
+              <p>The target Peer ID to only retrieve the Peer connection stats.<br>
+&#8594; When provided as an Array, it will retrieve the Peer connections stats with all the Peer IDs provided.<br>
+&#8594; When not provided, it will retrieve the Peer connections stats with all the currently connected Peers.</p>
 
             </div>
 
@@ -19194,9 +18623,8 @@ Function that terminates a data transfer.</p>
 
             <div class="param-description">
               
-              <p>The callback fired after all targeted Peers connection has
-  connection status retrieved or have met with an exception.
-  The callback signature is <code>function (error, success)</code>.</p>
+              <p>he callback function fired when request has completed.
+  <small>Function parameters signature is <code>function (error, success)</code></small></p>
 
             </div>
 
@@ -19212,8 +18640,8 @@ Function that terminates a data transfer.</p>
 
                     <div class="param-description">
                       
-                      <p>The error object received in the callback.
-  If received as <code>null</code>, it means that there is no errors.</p>
+                      <p>The error result in request.
+  <small>Defined as <code>null</code> when there are no errors in request</small></p>
 
                     </div>
 
@@ -19229,8 +18657,7 @@ Function that terminates a data transfer.</p>
 
                             <div class="param-description">
                               
-                              The list of Peers which connection statuses
-  to retrieve.
+                              The list Peer IDs targeted for retrieving the Peer connections stats.
                             </div>
                           </li>
                         
@@ -19243,22 +18670,23 @@ Function that terminates a data transfer.</p>
 
                             <div class="param-description">
                               
-                              The list of errors occurred
-  based on per Peer basis. It returns the Error to an ID of <code>"self"</code> if there is no Peers.
+                              The list of retrieval of Peer connection stats errors.
+  <small>If there is <code>"self"</code> property, it's likely due to having no Peers to retrieve the
+    Peer connections stats from.</small>
                             </div>
                           </li>
                         
                           <li class="param">
-                            <code class="param-name">retrievalErrors.(#peerId)</code>
-                            <span class="type"><b>{</b>Object | String<b>}</b></span>
+                            <code class="param-name">retrievalErrors.&lt;#peerId&gt;</code>
+                            <span class="type"><b>{</b>Error | String<b>}</b></span>
 
                             
                             
 
                             <div class="param-description">
                               
-                              The Peer ID that
-  is associated with the error that occurred when retrieving the connection status.
+                              The Peer connection stats retrieval error associated
+  with the Peer ID property name.
                             </div>
                           </li>
                         
@@ -19271,21 +18699,23 @@ Function that terminates a data transfer.</p>
 
                             <div class="param-description">
                               
-                              The list of Peers connection statuses.
+                              The list of Peer connection stats that has been successfully retrieved.
                             </div>
                           </li>
                         
                           <li class="param">
-                            <code class="param-name">connectionStats.(#peerId)</code>
-                            <span class="type"><b>{</b>Error<b>}</b></span>
+                            <code class="param-name">connectionStats.&lt;#peerId&gt;</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
 
                             
                             
 
                             <div class="param-description">
                               
-                              The Peer ID that
-  is associated with the connection status retrieved data.
+                              The Peer connection stats associated
+  with the Peer ID property name.
+<small>Object signature matches the <code>stats</code> parameter payload received in the
+  <a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>.</small>
                             </div>
                           </li>
                         
@@ -19302,8 +18732,8 @@ Function that terminates a data transfer.</p>
 
                     <div class="param-description">
                       
-                      <p>The success object received in the callback.
-  If received as <code>null</code>, it means that there are errors.</p>
+                      <p>The success result in request.
+  <small>Defined as <code>null</code> when there are errors in request</small></p>
 
                     </div>
 
@@ -19319,8 +18749,7 @@ Function that terminates a data transfer.</p>
 
                             <div class="param-description">
                               
-                              The list of Peers which connection statuses
-  to retrieve.
+                              The list Peer IDs targeted for retrieving the Peer connections stats.
                             </div>
                           </li>
                         
@@ -19333,12 +18762,12 @@ Function that terminates a data transfer.</p>
 
                             <div class="param-description">
                               
-                              The list of Peers connection statuses.
+                              The list of Peer connection stats.
                             </div>
                           </li>
                         
                           <li class="param">
-                            <code class="param-name">connectionStats.(#peerId)</code>
+                            <code class="param-name">connectionStats.&lt;#peerId&gt;</code>
                             <span class="type"><b>{</b>JSON<b>}</b></span>
 
                             
@@ -19346,852 +18775,10 @@ Function that terminates a data transfer.</p>
 
                             <div class="param-description">
                               
-                              The Peer ID that
-  is associated with the retrieved connection stats
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">raw</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The received raw connection stats data before parsing.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).audio</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection audio stats.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).audio.sending</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection audio sending stats.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).audio.sending.bytes</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection audio sending bytes.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).audio.sending.packets</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer
-  connection audio sending packets.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).audio.sending.packetsLost</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer
-  connection audio sending packets lost.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).audio.sending.ssrc</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer
-  connection audio sending ssrc.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).audio.sending.rtt</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer
-  connection audio sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not
-  defined in the original raw stats data.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).audio.receiving</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection audio receiving stats.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).audio.receiving.bytes</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection audio receiving bytes.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).audio.receiving.packets</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer
-  connection audio receiving packets.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).audio.receiving.packetsLost</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer
-  connection audio receiving packets lost.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).audio.receiving.ssrc</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer
-  connection audio receiving ssrc.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).video</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection video stats.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).video.sending</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection video sending stats.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).video.sending.bytes</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection video sending bytes.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).video.sending.packets</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer
-  connection video sending packets.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).video.sending.packetsLost</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer
-  connection video sending packets lost.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).video.sending.ssrc</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer
-  connection video sending ssrc ID.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).video.sending.rtt</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer
-  connection video sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not
-  defined in the original raw stats data.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).video.receiving</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection video receiving stats.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).video.receiving.bytes</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection video receiving bytes.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).video.receiving.packets</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer
-  connection video receiving packets.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).video.receiving.packetsLost</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer
-  connection video receiving packets lost.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).video.receiving.ssrc</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer
-  connection video receiving ssrc.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).selectedCandidate</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection selected candidate
-  pair details.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).selectedCandidate.local</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection
-  selected local candidate.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).selectedCandidate.local.ipAddress</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection
-  selected local candidate IP address.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).selectedCandidate.local.portNumber</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection
-  selected local candidate port number.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).selectedCandidate.local.transport</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection
-  selected local candidate transport.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).selectedCandidate.local.candidateType</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection
-  selected local candidate candidate type.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).selectedCandidate.remote</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection
-  selected remote candidate.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).selectedCandidate.remote.ipAddress</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection
-  selected remote candidate IP address.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).selectedCandidate.remote.portNumber</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection
-  selected remote candidate port number.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).selectedCandidate.remote.transport</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection
-  selected remote candidate transport.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).selectedCandidate.remote.candidateType</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection
-  selected remote candidate candidate type.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection details.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.iceConnectionState</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection ICE
-  connection state.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.iceGatheringState</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection ICE
-  gathering state.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.signalingState</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection
-  signaling state.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.localDescription</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection
-  local session description.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.localDescription.type</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection
-  local session description type.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.localDescription.sdp</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection
-  local session description sdp.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.remoteDescription</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection
-  remote session description.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.remoteDescription.type</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection
-  remote session description type.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.remoteDescription.sdp</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection
-  remote session description sdp.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.candidates</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection list of
-  candidates received or sent.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.candidates.sending</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection list of
-  candidates sent.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.candidates.sending.host</code>
-                            <span class="type"><b>{</b>Array<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection list of
-  <code>"host"</code> candidates sent.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.candidates.sending.host.(#index)</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The <code>"host"</code>
-  candidate sent.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.candidates.sending.srflx</code>
-                            <span class="type"><b>{</b>Array<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection list of
-  <code>"srflx"</code> candidates sent.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.candidates.sending.srflx.(#index)</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The <code>"srflx"</code>
-  candidate sent.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.candidates.sending.relay</code>
-                            <span class="type"><b>{</b>Array<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection list of
-  <code>"relay"</code> candidates sent.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.candidates.sending.relay.(#index)</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The <code>"relay"</code>
-  candidate sent.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.candidates.receiving</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection list of
-  candidates received.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.candidates.receiving.host</code>
-                            <span class="type"><b>{</b>Array<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection list of
-  <code>"host"</code> candidates received.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.candidates.receiving.host.(#index)</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The <code>"host"</code>
-  candidate received.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.candidates.receiving.srflx</code>
-                            <span class="type"><b>{</b>Array<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection list of
-  <code>"srflx"</code> candidates received.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.candidates.receiving.srflx.(#index)</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The <code>"srflx"</code>
-  candidate received.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.candidates.receiving.relay</code>
-                            <span class="type"><b>{</b>Array<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The Peer connection list of
-  <code>"relay"</code> candidates received.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">connectionStats.(#peerId).connection.candidates.receiving.relay.(#index)</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              The <code>"relay"</code>
-  candidate received.
+                              The Peer connection stats associated
+  with the Peer ID property name.
+<small>Object signature matches the <code>stats</code> parameter payload received in the
+  <a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>.</small>
                             </div>
                           </li>
                         
@@ -20209,20 +18796,6 @@ Function that terminates a data transfer.</p>
 
   
 
-  
-    <div class="code-item-section">
-      <h4>Example:</h4>
-      <pre class="example-content prettyprint">
-        <p>  SkylinkDemo.getConnectionStatus(peerId, function (error, success) {
-     if (error) {
-       console.error(&quot;Failed retrieving connection status for peer &quot;, peerId);
-     } else {
-       print(success.connectionStats);
-     }
-  });</p>
-
-      </pre>
-    </div>
   
   <hr>
 </div>
@@ -24211,7 +22784,7 @@ This event handler will always be triggered when the event name is triggered. If
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l106"><code>source&#x2F;peer-connection.js:106</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l99"><code>source&#x2F;peer-connection.js:99</code></a>
       </small>
     
 
@@ -24225,16 +22798,12 @@ This event handler will always be triggered when the event name is triggered. If
   </div>
 
   <div class="code-item-description">
-    <p>Refreshes a Peer connection.</p>
-<ul>
-<li>This feature can be used to refresh a Peer connection when the
-remote Stream received does not stream any audio/video stream.</li>
-<li>If there are more than 1 refresh during 5 seconds
-or refresh is less than 3 seconds since the last refresh
-initiated by the other peer, it will be aborted.</li>
-<li>As for MCU connection, the restart mechanism makes the self user
- leave and join the currently connected room again.</li>
-</ul>
+    <p><blockquote class="info">
+  For MCU enabled Peer connections, the restart functionality may differ.
+  <a href="http://support.temasys.com.sg/support/discussions/topics/12000002853">Read this article here</a>.<br>
+  Note that the functionality is throttled when invoked many times in less than 3 seconds interval. 
+</blockquote>
+Function that refreshes Peer connections.</p>
 
   </div>
 
@@ -24260,8 +22829,9 @@ initiated by the other peer, it will be aborted.</li>
 
             <div class="param-description">
               
-              <p>The array of targeted Peers connection to refresh
-  the connection with.</p>
+              <p>The target Peer ID to only refresh the Peer connection.<br>
+&#8594; When provided as an Array, it will refresh the Peer connections with all the Peer IDs provided.<br>
+&#8594; When not provided, it will refresh the Peer connections with all the currently connected Peers.</p>
 
             </div>
 
@@ -24277,9 +22847,8 @@ initiated by the other peer, it will be aborted.</li>
 
             <div class="param-description">
               
-              <p>The callback fired after all targeted Peers connection has
-  been initiated with refresh or have met with an exception.
-  The callback signature is <code>function (error, success)</code>.</p>
+              <p>The callback function fired when request has completed.
+  <small>Function parameters signature is <code>function (error, success)</code></small></p>
 
             </div>
 
@@ -24295,8 +22864,8 @@ initiated by the other peer, it will be aborted.</li>
 
                     <div class="param-description">
                       
-                      <p>The error object received in the callback.
-  If received as <code>null</code>, it means that there is no errors.</p>
+                      <p>The error result in request.
+  <small>Defined as <code>null</code> when there are no errors in request</small></p>
 
                     </div>
 
@@ -24312,8 +22881,7 @@ initiated by the other peer, it will be aborted.</li>
 
                             <div class="param-description">
                               
-                              The list of Peers that the
-  refresh connection had been initiated with.
+                              The list Peer IDs targeted for refreshing the Peer connections.
                             </div>
                           </li>
                         
@@ -24326,22 +22894,23 @@ initiated by the other peer, it will be aborted.</li>
 
                             <div class="param-description">
                               
-                              The list of errors occurred
-  based on per Peer basis.
+                              The list of Peer connection refresh errors.
+  <small>If there is <code>"self"</code> property, it's likely due to having no Peers to refresh the
+    Peer connections with.</small>
                             </div>
                           </li>
                         
                           <li class="param">
-                            <code class="param-name">refreshErrors.(#peerId)</code>
-                            <span class="type"><b>{</b>Object | String<b>}</b></span>
+                            <code class="param-name">refreshErrors.&lt;#peerId&gt;</code>
+                            <span class="type"><b>{</b>Error | String<b>}</b></span>
 
                             
                             
 
                             <div class="param-description">
                               
-                              The Peer ID that
-  is associated with the error that occurred when refreshing the connection.
+                              The Peer connection refresh error associated
+  with the Peer ID property name.
                             </div>
                           </li>
                         
@@ -24358,8 +22927,8 @@ initiated by the other peer, it will be aborted.</li>
 
                     <div class="param-description">
                       
-                      <p>The success object received in the callback.
-  If received as <code>null</code>, it means that there are errors.</p>
+                      <p>The success result in request.
+  <small>Defined as <code>null</code> when there are errors in request</small></p>
 
                     </div>
 
@@ -24375,8 +22944,7 @@ initiated by the other peer, it will be aborted.</li>
 
                             <div class="param-description">
                               
-                              The list of Peers that the
-  refresh connection had been initiated with.
+                              The list Peer IDs targeted for refreshing the Peer connections.
                             </div>
                           </li>
                         
@@ -24394,19 +22962,6 @@ initiated by the other peer, it will be aborted.</li>
 
   
 
-  
-    <div class="code-item-section">
-      <h4>Example:</h4>
-      <pre class="example-content prettyprint">
-        <p>  SkylinkDemo.on(&quot;iceConnectionState&quot;, function (state, peerId)) {
-    if (iceConnectionState === SkylinkDemo.ICE_CONNECTION_STATE.FAILED) {
-      // Do a refresh
-      SkylinkDemo.refreshConnection(peerId);
-    }
-  });</p>
-
-      </pre>
-    </div>
   
   <hr>
 </div>
@@ -24479,7 +23034,7 @@ initiated by the other peer, it will be aborted.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l393"><code>source&#x2F;data-transfer.js:393</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l411"><code>source&#x2F;data-transfer.js:411</code></a>
       </small>
     
 
@@ -24725,8 +23280,8 @@ Use the <a href="http://www.w3schools.com/tags/att_input_type.asp"><code>&lt;inp
             <div class="param-description">
               
               <p>The target Peer ID to only start the data transfer with.<br>
-  When provided as an Array, it will start the data transfers with all the Peer IDs provided.<br>
-  When not provided, it will start the data transfers with all the currently connection Peers.</p>
+&#8594; When provided as an Array, it will start the data transfers with all the Peer IDs provided.<br>
+&#8594; When not provided, it will start the data transfers with all the currently connected Peers.</p>
 
             </div>
 
@@ -24777,8 +23332,10 @@ Use the <a href="http://www.w3schools.com/tags/att_input_type.asp"><code>&lt;inp
                             <div class="param-description">
                               
                               <blockquote class="info">
-  This has been deprecated and will only be defined for single targeted Peer data transfer.
+  <b>Deprecation Warning!</b> This property has been deprecated.
+  Please use <code>callback.error.transferInfo.transferId</code> instead.
   </blockquote> The data transfer ID.
+  <small>Defined only for single targeted Peer data transfer.</small>
                             </div>
                           </li>
                         
@@ -24786,14 +23343,16 @@ Use the <a href="http://www.w3schools.com/tags/att_input_type.asp"><code>&lt;inp
                             <code class="param-name">state</code>
                             <span class="type"><b>{</b>String<b>}</b></span>
 
-                            <span class="label">Optional</span>
+                            
                             
 
                             <div class="param-description">
                               
                               <blockquote class="info">
-  This has been deprecated and will only be defined for single targeted Peer data transfer.
-  </blockquote> The data transfer state that resulted in error. [Rel: Skylink.DATA_TRANSFER_STATE]
+  <b>Deprecation Warning!</b> This property has been deprecated.
+  Please use <a href="#event_dataTransferState"><code>dataTransferState</code>
+  event</a> instead. </blockquote> The data transfer state that resulted in error.
+  <small>Defined only for single targeted Peer data transfer.</small> [Rel: Skylink.DATA_TRANSFER_STATE]
                             </div>
                           </li>
                         
@@ -24801,14 +23360,16 @@ Use the <a href="http://www.w3schools.com/tags/att_input_type.asp"><code>&lt;inp
                             <code class="param-name">peerId</code>
                             <span class="type"><b>{</b>String<b>}</b></span>
 
-                            <span class="label">Optional</span>
+                            
                             
 
                             <div class="param-description">
                               
                               <blockquote class="info">
-  This has been deprecated and will only be defined for single targeted Peer data transfer.
+  <b>Deprecation Warning!</b> This property has been deprecated.
+  Please use <code>callback.error.listOfPeers</code> instead.
   </blockquote> The targeted Peer ID for data transfer.
+  <small>Defined only for single targeted Peer data transfer.</small>
                             </div>
                           </li>
                         
@@ -24822,9 +23383,11 @@ Use the <a href="http://www.w3schools.com/tags/att_input_type.asp"><code>&lt;inp
                             <div class="param-description">
                               
                               <blockquote class="info">
-  This has been deprecated and will only be defined for single targeted Peer data transfer.
+  <b>Deprecation Warning!</b> This property has been deprecated.
+  Please use <code>callback.error.transferInfo.isPrivate</code> instead.
   </blockquote> The flag that indicates if data transfer is targeted or not, basing
   off the <code>targetPeerId</code> parameter being defined.
+  <small>Defined only for single targeted Peer data transfer.</small>
                             </div>
                           </li>
                         
@@ -24832,14 +23395,16 @@ Use the <a href="http://www.w3schools.com/tags/att_input_type.asp"><code>&lt;inp
                             <code class="param-name">error</code>
                             <span class="type"><b>{</b>Error | String<b>}</b></span>
 
-                            <span class="label">Optional</span>
+                            
                             
 
                             <div class="param-description">
                               
                               <blockquote class="info">
-  This has been deprecated and will only be defined for single targeted Peer data transfer.
+  <b>Deprecation Warning!</b> This property has been deprecated.
+  Please use <code>callback.error.transferErrors</code> instead.
   </blockquote> The error received that resulted in error.
+  <small>Defined only for single targeted Peer data transfer.</small>
                             </div>
                           </li>
                         
@@ -24866,12 +23431,13 @@ Use the <a href="http://www.w3schools.com/tags/att_input_type.asp"><code>&lt;inp
                             <div class="param-description">
                               
                               The list of data transfer errors.
+<small>If there is <code>"self"</code> property, it's likely due to having no Peers to start data transfers with.</small>
                             </div>
                           </li>
                         
                           <li class="param">
                             <code class="param-name">transferErrors.&lt;#peerId&gt;</code>
-                            <span class="type"><b>{</b>Object | String<b>}</b></span>
+                            <span class="type"><b>{</b>Error | String<b>}</b></span>
 
                             
                             
@@ -24929,7 +23495,8 @@ Use the <a href="http://www.w3schools.com/tags/att_input_type.asp"><code>&lt;inp
                             <div class="param-description">
                               
                               <blockquote class="info">
-  This has been deprecated and will only be defined for single targeted Peer data transfer.
+  <b>Deprecation Warning!</b> This property has been deprecated.
+  Please use <code>callback.success.transferInfo.transferId</code> instead.
   </blockquote> The data transfer ID.
                             </div>
                           </li>
@@ -24938,14 +23505,16 @@ Use the <a href="http://www.w3schools.com/tags/att_input_type.asp"><code>&lt;inp
                             <code class="param-name">state</code>
                             <span class="type"><b>{</b>String<b>}</b></span>
 
-                            <span class="label">Optional</span>
+                            
                             
 
                             <div class="param-description">
                               
                               <blockquote class="info">
-  This has been deprecated and will only be defined for single targeted Peer data transfer.
-  </blockquote> The data transfer state that resulted in error. [Rel: Skylink.DATA_TRANSFER_STATE]
+  <b>Deprecation Warning!</b> This property has been deprecated.
+  Please use <a href="#event_dataTransferState"><code>dataTransferState</code>
+  event</a> instead. </blockquote> The data transfer state that resulted in error.
+  <small>Defined only for single targeted Peer data transfer.</small> [Rel: Skylink.DATA_TRANSFER_STATE]
                             </div>
                           </li>
                         
@@ -24953,14 +23522,16 @@ Use the <a href="http://www.w3schools.com/tags/att_input_type.asp"><code>&lt;inp
                             <code class="param-name">peerId</code>
                             <span class="type"><b>{</b>String<b>}</b></span>
 
-                            <span class="label">Optional</span>
+                            
                             
 
                             <div class="param-description">
                               
                               <blockquote class="info">
-  This has been deprecated and will only be defined for single targeted Peer data transfer.
+  <b>Deprecation Warning!</b> This property has been deprecated.
+  Please use <code>callback.success.listOfPeers</code> instead.
   </blockquote> The targeted Peer ID for data transfer.
+  <small>Defined only for single targeted Peer data transfer.</small>
                             </div>
                           </li>
                         
@@ -24974,9 +23545,11 @@ Use the <a href="http://www.w3schools.com/tags/att_input_type.asp"><code>&lt;inp
                             <div class="param-description">
                               
                               <blockquote class="info">
-  This has been deprecated and will only be defined for single targeted Peer data transfer.
+  <b>Deprecation Warning!</b> This property has been deprecated.
+  Please use <code>callback.success.transferInfo.isPrivate</code> instead.
   </blockquote> The flag that indicates if data transfer is targeted or not, basing
   off the <code>targetPeerId</code> parameter being defined.
+  <small>Defined only for single targeted Peer data transfer.</small>
                             </div>
                           </li>
                         
@@ -25233,7 +23806,7 @@ To send message objects with DataChannel connections, see
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l603"><code>source&#x2F;data-transfer.js:603</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l621"><code>source&#x2F;data-transfer.js:621</code></a>
       </small>
     
 
@@ -25297,8 +23870,8 @@ Function that sends a P2P message using the Datachannel connection.</p>
             <div class="param-description">
               
               <p>The target Peer ID to only send the P2P message to.<br>
-  When provided as an Array, it will send the P2P message to all the Peer IDs provided.<br>
-  When not provided, it will send the P2P message to all the currently connection Peers.</p>
+&#8594; When provided as an Array, it will send the P2P message to all the Peer IDs provided.<br>
+&#8594; When not provided, it will send the P2P message to all the currently connected Peers.</p>
 
             </div>
 
@@ -25793,7 +24366,7 @@ Reference <a href="../classes/Skylink.html#method_refreshConnection" class="cros
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l696"><code>source&#x2F;data-transfer.js:696</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l714"><code>source&#x2F;data-transfer.js:714</code></a>
       </small>
     
 
@@ -25870,8 +24443,8 @@ Function that starts a string data transfer to Peers.</p>
             <div class="param-description">
               
               <p>The target Peer ID to only start the data transfer with.<br>
-  When provided as an Array, it will start the data transfers with all the Peer IDs provided.<br>
-  When not provided, it will start the data transfers with all the currently connection Peers.</p>
+&#8594; When provided as an Array, it will start the data transfers with all the Peer IDs provided.<br>
+&#8594; When not provided, it will start the data transfers with all the currently connected Peers.</p>
 
             </div>
 
@@ -25922,8 +24495,10 @@ Function that starts a string data transfer to Peers.</p>
                             <div class="param-description">
                               
                               <blockquote class="info">
-  This has been deprecated and will only be defined for single targeted Peer data transfer.
+  <b>Deprecation Warning!</b> This property has been deprecated.
+  Please use <code>callback.error.transferInfo.transferId</code> instead.
   </blockquote> The data transfer ID.
+  <small>Defined only for single targeted Peer data transfer.</small>
                             </div>
                           </li>
                         
@@ -25931,14 +24506,16 @@ Function that starts a string data transfer to Peers.</p>
                             <code class="param-name">state</code>
                             <span class="type"><b>{</b>String<b>}</b></span>
 
-                            <span class="label">Optional</span>
+                            
                             
 
                             <div class="param-description">
                               
                               <blockquote class="info">
-  This has been deprecated and will only be defined for single targeted Peer data transfer.
-  </blockquote> The data transfer state that resulted in error. [Rel: Skylink.DATA_TRANSFER_STATE]
+  <b>Deprecation Warning!</b> This property has been deprecated.
+  Please use <a href="#event_dataTransferState"><code>dataTransferState</code>
+  event</a> instead. </blockquote> The data transfer state that resulted in error.
+  <small>Defined only for single targeted Peer data transfer.</small> [Rel: Skylink.DATA_TRANSFER_STATE]
                             </div>
                           </li>
                         
@@ -25946,14 +24523,16 @@ Function that starts a string data transfer to Peers.</p>
                             <code class="param-name">peerId</code>
                             <span class="type"><b>{</b>String<b>}</b></span>
 
-                            <span class="label">Optional</span>
+                            
                             
 
                             <div class="param-description">
                               
                               <blockquote class="info">
-  This has been deprecated and will only be defined for single targeted Peer data transfer.
+  <b>Deprecation Warning!</b> This property has been deprecated.
+  Please use <code>callback.error.listOfPeers</code> instead.
   </blockquote> The targeted Peer ID for data transfer.
+  <small>Defined only for single targeted Peer data transfer.</small>
                             </div>
                           </li>
                         
@@ -25967,9 +24546,11 @@ Function that starts a string data transfer to Peers.</p>
                             <div class="param-description">
                               
                               <blockquote class="info">
-  This has been deprecated and will only be defined for single targeted Peer data transfer.
+  <b>Deprecation Warning!</b> This property has been deprecated.
+  Please use <code>callback.error.transferInfo.isPrivate</code> instead.
   </blockquote> The flag that indicates if data transfer is targeted or not, basing
   off the <code>targetPeerId</code> parameter being defined.
+  <small>Defined only for single targeted Peer data transfer.</small>
                             </div>
                           </li>
                         
@@ -25977,14 +24558,16 @@ Function that starts a string data transfer to Peers.</p>
                             <code class="param-name">error</code>
                             <span class="type"><b>{</b>Error | String<b>}</b></span>
 
-                            <span class="label">Optional</span>
+                            
                             
 
                             <div class="param-description">
                               
                               <blockquote class="info">
-  This has been deprecated and will only be defined for single targeted Peer data transfer.
+  <b>Deprecation Warning!</b> This property has been deprecated.
+  Please use <code>callback.error.transferErrors</code> instead.
   </blockquote> The error received that resulted in error.
+  <small>Defined only for single targeted Peer data transfer.</small>
                             </div>
                           </li>
                         
@@ -26011,12 +24594,13 @@ Function that starts a string data transfer to Peers.</p>
                             <div class="param-description">
                               
                               The list of data transfer errors.
+  <small>If there is <code>"self"</code> property, it's likely due to having no Peers to start data transfer with.</small>
                             </div>
                           </li>
                         
                           <li class="param">
                             <code class="param-name">transferErrors.&lt;#peerId&gt;</code>
-                            <span class="type"><b>{</b>Object | String<b>}</b></span>
+                            <span class="type"><b>{</b>Error | String<b>}</b></span>
 
                             
                             
@@ -26074,7 +24658,8 @@ Function that starts a string data transfer to Peers.</p>
                             <div class="param-description">
                               
                               <blockquote class="info">
-  This has been deprecated and will only be defined for single targeted Peer data transfer.
+  <b>Deprecation Warning!</b> This property has been deprecated.
+  Please use <code>callback.success.transferInfo.transferId</code> instead.
   </blockquote> The data transfer ID.
                             </div>
                           </li>
@@ -26083,14 +24668,16 @@ Function that starts a string data transfer to Peers.</p>
                             <code class="param-name">state</code>
                             <span class="type"><b>{</b>String<b>}</b></span>
 
-                            <span class="label">Optional</span>
+                            
                             
 
                             <div class="param-description">
                               
                               <blockquote class="info">
-  This has been deprecated and will only be defined for single targeted Peer data transfer.
-  </blockquote> The data transfer state that resulted in error. [Rel: Skylink.DATA_TRANSFER_STATE]
+  <b>Deprecation Warning!</b> This property has been deprecated.
+  Please use <a href="#event_dataTransferState"><code>dataTransferState</code>
+  event</a> instead. </blockquote> The data transfer state that resulted in error.
+  <small>Defined only for single targeted Peer data transfer.</small> [Rel: Skylink.DATA_TRANSFER_STATE]
                             </div>
                           </li>
                         
@@ -26098,14 +24685,16 @@ Function that starts a string data transfer to Peers.</p>
                             <code class="param-name">peerId</code>
                             <span class="type"><b>{</b>String<b>}</b></span>
 
-                            <span class="label">Optional</span>
+                            
                             
 
                             <div class="param-description">
                               
                               <blockquote class="info">
-  This has been deprecated and will only be defined for single targeted Peer data transfer.
+  <b>Deprecation Warning!</b> This property has been deprecated.
+  Please use <code>callback.success.listOfPeers</code> instead.
   </blockquote> The targeted Peer ID for data transfer.
+  <small>Defined only for single targeted Peer data transfer.</small>
                             </div>
                           </li>
                         
@@ -26119,9 +24708,11 @@ Function that starts a string data transfer to Peers.</p>
                             <div class="param-description">
                               
                               <blockquote class="info">
-  This has been deprecated and will only be defined for single targeted Peer data transfer.
+  <b>Deprecation Warning!</b> This property has been deprecated.
+  Please use <code>callback.success.transferInfo.isPrivate</code> instead.
   </blockquote> The flag that indicates if data transfer is targeted or not, basing
   off the <code>targetPeerId</code> parameter being defined.
+  <small>Defined only for single targeted Peer data transfer.</small>
                             </div>
                           </li>
                         
@@ -29877,7 +28468,7 @@ If <code>console.trace()</code> is not supported, it will fallback and
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l93"><code>source&#x2F;ice-connection.js:93</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l86"><code>source&#x2F;ice-connection.js:86</code></a>
       </small>
     
 
@@ -29956,7 +28547,7 @@ If <code>console.trace()</code> is not supported, it will fallback and
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l104"><code>source&#x2F;ice-connection.js:104</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l97"><code>source&#x2F;ice-connection.js:97</code></a>
       </small>
     
 
@@ -30035,7 +28626,7 @@ If <code>console.trace()</code> is not supported, it will fallback and
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l115"><code>source&#x2F;ice-connection.js:115</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l108"><code>source&#x2F;ice-connection.js:108</code></a>
       </small>
     
 
@@ -31058,7 +29649,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l150"><code>source&#x2F;ice-connection.js:150</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l143"><code>source&#x2F;ice-connection.js:143</code></a>
       </small>
     
 
@@ -31343,8 +29934,6 @@ This will configure TURN server connection using port <code>443</code> only and
       
 
       
-        <span class="label label-warning" title="This attribute is required for communication.">required</span>
-      
 
       
 
@@ -31391,8 +29980,7 @@ This will configure TURN server connection using port <code>443</code> only and
   </div>
 
   <div class="code-item-description">
-    <p>Stores the timestamp of the moment when the last Peers connection
-  restarts has happened. Used for the restart Peers connection functionality.</p>
+    <p>Stores the restart initiated timestamp to throttle the <code>refreshConnection</code> functionality.</p>
 
   </div>
 
@@ -32613,8 +31201,6 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
       
 
       
-        <span class="label label-warning" title="This attribute is required for communication.">required</span>
-      
 
       
 
@@ -32651,7 +31237,7 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l93"><code>source&#x2F;peer-connection.js:93</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l88"><code>source&#x2F;peer-connection.js:88</code></a>
       </small>
     
 
@@ -32661,7 +31247,7 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
   </div>
 
   <div class="code-item-description">
-    <p>Stores the list of Peers connection.</p>
+    <p>Stores the list of the Peer connections.</p>
 
   </div>
 
@@ -32676,14 +31262,14 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
       <ul class="params-list">
       
           <li class="param">
-            <code class="param-name">(#peerId)</code>
+            <code class="param-name">&lt;#peerId&gt;</code>
             <span class="type"><b>{</b>Object<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>The Peer ID associated to the RTCPeerConnection object.</p>
+                <p>The Peer connection.</p>
 
             </div>
 
@@ -33441,8 +32027,6 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
       
 
       
-        <span class="label label-warning" title="This attribute is required for communication.">required</span>
-      
 
       
 
@@ -33479,7 +32063,7 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l80"><code>source&#x2F;peer-connection.js:80</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l77"><code>source&#x2F;peer-connection.js:77</code></a>
       </small>
     
 
@@ -33489,8 +32073,8 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
   </div>
 
   <div class="code-item-description">
-    <p>Stores the counter of the number of consecutive
-  Peers connection restarts retries.</p>
+    <p>Stores the global number of Peer connection retries that would increase the wait-for-response timeout
+  for the Peer connection health timer.</p>
 
   </div>
 
@@ -36658,7 +35242,7 @@ If the value is <code>0</code>, it will use the default timeout from
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l137"><code>source&#x2F;ice-connection.js:137</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l130"><code>source&#x2F;ice-connection.js:130</code></a>
       </small>
     
 
@@ -36932,7 +35516,7 @@ This should configure the TURN ICE servers urls <code>?transport=protocol</code>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l126"><code>source&#x2F;ice-connection.js:126</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l119"><code>source&#x2F;ice-connection.js:119</code></a>
       </small>
     
 
@@ -38816,15 +37400,6 @@ At this state, self would set the remote <code>ANSWER</code> session description
 
   <div class="code-item-description">
     <p>Contains the list of Peer connection ICE connection states.</p>
-<ul>
-<li><b>What is an <a href="#attr_CANDIDATE_GENERATION_STATE">ICE candidate</a>?</b><br>
-It is the object that contains the IP addresses and port to allow ICE connection.</li>
-<li><b>What is an <a href="#attr_ICE_CONNECTION_STATE">ICE connection</a>?</b><br>
-It is the connection used for establishing media and Datachannel connections.</li>
-<li><b>What is the <a href="#attr_PEER_CONNECTION_STATE">session description</a> for?</b><br>
-It is the data where it stores the information to map the ICE candidates to the relevant
-media type (audio/video/Datachannel).</li>
-</ul>
 
   </div>
 
@@ -41170,7 +39745,7 @@ This relates to the persistent room feature configured in the Application Key.</
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l58"><code>source&#x2F;ice-connection.js:58</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l51"><code>source&#x2F;ice-connection.js:51</code></a>
       </small>
     
 
@@ -41341,7 +39916,7 @@ Contains the list of configurations to use when Peer connection ICE connection u
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l202"><code>source&#x2F;template&#x2F;header.js:202</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l201"><code>source&#x2F;template&#x2F;header.js:201</code></a>
       </small>
     
 
