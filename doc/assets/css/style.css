@@ -234,6 +234,7 @@ h3 code {
   background: #f0ad4e;
   color: #fff;
 }
+.returns-description small,
 .param .param-description small {
   margin: 5px 0;
   color: #888;
@@ -253,6 +254,8 @@ h3 code {
 }
 .returns-description .type {
   margin-right: 15px;
+  vertical-align: top;
+  color: #888;
 }
 #doc-type-select {
   margin-bottom: 35px;
