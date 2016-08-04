@@ -2184,154 +2184,142 @@
         {
             "file": "source/peer-privileged.js",
             "line": 1,
-            "description": "These are the list of Peer list retrieval states that Skylink would trigger.\n- This relates to and requires the Privileged Key feature where Peers using\n  that Privileged alias Key becomes a privileged Peer with privileged functionalities.",
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled for the App Key, as\n  only Users connecting using the App Key with this flag enabled (which we call Privileged Users / Peers)\n  can retrieve the list of Peer IDs from Rooms within the same App space.\n  <a href=\"http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about Privileged App Key feature here</a>.\n</blockquote>\nContains the list of <a href=\"#method_getPeers\"><code>getPeers()</code> method</a> retrieval states.",
             "itemtype": "attribute",
             "name": "GET_PEERS_STATE",
-            "type": "JSON",
             "params": [
                 {
                     "name": "ENQUIRED",
-                    "description": "<small>Value <code>\"enquired\"</code></small>\n  The state when the privileged Peer already enquired signaling for list of peers.",
+                    "description": "<small>Value <code>\"enquired\"</code></small>\n  The state when retrieving the list of Peer IDs from Signaling.",
                     "type": "String"
                 },
                 {
                     "name": "RECEIVED",
-                    "description": "<small>Value <code>\"received\"</code></small>\n  The state when the privileged Peer received list of peers from signaling.",
+                    "description": "<small>Value <code>\"received\"</code></small>\n  The state when the list of Peer IDs has been successfully retrieved from Signaling.",
                     "type": "String"
                 }
             ],
+            "type": "JSON",
             "readonly": "",
-            "component": "Peer",
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 21,
-            "description": "These are the list of Peer introduction states that Skylink would trigger.\n- This relates to and requires the Privileged Key feature where Peers using\n  that Privileged alias Key becomes a privileged Peer with privileged functionalities.",
+            "line": 25,
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled and\n  <code>\"autoIntroduce\"</code> flag to be disabled for the App Key, as only Users connecting\n  using the App Key with this flag enabled (which we call Privileged Users / Peers)\n  can introduce Peers in the same App space from other Rooms.\n  <a href=\"http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about Privileged App Key feature here</a>.\n</blockquote>\nContains the list of <a href=\"#method_introducePeer\"><code>introducePeer</code> method</a> introduction states.",
             "itemtype": "attribute",
             "name": "INTRODUCE_STATE",
-            "type": "JSON",
             "params": [
                 {
                     "name": "INTRODUCING",
-                    "description": "<small>Value <code>\"enquired\"</code></small>\n  The state when the privileged Peer have sent the introduction signal.",
+                    "description": "<small>Value <code>\"enquired\"</code></small>\n  The state when request to introduce the pair of Peers has been made to the Signaling.",
                     "type": "String"
                 },
                 {
                     "name": "ERROR",
-                    "description": "<small>Value <code>\"error\"</code></small>\n  The state when the Peer introduction has occurred an exception.",
+                    "description": "<small>Value <code>\"error\"</code></small>\n  The state when request to introduce the pair of Peers has failed.",
                     "type": "String"
                 }
             ],
             "readonly": "",
-            "component": "Peer",
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 41,
-            "description": "Whether this user automatically introduce to other peers.",
+            "line": 49,
+            "description": "Stores the flag that indicates if \"autoIntroduce\" is enabled.\nIf enabled, the Peers connecting the same Room will receive each others \"enter\" message ping.",
             "itemtype": "attribute",
             "name": "_autoIntroduce",
             "type": "Boolean",
             "default": "true",
             "access": "private",
             "tagname": "",
-            "component": "Peer",
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 53,
-            "description": "Whether this user is a privileged user.",
+            "line": 61,
+            "description": "Stores the flag that indicates if \"isPrivileged\" is enabled.\nIf enabled, the User has Privileged features which has the ability to retrieve the list of\n  Peers in the same App space with <code>getPeers()</code> method \n  and introduce Peers to each other with <code>introducePeer</code> method.",
             "itemtype": "attribute",
             "name": "isPrivileged",
             "type": "Boolean",
             "default": "false",
             "access": "private",
             "tagname": "",
-            "component": "Peer",
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 65,
-            "description": "List of peers retrieved from signaling",
+            "line": 75,
+            "description": "Stores the list of Peers retrieved from the Signaling from <code>getPeers()</code> method.",
             "itemtype": "attribute",
             "name": "_peerList",
-            "type": "Object",
-            "default": "null",
+            "type": "JSON",
             "access": "private",
             "tagname": "",
-            "component": "Peer",
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 77,
-            "description": "Retrieves the list of rooms and peers under the same realm based\n  on the Application Key configured in {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  from the platform signaling.\nThis will only work if self is a privileged Peer.",
+            "line": 85,
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled for the App Key, as\n  only Users connecting using the App Key with this flag enabled (which we call Privileged Users / Peers)\n  can retrieve the list of Peer IDs from Rooms within the same App space.\n  <a href=\"http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about Privileged App Key feature here</a>.\n</blockquote>\nFunction that retrieves the list of Peer IDs from Rooms within in the same App space.",
             "itemtype": "method",
             "name": "getPeers",
             "params": [
                 {
                     "name": "showAll",
-                    "description": "The flag that indicates if returned list should\n  also include privileged and standard in the list. By default, the value is <code>false</code>.\n  Which means only unprivileged peers' ID (isPrivileged = autoIntroduce = false) is included.",
+                    "description": "The flag that indicates if Signaling should also retrieve\n  the list of the Privileged Peer IDs.\n<small>By default, the Signaling doesn't return the Privileged Peer IDs</small>",
                     "type": "Boolean",
                     "optional": true,
                     "optdefault": "false"
                 },
                 {
                     "name": "callback",
-                    "description": "The callback fired after the receiving the current\n  list of Peers from platform signaling or have met with an exception.\n  The callback signature is <code>function (error, success)</code>.",
+                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>",
                     "type": "Function",
                     "optional": true,
                     "props": [
                         {
                             "name": "error",
-                            "description": "The error object received in the callback.\n  This is the exception thrown that caused the failure for getting self user media.\n  If received as <code>null</code>, it means that there is no errors.",
-                            "type": "Object"
+                            "description": "The error result in request.\n  <small>Defined as <code>null</code> when there are no errors in request</small>",
+                            "type": "Error|String"
                         },
                         {
                             "name": "success",
-                            "description": "The success object received in the callback.\n  If received as <code>null</code>, it means that there are errors.",
+                            "description": "The success result in request.\n  <small>Defined as <code>null</code> when there are errors in request</small>\n  <small>Object signature matches the <code>peerList</code> parameter payload received in the\n     <a href=\"#event_getPeersStateChange\"><code>getPeersStateChange</code> event</a>.</small>",
                             "type": "JSON"
                         }
                     ]
                 }
             ],
-            "example": [
-                "\n\n  // To get list of unprivileged peers only\n  SkylinkDemo.getPeers();\n\n  // To get list of all peers, including other privileged peers\n  SkylinkDemo.getPeers(true);\n\n  // To get a list of unprivileged peers then invoke the callback\n  SkylinkDemo.getPeers(function(error, success){\n    if (error){\n      console.log(\"Error happened. Can not retrieve list of peers\");\n    }\n    else{\n      console.log(\"Success fully retrieved list of peers\", success);\n    }\n  });\n\n  // To get a list of all peers then invoke the callback\n  SkylinkDemo.getPeers(true, function(error, success){\n    if (error){\n      console.log(\"Error happened. Can not retrieve list of peers\");\n    }\n    else{\n      console.log(\"Success fully retrieved list of peers\", success);\n    }\n  });"
-            ],
             "trigger": "getPeersStateChange",
-            "component": "Peer",
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 163,
-            "description": "Introduces two Peers to each other to start a connection with each other.\nThis will only work if self is a privileged Peer.",
+            "line": 146,
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled and\n  <code>\"autoIntroduce\"</code> flag to be disabled for the App Key, as only Users connecting\n  using the App Key with this flag enabled (which we call Privileged Users / Peers)\n  can introduce Peers in the same App space from other Rooms.\n  <a href=\"http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about Privileged App Key feature here</a>.\n</blockquote>\nFunction that introduces a pair of Peers to start Peer connection with each other.",
             "itemtype": "method",
             "name": "introducePeer",
             "params": [
                 {
                     "name": "sendingPeerId",
-                    "description": "The Peer ID of the peer\n  that initiates the connection with the introduced Peer.",
+                    "description": "The Peer ID of the Peer that will start Peer connection with <code>receivingPeerId</code>.",
                     "type": "String"
                 },
                 {
                     "name": "receivingPeerId",
-                    "description": "The Peer ID of the\n  introduced peer who would be introduced to the initiator Peer.",
+                    "description": "The Peer ID of the Peer that will be connected with <code>sendingPeerId</code>.",
                     "type": "String"
                 }
             ],
             "trigger": "introduceStateChange",
-            "component": "Peer",
             "since": "0.6.1",
             "class": "Skylink"
         },
@@ -11644,40 +11632,12 @@
             "line": " source/peer-handshake.js:1"
         },
         {
-            "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:1"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:21"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:41"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:53"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:65"
+            "message": "unknown tag: trigger",
+            "line": " source/peer-privileged.js:85"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-privileged.js:77"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:77"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/peer-privileged.js:163"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:163"
+            "line": " source/peer-privileged.js:146"
         },
         {
             "message": "unknown tag: component",

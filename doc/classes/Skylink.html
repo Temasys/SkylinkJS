@@ -18629,7 +18629,7 @@ Function that terminates a data transfer.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-privileged.js.html#l77"><code>source&#x2F;peer-privileged.js:77</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-privileged.js.html#l85"><code>source&#x2F;peer-privileged.js:85</code></a>
       </small>
     
 
@@ -18643,10 +18643,14 @@ Function that terminates a data transfer.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Retrieves the list of rooms and peers under the same realm based
-  on the Application Key configured in <a href="../classes/Skylink.html#method_init" class="crosslink">init()</a>
-  from the platform signaling.
-This will only work if self is a privileged Peer.</p>
+    <p><blockquote class="info">
+  Note that this feature requires <code>&quot;isPrivileged&quot;</code> flag to be enabled for the App Key, as
+  only Users connecting using the App Key with this flag enabled (which we call Privileged Users / Peers)
+  can retrieve the list of Peer IDs from Rooms within the same App space.
+  <a href="http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-">
+  Read more about Privileged App Key feature here</a>.
+</blockquote>
+Function that retrieves the list of Peer IDs from Rooms within in the same App space.</p>
 
   </div>
 
@@ -18672,9 +18676,9 @@ This will only work if self is a privileged Peer.</p>
 
             <div class="param-description">
               <small class="default"><span>DEFAULT: </span><code>false</code></small>
-              <p>The flag that indicates if returned list should
-  also include privileged and standard in the list. By default, the value is <code>false</code>.
-  Which means only unprivileged peers&#39; ID (isPrivileged = autoIntroduce = false) is included.</p>
+              <p>The flag that indicates if Signaling should also retrieve
+  the list of the Privileged Peer IDs.
+<small>By default, the Signaling doesn&#39;t return the Privileged Peer IDs</small></p>
 
             </div>
 
@@ -18690,9 +18694,8 @@ This will only work if self is a privileged Peer.</p>
 
             <div class="param-description">
               
-              <p>The callback fired after the receiving the current
-  list of Peers from platform signaling or have met with an exception.
-  The callback signature is <code>function (error, success)</code>.</p>
+              <p>The callback function fired when request has completed.
+  <small>Function parameters signature is <code>function (error, success)</code></small></p>
 
             </div>
 
@@ -18701,16 +18704,15 @@ This will only work if self is a privileged Peer.</p>
                 
                   <li class="param">
                     <code class="param-name">error</code>
-                    <span class="type"><b>{</b>Object<b>}</b></span>
+                    <span class="type"><b>{</b>Error | String<b>}</b></span>
 
                     
                     
 
                     <div class="param-description">
                       
-                      <p>The error object received in the callback.
-  This is the exception thrown that caused the failure for getting self user media.
-  If received as <code>null</code>, it means that there is no errors.</p>
+                      <p>The error result in request.
+  <small>Defined as <code>null</code> when there are no errors in request</small></p>
 
                     </div>
 
@@ -18726,8 +18728,10 @@ This will only work if self is a privileged Peer.</p>
 
                     <div class="param-description">
                       
-                      <p>The success object received in the callback.
-  If received as <code>null</code>, it means that there are errors.</p>
+                      <p>The success result in request.
+  <small>Defined as <code>null</code> when there are errors in request</small>
+  <small>Object signature matches the <code>peerList</code> parameter payload received in the
+     <a href="#event_getPeersStateChange"><code>getPeersStateChange</code> event</a>.</small></p>
 
                     </div>
 
@@ -18744,35 +18748,6 @@ This will only work if self is a privileged Peer.</p>
 
   
 
-  
-    <div class="code-item-section">
-      <h4>Example:</h4>
-      <pre class="example-content prettyprint">
-        <p>  // To get list of unprivileged peers only
-  SkylinkDemo.getPeers();</p>
-<p>  // To get list of all peers, including other privileged peers
-  SkylinkDemo.getPeers(true);</p>
-<p>  // To get a list of unprivileged peers then invoke the callback
-  SkylinkDemo.getPeers(function(error, success){
-    if (error){
-      console.log(&quot;Error happened. Can not retrieve list of peers&quot;);
-    }
-    else{
-      console.log(&quot;Success fully retrieved list of peers&quot;, success);
-    }
-  });</p>
-<p>  // To get a list of all peers then invoke the callback
-  SkylinkDemo.getPeers(true, function(error, success){
-    if (error){
-      console.log(&quot;Error happened. Can not retrieve list of peers&quot;);
-    }
-    else{
-      console.log(&quot;Success fully retrieved list of peers&quot;, success);
-    }
-  });</p>
-
-      </pre>
-    </div>
   
   <hr>
 </div>
@@ -20295,7 +20270,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-privileged.js.html#l163"><code>source&#x2F;peer-privileged.js:163</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-privileged.js.html#l146"><code>source&#x2F;peer-privileged.js:146</code></a>
       </small>
     
 
@@ -20309,8 +20284,15 @@ This will configure TURN server connection using port <code>443</code> only and
   </div>
 
   <div class="code-item-description">
-    <p>Introduces two Peers to each other to start a connection with each other.
-This will only work if self is a privileged Peer.</p>
+    <p><blockquote class="info">
+  Note that this feature requires <code>&quot;isPrivileged&quot;</code> flag to be enabled and
+  <code>&quot;autoIntroduce&quot;</code> flag to be disabled for the App Key, as only Users connecting
+  using the App Key with this flag enabled (which we call Privileged Users / Peers)
+  can introduce Peers in the same App space from other Rooms.
+  <a href="http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-">
+  Read more about Privileged App Key feature here</a>.
+</blockquote>
+Function that introduces a pair of Peers to start Peer connection with each other.</p>
 
   </div>
 
@@ -20336,8 +20318,7 @@ This will only work if self is a privileged Peer.</p>
 
             <div class="param-description">
               
-              <p>The Peer ID of the peer
-  that initiates the connection with the introduced Peer.</p>
+              <p>The Peer ID of the Peer that will start Peer connection with <code>receivingPeerId</code>.</p>
 
             </div>
 
@@ -20353,8 +20334,7 @@ This will only work if self is a privileged Peer.</p>
 
             <div class="param-description">
               
-              <p>The Peer ID of the
-  introduced peer who would be introduced to the initiator Peer.</p>
+              <p>The Peer ID of the Peer that will be connected with <code>sendingPeerId</code>.</p>
 
             </div>
 
@@ -26544,7 +26524,7 @@ must be set as <code>true</code> to enable the storage of logs.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-privileged.js.html#l41"><code>source&#x2F;peer-privileged.js:41</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-privileged.js.html#l49"><code>source&#x2F;peer-privileged.js:49</code></a>
       </small>
     
 
@@ -26554,7 +26534,8 @@ must be set as <code>true</code> to enable the storage of logs.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Whether this user automatically introduce to other peers.</p>
+    <p>Stores the flag that indicates if &quot;autoIntroduce&quot; is enabled.
+If enabled, the Peers connecting the same Room will receive each others &quot;enter&quot; message ping.</p>
 
   </div>
 
@@ -31033,7 +31014,7 @@ This timers sets a timeout which checks and waits if Peer connection is successf
               <div id="attr__peerList" class="code-item attr item private-attr-item ">
   <a name="config__peerList"></a> 
   <h3 class="code-item-name"><code>_peerList</code></h3>
-  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>Object<b>}</b></span>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>JSON<b>}</b></span>
 
   <div class="code-item-properties">
     <div class="properties-wrapper">
@@ -31078,7 +31059,7 @@ This timers sets a timeout which checks and waits if Peer connection is successf
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-privileged.js.html#l65"><code>source&#x2F;peer-privileged.js:65</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-privileged.js.html#l75"><code>source&#x2F;peer-privileged.js:75</code></a>
       </small>
     
 
@@ -31088,15 +31069,10 @@ This timers sets a timeout which checks and waits if Peer connection is successf
   </div>
 
   <div class="code-item-description">
-    <p>List of peers retrieved from signaling</p>
+    <p>Stores the list of Peers retrieved from the Signaling from <code>getPeers()</code> method.</p>
 
   </div>
 
-  
-    <div class="code-item-section">
-      <h4>Default value:</h4>
-      <code class="prettyprint">null</code>
-    </div>
   
 
   
@@ -36366,11 +36342,14 @@ This is used only for debugging purposes.</p>
   </div>
 
   <div class="code-item-description">
-    <p>These are the list of Peer list retrieval states that Skylink would trigger.</p>
-<ul>
-<li>This relates to and requires the Privileged Key feature where Peers using
-that Privileged alias Key becomes a privileged Peer with privileged functionalities.</li>
-</ul>
+    <p><blockquote class="info">
+  Note that this feature requires <code>&quot;isPrivileged&quot;</code> flag to be enabled for the App Key, as
+  only Users connecting using the App Key with this flag enabled (which we call Privileged Users / Peers)
+  can retrieve the list of Peer IDs from Rooms within the same App space.
+  <a href="http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-">
+  Read more about Privileged App Key feature here</a>.
+</blockquote>
+Contains the list of <a href="#method_getPeers"><code>getPeers()</code> method</a> retrieval states.</p>
 
   </div>
 
@@ -36393,7 +36372,7 @@ that Privileged alias Key becomes a privileged Peer with privileged functionalit
 
             <div class="param-description">
                 <p><small>Value <code>&quot;enquired&quot;</code></small>
-  The state when the privileged Peer already enquired signaling for list of peers.</p>
+  The state when retrieving the list of Peer IDs from Signaling.</p>
 
             </div>
 
@@ -36409,7 +36388,7 @@ that Privileged alias Key becomes a privileged Peer with privileged functionalit
 
             <div class="param-description">
                 <p><small>Value <code>&quot;received&quot;</code></small>
-  The state when the privileged Peer received list of peers from signaling.</p>
+  The state when the list of Peer IDs has been successfully retrieved from Signaling.</p>
 
             </div>
 
@@ -36876,7 +36855,7 @@ At this state, self would set the remote <code>ANSWER</code> session description
               <div id="attr_INTRODUCE_STATE" class="code-item attr item attr-item ">
   <a name="config_INTRODUCE_STATE"></a> 
   <h3 class="code-item-name"><code>INTRODUCE_STATE</code></h3>
-  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>JSON<b>}</b></span>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b><b>}</b></span>
 
   <div class="code-item-properties">
     <div class="properties-wrapper">
@@ -36921,7 +36900,7 @@ At this state, self would set the remote <code>ANSWER</code> session description
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-privileged.js.html#l21"><code>source&#x2F;peer-privileged.js:21</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-privileged.js.html#l25"><code>source&#x2F;peer-privileged.js:25</code></a>
       </small>
     
 
@@ -36931,11 +36910,15 @@ At this state, self would set the remote <code>ANSWER</code> session description
   </div>
 
   <div class="code-item-description">
-    <p>These are the list of Peer introduction states that Skylink would trigger.</p>
-<ul>
-<li>This relates to and requires the Privileged Key feature where Peers using
-that Privileged alias Key becomes a privileged Peer with privileged functionalities.</li>
-</ul>
+    <p><blockquote class="info">
+  Note that this feature requires <code>&quot;isPrivileged&quot;</code> flag to be enabled and
+  <code>&quot;autoIntroduce&quot;</code> flag to be disabled for the App Key, as only Users connecting
+  using the App Key with this flag enabled (which we call Privileged Users / Peers)
+  can introduce Peers in the same App space from other Rooms.
+  <a href="http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-">
+  Read more about Privileged App Key feature here</a>.
+</blockquote>
+Contains the list of <a href="#method_introducePeer"><code>introducePeer</code> method</a> introduction states.</p>
 
   </div>
 
@@ -36958,7 +36941,7 @@ that Privileged alias Key becomes a privileged Peer with privileged functionalit
 
             <div class="param-description">
                 <p><small>Value <code>&quot;enquired&quot;</code></small>
-  The state when the privileged Peer have sent the introduction signal.</p>
+  The state when request to introduce the pair of Peers has been made to the Signaling.</p>
 
             </div>
 
@@ -36974,7 +36957,7 @@ that Privileged alias Key becomes a privileged Peer with privileged functionalit
 
             <div class="param-description">
                 <p><small>Value <code>&quot;error&quot;</code></small>
-  The state when the Peer introduction has occurred an exception.</p>
+  The state when request to introduce the pair of Peers has failed.</p>
 
             </div>
 
@@ -37039,7 +37022,7 @@ that Privileged alias Key becomes a privileged Peer with privileged functionalit
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-privileged.js.html#l53"><code>source&#x2F;peer-privileged.js:53</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-privileged.js.html#l61"><code>source&#x2F;peer-privileged.js:61</code></a>
       </small>
     
 
@@ -37049,7 +37032,10 @@ that Privileged alias Key becomes a privileged Peer with privileged functionalit
   </div>
 
   <div class="code-item-description">
-    <p>Whether this user is a privileged user.</p>
+    <p>Stores the flag that indicates if &quot;isPrivileged&quot; is enabled.
+If enabled, the User has Privileged features which has the ability to retrieve the list of
+  Peers in the same App space with <code>getPeers()</code> method 
+  and introduce Peers to each other with <code>introducePeer</code> method.</p>
 
   </div>
 
