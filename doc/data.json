@@ -2332,12 +2332,12 @@
             "params": [
                 {
                     "name": "WARNING",
-                    "description": "<small>Value <code>\"warning\"</code></small>\n  The action state where Signaling might end the connection session.\n  Sometimes, it is served as a warning like for an instance when a Peer is\n  overloading and jamming the Signaling with loads of messages abnormally, the Signaling\n  would end the Peer's connection from the Room to prevent disruption for other Peers in Room.\n  <small>See <a href=\"#attr_SYSTEM_ACTION_REASON\"><code>SYSTEM_ACTION_REASON</code></a> for the\n    list of reasons that would result in this action state.</small>",
+                    "description": "<small>Value <code>\"warning\"</code></small>\n  The action given when Signaling might be ending the User session.\n  <small>See <a href=\"#attr_SYSTEM_ACTION_REASON\"><code>SYSTEM_ACTION_REASON</code></a> for the\n    list of reasons that would result in this action state.</small>",
                     "type": "String"
                 },
                 {
                     "name": "REJECT",
-                    "description": "<small>Value <code>\"reject\"</code></small>\n  The action state where the Signaling has ended the Peer's session.\n  <small>See <a href=\"#attr_SYSTEM_ACTION_REASON\"><code>SYSTEM_ACTION_REASON</code></a> for the\n    list of reasons that would result in this action state.</small>",
+                    "description": "<small>Value <code>\"reject\"</code></small>\n  The action state where the Signaling has ended the User session.\n  <small>See <a href=\"#attr_SYSTEM_ACTION_REASON\"><code>SYSTEM_ACTION_REASON</code></a> for the\n    list of reasons that would result in this action state.</small>",
                     "type": "String"
                 }
             ],
@@ -2348,116 +2348,136 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 25,
-            "description": "These are the list of Skylink platform signaling codes as the reason\n  for the system action given by the platform signaling that Skylink would receive.\n- You may refer to {{#crossLink \"Skylink/SYSTEM_ACTION:attribute\"}}SYSTEM_ACTION{{/crossLink}}\n  for the types of system actions that would be given.\n- Reason codes like <code>FAST_MESSAGE</code>, <code>ROOM_FULL</code>, <code>VERIFICATION</code> and\n  <code>OVER_SEAT_LIMIT</code> has been removed as they are no longer supported.",
+            "line": 22,
+            "description": "Contains the list of reason codes for the Signaling action states given.",
             "itemtype": "attribute",
             "name": "SYSTEM_ACTION_REASON",
-            "type": "JSON",
             "params": [
                 {
-                    "name": "ROOM_LOCKED",
-                    "description": "<small>Value <code>\"locked\"</code> | Action ties with <code>REJECT</code></small>\n  The reason code when room is locked and self is rejected from joining the room.",
-                    "type": "String"
-                },
-                {
-                    "name": "DUPLICATED_LOGIN",
-                    "description": "<small>Value <code>\"duplicatedLogin\"</code> | Action ties with <code>REJECT</code></small>\n  The reason code when the credentials given is already in use, which the platform signaling\n  throws an exception for this error.<br>\nThis rarely occurs as Skylink handles this issue, and it's recommended to report this issue if this occurs.",
-                    "type": "String"
-                },
-                {
-                    "name": "SERVER_ERROR",
-                    "description": "<small>Value <code>\"serverError\"</code> | Action ties with <code>REJECT</code></small>\n  The reason code when the connection with the platform signaling has an exception with self.<br>\nThis rarely (and should not) occur and it's recommended to  report this issue if this occurs.",
-                    "type": "String"
-                },
-                {
-                    "name": "EXPIRED",
-                    "description": "<small>Value <code>\"expired\"</code> | Action ties with <code>REJECT</code></small>\n  The reason code when the persistent room meeting has expired so self is unable to join the room as\n  the end time of the meeting has ended.<br>\nDepending on other meeting timings available for this room, the persistent room will appear expired.<br>\nThis relates to the persistent room feature configured in the Application Key.",
-                    "type": "String"
-                },
-                {
-                    "name": "ROOM_CLOSED",
-                    "description": "<small>Value <code>\"roomclose\"</code> | Action ties with <code>REJECT</code></small>\n  The reason code when the persistent room meeting has ended and has been rendered expired so self is rejected\n  from the room as the meeting is over.<br>\nThis relates to the persistent room feature configured in the Application Key.",
+                    "name": "FAST_MESSAGE",
+                    "description": "<small>Value <code>\"fastmsg\"</code></small>\n  The reason code given when User is jamming the Signaling with a flood of messages and\n  the Signaling might end the User session to prevent User from disrupting other Peers session.\n <small>This is caused by messages sent too quickly within less than 1 second interval from methods\n    like <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n    <a href=\"#method_setUserData\"><code>setUserData()</code> method</a>,\n    <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n    <a href=\"#method_enableAudio\"><code>enableAudio()</code> method</a>,\n    <a href=\"#method_enableVideo\"><code>enableVideo()</code> method</a>,\n    <a href=\"#method_disableAudio\"><code>disableAudio()</code> method</a> and\n    <a href=\"#method_disableVideo\"><code>disableVideo()</code> method</a>.\n    However this message should not occur as queueing of messages is implemented in the SDK.</small>\n <small>Ties with <a href=\"#attr_SYSTEM_ACTION\"><code>SYSTEM_ACTION</code></a> action state <code>WARNING</code></small>",
                     "type": "String"
                 },
                 {
                     "name": "ROOM_CLOSING",
-                    "description": "<small>Value <code>\"toclose\"</code> | Action ties with <code>WARNING</code></small>\n  The reason code when the persistent room meeting is going to end soon, so this warning is given to inform\n  users before self is rejected from the room.<br>\nThis relates to the persistent room feature configured in the Application Key.",
+                    "description": "<small>Value <code>\"toClose\"</code></small>\n  The reason code given when User session in the Room is ending.\n <small>The starting datetime and duration of the User session depends on the type of authentication scheme used.<br>\n   Read more about the different <a href=\"http://support.temasys.com.sg/support/solutions/articles/\n12000002712-authenticating-your-application-key-to-start-a-connection\">authentication methods here</a>\n   or see the <a href=\"#method_init\"><code>init()</code> method</a>.</small>\n <small>Ties with <a href=\"#attr_SYSTEM_ACTION\"><code>SYSTEM_ACTION</code></a> action state <code>WARNING</code></small>",
+                    "type": "String"
+                },
+                {
+                    "name": "CREDENTIALS_EXPIRED",
+                    "description": "<small>Value <code>\"oldTimeStamp\"</code></small>\n   The reason code given when provided credentials has already expired when User is attempting to join Room.\n <small>The starting datetime and duration of the User session depends on the type of authentication scheme used.<br>\n   Read more about the different <a href=\"http://support.temasys.com.sg/support/solutions/articles/\n12000002712-authenticating-your-application-key-to-start-a-connection\">authentication methods here</a>\n   or see the <a href=\"#method_init\"><code>init()</code> method</a>.</small>\n <small>Ties with <a href=\"#attr_SYSTEM_ACTION\"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small>",
+                    "type": "String"
+                },
+                {
+                    "name": "CREDENTIALS_ERROR",
+                    "description": "<small>Value <code>\"credentialError\"</code></small>\n   The reason code given when verifying provided credentials has failed when User is attempting to join Room.\n <small>Ties with <a href=\"#attr_SYSTEM_ACTION\"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small>",
+                    "type": "String"
+                },
+                {
+                    "name": "DUPLICATED_LOGIN",
+                    "description": "<small>Value <code>\"duplicatedLogin\"</code></small>\n   The reason code given when provided credentials has already been used when User is attempting to join Room.\n <small>Ties with <a href=\"#attr_SYSTEM_ACTION\"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small>",
+                    "type": "String"
+                },
+                {
+                    "name": "ROOM_NOT_STARTED",
+                    "description": "<small>Value <code>\"notStart\"</code></small>\n   The reason code given when Room session has not started when User is attempting to join Room.\n <small>The starting datetime and duration of the User session depends on the type of authentication scheme used.<br>\n   Read more about the different <a href=\"http://support.temasys.com.sg/support/solutions/articles/\n12000002712-authenticating-your-application-key-to-start-a-connection\">authentication methods here</a>\n   or see the <a href=\"#method_init\"><code>init()</code> method</a>.</small>\n <small>Ties with <a href=\"#attr_SYSTEM_ACTION\"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small>",
+                    "type": "String"
+                },
+                {
+                    "name": "EXPIRED",
+                    "description": "<small>Value <code>\"expired\"</code></small>\n   The reason code given when Room session has already ended when User is attempting to join Room.\n <small>Ties with <a href=\"#attr_SYSTEM_ACTION\"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small> \n <small>The starting datetime and duration of the User session depends on the type of authentication scheme used.<br>\n   Read more about the different <a href=\"http://support.temasys.com.sg/support/solutions/articles/\n12000002712-authenticating-your-application-key-to-start-a-connection\">authentication methods here</a>\n   or see the <a href=\"#method_init\"><code>init()</code> method</a>.</small>",
+                    "type": "String"
+                },
+                {
+                    "name": "ROOM_LOCKED",
+                    "description": "<small>Value <code>\"locked\"</code></small>\n   The reason code given when Room session has been locked and User is blocked from joining the Room.\n <small>Room can be unlocked with <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n    locked with <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a>.</small>\n <small>Ties with <a href=\"#attr_SYSTEM_ACTION\"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small>",
+                    "type": "String"
+                },
+                {
+                    "name": "ROOM_CLOSED",
+                    "description": "<small>Value <code>\"roomclose\"</code></small>\n  The reason code given when User session in the Room has already ended.\n  <small>Ties with <a href=\"#attr_SYSTEM_ACTION\"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small>\n <small>The starting datetime and duration of the User session depends on the type of authentication scheme used.<br>\n   Read more about the different <a href=\"http://support.temasys.com.sg/support/solutions/articles/\n12000002712-authenticating-your-application-key-to-start-a-connection\">authentication methods here</a>\n   or see the <a href=\"#method_init\"><code>init()</code> method</a>.</small>",
+                    "type": "String"
+                },
+                {
+                    "name": "SERVER_ERROR",
+                    "description": "<small>Value <code>\"serverError\"</code></small>\n   The reason code given when there has been errors while attempting to connect User to the Room.\n <small>Ties with <a href=\"#attr_SYSTEM_ACTION\"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small>",
+                    "type": "String"
+                },
+                {
+                    "name": "KEY_ERROR",
+                    "description": "<small>Value <code>\"keyFailed\"</code></small>\n   The reason code given when there has been errors while attempting to connect with the App Key provided in\n   <a href=\"#method_init\"><code>init()</code> method</a>.\n <small>Ties with <a href=\"#attr_SYSTEM_ACTION\"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small>",
                     "type": "String"
                 }
             ],
+            "type": "JSON",
             "readonly": "",
-            "component": "Room",
             "since": "0.5.2",
             "class": "Skylink"
         },
         {
             "file": "source/room-connection.js",
-            "line": 73,
-            "description": "Stores the current room self is joined to.\nThe selected room will be usually defaulted to\n  {{#crossLink \"Skylink/_defaultRoom:attribute\"}}_defaultRoom{{/crossLink}}\n  if there is no selected room in\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}.",
+            "line": 110,
+            "description": "Stores the current Room name that User is connected to.",
             "itemtype": "attribute",
             "name": "_selectedRoom",
             "type": "String",
-            "default": "Skylink._defaultRoom",
             "access": "private",
             "tagname": "",
-            "component": "Room",
             "since": "0.3.0",
             "class": "Skylink"
         },
         {
             "file": "source/room-connection.js",
-            "line": 89,
-            "description": "The flag that indicates if the currently joined room is locked.",
+            "line": 120,
+            "description": "Stores the flag that indicates if Room is locked.",
             "itemtype": "attribute",
             "name": "_roomLocked",
             "type": "Boolean",
             "access": "private",
             "tagname": "",
-            "component": "Room",
             "since": "0.5.2",
             "class": "Skylink"
         },
         {
             "file": "source/room-connection.js",
-            "line": 100,
-            "description": "The flag that indicates if self is currently joined in a room.",
+            "line": 130,
+            "description": "Stores the flag that indicates if User is connected to the Room.",
             "itemtype": "attribute",
             "name": "_inRoom",
             "type": "Boolean",
             "access": "private",
             "tagname": "",
-            "component": "Room",
             "since": "0.4.0",
             "class": "Skylink"
         },
         {
             "file": "source/room-connection.js",
-            "line": 111,
-            "description": "Connects self to the selected room.\nBy default, if room parameter is not provided, it will\n  connect to the default room provided in\n  {{#crossLink \"Skylink/init:method\"}}init() <code>defaultRoom</code> settings{{/crossLink}}.\nIf any existing user media streams attached in Skylink, like for an example, calling\n  {{#crossLink \"Skylink/getUserMedia:method\"}}getUserMedia(){{/crossLink}} or\n  {{#crossLink \"Skylink/sendStream:method\"}}sendStream(){{/crossLink}} before\n  <code>joinRoom()</code>, self would actually send the current attached user media stream\n  attached. To stop the current attached Stream, please invoke\n  {{#crossLink \"Skylink/stopStream:method\"}}stopStream(){{/crossLink}} before\n  <code>joinRoom()</code> is invoked.",
+            "line": 140,
+            "description": "<blockquote class=\"info\">\n  Currently, the SDK supports only single sending Stream per Peer.\n</blockquote>\nFunction that connects User to the Room.",
             "itemtype": "method",
             "name": "joinRoom",
             "params": [
                 {
                     "name": "room",
-                    "description": "The room for\n  self to join to. If room is not provided, the room\n  would default to the the <code>defaultRoom</code> option set\n  in {{#crossLink \"Skylink/init:method\"}}init() settings{{/crossLink}}.",
+                    "description": "The Room name to connect to.\n  <small>If not provided, the User will be connected to the <code>defaultRoom</code>\n    configured in the <a href=\"#method_init\"><code>init()</code> method</a>.</small>",
                     "type": "String",
                     "optional": true
                 },
                 {
                     "name": "options",
-                    "description": "The connection settings for self connection in the\n  room. If both audio and video\n  option is <code>false</code>, there should be no audio and video stream\n  sending from self connection.",
+                    "description": "The Room connection settings.",
                     "type": "JSON",
                     "optional": true,
                     "props": [
                         {
                             "name": "userData",
-                            "description": "The custom user data\n  information set by developer. This custom user data can also\n  be set in {{#crossLink \"Skylink/setUserData:method\"}}setUserData(){{/crossLink}}.",
+                            "description": "The User custom data.\n  <small>This can be set when User is in session with <a href=\"#method_setUserData\"><code>setUserData</code> method</a>.</small>",
                             "type": "String|JSON",
                             "optional": true
                         },
                         {
                             "name": "audio",
-                            "description": "The self Stream streaming audio settings.\n  If <code>false</code>, it means that audio streaming is disabled in\n  the self Stream. If this option is set to <code>true</code> or is defined with\n  settings, {{#crossLink \"Skylink/getUserMedia:method\"}}getUserMedia(){{/crossLink}}\n  will be invoked. Self will not connect to the room unless the Stream audio\n  user media access is given.",
+                            "description": "The audio settings for the Stream sent.\n  <small>If either <code>options.audio</code> or <code>options.video</code> is <code>true</code> or\n     type is of an Object, <code>joinRoom()</code> would invoke <a href=\"#method_getUserMedia\"><code>getUserMedia()</code>\n     method</a> to retrieve a new Stream, else it will use any existing Stream if any.</small>",
                             "type": "Boolean|JSON",
                             "optional": true,
                             "optdefault": "false",
@@ -2752,7 +2772,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 559,
+            "line": 574,
             "description": "Waits for the signaling socket channel connection to be ready before\n  starting the room connection with the Skylink signaling platform.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -2888,7 +2908,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 661,
+            "line": 676,
             "description": "Disconnects self from current connected room.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -2957,7 +2977,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 789,
+            "line": 804,
             "description": "Locks the currently connected room to prevent other peers\n  from joining the room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -2971,7 +2991,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 813,
+            "line": 828,
             "description": "Unlocks the currently connected room to allow other peers\n  to join the room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -11640,60 +11660,44 @@
             "line": " source/peer-privileged.js:146"
         },
         {
-            "message": "unknown tag: component",
-            "line": " source/room-connection.js:25"
+            "message": "unknown tag: trigger",
+            "line": " source/room-connection.js:140"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:73"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/room-connection.js:89"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/room-connection.js:100"
+            "line": " source/room-connection.js:140"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:111"
+            "line": " source/room-connection.js:574"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:111"
+            "line": " source/room-connection.js:574"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:559"
+            "line": " source/room-connection.js:676"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:559"
+            "line": " source/room-connection.js:676"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:661"
+            "line": " source/room-connection.js:804"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:661"
+            "line": " source/room-connection.js:804"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:789"
+            "line": " source/room-connection.js:828"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:789"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:813"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/room-connection.js:813"
+            "line": " source/room-connection.js:828"
         },
         {
             "message": "unknown tag: component",

@@ -2,14 +2,11 @@
  * Contains the list of Signaling action states.
  * @attribute SYSTEM_ACTION
  * @param {String} WARNING <small>Value <code>"warning"</code></small>
- *   The action state where Signaling might end the connection session.
- *   Sometimes, it is served as a warning like for an instance when a Peer is
- *   overloading and jamming the Signaling with loads of messages abnormally, the Signaling
- *   would end the Peer's connection from the Room to prevent disruption for other Peers in Room.
+ *   The action given when Signaling might be ending the User session.
  *   <small>See <a href="#attr_SYSTEM_ACTION_REASON"><code>SYSTEM_ACTION_REASON</code></a> for the
  *     list of reasons that would result in this action state.</small>
  * @param {String} REJECT <small>Value <code>"reject"</code></small>
- *   The action state where the Signaling has ended the Peer's session.
+ *   The action state where the Signaling has ended the User session.
  *   <small>See <a href="#attr_SYSTEM_ACTION_REASON"><code>SYSTEM_ACTION_REASON</code></a> for the
  *     list of reasons that would result in this action state.</small>
  * @type JSON
@@ -23,121 +20,139 @@ Skylink.prototype.SYSTEM_ACTION = {
 };
 
 /**
- * These are the list of Skylink platform signaling codes as the reason
- *   for the system action given by the platform signaling that Skylink would receive.
- * - You may refer to {{#crossLink "Skylink/SYSTEM_ACTION:attribute"}}SYSTEM_ACTION{{/crossLink}}
- *   for the types of system actions that would be given.
- * - Reason codes like <code>FAST_MESSAGE</code>, <code>ROOM_FULL</code>, <code>VERIFICATION</code> and
- *   <code>OVER_SEAT_LIMIT</code> has been removed as they are no longer supported.
+ * Contains the list of reason codes for the Signaling action states given.
  * @attribute SYSTEM_ACTION_REASON
+ * @param {String} FAST_MESSAGE <small>Value <code>"fastmsg"</code></small>
+ *   The reason code given when User is jamming the Signaling with a flood of messages and
+ *   the Signaling might end the User session to prevent User from disrupting other Peers session.
+ *  <small>This is caused by messages sent too quickly within less than 1 second interval from methods
+ *     like <a href="#method_sendMessage"><code>sendMessage()</code> method</a>,
+ *     <a href="#method_setUserData"><code>setUserData()</code> method</a>,
+ *     <a href="#method_muteStream"><code>muteStream()</code> method</a>,
+ *     <a href="#method_enableAudio"><code>enableAudio()</code> method</a>,
+ *     <a href="#method_enableVideo"><code>enableVideo()</code> method</a>,
+ *     <a href="#method_disableAudio"><code>disableAudio()</code> method</a> and
+ *     <a href="#method_disableVideo"><code>disableVideo()</code> method</a>.
+ *     However this message should not occur as queueing of messages is implemented in the SDK.</small>
+ *  <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>WARNING</code></small>
+ * @param {String} ROOM_CLOSING <small>Value <code>"toClose"</code></small>
+ *   The reason code given when User session in the Room is ending.
+ *  <small>The starting datetime and duration of the User session depends on the type of authentication scheme used.<br>
+ *    Read more about the different <a href="http://support.temasys.com.sg/support/solutions/articles/
+ * 12000002712-authenticating-your-application-key-to-start-a-connection">authentication methods here</a>
+ *    or see the <a href="#method_init"><code>init()</code> method</a>.</small>
+ *  <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>WARNING</code></small>
+ * @param {String} CREDENTIALS_EXPIRED <small>Value <code>"oldTimeStamp"</code></small>
+ *    The reason code given when provided credentials has already expired when User is attempting to join Room.
+ *  <small>The starting datetime and duration of the User session depends on the type of authentication scheme used.<br>
+ *    Read more about the different <a href="http://support.temasys.com.sg/support/solutions/articles/
+ * 12000002712-authenticating-your-application-key-to-start-a-connection">authentication methods here</a>
+ *    or see the <a href="#method_init"><code>init()</code> method</a>.</small>
+ *  <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small> 
+ * @param {String} CREDENTIALS_ERROR <small>Value <code>"credentialError"</code></small>
+ *    The reason code given when verifying provided credentials has failed when User is attempting to join Room.
+ *  <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small>
+ * @param {String} DUPLICATED_LOGIN <small>Value <code>"duplicatedLogin"</code></small>
+ *    The reason code given when provided credentials has already been used when User is attempting to join Room.
+ *  <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small> 
+ * @param {String} ROOM_NOT_STARTED <small>Value <code>"notStart"</code></small>
+ *    The reason code given when Room session has not started when User is attempting to join Room.
+ *  <small>The starting datetime and duration of the User session depends on the type of authentication scheme used.<br>
+ *    Read more about the different <a href="http://support.temasys.com.sg/support/solutions/articles/
+ * 12000002712-authenticating-your-application-key-to-start-a-connection">authentication methods here</a>
+ *    or see the <a href="#method_init"><code>init()</code> method</a>.</small>
+ *  <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small> 
+ * @param {String} EXPIRED <small>Value <code>"expired"</code></small>
+ *    The reason code given when Room session has already ended when User is attempting to join Room.
+ *  <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small> 
+ *  <small>The starting datetime and duration of the User session depends on the type of authentication scheme used.<br>
+ *    Read more about the different <a href="http://support.temasys.com.sg/support/solutions/articles/
+ * 12000002712-authenticating-your-application-key-to-start-a-connection">authentication methods here</a>
+ *    or see the <a href="#method_init"><code>init()</code> method</a>.</small>
+ * @param {String} ROOM_LOCKED <small>Value <code>"locked"</code></small>
+ *    The reason code given when Room session has been locked and User is blocked from joining the Room.
+ *  <small>Room can be unlocked with <a href="#method_unlockRoom"><code>unlockRoom()</code> method</a> and
+ *     locked with <a href="#method_lockRoom"><code>lockRoom()</code> method</a>.</small>
+ *  <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small> 
+ * @param {String} ROOM_CLOSED <small>Value <code>"roomclose"</code></small>
+ *   The reason code given when User session in the Room has already ended.
+ *   <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small>
+ *  <small>The starting datetime and duration of the User session depends on the type of authentication scheme used.<br>
+ *    Read more about the different <a href="http://support.temasys.com.sg/support/solutions/articles/
+ * 12000002712-authenticating-your-application-key-to-start-a-connection">authentication methods here</a>
+ *    or see the <a href="#method_init"><code>init()</code> method</a>.</small>
+ * @param {String} SERVER_ERROR <small>Value <code>"serverError"</code></small>
+ *    The reason code given when there has been errors while attempting to connect User to the Room.
+ *  <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small> 
+ * @param {String} KEY_ERROR <small>Value <code>"keyFailed"</code></small>
+ *    The reason code given when there has been errors while attempting to connect with the App Key provided in
+ *    <a href="#method_init"><code>init()</code> method</a>.
+ *  <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small> 
  * @type JSON
- * @param {String} ROOM_LOCKED <small>Value <code>"locked"</code> | Action ties with <code>REJECT</code></small>
- *   The reason code when room is locked and self is rejected from joining the room.
- * @param {String} DUPLICATED_LOGIN <small>Value <code>"duplicatedLogin"</code> | Action ties with <code>REJECT</code></small>
- *   The reason code when the credentials given is already in use, which the platform signaling
- *   throws an exception for this error.<br>
- * This rarely occurs as Skylink handles this issue, and it's recommended to report this issue if this occurs.
- * @param {String} SERVER_ERROR <small>Value <code>"serverError"</code> | Action ties with <code>REJECT</code></small>
- *   The reason code when the connection with the platform signaling has an exception with self.<br>
- * This rarely (and should not) occur and it's recommended to  report this issue if this occurs.
- * @param {String} EXPIRED <small>Value <code>"expired"</code> | Action ties with <code>REJECT</code></small>
- *   The reason code when the persistent room meeting has expired so self is unable to join the room as
- *   the end time of the meeting has ended.<br>
- * Depending on other meeting timings available for this room, the persistent room will appear expired.<br>
- * This relates to the persistent room feature configured in the Application Key.
- * @param {String} ROOM_CLOSED <small>Value <code>"roomclose"</code> | Action ties with <code>REJECT</code></small>
- *   The reason code when the persistent room meeting has ended and has been rendered expired so self is rejected
- *   from the room as the meeting is over.<br>
- * This relates to the persistent room feature configured in the Application Key.
- * @param {String} ROOM_CLOSING <small>Value <code>"toclose"</code> | Action ties with <code>WARNING</code></small>
- *   The reason code when the persistent room meeting is going to end soon, so this warning is given to inform
- *   users before self is rejected from the room.<br>
- * This relates to the persistent room feature configured in the Application Key.
  * @readOnly
- * @component Room
  * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype.SYSTEM_ACTION_REASON = {
-  //FAST_MESSAGE: 'fastmsg',
-  ROOM_LOCKED: 'locked',
-  //ROOM_FULL: 'roomfull',
+  CREDENTIALS_EXPIRED: 'oldTimeStamp',
+  CREDENTIALS_ERROR: 'credentialError',
   DUPLICATED_LOGIN: 'duplicatedLogin',
-  SERVER_ERROR: 'serverError',
-  //VERIFICATION: 'verification',
+  ROOM_NOT_STARTED: 'notStart',
   EXPIRED: 'expired',
+  ROOM_LOCKED: 'locked',
+  FAST_MESSAGE: 'fastmsg',
+  ROOM_CLOSING: 'toClose',
   ROOM_CLOSED: 'roomclose',
-  ROOM_CLOSING: 'toclose'
+  SERVER_ERROR: 'serverError',
+  KEY_ERROR: 'keyFailed'
 };
 
 /**
- * Stores the current room self is joined to.
- * The selected room will be usually defaulted to
- *   {{#crossLink "Skylink/_defaultRoom:attribute"}}_defaultRoom{{/crossLink}}
- *   if there is no selected room in
- *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}.
+ * Stores the current Room name that User is connected to.
  * @attribute _selectedRoom
  * @type String
- * @default Skylink._defaultRoom
  * @private
- * @component Room
  * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._selectedRoom = null;
 
 /**
- * The flag that indicates if the currently joined room is locked.
+ * Stores the flag that indicates if Room is locked.
  * @attribute _roomLocked
  * @type Boolean
  * @private
- * @component Room
  * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._roomLocked = false;
 
 /**
- * The flag that indicates if self is currently joined in a room.
+ * Stores the flag that indicates if User is connected to the Room.
  * @attribute _inRoom
  * @type Boolean
  * @private
- * @component Room
  * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype._inRoom = false;
 
 /**
- * Connects self to the selected room.
- * By default, if room parameter is not provided, it will
- *   connect to the default room provided in
- *   {{#crossLink "Skylink/init:method"}}init() <code>defaultRoom</code> settings{{/crossLink}}.
- * If any existing user media streams attached in Skylink, like for an example, calling
- *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}} or
- *   {{#crossLink "Skylink/sendStream:method"}}sendStream(){{/crossLink}} before
- *   <code>joinRoom()</code>, self would actually send the current attached user media stream
- *   attached. To stop the current attached Stream, please invoke
- *   {{#crossLink "Skylink/stopStream:method"}}stopStream(){{/crossLink}} before
- *   <code>joinRoom()</code> is invoked.
+ * <blockquote class="info">
+ *   Currently, the SDK supports only single sending Stream per Peer.
+ * </blockquote>
+ * Function that connects User to the Room.
  * @method joinRoom
- * @param {String} [room] The room for
- *   self to join to. If room is not provided, the room
- *   would default to the the <code>defaultRoom</code> option set
- *   in {{#crossLink "Skylink/init:method"}}init() settings{{/crossLink}}.
- * @param {JSON} [options] The connection settings for self connection in the
- *   room. If both audio and video
- *   option is <code>false</code>, there should be no audio and video stream
- *   sending from self connection.
- * @param {String|JSON} [options.userData] The custom user data
- *   information set by developer. This custom user data can also
- *   be set in {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}.
- * @param {Boolean|JSON} [options.audio=false] The self Stream streaming audio settings.
- *   If <code>false</code>, it means that audio streaming is disabled in
- *   the self Stream. If this option is set to <code>true</code> or is defined with
- *   settings, {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
- *   will be invoked. Self will not connect to the room unless the Stream audio
- *   user media access is given.
+ * @param {String} [room] The Room name to connect to.
+ *   <small>If not provided, the User will be connected to the <code>defaultRoom</code>
+ *     configured in the <a href="#method_init"><code>init()</code> method</a>.</small>
+ * @param {JSON} [options] The Room connection settings.
+ * @param {String|JSON} [options.userData] The User custom data.
+ *   <small>This can be set when User is in session with <a href="#method_setUserData"><code>setUserData</code> method</a>.</small>
+ * @param {Boolean|JSON} [options.audio=false] The audio settings for the Stream sent.
+ *   <small>If either <code>options.audio</code> or <code>options.video</code> is <code>true</code> or
+ *      type is of an Object, <code>joinRoom()</code> would invoke <a href="#method_getUserMedia"><code>getUserMedia()</code>
+ *      method</a> to retrieve a new Stream, else it will use any existing Stream if any.</small>
  * @param {Boolean} [options.audio.stereo] The flag that indicates if
  *   stereo should be enabled in self connection Stream
  *   audio streaming.
