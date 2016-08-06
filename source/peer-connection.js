@@ -100,7 +100,7 @@ Skylink.prototype._peerConnections = {};
  * <blockquote class="info">
  *   For MCU enabled Peer connections, the restart functionality may differ.
  *   <a href="http://support.temasys.com.sg/support/discussions/topics/12000002853">Read this article here</a>.<br>
- *   Note that the functionality is throttled when invoked many times in less than 3 seconds interval. 
+ *   Note that the functionality is throttled when invoked many times in less than 3 seconds interval.
  * </blockquote>
  * Function that refreshes Peer connections.
  * @method refreshConnection
