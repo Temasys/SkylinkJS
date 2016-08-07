@@ -1,11 +1,6 @@
 /**
- * These are the list of room initialization ready states that Skylink would trigger.
- * - The states indicates if the required connection information has been retrieved successfully from
- *   the platform server to start a connection.
- * - These states are triggered when {{#crossLink "Skylink/init:method"}}init(){{/crossLink}} or
- *   {{#crossLink "Skylink/joinRoom:attr"}}joinRoom(){{/crossLink}} is invoked.
+ * Contains the list of Room authentication or <a href="#method_init"><code>init()</code> method</a> states.
  * @attribute READY_STATE_CHANGE
- * @type JSON
  * @param {Number} INIT <small>Value <code>0</code></small>
  *   The state when Skylink is at the initial state before retrieval.<br>
  * If all dependencies has been loaded, this would proceed to <code>LOADING</code> state.
@@ -23,8 +18,8 @@
  * This state might be triggered when dependencies failed to load or HTTP retrieval fails.<br>
  * Reference {{#crossLink "Skylink/READY_STATE_CHANGE_ERROR:attr"}}READY_STATE_CHANGE_ERROR{{/crossLink}}
  *   to see the list of errors that might have triggered the <code>ERROR</code> state.
+ * @type JSON
  * @readOnly
- * @component Room
  * @for Skylink
  * @since 0.1.0
  */

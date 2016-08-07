@@ -196,6 +196,9 @@ Skylink.prototype._inRoom = false;
  * @param {Error|String} callback.error.error The <code>joinRoom()</code> error.
  * @param {Number} callback.error.errorCode The Room authentication state error code.
  *   <small>If error is not caused by Room authentication errors, this should not be defined</small>
+ *   <small>Sequentially, the User has to authenticate with the Platform to retrieve credentials which is
+ *      used to join the Room which is known when <a href="#event_systemAction"><code>systemAction</code> event</a>
+ *      is triggered. This error occurs when the authentication with the Platform fails.</small>
  *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
  * @param {String} callback.error.room The selected Room name to connect to.
  * @param {JSON} callback.success The success result in request.
@@ -205,7 +208,7 @@ Skylink.prototype._inRoom = false;
  * @param {JSON} callback.success.peerInfo The User current session information.
  *   <small>Object signature matches the <code>peerInfo</code> parameter payload received in the
  *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small>
- * @trigger readyStateChange, mediaAccessRequired, channelOpen, channelMessage, peerJoined, incomingStream
+ * @trigger readyStateChange, mediaAccessRequired, channelOpen, channelMessage, systemAction, peerJoined, incomingStream
  * @for Skylink
  * @since 0.5.5
  */

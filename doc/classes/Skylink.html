@@ -16182,7 +16182,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l572"><code>source&#x2F;room-connection.js:572</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l575"><code>source&#x2F;room-connection.js:575</code></a>
       </small>
     
 
@@ -20093,7 +20093,7 @@ Function that connects User to the Room.</p>
   
   <div class="code-item-section">
     <h4>Triggers:</h4>
-    <span class="code-item-trigger">readyStateChange, mediaAccessRequired, channelOpen, channelMessage, peerJoined, incomingStream</span>
+    <span class="code-item-trigger">readyStateChange, mediaAccessRequired, channelOpen, channelMessage, systemAction, peerJoined, incomingStream</span>
   </div>
   
 
@@ -20353,6 +20353,9 @@ Function that connects User to the Room.</p>
                               
                               The Room authentication state error code.
   <small>If error is not caused by Room authentication errors, this should not be defined</small>
+  <small>Sequentially, the User has to authenticate with the Platform to retrieve credentials which is
+     used to join the Room which is known when <a href="#event_systemAction"><code>systemAction</code> event</a>
+     is triggered. This error occurs when the authentication with the Platform fails.</small>
   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
                             </div>
                           </li>
@@ -20509,7 +20512,7 @@ Function that connects User to the Room.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l417"><code>source&#x2F;room-connection.js:417</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l420"><code>source&#x2F;room-connection.js:420</code></a>
       </small>
     
 
@@ -20742,7 +20745,7 @@ Function that connects User to the Room.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l531"><code>source&#x2F;room-connection.js:531</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l534"><code>source&#x2F;room-connection.js:534</code></a>
       </small>
     
 
@@ -24267,7 +24270,7 @@ Reference <a href="../classes/Skylink.html#method_refreshConnection" class="cros
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l551"><code>source&#x2F;room-connection.js:551</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l554"><code>source&#x2F;room-connection.js:554</code></a>
       </small>
     
 

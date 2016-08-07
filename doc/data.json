@@ -2539,7 +2539,7 @@
                                 },
                                 {
                                     "name": "errorCode",
-                                    "description": "The Room authentication state error code.\n  <small>If error is not caused by Room authentication errors, this should not be defined</small>\n  [Rel: Skylink.READY_STATE_CHANGE_ERROR]",
+                                    "description": "The Room authentication state error code.\n  <small>If error is not caused by Room authentication errors, this should not be defined</small>\n  <small>Sequentially, the User has to authenticate with the Platform to retrieve credentials which is\n     used to join the Room which is known when <a href=\"#event_systemAction\"><code>systemAction</code> event</a>\n     is triggered. This error occurs when the authentication with the Platform fails.</small>\n  [Rel: Skylink.READY_STATE_CHANGE_ERROR]",
                                     "type": "Number"
                                 },
                                 {
@@ -2574,13 +2574,13 @@
                     ]
                 }
             ],
-            "trigger": "readyStateChange, mediaAccessRequired, channelOpen, channelMessage, peerJoined, incomingStream",
+            "trigger": "readyStateChange, mediaAccessRequired, channelOpen, channelMessage, systemAction, peerJoined, incomingStream",
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/room-connection.js",
-            "line": 417,
+            "line": 420,
             "description": "Function that disconnects User from the currently connected Room and ends the User's session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -2645,7 +2645,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 531,
+            "line": 534,
             "description": "Function that locks the current Room which prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -2655,7 +2655,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 551,
+            "line": 554,
             "description": "Function that unlocks the current Room which if Room is previously lock to\n  allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -2665,7 +2665,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 572,
+            "line": 575,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -11336,15 +11336,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:417"
+            "line": " source/room-connection.js:420"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:531"
+            "line": " source/room-connection.js:534"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:551"
+            "line": " source/room-connection.js:554"
         },
         {
             "message": "unknown tag: component",
