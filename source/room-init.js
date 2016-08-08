@@ -134,24 +134,19 @@ Skylink.prototype.REGIONAL_SERVER = {
 };
 
 /**
- * The flag to enforce an SSL platform signaling and platform server connection.
- * If self domain accessing protocol is <code>https:</code>, SSL connections
- *   would be automatically used. This flag is mostly used for self domain accessing protocol
- *   that is <code>http:</code> and enforcing the SSL connections for
- *   platform signaling and platform server connection.
+ * Stores the flag if API and Signaling connections should enforce HTTPS connections
+ *   even though it's using HTTP connections.
  * @attribute _forceSSL
  * @type Boolean
  * @default false
- * @required
  * @private
- * @component Room
  * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._forceSSL = false;
 
 /**
- * The flag to enforce an SSL TURN server connection.
+ * Stores the flag if TURNS connections should be used   The flag to enforce an SSL TURN server connection.
  * If self domain accessing protocol is <code>https:</code>, SSL connections
  *   would be automatically used. This flag is mostly used for self domain accessing protocol
  *   that is <code>http:</code> and enforcing the SSL connections for

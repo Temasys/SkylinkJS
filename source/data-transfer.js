@@ -179,7 +179,7 @@ Skylink.prototype._dataTransfersTimeout = {};
 
 /**
  * <blockquote class="info">
- *   Currently, the data transfers to the Android and iOS have been broken as noted
+ *   Currently, the data transfers to the Android and iOS have interopability issues as noted
  *   in <a href="http://support.temasys.com.sg/support/discussions/topics/12000002852">an issue here</a>.<br>
  *   Additionally, the Android and iOS SDKs do not support simultaneous multi-transfers.
  * </blockquote>
@@ -410,7 +410,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
 
 /**
  * <blockquote class="info">
- *   Currently, the data transfers to the Android and iOS have been broken as noted
+ *   Currently, the data transfers to the Android and iOS have interopability issues as noted
  *   in <a href="http://support.temasys.com.sg/support/discussions/topics/12000002852">an issue here</a>.<br>
  *   <b>Deprecation Warning!</b> This method has been deprecated, please use <a href="#method_acceptDataTransfer">
  *   <code>acceptDataTransfer()</code> method</a> instead.
@@ -428,7 +428,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
 Skylink.prototype.respondBlobRequest =
 /**
  * <blockquote class="info">
- *   Currently, the data transfers to the Android and iOS have been broken as noted
+ *   Currently, the data transfers to the Android and iOS have interopability issues as noted
  *   in <a href="http://support.temasys.com.sg/support/discussions/topics/12000002852">an issue here</a>.
  * </blockquote>
  * Function that accepts or rejects a data transfer request from Peer.
@@ -514,7 +514,7 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
 
 /**
  * <blockquote class="info">
- *   Currently, the data transfers to the Android and iOS have been broken as noted
+ *   Currently, the data transfers to the Android and iOS have interopability issues as noted
  *   in <a href="http://support.temasys.com.sg/support/discussions/topics/12000002852">an issue here</a>.<br>
  *   <b>Deprecation Warning!</b> This method has been deprecated, please use <a href="#method_cancelDataTransfer">
  *   <code>method_cancelDataTransfer()</code> method</a> instead.
@@ -531,7 +531,7 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
 Skylink.prototype.cancelBlobTransfer =
 /**
  * <blockquote class="info">
- *   Currently, the data transfers to the Android and iOS have been broken as noted
+ *   Currently, the data transfers to the Android and iOS have been interopability issues as noted
  *   in <a href="http://support.temasys.com.sg/support/discussions/topics/12000002852">an issue here</a>.
  * </blockquote>
  * Function that terminates a data transfer.

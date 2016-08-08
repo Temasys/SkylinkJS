@@ -90,13 +90,8 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * These are the list of room initialization ready states that Skylink would trigger.
- * - The states indicates if the required connection information has been retrieved successfully from
- *   the platform server to start a connection.
- * - These states are triggered when {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}} or
- *   {{#crossLink &quot;Skylink/joinRoom:attr&quot;}}joinRoom(){{/crossLink}} is invoked.
+ * Contains the list of Room authentication or &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; states.
  * @attribute READY_STATE_CHANGE
- * @type JSON
  * @param {Number} INIT &lt;small&gt;Value &lt;code&gt;0&lt;/code&gt;&lt;/small&gt;
  *   The state when Skylink is at the initial state before retrieval.&lt;br&gt;
  * If all dependencies has been loaded, this would proceed to &lt;code&gt;LOADING&lt;/code&gt; state.
@@ -114,8 +109,8 @@
  * This state might be triggered when dependencies failed to load or HTTP retrieval fails.&lt;br&gt;
  * Reference {{#crossLink &quot;Skylink/READY_STATE_CHANGE_ERROR:attr&quot;}}READY_STATE_CHANGE_ERROR{{/crossLink}}
  *   to see the list of errors that might have triggered the &lt;code&gt;ERROR&lt;/code&gt; state.
+ * @type JSON
  * @readOnly
- * @component Room
  * @for Skylink
  * @since 0.1.0
  */
@@ -230,24 +225,19 @@ Skylink.prototype.REGIONAL_SERVER = {
 };
 
 /**
- * The flag to enforce an SSL platform signaling and platform server connection.
- * If self domain accessing protocol is &lt;code&gt;https:&lt;/code&gt;, SSL connections
- *   would be automatically used. This flag is mostly used for self domain accessing protocol
- *   that is &lt;code&gt;http:&lt;/code&gt; and enforcing the SSL connections for
- *   platform signaling and platform server connection.
+ * Stores the flag if API and Signaling connections should enforce HTTPS connections
+ *   even though it&#x27;s using HTTP connections.
  * @attribute _forceSSL
  * @type Boolean
  * @default false
- * @required
  * @private
- * @component Room
  * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._forceSSL = false;
 
 /**
- * The flag to enforce an SSL TURN server connection.
+ * Stores the flag if TURNS connections should be used   The flag to enforce an SSL TURN server connection.
  * If self domain accessing protocol is &lt;code&gt;https:&lt;/code&gt;, SSL connections
  *   would be automatically used. This flag is mostly used for self domain accessing protocol
  *   that is &lt;code&gt;http:&lt;/code&gt; and enforcing the SSL connections for

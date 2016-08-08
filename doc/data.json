@@ -746,7 +746,7 @@
         {
             "file": "source/data-transfer.js",
             "line": 180,
-            "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have been broken as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.<br>\n  Additionally, the Android and iOS SDKs do not support simultaneous multi-transfers.\n</blockquote>\nFunction that starts a data transfer to Peers.<br>\nUse the <a href=\"http://www.w3schools.com/tags/att_input_type.asp\"><code>&lt;input type=\"file\"&gt;</code></a>\n  to transfer files as the returning <a href=\"https://developer.mozilla.org/en/docs/Web/API/File\">\n  File object</a> is a type of Blob.",
+            "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have interopability issues as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.<br>\n  Additionally, the Android and iOS SDKs do not support simultaneous multi-transfers.\n</blockquote>\nFunction that starts a data transfer to Peers.<br>\nUse the <a href=\"http://www.w3schools.com/tags/att_input_type.asp\"><code>&lt;input type=\"file\"&gt;</code></a>\n  to transfer files as the returning <a href=\"https://developer.mozilla.org/en/docs/Web/API/File\">\n  File object</a> is a type of Blob.",
             "itemtype": "method",
             "name": "sendBlobData",
             "params": [
@@ -873,7 +873,7 @@
         {
             "file": "source/data-transfer.js",
             "line": 411,
-            "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have been broken as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.<br>\n  <b>Deprecation Warning!</b> This method has been deprecated, please use <a href=\"#method_acceptDataTransfer\">\n  <code>acceptDataTransfer()</code> method</a> instead.\n</blockquote>\nFunction that accepts or rejects a data transfer request from Peer.",
+            "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have interopability issues as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.<br>\n  <b>Deprecation Warning!</b> This method has been deprecated, please use <a href=\"#method_acceptDataTransfer\">\n  <code>acceptDataTransfer()</code> method</a> instead.\n</blockquote>\nFunction that accepts or rejects a data transfer request from Peer.",
             "itemtype": "method",
             "name": "respondBlobRequest",
             "params": [
@@ -904,7 +904,7 @@
         {
             "file": "source/data-transfer.js",
             "line": 429,
-            "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have been broken as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.\n</blockquote>\nFunction that accepts or rejects a data transfer request from Peer.",
+            "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have interopability issues as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.\n</blockquote>\nFunction that accepts or rejects a data transfer request from Peer.",
             "itemtype": "method",
             "name": "acceptDataTransfer",
             "params": [
@@ -933,7 +933,7 @@
         {
             "file": "source/data-transfer.js",
             "line": 515,
-            "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have been broken as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.<br>\n  <b>Deprecation Warning!</b> This method has been deprecated, please use <a href=\"#method_cancelDataTransfer\">\n  <code>method_cancelDataTransfer()</code> method</a> instead.\n</blockquote>\nFunction that terminates a data transfer.",
+            "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have interopability issues as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.<br>\n  <b>Deprecation Warning!</b> This method has been deprecated, please use <a href=\"#method_cancelDataTransfer\">\n  <code>method_cancelDataTransfer()</code> method</a> instead.\n</blockquote>\nFunction that terminates a data transfer.",
             "itemtype": "method",
             "name": "cancelBlobTransfer",
             "params": [
@@ -957,7 +957,7 @@
         {
             "file": "source/data-transfer.js",
             "line": 532,
-            "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have been broken as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.\n</blockquote>\nFunction that terminates a data transfer.",
+            "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have been interopability issues as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.\n</blockquote>\nFunction that terminates a data transfer.",
             "itemtype": "method",
             "name": "cancelDataTransfer",
             "params": [
@@ -2677,10 +2677,9 @@
         {
             "file": "source/room-init.js",
             "line": 1,
-            "description": "These are the list of room initialization ready states that Skylink would trigger.\n- The states indicates if the required connection information has been retrieved successfully from\n  the platform server to start a connection.\n- These states are triggered when {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}} or\n  {{#crossLink \"Skylink/joinRoom:attr\"}}joinRoom(){{/crossLink}} is invoked.",
+            "description": "Contains the list of Room authentication or <a href=\"#method_init\"><code>init()</code> method</a> states.",
             "itemtype": "attribute",
             "name": "READY_STATE_CHANGE",
-            "type": "JSON",
             "params": [
                 {
                     "name": "INIT",
@@ -2703,14 +2702,14 @@
                     "type": "Number"
                 }
             ],
+            "type": "JSON",
             "readonly": "",
-            "component": "Room",
             "since": "0.1.0",
             "class": "Skylink"
         },
         {
             "file": "source/room-init.js",
-            "line": 38,
+            "line": 33,
             "description": "These are the list of room initialization ready state errors that Skylink has.\n- Ready state errors like <code>ROOM_LOCKED</code>, <code>API_NOT_ENOUGH_CREDIT</code>,\n  <code>API_NOT_ENOUGH_PREPAID_CREDIT</code>, <code>API_FAILED_FINDING_PREPAID_CREDIT</code> and\n  <code>SCRIPT_ERROR</code> has been removed as they are no longer supported.",
             "itemtype": "attribute",
             "name": "READY_STATE_CHANGE_ERROR",
@@ -2794,7 +2793,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 120,
+            "line": 115,
             "description": "These are the list of available platform signaling servers Skylink\n  should connect to for faster connectivity.",
             "itemtype": "attribute",
             "name": "REGIONAL_SERVER",
@@ -2820,23 +2819,21 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 141,
-            "description": "The flag to enforce an SSL platform signaling and platform server connection.\nIf self domain accessing protocol is <code>https:</code>, SSL connections\n  would be automatically used. This flag is mostly used for self domain accessing protocol\n  that is <code>http:</code> and enforcing the SSL connections for\n  platform signaling and platform server connection.",
+            "line": 136,
+            "description": "Stores the flag if API and Signaling connections should enforce HTTPS connections\n  even though it's using HTTP connections.",
             "itemtype": "attribute",
             "name": "_forceSSL",
             "type": "Boolean",
             "default": "false",
-            "required": 1,
             "access": "private",
             "tagname": "",
-            "component": "Room",
             "since": "0.5.4",
             "class": "Skylink"
         },
         {
             "file": "source/room-init.js",
-            "line": 158,
-            "description": "The flag to enforce an SSL TURN server connection.\nIf self domain accessing protocol is <code>https:</code>, SSL connections\n  would be automatically used. This flag is mostly used for self domain accessing protocol\n  that is <code>http:</code> and enforcing the SSL connections for\n  TURN server connection.\nThis will configure TURN server connection using port <code>443</code> only and\n  if <code>turns:</code> protocol is supported, it will use <code>turns:</code> protocol.",
+            "line": 148,
+            "description": "Stores the flag if TURNS connections should be used   The flag to enforce an SSL TURN server connection.\nIf self domain accessing protocol is <code>https:</code>, SSL connections\n  would be automatically used. This flag is mostly used for self domain accessing protocol\n  that is <code>http:</code> and enforcing the SSL connections for\n  TURN server connection.\nThis will configure TURN server connection using port <code>443</code> only and\n  if <code>turns:</code> protocol is supported, it will use <code>turns:</code> protocol.",
             "itemtype": "attribute",
             "name": "_forceTURNSSL",
             "type": "Boolean",
@@ -2850,7 +2847,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 177,
+            "line": 167,
             "description": "The flag to enforce TURN server connection for quicker connectivity.",
             "itemtype": "attribute",
             "name": "_forceTURN",
@@ -2865,7 +2862,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 190,
+            "line": 180,
             "description": "The constructed REST path that Skylink makes a <code>HTTP /GET</code> from\n  to retrieve the connection information required.",
             "itemtype": "attribute",
             "name": "_path",
@@ -2879,7 +2876,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 203,
+            "line": 193,
             "description": "The regional server that Skylink should connect to for fastest connectivity.",
             "itemtype": "attribute",
             "name": "_serverRegion",
@@ -2892,7 +2889,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 214,
+            "line": 204,
             "description": "The platform server URL that Skylink can construct the REST path with to make\n  a <code>HTTP /GET</code> to retrieve the connection information required.\nIf the value is not the default value, it's mostly for debugging purposes.\nIt's not advisable to allow developers to set the custom server URL unless\n  they are aware of what they are doing, as this is a debugging feature.",
             "itemtype": "attribute",
             "name": "_roomServer",
@@ -2906,7 +2903,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 230,
+            "line": 220,
             "description": "Stores the Application Key that is configured in the\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_appKey",
@@ -2919,7 +2916,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 242,
+            "line": 232,
             "description": "Stores the default room that is configured in the\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.\nIf no room is provided in {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}},\n  this is the room that self would join to by default.\nIf the value is not provided in {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}},\n  by default, the value is the Application Key that is configured\n  in {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_defaultRoom",
@@ -2933,7 +2930,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 260,
+            "line": 250,
             "description": "Stores the new persistent room meeting start datetime stamp in\n  [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601).\nThis will start a new meeting based on the starting datetime stamp\n  in the room that was selected to join.\nThe start date time of the room will not affect non persistent room connection.\nThe persistent room feature is configurable in the Application Key\n  in the developer console.",
             "itemtype": "attribute",
             "name": "_roomStart",
@@ -2947,7 +2944,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 278,
+            "line": 268,
             "description": "Stores the new persistent room meeting duration (in hours)\n  that the current new meeting duration should be in the room\n  that was selected to join.\nThe duration will not affect non persistent room connection.\nThe persistent room feature is configurable in the Application Key\n  in the developer console.",
             "itemtype": "attribute",
             "name": "_roomDuration",
@@ -2961,7 +2958,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 295,
+            "line": 285,
             "description": "Stores the room credentials for Application Key.\nThis is required for rooms connecting without CORS verification\n  or starting a new persistent room meeting.\nTo generate the credentials:\n- Concatenate a string that consists of the room name\n  the room meeting duration (in hours) and the start date timestamp (in ISO 8601 format).\n  Format <code>room + duration + startDateTimeStamp</code>.\n- Hash the concatenated string with the Application Key token using\n  [SHA-1](https://en.wikipedia.org/wiki/SHA-1).\n  You may use the [CryptoJS.HmacSHA1](https://code.google.com/p/crypto-js/#HMAC) function to do so.\n  Example <code>var hash = CryptoJS.HmacSHA1(concatenatedString, token);</code>.\n- Convert the hash to a [Base64](https://en.wikipedia.org/wiki/Base64) encoded string. You may use the\n  [CryptoJS.enc.Base64](https://code.google.com/p/crypto-js/#The_Cipher_Output) function\n  to do so. Example <code>var base64String = hash.toString(CryptoJS.enc.Base64); </code>.\n- Encode the Base64 encoded string to a URI component using UTF-8 encoding with\n  [encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent).\n  Example <code>var credentials = encodeURIComponent(base64String);</code>\nand the duration.",
             "itemtype": "attribute",
             "name": "_roomCredentials",
@@ -2975,7 +2972,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 324,
+            "line": 314,
             "description": "Stores the current Skylink room connection retrieval ready state.\n[Rel: Skylink.READY_STATE_CHANGE]",
             "itemtype": "attribute",
             "name": "_readyState",
@@ -2989,7 +2986,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 337,
+            "line": 327,
             "description": "Stores the Skylink server connection key for the selected room.",
             "itemtype": "attribute",
             "name": "_key",
@@ -3002,7 +2999,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 348,
+            "line": 338,
             "description": "Stores the Skylink server Application Key owner string for the selected room.",
             "itemtype": "attribute",
             "name": "_appKeyOwner",
@@ -3015,7 +3012,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 359,
+            "line": 349,
             "description": "Stores the room connection information that is passed for starting\n  the selected room connection. Some of these information are also\n  used and required to send for every messages sent to the platform\n  signaling connection for targeting the correct room and\n  self identification in the room.",
             "itemtype": "attribute",
             "name": "_room",
@@ -3083,7 +3080,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 400,
+            "line": 390,
             "description": "Starts a <code>HTTP /GET</code> REST call to the platform server to\n  retrieve the required connection information.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -3246,7 +3243,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 565,
+            "line": 555,
             "description": "Parses the connection information retrieved from the platform server and\n  stores them into the relevant attributes in\n  {{#crossLink \"Skylink/_room:attribute\"}}_room{{/crossLink}} and\n  {{#crossLink \"Skylink/_user:attribute\"}}_user{{/crossLink}}.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -3375,7 +3372,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 694,
+            "line": 684,
             "description": "Starts loading the required dependencies and then retrieve the required\n  connection information from the platform server.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -3389,7 +3386,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 789,
+            "line": 779,
             "description": "Starts loading the required connection information to start connection\n  based on the selected room in {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -3422,7 +3419,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 840,
+            "line": 830,
             "description": "Initialises and configures Skylink to begin any connection.\n<b>NOTE</b> that this is the first method that has to be called before\n  using any other functionalities other than debugging features like\n  {{#crossLink \"Skylink/setLogLevel:method\"}}setLogLevel(){{/crossLink}} and\n  {{#crossLink \"Skylink/setDebugMode:method\"}}setDebugMode(){{/crossLink}} and\n  after all event subscriptions like {{#crossLink \"Skylink/on:method\"}}on(){{/crossLink}}\n  or {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}} has been made.\nThis is where the Application Key is configured and attached to Skylink for usage.",
             "itemtype": "method",
             "name": "init",
@@ -11348,111 +11345,103 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:1"
+            "line": " source/room-init.js:33"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:38"
+            "line": " source/room-init.js:115"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:120"
+            "line": " source/room-init.js:148"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:141"
+            "line": " source/room-init.js:167"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:158"
+            "line": " source/room-init.js:180"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:177"
+            "line": " source/room-init.js:193"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:190"
+            "line": " source/room-init.js:204"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:203"
+            "line": " source/room-init.js:220"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:214"
+            "line": " source/room-init.js:232"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:230"
+            "line": " source/room-init.js:250"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:242"
+            "line": " source/room-init.js:268"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:260"
+            "line": " source/room-init.js:285"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:278"
+            "line": " source/room-init.js:314"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:295"
+            "line": " source/room-init.js:327"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:324"
+            "line": " source/room-init.js:338"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:337"
+            "line": " source/room-init.js:349"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:348"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/room-init.js:359"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/room-init.js:400"
+            "line": " source/room-init.js:390"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:565"
+            "line": " source/room-init.js:555"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:565"
+            "line": " source/room-init.js:555"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:694"
+            "line": " source/room-init.js:684"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:694"
+            "line": " source/room-init.js:684"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:789"
+            "line": " source/room-init.js:779"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:789"
+            "line": " source/room-init.js:779"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:840"
+            "line": " source/room-init.js:830"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:840"
+            "line": " source/room-init.js:830"
         },
         {
             "message": "unknown tag: component",
