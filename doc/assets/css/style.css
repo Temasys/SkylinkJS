@@ -168,8 +168,9 @@ h3 code {
   min-height: 0;
 }
 .code-item h4 {
-  font-size: 15px;
+  font-size: 12px;
   text-transform: uppercase;
+  font-weight: 600;
 }
 .code-item-trigger a {
   font-weight: normal;

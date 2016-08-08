@@ -1,9 +1,9 @@
 /**
  * <blockquote class="info">
- *   Current version: <code>0.1.0</code>
+ *   Note that this is used only for SDK developer purposes. 
+ *   Current version: <code>0.1.0</code><br>
  * </blockquote>
  * Contains the current version of the data transfer protocol.
- * This is used only for debugging purposes.
  * @attribute DT_PROTOCOL_VERSION
  * @type String
  * @readOnly
@@ -16,9 +16,9 @@ Skylink.prototype.DT_PROTOCOL_VERSION = '0.1.0';
  * Contains the list of data transfers directions.
  * @attribute DATA_TRANSFER_TYPE
  * @param {String} UPLOAD <small>Value <code>"upload"</code></small>
- *   The direction that indicates that transfer is uploading data to Peer.
+ *   The direction that indicates that transfer is uploading data from User to Peer.
  * @param {String} DOWNLOAD <small>Value <code>"download"</code></small>
- *   The direction that indicates that transfer is downloading data from Peer.
+ *   The direction that indicates that transfer is downloading data from Peer to User.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -33,7 +33,7 @@ Skylink.prototype.DATA_TRANSFER_TYPE = {
  * Contains the list of data transfer states.
  * @attribute DATA_TRANSFER_STATE
  * @param {String} UPLOAD_REQUEST <small>Value <code>"request"</code></small>
- *   The state when receiving a data transfer request from Peer.
+ *   The state when receiving a uploading data transfer request from Peer to User.
  *   <small>At this stage, you may allow users to accept or reject the data transfer request from Peer
  *     using the the <a href="#method_acceptDataTransfer"><code>acceptDataTransfer()</code> method</a>.</small>
  * @param {String} UPLOAD_STARTED <small>Value <code>"uploadStarted"</code></small>
@@ -181,9 +181,11 @@ Skylink.prototype._dataTransfersTimeout = {};
  * <blockquote class="info">
  *   Currently, the data transfers to the Android and iOS have interopability issues as noted
  *   in <a href="http://support.temasys.com.sg/support/discussions/topics/12000002852">an issue here</a>.<br>
- *   Additionally, the Android and iOS SDKs do not support simultaneous multi-transfers.
+ *   Additionally, the Android and iOS SDKs do not support simultaneous multi-transfers.<br>
+ *   Note that <code>enableDataChannel</code> has to be enabled from <a href="#method_init"><code>init()</code> method</a>
+ *   to utilise this method.
  * </blockquote>
- * Function that starts a data transfer to Peers.<br>
+ * Function that starts an uploading data transfer from User to Peers.<br>
  * Use the <a href="http://www.w3schools.com/tags/att_input_type.asp"><code>&lt;input type="file"&gt;</code></a>
  *   to transfer files as the returning <a href="https://developer.mozilla.org/en/docs/Web/API/File">
  *   File object</a> is a type of Blob.
@@ -258,7 +260,8 @@ Skylink.prototype._dataTransfersTimeout = {};
  * @param {JSON} callback.success.transferInfo The data transfer information.
  *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
  *      <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
- * @trigger incomingData, incomingDataRequest, dataTransferState, dataChannelState
+ * @trigger <ol>
+ *   <li>
  * @for Skylink
  * @since 0.5.5
  */
@@ -415,7 +418,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
  *   <b>Deprecation Warning!</b> This method has been deprecated, please use <a href="#method_acceptDataTransfer">
  *   <code>acceptDataTransfer()</code> method</a> instead.
  * </blockquote>
- * Function that accepts or rejects a data transfer request from Peer.
+ * Function that accepts or rejects an uploading data transfer request from Peer to User.
  * @method respondBlobRequest
  * @param {String} peerId The Peer ID of the data transfer request from Peer.
  * @param {String} transferId The data transfer ID.
@@ -431,7 +434,7 @@ Skylink.prototype.respondBlobRequest =
  *   Currently, the data transfers to the Android and iOS have interopability issues as noted
  *   in <a href="http://support.temasys.com.sg/support/discussions/topics/12000002852">an issue here</a>.
  * </blockquote>
- * Function that accepts or rejects a data transfer request from Peer.
+ * Function that accepts or rejects an uploading data transfer request from Peer to User.
  * @method acceptDataTransfer
  * @param {String} peerId The Peer ID of the data transfer request from Peer.
  * @param {String} transferId The data transfer ID.
@@ -626,7 +629,7 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
  *   you are considering to send large string to Peers, please use the <a href="#method_sendURLData">
  * <code>sendURLData()</code> method</a>.
  * </blockquote>
- * Function that sends a P2P message using the Datachannel connection.
+ * Function that sends a P2P message from User to Peers using the Datachannel connection.
  * @method sendP2PMessage
  * @param {String|JSON} message The message.
  * @param {String|Array} [targetPeerId] The target Peer ID to only send the P2P message to.<br>
@@ -715,7 +718,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
  * <blockquote class="info">
  *   Currently, the Android and iOS SDKs do not support this type of data transfer.
  * </blockquote>
- * Function that starts a string data transfer to Peers.
+ * Function that starts an uploading string data transfer from User to Peers.
  * @method sendURLData
  * @param {String} data The data string to transfer to Peer.
  * @param {Number} [timeout=60] The timeout to wait for response from Peer. Once timeout is reached without

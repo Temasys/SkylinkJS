@@ -376,7 +376,7 @@
         {
             "file": "source/data-process.js",
             "line": 1,
-            "description": "<blockquote class=\"info\">\n  Currently, we do not support Blob or ArrayBuffer data type of transfers, but we\n  look into implementing it in the future.\n</blockquote>\nContains the list of supported data transfer data types.",
+            "description": "<blockquote class=\"info\">\n  Currently, we do not support Blob or ArrayBuffer data type of transfers, but we\n  will look into implementing it in the future.\n</blockquote>\nContains the list of supported data transfer data types.",
             "itemtype": "attribute",
             "name": "DATA_TRANSFER_DATA_TYPE",
             "params": [
@@ -488,7 +488,7 @@
         {
             "file": "source/data-transfer.js",
             "line": 1,
-            "description": "<blockquote class=\"info\">\n  Current version: <code>0.1.0</code>\n</blockquote>\nContains the current version of the data transfer protocol.\nThis is used only for debugging purposes.",
+            "description": "<blockquote class=\"info\">\n  Note that this is used only for SDK developer purposes. \n  Current version: <code>0.1.0</code><br>\n</blockquote>\nContains the current version of the data transfer protocol.",
             "itemtype": "attribute",
             "name": "DT_PROTOCOL_VERSION",
             "type": "String",
@@ -505,12 +505,12 @@
             "params": [
                 {
                     "name": "UPLOAD",
-                    "description": "<small>Value <code>\"upload\"</code></small>\n  The direction that indicates that transfer is uploading data to Peer.",
+                    "description": "<small>Value <code>\"upload\"</code></small>\n  The direction that indicates that transfer is uploading data from User to Peer.",
                     "type": "String"
                 },
                 {
                     "name": "DOWNLOAD",
-                    "description": "<small>Value <code>\"download\"</code></small>\n  The direction that indicates that transfer is downloading data from Peer.",
+                    "description": "<small>Value <code>\"download\"</code></small>\n  The direction that indicates that transfer is downloading data from Peer to User.",
                     "type": "String"
                 }
             ],
@@ -528,7 +528,7 @@
             "params": [
                 {
                     "name": "UPLOAD_REQUEST",
-                    "description": "<small>Value <code>\"request\"</code></small>\n  The state when receiving a data transfer request from Peer.\n  <small>At this stage, you may allow users to accept or reject the data transfer request from Peer\n    using the the <a href=\"#method_acceptDataTransfer\"><code>acceptDataTransfer()</code> method</a>.</small>",
+                    "description": "<small>Value <code>\"request\"</code></small>\n  The state when receiving a uploading data transfer request from Peer to User.\n  <small>At this stage, you may allow users to accept or reject the data transfer request from Peer\n    using the the <a href=\"#method_acceptDataTransfer\"><code>acceptDataTransfer()</code> method</a>.</small>",
                     "type": "String"
                 },
                 {
@@ -746,7 +746,7 @@
         {
             "file": "source/data-transfer.js",
             "line": 180,
-            "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have interopability issues as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.<br>\n  Additionally, the Android and iOS SDKs do not support simultaneous multi-transfers.\n</blockquote>\nFunction that starts a data transfer to Peers.<br>\nUse the <a href=\"http://www.w3schools.com/tags/att_input_type.asp\"><code>&lt;input type=\"file\"&gt;</code></a>\n  to transfer files as the returning <a href=\"https://developer.mozilla.org/en/docs/Web/API/File\">\n  File object</a> is a type of Blob.",
+            "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have interopability issues as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.<br>\n  Additionally, the Android and iOS SDKs do not support simultaneous multi-transfers.<br>\n  Note that <code>enableDataChannel</code> has to be enabled from <a href=\"#method_init\"><code>init()</code> method</a>\n  to utilise this method.\n</blockquote>\nFunction that starts an uploading data transfer from User to Peers.<br>\nUse the <a href=\"http://www.w3schools.com/tags/att_input_type.asp\"><code>&lt;input type=\"file\"&gt;</code></a>\n  to transfer files as the returning <a href=\"https://developer.mozilla.org/en/docs/Web/API/File\">\n  File object</a> is a type of Blob.",
             "itemtype": "method",
             "name": "sendBlobData",
             "params": [
@@ -866,14 +866,14 @@
                     ]
                 }
             ],
-            "trigger": "incomingData, incomingDataRequest, dataTransferState, dataChannelState",
+            "trigger": "<ol>\n  <li>",
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 411,
-            "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have interopability issues as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.<br>\n  <b>Deprecation Warning!</b> This method has been deprecated, please use <a href=\"#method_acceptDataTransfer\">\n  <code>acceptDataTransfer()</code> method</a> instead.\n</blockquote>\nFunction that accepts or rejects a data transfer request from Peer.",
+            "line": 414,
+            "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have interopability issues as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.<br>\n  <b>Deprecation Warning!</b> This method has been deprecated, please use <a href=\"#method_acceptDataTransfer\">\n  <code>acceptDataTransfer()</code> method</a> instead.\n</blockquote>\nFunction that accepts or rejects an uploading data transfer request from Peer to User.",
             "itemtype": "method",
             "name": "respondBlobRequest",
             "params": [
@@ -903,8 +903,8 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 429,
-            "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have interopability issues as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.\n</blockquote>\nFunction that accepts or rejects a data transfer request from Peer.",
+            "line": 432,
+            "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have interopability issues as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.\n</blockquote>\nFunction that accepts or rejects an uploading data transfer request from Peer to User.",
             "itemtype": "method",
             "name": "acceptDataTransfer",
             "params": [
@@ -932,7 +932,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 515,
+            "line": 518,
             "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have interopability issues as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.<br>\n  <b>Deprecation Warning!</b> This method has been deprecated, please use <a href=\"#method_cancelDataTransfer\">\n  <code>method_cancelDataTransfer()</code> method</a> instead.\n</blockquote>\nFunction that terminates a data transfer.",
             "itemtype": "method",
             "name": "cancelBlobTransfer",
@@ -956,7 +956,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 532,
+            "line": 535,
             "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have been interopability issues as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.\n</blockquote>\nFunction that terminates a data transfer.",
             "itemtype": "method",
             "name": "cancelDataTransfer",
@@ -978,8 +978,8 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 621,
-            "description": "<blockquote class=\"info\">\n  Note that message Datachannel type connection MUST be opened first before this\n  functionality would work.<br>\n  The estimated maximum size for the string to be sent over is about <code>16 kB</code>. If\n  you are considering to send large string to Peers, please use the <a href=\"#method_sendURLData\">\n<code>sendURLData()</code> method</a>.\n</blockquote>\nFunction that sends a P2P message using the Datachannel connection.",
+            "line": 624,
+            "description": "<blockquote class=\"info\">\n  Note that message Datachannel type connection MUST be opened first before this\n  functionality would work.<br>\n  The estimated maximum size for the string to be sent over is about <code>16 kB</code>. If\n  you are considering to send large string to Peers, please use the <a href=\"#method_sendURLData\">\n<code>sendURLData()</code> method</a>.\n</blockquote>\nFunction that sends a P2P message from User to Peers using the Datachannel connection.",
             "itemtype": "method",
             "name": "sendP2PMessage",
             "params": [
@@ -1001,8 +1001,8 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 714,
-            "description": "<blockquote class=\"info\">\n  Currently, the Android and iOS SDKs do not support this type of data transfer.\n</blockquote>\nFunction that starts a string data transfer to Peers.",
+            "line": 717,
+            "description": "<blockquote class=\"info\">\n  Currently, the Android and iOS SDKs do not support this type of data transfer.\n</blockquote>\nFunction that starts an uploading string data transfer from User to Peers.",
             "itemtype": "method",
             "name": "sendURLData",
             "params": [
@@ -1128,7 +1128,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 940,
+            "line": 943,
             "description": "Function that sets the data transfer \"wait-for-response\" timeout.\nWhen there is not response after timeout, the data transfer will be terminated.",
             "itemtype": "method",
             "name": "_setDataChannelTimeout",
@@ -1139,7 +1139,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 986,
+            "line": 989,
             "description": "Function that stops and clears the data transfer \"wait-for-response\" timeout.",
             "itemtype": "method",
             "name": "_clearDataChannelTimeout",
@@ -1150,7 +1150,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1004,
+            "line": 1007,
             "description": "Function that starts a data transfer to Peer.\nThis will open a new data type of Datachannel connection with Peer if\n  simultaneous multi-transfers is supported by Peer.",
             "itemtype": "method",
             "name": "_sendBlobDataToPeer",
@@ -1161,7 +1161,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1220,
+            "line": 1223,
             "description": "Function that handles the data received from Datachannel and\n  routes to the relevant data transfer protocol handler.",
             "itemtype": "method",
             "name": "_dataChannelProtocolHandler",
@@ -1172,7 +1172,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1287,
+            "line": 1290,
             "description": "Function that handles the \"WRQ\" data transfer protocol.",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
@@ -1183,7 +1183,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1341,
+            "line": 1344,
             "description": "Function that handles the \"ACK\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
@@ -1194,7 +1194,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1488,
+            "line": 1491,
             "description": "Function that handles the \"MESSAGE\" data transfer protocol.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -1205,7 +1205,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1508,
+            "line": 1511,
             "description": "Function that handles the \"ERROR\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -1216,7 +1216,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1548,
+            "line": 1551,
             "description": "Function that handles the \"CANCEL\" data transfer protocol.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -1227,7 +1227,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1627,
+            "line": 1630,
             "description": "Function that handles the data transfer chunk received.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
@@ -1238,7 +1238,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1852,
+            "line": 1855,
             "description": "Function that start the data transfer with the list of targeted Peer IDs provided.\nAt this stage, it will open a new Datachannel connection if simultaneous multi-transfers is\n  supported by Peer, or it will using the messaging type Datachannel connection.\nNote that 1 data transfer can occur at a time in 1 Datachannel connection.",
             "itemtype": "method",
             "name": "_startDataTransfer",
@@ -11281,27 +11281,27 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:411"
+            "line": " source/data-transfer.js:414"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:429"
+            "line": " source/data-transfer.js:432"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:515"
+            "line": " source/data-transfer.js:518"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:532"
+            "line": " source/data-transfer.js:535"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:621"
+            "line": " source/data-transfer.js:624"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:714"
+            "line": " source/data-transfer.js:717"
         },
         {
             "message": "unknown tag: trigger",

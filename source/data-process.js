@@ -1,7 +1,7 @@
 /**
  * <blockquote class="info">
  *   Currently, we do not support Blob or ArrayBuffer data type of transfers, but we
- *   look into implementing it in the future.
+ *   will look into implementing it in the future.
  * </blockquote>
  * Contains the list of supported data transfer data types.
  * @attribute DATA_TRANSFER_DATA_TYPE

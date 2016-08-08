@@ -53,7 +53,7 @@ $(document).ready(function () {
     $(element).html(elementHTML);
   });
   // seperate every code-item-trigger
-  $('.code-item-trigger').each(function () {
+  /*$('.code-item-trigger').each(function () {
     var element = $(this);
     var elementTriggerList = $(element).html().split(',');
     var elementOutputHTML = '';
@@ -64,7 +64,7 @@ $(document).ready(function () {
         '" class="label label-primary">' + elementTriggerList[i] + '</a>';
     }
     $(element).html(elementOutputHTML);
-  });
+  });*/
   // remove unwanted code information
   $('.code-item-information').each(function () {
     var element = $(this);
