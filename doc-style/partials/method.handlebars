@@ -120,6 +120,22 @@
     {{{methodDescription}}}
   </div>
 
+  {{#example}}
+    <div class="code-item-section">
+      <h4>Example:</h4>
+      <pre class="example-content prettyprint">
+        {{{.}}}
+      </pre>
+    </div>
+  {{/example}}
+
+  {{#requires}}
+    <div class="code-item-section">
+      <h4>Requires:</h4>
+      {{{.}}}
+    </div>
+  {{/requires}}
+
   {{#if trigger}}
   <div class="code-item-section">
     <h4>Events Sequence:</h4>
@@ -207,13 +223,5 @@
     </div>
   {{/return}}
 
-  {{#example}}
-    <div class="code-item-section">
-      <h4>Example:</h4>
-      <pre class="example-content prettyprint">
-        {{{.}}}
-      </pre>
-    </div>
-  {{/example}}
   <hr>
 </div>

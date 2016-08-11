@@ -231,9 +231,15 @@ h3 code {
   background: #f0ad4e;
   color: #fff;
 }
-
-
-
+.desc-seq ul {
+  list-style-type: disc;
+  padding-left: 25px;
+  color: #828282;
+  font-size: 13px;
+}
+.desc-seq ul li {
+  margin: 5px 0;
+}
 .desc-seq small,
 .returns-description small,
 .param .param-description small {

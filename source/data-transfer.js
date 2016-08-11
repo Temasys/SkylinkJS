@@ -181,23 +181,16 @@ Skylink.prototype._dataTransfersTimeout = {};
  * <blockquote class="info">
  *   Currently, the data transfers to the Android and iOS have interopability issues as noted
  *   in <a href="http://support.temasys.com.sg/support/discussions/topics/12000002852">an issue here</a>.<br>
- *   Additionally, the Android and iOS SDKs do not support simultaneous data transfers, which means
- *   that data transfers will occur in the <a href="#attr_DATA_CHANNEL_TYPE"><code>MESSAGING</code> type</a> of
- *   Datachannel connection and only one uploading or downloading data transfer will occur (1 simultaneously) with Peer.<br>
- *   Note that <code>enableDataChannel</code> has to be enabled from <a href="#method_init"><code>init()</code> method</a>
- *   to utilise this method.
+ *   Additionally, the Android and iOS SDKs do not support simultaneous data transfers.
  * </blockquote>
- * Function that starts an uploading data transfer from User to Peers.<br>
- * Use the <a href="http://www.w3schools.com/tags/att_input_type.asp"><code>&lt;input type="file"&gt;</code></a>
- *   to transfer files as the returning <a href="https://developer.mozilla.org/en/docs/Web/API/File">
- *   File object</a> is a type of Blob.
+ * Function that starts an uploading data transfer from User to Peers.
  * @method sendBlobData
  * @param {Blob} data The Blob object to transfer to Peer.
  * @param {Number} [timeout=60] The timeout to wait for response from Peer. Once timeout is reached without
  *   response, the data transfer is terminated.
  * @param {String|Array} [targetPeerId] The target Peer ID to only start the data transfer with.<br>
- * &#8594; When provided as an Array, it will start the data transfers with all the Peer IDs provided.<br>
- * &#8594; When not provided, it will start the data transfers with all the currently connected Peers.
+ * - When provided as an Array, it will start the data transfers with all the Peer IDs provided.<br>
+ * - When not provided, it will start the data transfers with all the currently connected Peers.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  * @param {JSON} callback.error The error result in request.
@@ -262,30 +255,61 @@ Skylink.prototype._dataTransfersTimeout = {};
  * @param {JSON} callback.success.transferInfo The data transfer information.
  *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
  *      <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
+ *
  * @trigger <ol class="desc-seq">
- *   <li>Opens a new Datachannel connection with targeted Peers that supports simultaneous data transfers.</li>
- *   <li>Starts the data transfers when the <a href="#dataChannelState"><code>dataChannelState</code> event</a>
- *      triggers parameter payload <code>state</code> as <code>OPEN</code> for the new Datachannel connection
- *      (indicated with <code>channelType</code> value <code>DATA</code>). For Peers that do not support
- *      simultaneous data transfers, <code>sendBlobData()</code> checks if the Datachannel type
- *      <code>MESSAGING</code> connection is opened and that there is no current uploading or downloading data transfers
- *      in the Datachannel connection. If Peers do not have any Datachannel connections created, data transfer with
- *      Peer is aborted.</li>
- *   <li>The Peers will know if there is any data transfer request from User with <a href="event_dataTransferState">
- *      <code>dataTransferState</code> event</a> triggers parameter payload <code>state</code> as <code>UPLOAD_REQUEST</code>
- *      or with the <a href="#event_incomingDataRequest"><code>incomingDataRequest</code> event</a>. The Peers can
- *      choose to accept or reject User's data transfer request with the  <a href="#method_acceptDataTransfer">
- *      <code>acceptDataTransfer()</code> method</a>.</li>
- *   <li>Once data transfer request is accepted by Peers, the <a href="#event_dataTransferState"><code>dataTransferState</code>
- *      event</a> parameter payload <code>state</code> value will be
- *      < Starts the data transfer with targeted Peers.
- *      <small>If the data transfer is accepted by Peer, the
- *      , else if rejected, the <code>state</code> value will be
- *      <code>REJECTED</code>. Peers will know if there is a data transfer request from User with
- *      <code>state</code> value as <code>UPLOAD_REQUEST</code>, or they may subscribe to the
- *      . The Peers can then
- *      accept or reject the User's data transfer request with the.</small></li>
- *   <li>Data transfer <code></ol>
+ *   <li>Opens a new Datachannel connection with targeted Peers.<ul>
+ *      <li>Triggers <a href="#event_dataChannelState">
+ *      <code>dataChannelState</code> event</a> with parameter payload <code>channelType</code> as
+ *      <code>DATA</code>.</li></ul></li>
+ *   <li>Starts sending data transfer requests to targeted Peers when the Datachannel connections are opened.<ul>
+ *      <li>For Peers that do not support simultaneous data transfers, the <code>MESSAGING</code> Datachannel type connection
+ *      will be used. Note that only 1 simultaneous data transfer an occur between the Peers and the User.</li>
+ *      <li>For Peers that do not have any Datachannel connections or that the <code>MESSAGING</code> Datachannel type
+ *      connection is not opened, the data transfer to the Peers will be terminated.</small></li></ul></li>
+ *   <li>Peers receive the data transfer request received from User. <ul>
+ *       <li>Triggers <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> with paramter payload
+ *       <code>state</code> as <code>UPLOAD_REQUEST</code> for Peers.</li>
+ *       <li>Triggers <a href="#event_incomingDataRequest"><code>incomingDataRequest</code> event</a>.</li>
+ *       <li>Peers can accept or reject the data transfer request with the <a href="#method_acceptDataTransfer">
+ *       <code>acceptDataTransfer()</code> method</a>.</li></ul></li>
+ *   <li>User receive data transfer request response from each Peer. <ul>
+ *       <li>Triggers <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> with parameter payload
+ *       <code>state</code> as <code>UPLOAD_STARTED</code> when Peer accepts data transfer request and data transfer to Peer
+ *       has started.</li>
+ *        <li>Triggers <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> with parameter payload
+ *       <code>state</code> as <code>REJECTED</code> when Peer rejects data transfer request and data transfer to Peer
+ *       has been terminated.</li></ul></li>
+ *   <li>Starts sending data to Peers.<ul>
+ *       <li>Triggers <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> with parameter payload
+ *       <code>state</code> as <code>UPLOADING</code> for User when data transfer is in-progress.</li>
+ *       <li>Triggers <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> with parameter payload
+ *       <code>state</code> as <code>DOWNLOADING</code> for Peers when data transfer is in-progress.</li></ul></li>
+ *   <li>Completes data transfer to Peers.<ul>
+ *       <li>Triggers <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> with parameter payload
+ *       <code>state</code> as <code>UPLOAD_COMPLETED</code> for User.</li>
+ *       <li>Triggers <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> with parameter payload
+ *       <code>state</code> as <code>DOWNLOAD_COMPLETED</code> for Peers.</li>
+ *       <li>Triggers <a href="#event_incomingData"><code>incomingData</code> event</a>.</li></ul></li>
+ *   <li>Closes the Datachannel connection with targeted Peers.<ul>
+ *       <li>Triggers <a href="#event_dataChannelState">
+ *       <code>dataChannelState</code> event</a> with parameter payload <code>state</code> as <code>CLOSED</code> and
+ *       <code>channelType</code> as <code>DATA</code>.</li></ul></li>
+ *   </ol>
+ *
+ * @example &lt;body&gt;
+ *   &lt;input type="file" onchange="uploadFile(this.Files)"&gt;
+ *   &lt;script&gt;
+ *     function uploadFile(files) {
+ *       skylinkDemo.sendBlobData(files[0], function (err, success) {
+ *         if (err) {
+ *           // sendBlobData() error
+ *           return;
+ *         }
+ *         // sendBlobData() success;
+ *       });
+ *     }
+ *   &lt;/script&gt;
+ *  &lt;/body&gt;
  * @for Skylink
  * @since 0.5.5
  */

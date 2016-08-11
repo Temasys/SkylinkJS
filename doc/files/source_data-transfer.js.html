@@ -272,23 +272,16 @@ Skylink.prototype._dataTransfersTimeout = {};
  * &lt;blockquote class=&quot;info&quot;&gt;
  *   Currently, the data transfers to the Android and iOS have interopability issues as noted
  *   in &lt;a href=&quot;http://support.temasys.com.sg/support/discussions/topics/12000002852&quot;&gt;an issue here&lt;/a&gt;.&lt;br&gt;
- *   Additionally, the Android and iOS SDKs do not support simultaneous data transfers, which means
- *   that data transfers will occur in the &lt;a href=&quot;#attr_DATA_CHANNEL_TYPE&quot;&gt;&lt;code&gt;MESSAGING&lt;/code&gt; type&lt;/a&gt; of
- *   Datachannel connection and only one uploading or downloading data transfer will occur (1 simultaneously) with Peer.&lt;br&gt;
- *   Note that &lt;code&gt;enableDataChannel&lt;/code&gt; has to be enabled from &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;
- *   to utilise this method.
+ *   Additionally, the Android and iOS SDKs do not support simultaneous data transfers.
  * &lt;/blockquote&gt;
- * Function that starts an uploading data transfer from User to Peers.&lt;br&gt;
- * Use the &lt;a href=&quot;http://www.w3schools.com/tags/att_input_type.asp&quot;&gt;&lt;code&gt;&amp;lt;input type=&quot;file&quot;&amp;gt;&lt;/code&gt;&lt;/a&gt;
- *   to transfer files as the returning &lt;a href=&quot;https://developer.mozilla.org/en/docs/Web/API/File&quot;&gt;
- *   File object&lt;/a&gt; is a type of Blob.
+ * Function that starts an uploading data transfer from User to Peers.
  * @method sendBlobData
  * @param {Blob} data The Blob object to transfer to Peer.
  * @param {Number} [timeout=60] The timeout to wait for response from Peer. Once timeout is reached without
  *   response, the data transfer is terminated.
  * @param {String|Array} [targetPeerId] The target Peer ID to only start the data transfer with.&lt;br&gt;
- * &amp;#8594; When provided as an Array, it will start the data transfers with all the Peer IDs provided.&lt;br&gt;
- * &amp;#8594; When not provided, it will start the data transfers with all the currently connected Peers.
+ * - When provided as an Array, it will start the data transfers with all the Peer IDs provided.&lt;br&gt;
+ * - When not provided, it will start the data transfers with all the currently connected Peers.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  * @param {JSON} callback.error The error result in request.
@@ -353,30 +346,61 @@ Skylink.prototype._dataTransfersTimeout = {};
  * @param {JSON} callback.success.transferInfo The data transfer information.
  *   &lt;small&gt;Object signature matches the &lt;code&gt;transferInfo&lt;/code&gt; parameter payload received in the
  *      &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
+ *
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
- *   &lt;li&gt;Opens a new Datachannel connection with targeted Peers that supports simultaneous data transfers.&lt;/li&gt;
- *   &lt;li&gt;Starts the data transfers when the &lt;a href=&quot;#dataChannelState&quot;&gt;&lt;code&gt;dataChannelState&lt;/code&gt; event&lt;/a&gt;
- *      triggers parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;OPEN&lt;/code&gt; for the new Datachannel connection
- *      (indicated with &lt;code&gt;channelType&lt;/code&gt; value &lt;code&gt;DATA&lt;/code&gt;). For Peers that do not support
- *      simultaneous data transfers, &lt;code&gt;sendBlobData()&lt;/code&gt; checks if the Datachannel type
- *      &lt;code&gt;MESSAGING&lt;/code&gt; connection is opened and that there is no current uploading or downloading data transfers
- *      in the Datachannel connection. If Peers do not have any Datachannel connections created, data transfer with
- *      Peer is aborted.&lt;/li&gt;
- *   &lt;li&gt;The Peers will know if there is any data transfer request from User with &lt;a href=&quot;event_dataTransferState&quot;&gt;
- *      &lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt; triggers parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;UPLOAD_REQUEST&lt;/code&gt;
- *      or with the &lt;a href=&quot;#event_incomingDataRequest&quot;&gt;&lt;code&gt;incomingDataRequest&lt;/code&gt; event&lt;/a&gt;. The Peers can
- *      choose to accept or reject User&#x27;s data transfer request with the  &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;
- *      &lt;code&gt;acceptDataTransfer()&lt;/code&gt; method&lt;/a&gt;.&lt;/li&gt;
- *   &lt;li&gt;Once data transfer request is accepted by Peers, the &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt;
- *      event&lt;/a&gt; parameter payload &lt;code&gt;state&lt;/code&gt; value will be
- *      &lt; Starts the data transfer with targeted Peers.
- *      &lt;small&gt;If the data transfer is accepted by Peer, the
- *      , else if rejected, the &lt;code&gt;state&lt;/code&gt; value will be
- *      &lt;code&gt;REJECTED&lt;/code&gt;. Peers will know if there is a data transfer request from User with
- *      &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;UPLOAD_REQUEST&lt;/code&gt;, or they may subscribe to the
- *      . The Peers can then
- *      accept or reject the User&#x27;s data transfer request with the.&lt;/small&gt;&lt;/li&gt;
- *   &lt;li&gt;Data transfer &lt;code&gt;&lt;/ol&gt;
+ *   &lt;li&gt;Opens a new Datachannel connection with targeted Peers.&lt;ul&gt;
+ *      &lt;li&gt;Triggers &lt;a href=&quot;#event_dataChannelState&quot;&gt;
+ *      &lt;code&gt;dataChannelState&lt;/code&gt; event&lt;/a&gt; with parameter payload &lt;code&gt;channelType&lt;/code&gt; as
+ *      &lt;code&gt;DATA&lt;/code&gt;.&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;
+ *   &lt;li&gt;Starts sending data transfer requests to targeted Peers when the Datachannel connections are opened.&lt;ul&gt;
+ *      &lt;li&gt;For Peers that do not support simultaneous data transfers, the &lt;code&gt;MESSAGING&lt;/code&gt; Datachannel type connection
+ *      will be used. Note that only 1 simultaneous data transfer an occur between the Peers and the User.&lt;/li&gt;
+ *      &lt;li&gt;For Peers that do not have any Datachannel connections or that the &lt;code&gt;MESSAGING&lt;/code&gt; Datachannel type
+ *      connection is not opened, the data transfer to the Peers will be terminated.&lt;/small&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;
+ *   &lt;li&gt;Peers receive the data transfer request received from User. &lt;ul&gt;
+ *       &lt;li&gt;Triggers &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt; with paramter payload
+ *       &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;UPLOAD_REQUEST&lt;/code&gt; for Peers.&lt;/li&gt;
+ *       &lt;li&gt;Triggers &lt;a href=&quot;#event_incomingDataRequest&quot;&gt;&lt;code&gt;incomingDataRequest&lt;/code&gt; event&lt;/a&gt;.&lt;/li&gt;
+ *       &lt;li&gt;Peers can accept or reject the data transfer request with the &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;
+ *       &lt;code&gt;acceptDataTransfer()&lt;/code&gt; method&lt;/a&gt;.&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;
+ *   &lt;li&gt;User receive data transfer request response from each Peer. &lt;ul&gt;
+ *       &lt;li&gt;Triggers &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt; with parameter payload
+ *       &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;UPLOAD_STARTED&lt;/code&gt; when Peer accepts data transfer request and data transfer to Peer
+ *       has started.&lt;/li&gt;
+ *        &lt;li&gt;Triggers &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt; with parameter payload
+ *       &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;REJECTED&lt;/code&gt; when Peer rejects data transfer request and data transfer to Peer
+ *       has been terminated.&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;
+ *   &lt;li&gt;Starts sending data to Peers.&lt;ul&gt;
+ *       &lt;li&gt;Triggers &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt; with parameter payload
+ *       &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;UPLOADING&lt;/code&gt; for User when data transfer is in-progress.&lt;/li&gt;
+ *       &lt;li&gt;Triggers &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt; with parameter payload
+ *       &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DOWNLOADING&lt;/code&gt; for Peers when data transfer is in-progress.&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;
+ *   &lt;li&gt;Completes data transfer to Peers.&lt;ul&gt;
+ *       &lt;li&gt;Triggers &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt; with parameter payload
+ *       &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;UPLOAD_COMPLETED&lt;/code&gt; for User.&lt;/li&gt;
+ *       &lt;li&gt;Triggers &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt; with parameter payload
+ *       &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DOWNLOAD_COMPLETED&lt;/code&gt; for Peers.&lt;/li&gt;
+ *       &lt;li&gt;Triggers &lt;a href=&quot;#event_incomingData&quot;&gt;&lt;code&gt;incomingData&lt;/code&gt; event&lt;/a&gt;.&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;
+ *   &lt;li&gt;Closes the Datachannel connection with targeted Peers.&lt;ul&gt;
+ *       &lt;li&gt;Triggers &lt;a href=&quot;#event_dataChannelState&quot;&gt;
+ *       &lt;code&gt;dataChannelState&lt;/code&gt; event&lt;/a&gt; with parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;CLOSED&lt;/code&gt; and
+ *       &lt;code&gt;channelType&lt;/code&gt; as &lt;code&gt;DATA&lt;/code&gt;.&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;
+ *   &lt;/ol&gt;
+ *
+ * @example &amp;lt;body&amp;gt;
+ *   &amp;lt;input type=&quot;file&quot; onchange=&quot;uploadFile(this.Files)&quot;&amp;gt;
+ *   &amp;lt;script&amp;gt;
+ *     function uploadFile(files) {
+ *       skylinkDemo.sendBlobData(files[0], function (err, success) {
+ *         if (err) {
+ *           // sendBlobData() error
+ *           return;
+ *         }
+ *         // sendBlobData() success;
+ *       });
+ *     }
+ *   &amp;lt;/script&amp;gt;
+ *  &amp;lt;/body&amp;gt;
  * @for Skylink
  * @since 0.5.5
  */
