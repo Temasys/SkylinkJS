@@ -1,7 +1,7 @@
 /**
  * <blockquote class="info">
- *   Note that this is used only for SDK developer purposes. 
- *   Current version: <code>0.1.0</code><br>
+ *   Note that this is used only for SDK developer purposes.<br>
+ *   Current version: <code>0.1.0</code>
  * </blockquote>
  * Contains the current version of the data transfer protocol.
  * @attribute DT_PROTOCOL_VERSION
@@ -112,7 +112,7 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
 };
 
 /**
- * Stores the list of types of SDKs that do not support simultaneous multi-transfers.
+ * Stores the list of types of SDKs that do not support simultaneous data transfers.
  * @attribute _INTEROP_MULTI_TRANSFERS
  * @type Array
  * @readOnly
@@ -181,7 +181,9 @@ Skylink.prototype._dataTransfersTimeout = {};
  * <blockquote class="info">
  *   Currently, the data transfers to the Android and iOS have interopability issues as noted
  *   in <a href="http://support.temasys.com.sg/support/discussions/topics/12000002852">an issue here</a>.<br>
- *   Additionally, the Android and iOS SDKs do not support simultaneous multi-transfers.<br>
+ *   Additionally, the Android and iOS SDKs do not support simultaneous data transfers, which means
+ *   that data transfers will occur in the <a href="#attr_DATA_CHANNEL_TYPE"><code>MESSAGING</code> type</a> of
+ *   Datachannel connection and only one uploading or downloading data transfer will occur (1 simultaneously) with Peer.<br>
  *   Note that <code>enableDataChannel</code> has to be enabled from <a href="#method_init"><code>init()</code> method</a>
  *   to utilise this method.
  * </blockquote>
@@ -260,8 +262,30 @@ Skylink.prototype._dataTransfersTimeout = {};
  * @param {JSON} callback.success.transferInfo The data transfer information.
  *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
  *      <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
- * @trigger <ol>
- *   <li>
+ * @trigger <ol class="desc-seq">
+ *   <li>Opens a new Datachannel connection with targeted Peers that supports simultaneous data transfers.</li>
+ *   <li>Starts the data transfers when the <a href="#dataChannelState"><code>dataChannelState</code> event</a>
+ *      triggers parameter payload <code>state</code> as <code>OPEN</code> for the new Datachannel connection
+ *      (indicated with <code>channelType</code> value <code>DATA</code>). For Peers that do not support
+ *      simultaneous data transfers, <code>sendBlobData()</code> checks if the Datachannel type
+ *      <code>MESSAGING</code> connection is opened and that there is no current uploading or downloading data transfers
+ *      in the Datachannel connection. If Peers do not have any Datachannel connections created, data transfer with
+ *      Peer is aborted.</li>
+ *   <li>The Peers will know if there is any data transfer request from User with <a href="event_dataTransferState">
+ *      <code>dataTransferState</code> event</a> triggers parameter payload <code>state</code> as <code>UPLOAD_REQUEST</code>
+ *      or with the <a href="#event_incomingDataRequest"><code>incomingDataRequest</code> event</a>. The Peers can
+ *      choose to accept or reject User's data transfer request with the  <a href="#method_acceptDataTransfer">
+ *      <code>acceptDataTransfer()</code> method</a>.</li>
+ *   <li>Once data transfer request is accepted by Peers, the <a href="#event_dataTransferState"><code>dataTransferState</code>
+ *      event</a> parameter payload <code>state</code> value will be
+ *      < Starts the data transfer with targeted Peers.
+ *      <small>If the data transfer is accepted by Peer, the
+ *      , else if rejected, the <code>state</code> value will be
+ *      <code>REJECTED</code>. Peers will know if there is a data transfer request from User with
+ *      <code>state</code> value as <code>UPLOAD_REQUEST</code>, or they may subscribe to the
+ *      . The Peers can then
+ *      accept or reject the User's data transfer request with the.</small></li>
+ *   <li>Data transfer <code></ol>
  * @for Skylink
  * @since 0.5.5
  */
@@ -1007,7 +1031,7 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender, channelN
 /**
  * Function that starts a data transfer to Peer.
  * This will open a new data type of Datachannel connection with Peer if
- *   simultaneous multi-transfers is supported by Peer.
+ *   simultaneous data transfers is supported by Peer.
  * @method _sendBlobDataToPeer
  * @private
  * @for Skylink
@@ -1854,7 +1878,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
 
 /**
  * Function that start the data transfer with the list of targeted Peer IDs provided.
- * At this stage, it will open a new Datachannel connection if simultaneous multi-transfers is
+ * At this stage, it will open a new Datachannel connection if simultaneous data transfers is
  *   supported by Peer, or it will using the messaging type Datachannel connection.
  * Note that 1 data transfer can occur at a time in 1 Datachannel connection.
  * @method _startDataTransfer

@@ -91,8 +91,8 @@
     <pre class="code prettyprint linenums">
 /**
  * &lt;blockquote class=&quot;info&quot;&gt;
- *   Note that this is used only for SDK developer purposes. 
- *   Current version: &lt;code&gt;0.1.0&lt;/code&gt;&lt;br&gt;
+ *   Note that this is used only for SDK developer purposes.&lt;br&gt;
+ *   Current version: &lt;code&gt;0.1.0&lt;/code&gt;
  * &lt;/blockquote&gt;
  * Contains the current version of the data transfer protocol.
  * @attribute DT_PROTOCOL_VERSION
@@ -203,7 +203,7 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
 };
 
 /**
- * Stores the list of types of SDKs that do not support simultaneous multi-transfers.
+ * Stores the list of types of SDKs that do not support simultaneous data transfers.
  * @attribute _INTEROP_MULTI_TRANSFERS
  * @type Array
  * @readOnly
@@ -272,7 +272,9 @@ Skylink.prototype._dataTransfersTimeout = {};
  * &lt;blockquote class=&quot;info&quot;&gt;
  *   Currently, the data transfers to the Android and iOS have interopability issues as noted
  *   in &lt;a href=&quot;http://support.temasys.com.sg/support/discussions/topics/12000002852&quot;&gt;an issue here&lt;/a&gt;.&lt;br&gt;
- *   Additionally, the Android and iOS SDKs do not support simultaneous multi-transfers.&lt;br&gt;
+ *   Additionally, the Android and iOS SDKs do not support simultaneous data transfers, which means
+ *   that data transfers will occur in the &lt;a href=&quot;#attr_DATA_CHANNEL_TYPE&quot;&gt;&lt;code&gt;MESSAGING&lt;/code&gt; type&lt;/a&gt; of
+ *   Datachannel connection and only one uploading or downloading data transfer will occur (1 simultaneously) with Peer.&lt;br&gt;
  *   Note that &lt;code&gt;enableDataChannel&lt;/code&gt; has to be enabled from &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;
  *   to utilise this method.
  * &lt;/blockquote&gt;
@@ -351,8 +353,30 @@ Skylink.prototype._dataTransfersTimeout = {};
  * @param {JSON} callback.success.transferInfo The data transfer information.
  *   &lt;small&gt;Object signature matches the &lt;code&gt;transferInfo&lt;/code&gt; parameter payload received in the
  *      &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
- * @trigger &lt;ol&gt;
- *   &lt;li&gt;
+ * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
+ *   &lt;li&gt;Opens a new Datachannel connection with targeted Peers that supports simultaneous data transfers.&lt;/li&gt;
+ *   &lt;li&gt;Starts the data transfers when the &lt;a href=&quot;#dataChannelState&quot;&gt;&lt;code&gt;dataChannelState&lt;/code&gt; event&lt;/a&gt;
+ *      triggers parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;OPEN&lt;/code&gt; for the new Datachannel connection
+ *      (indicated with &lt;code&gt;channelType&lt;/code&gt; value &lt;code&gt;DATA&lt;/code&gt;). For Peers that do not support
+ *      simultaneous data transfers, &lt;code&gt;sendBlobData()&lt;/code&gt; checks if the Datachannel type
+ *      &lt;code&gt;MESSAGING&lt;/code&gt; connection is opened and that there is no current uploading or downloading data transfers
+ *      in the Datachannel connection. If Peers do not have any Datachannel connections created, data transfer with
+ *      Peer is aborted.&lt;/li&gt;
+ *   &lt;li&gt;The Peers will know if there is any data transfer request from User with &lt;a href=&quot;event_dataTransferState&quot;&gt;
+ *      &lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt; triggers parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;UPLOAD_REQUEST&lt;/code&gt;
+ *      or with the &lt;a href=&quot;#event_incomingDataRequest&quot;&gt;&lt;code&gt;incomingDataRequest&lt;/code&gt; event&lt;/a&gt;. The Peers can
+ *      choose to accept or reject User&#x27;s data transfer request with the  &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;
+ *      &lt;code&gt;acceptDataTransfer()&lt;/code&gt; method&lt;/a&gt;.&lt;/li&gt;
+ *   &lt;li&gt;Once data transfer request is accepted by Peers, the &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt;
+ *      event&lt;/a&gt; parameter payload &lt;code&gt;state&lt;/code&gt; value will be
+ *      &lt; Starts the data transfer with targeted Peers.
+ *      &lt;small&gt;If the data transfer is accepted by Peer, the
+ *      , else if rejected, the &lt;code&gt;state&lt;/code&gt; value will be
+ *      &lt;code&gt;REJECTED&lt;/code&gt;. Peers will know if there is a data transfer request from User with
+ *      &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;UPLOAD_REQUEST&lt;/code&gt;, or they may subscribe to the
+ *      . The Peers can then
+ *      accept or reject the User&#x27;s data transfer request with the.&lt;/small&gt;&lt;/li&gt;
+ *   &lt;li&gt;Data transfer &lt;code&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.5.5
  */
@@ -1098,7 +1122,7 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender, channelN
 /**
  * Function that starts a data transfer to Peer.
  * This will open a new data type of Datachannel connection with Peer if
- *   simultaneous multi-transfers is supported by Peer.
+ *   simultaneous data transfers is supported by Peer.
  * @method _sendBlobDataToPeer
  * @private
  * @for Skylink
@@ -1945,7 +1969,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
 
 /**
  * Function that start the data transfer with the list of targeted Peer IDs provided.
- * At this stage, it will open a new Datachannel connection if simultaneous multi-transfers is
+ * At this stage, it will open a new Datachannel connection if simultaneous data transfers is
  *   supported by Peer, or it will using the messaging type Datachannel connection.
  * Note that 1 data transfer can occur at a time in 1 Datachannel connection.
  * @method _startDataTransfer

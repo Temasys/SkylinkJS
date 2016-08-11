@@ -31,7 +31,7 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
  *   The Datachannel type that is used for messaging in
  *   <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>.
  *   This Datachannel type exists only once and may be used for data transfers (1 simultaneously) when
- *   Peer does not support multiple simultaneous data transfers.
+ *   Peer does not support simultaneous data transfers.
  *   The connection will only close when the Peer connection is closed.
  * @param {String} DATA <small>Value <code>"data"</code></small>
  *   The Datachannel type that is used only for a data transfer.
