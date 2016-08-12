@@ -323,7 +323,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
  *     if (state === skylinkDemo.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS) {
  *       // Display connection stats
  *     } else if (state === skylinkDemo.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR) {
- *       // Display connection stats error
+ *       // Display retrieval error
  *     }
  *   });
  *

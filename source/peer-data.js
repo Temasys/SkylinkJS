@@ -43,7 +43,20 @@ Skylink.prototype._userData = '';
  * Function that overwrites the User current custom data.
  * @method setUserData
  * @param {JSON|String} userData The updated custom data.
- * @trigger peerUpdated
+ * @trigger <ol class="desc-seq">
+ *   <li>Updates the User current custom data. <ul>
+ *     <li>If User is currently in Room, it will trigger the <a href="#event_peerUpdated"><code>peerUpdated</code> event</a>.</li>
+ *   </ul></li></ol>
+ * @example &lt;body&gt;
+ *   skylinkDemo.on("peerUpdated", function (peerId, peerInfo, isSelf) {
+ *     // Reflect updated custom data
+ *   });
+ *
+ *   skylinkDemo.on("peerJoined", function (peerId, peerInfo, isSelf) {
+ *     if (isSelf) {
+ *       skylinkDemo.setUserData("newData");
+ *     }
+ *   });
  * @for Skylink
  * @since 0.5.5
  */
@@ -70,6 +83,12 @@ Skylink.prototype.setUserData = function(userData) {
  * Function that retrieves the User current custom data.
  * @method getUserData
  * @return {JSON|String} The User current custom data.
+ * @trigger <ol class="desc-seq">
+ *   <li>Returns the User / Peer current custom data.</li></ol>
+ * @example &lt;body&gt;
+ *   skylinkDemo.on("iceConnectionState", function (state, peerId) {
+ *     var peerCustomData = skylinkDemo.getUserData(peerId);
+ *   });
  * @for Skylink
  * @since 0.5.10
  */
@@ -88,19 +107,6 @@ Skylink.prototype.getUserData = function(peerId) {
 };
 
 /**
- * Function that parses the User custom data provided.
- * @method _parseUserData
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._parseUserData = function(userData) {
-  log.debug('Parsing user data:', userData);
-
-  this._userData = userData || '';
-};
-
-/**
  * Function that retrieves the User / Peer current session information.
  * @method getPeerInfo
  * @param {String} [peerId] The Peer ID to retrieve current session information from.<br>
@@ -109,6 +115,12 @@ Skylink.prototype._parseUserData = function(userData) {
  * @return {JSON} The User / Peer current session information.
  *   <small>Object signature matches the <code>peerInfo</code> parameter payload received in the
  *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small>
+ * @trigger <ol class="desc-seq">
+ *   <li>Returns the User / Peer current session information.</li></ol>
+ * @example &lt;body&gt;
+ *   skylinkDemo.on("iceConnectionState", function (state, peerId) {
+ *     var peerInfo = skylinkDemo.getPeerInfo(peerId);
+ *   });
  * @for Skylink
  * @since 0.4.0
  */
@@ -162,4 +174,17 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       room: clone(this._selectedRoom)
     };
   }
+};
+
+/**
+ * Function that parses the User custom data provided.
+ * @method _parseUserData
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._parseUserData = function(userData) {
+  log.debug('Parsing user data:', userData);
+
+  this._userData = userData || '';
 };

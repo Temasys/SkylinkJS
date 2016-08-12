@@ -10565,7 +10565,7 @@ Once URI is formed, it will start a new socket.io connection with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l90"><code>source&#x2F;peer-data.js:90</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l179"><code>source&#x2F;peer-data.js:179</code></a>
       </small>
     
 
@@ -18298,7 +18298,7 @@ Function that terminates a data transfer.</p>
     if (state === skylinkDemo.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS) {
       // Display connection stats
     } else if (state === skylinkDemo.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR) {
-      // Display connection stats error
+      // Display retrieval error
     }
   });</p>
 <p>  skylinkDemo.on(&quot;peerJoined&quot;, function (peerId, peerInfo, isSelf) {
@@ -18597,7 +18597,7 @@ Function that terminates a data transfer.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l103"><code>source&#x2F;peer-data.js:103</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l109"><code>source&#x2F;peer-data.js:109</code></a>
       </small>
     
 
@@ -18616,9 +18616,26 @@ Function that terminates a data transfer.</p>
   </div>
 
   
+    <div class="code-item-section">
+      <h4>Example:</h4>
+      <pre class="example-content prettyprint">
+        <p> &lt;body&gt;
+  skylinkDemo.on(&quot;iceConnectionState&quot;, function (state, peerId) {
+    var peerInfo = skylinkDemo.getPeerInfo(peerId);
+  });</p>
+
+      </pre>
+    </div>
+  
 
   
 
+  
+  <div class="code-item-section">
+    <h4>Events Sequence:</h4>
+    <span class="code-item-trigger"><ol class="desc-seq">
+  <li>Returns the User / Peer current session information.</li></ol></span>
+  </div>
   
 
   
@@ -18900,7 +18917,7 @@ Function that retrieves the list of Peer IDs from Rooms within in the same App s
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l69"><code>source&#x2F;peer-data.js:69</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l82"><code>source&#x2F;peer-data.js:82</code></a>
       </small>
     
 
@@ -18919,9 +18936,26 @@ Function that retrieves the list of Peer IDs from Rooms within in the same App s
   </div>
 
   
+    <div class="code-item-section">
+      <h4>Example:</h4>
+      <pre class="example-content prettyprint">
+        <p> &lt;body&gt;
+  skylinkDemo.on(&quot;iceConnectionState&quot;, function (state, peerId) {
+    var peerCustomData = skylinkDemo.getUserData(peerId);
+  });</p>
+
+      </pre>
+    </div>
+  
 
   
 
+  
+  <div class="code-item-section">
+    <h4>Events Sequence:</h4>
+    <span class="code-item-trigger"><ol class="desc-seq">
+  <li>Returns the User / Peer current custom data.</li></ol></span>
+  </div>
   
 
   
@@ -24534,13 +24568,32 @@ Function that starts an uploading string data transfer from User to Peers.</p>
   </div>
 
   
+    <div class="code-item-section">
+      <h4>Example:</h4>
+      <pre class="example-content prettyprint">
+        <p> &lt;body&gt;
+  skylinkDemo.on(&quot;peerUpdated&quot;, function (peerId, peerInfo, isSelf) {
+    // Reflect updated custom data
+  });</p>
+<p>  skylinkDemo.on(&quot;peerJoined&quot;, function (peerId, peerInfo, isSelf) {
+    if (isSelf) {
+      skylinkDemo.setUserData(&quot;newData&quot;);
+    }
+  });</p>
+
+      </pre>
+    </div>
+  
 
   
 
   
   <div class="code-item-section">
     <h4>Events Sequence:</h4>
-    <span class="code-item-trigger">peerUpdated</span>
+    <span class="code-item-trigger"><ol class="desc-seq">
+  <li>Updates the User current custom data. <ul>
+    <li>If User is currently in Room, it will trigger the <a href="#event_peerUpdated"><code>peerUpdated</code> event</a>.</li>
+  </ul></li></ol></span>
   </div>
   
 
