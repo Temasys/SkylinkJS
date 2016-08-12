@@ -875,7 +875,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 467,
+            "line": 465,
             "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have interopability issues as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.<br>\n  <b>Deprecation Warning!</b> This method has been deprecated, please use <a href=\"#method_acceptDataTransfer\">\n  <code>acceptDataTransfer()</code> method</a> instead.\n</blockquote>\nFunction that accepts or rejects an uploading data transfer request from Peer to User.",
             "itemtype": "method",
             "name": "respondBlobRequest",
@@ -909,7 +909,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 503,
+            "line": 499,
             "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have interopability issues as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.\n</blockquote>\nFunction that accepts or rejects an uploading data transfer request from Peer to User.",
             "itemtype": "method",
             "name": "acceptDataTransfer",
@@ -941,7 +941,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 607,
+            "line": 601,
             "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have interopability issues as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.<br>\n  <b>Deprecation Warning!</b> This method has been deprecated, please use <a href=\"#method_cancelDataTransfer\">\n  <code>method_cancelDataTransfer()</code> method</a> instead.\n</blockquote>\nFunction that terminates a data transfer.",
             "itemtype": "method",
             "name": "cancelBlobTransfer",
@@ -968,7 +968,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 662,
+            "line": 655,
             "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have been interopability issues as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.\n</blockquote>\nFunction that terminates a data transfer.",
             "itemtype": "method",
             "name": "cancelDataTransfer",
@@ -993,7 +993,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 787,
+            "line": 779,
             "description": "<blockquote class=\"info\">\n  Note that message Datachannel type connection MUST be opened first before this\n  functionality would work.<br>\n  The estimated maximum size for the string to be sent over is about <code>16 kB</code>. If\n  you are considering to send large string to Peers, please use the <a href=\"#method_sendURLData\">\n<code>sendURLData()</code> method</a>.\n</blockquote>\nFunction that sends a P2P message from User to Peers using the Datachannel connection.",
             "itemtype": "method",
             "name": "sendP2PMessage",
@@ -1019,7 +1019,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 894,
+            "line": 885,
             "description": "<blockquote class=\"info\">\n  Currently, the Android and iOS SDKs do not support this type of data transfer.\n</blockquote>\nFunction that starts an uploading string data transfer from User to Peers.",
             "itemtype": "method",
             "name": "sendURLData",
@@ -1149,7 +1149,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1181,
+            "line": 1172,
             "description": "Function that sets the data transfer \"wait-for-response\" timeout.\nWhen there is not response after timeout, the data transfer will be terminated.",
             "itemtype": "method",
             "name": "_setDataChannelTimeout",
@@ -1160,7 +1160,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1227,
+            "line": 1218,
             "description": "Function that stops and clears the data transfer \"wait-for-response\" timeout.",
             "itemtype": "method",
             "name": "_clearDataChannelTimeout",
@@ -1171,7 +1171,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1245,
+            "line": 1236,
             "description": "Function that starts a data transfer to Peer.\nThis will open a new data type of Datachannel connection with Peer if\n  simultaneous data transfers is supported by Peer.",
             "itemtype": "method",
             "name": "_sendBlobDataToPeer",
@@ -1182,7 +1182,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1461,
+            "line": 1452,
             "description": "Function that handles the data received from Datachannel and\n  routes to the relevant data transfer protocol handler.",
             "itemtype": "method",
             "name": "_dataChannelProtocolHandler",
@@ -1193,7 +1193,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1528,
+            "line": 1519,
             "description": "Function that handles the \"WRQ\" data transfer protocol.",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
@@ -1204,7 +1204,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1582,
+            "line": 1573,
             "description": "Function that handles the \"ACK\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
@@ -1215,7 +1215,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1729,
+            "line": 1720,
             "description": "Function that handles the \"MESSAGE\" data transfer protocol.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -1226,7 +1226,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1749,
+            "line": 1740,
             "description": "Function that handles the \"ERROR\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -1237,7 +1237,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1789,
+            "line": 1780,
             "description": "Function that handles the \"CANCEL\" data transfer protocol.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -1248,7 +1248,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1868,
+            "line": 1859,
             "description": "Function that handles the data transfer chunk received.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
@@ -1259,7 +1259,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2093,
+            "line": 2084,
             "description": "Function that start the data transfer with the list of targeted Peer IDs provided.\nAt this stage, it will open a new Datachannel connection if simultaneous data transfers is\n  supported by Peer, or it will using the messaging type Datachannel connection.\nNote that 1 data transfer can occur at a time in 1 Datachannel connection.",
             "itemtype": "method",
             "name": "_startDataTransfer",
@@ -1716,7 +1716,7 @@
             "params": [
                 {
                     "name": "targetPeerId",
-                    "description": "The target Peer ID to only refresh the Peer connection.<br>\n&#8594; When provided as an Array, it will refresh the Peer connections with all the Peer IDs provided.<br>\n&#8594; When not provided, it will refresh the Peer connections with all the currently connected Peers.",
+                    "description": "The target Peer ID to only refresh the Peer connection.<br>\n- When provided as an Array, it will refresh the Peer connections with all the Peer IDs provided.<br>\n- When not provided, it will refresh the Peer connections with all the currently connected Peers.",
                     "type": "String|Array",
                     "optional": true
                 },
@@ -1763,20 +1763,23 @@
                     ]
                 }
             ],
-            "trigger": "peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined, serverPeerLeft",
+            "trigger": "<b class=\"desc-seq-header\">&#8594; For Peer connections without MCU enabled:</b> <ol class=\"desc-seq\">\n  <li>Starts re-negotiation with Peer connections. <ul>\n    <li>Triggers <a href=\"#event_peerRestart\"><code>peerRestart</code> event</a>.</li></ul></li>\n  </ol>\n  <b class=\"desc-seq-header\">&#8594; For Peer connections with MCU enabled:</b> <ol class=\"desc-seq\">\n  <li>Starts sending notifications to Peer connected in the Room that User is restarting connection.<ul>\n     <li>Triggers <a href=\"#event_peerRestart\"><code>peerRestart</code> event</a>.</li>\n     <li>Triggers <a href=\"#event_serverPeerRestart\"><code>serverPeerRestart</code> event</a> for User</li>\n  </ul></li>\n  <li>Invokes <a href=\"#event_joinRoom\"><code>joinRoom()</code> method</a>. <ul>\n    <li><code>refreshConnection()</code> will retain the User session information except the Peer ID will\n       be a different assigned ID.</li>\n    <li>Triggers <a href=\"#event_peerLeft\"><code>peerLeft</code> event</a>.</li>\n    <li>Triggers <a href=\"#event_serverPeerLeft\"><code>serverPeerLeft</code> event</a> for User.</li>\n    <li>Triggers <a href=\"#event_peerJoined\"><code>peerJoined</code> event</a>.</li>\n    <li>Triggers <a href=\"#event_serverPeerJoined\"><code>serverPeerJoined</code> event</a> for User.</li></ul></li>\n  </ol>",
+            "example": [
+                " &lt;body&gt;\n  &lt;div id=\"peer-list\"&gt;&lt;/div&gt;\n  &lt;script&gt;\n    skylinkDemo.on(\"peerJoined\", function (peerId, peerInfo, isSelf) {\n      if (!isSelf) {\n        var peerBtn = document.createElement(\"button\");\n        peerBtn.id = peerId;\n        peerBtn.onclick = function () {\n          skylinkDemo.refreshConnection(peerId);\n        };\n        peerBtn.innerHTML = \"Refresh Connection?\";\n        document.getElementById(\"peer-list\").appendChild(peerBtn);\n      }\n    });\n  &lt;/script&gt;\n &lt;/body&gt;"
+            ],
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 247,
+            "line": 279,
             "description": "Function that retrieves the Peer connection stats.",
             "itemtype": "method",
             "name": "getConnectionStatus",
             "params": [
                 {
                     "name": "targetPeerId",
-                    "description": "The target Peer ID to only retrieve the Peer connection stats.<br>\n&#8594; When provided as an Array, it will retrieve the Peer connections stats with all the Peer IDs provided.<br>\n&#8594; When not provided, it will retrieve the Peer connections stats with all the currently connected Peers.",
+                    "description": "The target Peer ID to only retrieve the Peer connection stats.<br>\n- When provided as an Array, it will retrieve the Peer connections stats with all the Peer IDs provided.<br>\n- When not provided, it will retrieve the Peer connections stats with all the currently connected Peers.",
                     "type": "String|Array",
                     "optional": true
                 },
@@ -1843,13 +1846,16 @@
                     ]
                 }
             ],
-            "trigger": "getConnectionStatusStateChange",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>Retrieves the Peer connections stats.<ul>\n    <li>Triggers <a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>\n      with parameter payload <code>state</code> as <code>RETRIEVING</code>.</li>\n    <li>If retrieval of Peer connection stats is successful, it triggers <a href=\"#event_getConnectionStatusStateChange\">\n      <code>getConnectionStatusStateChange</code> event</a> with parameter payload <code>state</code> as\n      <code>RETRIEVE_SUCCESS</code> after <code>RETRIEVING</code>.</li>\n    <li>If retrieval of Peer connection stats had failed, it triggers <a href=\"#event_getConnectionStatusStateChange\">\n      <code>getConnectionStatusStateChange</code> event</a> with parameter payload <code>state</code> as\n      <code>RETRIEVE_ERROR</code> after <code>RETRIEVING</code>.</li>\n  </ul></li></ol>",
+            "example": [
+                " \n  var peerIntervals = {};\n\n  skylinkDemo.on(\"getConnectionStatusStateChange\", function (state, peerId, stats, error) {\n    if (state === skylinkDemo.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS) {\n      // Display connection stats\n    } else if (state === skylinkDemo.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR) {\n      // Display connection stats error\n    }\n  });\n\n  skylinkDemo.on(\"peerJoined\", function (peerId, peerInfo, isSelf) {\n    if (!isSelf) {\n      peerIntervals[peerId] = setInterval(function () {\n        skylinkDemo.getConnectionStatus(peerId);\n      }, 1000);\n    }\n  });"
+            ],
             "since": "0.6.14",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 558,
+            "line": 618,
             "description": "Function that starts the Peer connection session.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_addPeer",
@@ -1860,7 +1866,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 610,
+            "line": 670,
             "description": "Function that re-negotiates a Peer connection.\nWe currently do not implement the ICE restart functionality.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -1871,7 +1877,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 740,
+            "line": 800,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -1882,7 +1888,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 796,
+            "line": 856,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -1893,13 +1899,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 935,
+            "line": 995,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 998,
+            "line": 1058,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -11302,27 +11308,27 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:467"
+            "line": " source/data-transfer.js:465"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:503"
+            "line": " source/data-transfer.js:499"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:607"
+            "line": " source/data-transfer.js:601"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:662"
+            "line": " source/data-transfer.js:655"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:787"
+            "line": " source/data-transfer.js:779"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:894"
+            "line": " source/data-transfer.js:885"
         },
         {
             "message": "unknown tag: trigger",
@@ -11330,7 +11336,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:247"
+            "line": " source/peer-connection.js:279"
         },
         {
             "message": "unknown tag: trigger",
@@ -12314,7 +12320,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:935"
+            "line": " source/peer-connection.js:995"
         }
     ]
 }

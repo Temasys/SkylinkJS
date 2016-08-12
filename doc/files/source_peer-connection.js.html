@@ -196,8 +196,8 @@ Skylink.prototype._peerConnections = {};
  * Function that refreshes Peer connections.
  * @method refreshConnection
  * @param {String|Array} [targetPeerId] The target Peer ID to only refresh the Peer connection.&lt;br&gt;
- * &amp;#8594; When provided as an Array, it will refresh the Peer connections with all the Peer IDs provided.&lt;br&gt;
- * &amp;#8594; When not provided, it will refresh the Peer connections with all the currently connected Peers.
+ * - When provided as an Array, it will refresh the Peer connections with all the Peer IDs provided.&lt;br&gt;
+ * - When not provided, it will refresh the Peer connections with all the currently connected Peers.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  * @param {JSON} callback.error The error result in request.
@@ -211,7 +211,39 @@ Skylink.prototype._peerConnections = {};
  * @param {JSON} callback.success The success result in request.
  *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are errors in request&lt;/small&gt;
  * @param {Array} callback.success.listOfPeers The list Peer IDs targeted for refreshing the Peer connections.
- * @trigger peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined, serverPeerLeft
+ * @trigger &lt;b class=&quot;desc-seq-header&quot;&gt;&amp;#8594; For Peer connections without MCU enabled:&lt;/b&gt; &lt;ol class=&quot;desc-seq&quot;&gt;
+ *   &lt;li&gt;Starts re-negotiation with Peer connections. &lt;ul&gt;
+ *     &lt;li&gt;Triggers &lt;a href=&quot;#event_peerRestart&quot;&gt;&lt;code&gt;peerRestart&lt;/code&gt; event&lt;/a&gt;.&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;
+ *   &lt;/ol&gt;
+ *   &lt;b class=&quot;desc-seq-header&quot;&gt;&amp;#8594; For Peer connections with MCU enabled:&lt;/b&gt; &lt;ol class=&quot;desc-seq&quot;&gt;
+ *   &lt;li&gt;Starts sending notifications to Peer connected in the Room that User is restarting connection.&lt;ul&gt;
+ *      &lt;li&gt;Triggers &lt;a href=&quot;#event_peerRestart&quot;&gt;&lt;code&gt;peerRestart&lt;/code&gt; event&lt;/a&gt;.&lt;/li&gt;
+ *      &lt;li&gt;Triggers &lt;a href=&quot;#event_serverPeerRestart&quot;&gt;&lt;code&gt;serverPeerRestart&lt;/code&gt; event&lt;/a&gt; for User&lt;/li&gt;
+ *   &lt;/ul&gt;&lt;/li&gt;
+ *   &lt;li&gt;Invokes &lt;a href=&quot;#event_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt;. &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;refreshConnection()&lt;/code&gt; will retain the User session information except the Peer ID will
+ *        be a different assigned ID.&lt;/li&gt;
+ *     &lt;li&gt;Triggers &lt;a href=&quot;#event_peerLeft&quot;&gt;&lt;code&gt;peerLeft&lt;/code&gt; event&lt;/a&gt;.&lt;/li&gt;
+ *     &lt;li&gt;Triggers &lt;a href=&quot;#event_serverPeerLeft&quot;&gt;&lt;code&gt;serverPeerLeft&lt;/code&gt; event&lt;/a&gt; for User.&lt;/li&gt;
+ *     &lt;li&gt;Triggers &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/li&gt;
+ *     &lt;li&gt;Triggers &lt;a href=&quot;#event_serverPeerJoined&quot;&gt;&lt;code&gt;serverPeerJoined&lt;/code&gt; event&lt;/a&gt; for User.&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;
+ *   &lt;/ol&gt;
+ * @example &amp;lt;body&amp;gt;
+ *   &amp;lt;div id=&quot;peer-list&quot;&amp;gt;&amp;lt;/div&amp;gt;
+ *   &amp;lt;script&amp;gt;
+ *     skylinkDemo.on(&quot;peerJoined&quot;, function (peerId, peerInfo, isSelf) {
+ *       if (!isSelf) {
+ *         var peerBtn = document.createElement(&quot;button&quot;);
+ *         peerBtn.id = peerId;
+ *         peerBtn.onclick = function () {
+ *           skylinkDemo.refreshConnection(peerId);
+ *         };
+ *         peerBtn.innerHTML = &quot;Refresh Connection?&quot;;
+ *         document.getElementById(&quot;peer-list&quot;).appendChild(peerBtn);
+ *       }
+ *     });
+ *   &amp;lt;/script&amp;gt;
+ *  &amp;lt;/body&amp;gt;
  * @for Skylink
  * @since 0.5.5
  */
@@ -339,8 +371,8 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
  * Function that retrieves the Peer connection stats.
  * @method getConnectionStatus
  * @param {String|Array} [targetPeerId] The target Peer ID to only retrieve the Peer connection stats.&lt;br&gt;
- * &amp;#8594; When provided as an Array, it will retrieve the Peer connections stats with all the Peer IDs provided.&lt;br&gt;
- * &amp;#8594; When not provided, it will retrieve the Peer connections stats with all the currently connected Peers.
+ * - When provided as an Array, it will retrieve the Peer connections stats with all the Peer IDs provided.&lt;br&gt;
+ * - When not provided, it will retrieve the Peer connections stats with all the currently connected Peers.
  * @param {Function} [callback] he callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  * @param {JSON} callback.error The error result in request.
@@ -364,7 +396,35 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
  *   with the Peer ID property name.
  * &lt;small&gt;Object signature matches the &lt;code&gt;stats&lt;/code&gt; parameter payload received in the
  *   &lt;a href=&quot;#event_getConnectionStatusStateChange&quot;&gt;&lt;code&gt;getConnectionStatusStateChange&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
- * @trigger getConnectionStatusStateChange
+ * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
+ *   &lt;li&gt;Retrieves the Peer connections stats.&lt;ul&gt;
+ *     &lt;li&gt;Triggers &lt;a href=&quot;#event_getConnectionStatusStateChange&quot;&gt;&lt;code&gt;getConnectionStatusStateChange&lt;/code&gt; event&lt;/a&gt;
+ *       with parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;RETRIEVING&lt;/code&gt;.&lt;/li&gt;
+ *     &lt;li&gt;If retrieval of Peer connection stats is successful, it triggers &lt;a href=&quot;#event_getConnectionStatusStateChange&quot;&gt;
+ *       &lt;code&gt;getConnectionStatusStateChange&lt;/code&gt; event&lt;/a&gt; with parameter payload &lt;code&gt;state&lt;/code&gt; as
+ *       &lt;code&gt;RETRIEVE_SUCCESS&lt;/code&gt; after &lt;code&gt;RETRIEVING&lt;/code&gt;.&lt;/li&gt;
+ *     &lt;li&gt;If retrieval of Peer connection stats had failed, it triggers &lt;a href=&quot;#event_getConnectionStatusStateChange&quot;&gt;
+ *       &lt;code&gt;getConnectionStatusStateChange&lt;/code&gt; event&lt;/a&gt; with parameter payload &lt;code&gt;state&lt;/code&gt; as
+ *       &lt;code&gt;RETRIEVE_ERROR&lt;/code&gt; after &lt;code&gt;RETRIEVING&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;/ul&gt;&lt;/li&gt;&lt;/ol&gt;
+ * @example 
+ *   var peerIntervals = {};
+ *
+ *   skylinkDemo.on(&quot;getConnectionStatusStateChange&quot;, function (state, peerId, stats, error) {
+ *     if (state === skylinkDemo.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS) {
+ *       // Display connection stats
+ *     } else if (state === skylinkDemo.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR) {
+ *       // Display connection stats error
+ *     }
+ *   });
+ *
+ *   skylinkDemo.on(&quot;peerJoined&quot;, function (peerId, peerInfo, isSelf) {
+ *     if (!isSelf) {
+ *       peerIntervals[peerId] = setInterval(function () {
+ *         skylinkDemo.getConnectionStatus(peerId);
+ *       }, 1000);
+ *     }
+ *   });
  * @for Skylink
  * @since 0.6.14
  */

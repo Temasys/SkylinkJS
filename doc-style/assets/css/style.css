@@ -231,13 +231,22 @@ h3 code {
   background: #f0ad4e;
   color: #fff;
 }
-.desc-seq ul {
+.desc-seq-header {
+  color: #575757;
+  font-weight: 600;
+  font-size: 12px;
+  display: block;
+  margin-bottom: 5px;
+}
+.desc-seq ul,
+.desc-seq ol {
   list-style-type: disc;
   padding-left: 25px;
   color: #828282;
   font-size: 13px;
 }
-.desc-seq ul li {
+.desc-seq ul li,
+.desc-seq ol li {
   margin: 5px 0;
 }
 .desc-seq small,

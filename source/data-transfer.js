@@ -255,7 +255,6 @@ Skylink.prototype._dataTransfersTimeout = {};
  * @param {JSON} callback.success.transferInfo The data transfer information.
  *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
  *      <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
- *
  * @trigger <ol class="desc-seq">
  *   <li>Opens a new Datachannel connection with targeted Peers.<ul>
  *      <li>Triggers <a href="#event_dataChannelState">
@@ -300,7 +299,6 @@ Skylink.prototype._dataTransfersTimeout = {};
  *       <code>dataChannelState</code> event</a> with parameter payload <code>state</code> as <code>CLOSED</code> and
  *       <code>channelType</code> as <code>DATA</code>.</li></ul></li>
  *   </ol>
- *
  * @example &lt;body&gt;
  *   &lt;input type="file" onchange="uploadFile(this.Files)"&gt;
  *   &lt;script&gt;
@@ -476,7 +474,6 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
  * @param {String} peerId The Peer ID of the data transfer request from Peer.
  * @param {String} transferId The data transfer ID.
  * @param {Boolean} [accept=false] The flag to accept or reject the data transfer request from Peer.
- *
  * @trigger <ol class="desc-seq">
  *   <li>Checks if there is an existing data transfer request from Peer based on the
  *      <code>peerId</code> and <code>transferId</code> method parameters provided.</li>
@@ -488,7 +485,6 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
  *         <a href="#event_dataTranferState"><code>dataTransferState</code> event</a> with parameter payload
  *         <code>state</code> as <code>REJECTED</code> for Peer.</li></ul></li>
  *   </ol>
- *
  * @example
  *   skylinkDemo.on("dataTransferState", function (state, transferId, peerId) {
  *      if (state === skylinkDemo.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {
@@ -510,7 +506,6 @@ Skylink.prototype.respondBlobRequest =
  * @param {String} peerId The Peer ID of the data transfer request from Peer.
  * @param {String} transferId The data transfer ID.
  * @param {Boolean} [accept=false] The flag to accept or reject the data transfer request from Peer.
- *
  * @trigger <ol class="desc-seq">
  *   <li>Checks if there is an existing data transfer request from Peer based on the
  *      <code>peerId</code> and <code>transferId</code> method parameters provided.</li>
@@ -522,7 +517,6 @@ Skylink.prototype.respondBlobRequest =
  *         <a href="#event_dataTranferState"><code>dataTransferState</code> event</a> with parameter payload
  *         <code>state</code> as <code>REJECTED</code> for Peer.</li></ul></li>
  *   </ol>
- *
  * @example
  *   skylinkDemo.on("dataTransferState", function (state, transferId, peerId) {
  *      if (state === skylinkDemo.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {
@@ -627,7 +621,6 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
  *    <li>This triggers <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
  *      with parameter payload <code>state</code> as <code>CANCEL</code>.</li></ul></li>
  *  </ol>
- *
  * @example
  *   var transferSessions = {};
  *
@@ -679,7 +672,6 @@ Skylink.prototype.cancelBlobTransfer =
  *    <li>This triggers <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
  *      with parameter payload <code>state</code> as <code>CANCEL</code>.</li></ul></li>
  *  </ol>
- *
  * @example
  *   var transferSessions = {};
  *
@@ -805,7 +797,6 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
  *      with parameter payload <code>isSelf</code> value as <code>true</code> for User and
  *      <code>false</code> for receiving Peers.</li></ul></li>
  *  </ol>
- *
  * @example
  *   skylinkDemo.on("dataChannelState", function (state, peerId, error, channelName, channelType) {
  *      if (state === skylinkDemo.DATA_CHANNEL_STATE.OPEN &&
