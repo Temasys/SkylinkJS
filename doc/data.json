@@ -866,7 +866,7 @@
                     ]
                 }
             ],
-            "trigger": "<ol class=\"desc-seq\">\n  <li>Opens a new Datachannel connection with targeted Peers.<ul>\n     <li>Triggers <a href=\"#event_dataChannelState\">\n     <code>dataChannelState</code> event</a> with parameter payload <code>channelType</code> as\n     <code>DATA</code>.</li></ul></li>\n  <li>Starts sending data transfer requests to targeted Peers when the Datachannel connections are opened.<ul>\n     <li>For Peers that do not support simultaneous data transfers, the <code>MESSAGING</code> Datachannel type connection\n     will be used. Note that only 1 simultaneous data transfer an occur between the Peers and the User.</li>\n     <li>For Peers that do not have any Datachannel connections or that the <code>MESSAGING</code> Datachannel type\n     connection is not opened, the data transfer to the Peers will be terminated.</small></li></ul></li>\n  <li>Peers receive the data transfer request received from User. <ul>\n      <li>Triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> with paramter payload\n      <code>state</code> as <code>UPLOAD_REQUEST</code> for Peers.</li>\n      <li>Triggers <a href=\"#event_incomingDataRequest\"><code>incomingDataRequest</code> event</a>.</li>\n      <li>Peers can accept or reject the data transfer request with the <a href=\"#method_acceptDataTransfer\">\n      <code>acceptDataTransfer()</code> method</a>.</li></ul></li>\n  <li>User receive data transfer request response from each Peer. <ul>\n      <li>Triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> with parameter payload\n      <code>state</code> as <code>UPLOAD_STARTED</code> when Peer accepts data transfer request and data transfer to Peer\n      has started.</li>\n       <li>Triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> with parameter payload\n      <code>state</code> as <code>REJECTED</code> when Peer rejects data transfer request and data transfer to Peer\n      has been terminated.</li></ul></li>\n  <li>Starts sending data to Peers.<ul>\n      <li>Triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> with parameter payload\n      <code>state</code> as <code>UPLOADING</code> for User when data transfer is in-progress.</li>\n      <li>Triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> with parameter payload\n      <code>state</code> as <code>DOWNLOADING</code> for Peers when data transfer is in-progress.</li></ul></li>\n  <li>Completes data transfer to Peers.<ul>\n      <li>Triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> with parameter payload\n      <code>state</code> as <code>UPLOAD_COMPLETED</code> for User.</li>\n      <li>Triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> with parameter payload\n      <code>state</code> as <code>DOWNLOAD_COMPLETED</code> for Peers.</li>\n      <li>Triggers <a href=\"#event_incomingData\"><code>incomingData</code> event</a>.</li></ul></li>\n  <li>Closes the Datachannel connection with targeted Peers.<ul>\n      <li>Triggers <a href=\"#event_dataChannelState\">\n      <code>dataChannelState</code> event</a> with parameter payload <code>state</code> as <code>CLOSED</code> and\n      <code>channelType</code> as <code>DATA</code>.</li></ul></li>\n  </ol>",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>Opens a new Datachannel connection with targeted Peers.<ul>\n     <li>Triggers <a href=\"#event_dataChannelState\">\n     <code>dataChannelState</code> event</a> with parameter payload <code>channelType</code> as\n     <code>DATA</code>.</li></ul></li>\n  <li>Starts sending data transfer requests to targeted Peers when the Datachannel connections are opened.<ul>\n     <li>For Peers that do not support simultaneous data transfers, the <code>MESSAGING</code> Datachannel type connection\n     will be used. Note that only 1 simultaneous data transfer an occur between the Peers and the User.</li>\n     <li>For Peers that do not have any Datachannel connections or that the <code>MESSAGING</code> Datachannel type\n     connection is not opened, the data transfer to the Peers will be terminated.</li>\n     <li>For data transfers from <code>sendBlobData()</code> method, the value of the parameter\n        payload of <code>transferInfo.dataType</code> in <a href=\"#event_dataTransferState\">\n        <code>dataTransferState</code> event</a>, <a href=\"#event_incomingDataRequest\">\n        <code>incomingDataRequest</code> event</a> and <a href=\"#event_incomingData\">\n        <code>incomingData</code> event</a> is <code>\"blob\"</code></li></ul></li>\n  <li>Peers receive the data transfer request received from User. <ul>\n      <li>Triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> with paramter payload\n      <code>state</code> as <code>UPLOAD_REQUEST</code> for Peers.</li>\n      <li>Triggers <a href=\"#event_incomingDataRequest\"><code>incomingDataRequest</code> event</a>.</li>\n      <li>Peers can accept or reject the data transfer request with the <a href=\"#method_acceptDataTransfer\">\n      <code>acceptDataTransfer()</code> method</a>.</li></ul></li>\n  <li>User receive data transfer request response from each Peer. <ul>\n      <li>Triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> with parameter payload\n      <code>state</code> as <code>UPLOAD_STARTED</code> when Peer accepts data transfer request and data transfer to Peer\n      has started.</li>\n       <li>Triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> with parameter payload\n      <code>state</code> as <code>REJECTED</code> when Peer rejects data transfer request and data transfer to Peer\n      has been terminated.</li></ul></li>\n  <li>Starts sending data to Peers.<ul>\n      <li>Triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> with parameter payload\n      <code>state</code> as <code>UPLOADING</code> for User when data transfer is in-progress.</li>\n      <li>Triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> with parameter payload\n      <code>state</code> as <code>DOWNLOADING</code> for Peers when data transfer is in-progress.</li></ul></li>\n  <li>Completes data transfer to Peers.<ul>\n      <li>Triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> with parameter payload\n      <code>state</code> as <code>UPLOAD_COMPLETED</code> for User.</li>\n      <li>Triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> with parameter payload\n      <code>state</code> as <code>DOWNLOAD_COMPLETED</code> for Peers.</li>\n      <li>Triggers <a href=\"#event_incomingData\"><code>incomingData</code> event</a>.</li></ul></li>\n  <li>Closes the Datachannel connection with targeted Peers.<ul>\n      <li>Triggers <a href=\"#event_dataChannelState\">\n      <code>dataChannelState</code> event</a> with parameter payload <code>state</code> as <code>CLOSED</code> and\n      <code>channelType</code> as <code>DATA</code>.</li></ul></li>\n  </ol>",
             "example": [
                 " &lt;body&gt;\n  &lt;input type=\"file\" onchange=\"uploadFile(this.Files)\"&gt;\n  &lt;script&gt;\n    function uploadFile(files) {\n      skylinkDemo.sendBlobData(files[0], function (err, success) {\n        if (err) {\n          // sendBlobData() error\n          return;\n        }\n        // sendBlobData() success;\n      });\n    }\n  &lt;/script&gt;\n &lt;/body&gt;"
             ],
@@ -875,7 +875,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 462,
+            "line": 467,
             "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have interopability issues as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.<br>\n  <b>Deprecation Warning!</b> This method has been deprecated, please use <a href=\"#method_acceptDataTransfer\">\n  <code>acceptDataTransfer()</code> method</a> instead.\n</blockquote>\nFunction that accepts or rejects an uploading data transfer request from Peer to User.",
             "itemtype": "method",
             "name": "respondBlobRequest",
@@ -898,7 +898,10 @@
                     "optdefault": "false"
                 }
             ],
-            "trigger": "dataTransferState, incomingDataRequest, incomingData",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>Checks if there is an existing data transfer request from Peer based on the\n     <code>peerId</code> and <code>transferId</code> method parameters provided.</li>\n  <li>Starts sending the response to Peer.<ul>\n     <li>If User accepts the data transfer request, the downloading data transfer will begin from Peer.\n        This triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code>\n        event</a> with parameter payload <code>state</code> as <code>DOWNLOAD_STARTED</code>.</li>\n     <li>If User rejects the data transfer request, the data transfer will be terminated. This triggers\n        <a href=\"#event_dataTranferState\"><code>dataTransferState</code> event</a> with parameter payload\n        <code>state</code> as <code>REJECTED</code> for Peer.</li></ul></li>\n  </ol>",
+            "example": [
+                "\n  skylinkDemo.on(\"dataTransferState\", function (state, transferId, peerId) {\n     if (state === skylinkDemo.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {\n       skylinkDemo.respondBlobRequest(peerId, transferId, confirm(\"Accept File from \" + peerId + \"?\"));\n     }\n  });"
+            ],
             "deprecated": true,
             "deprecationMessage": "true",
             "since": "0.5.0",
@@ -906,7 +909,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 480,
+            "line": 503,
             "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have interopability issues as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.\n</blockquote>\nFunction that accepts or rejects an uploading data transfer request from Peer to User.",
             "itemtype": "method",
             "name": "acceptDataTransfer",
@@ -929,13 +932,16 @@
                     "optdefault": "false"
                 }
             ],
-            "trigger": "dataTransferState, incomingDataRequest, incomingData",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>Checks if there is an existing data transfer request from Peer based on the\n     <code>peerId</code> and <code>transferId</code> method parameters provided.</li>\n  <li>Starts sending the response to Peer.<ul>\n     <li>If User accepts the data transfer request, the downloading data transfer will begin from Peer.\n        This triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code>\n        event</a> with parameter payload <code>state</code> as <code>DOWNLOAD_STARTED</code>.</li>\n     <li>If User rejects the data transfer request, the data transfer will be terminated. This triggers\n        <a href=\"#event_dataTranferState\"><code>dataTransferState</code> event</a> with parameter payload\n        <code>state</code> as <code>REJECTED</code> for Peer.</li></ul></li>\n  </ol>",
+            "example": [
+                "\n  skylinkDemo.on(\"dataTransferState\", function (state, transferId, peerId) {\n     if (state === skylinkDemo.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {\n       skylinkDemo.acceptDataTransfer(peerId, transferId, confirm(\"Accept File from \" + peerId + \"?\"));\n     }\n  });"
+            ],
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 566,
+            "line": 607,
             "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have interopability issues as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.<br>\n  <b>Deprecation Warning!</b> This method has been deprecated, please use <a href=\"#method_cancelDataTransfer\">\n  <code>method_cancelDataTransfer()</code> method</a> instead.\n</blockquote>\nFunction that terminates a data transfer.",
             "itemtype": "method",
             "name": "cancelBlobTransfer",
@@ -951,7 +957,10 @@
                     "type": "String"
                 }
             ],
-            "trigger": "dataTransferState",
+            "trigger": "<ol class=\"desc-seq\">\n <li>Checks if there is an existing data transfer request from Peer based on the\n   <code>peerId</code> and <code>transferId</code> method parameters provided.<ul>\n   <li>Note that User can only terminate data transfer with Peer when <a href=\"#event_dataTransferState\">\n      <code>dataTransferState</code> event</a> parameter payload <code>state</code> is at\n      <code>DOWNLOADING</code>, <code>UPLOADING</code>, <code>DOWNLOAD_STARTED</code> or <code>UPLOAD_STARTED</code>\n   </li></ul></li>\n <li>Terminates data transfer from/to Peer.<ul>\n   <li>This triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n     with parameter payload <code>state</code> as <code>CANCEL</code>.</li></ul></li>\n </ol>",
+            "example": [
+                "\n  var transferSessions = {};\n\n  skylinkDemo.on(\"dataTransferState\", function (state, transferId, peerId) {\n     if ([skylinkDemo.DATA_TRANSFER_STATE.DOWNLOAD_STARTED,\n          skylinkDemo.DATA_TRANSFER_STATE.UPLOAD_STARTED].indexOf(state) > -1) {\n       if (!Array.isArray(transferSessions[transferId])) {\n         transferSessions[transferId] = [];\n       }\n       transferSessions[transferId].push(peerId);\n       // Display UI button for transfer in-progress and cancel\n     } else if ([skylinkDemo.DATA_TRANSFER_STATE.CANCEL,\n          skylinkDemo.DATA_TRANSFER_STATE.ERROR,\n          skylinkDemo.DATA_TRANSFER_STATE.UPLOAD_COMPLETED,\n          skylinkDemo.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED].indexOf(state) > -1) {\n        var foundIndex = transferSessions[transferId].indexOf(peerId);\n        if (foundIndex > -1) {\n          transferSessions[transferId].splice(foundIndex, 1);\n        }\n     }\n  });\n\n  function cancelTransfer (peerId, transferId) {\n    skylinkDemo.cancelBlobTransfer(peerId, transferId);\n  }"
+            ],
             "deprecated": true,
             "deprecationMessage": "true",
             "since": "0.5.7",
@@ -959,7 +968,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 583,
+            "line": 662,
             "description": "<blockquote class=\"info\">\n  Currently, the data transfers to the Android and iOS have been interopability issues as noted\n  in <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002852\">an issue here</a>.\n</blockquote>\nFunction that terminates a data transfer.",
             "itemtype": "method",
             "name": "cancelDataTransfer",
@@ -975,13 +984,16 @@
                     "type": "String"
                 }
             ],
-            "trigger": "dataTransferState",
+            "trigger": "<ol class=\"desc-seq\">\n <li>Checks if there is an existing data transfer request from Peer based on the\n   <code>peerId</code> and <code>transferId</code> method parameters provided.<ul>\n   <li>Note that User can only terminate data transfer with Peer when <a href=\"#event_dataTransferState\">\n      <code>dataTransferState</code> event</a> parameter payload <code>state</code> is at\n      <code>DOWNLOADING</code>, <code>UPLOADING</code>, <code>DOWNLOAD_STARTED</code> or <code>UPLOAD_STARTED</code>\n   </li></ul></li>\n <li>Terminates data transfer from/to Peer.<ul>\n   <li>This triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n     with parameter payload <code>state</code> as <code>CANCEL</code>.</li></ul></li>\n </ol>",
+            "example": [
+                "\n  var transferSessions = {};\n\n  skylinkDemo.on(\"dataTransferState\", function (state, transferId, peerId) {\n     if ([skylinkDemo.DATA_TRANSFER_STATE.DOWNLOAD_STARTED,\n          skylinkDemo.DATA_TRANSFER_STATE.UPLOAD_STARTED].indexOf(state) > -1) {\n       if (!Array.isArray(transferSessions[transferId])) {\n         transferSessions[transferId] = [];\n       }\n       transferSessions[transferId].push(peerId);\n       // Display UI button for transfer in-progress and cancel\n     } else if ([skylinkDemo.DATA_TRANSFER_STATE.CANCEL,\n          skylinkDemo.DATA_TRANSFER_STATE.ERROR,\n          skylinkDemo.DATA_TRANSFER_STATE.UPLOAD_COMPLETED,\n          skylinkDemo.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED].indexOf(state) > -1) {\n        var foundIndex = transferSessions[transferId].indexOf(peerId);\n        if (foundIndex > -1) {\n          transferSessions[transferId].splice(foundIndex, 1);\n        }\n     }\n  });\n\n  function cancelTransfer (peerId, transferId) {\n    skylinkDemo.cancelDataTransfer(peerId, transferId);\n  }"
+            ],
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 672,
+            "line": 787,
             "description": "<blockquote class=\"info\">\n  Note that message Datachannel type connection MUST be opened first before this\n  functionality would work.<br>\n  The estimated maximum size for the string to be sent over is about <code>16 kB</code>. If\n  you are considering to send large string to Peers, please use the <a href=\"#method_sendURLData\">\n<code>sendURLData()</code> method</a>.\n</blockquote>\nFunction that sends a P2P message from User to Peers using the Datachannel connection.",
             "itemtype": "method",
             "name": "sendP2PMessage",
@@ -993,18 +1005,21 @@
                 },
                 {
                     "name": "targetPeerId",
-                    "description": "The target Peer ID to only send the P2P message to.<br>\n&#8594; When provided as an Array, it will send the P2P message to all the Peer IDs provided.<br>\n&#8594; When not provided, it will send the P2P message to all the currently connected Peers.",
+                    "description": "The target Peer ID to only send the P2P message to.<br>\n- When provided as an Array, it will send the P2P message to all the Peer IDs provided.<br>\n- When not provided, it will send the P2P message to all the currently connected Peers.",
                     "type": "String|Array",
                     "optional": true
                 }
             ],
-            "trigger": "incomingMessage",
+            "trigger": "<ol class=\"desc-seq\">\n <li>Checks if Datachannel connection <code>MESSAGING</code> type if opened</li>\n <li>Sends P2P message to Peers.<ul>\n   <li>Triggers <a href=\"#event_incomingMessage\"><code>incomingMessage</code> event</a>\n     with parameter payload <code>isSelf</code> value as <code>true</code> for User and\n     <code>false</code> for receiving Peers.</li></ul></li>\n </ol>",
+            "example": [
+                "\n  skylinkDemo.on(\"dataChannelState\", function (state, peerId, error, channelName, channelType) {\n     if (state === skylinkDemo.DATA_CHANNEL_STATE.OPEN &&\n       channelType === skylinkDemo.DATA_CHANNEL_TYPE.MESSAGING) {\n       skylinkDemo.sendP2PMessage(\"test\", peerId);\n     }\n  });"
+            ],
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 765,
+            "line": 894,
             "description": "<blockquote class=\"info\">\n  Currently, the Android and iOS SDKs do not support this type of data transfer.\n</blockquote>\nFunction that starts an uploading string data transfer from User to Peers.",
             "itemtype": "method",
             "name": "sendURLData",
@@ -1023,7 +1038,7 @@
                 },
                 {
                     "name": "targetPeerId",
-                    "description": "The target Peer ID to only start the data transfer with.<br>\n&#8594; When provided as an Array, it will start the data transfers with all the Peer IDs provided.<br>\n&#8594; When not provided, it will start the data transfers with all the currently connected Peers.",
+                    "description": "The target Peer ID to only start the data transfer with.<br>\n- When provided as an Array, it will start the data transfers with all the Peer IDs provided.<br>\n- When not provided, it will start the data transfers with all the currently connected Peers.",
                     "type": "String|Array",
                     "optional": true
                 },
@@ -1125,13 +1140,16 @@
                     ]
                 }
             ],
-            "trigger": "incomingData, incomingDataRequest, dataTransferState, dataChannelState",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>Opens a new Datachannel connection with targeted Peers.<ul>\n     <li>Triggers <a href=\"#event_dataChannelState\">\n     <code>dataChannelState</code> event</a> with parameter payload <code>channelType</code> as\n     <code>DATA</code>.</li></ul></li>\n  <li>Starts sending data transfer requests to targeted Peers when the Datachannel connections are opened.<ul>\n     <li>For Peers that do not support simultaneous data transfers, the <code>MESSAGING</code> Datachannel type connection\n     will be used. Note that only 1 simultaneous data transfer an occur between the Peers and the User.</li>\n     <li>For Peers that do not have any Datachannel connections or that the <code>MESSAGING</code> Datachannel type\n     connection is not opened, the data transfer to the Peers will be terminated.</li>\n     <li>For data transfers from <code>sendURLData()</code> method, the value of the parameter\n        payload of <code>transferInfo.dataType</code> in <a href=\"#event_dataTransferState\">\n        <code>dataTransferState</code> event</a>, <a href=\"#event_incomingDataRequest\">\n        <code>incomingDataRequest</code> event</a> and <a href=\"#event_incomingData\">\n        <code>incomingData</code> event</a> is <code>\"dataURL\"</code></li></ul></li>\n  <li>Peers receive the data transfer request received from User. <ul>\n      <li>Triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> with paramter payload\n      <code>state</code> as <code>UPLOAD_REQUEST</code> for Peers.</li>\n      <li>Triggers <a href=\"#event_incomingDataRequest\"><code>incomingDataRequest</code> event</a>.</li>\n      <li>Peers can accept or reject the data transfer request with the <a href=\"#method_acceptDataTransfer\">\n      <code>acceptDataTransfer()</code> method</a>.</li></ul></li>\n  <li>User receive data transfer request response from each Peer. <ul>\n      <li>Triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> with parameter payload\n      <code>state</code> as <code>UPLOAD_STARTED</code> when Peer accepts data transfer request and data transfer to Peer\n      has started.</li>\n       <li>Triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> with parameter payload\n      <code>state</code> as <code>REJECTED</code> when Peer rejects data transfer request and data transfer to Peer\n      has been terminated.</li></ul></li>\n  <li>Starts sending data to Peers.<ul>\n      <li>Triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> with parameter payload\n      <code>state</code> as <code>UPLOADING</code> for User when data transfer is in-progress.</li>\n      <li>Triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> with parameter payload\n      <code>state</code> as <code>DOWNLOADING</code> for Peers when data transfer is in-progress.</li></ul></li>\n  <li>Completes data transfer to Peers.<ul>\n      <li>Triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> with parameter payload\n      <code>state</code> as <code>UPLOAD_COMPLETED</code> for User.</li>\n      <li>Triggers <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> with parameter payload\n      <code>state</code> as <code>DOWNLOAD_COMPLETED</code> for Peers.</li>\n      <li>Triggers <a href=\"#event_incomingData\"><code>incomingData</code> event</a>.</li></ul></li>\n  <li>Closes the Datachannel connection with targeted Peers.<ul>\n      <li>Triggers <a href=\"#event_dataChannelState\">\n      <code>dataChannelState</code> event</a> with parameter payload <code>state</code> as <code>CLOSED</code> and\n      <code>channelType</code> as <code>DATA</code>.</li></ul></li>\n  </ol>",
+            "example": [
+                " &lt;body&gt;\n  &lt;input type=\"file\" onchange=\"showImage(this.Files)\"&gt;\n  &lt;script&gt;\n    function showImage(files) {\n      var fr = new FileReader();\n      fr.onload = function () {\n        skylinkDemo.sendURLData(fr.result, function (err, success) {\n          if (err) {\n            // sendBlobData() error\n            return;\n          }\n          // sendBlobData() success;\n        });\n      };\n      fr.readAsDataURL(files[0]);\n    }\n  &lt;/script&gt;\n &lt;/body&gt;"
+            ],
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 991,
+            "line": 1181,
             "description": "Function that sets the data transfer \"wait-for-response\" timeout.\nWhen there is not response after timeout, the data transfer will be terminated.",
             "itemtype": "method",
             "name": "_setDataChannelTimeout",
@@ -1142,7 +1160,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1037,
+            "line": 1227,
             "description": "Function that stops and clears the data transfer \"wait-for-response\" timeout.",
             "itemtype": "method",
             "name": "_clearDataChannelTimeout",
@@ -1153,7 +1171,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1055,
+            "line": 1245,
             "description": "Function that starts a data transfer to Peer.\nThis will open a new data type of Datachannel connection with Peer if\n  simultaneous data transfers is supported by Peer.",
             "itemtype": "method",
             "name": "_sendBlobDataToPeer",
@@ -1164,7 +1182,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1271,
+            "line": 1461,
             "description": "Function that handles the data received from Datachannel and\n  routes to the relevant data transfer protocol handler.",
             "itemtype": "method",
             "name": "_dataChannelProtocolHandler",
@@ -1175,7 +1193,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1338,
+            "line": 1528,
             "description": "Function that handles the \"WRQ\" data transfer protocol.",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
@@ -1186,7 +1204,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1392,
+            "line": 1582,
             "description": "Function that handles the \"ACK\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
@@ -1197,7 +1215,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1539,
+            "line": 1729,
             "description": "Function that handles the \"MESSAGE\" data transfer protocol.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -1208,7 +1226,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1559,
+            "line": 1749,
             "description": "Function that handles the \"ERROR\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -1219,7 +1237,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1599,
+            "line": 1789,
             "description": "Function that handles the \"CANCEL\" data transfer protocol.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -1230,7 +1248,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1678,
+            "line": 1868,
             "description": "Function that handles the data transfer chunk received.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
@@ -1241,7 +1259,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1903,
+            "line": 2093,
             "description": "Function that start the data transfer with the list of targeted Peer IDs provided.\nAt this stage, it will open a new Datachannel connection if simultaneous data transfers is\n  supported by Peer, or it will using the messaging type Datachannel connection.\nNote that 1 data transfer can occur at a time in 1 Datachannel connection.",
             "itemtype": "method",
             "name": "_startDataTransfer",
@@ -11284,27 +11302,27 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:462"
+            "line": " source/data-transfer.js:467"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:480"
+            "line": " source/data-transfer.js:503"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:566"
+            "line": " source/data-transfer.js:607"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:583"
+            "line": " source/data-transfer.js:662"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:672"
+            "line": " source/data-transfer.js:787"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:765"
+            "line": " source/data-transfer.js:894"
         },
         {
             "message": "unknown tag: trigger",

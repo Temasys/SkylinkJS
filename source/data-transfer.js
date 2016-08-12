@@ -265,7 +265,12 @@ Skylink.prototype._dataTransfersTimeout = {};
  *      <li>For Peers that do not support simultaneous data transfers, the <code>MESSAGING</code> Datachannel type connection
  *      will be used. Note that only 1 simultaneous data transfer an occur between the Peers and the User.</li>
  *      <li>For Peers that do not have any Datachannel connections or that the <code>MESSAGING</code> Datachannel type
- *      connection is not opened, the data transfer to the Peers will be terminated.</small></li></ul></li>
+ *      connection is not opened, the data transfer to the Peers will be terminated.</li>
+ *      <li>For data transfers from <code>sendBlobData()</code> method, the value of the parameter
+ *         payload of <code>transferInfo.dataType</code> in <a href="#event_dataTransferState">
+ *         <code>dataTransferState</code> event</a>, <a href="#event_incomingDataRequest">
+ *         <code>incomingDataRequest</code> event</a> and <a href="#event_incomingData">
+ *         <code>incomingData</code> event</a> is <code>"blob"</code></li></ul></li>
  *   <li>Peers receive the data transfer request received from User. <ul>
  *       <li>Triggers <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> with paramter payload
  *       <code>state</code> as <code>UPLOAD_REQUEST</code> for Peers.</li>
@@ -471,7 +476,25 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
  * @param {String} peerId The Peer ID of the data transfer request from Peer.
  * @param {String} transferId The data transfer ID.
  * @param {Boolean} [accept=false] The flag to accept or reject the data transfer request from Peer.
- * @trigger dataTransferState, incomingDataRequest, incomingData
+ *
+ * @trigger <ol class="desc-seq">
+ *   <li>Checks if there is an existing data transfer request from Peer based on the
+ *      <code>peerId</code> and <code>transferId</code> method parameters provided.</li>
+ *   <li>Starts sending the response to Peer.<ul>
+ *      <li>If User accepts the data transfer request, the downloading data transfer will begin from Peer.
+ *         This triggers <a href="#event_dataTransferState"><code>dataTransferState</code>
+ *         event</a> with parameter payload <code>state</code> as <code>DOWNLOAD_STARTED</code>.</li>
+ *      <li>If User rejects the data transfer request, the data transfer will be terminated. This triggers
+ *         <a href="#event_dataTranferState"><code>dataTransferState</code> event</a> with parameter payload
+ *         <code>state</code> as <code>REJECTED</code> for Peer.</li></ul></li>
+ *   </ol>
+ *
+ * @example
+ *   skylinkDemo.on("dataTransferState", function (state, transferId, peerId) {
+ *      if (state === skylinkDemo.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {
+ *        skylinkDemo.respondBlobRequest(peerId, transferId, confirm("Accept File from " + peerId + "?"));
+ *      }
+ *   });
  * @deprecated true
  * @for Skylink
  * @since 0.5.0
@@ -487,7 +510,25 @@ Skylink.prototype.respondBlobRequest =
  * @param {String} peerId The Peer ID of the data transfer request from Peer.
  * @param {String} transferId The data transfer ID.
  * @param {Boolean} [accept=false] The flag to accept or reject the data transfer request from Peer.
- * @trigger dataTransferState, incomingDataRequest, incomingData
+ *
+ * @trigger <ol class="desc-seq">
+ *   <li>Checks if there is an existing data transfer request from Peer based on the
+ *      <code>peerId</code> and <code>transferId</code> method parameters provided.</li>
+ *   <li>Starts sending the response to Peer.<ul>
+ *      <li>If User accepts the data transfer request, the downloading data transfer will begin from Peer.
+ *         This triggers <a href="#event_dataTransferState"><code>dataTransferState</code>
+ *         event</a> with parameter payload <code>state</code> as <code>DOWNLOAD_STARTED</code>.</li>
+ *      <li>If User rejects the data transfer request, the data transfer will be terminated. This triggers
+ *         <a href="#event_dataTranferState"><code>dataTransferState</code> event</a> with parameter payload
+ *         <code>state</code> as <code>REJECTED</code> for Peer.</li></ul></li>
+ *   </ol>
+ *
+ * @example
+ *   skylinkDemo.on("dataTransferState", function (state, transferId, peerId) {
+ *      if (state === skylinkDemo.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {
+ *        skylinkDemo.acceptDataTransfer(peerId, transferId, confirm("Accept File from " + peerId + "?"));
+ *      }
+ *   });
  * @for Skylink
  * @since 0.6.1
  */
@@ -574,7 +615,45 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
  * @method cancelBlobTransfer
  * @param {String} peerId The Peer ID of the data transfer from/to Peer.
  * @param {String} transferId The data transfer ID.
- * @trigger dataTransferState
+ *
+ * @trigger <ol class="desc-seq">
+ *  <li>Checks if there is an existing data transfer request from Peer based on the
+ *    <code>peerId</code> and <code>transferId</code> method parameters provided.<ul>
+ *    <li>Note that User can only terminate data transfer with Peer when <a href="#event_dataTransferState">
+ *       <code>dataTransferState</code> event</a> parameter payload <code>state</code> is at
+ *       <code>DOWNLOADING</code>, <code>UPLOADING</code>, <code>DOWNLOAD_STARTED</code> or <code>UPLOAD_STARTED</code>
+ *    </li></ul></li>
+ *  <li>Terminates data transfer from/to Peer.<ul>
+ *    <li>This triggers <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *      with parameter payload <code>state</code> as <code>CANCEL</code>.</li></ul></li>
+ *  </ol>
+ *
+ * @example
+ *   var transferSessions = {};
+ *
+ *   skylinkDemo.on("dataTransferState", function (state, transferId, peerId) {
+ *      if ([skylinkDemo.DATA_TRANSFER_STATE.DOWNLOAD_STARTED,
+ *           skylinkDemo.DATA_TRANSFER_STATE.UPLOAD_STARTED].indexOf(state) > -1) {
+ *        if (!Array.isArray(transferSessions[transferId])) {
+ *          transferSessions[transferId] = [];
+ *        }
+ *        transferSessions[transferId].push(peerId);
+ *        // Display UI button for transfer in-progress and cancel
+ *      } else if ([skylinkDemo.DATA_TRANSFER_STATE.CANCEL,
+ *           skylinkDemo.DATA_TRANSFER_STATE.ERROR,
+ *           skylinkDemo.DATA_TRANSFER_STATE.UPLOAD_COMPLETED,
+ *           skylinkDemo.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED].indexOf(state) > -1) {
+ *         var foundIndex = transferSessions[transferId].indexOf(peerId);
+ *         if (foundIndex > -1) {
+ *           transferSessions[transferId].splice(foundIndex, 1);
+ *         }
+ *      }
+ *   });
+ *
+ *   function cancelTransfer (peerId, transferId) {
+ *     skylinkDemo.cancelBlobTransfer(peerId, transferId);
+ *   }
+ * @for Skylink
  * @deprecated true
  * @for Skylink
  * @since 0.5.7
@@ -589,7 +668,43 @@ Skylink.prototype.cancelBlobTransfer =
  * @method cancelDataTransfer
  * @param {String} peerId The Peer ID of the data transfer from/to Peer.
  * @param {String} transferId The data transfer ID.
- * @trigger dataTransferState
+ * @trigger <ol class="desc-seq">
+ *  <li>Checks if there is an existing data transfer request from Peer based on the
+ *    <code>peerId</code> and <code>transferId</code> method parameters provided.<ul>
+ *    <li>Note that User can only terminate data transfer with Peer when <a href="#event_dataTransferState">
+ *       <code>dataTransferState</code> event</a> parameter payload <code>state</code> is at
+ *       <code>DOWNLOADING</code>, <code>UPLOADING</code>, <code>DOWNLOAD_STARTED</code> or <code>UPLOAD_STARTED</code>
+ *    </li></ul></li>
+ *  <li>Terminates data transfer from/to Peer.<ul>
+ *    <li>This triggers <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *      with parameter payload <code>state</code> as <code>CANCEL</code>.</li></ul></li>
+ *  </ol>
+ *
+ * @example
+ *   var transferSessions = {};
+ *
+ *   skylinkDemo.on("dataTransferState", function (state, transferId, peerId) {
+ *      if ([skylinkDemo.DATA_TRANSFER_STATE.DOWNLOAD_STARTED,
+ *           skylinkDemo.DATA_TRANSFER_STATE.UPLOAD_STARTED].indexOf(state) > -1) {
+ *        if (!Array.isArray(transferSessions[transferId])) {
+ *          transferSessions[transferId] = [];
+ *        }
+ *        transferSessions[transferId].push(peerId);
+ *        // Display UI button for transfer in-progress and cancel
+ *      } else if ([skylinkDemo.DATA_TRANSFER_STATE.CANCEL,
+ *           skylinkDemo.DATA_TRANSFER_STATE.ERROR,
+ *           skylinkDemo.DATA_TRANSFER_STATE.UPLOAD_COMPLETED,
+ *           skylinkDemo.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED].indexOf(state) > -1) {
+ *         var foundIndex = transferSessions[transferId].indexOf(peerId);
+ *         if (foundIndex > -1) {
+ *           transferSessions[transferId].splice(foundIndex, 1);
+ *         }
+ *      }
+ *   });
+ *
+ *   function cancelTransfer (peerId, transferId) {
+ *     skylinkDemo.cancelDataTransfer(peerId, transferId);
+ *   }
  * @for Skylink
  * @since 0.6.1
  */
@@ -681,9 +796,23 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
  * @method sendP2PMessage
  * @param {String|JSON} message The message.
  * @param {String|Array} [targetPeerId] The target Peer ID to only send the P2P message to.<br>
- * &#8594; When provided as an Array, it will send the P2P message to all the Peer IDs provided.<br>
- * &#8594; When not provided, it will send the P2P message to all the currently connected Peers.
- * @trigger incomingMessage
+ * - When provided as an Array, it will send the P2P message to all the Peer IDs provided.<br>
+ * - When not provided, it will send the P2P message to all the currently connected Peers.
+ * @trigger <ol class="desc-seq">
+ *  <li>Checks if Datachannel connection <code>MESSAGING</code> type if opened</li>
+ *  <li>Sends P2P message to Peers.<ul>
+ *    <li>Triggers <a href="#event_incomingMessage"><code>incomingMessage</code> event</a>
+ *      with parameter payload <code>isSelf</code> value as <code>true</code> for User and
+ *      <code>false</code> for receiving Peers.</li></ul></li>
+ *  </ol>
+ *
+ * @example
+ *   skylinkDemo.on("dataChannelState", function (state, peerId, error, channelName, channelType) {
+ *      if (state === skylinkDemo.DATA_CHANNEL_STATE.OPEN &&
+ *        channelType === skylinkDemo.DATA_CHANNEL_TYPE.MESSAGING) {
+ *        skylinkDemo.sendP2PMessage("test", peerId);
+ *      }
+ *   });
  * @for Skylink
  * @since 0.5.5
  */
@@ -772,8 +901,8 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
  * @param {Number} [timeout=60] The timeout to wait for response from Peer. Once timeout is reached without
  *   response, the data transfer is terminated.
  * @param {String|Array} [targetPeerId] The target Peer ID to only start the data transfer with.<br>
- * &#8594; When provided as an Array, it will start the data transfers with all the Peer IDs provided.<br>
- * &#8594; When not provided, it will start the data transfers with all the currently connected Peers.
+ * - When provided as an Array, it will start the data transfers with all the Peer IDs provided.<br>
+ * - When not provided, it will start the data transfers with all the currently connected Peers.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  * @param {JSON} callback.error The error result in request.
@@ -838,7 +967,68 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
  * @param {JSON} callback.success.transferInfo The data transfer information.
  *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
  *      <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
- * @trigger incomingData, incomingDataRequest, dataTransferState, dataChannelState
+ * @trigger <ol class="desc-seq">
+ *   <li>Opens a new Datachannel connection with targeted Peers.<ul>
+ *      <li>Triggers <a href="#event_dataChannelState">
+ *      <code>dataChannelState</code> event</a> with parameter payload <code>channelType</code> as
+ *      <code>DATA</code>.</li></ul></li>
+ *   <li>Starts sending data transfer requests to targeted Peers when the Datachannel connections are opened.<ul>
+ *      <li>For Peers that do not support simultaneous data transfers, the <code>MESSAGING</code> Datachannel type connection
+ *      will be used. Note that only 1 simultaneous data transfer an occur between the Peers and the User.</li>
+ *      <li>For Peers that do not have any Datachannel connections or that the <code>MESSAGING</code> Datachannel type
+ *      connection is not opened, the data transfer to the Peers will be terminated.</li>
+ *      <li>For data transfers from <code>sendURLData()</code> method, the value of the parameter
+ *         payload of <code>transferInfo.dataType</code> in <a href="#event_dataTransferState">
+ *         <code>dataTransferState</code> event</a>, <a href="#event_incomingDataRequest">
+ *         <code>incomingDataRequest</code> event</a> and <a href="#event_incomingData">
+ *         <code>incomingData</code> event</a> is <code>"dataURL"</code></li></ul></li>
+ *   <li>Peers receive the data transfer request received from User. <ul>
+ *       <li>Triggers <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> with paramter payload
+ *       <code>state</code> as <code>UPLOAD_REQUEST</code> for Peers.</li>
+ *       <li>Triggers <a href="#event_incomingDataRequest"><code>incomingDataRequest</code> event</a>.</li>
+ *       <li>Peers can accept or reject the data transfer request with the <a href="#method_acceptDataTransfer">
+ *       <code>acceptDataTransfer()</code> method</a>.</li></ul></li>
+ *   <li>User receive data transfer request response from each Peer. <ul>
+ *       <li>Triggers <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> with parameter payload
+ *       <code>state</code> as <code>UPLOAD_STARTED</code> when Peer accepts data transfer request and data transfer to Peer
+ *       has started.</li>
+ *        <li>Triggers <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> with parameter payload
+ *       <code>state</code> as <code>REJECTED</code> when Peer rejects data transfer request and data transfer to Peer
+ *       has been terminated.</li></ul></li>
+ *   <li>Starts sending data to Peers.<ul>
+ *       <li>Triggers <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> with parameter payload
+ *       <code>state</code> as <code>UPLOADING</code> for User when data transfer is in-progress.</li>
+ *       <li>Triggers <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> with parameter payload
+ *       <code>state</code> as <code>DOWNLOADING</code> for Peers when data transfer is in-progress.</li></ul></li>
+ *   <li>Completes data transfer to Peers.<ul>
+ *       <li>Triggers <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> with parameter payload
+ *       <code>state</code> as <code>UPLOAD_COMPLETED</code> for User.</li>
+ *       <li>Triggers <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> with parameter payload
+ *       <code>state</code> as <code>DOWNLOAD_COMPLETED</code> for Peers.</li>
+ *       <li>Triggers <a href="#event_incomingData"><code>incomingData</code> event</a>.</li></ul></li>
+ *   <li>Closes the Datachannel connection with targeted Peers.<ul>
+ *       <li>Triggers <a href="#event_dataChannelState">
+ *       <code>dataChannelState</code> event</a> with parameter payload <code>state</code> as <code>CLOSED</code> and
+ *       <code>channelType</code> as <code>DATA</code>.</li></ul></li>
+ *   </ol>
+ * @example &lt;body&gt;
+ *   &lt;input type="file" onchange="showImage(this.Files)"&gt;
+ *   &lt;script&gt;
+ *     function showImage(files) {
+ *       var fr = new FileReader();
+ *       fr.onload = function () {
+ *         skylinkDemo.sendURLData(fr.result, function (err, success) {
+ *           if (err) {
+ *             // sendBlobData() error
+ *             return;
+ *           }
+ *           // sendBlobData() success;
+ *         });
+ *       };
+ *       fr.readAsDataURL(files[0]);
+ *     }
+ *   &lt;/script&gt;
+ *  &lt;/body&gt;
  * @for Skylink
  * @since 0.6.1
  */

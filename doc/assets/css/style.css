@@ -388,6 +388,10 @@ blockquote.info {
   margin: 16px 0;
 }
 
+.params-list blockquote.info {
+  font-size: 13px;
+}
+
 @media (max-width: 991px) {
   .section-doc-group .col-md-3 {
     display: none;
