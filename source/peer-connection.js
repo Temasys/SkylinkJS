@@ -129,13 +129,9 @@ Skylink.prototype._peerConnections = {};
  *      <li>Triggers <a href="#event_peerRestart"><code>peerRestart</code> event</a>.</li>
  *      <li>Triggers <a href="#event_serverPeerRestart"><code>serverPeerRestart</code> event</a> for User</li>
  *   </ul></li>
- *   <li>Invokes <a href="#event_joinRoom"><code>joinRoom()</code> method</a>. <ul>
+ *   <li>Invokes <a href="#method_joinRoom"><code>joinRoom()</code> method</a>. <ul>
  *     <li><code>refreshConnection()</code> will retain the User session information except the Peer ID will
- *        be a different assigned ID.</li>
- *     <li>Triggers <a href="#event_peerLeft"><code>peerLeft</code> event</a>.</li>
- *     <li>Triggers <a href="#event_serverPeerLeft"><code>serverPeerLeft</code> event</a> for User.</li>
- *     <li>Triggers <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</li>
- *     <li>Triggers <a href="#event_serverPeerJoined"><code>serverPeerJoined</code> event</a> for User.</li></ul></li>
+ *        be a different assigned ID.</li></ul></li>
  *   </ol>
  * @example &lt;body&gt;
  *   &lt;div id="peer-list"&gt;&lt;/div&gt;

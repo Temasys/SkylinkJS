@@ -1763,7 +1763,7 @@
                     ]
                 }
             ],
-            "trigger": "<b class=\"desc-seq-header\">&#8594; For Peer connections without MCU enabled:</b> <ol class=\"desc-seq\">\n  <li>Starts re-negotiation with Peer connections. <ul>\n    <li>Triggers <a href=\"#event_peerRestart\"><code>peerRestart</code> event</a>.</li></ul></li>\n  </ol>\n  <b class=\"desc-seq-header\">&#8594; For Peer connections with MCU enabled:</b> <ol class=\"desc-seq\">\n  <li>Starts sending notifications to Peer connected in the Room that User is restarting connection.<ul>\n     <li>Triggers <a href=\"#event_peerRestart\"><code>peerRestart</code> event</a>.</li>\n     <li>Triggers <a href=\"#event_serverPeerRestart\"><code>serverPeerRestart</code> event</a> for User</li>\n  </ul></li>\n  <li>Invokes <a href=\"#event_joinRoom\"><code>joinRoom()</code> method</a>. <ul>\n    <li><code>refreshConnection()</code> will retain the User session information except the Peer ID will\n       be a different assigned ID.</li>\n    <li>Triggers <a href=\"#event_peerLeft\"><code>peerLeft</code> event</a>.</li>\n    <li>Triggers <a href=\"#event_serverPeerLeft\"><code>serverPeerLeft</code> event</a> for User.</li>\n    <li>Triggers <a href=\"#event_peerJoined\"><code>peerJoined</code> event</a>.</li>\n    <li>Triggers <a href=\"#event_serverPeerJoined\"><code>serverPeerJoined</code> event</a> for User.</li></ul></li>\n  </ol>",
+            "trigger": "<b class=\"desc-seq-header\">&#8594; For Peer connections without MCU enabled:</b> <ol class=\"desc-seq\">\n  <li>Starts re-negotiation with Peer connections. <ul>\n    <li>Triggers <a href=\"#event_peerRestart\"><code>peerRestart</code> event</a>.</li></ul></li>\n  </ol>\n  <b class=\"desc-seq-header\">&#8594; For Peer connections with MCU enabled:</b> <ol class=\"desc-seq\">\n  <li>Starts sending notifications to Peer connected in the Room that User is restarting connection.<ul>\n     <li>Triggers <a href=\"#event_peerRestart\"><code>peerRestart</code> event</a>.</li>\n     <li>Triggers <a href=\"#event_serverPeerRestart\"><code>serverPeerRestart</code> event</a> for User</li>\n  </ul></li>\n  <li>Invokes <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a>. <ul>\n    <li><code>refreshConnection()</code> will retain the User session information except the Peer ID will\n       be a different assigned ID.</li></ul></li>\n  </ol>",
             "example": [
                 " &lt;body&gt;\n  &lt;div id=\"peer-list\"&gt;&lt;/div&gt;\n  &lt;script&gt;\n    skylinkDemo.on(\"peerJoined\", function (peerId, peerInfo, isSelf) {\n      if (!isSelf) {\n        var peerBtn = document.createElement(\"button\");\n        peerBtn.id = peerId;\n        peerBtn.onclick = function () {\n          skylinkDemo.refreshConnection(peerId);\n        };\n        peerBtn.innerHTML = \"Refresh Connection?\";\n        document.getElementById(\"peer-list\").appendChild(peerBtn);\n      }\n    });\n  &lt;/script&gt;\n &lt;/body&gt;"
             ],
@@ -1772,7 +1772,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 279,
+            "line": 275,
             "description": "Function that retrieves the Peer connection stats.",
             "itemtype": "method",
             "name": "getConnectionStatus",
@@ -1855,7 +1855,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 618,
+            "line": 614,
             "description": "Function that starts the Peer connection session.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_addPeer",
@@ -1866,7 +1866,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 670,
+            "line": 666,
             "description": "Function that re-negotiates a Peer connection.\nWe currently do not implement the ICE restart functionality.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -1877,7 +1877,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 800,
+            "line": 796,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -1888,7 +1888,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 856,
+            "line": 852,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -1899,13 +1899,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 995,
+            "line": 991,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1058,
+            "line": 1054,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -11347,7 +11347,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:279"
+            "line": " source/peer-connection.js:275"
         },
         {
             "message": "unknown tag: trigger",
@@ -12339,7 +12339,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:995"
+            "line": " source/peer-connection.js:991"
         }
     ]
 }
