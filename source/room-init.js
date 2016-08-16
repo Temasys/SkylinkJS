@@ -289,7 +289,8 @@ Skylink.prototype._appKeyOwner = null;
  * @param {String} token The "roomCred" for <code>joinRoom()</code>.
  * @param {String} startDateTime The "start" for <code>joinRoom()</code>.
  * @param {String} duration The "len" for <code>joinRoom()</code>.
- * @param {String} connection The RTCPeerConnection constraints and configuration. This is not used in the SDK.
+ * @param {String} connection The RTCPeerConnection constraints and configuration. This is not used in the SDK
+ *   except for the "mediaConstraints" property that sets the default <code>getUserMedia()</code> settings.
  * @type JSON
  * @private
  * @for Skylink
