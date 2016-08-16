@@ -1848,7 +1848,7 @@
             ],
             "trigger": "<ol class=\"desc-seq\">\n  <li>Retrieves the Peer connections stats.<ul>\n    <li>Triggers <a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>\n      with parameter payload <code>state</code> as <code>RETRIEVING</code>.</li>\n    <li>If retrieval of Peer connection stats is successful, it triggers <a href=\"#event_getConnectionStatusStateChange\">\n      <code>getConnectionStatusStateChange</code> event</a> with parameter payload <code>state</code> as\n      <code>RETRIEVE_SUCCESS</code> after <code>RETRIEVING</code>.</li>\n    <li>If retrieval of Peer connection stats had failed, it triggers <a href=\"#event_getConnectionStatusStateChange\">\n      <code>getConnectionStatusStateChange</code> event</a> with parameter payload <code>state</code> as\n      <code>RETRIEVE_ERROR</code> after <code>RETRIEVING</code>.</li>\n  </ul></li></ol>",
             "example": [
-                " \n  var peerIntervals = {};\n\n  skylinkDemo.on(\"getConnectionStatusStateChange\", function (state, peerId, stats, error) {\n    if (state === skylinkDemo.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS) {\n      // Display connection stats\n    } else if (state === skylinkDemo.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR) {\n      // Display retrieval error\n    }\n  });\n\n  skylinkDemo.on(\"peerJoined\", function (peerId, peerInfo, isSelf) {\n    if (!isSelf) {\n      peerIntervals[peerId] = setInterval(function () {\n        skylinkDemo.getConnectionStatus(peerId);\n      }, 1000);\n    }\n  });"
+                "\n  var peerIntervals = {};\n\n  skylinkDemo.on(\"getConnectionStatusStateChange\", function (state, peerId, stats, error) {\n    if (state === skylinkDemo.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS) {\n      // Display connection stats\n    } else if (state === skylinkDemo.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR) {\n      // Display retrieval error\n    }\n  });\n\n  skylinkDemo.on(\"peerJoined\", function (peerId, peerInfo, isSelf) {\n    if (!isSelf) {\n      peerIntervals[peerId] = setInterval(function () {\n        skylinkDemo.getConnectionStatus(peerId);\n      }, 1000);\n    }\n  });"
             ],
             "since": "0.6.14",
             "class": "Skylink"
@@ -2280,7 +2280,7 @@
         {
             "file": "source/peer-privileged.js",
             "line": 61,
-            "description": "Stores the flag that indicates if \"isPrivileged\" is enabled.\nIf enabled, the User has Privileged features which has the ability to retrieve the list of\n  Peers in the same App space with <code>getPeers()</code> method \n  and introduce Peers to each other with <code>introducePeer</code> method.",
+            "description": "Stores the flag that indicates if \"isPrivileged\" is enabled.\nIf enabled, the User has Privileged features which has the ability to retrieve the list of\n  Peers in the same App space with <code>getPeers()</code> method\n  and introduce Peers to each other with <code>introducePeer</code> method.",
             "itemtype": "attribute",
             "name": "isPrivileged",
             "type": "Boolean",
@@ -2335,13 +2335,16 @@
                     ]
                 }
             ],
-            "trigger": "getPeersStateChange",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>Retrieves the list of Peers ID in the App space.<ul>\n    <li>Triggers <a href=\"#event_getPeersStateChange\"><code>getPeersStateChange</code> event</a>\n      with parameter payload <code>state</code> as <code>ENQUIRED</code>.</li>\n    <li>If retrieval of the list of Peer IDs is successful, it triggers <a href=\"#event_getPeersStateChange\">\n      <code>getPeersStateChange</code> event</a> with parameter payload <code>state</code> as\n      <code>RECEIVED</code> after <code>ENQUIRED</code>.</li>\n  </ul></li></ol>",
+            "example": [
+                "\n  skylinkDemo.on(\"getPeersStateChange\", function (state, privilegedPeerId, peerList) {\n\t\t if (state === skylinkDemo.GET_PEERS_STATE.RECEIVED) {\n      // Display list\n    }\n  });\n\n  skylinkDemo.getPeers();"
+            ],
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 146,
+            "line": 161,
             "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled and\n  <code>\"autoIntroduce\"</code> flag to be disabled for the App Key, as only Users connecting\n  using the App Key with this flag enabled (which we call Privileged Users / Peers)\n  can introduce Peers in the same App space from other Rooms.\n  <a href=\"http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about Privileged App Key feature here</a>.\n</blockquote>\nFunction that introduces a pair of Peers to start Peer connection with each other.",
             "itemtype": "method",
             "name": "introducePeer",
@@ -2357,7 +2360,10 @@
                     "type": "String"
                 }
             ],
-            "trigger": "introduceStateChange",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>Introduces a Peer to another Peer.<ul>\n    <li>If introduction of Peer to Peer is successful, it triggers <a href=\"#event_introduceStateChange\">\n      <code>introduceStateChange</code> event</a> with parameter payload <code>state</code> as\n      <code>INTRODUCING</code>.</li>\n    <li>If introduction of Peer to Peer had failed, it triggers <a href=\"#event_introduceStateChange\">\n      <code>introduceStateChange</code> event</a> with parameter payload <code>state</code> as\n      <code>ERROR</code>.</li>\n  </ul></li></ol>",
+            "example": [
+                "\n  skylinkDemo.on(\"introduceStateChange\", function (state, privilegedPeerId, sendingPeerId, receivingPeerId) {\n\t   if (state === skylinkDemo.INTRODUCE_STATE.INTRODUCING) {\n      // Display to UI that \"sendingPeerId\" is introducing (or connecting) to \"receivingPeerId\"\n    }\n  });\n\n  skylinkDemo.on(\"getPeersStateChange\", function (state, privilegedPeerId, peerList) {\n\t\t if (state === skylinkDemo.GET_PEERS_STATE.RECEIVED) {\n      skylinkDemo.introducePeer(peerList.roomA[0], peerList.roomB[0]);\n    }\n  });\n\n  skylinkDemo.getPeers();"
+            ],
             "since": "0.6.1",
             "class": "Skylink"
         },
@@ -11371,7 +11377,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-privileged.js:146"
+            "line": " source/peer-privileged.js:161"
         },
         {
             "message": "unknown tag: trigger",

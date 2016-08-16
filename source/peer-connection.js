@@ -312,7 +312,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
  *       <code>getConnectionStatusStateChange</code> event</a> with parameter payload <code>state</code> as
  *       <code>RETRIEVE_ERROR</code> after <code>RETRIEVING</code>.</li>
  *   </ul></li></ol>
- * @example 
+ * @example
  *   var peerIntervals = {};
  *
  *   skylinkDemo.on("getConnectionStatusStateChange", function (state, peerId, stats, error) {

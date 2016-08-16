@@ -18772,13 +18772,33 @@ Function that retrieves the list of Peer IDs from Rooms within in the same App s
   </div>
 
   
+    <div class="code-item-section">
+      <h4>Example:</h4>
+      <pre class="example-content prettyprint">
+        <p>  skylinkDemo.on(&quot;getPeersStateChange&quot;, function (state, privilegedPeerId, peerList) {
+         if (state === skylinkDemo.GET_PEERS_STATE.RECEIVED) {
+      // Display list
+    }
+  });</p>
+<p>  skylinkDemo.getPeers();</p>
+
+      </pre>
+    </div>
+  
 
   
 
   
   <div class="code-item-section">
     <h4>Events Sequence:</h4>
-    <span class="code-item-trigger">getPeersStateChange</span>
+    <span class="code-item-trigger"><ol class="desc-seq">
+  <li>Retrieves the list of Peers ID in the App space.<ul>
+    <li>Triggers <a href="#event_getPeersStateChange"><code>getPeersStateChange</code> event</a>
+      with parameter payload <code>state</code> as <code>ENQUIRED</code>.</li>
+    <li>If retrieval of the list of Peer IDs is successful, it triggers <a href="#event_getPeersStateChange">
+      <code>getPeersStateChange</code> event</a> with parameter payload <code>state</code> as
+      <code>RECEIVED</code> after <code>ENQUIRED</code>.</li>
+  </ul></li></ol></span>
   </div>
   
 
@@ -20416,7 +20436,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-privileged.js.html#l146"><code>source&#x2F;peer-privileged.js:146</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-privileged.js.html#l161"><code>source&#x2F;peer-privileged.js:161</code></a>
       </small>
     
 
@@ -20443,13 +20463,39 @@ Function that introduces a pair of Peers to start Peer connection with each othe
   </div>
 
   
+    <div class="code-item-section">
+      <h4>Example:</h4>
+      <pre class="example-content prettyprint">
+        <p>  skylinkDemo.on(&quot;introduceStateChange&quot;, function (state, privilegedPeerId, sendingPeerId, receivingPeerId) {
+       if (state === skylinkDemo.INTRODUCE_STATE.INTRODUCING) {
+      // Display to UI that &quot;sendingPeerId&quot; is introducing (or connecting) to &quot;receivingPeerId&quot;
+    }
+  });</p>
+<p>  skylinkDemo.on(&quot;getPeersStateChange&quot;, function (state, privilegedPeerId, peerList) {
+         if (state === skylinkDemo.GET_PEERS_STATE.RECEIVED) {
+      skylinkDemo.introducePeer(peerList.roomA[0], peerList.roomB[0]);
+    }
+  });</p>
+<p>  skylinkDemo.getPeers();</p>
+
+      </pre>
+    </div>
+  
 
   
 
   
   <div class="code-item-section">
     <h4>Events Sequence:</h4>
-    <span class="code-item-trigger">introduceStateChange</span>
+    <span class="code-item-trigger"><ol class="desc-seq">
+  <li>Introduces a Peer to another Peer.<ul>
+    <li>If introduction of Peer to Peer is successful, it triggers <a href="#event_introduceStateChange">
+      <code>introduceStateChange</code> event</a> with parameter payload <code>state</code> as
+      <code>INTRODUCING</code>.</li>
+    <li>If introduction of Peer to Peer had failed, it triggers <a href="#event_introduceStateChange">
+      <code>introduceStateChange</code> event</a> with parameter payload <code>state</code> as
+      <code>ERROR</code>.</li>
+  </ul></li></ol></span>
   </div>
   
 
@@ -36895,7 +36941,7 @@ Contains the list of <a href="#method_introducePeer"><code>introducePeer</code> 
   <div class="code-item-description">
     <p>Stores the flag that indicates if &quot;isPrivileged&quot; is enabled.
 If enabled, the User has Privileged features which has the ability to retrieve the list of
-  Peers in the same App space with <code>getPeers()</code> method 
+  Peers in the same App space with <code>getPeers()</code> method
   and introduce Peers to each other with <code>introducePeer</code> method.</p>
 
   </div>

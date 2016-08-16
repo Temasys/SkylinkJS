@@ -61,7 +61,7 @@ Skylink.prototype._autoIntroduce = true;
 /**
  * Stores the flag that indicates if "isPrivileged" is enabled.
  * If enabled, the User has Privileged features which has the ability to retrieve the list of
- *   Peers in the same App space with <code>getPeers()</code> method 
+ *   Peers in the same App space with <code>getPeers()</code> method
  *   and introduce Peers to each other with <code>introducePeer</code> method.
  * @attribute isPrivileged
  * @type Boolean
@@ -103,7 +103,22 @@ Skylink.prototype._peerList = null;
  *   <small>Defined as <code>null</code> when there are errors in request</small>
  *   <small>Object signature matches the <code>peerList</code> parameter payload received in the
  *      <a href="#event_getPeersStateChange"><code>getPeersStateChange</code> event</a>.</small>
- * @trigger getPeersStateChange
+ * @trigger <ol class="desc-seq">
+ *   <li>Retrieves the list of Peers ID in the App space.<ul>
+ *     <li>Triggers <a href="#event_getPeersStateChange"><code>getPeersStateChange</code> event</a>
+ *       with parameter payload <code>state</code> as <code>ENQUIRED</code>.</li>
+ *     <li>If retrieval of the list of Peer IDs is successful, it triggers <a href="#event_getPeersStateChange">
+ *       <code>getPeersStateChange</code> event</a> with parameter payload <code>state</code> as
+ *       <code>RECEIVED</code> after <code>ENQUIRED</code>.</li>
+ *   </ul></li></ol>
+ * @example
+ *   skylinkDemo.on("getPeersStateChange", function (state, privilegedPeerId, peerList) {
+ *		 if (state === skylinkDemo.GET_PEERS_STATE.RECEIVED) {
+ *       // Display list
+ *     }
+ *   });
+ *
+ *   skylinkDemo.getPeers();
  * @for Skylink
  * @since 0.6.1
  */
@@ -128,7 +143,7 @@ Skylink.prototype.getPeers = function(showAll, callback){
 		type: self._SIG_MESSAGE_TYPE.GET_PEERS,
 		showAll: showAll || false
 	});
-	
+
 	self._trigger('getPeersStateChange',self.GET_PEERS_STATE.ENQUIRED, self._user.sid, null);
 
 	log.log('Enquired server for peers within the realm');
@@ -156,7 +171,29 @@ Skylink.prototype.getPeers = function(showAll, callback){
  * @method introducePeer
  * @param {String} sendingPeerId The Peer ID of the Peer that will start Peer connection with <code>receivingPeerId</code>.
  * @param {String} receivingPeerId The Peer ID of the Peer that will be connected with <code>sendingPeerId</code>.
- * @trigger introduceStateChange
+ * @trigger <ol class="desc-seq">
+ *   <li>Introduces a Peer to another Peer.<ul>
+ *     <li>If introduction of Peer to Peer is successful, it triggers <a href="#event_introduceStateChange">
+ *       <code>introduceStateChange</code> event</a> with parameter payload <code>state</code> as
+ *       <code>INTRODUCING</code>.</li>
+  *     <li>If introduction of Peer to Peer had failed, it triggers <a href="#event_introduceStateChange">
+ *       <code>introduceStateChange</code> event</a> with parameter payload <code>state</code> as
+ *       <code>ERROR</code>.</li>
+ *   </ul></li></ol>
+ * @example
+ *   skylinkDemo.on("introduceStateChange", function (state, privilegedPeerId, sendingPeerId, receivingPeerId) {
+ *	   if (state === skylinkDemo.INTRODUCE_STATE.INTRODUCING) {
+ *       // Display to UI that "sendingPeerId" is introducing (or connecting) to "receivingPeerId"
+ *     }
+ *   });
+ *
+ *   skylinkDemo.on("getPeersStateChange", function (state, privilegedPeerId, peerList) {
+ *		 if (state === skylinkDemo.GET_PEERS_STATE.RECEIVED) {
+ *       skylinkDemo.introducePeer(peerList.roomA[0], peerList.roomB[0]);
+ *     }
+ *   });
+ *
+ *   skylinkDemo.getPeers();
  * @for Skylink
  * @since 0.6.1
  */
