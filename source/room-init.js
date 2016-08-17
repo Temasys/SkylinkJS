@@ -1,23 +1,17 @@
 /**
- * Contains the list of Room authentication or <a href="#method_init"><code>init()</code> method</a> states.
+ * Contains the list of <a href="#method_init"><code>init()</code> method</a> authentication states.
  * @attribute READY_STATE_CHANGE
  * @param {Number} INIT <small>Value <code>0</code></small>
- *   The state when Skylink is at the initial state before retrieval.<br>
- * If all dependencies has been loaded, this would proceed to <code>LOADING</code> state.
+ *   The state when <code>init()</code> has just started.
  * @param {Number} LOADING <small>Value <code>1</code></small>
- *   The state when Skylink starts retrieving the connection information from the platform server.<br>
- * This state occurs after <code>INIT</code> state and if retrieval is successful, this would
- *   proceed to <code>COMPLETED</code> state.
+ *   The state when <code>init()</code> is authenticating the App Key and credentials provided with the API.
  * @param {Number} COMPLETED <small>Value <code>2</code></small>
- *   The state when the connection information has been retrieved successfully.<br>
- * This state occurs after <code>LOADING</code>, and if it's
- *   {{#crossLink "Skylink/joinRoom:attr"}}joinRoom(){{/crossLink}} that is invoked, room connection
- *   would commerce.
+ *   The state when <code>init()</code> has succesfully authenticated the App key and credentials provided with the API.
+ *   <small>The API will return the Room credentials which will be used in
+ *   <a href="#method_joinRoom"><code>joinRoom()</code> method</a> for connection to Signaling.</small>
  * @param {Number} ERROR <small>Value <code>-1</code></small>
- *   The state when an exception occured while retrieving the connection information.<br>
- * This state might be triggered when dependencies failed to load or HTTP retrieval fails.<br>
- * Reference {{#crossLink "Skylink/READY_STATE_CHANGE_ERROR:attr"}}READY_STATE_CHANGE_ERROR{{/crossLink}}
- *   to see the list of errors that might have triggered the <code>ERROR</code> state.
+ *   The state when <code>init()</code> had failed authenticating the App Key and credentials provided with the API.
+ *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -38,18 +32,21 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @attribute READY_STATE_CHANGE_ERROR
  * @type JSON
  * @param {Number} API_INVALID <small>Value <code>4001</code></small>
- *   The error when provided Application Key does not exists <em>(invalid)</em>.<br>
- * For this error, it's recommended that you check if the Application Key exists in your account
- *   in the developer console.
+ *   The error returned when App Key provided does not exists.
+ *  <small>To resolve this, check if the App Key provided exists in the <a href="https://developer.temasys.com.sg">
+ *     Developer Console</a>.</small>
  * @param {Number} API_DOMAIN_NOT_MATCH <small>Value <code>4002</code></small>
- *   The error when application accessing from backend IP address is not valid for provided Application Key.<br>
- * This rarely (and should not) occur and it's recommended to report this issue if this occurs.
+ *   The error returned when accessing backend IP address does not match the <code>"domain"</code>
+ *   property configured in the App Key settings.
+ *  <small>To resolve this, contact our <a href="http://support.temasys.com.sg">Support Portal</a>.</small>
  * @param {Number} API_CORS_DOMAIN_NOT_MATCH <small>Value <code>4003</code></small>
- *   The error when application accessing from the CORS domain is not valid for provided Application Key.<br>
- * For this error, it's recommended that you check the CORS configuration for the provided Application Key
- *   in the developer console.
+ *   The error returned when accessing CORS domain does not match the <code>"corsurl"</code> property
+ *   configured in the App Key settings.
+ *   <small>To resolve this, configure the App Key CORS Url setting in the <a href="https://developer.temasys.com.sg">
+ *     Developer Console</a>.</small>
  * @param {Number} API_CREDENTIALS_INVALID <small>Value <code>4004</code></small>
- *   The error when credentials provided is not valid for provided Application Key.<br>
+ *   The error returned when ac
+ * The error when credentials provided is not valid for provided Application Key.<br>
  * For this error, it's recommended to check the <code>credentials</code> provided in
  *   {{#crossLink "Skylink/init:method"}}init() configuration{{/crossLink}}.
  * @param {Number} API_CREDENTIALS_NOT_MATCH <small>Value <code>4005</code></small>
@@ -101,6 +98,12 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
   API_CREDENTIALS_NOT_MATCH: 4005,
   API_INVALID_PARENT_KEY: 4006,
   API_NO_MEETING_RECORD_FOUND: 4010,
+  
+  // New ones
+  API_OVER_SEAT_LIMIT: 4020,
+  API_RETRIEVAL_FAILED: 4021,
+  API_WRONG_ACCESS_DOMAIN: 5005,
+  
   //ROOM_LOCKED: 5001,
   XML_HTTP_REQUEST_ERROR: -1,
   NO_SOCKET_IO: 1,
@@ -299,87 +302,55 @@ Skylink.prototype._appKeyOwner = null;
 Skylink.prototype._room = null;
 
 /**
- * Initialises and configures Skylink to begin any connection.
- * <b>NOTE</b> that this is the first method that has to be called before
- *   using any other functionalities other than debugging features like
- *   {{#crossLink "Skylink/setLogLevel:method"}}setLogLevel(){{/crossLink}} and
- *   {{#crossLink "Skylink/setDebugMode:method"}}setDebugMode(){{/crossLink}} and
- *   after all event subscriptions like {{#crossLink "Skylink/on:method"}}on(){{/crossLink}}
- *   or {{#crossLink "Skylink/once:method"}}once(){{/crossLink}} has been made.
- * This is where the Application Key is configured and attached to Skylink for usage.
+ * Function that authenticates the App Key to initialise the SDK. 
  * @method init
- * @param {String|JSON} options The configuration settings for Skylink.
- *   If provided options is a <var>typeof</var> <code>string</code>, it will
- *   be interpreted as the Application Key being provided.
- * @param {String} options.appKey Previously known as <code>apiKey</code>.
- *   The Application Key that Skylink uses for initialising and connecting rooms.
- * @param {String} [options.defaultRoom=options.appKey] The default room that
- *   Skylink should connect to if there is no room provided in
- *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}.
- *   If this value is not provided, the default room value would be
- *   the Application Key provided.
- * @param {String} [options.roomServer] The platform server URL that Skylink makes a
- *   <code>HTTP /GET</code> to retrieve the connection information required.
- *   This is a debugging feature, and it's not advisable to manipulate
- *     this value unless you are using a beta platform server.
- * @param {String} [options.region] <i>Deprecated feature</i>. The regional server that Skylink
- *    should connect to for fastest connectivity. [Rel: Skylink.REGIONAL_SERVER]
- * @param {Boolean} [options.enableIceTrickle=true] <i>Debugging Feature</i>.
- *    The flag that indicates if PeerConnections
- *    should enable trickling of ICE to connect the ICE connection. Configuring
- *    this value to <code>false</code> may result in a slower connection but
- *    a more stable connection.
- * @param {Boolean} [options.enableDataChannel=true] <i>Debugging feature</i>.
- *   The flag that indicates if PeerConnections
- *   should have any DataChannel connections. Configuring this value to <code>false</code>
- *   may result in failure to use features like
- *   {{#crossLink "Skylink/sendBlobData:method"}}sendBlobData(){{/crossLink}},
- *   {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}} and
- *   {{#crossLink "Skylink/sendURLData:method"}}sendURLData(){{/crossLink}} or any
- *   DataChannel connection related services.
- * @param {Boolean} [options.enableTURNServer=true] <i>Debugging feature</i>.
- *   The flag that indicates if PeerConnections connection should use any TURN server connection.
- *   Tampering this flag may disable any successful Peer connection
- *   that is behind any firewalls, so set this value at your own risk.
- * @param {Boolean} [options.enableSTUNServer=true] <i>Debugging feature</i>.
- *   The flag that indicates if PeerConnections connection should use any STUN server connection.
- *   Tampering this flag may cause issues to connections, so set this value at your own risk.
- * @param {Boolean} [options.forceTURN=false] The flag that indicates if PeerConnections connection
- *   should only use TURN server connection which enables a quicker connectivity.
- *   Note that this will not work if TURN is disabled for the Application Key provided.
- *   This configuration will override the settings for <code>enableTURNServer</code>
- *   and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and
- *   <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.
- * @param {Boolean} [options.usePublicSTUN=true] The flag that indicates if PeerConnections connection
- *   should enable usage of public STUN server connection connectivity.
- *   This configuration would not work if <code>enableSTUNServer</code> is set to <code>false</code>
- *   or <code>forceTURN</code> is set to <code>true</code>.
- * @param {Boolean} [options.TURNServerTransport=Skylink.TURN_TRANSPORT.ANY] <i>Debugging feature</i>.
- *   The TURN server transport to enable for TURN server connections.
- *   Tampering this flag may cause issues to connections, so set this value at your own risk.
+ * @param {JSON|String} options The configuration options.
+ * - When provided as a string, it's configured as <code>options.appKey</code>.
+ * @param {String} options.appKey The App Key.
+ * @param {String} [options.defaultRoom] The default Room name to use when
+ *    no Room name is provided in <a href="#method_joinRoom"><code>joinRoom()</code> method</a>.
+ * - When not provided, it's configured as <code>options.appKey</code>.
+ * <small>Fallbacks to the value of <code>options.appKey</code> if this is not provided.</small>
+ * <small>This is the only Room name connected to when using credentials based authentication.</small>
+ * @param {String} [options.roomServer] The platform API server url.
+ * <small>This is a debugging feature and is not recommended to be used by developers unless
+ *   instructed for debugging purposes.</small>
+ * @param {String} [options.region] <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This option has been deprecated.<br>Automatic nearest regional server has been implemented
+ *   on the platform.</blockquote>
+ *   The platform regional server to connect to for better connectivity.
+ *   [Rel: Skylink.REGIONAL_SERVER]
+ * @param {Boolean} [options.enableIceTrickle=true] The flag if trickle ICE should be
+ *   enabled when connecting with Peer connections.
+ * @param {Boolean} [options.enableDataChannel=true] The flag if Datachannel connections
+ *   should be enabled with connected with Peer connections.
+ * @param {Boolean} [options.enableTURNServer=true] The flag if TURN ICE servers should
+ *   be filtered out when constructing Peer connections.
+ * @param {Boolean} [options.enableSTUNServer=true] The flag if STUN ICE servers should
+ *   be filtered out when constructing Peer connections.
+ * @param {Boolean} [options.forceTURN=false] The flag if Peers should have enforced
+ *   connections over the TURN server.
+ *   <small>This sets <code>options.enableTURNServer</code> value to <code>true</code> and
+ *     <code>options.enableSTUNServer</code> value to <code>false</code>.</small>
+ *   <small>Filters the <code>"relay"</code> ICE candidates during Peer connections ICE gathering to enforce TURN connections.</small>
+ * @param {Boolean} [options.usePublicSTUN=true] The flag if STUN ICE servers not
+ *   belonging to <code>temasys.com.sg</code> should be filtered out when constructing Peer connections.
+ * @param {Boolean} [options.TURNServerTransport] The option for filtering and configuring
+ *   TURN ICE servers url <code>?transport=</code> query parameter when constructing a Peer connections.
+ *   <small>Fallbacks to <code>ANY</code> option if not provided.</small>
  *   [Rel: Skylink.TURN_TRANSPORT]
- * @param {JSON} [options.credentials] The credentials configured for starting a new persistent
- *   room meeting or connecting with Application Keys that do not use CORS authentication.
- *   Setting the <code>startDateTime</code> or the <code>duration</code> will not affect
- *   the actual duration for non persistent rooms. This feature would only affect connections with
- *   Application Keys that is configured for persistent room feature.
- *   To enable persistent room or disable CORS, you may set it in the developer console.
- *   CORS may be disabled by setting the platform to <code>"Other"</code>.
- * @param {String} options.credentials.startDateTime The room start datetime stamp in
- *   <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601 format</a>.
- *   This will start a new meeting based on the starting datetime stamp
- *   in the room that was selected to join for Application Key that is configured
- *   with persistent room feature. You may use
- *   <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString">
- *   Date.toISOString()</a> to retrieve ISO 8601 formatted date time stamp.
- *   The start date time of the room will not affect non persistent room connection.
- * @param {Number} options.credentials.duration The duration (in hours)
- *   that the room duration should be in. This will set the duration starting from
- *   the provided <code>startDateTime</code> onwards and after the duration is over,
- *   the meeting is over and the room is closed for Application Key that is
- *   configured with persistent room feature.
- *   The duration will not affect non persistent room connection.The duration of the meeting in hours.<br>
- *   <small>E.g. <code>0.5</code> for half an hour, <code>1.4</code> for 1 hour and 24 minutes</small>
+ * @param {JSON} [options.credentials] The credentials for authenticating App Key.
+ *   <small>By default, <code>init()</code> uses the CORS URL authentication.
+ *   For more details on the different authentication methods, read
+ *     <a href="http://support.temasys.com.sg/support/solutions/articles/
+ * 12000002712-authenticating-your-application-key-to-start-a-connection">the article here</a>.</small>
+ *   <small>This is also part of the persistent Room feature configuration. <a href="http://support.temasys.com.sg/support
+ * /solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings">Read more here</a>.</small>
+ * @param {String} options.credentials.startDateTime The credentials starting DateTime stamp
+ *   in <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601 format</a>.
+ *   <small>This configures the User's the starting DateTime session connected to Room.</small>
+ * @param {Number} options.credentials.duration The credentials duration in hours.
+ *   <small>This configures the User's the duration session connected to Room.</small>
  * @param {String} options.credentials.credentials The room credentials for Application Key.
  *   This is required for rooms connecting without CORS verification or starting a new persistent room meeting.<br><br>
  *   <u>To generate the credentials:</u><br>

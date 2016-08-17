@@ -274,6 +274,21 @@ h3 code {
   padding: 0 5px 0 0;
   font-size: 12px;
 }
+.param .param-description ul {
+  padding-left: 0;
+  margin-bottom: 15px;
+  list-style-type: none;
+  list-style-position: inside;
+}
+.param .param-description ul li:before {
+  content: "\00BB \0020";
+  color: #aaa;
+  font-size: 18px;
+}
+.param .param-description ul li {
+  color: #888;
+  font-size: 14px;
+}
 .returns-description span,
 .returns-description p {
   display: inline-block;
