@@ -2775,12 +2775,12 @@
                 },
                 {
                     "name": "API_CREDENTIALS_INVALID",
-                    "description": "<small>Value <code>4004</code></small>\n  The value of the failure code when there is no CORS prsent in the HTTP headers during the request to the\n  Auth server present nor <code>options.credentials.credentials</code> configuration provided in the <code>init()</code>.\n  <small>To resolve this, ensure that CORS are present in the HTTP headers during the request to the Auth server.</small>",
+                    "description": "<small>Value <code>4004</code></small>\n  The value of the failure code when there is no [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)\n  present in the HTTP headers during the request to the Auth server present nor\n  <code>options.credentials.credentials</code> configuration provided in the <code>init()</code>.\n  <small>To resolve this, ensure that CORS are present in the HTTP headers during the request to the Auth server.</small>",
                     "type": "Number"
                 },
                 {
                     "name": "API_CREDENTIALS_NOT_MATCH",
-                    "description": "<small>Value <code>4005</code></small>\n  The value of the failure code when the <code>options.credentials.credentials</code> configuration provided in the\n  <code>init()</code> does not match up with the <code>options.credentials.startDateTime</code>,\n  <code>options.credentials.duration</code> or that the <code>\"secret\"</code> used to generate\n  <code>options.credentials.credentials</code> does not match the App Key provided.\n  <small>To resolve this, check that the <code>options.credentials.credentials</code> is generated correctly and\n  that the <code>\"secret\"</code> used to generate it is from the App Key provided in the <code>init()</code>.</small>",
+                    "description": "<small>Value <code>4005</code></small>\n  The value of the failure code when the <code>options.credentials.credentials</code> configuration provided in the\n  <code>init()</code> does not match up with the <code>options.credentials.startDateTime</code>,\n  <code>options.credentials.duration</code> or that the <code>\"secret\"</code> used to generate\n  <code>options.credentials.credentials</code> does not match the App Key's <code>\"secret</code> property provided.\n  <small>To resolve this, check that the <code>options.credentials.credentials</code> is generated correctly and\n  that the <code>\"secret\"</code> used to generate it is from the App Key provided in the <code>init()</code>.</small>",
                     "type": "Number"
                 },
                 {
@@ -2846,7 +2846,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 126,
+            "line": 127,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This constant has been deprecated.<br>Automatic nearest regional server has been implemented\n  on the platform.\n</blockquote>\nThe list of available Auth servers in these regions that\n<a href=\"#method_init\"><code>init()</code> method</a> could use for better connectivity.",
             "itemtype": "attribute",
             "name": "REGIONAL_SERVER",
@@ -2870,7 +2870,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 149,
+            "line": 150,
             "description": "Stores the flag if HTTPS connections should be enforced when connecting to\n  the API or Signaling server if App is accessing from HTTP domain.\nHTTPS connections are enforced if App is accessing from HTTPS domains.",
             "itemtype": "attribute",
             "name": "_forceSSL",
@@ -2883,7 +2883,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 162,
+            "line": 163,
             "description": "Stores the flag if TURNS connections should be enforced when connecting to\n  the TURN server if App is accessing from HTTP domain.\nTURNS connections are enforced if App is accessing from HTTPS domains.",
             "itemtype": "attribute",
             "name": "_forceTURNSSL",
@@ -2896,7 +2896,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 175,
+            "line": 176,
             "description": "Stores the flag if TURN connections should be enforced when connecting to Peers.\nThis filters all non \"relay\" ICE candidates to enforce connections via the TURN server.",
             "itemtype": "attribute",
             "name": "_forceTURN",
@@ -2909,7 +2909,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 187,
+            "line": 188,
             "description": "Stores the construct API REST path to obtain Room credentials.",
             "itemtype": "attribute",
             "name": "_path",
@@ -2921,7 +2921,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 197,
+            "line": 198,
             "description": "Stores the server region for the Signaling to use.\nThis is already deprecated an no longer useful. To discuss and remove.",
             "itemtype": "attribute",
             "name": "_serverRegion",
@@ -2933,7 +2933,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 208,
+            "line": 209,
             "description": "Stores the API server url.",
             "itemtype": "attribute",
             "name": "_roomServer",
@@ -2945,7 +2945,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 218,
+            "line": 219,
             "description": "Stores the App Key configured in <code>init()</code>.",
             "itemtype": "attribute",
             "name": "_appKey",
@@ -2957,7 +2957,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 228,
+            "line": 229,
             "description": "Stores the default Room name to connect to when <code>joinRoom()</code> does not provide a Room name.",
             "itemtype": "attribute",
             "name": "_defaultRoom",
@@ -2969,7 +2969,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 238,
+            "line": 239,
             "description": "Stores the <code>init()</code> credentials starting DateTime stamp in ISO 8601.",
             "itemtype": "attribute",
             "name": "_roomStart",
@@ -2981,7 +2981,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 248,
+            "line": 249,
             "description": "Stores the <code>init()</code> credentials duration counted in hours.",
             "itemtype": "attribute",
             "name": "_roomDuration",
@@ -2993,7 +2993,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 258,
+            "line": 259,
             "description": "Stores the <code>init()</code> generated credentials string.",
             "itemtype": "attribute",
             "name": "_roomCredentials",
@@ -3005,7 +3005,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 268,
+            "line": 269,
             "description": "Stores the current <code>init()</code> readyState.",
             "itemtype": "attribute",
             "name": "_readyState",
@@ -3017,7 +3017,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 278,
+            "line": 279,
             "description": "Stores the \"cid\" used for <code>joinRoom()</code>.",
             "itemtype": "attribute",
             "name": "_key",
@@ -3029,7 +3029,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 288,
+            "line": 289,
             "description": "Stores the \"apiOwner\" used for <code>joinRoom()</code>.",
             "itemtype": "attribute",
             "name": "_appKeyOwner",
@@ -3041,7 +3041,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 298,
+            "line": 299,
             "description": "Stores the Room credentials information for <code>joinRoom()</code>.",
             "itemtype": "attribute",
             "name": "_room",
@@ -3080,7 +3080,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 314,
+            "line": 315,
             "description": "Function that authenticates and initialises App Key used for Room connections.",
             "itemtype": "method",
             "name": "init",
@@ -3092,12 +3092,12 @@
                     "props": [
                         {
                             "name": "appKey",
-                            "description": "The App Key.",
+                            "description": "The App Key.\n  <small>By default, <code>init()</code> uses [HTTP CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)\n  authentication. For credentials based authentication, see the <code>options.credentials</code> configuration\n  below. You can know more about the <a href=\"http://support.temasys.com.sg/support/solutions/articles/\n12000002712-authenticating-your-application-key-to-start-a-connection\">in the authentication methods article here</a>\n  for more details on the various authentication methods.</small>\n  <small>If you are using the Persistent Room feature for scheduled meetings, you will require to\n  use the credential based authentication. See the <a href=\"http://support.temasys.com.sg/support\n/solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings\">Persistent Room article here\n  </a> for more information.</small>",
                             "type": "String"
                         },
                         {
                             "name": "defaultRoom",
-                            "description": "The default Room to connect to when no <code>room</code> parameter\n   is provided in  <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a>.\n- When not provided, it's value is <code>options.appKey</code>.\n  <small>Note that switching Rooms is not available when using <code>options.credentials</code> based authentication.\n  The Room that User will be connected to is the <code>defaultRoom</code> provided.</small>",
+                            "description": "The default Room to connect to when no <code>room</code> parameter\n   is provided in  <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a>.\n- When not provided, its value is <code>options.appKey</code>.\n  <small>Note that switching Rooms is not available when using <code>options.credentials</code> based authentication.\n  The Room that User will be connected to is the <code>defaultRoom</code> provided.</small>",
                             "type": "String",
                             "optional": true
                         },
@@ -3122,106 +3122,104 @@
                         },
                         {
                             "name": "enableDataChannel",
-                            "description": "The flag if Datachannel connections should be enabled.\n  <small>This is required to be enabled for <a href=\"#method_sendBlobData\"><code>sendBlobData()</code> method</a>\n  <a href=\"#method_sendURLData\"><code>sendURLData()</code> method</a> and\n  <a href=\"#method_sendP2PMessage\"><code>sendP2PMessage()</code> method</a>.</small>",
+                            "description": "The flag if Datachannel connections should be enabled.\n  <small>This is required to be enabled for <a href=\"#method_sendBlobData\"><code>sendBlobData()</code> method</a>,\n  <a href=\"#method_sendURLData\"><code>sendURLData()</code> method</a> and\n  <a href=\"#method_sendP2PMessage\"><code>sendP2PMessage()</code> method</a>.</small>",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
                         },
                         {
                             "name": "enableTURNServer",
-                            "description": "The flag if TURN ICE servers should\n  be filtered out when constructing Peer connections.",
+                            "description": "The flag if TURN ICE servers should\n  be used when constructing Peer connections to allow TURN connections when required and enabled for the App Key.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
                         },
                         {
                             "name": "enableSTUNServer",
-                            "description": "The flag if STUN ICE servers should\n  be filtered out when constructing Peer connections.",
+                            "description": "The flag if STUN ICE servers should\n  be used when constructing Peer connections to allow TURN connections when required.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
                         },
                         {
                             "name": "forceTURN",
-                            "description": "The flag if Peer connections should enforce connections over the TURN server.\n  <small>This sets <code>options.enableTURNServer</code> value to <code>true</code> and\n  <code>options.enableSTUNServer</code> value to <code>false</code>.</small>\n  <small>This filters the <code>\"relay\"</code> ICE candidates during Peer connections\n  ICE gathering to enforce TURN connections.</small>",
+                            "description": "The flag if Peer connections should enforce\n  connections over the TURN server.\n  <small>This sets <code>options.enableTURNServer</code> value to <code>true</code> and\n  <code>options.enableSTUNServer</code> value to <code>false</code>.</small>\n  <small>During Peer connections, it filters out non <code>\"relay\"</code> ICE candidates to\n  ensure that TURN connections is enforced.</small>",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
                         },
                         {
                             "name": "usePublicSTUN",
-                            "description": "The flag if publicly available STUN ICE servers should\n  be filtered out when constructing Peer connections.",
+                            "description": "The flag if publicly available STUN ICE servers should\n  be used if <code>options.enableSTUNServer</code> is enabled.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
                         },
                         {
                             "name": "TURNServerTransport",
-                            "description": "The option for filtering and configuring\n  TURN ICE servers <code>?transport=</code> query parameter when constructing a Peer connections.\n- When not provided, it's value is <code>ANY</code>.\n  [Rel: Skylink.TURN_TRANSPORT]",
+                            "description": "The option to configure the <code>?transport=</code>\n  query parameter in TURN ICE servers when constructing a Peer connections.\n- When not provided, its value is <code>ANY</code>.\n  [Rel: Skylink.TURN_TRANSPORT]",
                             "type": "Boolean",
                             "optional": true
                         },
                         {
                             "name": "credentials",
-                            "description": "The credentials used for The credentials for authenticating App Key.\n  <small>By default, <code>init()</code> uses the CORS URL authentication.\n  For more details on the different authentication methods, read\n    <a href=\"http://support.temasys.com.sg/support/solutions/articles/\n12000002712-authenticating-your-application-key-to-start-a-connection\">the article here</a>.</small>\n  <small>This is also part of the persistent Room feature configuration. <a href=\"http://support.temasys.com.sg/support\n/solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings\">Read more here</a>.</small>",
+                            "description": "The credentials used for authenticating App Key with\n  credentials to retrieve the Room session token used for connection in <a href=\"#method_joinRoom\">\n  <code>joinRoom()</code> method</a>.\n  <small>Note that switching of Rooms is not allowed when using credentials based authentication, unless\n  <code>init()</code> is invoked again with a different set of credentials followed by invoking\n  the <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a>.</small>",
                             "type": "JSON",
                             "optional": true,
                             "props": [
                                 {
                                     "name": "startDateTime",
-                                    "description": "The credentials starting DateTime stamp\n  in <a href=\"https://en.wikipedia.org/wiki/ISO_8601\">ISO 8601 format</a>.\n  <small>This configures the User's the starting DateTime session connected to Room.</small>",
+                                    "description": "The credentials User session in Room starting DateTime\n  in <a href=\"https://en.wikipedia.org/wiki/ISO_8601\">ISO 8601 format</a>.",
                                     "type": "String"
                                 },
                                 {
                                     "name": "duration",
-                                    "description": "The credentials duration in hours.\n  <small>This configures the User's the duration session connected to Room.</small>",
+                                    "description": "The credentials User session in Room duration in hours.",
                                     "type": "Number"
                                 },
                                 {
                                     "name": "credentials",
-                                    "description": "The room credentials for Application Key.\n  This is required for rooms connecting without CORS verification or starting a new persistent room meeting.<br><br>\n  <u>To generate the credentials:</u><br>\n  <ol>\n  <li>Concatenate a string that consists of the room name\n    the room meeting duration (in hours) and the start date timestamp (in ISO 8601 format).<br>\n    <small>Format <code>room + \"_\" + duration + \"_\" + startDateTimeStamp</code></small></li>\n  <li>Hash the concatenated string with the Application Key token using\n    <a href=\"https://en.wikipedia.org/wiki/SHA-1\">SHA-1</a>.\n    You may use the <a href=\"https://code.google.com/p/crypto-js/#HMAC\">CryptoJS.HmacSHA1</a> function to do so.<br>\n    <small>Example <code>var hash = CryptoJS.HmacSHA1(concatenatedString, token);</code></small></li>\n  <li>Convert the hash to a <a href=\"https://en.wikipedia.org/wiki/Base64\">Base64</a> encoded string. You may use the\n    <a href=\"https://code.google.com/p/crypto-js/#The_Cipher_Output\">CryptoJS.enc.Base64</a> function\n    to do so.<br><small>Example <code>var base64String = hash.toString(CryptoJS.enc.Base64); </code></small></li>\n  <li>Encode the Base64 encoded string to a URI component using UTF-8 encoding with\n    <a href=\"https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent\">encodeURIComponent()</a>.<br>\n    <small>Example <code>var credentials = encodeURIComponent(base64String);</code></small></li>\n  </ol><br>",
+                                    "description": "The generated credentials used to authenticate\n  the provided App Key with its <code>\"secret\"</code> property.\n  <blockquote class=\"details\"><h5>To generate the credentials:</h5><ol>\n  <li>Concatenate a string that consists of the Room name you provide in the <code>options.defaultRoom</code>,\n  the <code>options.credentials.duration</code> and the <code>options.credentials.startDateTime</code>.\n  <small>Example: <code>var concatStr = defaultRoom + \"_\" + duration + \"_\" + startDateTime;</code></small></li>\n  <li>Hash the concatenated string with the App Key <code>\"secret\"</code> property using\n  <a href=\"https://en.wikipedia.org/wiki/SHA-1\">SHA-1</a>.\n  <small>Example: <code>var hash = CryptoJS.HmacSHA1(concatStr, appKeySecret);</code></small>\n  <small>See the <a href=\"https://code.google.com/p/crypto-js/#HMAC\"><code>CryptoJS.HmacSHA1</code> library</a>.</small></li>\n  <li>Encode the hashed string using <a href=\"https://en.wikipedia.org/wiki/Base64\">base64</a>\n  <small>Example: <code>var b64Str = hash.toString(CryptoJS.enc.Base64);</code></small>\n  <small>See the <a href=\"https://code.google.com/p/crypto-js/#The_Cipher_Output\">CryptoJS.enc.Base64</a> library</a>.</small></li>\n  <li>Encode the base64 encoded string to replace special characters using UTF-8 encoding.\n  <small>Example: <code>var credentials = encodeURIComponent(base64String);</code></small>\n  <small>See <a href=\"https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/\nGlobal_Objects/encodeURIComponent\">encodeURIComponent() API</a>.</small></li></ol></blockquote>",
                                     "type": "String"
                                 }
                             ]
                         },
                         {
                             "name": "audioFallback",
-                            "description": "The flag that indicates if there is a failure in\n  {{#crossLink \"Skylink/getUserMedia:method\"}}getUserMedia(){{/crossLink}} in retrieving user media\n  video stream, it should fallback to retrieve audio stream only. This would not work for\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}} except\n  {{#crossLink \"Skylink/getUserMedia:method\"}}getUserMedia(){{/crossLink}}.",
+                            "description": "The flag if <a href=\"#method_getUserMedia\">\n  <code>getUserMedia()</code> method</a> should fallback to retrieve only audio Stream when\n  retrieving audio and video Stream fails.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
                         },
                         {
                             "name": "forceSSL",
-                            "description": "The flag to enforce an SSL platform signaling and platform server connection.\n  If self domain accessing protocol is <code>https:</code>, SSL connections\n  would be automatically used. This flag is mostly used for self domain accessing protocol\n  that is <code>http:</code> and enforcing the SSL connections for\n  platform signaling and platform server connection.",
+                            "description": "The flag if HTTPS connections should be enforced\n  during request to Auth server and socket connections to Signaling server\n  when accessing <code>window.location.protocol</code> value is <code>\"http:\"</code>.\n  <small>By default, <code>\"https:\"</code> protocol connections uses HTTPS connections.</small>",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
                         },
                         {
                             "name": "audioCodec",
-                            "description": "<i>Debugging Feature</i>.\n  The preferred audio codec that Peer connection\n  streaming audio codec should use in the connection when available. If not available, the default\n  codec would be the browser generated session description selected codec. [Rel: Skylink.AUDIO_CODEC]",
+                            "description": "The option to configure\n  the preferred sending audio codec when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  <small>Note that the audio codec selected will be determined by the browser audio codecs supports.</small>\n  [Rel: Skylink.AUDIO_CODEC]",
                             "type": "String",
-                            "optional": true,
-                            "optdefault": "Skylink.AUDIO_CODEC.AUTO"
+                            "optional": true
                         },
                         {
                             "name": "videoCodec",
-                            "description": "<i>Debugging Feature</i>.\n  The preferred video codec that Peer connection\n  streaming video codec should use in the connection when available. If not available, the default\n  codec would be the browser generated session description selected codec. [Rel: Skylink.VIDEO_CODEC]",
+                            "description": "The option to configure\n  the preferred sending video codec when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  <small>Note that the video codec selected will be determined by the browser video codecs supports.</small>\n  [Rel: Skylink.VIDEO_CODEC]",
                             "type": "String",
-                            "optional": true,
-                            "optdefault": "Skylink.VIDEO_CODEC.AUTO"
+                            "optional": true
                         },
                         {
                             "name": "socketTimeout",
-                            "description": "The timeout that the socket connection should throw a\n  timeout exception when socket fails to receive a response from connection. Depending on\n  the max retries left based on the availability of ports given by the platform server,\n  the socket will reattempt to establish a socket connection with the signaling server.<br>\n  The mininum timeout value is <code>5000</code>.",
+                            "description": "The timeout for socket to wait for\n  a response from Signaling to indicate if connection has timed out.\n  <small>Note that the mininum timeout value is <code>5000</code>. If less, this value will be <code>5000</code>.</small>",
                             "type": "Number",
                             "optional": true,
                             "optdefault": "20000"
                         },
                         {
                             "name": "forceTURNSSL",
-                            "description": "The flag to enforce an SSL TURN server connection.\n  If self domain accessing protocol is <code>https:</code>, SSL connections\n  would be automatically used. This flag is mostly used for self domain accessing protocol\n  that is <code>http:</code> and enforcing the SSL connections for\n  TURN server connection.\nThis will configure TURN server connection using port <code>443</code> only and\n  if <code>turns:</code> protocol is supported, it will use <code>turns:</code> protocol.",
+                            "description": "<blockquote class=\"info\">\n  Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,\n  TURN ICE servers using port <code>443</code> will be used instead.</blockquote>\n  The flag if TURNS protocol should be used when <code>options.enableTURNServer</code> is enabled.\n  <small>By default, <code>\"https:\"</code> protocol connections uses TURNS protocol.</small>",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
@@ -3230,121 +3228,120 @@
                 },
                 {
                     "name": "callback",
-                    "description": "The callback fired after Skylink has been\n  initialised successfully or have met with an exception.\n  The callback signature is <code>function (error, success)</code>.",
+                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_readyStateChange\">\n  <code>readyStateChange</code> event</a> <code>state</code> parameter payload value\n  as <code>COMPLETED</code> for request success and <code>ERROR</code> for request error.</small>\n  [Rel: Skylink.READY_STATE_CHANGE]",
                     "type": "Function",
                     "optional": true,
                     "props": [
                         {
                             "name": "error",
-                            "description": "The error object received in the callback.\n  If received as <code>null</code>, it means that there is no errors.",
-                            "type": "JSON",
+                            "description": "The error result in request.\n- When defined as string, it's the error when required App Key is not provided.\n  <small>Defined as <code>null</code> when there are no errors in request</small>",
+                            "type": "JSON|String",
                             "props": [
                                 {
                                     "name": "errorCode",
-                                    "description": "The\n  <a href=\"#attr_READY_STATE_CHANGE_ERROR\">READY_STATE_CHANGE_ERROR</a>\n  if there is an <a href=\"#event_readyStateChange\">readyStateChange</a>\n  event error that caused the failure for initialising Skylink.\n  [Rel: Skylink.READY_STATE_CHANGE_ERROR]",
+                                    "description": "The <a href=\"#event_readyStateChange\"><code>readyStateChange</code>\n  event</a> <code>error.errorCode</code> parameter payload value.\n  [Rel: Skylink.READY_STATE_CHANGE_ERROR]",
                                     "type": "Number"
                                 },
                                 {
                                     "name": "error",
-                                    "description": "The exception thrown that caused the failure\n  for initialising Skylink.",
+                                    "description": "The <a href=\"#event_readyStateChange\"><code>readyStateChange</code>\n  event</a> <code>error.content</code> parameter payload value.",
                                     "type": "Object"
                                 },
                                 {
                                     "name": "status",
-                                    "description": "The XMLHttpRequest status code received\n  when exception is thrown that caused the failure for initialising Skylink.",
+                                    "description": "The <a href=\"#event_readyStateChange\"><code>readyStateChange</code>\n  event</a> <code>error.status</code> parameter payload value.",
                                     "type": "Number"
                                 }
                             ]
                         },
                         {
                             "name": "success",
-                            "description": "The success object received in the callback.\n  If received as <code>null</code>, it means that there are errors.",
+                            "description": "The success result in request.\n  <small>Defined as <code>null</code> when there are errors in request</small>",
                             "type": "JSON",
                             "props": [
                                 {
                                     "name": "appKey",
-                                    "description": "Previously known as <code>apiKey</code>.\n  The Application Key that Skylink uses for initialising and connecting rooms.",
+                                    "description": "The configured value of the <code>options.appKey</code>.",
                                     "type": "String"
                                 },
                                 {
                                     "name": "defaultRoom",
-                                    "description": "The default room that\n  Skylink should connect to if there is no room provided in\n  <a href=\"#method_joinRoom\">joinRoom()</a>.",
+                                    "description": "The configured value of the <code>options.defaultRoom</code>.",
                                     "type": "String"
                                 },
                                 {
                                     "name": "roomServer",
-                                    "description": "The platform server URL that Skylink makes a\n  <code>HTTP /GET</code> to retrieve the connection information required.",
+                                    "description": "The configured value of the <code>options.roomServer</code>.",
                                     "type": "String"
                                 },
                                 {
                                     "name": "enableIceTrickle",
-                                    "description": "The flag that indicates if PeerConnections\n   should enable trickling of ICE to connect the ICE connection.",
+                                    "description": "The configured value of the <code>options.enableIceTrickle</code>.",
                                     "type": "Boolean"
                                 },
                                 {
                                     "name": "enableDataChannel",
-                                    "description": "The flag that indicates if PeerConnections\n  should have any DataChannel connections.",
+                                    "description": "The configured value of the <code>options.enableDataChannel</code>.",
                                     "type": "Boolean"
                                 },
                                 {
                                     "name": "enableTURNServer",
-                                    "description": "The flag that indicates if\n  PeerConnections connection should use any TURN server connection.",
+                                    "description": "The configured value of the <code>options.enableTURNServer</code>.",
                                     "type": "Boolean"
                                 },
                                 {
                                     "name": "enableSTUNServer",
-                                    "description": "The flag that indicates if\n  PeerConnections connection should use any STUN server connection.",
+                                    "description": "The configured value of the <code>options.enableSTUNServer</code>.",
                                     "type": "Boolean"
                                 },
                                 {
                                     "name": "TURNServerTransport",
-                                    "description": "The TURN server transport\n  to enable for TURN server connections.\n  [Rel: Skylink.TURN_TRANSPORT]",
+                                    "description": "The configured value of the <code>options.TURNServerTransport</code>.",
                                     "type": "Boolean"
                                 },
                                 {
                                     "name": "serverRegion",
-                                    "description": "The regional server that Skylink\n   should connect to for fastest connectivity. [Rel: Skylink.REGIONAL_SERVER]",
-                                    "type": "String",
-                                    "optional": true
+                                    "description": "The configured value of the <code>options.region</code>.",
+                                    "type": "String"
                                 },
                                 {
                                     "name": "audioFallback",
-                                    "description": "The flag that indicates if there is a failure in\n  <a href=\"#method_getUserMedia\">getUserMedia()</a> in retrieving user media\n  video stream, it should fallback to retrieve audio stream only.",
+                                    "description": "The configured value of the <code>options.audioFallback</code>.",
                                     "type": "Boolean"
                                 },
                                 {
                                     "name": "forceSSL",
-                                    "description": "The flag to enforce an SSL platform signaling and platform server connection.\n  If self domain accessing protocol is <code>https:</code>, SSL connections\n  would be automatically used.",
+                                    "description": "The configured value of the <code>options.forceSSL</code>.",
                                     "type": "Boolean"
                                 },
                                 {
                                     "name": "audioCodec",
-                                    "description": "The preferred audio codec that Peer connection\n  streaming audio codec should use in the connection when available. [Rel: Skylink.AUDIO_CODEC]",
+                                    "description": "The configured value of the <code>options.audioCodec</code>.",
                                     "type": "String"
                                 },
                                 {
                                     "name": "videoCodec",
-                                    "description": "The preferred video codec that Peer connection\n  streaming video codec should use in the connection when available. [Rel: Skylink.VIDEO_CODEC]",
+                                    "description": "The configured value of the <code>options.videoCodec</code>.",
                                     "type": "String"
                                 },
                                 {
                                     "name": "socketTimeout",
-                                    "description": "The timeout that the socket connection should throw a\n  timeout exception when socket fails to receive a response from connection. Depending on\n  the max retries left based on the availability of ports given by the platform server,\n  the socket will reattempt to establish a socket connection with the signaling server.",
+                                    "description": "The configured value of the <code>options.socketTimeout</code>.",
                                     "type": "Number"
                                 },
                                 {
                                     "name": "forceTURNSSL",
-                                    "description": "The flag to enforce an SSL TURN server connection.\n  If self domain accessing protocol is <code>https:</code>, SSL connections\n  would be automatically used.\nThis will configure TURN server connection using port <code>443</code> only and\n  if <code>turns:</code> protocol is supported, it will use <code>turns:</code> protocol.",
+                                    "description": "The configured value of the <code>options.forceTURNSSL</code>.",
                                     "type": "Boolean"
                                 },
                                 {
                                     "name": "forceTURN",
-                                    "description": "The flag that indicates if PeerConnections connection\n  should only use TURN server connection which enables a quicker connectivity.\n  Note that this will not work if TURN is disabled for the Application Key provided.\n  This configuration will override the settings for <code>enableTURNServer</code>\n  and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and\n  <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.",
+                                    "description": "The configured value of the <code>options.forceTURN</code>.",
                                     "type": "Boolean"
                                 },
                                 {
                                     "name": "usePublicSTUN",
-                                    "description": "The flag that indicates if PeerConnections connection\n  should enable usage of public STUN server connection connectivity.\n  This configuration would not work if <code>enableSTUNServer</code> is set to <code>false</code>\n  or <code>forceTURN</code> is set to <code>true</code>.",
+                                    "description": "The configured value of the <code>options.usePublicSTUN</code>.",
                                     "type": "Boolean"
                                 }
                             ]
@@ -3353,17 +3350,15 @@
                 }
             ],
             "example": [
-                "\n  // Note: Default room is appKey when no room\n  // Example 1: To initalize without setting any default room.\n  SkylinkDemo.init(\"YOUR_APP_KEY_HERE\");\n\n  // Example 2: To initialize with appKey and defaultRoom\n  SkylinkDemo.init({\n    appKey: \"YOUR_APP_KEY_HERE\",\n    defaultRoom: \"mainHangout\"\n  });\n\n  // Example 3: To initialize with credentials to set startDateTime and\n  // duration of the room\n  var hash = CryptoJS.HmacSHA1(roomname + \"_\" + duration + \"_\" +\n    (new Date()).toISOString(), token);\n  var credentials = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));\n  SkylinkDemo.init({\n    appKey: \"YOUR_APP_KEY_HERE\",\n    defaultRoom: \"mainHangout\"\n    credentials: {\n       startDateTime: (new Date()).toISOString(),\n       duration: 500,\n       credentials: credentials\n    }\n  });\n\n  // Example 4: To initialize with callback\n  SkylinkDemo.init(\"YOUR_APP_KEY_HERE\", function(error,success){\n    if (error){\n      console.error(\"Init failed:\", error);\n    }\n    else{\n      console.info(\"Init succeed:\", success);\n    }\n  });"
+                "\n  // Example 1: Using CORS authentication and connection to default Room\n  skylinkDemo(appKey, function () {\n    skylinkDemo.joinRoom(); // Goes to default Room\n  });\n\n  // Example 2: Using CORS authentication and connection to a different Room\n  skylinkDemo(appKey, function () {\n    skylinkDemo.joinRoom(\"testxx\"); // Goes to \"testxx\" Room\n  });\n\n  // Example 3: Using credentials authentication and connection to only default Room\n  var defaultRoom   = \"test\",\n      startDateTime = (new Date()).toISOString(),\n      duration      = 1, // Allows only User session to stay for 1 hour\n      appKeySecret  = \"xxxxxxx\",\n      hash          = CryptoJS.HmacSHA1(defaultRoom + \"_\" + duration + \"_\" + startDateTime, appKeySecret);\n      credentials   = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));\n\n  skylinkDemo({\n    defaultRoom: defaultRoom,\n    appKey: appKey,\n    credentials: {\n      duration: duration,\n      startDateTime: startDateTime,\n      credentials: credentials\n    }\n  }, function () {\n    skylinkDemo.joinRoom(); // Goes to default Room (switching to different Room is not allowed for credentials authentication)\n  });"
             ],
-            "trigger": "readyStateChange",
-            "required": 1,
-            "component": "Room",
+            "trigger": "<ol class=\"desc-seq\">\n  <li><a href=\"#event_readyStateChange\"><code>readyStateChange</code> event</a> triggers parameter\n  payload <code>state</code> value as <code>LOADING</code>.</li><li><ol>\n  <li>When authentication is successful,\n  <a href=\"#event_readyStateChange\"><code>readyStateChange</code> event</a> triggers parameter\n  payload <code>state</code> value as <code>COMPLETED</code>.\n  <small>Room session token will be retrieved and will be required by <a href=\"#method_joinRoom\">\n  <code>joinRoom()</code> method</a> to start Room connection.</small></li>\n  <li>When authentication fails, <a href=\"#event_readyStateChange\"><code>readyStateChange</code>\n  event</a> triggers parameter payload <code>state</code> value as <code>ERROR</code>.</li></ol></ol>",
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/room-init.js",
-            "line": 768,
+            "line": 741,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -3374,7 +3369,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 842,
+            "line": 815,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -3385,7 +3380,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 915,
+            "line": 888,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -3396,7 +3391,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1006,
+            "line": 979,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -8485,11 +8480,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:314"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/room-init.js:314"
+            "line": " source/room-init.js:315"
         },
         {
             "message": "unknown tag: component",

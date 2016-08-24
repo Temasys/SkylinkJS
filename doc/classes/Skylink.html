@@ -5209,7 +5209,7 @@ See confluence docs for the &quot;enter&quot; expected properties to be received
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l1006"><code>source&#x2F;room-init.js:1006</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l979"><code>source&#x2F;room-init.js:979</code></a>
       </small>
     
 
@@ -5447,7 +5447,7 @@ See confluence docs for the &quot;introduceError&quot; expected properties to be
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l915"><code>source&#x2F;room-init.js:915</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l888"><code>source&#x2F;room-init.js:888</code></a>
       </small>
     
 
@@ -6789,7 +6789,7 @@ This parses and sets any missing values to default.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l842"><code>source&#x2F;room-init.js:842</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l815"><code>source&#x2F;room-init.js:815</code></a>
       </small>
     
 
@@ -7896,7 +7896,7 @@ To evaluate removal of this change once we roll out H264 codec interop.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l768"><code>source&#x2F;room-init.js:768</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l741"><code>source&#x2F;room-init.js:741</code></a>
       </small>
     
 
@@ -12337,7 +12337,7 @@ Do not invoke this function when user has already joined a room as
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l314"><code>source&#x2F;room-init.js:314</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l315"><code>source&#x2F;room-init.js:315</code></a>
       </small>
     
 
@@ -12359,36 +12359,31 @@ Do not invoke this function when user has already joined a room as
     <div class="code-item-section">
       <h4>Example:</h4>
       <pre class="example-content prettyprint">
-        <p>  // Note: Default room is appKey when no room
-  // Example 1: To initalize without setting any default room.
-  SkylinkDemo.init(&quot;YOUR_APP_KEY_HERE&quot;);</p>
-<p>  // Example 2: To initialize with appKey and defaultRoom
-  SkylinkDemo.init({
-    appKey: &quot;YOUR_APP_KEY_HERE&quot;,
-    defaultRoom: &quot;mainHangout&quot;
+        <p>  // Example 1: Using CORS authentication and connection to default Room
+  skylinkDemo(appKey, function () {
+    skylinkDemo.joinRoom(); // Goes to default Room
   });</p>
-<p>  // Example 3: To initialize with credentials to set startDateTime and
-  // duration of the room
-  var hash = CryptoJS.HmacSHA1(roomname + &quot;<em>&quot; + duration + &quot;</em>&quot; +
-    (new Date()).toISOString(), token);
-  var credentials = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
-  SkylinkDemo.init({
-    appKey: &quot;YOUR_APP_KEY_HERE&quot;,
-    defaultRoom: &quot;mainHangout&quot;
+<p>  // Example 2: Using CORS authentication and connection to a different Room
+  skylinkDemo(appKey, function () {
+    skylinkDemo.joinRoom(&quot;testxx&quot;); // Goes to &quot;testxx&quot; Room
+  });</p>
+<p>  // Example 3: Using credentials authentication and connection to only default Room
+  var defaultRoom   = &quot;test&quot;,
+      startDateTime = (new Date()).toISOString(),
+      duration      = 1, // Allows only User session to stay for 1 hour
+      appKeySecret  = &quot;xxxxxxx&quot;,
+      hash          = CryptoJS.HmacSHA1(defaultRoom + &quot;<em>&quot; + duration + &quot;</em>&quot; + startDateTime, appKeySecret);
+      credentials   = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));</p>
+<p>  skylinkDemo({
+    defaultRoom: defaultRoom,
+    appKey: appKey,
     credentials: {
-       startDateTime: (new Date()).toISOString(),
-       duration: 500,
-       credentials: credentials
+      duration: duration,
+      startDateTime: startDateTime,
+      credentials: credentials
     }
-  });</p>
-<p>  // Example 4: To initialize with callback
-  SkylinkDemo.init(&quot;YOUR_APP_KEY_HERE&quot;, function(error,success){
-    if (error){
-      console.error(&quot;Init failed:&quot;, error);
-    }
-    else{
-      console.info(&quot;Init succeed:&quot;, success);
-    }
+  }, function () {
+    skylinkDemo.joinRoom(); // Goes to default Room (switching to different Room is not allowed for credentials authentication)
   });</p>
 
       </pre>
@@ -12400,7 +12395,16 @@ Do not invoke this function when user has already joined a room as
   
   <div class="code-item-section">
     <h4>Events Sequence:</h4>
-    <span class="code-item-trigger">readyStateChange</span>
+    <span class="code-item-trigger"><ol class="desc-seq">
+  <li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers parameter
+  payload <code>state</code> value as <code>LOADING</code>.</li><li><ol>
+  <li>When authentication is successful,
+  <a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers parameter
+  payload <code>state</code> value as <code>COMPLETED</code>.
+  <small>Room session token will be retrieved and will be required by <a href="#method_joinRoom">
+  <code>joinRoom()</code> method</a> to start Room connection.</small></li>
+  <li>When authentication fails, <a href="#event_readyStateChange"><code>readyStateChange</code>
+  event</a> triggers parameter payload <code>state</code> value as <code>ERROR</code>.</li></ol></ol></span>
   </div>
   
 
@@ -12438,7 +12442,16 @@ Do not invoke this function when user has already joined a room as
 
                     <div class="param-description">
                       
-                      <p>The App Key.</p>
+                      <p>The App Key.
+  <small>By default, <code>init()</code> uses <a href="https://en.wikipedia.org/wiki/Cross-origin_resource_sharing">HTTP CORS</a>
+  authentication. For credentials based authentication, see the <code>options.credentials</code> configuration
+  below. You can know more about the <a href="http://support.temasys.com.sg/support/solutions/articles/
+12000002712-authenticating-your-application-key-to-start-a-connection">in the authentication methods article here</a>
+  for more details on the various authentication methods.</small>
+  <small>If you are using the Persistent Room feature for scheduled meetings, you will require to
+  use the credential based authentication. See the <a href="http://support.temasys.com.sg/support
+/solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings">Persistent Room article here
+  </a> for more information.</small></p>
 
                     </div>
 
@@ -12457,7 +12470,7 @@ Do not invoke this function when user has already joined a room as
                       <p>The default Room to connect to when no <code>room</code> parameter
    is provided in  <a href="#method_joinRoom"><code>joinRoom()</code> method</a>.</p>
 <ul>
-<li>When not provided, it&#39;s value is <code>options.appKey</code>.
+<li>When not provided, its value is <code>options.appKey</code>.
 <small>Note that switching Rooms is not available when using <code>options.credentials</code> based authentication.
 The Room that User will be connected to is the <code>defaultRoom</code> provided.</small></li>
 </ul>
@@ -12531,7 +12544,7 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span><code>true</code></small>
                       <p>The flag if Datachannel connections should be enabled.
-  <small>This is required to be enabled for <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>
+  <small>This is required to be enabled for <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>,
   <a href="#method_sendURLData"><code>sendURLData()</code> method</a> and
   <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>.</small></p>
 
@@ -12550,7 +12563,7 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span><code>true</code></small>
                       <p>The flag if TURN ICE servers should
-  be filtered out when constructing Peer connections.</p>
+  be used when constructing Peer connections to allow TURN connections when required and enabled for the App Key.</p>
 
                     </div>
 
@@ -12567,7 +12580,7 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span><code>true</code></small>
                       <p>The flag if STUN ICE servers should
-  be filtered out when constructing Peer connections.</p>
+  be used when constructing Peer connections to allow TURN connections when required.</p>
 
                     </div>
 
@@ -12583,11 +12596,12 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span><code>false</code></small>
-                      <p>The flag if Peer connections should enforce connections over the TURN server.
+                      <p>The flag if Peer connections should enforce
+  connections over the TURN server.
   <small>This sets <code>options.enableTURNServer</code> value to <code>true</code> and
   <code>options.enableSTUNServer</code> value to <code>false</code>.</small>
-  <small>This filters the <code>&quot;relay&quot;</code> ICE candidates during Peer connections
-  ICE gathering to enforce TURN connections.</small></p>
+  <small>During Peer connections, it filters out non <code>&quot;relay&quot;</code> ICE candidates to
+  ensure that TURN connections is enforced.</small></p>
 
                     </div>
 
@@ -12604,7 +12618,7 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span><code>true</code></small>
                       <p>The flag if publicly available STUN ICE servers should
-  be filtered out when constructing Peer connections.</p>
+  be used if <code>options.enableSTUNServer</code> is enabled.</p>
 
                     </div>
 
@@ -12620,10 +12634,10 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
 
                     <div class="param-description">
                       
-                      <p>The option for filtering and configuring
-  TURN ICE servers <code>?transport=</code> query parameter when constructing a Peer connections.</p>
+                      <p>The option to configure the <code>?transport=</code>
+  query parameter in TURN ICE servers when constructing a Peer connections.</p>
 <ul>
-<li>When not provided, it&#39;s value is <code>ANY</code>.
+<li>When not provided, its value is <code>ANY</code>.
 [Rel: Skylink.TURN_TRANSPORT]</li>
 </ul>
 
@@ -12641,13 +12655,12 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
 
                     <div class="param-description">
                       
-                      <p>The credentials used for The credentials for authenticating App Key.
-  <small>By default, <code>init()</code> uses the CORS URL authentication.
-  For more details on the different authentication methods, read
-    <a href="http://support.temasys.com.sg/support/solutions/articles/
-12000002712-authenticating-your-application-key-to-start-a-connection">the article here</a>.</small>
-  <small>This is also part of the persistent Room feature configuration. <a href="http://support.temasys.com.sg/support
-/solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings">Read more here</a>.</small></p>
+                      <p>The credentials used for authenticating App Key with
+  credentials to retrieve the Room session token used for connection in <a href="#method_joinRoom">
+  <code>joinRoom()</code> method</a>.
+  <small>Note that switching of Rooms is not allowed when using credentials based authentication, unless
+  <code>init()</code> is invoked again with a different set of credentials followed by invoking
+  the <a href="#method_joinRoom"><code>joinRoom()</code> method</a>.</small></p>
 
                     </div>
 
@@ -12663,9 +12676,8 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
 
                             <div class="param-description">
                               
-                              The credentials starting DateTime stamp
+                              The credentials User session in Room starting DateTime
   in <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601 format</a>.
-  <small>This configures the User's the starting DateTime session connected to Room.</small>
                             </div>
                           </li>
                         
@@ -12678,8 +12690,7 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
 
                             <div class="param-description">
                               
-                              The credentials duration in hours.
-  <small>This configures the User's the duration session connected to Room.</small>
+                              The credentials User session in Room duration in hours.
                             </div>
                           </li>
                         
@@ -12692,24 +12703,23 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
 
                             <div class="param-description">
                               
-                              The room credentials for Application Key.
-  This is required for rooms connecting without CORS verification or starting a new persistent room meeting.<br><br>
-  <u>To generate the credentials:</u><br>
-  <ol>
-  <li>Concatenate a string that consists of the room name
-    the room meeting duration (in hours) and the start date timestamp (in ISO 8601 format).<br>
-    <small>Format <code>room + "_" + duration + "_" + startDateTimeStamp</code></small></li>
-  <li>Hash the concatenated string with the Application Key token using
-    <a href="https://en.wikipedia.org/wiki/SHA-1">SHA-1</a>.
-    You may use the <a href="https://code.google.com/p/crypto-js/#HMAC">CryptoJS.HmacSHA1</a> function to do so.<br>
-    <small>Example <code>var hash = CryptoJS.HmacSHA1(concatenatedString, token);</code></small></li>
-  <li>Convert the hash to a <a href="https://en.wikipedia.org/wiki/Base64">Base64</a> encoded string. You may use the
-    <a href="https://code.google.com/p/crypto-js/#The_Cipher_Output">CryptoJS.enc.Base64</a> function
-    to do so.<br><small>Example <code>var base64String = hash.toString(CryptoJS.enc.Base64); </code></small></li>
-  <li>Encode the Base64 encoded string to a URI component using UTF-8 encoding with
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent">encodeURIComponent()</a>.<br>
-    <small>Example <code>var credentials = encodeURIComponent(base64String);</code></small></li>
-  </ol><br>
+                              The generated credentials used to authenticate
+  the provided App Key with its <code>"secret"</code> property.
+  <blockquote class="details"><h5>To generate the credentials:</h5><ol>
+  <li>Concatenate a string that consists of the Room name you provide in the <code>options.defaultRoom</code>,
+  the <code>options.credentials.duration</code> and the <code>options.credentials.startDateTime</code>.
+  <small>Example: <code>var concatStr = defaultRoom + "_" + duration + "_" + startDateTime;</code></small></li>
+  <li>Hash the concatenated string with the App Key <code>"secret"</code> property using
+  <a href="https://en.wikipedia.org/wiki/SHA-1">SHA-1</a>.
+  <small>Example: <code>var hash = CryptoJS.HmacSHA1(concatStr, appKeySecret);</code></small>
+  <small>See the <a href="https://code.google.com/p/crypto-js/#HMAC"><code>CryptoJS.HmacSHA1</code> library</a>.</small></li>
+  <li>Encode the hashed string using <a href="https://en.wikipedia.org/wiki/Base64">base64</a>
+  <small>Example: <code>var b64Str = hash.toString(CryptoJS.enc.Base64);</code></small>
+  <small>See the <a href="https://code.google.com/p/crypto-js/#The_Cipher_Output">CryptoJS.enc.Base64</a> library</a>.</small></li>
+  <li>Encode the base64 encoded string to replace special characters using UTF-8 encoding.
+  <small>Example: <code>var credentials = encodeURIComponent(base64String);</code></small>
+  <small>See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/
+Global_Objects/encodeURIComponent">encodeURIComponent() API</a>.</small></li></ol></blockquote>
                             </div>
                           </li>
                         
@@ -12726,11 +12736,9 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span><code>false</code></small>
-                      <p>The flag that indicates if there is a failure in
-  <a href="../classes/Skylink.html#method_getUserMedia" class="crosslink">getUserMedia()</a> in retrieving user media
-  video stream, it should fallback to retrieve audio stream only. This would not work for
-  <a href="../classes/Skylink.html#method_joinRoom" class="crosslink">joinRoom()</a> except
-  <a href="../classes/Skylink.html#method_getUserMedia" class="crosslink">getUserMedia()</a>.</p>
+                      <p>The flag if <a href="#method_getUserMedia">
+  <code>getUserMedia()</code> method</a> should fallback to retrieve only audio Stream when
+  retrieving audio and video Stream fails.</p>
 
                     </div>
 
@@ -12746,11 +12754,10 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span><code>false</code></small>
-                      <p>The flag to enforce an SSL platform signaling and platform server connection.
-  If self domain accessing protocol is <code>https:</code>, SSL connections
-  would be automatically used. This flag is mostly used for self domain accessing protocol
-  that is <code>http:</code> and enforcing the SSL connections for
-  platform signaling and platform server connection.</p>
+                      <p>The flag if HTTPS connections should be enforced
+  during request to Auth server and socket connections to Signaling server
+  when accessing <code>window.location.protocol</code> value is <code>&quot;http:&quot;</code>.
+  <small>By default, <code>&quot;https:&quot;</code> protocol connections uses HTTPS connections.</small></p>
 
                     </div>
 
@@ -12765,11 +12772,14 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span><code>Skylink.AUDIO_CODEC.AUTO</code></small>
-                      <p><i>Debugging Feature</i>.
-  The preferred audio codec that Peer connection
-  streaming audio codec should use in the connection when available. If not available, the default
-  codec would be the browser generated session description selected codec. [Rel: Skylink.AUDIO_CODEC]</p>
+                      
+                      <p>The option to configure
+  the preferred sending audio codec when available for Peer connection.</p>
+<ul>
+<li>When not provided, its value is <code>AUTO</code>.
+<small>Note that the audio codec selected will be determined by the browser audio codecs supports.</small>
+[Rel: Skylink.AUDIO_CODEC]</li>
+</ul>
 
                     </div>
 
@@ -12784,11 +12794,14 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span><code>Skylink.VIDEO_CODEC.AUTO</code></small>
-                      <p><i>Debugging Feature</i>.
-  The preferred video codec that Peer connection
-  streaming video codec should use in the connection when available. If not available, the default
-  codec would be the browser generated session description selected codec. [Rel: Skylink.VIDEO_CODEC]</p>
+                      
+                      <p>The option to configure
+  the preferred sending video codec when available for Peer connection.</p>
+<ul>
+<li>When not provided, its value is <code>AUTO</code>.
+<small>Note that the video codec selected will be determined by the browser video codecs supports.</small>
+[Rel: Skylink.VIDEO_CODEC]</li>
+</ul>
 
                     </div>
 
@@ -12804,11 +12817,9 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span><code>20000</code></small>
-                      <p>The timeout that the socket connection should throw a
-  timeout exception when socket fails to receive a response from connection. Depending on
-  the max retries left based on the availability of ports given by the platform server,
-  the socket will reattempt to establish a socket connection with the signaling server.<br>
-  The mininum timeout value is <code>5000</code>.</p>
+                      <p>The timeout for socket to wait for
+  a response from Signaling to indicate if connection has timed out.
+  <small>Note that the mininum timeout value is <code>5000</code>. If less, this value will be <code>5000</code>.</small></p>
 
                     </div>
 
@@ -12824,13 +12835,11 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span><code>false</code></small>
-                      <p>The flag to enforce an SSL TURN server connection.
-  If self domain accessing protocol is <code>https:</code>, SSL connections
-  would be automatically used. This flag is mostly used for self domain accessing protocol
-  that is <code>http:</code> and enforcing the SSL connections for
-  TURN server connection.
-This will configure TURN server connection using port <code>443</code> only and
-  if <code>turns:</code> protocol is supported, it will use <code>turns:</code> protocol.</p>
+                      <p><blockquote class="info">
+  Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,
+  TURN ICE servers using port <code>443</code> will be used instead.</blockquote>
+  The flag if TURNS protocol should be used when <code>options.enableTURNServer</code> is enabled.
+  <small>By default, <code>&quot;https:&quot;</code> protocol connections uses TURNS protocol.</small></p>
 
                     </div>
 
@@ -12850,9 +12859,12 @@ This will configure TURN server connection using port <code>443</code> only and
 
             <div class="param-description">
               
-              <p>The callback fired after Skylink has been
-  initialised successfully or have met with an exception.
-  The callback signature is <code>function (error, success)</code>.</p>
+              <p>The callback function fired when request has completed.
+  <small>Function parameters signature is <code>function (error, success)</code></small>
+  <small>Function request completion is determined by the <a href="#event_readyStateChange">
+  <code>readyStateChange</code> event</a> <code>state</code> parameter payload value
+  as <code>COMPLETED</code> for request success and <code>ERROR</code> for request error.</small>
+  [Rel: Skylink.READY_STATE_CHANGE]</p>
 
             </div>
 
@@ -12861,15 +12873,18 @@ This will configure TURN server connection using port <code>443</code> only and
                 
                   <li class="param">
                     <code class="param-name">error</code>
-                    <span class="type"><b>{</b>JSON<b>}</b></span>
+                    <span class="type"><b>{</b>JSON | String<b>}</b></span>
 
                     
                     
 
                     <div class="param-description">
                       
-                      <p>The error object received in the callback.
-  If received as <code>null</code>, it means that there is no errors.</p>
+                      <p>The error result in request.</p>
+<ul>
+<li>When defined as string, it&#39;s the error when required App Key is not provided.
+<small>Defined as <code>null</code> when there are no errors in request</small></li>
+</ul>
 
                     </div>
 
@@ -12885,10 +12900,8 @@ This will configure TURN server connection using port <code>443</code> only and
 
                             <div class="param-description">
                               
-                              The
-  <a href="#attr_READY_STATE_CHANGE_ERROR">READY_STATE_CHANGE_ERROR</a>
-  if there is an <a href="#event_readyStateChange">readyStateChange</a>
-  event error that caused the failure for initialising Skylink.
+                              The <a href="#event_readyStateChange"><code>readyStateChange</code>
+  event</a> <code>error.errorCode</code> parameter payload value.
   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
                             </div>
                           </li>
@@ -12902,8 +12915,8 @@ This will configure TURN server connection using port <code>443</code> only and
 
                             <div class="param-description">
                               
-                              The exception thrown that caused the failure
-  for initialising Skylink.
+                              The <a href="#event_readyStateChange"><code>readyStateChange</code>
+  event</a> <code>error.content</code> parameter payload value.
                             </div>
                           </li>
                         
@@ -12916,8 +12929,8 @@ This will configure TURN server connection using port <code>443</code> only and
 
                             <div class="param-description">
                               
-                              The XMLHttpRequest status code received
-  when exception is thrown that caused the failure for initialising Skylink.
+                              The <a href="#event_readyStateChange"><code>readyStateChange</code>
+  event</a> <code>error.status</code> parameter payload value.
                             </div>
                           </li>
                         
@@ -12934,8 +12947,8 @@ This will configure TURN server connection using port <code>443</code> only and
 
                     <div class="param-description">
                       
-                      <p>The success object received in the callback.
-  If received as <code>null</code>, it means that there are errors.</p>
+                      <p>The success result in request.
+  <small>Defined as <code>null</code> when there are errors in request</small></p>
 
                     </div>
 
@@ -12951,8 +12964,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
                             <div class="param-description">
                               
-                              Previously known as <code>apiKey</code>.
-  The Application Key that Skylink uses for initialising and connecting rooms.
+                              The configured value of the <code>options.appKey</code>.
                             </div>
                           </li>
                         
@@ -12965,9 +12977,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
                             <div class="param-description">
                               
-                              The default room that
-  Skylink should connect to if there is no room provided in
-  <a href="#method_joinRoom">joinRoom()</a>.
+                              The configured value of the <code>options.defaultRoom</code>.
                             </div>
                           </li>
                         
@@ -12980,8 +12990,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
                             <div class="param-description">
                               
-                              The platform server URL that Skylink makes a
-  <code>HTTP /GET</code> to retrieve the connection information required.
+                              The configured value of the <code>options.roomServer</code>.
                             </div>
                           </li>
                         
@@ -12994,8 +13003,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
                             <div class="param-description">
                               
-                              The flag that indicates if PeerConnections
-   should enable trickling of ICE to connect the ICE connection.
+                              The configured value of the <code>options.enableIceTrickle</code>.
                             </div>
                           </li>
                         
@@ -13008,8 +13016,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
                             <div class="param-description">
                               
-                              The flag that indicates if PeerConnections
-  should have any DataChannel connections.
+                              The configured value of the <code>options.enableDataChannel</code>.
                             </div>
                           </li>
                         
@@ -13022,8 +13029,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
                             <div class="param-description">
                               
-                              The flag that indicates if
-  PeerConnections connection should use any TURN server connection.
+                              The configured value of the <code>options.enableTURNServer</code>.
                             </div>
                           </li>
                         
@@ -13036,8 +13042,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
                             <div class="param-description">
                               
-                              The flag that indicates if
-  PeerConnections connection should use any STUN server connection.
+                              The configured value of the <code>options.enableSTUNServer</code>.
                             </div>
                           </li>
                         
@@ -13050,9 +13055,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
                             <div class="param-description">
                               
-                              The TURN server transport
-  to enable for TURN server connections.
-  [Rel: Skylink.TURN_TRANSPORT]
+                              The configured value of the <code>options.TURNServerTransport</code>.
                             </div>
                           </li>
                         
@@ -13060,13 +13063,12 @@ This will configure TURN server connection using port <code>443</code> only and
                             <code class="param-name">serverRegion</code>
                             <span class="type"><b>{</b>String<b>}</b></span>
 
-                            <span class="label">Optional</span>
+                            
                             
 
                             <div class="param-description">
                               
-                              The regional server that Skylink
-   should connect to for fastest connectivity. [Rel: Skylink.REGIONAL_SERVER]
+                              The configured value of the <code>options.region</code>.
                             </div>
                           </li>
                         
@@ -13079,9 +13081,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
                             <div class="param-description">
                               
-                              The flag that indicates if there is a failure in
-  <a href="#method_getUserMedia">getUserMedia()</a> in retrieving user media
-  video stream, it should fallback to retrieve audio stream only.
+                              The configured value of the <code>options.audioFallback</code>.
                             </div>
                           </li>
                         
@@ -13094,9 +13094,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
                             <div class="param-description">
                               
-                              The flag to enforce an SSL platform signaling and platform server connection.
-  If self domain accessing protocol is <code>https:</code>, SSL connections
-  would be automatically used.
+                              The configured value of the <code>options.forceSSL</code>.
                             </div>
                           </li>
                         
@@ -13109,8 +13107,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
                             <div class="param-description">
                               
-                              The preferred audio codec that Peer connection
-  streaming audio codec should use in the connection when available. [Rel: Skylink.AUDIO_CODEC]
+                              The configured value of the <code>options.audioCodec</code>.
                             </div>
                           </li>
                         
@@ -13123,8 +13120,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
                             <div class="param-description">
                               
-                              The preferred video codec that Peer connection
-  streaming video codec should use in the connection when available. [Rel: Skylink.VIDEO_CODEC]
+                              The configured value of the <code>options.videoCodec</code>.
                             </div>
                           </li>
                         
@@ -13137,10 +13133,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
                             <div class="param-description">
                               
-                              The timeout that the socket connection should throw a
-  timeout exception when socket fails to receive a response from connection. Depending on
-  the max retries left based on the availability of ports given by the platform server,
-  the socket will reattempt to establish a socket connection with the signaling server.
+                              The configured value of the <code>options.socketTimeout</code>.
                             </div>
                           </li>
                         
@@ -13153,11 +13146,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
                             <div class="param-description">
                               
-                              The flag to enforce an SSL TURN server connection.
-  If self domain accessing protocol is <code>https:</code>, SSL connections
-  would be automatically used.
-This will configure TURN server connection using port <code>443</code> only and
-  if <code>turns:</code> protocol is supported, it will use <code>turns:</code> protocol.
+                              The configured value of the <code>options.forceTURNSSL</code>.
                             </div>
                           </li>
                         
@@ -13170,12 +13159,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
                             <div class="param-description">
                               
-                              The flag that indicates if PeerConnections connection
-  should only use TURN server connection which enables a quicker connectivity.
-  Note that this will not work if TURN is disabled for the Application Key provided.
-  This configuration will override the settings for <code>enableTURNServer</code>
-  and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and
-  <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.
+                              The configured value of the <code>options.forceTURN</code>.
                             </div>
                           </li>
                         
@@ -13188,10 +13172,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
                             <div class="param-description">
                               
-                              The flag that indicates if PeerConnections connection
-  should enable usage of public STUN server connection connectivity.
-  This configuration would not work if <code>enableSTUNServer</code> is set to <code>false</code>
-  or <code>forceTURN</code> is set to <code>true</code>.
+                              The configured value of the <code>options.usePublicSTUN</code>.
                             </div>
                           </li>
                         
@@ -18395,7 +18376,7 @@ must be set as <code>true</code> to enable the storage of logs.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l218"><code>source&#x2F;room-init.js:218</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l219"><code>source&#x2F;room-init.js:219</code></a>
       </small>
     
 
@@ -18469,7 +18450,7 @@ must be set as <code>true</code> to enable the storage of logs.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l288"><code>source&#x2F;room-init.js:288</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l289"><code>source&#x2F;room-init.js:289</code></a>
       </small>
     
 
@@ -19304,7 +19285,7 @@ If enabled, the Peers connecting the same Room will receive each others &quot;en
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l228"><code>source&#x2F;room-init.js:228</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l229"><code>source&#x2F;room-init.js:229</code></a>
       </small>
     
 
@@ -20361,7 +20342,7 @@ This uses the <code>console.trace</code> API.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l149"><code>source&#x2F;room-init.js:149</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l150"><code>source&#x2F;room-init.js:150</code></a>
       </small>
     
 
@@ -20442,7 +20423,7 @@ HTTPS connections are enforced if App is accessing from HTTPS domains.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l175"><code>source&#x2F;room-init.js:175</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l176"><code>source&#x2F;room-init.js:176</code></a>
       </small>
     
 
@@ -20522,7 +20503,7 @@ This filters all non &quot;relay&quot; ICE candidates to enforce connections via
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l162"><code>source&#x2F;room-init.js:162</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l163"><code>source&#x2F;room-init.js:163</code></a>
       </small>
     
 
@@ -21279,7 +21260,7 @@ If App Key enables MCU but this is false, this means likely there are problems c
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l278"><code>source&#x2F;room-init.js:278</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l279"><code>source&#x2F;room-init.js:279</code></a>
       </small>
     
 
@@ -22192,7 +22173,7 @@ These events are only triggered once.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l187"><code>source&#x2F;room-init.js:187</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l188"><code>source&#x2F;room-init.js:188</code></a>
       </small>
     
 
@@ -22988,7 +22969,7 @@ If Peer has a higher connection weight, it will do the offer from its Peer conne
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l268"><code>source&#x2F;room-init.js:268</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l269"><code>source&#x2F;room-init.js:269</code></a>
       </small>
     
 
@@ -23212,7 +23193,7 @@ If Peer has a higher connection weight, it will do the offer from its Peer conne
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l298"><code>source&#x2F;room-init.js:298</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l299"><code>source&#x2F;room-init.js:299</code></a>
       </small>
     
 
@@ -23370,7 +23351,7 @@ If Peer has a higher connection weight, it will do the offer from its Peer conne
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l258"><code>source&#x2F;room-init.js:258</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l259"><code>source&#x2F;room-init.js:259</code></a>
       </small>
     
 
@@ -23444,7 +23425,7 @@ If Peer has a higher connection weight, it will do the offer from its Peer conne
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l248"><code>source&#x2F;room-init.js:248</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l249"><code>source&#x2F;room-init.js:249</code></a>
       </small>
     
 
@@ -23592,7 +23573,7 @@ If Peer has a higher connection weight, it will do the offer from its Peer conne
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l208"><code>source&#x2F;room-init.js:208</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l209"><code>source&#x2F;room-init.js:209</code></a>
       </small>
     
 
@@ -23666,7 +23647,7 @@ If Peer has a higher connection weight, it will do the offer from its Peer conne
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l238"><code>source&#x2F;room-init.js:238</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l239"><code>source&#x2F;room-init.js:239</code></a>
       </small>
     
 
@@ -24158,7 +24139,7 @@ If Peer has a higher connection weight, it will do the offer from its Peer conne
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l197"><code>source&#x2F;room-init.js:197</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l198"><code>source&#x2F;room-init.js:198</code></a>
       </small>
     
 
@@ -28700,8 +28681,9 @@ If enabled, the User has Privileged features which has the ability to retrieve t
 
             <div class="param-description">
                 <p><small>Value <code>4004</code></small>
-  The value of the failure code when there is no CORS prsent in the HTTP headers during the request to the
-  Auth server present nor <code>options.credentials.credentials</code> configuration provided in the <code>init()</code>.
+  The value of the failure code when there is no <a href="https://en.wikipedia.org/wiki/Cross-origin_resource_sharing">CORS</a>
+  present in the HTTP headers during the request to the Auth server present nor
+  <code>options.credentials.credentials</code> configuration provided in the <code>init()</code>.
   <small>To resolve this, ensure that CORS are present in the HTTP headers during the request to the Auth server.</small></p>
 
             </div>
@@ -28721,7 +28703,7 @@ If enabled, the User has Privileged features which has the ability to retrieve t
   The value of the failure code when the <code>options.credentials.credentials</code> configuration provided in the
   <code>init()</code> does not match up with the <code>options.credentials.startDateTime</code>,
   <code>options.credentials.duration</code> or that the <code>&quot;secret&quot;</code> used to generate
-  <code>options.credentials.credentials</code> does not match the App Key provided.
+  <code>options.credentials.credentials</code> does not match the App Key&#39;s <code>&quot;secret</code> property provided.
   <small>To resolve this, check that the <code>options.credentials.credentials</code> is generated correctly and
   that the <code>&quot;secret&quot;</code> used to generate it is from the App Key provided in the <code>init()</code>.</small></p>
 
@@ -28991,7 +28973,7 @@ If enabled, the User has Privileged features which has the ability to retrieve t
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l126"><code>source&#x2F;room-init.js:126</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l127"><code>source&#x2F;room-init.js:127</code></a>
       </small>
     
 

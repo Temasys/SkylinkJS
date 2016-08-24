@@ -42,14 +42,15 @@ Skylink.prototype.READY_STATE_CHANGE = {
  *   <small>To resolve this, configure the App Key CORS in
  *   <a href="https://console.temasys.io">the Developer Console</a>.</small>
  * @param {Number} API_CREDENTIALS_INVALID     <small>Value <code>4004</code></small>
- *   The value of the failure code when there is no CORS prsent in the HTTP headers during the request to the
- *   Auth server present nor <code>options.credentials.credentials</code> configuration provided in the <code>init()</code>.
+ *   The value of the failure code when there is no [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
+ *   present in the HTTP headers during the request to the Auth server present nor
+ *   <code>options.credentials.credentials</code> configuration provided in the <code>init()</code>.
  *   <small>To resolve this, ensure that CORS are present in the HTTP headers during the request to the Auth server.</small>
  * @param {Number} API_CREDENTIALS_NOT_MATCH   <small>Value <code>4005</code></small>
  *   The value of the failure code when the <code>options.credentials.credentials</code> configuration provided in the
  *   <code>init()</code> does not match up with the <code>options.credentials.startDateTime</code>,
  *   <code>options.credentials.duration</code> or that the <code>"secret"</code> used to generate
- *   <code>options.credentials.credentials</code> does not match the App Key provided.
+ *   <code>options.credentials.credentials</code> does not match the App Key's <code>"secret</code> property provided.
  *   <small>To resolve this, check that the <code>options.credentials.credentials</code> is generated correctly and
  *   that the <code>"secret"</code> used to generate it is from the App Key provided in the <code>init()</code>.</small>
  * @param {Number} API_INVALID_PARENT_KEY      <small>Value <code>4006</code></small>
@@ -317,9 +318,18 @@ Skylink.prototype._room = null;
  * @param {JSON|String} options The configuration options.
  * - When provided as a string, it's configured as <code>options.appKey</code>.
  * @param {String} options.appKey The App Key.
+ *   <small>By default, <code>init()</code> uses [HTTP CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
+ *   authentication. For credentials based authentication, see the <code>options.credentials</code> configuration
+ *   below. You can know more about the <a href="http://support.temasys.com.sg/support/solutions/articles/
+ * 12000002712-authenticating-your-application-key-to-start-a-connection">in the authentication methods article here</a>
+ *   for more details on the various authentication methods.</small>
+ *   <small>If you are using the Persistent Room feature for scheduled meetings, you will require to
+ *   use the credential based authentication. See the <a href="http://support.temasys.com.sg/support
+ * /solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings">Persistent Room article here
+ *   </a> for more information.</small>
  * @param {String} [options.defaultRoom] The default Room to connect to when no <code>room</code> parameter
  *    is provided in  <a href="#method_joinRoom"><code>joinRoom()</code> method</a>.
- * - When not provided, it's value is <code>options.appKey</code>.
+ * - When not provided, its value is <code>options.appKey</code>.
  *   <small>Note that switching Rooms is not available when using <code>options.credentials</code> based authentication.
  *   The Room that User will be connected to is the <code>defaultRoom</code> provided.</small>
  * @param {String} [options.roomServer] The Auth server.
@@ -332,188 +342,151 @@ Skylink.prototype._room = null;
  * @param {Boolean} [options.enableIceTrickle=true] The flag if Peer connections should
  *   trickle ICE for faster connectivity.
  * @param {Boolean} [options.enableDataChannel=true] The flag if Datachannel connections should be enabled.
- *   <small>This is required to be enabled for <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>
+ *   <small>This is required to be enabled for <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>,
  *   <a href="#method_sendURLData"><code>sendURLData()</code> method</a> and
  *   <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>.</small>
  * @param {Boolean} [options.enableTURNServer=true] The flag if TURN ICE servers should
- *   be filtered out when constructing Peer connections.
+ *   be used when constructing Peer connections to allow TURN connections when required and enabled for the App Key.
  * @param {Boolean} [options.enableSTUNServer=true] The flag if STUN ICE servers should
- *   be filtered out when constructing Peer connections.
- * @param {Boolean} [options.forceTURN=false] The flag if Peer connections should enforce connections over the TURN server.
+ *   be used when constructing Peer connections to allow TURN connections when required.
+ * @param {Boolean} [options.forceTURN=false] The flag if Peer connections should enforce
+ *   connections over the TURN server.
  *   <small>This sets <code>options.enableTURNServer</code> value to <code>true</code> and
  *   <code>options.enableSTUNServer</code> value to <code>false</code>.</small>
- *   <small>This filters the <code>"relay"</code> ICE candidates during Peer connections
- *   ICE gathering to enforce TURN connections.</small>
+ *   <small>During Peer connections, it filters out non <code>"relay"</code> ICE candidates to
+ *   ensure that TURN connections is enforced.</small>
  * @param {Boolean} [options.usePublicSTUN=true] The flag if publicly available STUN ICE servers should
- *   be filtered out when constructing Peer connections.
- * @param {Boolean} [options.TURNServerTransport] The option for filtering and configuring
- *   TURN ICE servers <code>?transport=</code> query parameter when constructing a Peer connections.
- * - When not provided, it's value is <code>ANY</code>.
+ *   be used if <code>options.enableSTUNServer</code> is enabled.
+ * @param {Boolean} [options.TURNServerTransport] The option to configure the <code>?transport=</code>
+ *   query parameter in TURN ICE servers when constructing a Peer connections.
+ * - When not provided, its value is <code>ANY</code>.
  *   [Rel: Skylink.TURN_TRANSPORT]
- * @param {JSON} [options.credentials] The credentials used for The credentials for authenticating App Key.
- *   <small>By default, <code>init()</code> uses the CORS URL authentication.
- *   For more details on the different authentication methods, read
- *     <a href="http://support.temasys.com.sg/support/solutions/articles/
- * 12000002712-authenticating-your-application-key-to-start-a-connection">the article here</a>.</small>
- *   <small>This is also part of the persistent Room feature configuration. <a href="http://support.temasys.com.sg/support
- * /solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings">Read more here</a>.</small>
- * @param {String} options.credentials.startDateTime The credentials starting DateTime stamp
+ * @param {JSON} [options.credentials] The credentials used for authenticating App Key with
+ *   credentials to retrieve the Room session token used for connection in <a href="#method_joinRoom">
+ *   <code>joinRoom()</code> method</a>.
+ *   <small>Note that switching of Rooms is not allowed when using credentials based authentication, unless
+ *   <code>init()</code> is invoked again with a different set of credentials followed by invoking
+ *   the <a href="#method_joinRoom"><code>joinRoom()</code> method</a>.</small>
+ * @param {String} options.credentials.startDateTime The credentials User session in Room starting DateTime
  *   in <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601 format</a>.
- *   <small>This configures the User's the starting DateTime session connected to Room.</small>
- * @param {Number} options.credentials.duration The credentials duration in hours.
- *   <small>This configures the User's the duration session connected to Room.</small>
- * @param {String} options.credentials.credentials The room credentials for Application Key.
- *   This is required for rooms connecting without CORS verification or starting a new persistent room meeting.<br><br>
- *   <u>To generate the credentials:</u><br>
- *   <ol>
- *   <li>Concatenate a string that consists of the room name
- *     the room meeting duration (in hours) and the start date timestamp (in ISO 8601 format).<br>
- *     <small>Format <code>room + "_" + duration + "_" + startDateTimeStamp</code></small></li>
- *   <li>Hash the concatenated string with the Application Key token using
- *     <a href="https://en.wikipedia.org/wiki/SHA-1">SHA-1</a>.
- *     You may use the <a href="https://code.google.com/p/crypto-js/#HMAC">CryptoJS.HmacSHA1</a> function to do so.<br>
- *     <small>Example <code>var hash = CryptoJS.HmacSHA1(concatenatedString, token);</code></small></li>
- *   <li>Convert the hash to a <a href="https://en.wikipedia.org/wiki/Base64">Base64</a> encoded string. You may use the
- *     <a href="https://code.google.com/p/crypto-js/#The_Cipher_Output">CryptoJS.enc.Base64</a> function
- *     to do so.<br><small>Example <code>var base64String = hash.toString(CryptoJS.enc.Base64); </code></small></li>
- *   <li>Encode the Base64 encoded string to a URI component using UTF-8 encoding with
- *     <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent">encodeURIComponent()</a>.<br>
- *     <small>Example <code>var credentials = encodeURIComponent(base64String);</code></small></li>
- *   </ol><br>
- * @param {Boolean} [options.audioFallback=false] The flag that indicates if there is a failure in
- *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}} in retrieving user media
- *   video stream, it should fallback to retrieve audio stream only. This would not work for
- *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}} except
- *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}.
- * @param {Boolean} [options.forceSSL=false] The flag to enforce an SSL platform signaling and platform server connection.
- *   If self domain accessing protocol is <code>https:</code>, SSL connections
- *   would be automatically used. This flag is mostly used for self domain accessing protocol
- *   that is <code>http:</code> and enforcing the SSL connections for
- *   platform signaling and platform server connection.
- * @param {String} [options.audioCodec=Skylink.AUDIO_CODEC.AUTO] <i>Debugging Feature</i>.
- *   The preferred audio codec that Peer connection
- *   streaming audio codec should use in the connection when available. If not available, the default
- *   codec would be the browser generated session description selected codec. [Rel: Skylink.AUDIO_CODEC]
- * @param {String} [options.videoCodec=Skylink.VIDEO_CODEC.AUTO] <i>Debugging Feature</i>.
- *   The preferred video codec that Peer connection
- *   streaming video codec should use in the connection when available. If not available, the default
- *   codec would be the browser generated session description selected codec. [Rel: Skylink.VIDEO_CODEC]
- * @param {Number} [options.socketTimeout=20000] The timeout that the socket connection should throw a
- *   timeout exception when socket fails to receive a response from connection. Depending on
- *   the max retries left based on the availability of ports given by the platform server,
- *   the socket will reattempt to establish a socket connection with the signaling server.<br>
- *   The mininum timeout value is <code>5000</code>.
- * @param {Boolean} [options.forceTURNSSL=false] The flag to enforce an SSL TURN server connection.
- *   If self domain accessing protocol is <code>https:</code>, SSL connections
- *   would be automatically used. This flag is mostly used for self domain accessing protocol
- *   that is <code>http:</code> and enforcing the SSL connections for
- *   TURN server connection.
- * This will configure TURN server connection using port <code>443</code> only and
- *   if <code>turns:</code> protocol is supported, it will use <code>turns:</code> protocol.
- * @param {Function} [callback] The callback fired after Skylink has been
- *   initialised successfully or have met with an exception.
- *   The callback signature is <code>function (error, success)</code>.
- * @param {JSON} callback.error The error object received in the callback.
- *   If received as <code>null</code>, it means that there is no errors.
- * @param {Number} callback.error.errorCode The
- *   <a href="#attr_READY_STATE_CHANGE_ERROR">READY_STATE_CHANGE_ERROR</a>
- *   if there is an <a href="#event_readyStateChange">readyStateChange</a>
- *   event error that caused the failure for initialising Skylink.
+ * @param {Number} options.credentials.duration The credentials User session in Room duration in hours.
+ * @param {String} options.credentials.credentials The generated credentials used to authenticate
+ *   the provided App Key with its <code>"secret"</code> property.
+ *   <blockquote class="details"><h5>To generate the credentials:</h5><ol>
+ *   <li>Concatenate a string that consists of the Room name you provide in the <code>options.defaultRoom</code>,
+ *   the <code>options.credentials.duration</code> and the <code>options.credentials.startDateTime</code>.
+ *   <small>Example: <code>var concatStr = defaultRoom + "_" + duration + "_" + startDateTime;</code></small></li>
+ *   <li>Hash the concatenated string with the App Key <code>"secret"</code> property using
+ *   <a href="https://en.wikipedia.org/wiki/SHA-1">SHA-1</a>.
+ *   <small>Example: <code>var hash = CryptoJS.HmacSHA1(concatStr, appKeySecret);</code></small>
+ *   <small>See the <a href="https://code.google.com/p/crypto-js/#HMAC"><code>CryptoJS.HmacSHA1</code> library</a>.</small></li>
+ *   <li>Encode the hashed string using <a href="https://en.wikipedia.org/wiki/Base64">base64</a>
+ *   <small>Example: <code>var b64Str = hash.toString(CryptoJS.enc.Base64);</code></small>
+ *   <small>See the <a href="https://code.google.com/p/crypto-js/#The_Cipher_Output">CryptoJS.enc.Base64</a> library</a>.</small></li>
+ *   <li>Encode the base64 encoded string to replace special characters using UTF-8 encoding.
+ *   <small>Example: <code>var credentials = encodeURIComponent(base64String);</code></small>
+ *   <small>See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/
+ * Global_Objects/encodeURIComponent">encodeURIComponent() API</a>.</small></li></ol></blockquote>
+ * @param {Boolean} [options.audioFallback=false] The flag if <a href="#method_getUserMedia">
+ *   <code>getUserMedia()</code> method</a> should fallback to retrieve only audio Stream when
+ *   retrieving audio and video Stream fails.
+ * @param {Boolean} [options.forceSSL=false] The flag if HTTPS connections should be enforced
+ *   during request to Auth server and socket connections to Signaling server
+ *   when accessing <code>window.location.protocol</code> value is <code>"http:"</code>.
+ *   <small>By default, <code>"https:"</code> protocol connections uses HTTPS connections.</small>
+ * @param {String} [options.audioCodec] The option to configure
+ *   the preferred sending audio codec when available for Peer connection.
+ * - When not provided, its value is <code>AUTO</code>.
+ *   <small>Note that the audio codec selected will be determined by the browser audio codecs supports.</small>
+ *   [Rel: Skylink.AUDIO_CODEC]
+ * @param {String} [options.videoCodec] The option to configure
+ *   the preferred sending video codec when available for Peer connection.
+ * - When not provided, its value is <code>AUTO</code>.
+ *   <small>Note that the video codec selected will be determined by the browser video codecs supports.</small>
+ *   [Rel: Skylink.VIDEO_CODEC]
+ * @param {Number} [options.socketTimeout=20000] The timeout for socket to wait for
+ *   a response from Signaling to indicate if connection has timed out.
+ *   <small>Note that the mininum timeout value is <code>5000</code>. If less, this value will be <code>5000</code>.</small>
+ * @param {Boolean} [options.forceTURNSSL=false] <blockquote class="info">
+ *   Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,
+ *   TURN ICE servers using port <code>443</code> will be used instead.</blockquote>
+ *   The flag if TURNS protocol should be used when <code>options.enableTURNServer</code> is enabled.
+ *   <small>By default, <code>"https:"</code> protocol connections uses TURNS protocol.</small>
+ * @param {Function} [callback] The callback function fired when request has completed.
+ *   <small>Function parameters signature is <code>function (error, success)</code></small>
+ *   <small>Function request completion is determined by the <a href="#event_readyStateChange">
+ *   <code>readyStateChange</code> event</a> <code>state</code> parameter payload value
+ *   as <code>COMPLETED</code> for request success and <code>ERROR</code> for request error.</small>
+ *   [Rel: Skylink.READY_STATE_CHANGE]
+ * @param {JSON|String} callback.error The error result in request.
+ * - When defined as string, it's the error when required App Key is not provided.
+ *   <small>Defined as <code>null</code> when there are no errors in request</small>
+ * @param {Number} callback.error.errorCode The <a href="#event_readyStateChange"><code>readyStateChange</code>
+ *   event</a> <code>error.errorCode</code> parameter payload value.
  *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
- * @param {Object} callback.error.error The exception thrown that caused the failure
- *   for initialising Skylink.
- * @param {Number} callback.error.status The XMLHttpRequest status code received
- *   when exception is thrown that caused the failure for initialising Skylink.
- * @param {JSON} callback.success The success object received in the callback.
- *   If received as <code>null</code>, it means that there are errors.
- * @param {String} callback.success.appKey Previously known as <code>apiKey</code>.
- *   The Application Key that Skylink uses for initialising and connecting rooms.
- * @param {String} callback.success.defaultRoom The default room that
- *   Skylink should connect to if there is no room provided in
- *   <a href="#method_joinRoom">joinRoom()</a>.
- * @param {String} callback.success.roomServer The platform server URL that Skylink makes a
- *   <code>HTTP /GET</code> to retrieve the connection information required.
- * @param {Boolean} callback.success.enableIceTrickle The flag that indicates if PeerConnections
- *    should enable trickling of ICE to connect the ICE connection.
- * @param {Boolean} callback.success.enableDataChannel The flag that indicates if PeerConnections
- *   should have any DataChannel connections.
- * @param {Boolean} callback.success.enableTURNServer The flag that indicates if
- *   PeerConnections connection should use any TURN server connection.
- * @param {Boolean} callback.success.enableSTUNServer The flag that indicates if
- *   PeerConnections connection should use any STUN server connection.
- * @param {Boolean} callback.success.TURNServerTransport The TURN server transport
- *   to enable for TURN server connections.
- *   [Rel: Skylink.TURN_TRANSPORT]
- * @param {String} [callback.success.serverRegion] The regional server that Skylink
- *    should connect to for fastest connectivity. [Rel: Skylink.REGIONAL_SERVER]
- * @param {Boolean} callback.success.audioFallback The flag that indicates if there is a failure in
- *   <a href="#method_getUserMedia">getUserMedia()</a> in retrieving user media
- *   video stream, it should fallback to retrieve audio stream only.
- * @param {Boolean} callback.success.forceSSL The flag to enforce an SSL platform signaling and platform server connection.
- *   If self domain accessing protocol is <code>https:</code>, SSL connections
- *   would be automatically used.
- * @param {String} callback.success.audioCodec The preferred audio codec that Peer connection
- *   streaming audio codec should use in the connection when available. [Rel: Skylink.AUDIO_CODEC]
- * @param {String} callback.success.videoCodec The preferred video codec that Peer connection
- *   streaming video codec should use in the connection when available. [Rel: Skylink.VIDEO_CODEC]
- * @param {Number} callback.success.socketTimeout The timeout that the socket connection should throw a
- *   timeout exception when socket fails to receive a response from connection. Depending on
- *   the max retries left based on the availability of ports given by the platform server,
- *   the socket will reattempt to establish a socket connection with the signaling server.
- * @param {Boolean} callback.success.forceTURNSSL The flag to enforce an SSL TURN server connection.
- *   If self domain accessing protocol is <code>https:</code>, SSL connections
- *   would be automatically used.
- * This will configure TURN server connection using port <code>443</code> only and
- *   if <code>turns:</code> protocol is supported, it will use <code>turns:</code> protocol.
- * @param {Boolean} callback.success.forceTURN The flag that indicates if PeerConnections connection
- *   should only use TURN server connection which enables a quicker connectivity.
- *   Note that this will not work if TURN is disabled for the Application Key provided.
- *   This configuration will override the settings for <code>enableTURNServer</code>
- *   and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and
- *   <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.
- * @param {Boolean} callback.success.usePublicSTUN The flag that indicates if PeerConnections connection
- *   should enable usage of public STUN server connection connectivity.
- *   This configuration would not work if <code>enableSTUNServer</code> is set to <code>false</code>
- *   or <code>forceTURN</code> is set to <code>true</code>.
+ * @param {Object} callback.error.error The <a href="#event_readyStateChange"><code>readyStateChange</code>
+ *   event</a> <code>error.content</code> parameter payload value.
+ * @param {Number} callback.error.status The <a href="#event_readyStateChange"><code>readyStateChange</code>
+ *   event</a> <code>error.status</code> parameter payload value.
+ * @param {JSON} callback.success The success result in request.
+ *   <small>Defined as <code>null</code> when there are errors in request</small>
+ * @param {String} callback.success.appKey The configured value of the <code>options.appKey</code>.
+ * @param {String} callback.success.defaultRoom The configured value of the <code>options.defaultRoom</code>.
+ * @param {String} callback.success.roomServer The configured value of the <code>options.roomServer</code>.
+ * @param {Boolean} callback.success.enableIceTrickle The configured value of the <code>options.enableIceTrickle</code>.
+ * @param {Boolean} callback.success.enableDataChannel The configured value of the <code>options.enableDataChannel</code>.
+ * @param {Boolean} callback.success.enableTURNServer The configured value of the <code>options.enableTURNServer</code>.
+ * @param {Boolean} callback.success.enableSTUNServer The configured value of the <code>options.enableSTUNServer</code>.
+ * @param {Boolean} callback.success.TURNServerTransport The configured value of the <code>options.TURNServerTransport</code>.
+ * @param {String} callback.success.serverRegion The configured value of the <code>options.region</code>.
+ * @param {Boolean} callback.success.audioFallback The configured value of the <code>options.audioFallback</code>.
+ * @param {Boolean} callback.success.forceSSL The configured value of the <code>options.forceSSL</code>.
+ * @param {String} callback.success.audioCodec The configured value of the <code>options.audioCodec</code>.
+ * @param {String} callback.success.videoCodec The configured value of the <code>options.videoCodec</code>.
+ * @param {Number} callback.success.socketTimeout The configured value of the <code>options.socketTimeout</code>.
+ * @param {Boolean} callback.success.forceTURNSSL The configured value of the <code>options.forceTURNSSL</code>.
+ * @param {Boolean} callback.success.forceTURN The configured value of the <code>options.forceTURN</code>.
+ * @param {Boolean} callback.success.usePublicSTUN The configured value of the <code>options.usePublicSTUN</code>.
  * @example
- *   // Note: Default room is appKey when no room
- *   // Example 1: To initalize without setting any default room.
- *   SkylinkDemo.init("YOUR_APP_KEY_HERE");
- *
- *   // Example 2: To initialize with appKey and defaultRoom
- *   SkylinkDemo.init({
- *     appKey: "YOUR_APP_KEY_HERE",
- *     defaultRoom: "mainHangout"
+ *   // Example 1: Using CORS authentication and connection to default Room
+ *   skylinkDemo(appKey, function () {
+ *     skylinkDemo.joinRoom(); // Goes to default Room
  *   });
  *
- *   // Example 3: To initialize with credentials to set startDateTime and
- *   // duration of the room
- *   var hash = CryptoJS.HmacSHA1(roomname + "_" + duration + "_" +
- *     (new Date()).toISOString(), token);
- *   var credentials = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
- *   SkylinkDemo.init({
- *     appKey: "YOUR_APP_KEY_HERE",
- *     defaultRoom: "mainHangout"
+ *   // Example 2: Using CORS authentication and connection to a different Room
+ *   skylinkDemo(appKey, function () {
+ *     skylinkDemo.joinRoom("testxx"); // Goes to "testxx" Room
+ *   });
+ *
+ *   // Example 3: Using credentials authentication and connection to only default Room
+ *   var defaultRoom   = "test",
+ *       startDateTime = (new Date()).toISOString(),
+ *       duration      = 1, // Allows only User session to stay for 1 hour
+ *       appKeySecret  = "xxxxxxx",
+ *       hash          = CryptoJS.HmacSHA1(defaultRoom + "_" + duration + "_" + startDateTime, appKeySecret);
+ *       credentials   = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
+ *
+ *   skylinkDemo({
+ *     defaultRoom: defaultRoom,
+ *     appKey: appKey,
  *     credentials: {
- *        startDateTime: (new Date()).toISOString(),
- *        duration: 500,
- *        credentials: credentials
+ *       duration: duration,
+ *       startDateTime: startDateTime,
+ *       credentials: credentials
  *     }
+ *   }, function () {
+ *     skylinkDemo.joinRoom(); // Goes to default Room (switching to different Room is not allowed for credentials authentication)
  *   });
- *
- *   // Example 4: To initialize with callback
- *   SkylinkDemo.init("YOUR_APP_KEY_HERE", function(error,success){
- *     if (error){
- *       console.error("Init failed:", error);
- *     }
- *     else{
- *       console.info("Init succeed:", success);
- *     }
- *   });
- *
- * @trigger readyStateChange
- * @required
- * @component Room
+ * @trigger <ol class="desc-seq">
+ *   <li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers parameter
+ *   payload <code>state</code> value as <code>LOADING</code>.</li><li><ol>
+ *   <li>When authentication is successful,
+ *   <a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers parameter
+ *   payload <code>state</code> value as <code>COMPLETED</code>.
+ *   <small>Room session token will be retrieved and will be required by <a href="#method_joinRoom">
+ *   <code>joinRoom()</code> method</a> to start Room connection.</small></li>
+ *   <li>When authentication fails, <a href="#event_readyStateChange"><code>readyStateChange</code>
+ *   event</a> triggers parameter payload <code>state</code> value as <code>ERROR</code>.</li></ol></ol>
  * @for Skylink
  * @since 0.5.5
  */

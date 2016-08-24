@@ -238,12 +238,15 @@ h3 code {
   display: block;
   margin-bottom: 5px;
 }
-.desc-seq ul,
 .desc-seq ol {
+  list-style-type: lower-alpha;
+  padding-left: 10px;
+}
+.desc-seq ul {
   list-style-type: disc;
-  padding-left: 25px;
   color: #828282;
   font-size: 13px;
+  padding-left: 25px;
 }
 .desc-seq ul li,
 .desc-seq ol li {
@@ -430,6 +433,24 @@ blockquote.info {
 
 .params-list blockquote.info {
   font-size: 13px;
+}
+
+blockquote.details {
+  padding: 5px 12px!important;
+  margin: 15px 0;
+  border-left: solid 3px #f8f8f8!important;
+}
+
+blockquote.details h5 {
+  margin-top: 0;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: #888;
+}
+
+blockquote.details ol li {
+  margin: 5px 0 12px;
 }
 
 @media (max-width: 991px) {
