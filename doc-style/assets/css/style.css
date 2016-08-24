@@ -256,6 +256,20 @@ h3 code {
   color: #888;
   display: block;
 }
+.param .param-name {
+  background: none;
+  font-weight: bold;
+}
+.param .param-description code {
+  background: #f9f7f3;
+  color: #8a6d3b;
+  font-weight: bold;
+}
+.param .param-description small code {
+  color: #c7254e;
+  background-color: #f9f2f4;
+  font-weight: normal;
+}
 .param .param-description small.default {
   border-left: solid 3px #eee;
   display: inline-block;
@@ -281,13 +295,15 @@ h3 code {
   list-style-position: inside;
 }
 .param .param-description ul li:before {
-  content: "\00BB \0020";
+  content: "\21D2 \0020";
   color: #aaa;
-  font-size: 18px;
+  font-size: 16px;
+  padding-top:5px;
 }
 .param .param-description ul li {
   color: #888;
   font-size: 14px;
+  padding-top:0;
 }
 .returns-description span,
 .returns-description p {

@@ -5209,7 +5209,7 @@ See confluence docs for the &quot;enter&quot; expected properties to be received
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l994"><code>source&#x2F;room-init.js:994</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l1006"><code>source&#x2F;room-init.js:1006</code></a>
       </small>
     
 
@@ -5447,7 +5447,7 @@ See confluence docs for the &quot;introduceError&quot; expected properties to be
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l903"><code>source&#x2F;room-init.js:903</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l915"><code>source&#x2F;room-init.js:915</code></a>
       </small>
     
 
@@ -6789,7 +6789,7 @@ This parses and sets any missing values to default.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l830"><code>source&#x2F;room-init.js:830</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l842"><code>source&#x2F;room-init.js:842</code></a>
       </small>
     
 
@@ -7896,7 +7896,7 @@ To evaluate removal of this change once we roll out H264 codec interop.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l756"><code>source&#x2F;room-init.js:756</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l768"><code>source&#x2F;room-init.js:768</code></a>
       </small>
     
 
@@ -12337,7 +12337,7 @@ Do not invoke this function when user has already joined a room as
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l304"><code>source&#x2F;room-init.js:304</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l314"><code>source&#x2F;room-init.js:314</code></a>
       </small>
     
 
@@ -12351,7 +12351,7 @@ Do not invoke this function when user has already joined a room as
   </div>
 
   <div class="code-item-description">
-    <p>Function that authenticates the App Key to initialise the SDK.</p>
+    <p>Function that authenticates and initialises App Key used for Room connections.</p>
 
   </div>
 
@@ -12454,10 +12454,13 @@ Do not invoke this function when user has already joined a room as
 
                     <div class="param-description">
                       
-                      <p>The default Room name to use when
-   no Room name is provided in <a href="#method_joinRoom"><code>joinRoom()</code> method</a>.
-<small>Fallbacks to the value of <code>options.appKey</code> if this is not provided.</small>
-<small>This is the only Room name connected to when using credentials based authentication.</small></p>
+                      <p>The default Room to connect to when no <code>room</code> parameter
+   is provided in  <a href="#method_joinRoom"><code>joinRoom()</code> method</a>.</p>
+<ul>
+<li>When not provided, it&#39;s value is <code>options.appKey</code>.
+<small>Note that switching Rooms is not available when using <code>options.credentials</code> based authentication.
+The Room that User will be connected to is the <code>defaultRoom</code> provided.</small></li>
+</ul>
 
                     </div>
 
@@ -12473,9 +12476,8 @@ Do not invoke this function when user has already joined a room as
 
                     <div class="param-description">
                       
-                      <p>The platform API server url.
-<small>This is a debugging feature and is not recommended to be used by developers unless
-  instructed for debugging purposes.</small></p>
+                      <p>The Auth server.
+<small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small></p>
 
                     </div>
 
@@ -12494,7 +12496,7 @@ Do not invoke this function when user has already joined a room as
                       <p><blockquote class="info"><b>Deprecation Warning!</b>
   This option has been deprecated.<br>Automatic nearest regional server has been implemented
   on the platform.</blockquote>
-  The platform regional server to connect to for better connectivity.
+  The Auth server in the various regions to connect to for better connectivity.
   [Rel: Skylink.REGIONAL_SERVER]</p>
 
                     </div>
@@ -12511,8 +12513,8 @@ Do not invoke this function when user has already joined a room as
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span><code>true</code></small>
-                      <p>The flag if trickle ICE should be
-  enabled when connecting with Peer connections.</p>
+                      <p>The flag if Peer connections should
+  trickle ICE for faster connectivity.</p>
 
                     </div>
 
@@ -12528,8 +12530,10 @@ Do not invoke this function when user has already joined a room as
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span><code>true</code></small>
-                      <p>The flag if Datachannel connections
-  should be enabled with connected with Peer connections.</p>
+                      <p>The flag if Datachannel connections should be enabled.
+  <small>This is required to be enabled for <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>
+  <a href="#method_sendURLData"><code>sendURLData()</code> method</a> and
+  <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>.</small></p>
 
                     </div>
 
@@ -12579,11 +12583,11 @@ Do not invoke this function when user has already joined a room as
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span><code>false</code></small>
-                      <p>The flag if Peers should have enforced
-  connections over the TURN server.
+                      <p>The flag if Peer connections should enforce connections over the TURN server.
   <small>This sets <code>options.enableTURNServer</code> value to <code>true</code> and
-    <code>options.enableSTUNServer</code> value to <code>false</code>.</small>
-  <small>Filters the <code>&quot;relay&quot;</code> ICE candidates during Peer connections ICE gathering to enforce TURN connections.</small></p>
+  <code>options.enableSTUNServer</code> value to <code>false</code>.</small>
+  <small>This filters the <code>&quot;relay&quot;</code> ICE candidates during Peer connections
+  ICE gathering to enforce TURN connections.</small></p>
 
                     </div>
 
@@ -12599,8 +12603,8 @@ Do not invoke this function when user has already joined a room as
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span><code>true</code></small>
-                      <p>The flag if STUN ICE servers not
-  belonging to <code>temasys.com.sg</code> should be filtered out when constructing Peer connections.</p>
+                      <p>The flag if publicly available STUN ICE servers should
+  be filtered out when constructing Peer connections.</p>
 
                     </div>
 
@@ -12617,9 +12621,11 @@ Do not invoke this function when user has already joined a room as
                     <div class="param-description">
                       
                       <p>The option for filtering and configuring
-  TURN ICE servers url <code>?transport=</code> query parameter when constructing a Peer connections.
-  <small>Fallbacks to <code>ANY</code> option if not provided.</small>
-  [Rel: Skylink.TURN_TRANSPORT]</p>
+  TURN ICE servers <code>?transport=</code> query parameter when constructing a Peer connections.</p>
+<ul>
+<li>When not provided, it&#39;s value is <code>ANY</code>.
+[Rel: Skylink.TURN_TRANSPORT]</li>
+</ul>
 
                     </div>
 
@@ -12635,7 +12641,7 @@ Do not invoke this function when user has already joined a room as
 
                     <div class="param-description">
                       
-                      <p>The credentials for authenticating App Key.
+                      <p>The credentials used for The credentials for authenticating App Key.
   <small>By default, <code>init()</code> uses the CORS URL authentication.
   For more details on the different authentication methods, read
     <a href="http://support.temasys.com.sg/support/solutions/articles/
@@ -18389,7 +18395,7 @@ must be set as <code>true</code> to enable the storage of logs.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l208"><code>source&#x2F;room-init.js:208</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l218"><code>source&#x2F;room-init.js:218</code></a>
       </small>
     
 
@@ -18463,7 +18469,7 @@ must be set as <code>true</code> to enable the storage of logs.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l278"><code>source&#x2F;room-init.js:278</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l288"><code>source&#x2F;room-init.js:288</code></a>
       </small>
     
 
@@ -19298,7 +19304,7 @@ If enabled, the Peers connecting the same Room will receive each others &quot;en
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l218"><code>source&#x2F;room-init.js:218</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l228"><code>source&#x2F;room-init.js:228</code></a>
       </small>
     
 
@@ -20355,7 +20361,7 @@ This uses the <code>console.trace</code> API.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l139"><code>source&#x2F;room-init.js:139</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l149"><code>source&#x2F;room-init.js:149</code></a>
       </small>
     
 
@@ -20436,7 +20442,7 @@ HTTPS connections are enforced if App is accessing from HTTPS domains.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l165"><code>source&#x2F;room-init.js:165</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l175"><code>source&#x2F;room-init.js:175</code></a>
       </small>
     
 
@@ -20516,7 +20522,7 @@ This filters all non &quot;relay&quot; ICE candidates to enforce connections via
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l152"><code>source&#x2F;room-init.js:152</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l162"><code>source&#x2F;room-init.js:162</code></a>
       </small>
     
 
@@ -21273,7 +21279,7 @@ If App Key enables MCU but this is false, this means likely there are problems c
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l268"><code>source&#x2F;room-init.js:268</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l278"><code>source&#x2F;room-init.js:278</code></a>
       </small>
     
 
@@ -22186,7 +22192,7 @@ These events are only triggered once.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l177"><code>source&#x2F;room-init.js:177</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l187"><code>source&#x2F;room-init.js:187</code></a>
       </small>
     
 
@@ -22982,7 +22988,7 @@ If Peer has a higher connection weight, it will do the offer from its Peer conne
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l258"><code>source&#x2F;room-init.js:258</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l268"><code>source&#x2F;room-init.js:268</code></a>
       </small>
     
 
@@ -23206,7 +23212,7 @@ If Peer has a higher connection weight, it will do the offer from its Peer conne
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l288"><code>source&#x2F;room-init.js:288</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l298"><code>source&#x2F;room-init.js:298</code></a>
       </small>
     
 
@@ -23364,7 +23370,7 @@ If Peer has a higher connection weight, it will do the offer from its Peer conne
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l248"><code>source&#x2F;room-init.js:248</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l258"><code>source&#x2F;room-init.js:258</code></a>
       </small>
     
 
@@ -23438,7 +23444,7 @@ If Peer has a higher connection weight, it will do the offer from its Peer conne
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l238"><code>source&#x2F;room-init.js:238</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l248"><code>source&#x2F;room-init.js:248</code></a>
       </small>
     
 
@@ -23586,7 +23592,7 @@ If Peer has a higher connection weight, it will do the offer from its Peer conne
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l198"><code>source&#x2F;room-init.js:198</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l208"><code>source&#x2F;room-init.js:208</code></a>
       </small>
     
 
@@ -23660,7 +23666,7 @@ If Peer has a higher connection weight, it will do the offer from its Peer conne
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l228"><code>source&#x2F;room-init.js:228</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l238"><code>source&#x2F;room-init.js:238</code></a>
       </small>
     
 
@@ -24152,7 +24158,7 @@ If Peer has a higher connection weight, it will do the offer from its Peer conne
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l187"><code>source&#x2F;room-init.js:187</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l197"><code>source&#x2F;room-init.js:197</code></a>
       </small>
     
 
@@ -28466,7 +28472,7 @@ If enabled, the User has Privileged features which has the ability to retrieve t
   </div>
 
   <div class="code-item-description">
-    <p>Contains the list of <a href="#method_init"><code>init()</code> method</a> authentication states.</p>
+    <p>The list of <a href="#method_init"><code>init()</code> method</a> ready states.</p>
 
   </div>
 
@@ -28489,7 +28495,7 @@ If enabled, the User has Privileged features which has the ability to retrieve t
 
             <div class="param-description">
                 <p><small>Value <code>0</code></small>
-  The state when <code>init()</code> has just started.</p>
+  The value of the state when <code>init()</code> has just started.</p>
 
             </div>
 
@@ -28505,7 +28511,8 @@ If enabled, the User has Privileged features which has the ability to retrieve t
 
             <div class="param-description">
                 <p><small>Value <code>1</code></small>
-  The state when <code>init()</code> is authenticating the App Key and credentials provided with the API.</p>
+  The value of the state when <code>init()</code> is authenticating App Key provided
+  (and with credentials if provided as well) with the Auth server.</p>
 
             </div>
 
@@ -28521,9 +28528,10 @@ If enabled, the User has Privileged features which has the ability to retrieve t
 
             <div class="param-description">
                 <p><small>Value <code>2</code></small>
-  The state when <code>init()</code> has succesfully authenticated the App key and credentials provided with the API.
-  <small>The API will return the Room credentials which will be used in
-  <a href="#method_joinRoom"><code>joinRoom()</code> method</a> for connection to Signaling.</small></p>
+  The value of the state when <code>init()</code> has successfully authenticated with the Auth server.
+  Room session token is generated for joining the <code>defaultRoom</code> provided in <code>init()</code>.
+  <small>Room session token has to be generated each time User switches to a different Room
+  in <a href="#method_joinRoom"><code>joinRoom()</code> method</a>.</small></p>
 
             </div>
 
@@ -28539,7 +28547,7 @@ If enabled, the User has Privileged features which has the ability to retrieve t
 
             <div class="param-description">
                 <p><small>Value <code>-1</code></small>
-  The state when <code>init()</code> had failed authenticating the App Key and credentials provided with the API.
+  The value of the state when <code>init()</code> has failed authenticating with the Auth server.
   [Rel: Skylink.READY_STATE_CHANGE_ERROR]</p>
 
             </div>
@@ -28605,7 +28613,7 @@ If enabled, the User has Privileged features which has the ability to retrieve t
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l27"><code>source&#x2F;room-init.js:27</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l29"><code>source&#x2F;room-init.js:29</code></a>
       </small>
     
 
@@ -28615,12 +28623,7 @@ If enabled, the User has Privileged features which has the ability to retrieve t
   </div>
 
   <div class="code-item-description">
-    <p>These are the list of room initialization ready state errors that Skylink has.</p>
-<ul>
-<li>Ready state errors like <code>ROOM_LOCKED</code>, <code>API_NOT_ENOUGH_CREDIT</code>,
-<code>API_NOT_ENOUGH_PREPAID_CREDIT</code>, <code>API_FAILED_FINDING_PREPAID_CREDIT</code> and
-<code>SCRIPT_ERROR</code> has been removed as they are no longer supported.</li>
-</ul>
+    <p>The list of <a href="#method_init"><code>init()</code> method</a> ready state failure codes.</p>
 
   </div>
 
@@ -28643,9 +28646,9 @@ If enabled, the User has Privileged features which has the ability to retrieve t
 
             <div class="param-description">
                 <p><small>Value <code>4001</code></small>
-  The error returned when App Key provided does not exists.
- <small>To resolve this, check if the App Key provided exists in the <a href="https://developer.temasys.com.sg">
-    Developer Console</a>.</small></p>
+  The value of the failure code when provided App Key in <code>init()</code> does not exists.
+  <small>To resolve this, check that the provided App Key exists in
+  <a href="https://console.temasys.io">the Developer Console</a>.</small></p>
 
             </div>
 
@@ -28661,9 +28664,9 @@ If enabled, the User has Privileged features which has the ability to retrieve t
 
             <div class="param-description">
                 <p><small>Value <code>4002</code></small>
-  The error returned when accessing backend IP address does not match the <code>&quot;domain&quot;</code>
-  property configured in the App Key settings.
- <small>To resolve this, contact our <a href="http://support.temasys.com.sg">Support Portal</a>.</small></p>
+  The value of the failure code when <code>&quot;domainName&quot;</code> property in the App Key does not
+  match the accessing server IP address.
+  <small>To resolve this, contact our <a href="http://support.temasys.com.sg">support portal</a>.</small></p>
 
             </div>
 
@@ -28679,10 +28682,9 @@ If enabled, the User has Privileged features which has the ability to retrieve t
 
             <div class="param-description">
                 <p><small>Value <code>4003</code></small>
-  The error returned when accessing CORS domain does not match the <code>&quot;corsurl&quot;</code> property
-  configured in the App Key settings.
-  <small>To resolve this, configure the App Key CORS Url setting in the <a href="https://developer.temasys.com.sg">
-    Developer Console</a>.</small></p>
+  The value of the failure code when <code>&quot;corsurl&quot;</code> property in the App Key does not match accessing CORS.
+  <small>To resolve this, configure the App Key CORS in
+  <a href="https://console.temasys.io">the Developer Console</a>.</small></p>
 
             </div>
 
@@ -28698,10 +28700,9 @@ If enabled, the User has Privileged features which has the ability to retrieve t
 
             <div class="param-description">
                 <p><small>Value <code>4004</code></small>
-  The error returned when ac
-The error when credentials provided is not valid for provided Application Key.<br>
-For this error, it&#39;s recommended to check the <code>credentials</code> provided in
-  <a href="../classes/Skylink.html#method_init" class="crosslink">init() configuration</a>.</p>
+  The value of the failure code when there is no CORS prsent in the HTTP headers during the request to the
+  Auth server present nor <code>options.credentials.credentials</code> configuration provided in the <code>init()</code>.
+  <small>To resolve this, ensure that CORS are present in the HTTP headers during the request to the Auth server.</small></p>
 
             </div>
 
@@ -28717,9 +28718,12 @@ For this error, it&#39;s recommended to check the <code>credentials</code> provi
 
             <div class="param-description">
                 <p><small>Value <code>4005</code></small>
-  The error when credentials does not match as expected generated credentials for provided Application Key.<br>
-For this error, it&#39;s recommended to check the <code>credentials</code> provided in
-  <a href="../classes/Skylink.html#method_init" class="crosslink">init() configuration</a>.</p>
+  The value of the failure code when the <code>options.credentials.credentials</code> configuration provided in the
+  <code>init()</code> does not match up with the <code>options.credentials.startDateTime</code>,
+  <code>options.credentials.duration</code> or that the <code>&quot;secret&quot;</code> used to generate
+  <code>options.credentials.credentials</code> does not match the App Key provided.
+  <small>To resolve this, check that the <code>options.credentials.credentials</code> is generated correctly and
+  that the <code>&quot;secret&quot;</code> used to generate it is from the App Key provided in the <code>init()</code>.</small></p>
 
             </div>
 
@@ -28735,8 +28739,9 @@ For this error, it&#39;s recommended to check the <code>credentials</code> provi
 
             <div class="param-description">
                 <p><small>Value <code>4006</code></small>
-  The error when provided alias Application Key has an error because parent Application Key does not exists.<br>
-For this error, it&#39;s recommended to provide another alias Application Key.</p>
+  The value of the failure code when the App Key provided does not belong to any existing App.
+  <small>To resolve this, check that the provided App Key exists in
+  <a href="https://console.temasys.io">the Developer Console</a>.</small></p>
 
             </div>
 
@@ -28752,10 +28757,10 @@ For this error, it&#39;s recommended to provide another alias Application Key.</
 
             <div class="param-description">
                 <p><small>Value <code>4010</code></small>
-  The error when there is no meeting currently that is open or available to join
-  for self at the current time in the selected room.<br>
-For this error, it&#39;s recommended to retrieve the list of meetings and check if it exists using
-  the <a href="https://temasys.atlassian.net/wiki/display/TPD/SkylinkAPI+-+Meeting+%28Persistent+Room%29+Resources">Meeting Resource REST API</a>.</p>
+  The value of the failure code when provided <code>options.credentials</code>
+  does not match any scheduled meetings available for the &quot;Persistent Room&quot; enabled App Key provided.
+  <small>See the <a href="http://support.temasys.com.sg/support/solutions/articles/
+12000002811-using-the-persistent-room-feature-to-configure-meetings">Persistent Room article</a> to learn more.</small></p>
 
             </div>
 
@@ -28763,17 +28768,18 @@ For this error, it&#39;s recommended to retrieve the list of meetings and check 
           </li>
       
           <li class="param">
-            <code class="param-name">NO_SOCKET_IO</code>
+            <code class="param-name">API_OVER_SEAT_LIMIT</code>
             <span class="type"><b>{</b>Number<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p><small>Value <code>1</code></small>
-  The error when socket.io dependency is not loaded.<br>
-For this error, it&#39;s recommended to load the
-  <a href="http://socket.io/download/">correct socket.io-client dependency</a> from the CDN.</p>
+                <p><small>Value <code>4020</code></small>
+  The value of the failure code when App Key has reached its current concurrent users limit.
+  <small>To resolve this, use another App Key. To create App Keys dynamically, see the
+  <a href="https://temasys.atlassian.net/wiki/display/TPD/SkylinkAPI+-+Application+Resources">Application REST API
+  docs</a> for more information.</small></p>
 
             </div>
 
@@ -28781,16 +28787,16 @@ For this error, it&#39;s recommended to load the
           </li>
       
           <li class="param">
-            <code class="param-name">NO_XMLHTTPREQUEST_SUPPORT</code>
+            <code class="param-name">API_RETRIEVAL_FAILED</code>
             <span class="type"><b>{</b>Number<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p><small>Value <code>2</code></small>
-  The error when XMLHttpRequest is not supported in current browser.<br>
-For this error, it&#39;s recommended to ask user to switch to another browser that supports <code>XMLHttpRequest</code>.</p>
+                <p><small>Value <code>4021</code></small>
+  The value of the failure code when App Key retrieval of authentication token fails.
+  <small>If this happens frequently, contact our <a href="http://support.temasys.com.sg">support portal</a>.</small></p>
 
             </div>
 
@@ -28798,68 +28804,17 @@ For this error, it&#39;s recommended to ask user to switch to another browser th
           </li>
       
           <li class="param">
-            <code class="param-name">NO_WEBRTC_SUPPORT</code>
+            <code class="param-name">API_WRONG_ACCESS_DOMAIN</code>
             <span class="type"><b>{</b>Number<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p><small>Value <code>3</code></small>
-  The error when WebRTC is not supported in current browser.<br>
-For this error, it&#39;s recommended to ask user to switch to another browser that supports WebRTC.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">NO_PATH</code>
-            <span class="type"><b>{</b>Number<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-                <p><small>Value <code>4</code></small>
-  The error when constructed path is invalid.<br>
-This rarely (and should not) occur and it&#39;s recommended to report this issue if this occurs.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">INVALID_XMLHTTPREQUEST_STATUS</code>
-            <span class="type"><b>{</b>Number<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-                <p><small>Value <code>5</code></small>
-  The error when XMLHttpRequest does not return a HTTP status code of <code>200</code> but a HTTP failure.<br>
-This rarely (and should not) occur and it&#39;s recommended to report this issue if this occurs.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">ADAPTER_NO_LOADED</code>
-            <span class="type"><b>{</b>Number<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-                <p><small>Value <code>7</code></small>
-  The error when AdapterJS dependency is not loaded.<br>
-For this error, it&#39;s recommended to load the
-  <a href="https://github.com/Temasys/AdapterJS/releases">correct AdapterJS dependency</a> from the CDN.</p>
+                <p><small>Value <code>5005</code></small>
+  The value of the failure code when App Key makes request to the incorrect Auth server.
+  <small>To resolve this, ensure that the <code>roomServer</code> is not configured. If this persists even without
+  <code>roomServer</code> configuration, contact our <a href="http://support.temasys.com.sg">support portal</a>.</small></p>
 
             </div>
 
@@ -28875,9 +28830,101 @@ For this error, it&#39;s recommended to load the
 
             <div class="param-description">
                 <p><small>Value <code>-1</code></small>
-  The error when XMLHttpRequest failure on the network level when attempting to
-  connect to the platform server to retrieve selected room connection information.<br>
-This might happen when connection timeouts. If this is a persistent issue, it&#39;s recommended to report this issue.</p>
+  The value of the failure code when requesting to Auth server has timed out.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">NO_SOCKET_IO</code>
+            <span class="type"><b>{</b>Number<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p><small>Value <code>1</code></small>
+  The value of the failure code when dependency <a href="http://socket.io/download/">Socket.IO client</a> is not loaded.
+  <small>To resolve this, ensure that the Socket.IO client dependency is loaded before the Skylink SDK.
+  You may use the provided Socket.IO client <a href="http://socket.io/download/">CDN here</a>.</small></p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">NO_XMLHTTPREQUEST_SUPPORT</code>
+            <span class="type"><b>{</b>Number<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p><small>Value <code>2</code></small>
+  The value of the failure code when <a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest">
+  XMLHttpRequest API</a> required to make request to Auth server is not supported.
+  <small>To resolve this, display in the Web UI to ask clients to switch to the list of supported browser
+  as <a href="https://github.com/Temasys/SkylinkJS/tree/0.6.14#supported-browsers">listed in here</a>.</small></p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">NO_WEBRTC_SUPPORT</code>
+            <span class="type"><b>{</b>Number<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p><small>Value <code>3</code></small>
+  The value of the failure code when <a href="https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/">
+  RTCPeerConnection API</a> required for Peer connections is not supported.
+  <small>To resolve this, display in the Web UI to ask clients to switch to the list of supported browser
+  as <a href="https://github.com/Temasys/SkylinkJS/tree/0.6.14#supported-browsers">listed in here</a>.
+  For <a href="http://confluence.temasys.com.sg/display/TWPP">plugin supported browsers</a>, if the clients
+  does not have the plugin installed, there will be an installation toolbar that will prompt for installation
+  to support the RTCPeerConnection API.</small></p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">NO_PATH</code>
+            <span class="type"><b>{</b>Number<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p><small>Value <code>4</code></small>
+  The value of the failure code when provided <code>init()</code> configuration has errors.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">ADAPTER_NO_LOADED</code>
+            <span class="type"><b>{</b>Number<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p><small>Value <code>7</code></small>
+  The value of the failure code when dependency <a href="https://github.com/Temasys/AdapterJS/">AdapterJS</a>
+  is not loaded.
+  <small>To resolve this, ensure that the AdapterJS dependency is loaded before the Skylink dependency.
+  You may use the provided AdapterJS <a href="https://github.com/Temasys/AdapterJS/">CDN here</a>.</small></p>
 
             </div>
 
@@ -28938,16 +28985,13 @@ This might happen when connection timeouts. If this is a persistent issue, it&#3
           
         
       
-      <!--
-        <span>Deprecated: Signaling server selection is handled on
-   the server side based on load and latency.</span>
-      -->
+      <!---->
       
     </div>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l118"><code>source&#x2F;room-init.js:118</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l126"><code>source&#x2F;room-init.js:126</code></a>
       </small>
     
 
@@ -28957,8 +29001,12 @@ This might happen when connection timeouts. If this is a persistent issue, it&#3
   </div>
 
   <div class="code-item-description">
-    <p>These are the list of available platform signaling servers Skylink
-  should connect to for faster connectivity.</p>
+    <p><blockquote class="info"><b>Deprecation Warning!</b>
+  This constant has been deprecated.<br>Automatic nearest regional server has been implemented
+  on the platform.
+</blockquote>
+The list of available Auth servers in these regions that
+<a href="#method_init"><code>init()</code> method</a> could use for better connectivity.</p>
 
   </div>
 
@@ -28981,7 +29029,7 @@ This might happen when connection timeouts. If this is a persistent issue, it&#3
 
             <div class="param-description">
                 <p><small>Value <code>&quot;sg&quot;</code></small>
-  The option to select the Asia pacific server 1 regional server.</p>
+  The value of the option to use the Auth server in Asia Pacific (APAC).</p>
 
             </div>
 
@@ -28997,7 +29045,7 @@ This might happen when connection timeouts. If this is a persistent issue, it&#3
 
             <div class="param-description">
                 <p><small>Value <code>&quot;us2&quot;</code></small>
-  The option to select the US server 1 regional server.</p>
+  The value of the option to use the Auth server in United States (US).</p>
 
             </div>
 

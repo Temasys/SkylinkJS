@@ -2721,28 +2721,28 @@
         {
             "file": "source/room-init.js",
             "line": 1,
-            "description": "Contains the list of <a href=\"#method_init\"><code>init()</code> method</a> authentication states.",
+            "description": "The list of <a href=\"#method_init\"><code>init()</code> method</a> ready states.",
             "itemtype": "attribute",
             "name": "READY_STATE_CHANGE",
             "params": [
                 {
                     "name": "INIT",
-                    "description": "<small>Value <code>0</code></small>\n  The state when <code>init()</code> has just started.",
+                    "description": "<small>Value <code>0</code></small>\n  The value of the state when <code>init()</code> has just started.",
                     "type": "Number"
                 },
                 {
                     "name": "LOADING",
-                    "description": "<small>Value <code>1</code></small>\n  The state when <code>init()</code> is authenticating the App Key and credentials provided with the API.",
+                    "description": "<small>Value <code>1</code></small>\n  The value of the state when <code>init()</code> is authenticating App Key provided\n  (and with credentials if provided as well) with the Auth server.",
                     "type": "Number"
                 },
                 {
                     "name": "COMPLETED",
-                    "description": "<small>Value <code>2</code></small>\n  The state when <code>init()</code> has succesfully authenticated the App key and credentials provided with the API.\n  <small>The API will return the Room credentials which will be used in\n  <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a> for connection to Signaling.</small>",
+                    "description": "<small>Value <code>2</code></small>\n  The value of the state when <code>init()</code> has successfully authenticated with the Auth server.\n  Room session token is generated for joining the <code>defaultRoom</code> provided in <code>init()</code>.\n  <small>Room session token has to be generated each time User switches to a different Room\n  in <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a>.</small>",
                     "type": "Number"
                 },
                 {
                     "name": "ERROR",
-                    "description": "<small>Value <code>-1</code></small>\n  The state when <code>init()</code> had failed authenticating the App Key and credentials provided with the API.\n  [Rel: Skylink.READY_STATE_CHANGE_ERROR]",
+                    "description": "<small>Value <code>-1</code></small>\n  The value of the state when <code>init()</code> has failed authenticating with the Auth server.\n  [Rel: Skylink.READY_STATE_CHANGE_ERROR]",
                     "type": "Number"
                 }
             ],
@@ -2753,117 +2753,124 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 27,
-            "description": "These are the list of room initialization ready state errors that Skylink has.\n- Ready state errors like <code>ROOM_LOCKED</code>, <code>API_NOT_ENOUGH_CREDIT</code>,\n  <code>API_NOT_ENOUGH_PREPAID_CREDIT</code>, <code>API_FAILED_FINDING_PREPAID_CREDIT</code> and\n  <code>SCRIPT_ERROR</code> has been removed as they are no longer supported.",
+            "line": 29,
+            "description": "The list of <a href=\"#method_init\"><code>init()</code> method</a> ready state failure codes.",
             "itemtype": "attribute",
             "name": "READY_STATE_CHANGE_ERROR",
-            "type": "JSON",
             "params": [
                 {
                     "name": "API_INVALID",
-                    "description": "<small>Value <code>4001</code></small>\n  The error returned when App Key provided does not exists.\n <small>To resolve this, check if the App Key provided exists in the <a href=\"https://developer.temasys.com.sg\">\n    Developer Console</a>.</small>",
+                    "description": "<small>Value <code>4001</code></small>\n  The value of the failure code when provided App Key in <code>init()</code> does not exists.\n  <small>To resolve this, check that the provided App Key exists in\n  <a href=\"https://console.temasys.io\">the Developer Console</a>.</small>",
                     "type": "Number"
                 },
                 {
                     "name": "API_DOMAIN_NOT_MATCH",
-                    "description": "<small>Value <code>4002</code></small>\n  The error returned when accessing backend IP address does not match the <code>\"domain\"</code>\n  property configured in the App Key settings.\n <small>To resolve this, contact our <a href=\"http://support.temasys.com.sg\">Support Portal</a>.</small>",
+                    "description": "<small>Value <code>4002</code></small>\n  The value of the failure code when <code>\"domainName\"</code> property in the App Key does not\n  match the accessing server IP address.\n  <small>To resolve this, contact our <a href=\"http://support.temasys.com.sg\">support portal</a>.</small>",
                     "type": "Number"
                 },
                 {
                     "name": "API_CORS_DOMAIN_NOT_MATCH",
-                    "description": "<small>Value <code>4003</code></small>\n  The error returned when accessing CORS domain does not match the <code>\"corsurl\"</code> property\n  configured in the App Key settings.\n  <small>To resolve this, configure the App Key CORS Url setting in the <a href=\"https://developer.temasys.com.sg\">\n    Developer Console</a>.</small>",
+                    "description": "<small>Value <code>4003</code></small>\n  The value of the failure code when <code>\"corsurl\"</code> property in the App Key does not match accessing CORS.\n  <small>To resolve this, configure the App Key CORS in\n  <a href=\"https://console.temasys.io\">the Developer Console</a>.</small>",
                     "type": "Number"
                 },
                 {
                     "name": "API_CREDENTIALS_INVALID",
-                    "description": "<small>Value <code>4004</code></small>\n  The error returned when ac\nThe error when credentials provided is not valid for provided Application Key.<br>\nFor this error, it's recommended to check the <code>credentials</code> provided in\n  {{#crossLink \"Skylink/init:method\"}}init() configuration{{/crossLink}}.",
+                    "description": "<small>Value <code>4004</code></small>\n  The value of the failure code when there is no CORS prsent in the HTTP headers during the request to the\n  Auth server present nor <code>options.credentials.credentials</code> configuration provided in the <code>init()</code>.\n  <small>To resolve this, ensure that CORS are present in the HTTP headers during the request to the Auth server.</small>",
                     "type": "Number"
                 },
                 {
                     "name": "API_CREDENTIALS_NOT_MATCH",
-                    "description": "<small>Value <code>4005</code></small>\n  The error when credentials does not match as expected generated credentials for provided Application Key.<br>\nFor this error, it's recommended to check the <code>credentials</code> provided in\n  {{#crossLink \"Skylink/init:method\"}}init() configuration{{/crossLink}}.",
+                    "description": "<small>Value <code>4005</code></small>\n  The value of the failure code when the <code>options.credentials.credentials</code> configuration provided in the\n  <code>init()</code> does not match up with the <code>options.credentials.startDateTime</code>,\n  <code>options.credentials.duration</code> or that the <code>\"secret\"</code> used to generate\n  <code>options.credentials.credentials</code> does not match the App Key provided.\n  <small>To resolve this, check that the <code>options.credentials.credentials</code> is generated correctly and\n  that the <code>\"secret\"</code> used to generate it is from the App Key provided in the <code>init()</code>.</small>",
                     "type": "Number"
                 },
                 {
                     "name": "API_INVALID_PARENT_KEY",
-                    "description": "<small>Value <code>4006</code></small>\n  The error when provided alias Application Key has an error because parent Application Key does not exists.<br>\nFor this error, it's recommended to provide another alias Application Key.",
+                    "description": "<small>Value <code>4006</code></small>\n  The value of the failure code when the App Key provided does not belong to any existing App.\n  <small>To resolve this, check that the provided App Key exists in\n  <a href=\"https://console.temasys.io\">the Developer Console</a>.</small>",
                     "type": "Number"
                 },
                 {
                     "name": "API_NO_MEETING_RECORD_FOUND",
-                    "description": "<small>Value <code>4010</code></small>\n  The error when there is no meeting currently that is open or available to join\n  for self at the current time in the selected room.<br>\nFor this error, it's recommended to retrieve the list of meetings and check if it exists using\n  the [Meeting Resource REST API](https://temasys.atlassian.net/wiki/display/TPD/SkylinkAPI+-+Meeting+%28Persistent+Room%29+Resources).",
+                    "description": "<small>Value <code>4010</code></small>\n  The value of the failure code when provided <code>options.credentials</code>\n  does not match any scheduled meetings available for the \"Persistent Room\" enabled App Key provided.\n  <small>See the <a href=\"http://support.temasys.com.sg/support/solutions/articles/\n12000002811-using-the-persistent-room-feature-to-configure-meetings\">Persistent Room article</a> to learn more.</small>",
                     "type": "Number"
                 },
                 {
-                    "name": "NO_SOCKET_IO",
-                    "description": "<small>Value <code>1</code></small>\n  The error when socket.io dependency is not loaded.<br>\nFor this error, it's recommended to load the\n  [correct socket.io-client dependency](http://socket.io/download/) from the CDN.",
+                    "name": "API_OVER_SEAT_LIMIT",
+                    "description": "<small>Value <code>4020</code></small>\n  The value of the failure code when App Key has reached its current concurrent users limit.\n  <small>To resolve this, use another App Key. To create App Keys dynamically, see the\n  <a href=\"https://temasys.atlassian.net/wiki/display/TPD/SkylinkAPI+-+Application+Resources\">Application REST API\n  docs</a> for more information.</small>",
                     "type": "Number"
                 },
                 {
-                    "name": "NO_XMLHTTPREQUEST_SUPPORT",
-                    "description": "<small>Value <code>2</code></small>\n  The error when XMLHttpRequest is not supported in current browser.<br>\nFor this error, it's recommended to ask user to switch to another browser that supports <code>XMLHttpRequest</code>.",
+                    "name": "API_RETRIEVAL_FAILED",
+                    "description": "<small>Value <code>4021</code></small>\n  The value of the failure code when App Key retrieval of authentication token fails.\n  <small>If this happens frequently, contact our <a href=\"http://support.temasys.com.sg\">support portal</a>.</small>",
                     "type": "Number"
                 },
                 {
-                    "name": "NO_WEBRTC_SUPPORT",
-                    "description": "<small>Value <code>3</code></small>\n  The error when WebRTC is not supported in current browser.<br>\nFor this error, it's recommended to ask user to switch to another browser that supports WebRTC.",
-                    "type": "Number"
-                },
-                {
-                    "name": "NO_PATH",
-                    "description": "<small>Value <code>4</code></small>\n  The error when constructed path is invalid.<br>\nThis rarely (and should not) occur and it's recommended to report this issue if this occurs.",
-                    "type": "Number"
-                },
-                {
-                    "name": "INVALID_XMLHTTPREQUEST_STATUS",
-                    "description": "<small>Value <code>5</code></small>\n  The error when XMLHttpRequest does not return a HTTP status code of <code>200</code> but a HTTP failure.<br>\nThis rarely (and should not) occur and it's recommended to report this issue if this occurs.",
-                    "type": "Number"
-                },
-                {
-                    "name": "ADAPTER_NO_LOADED",
-                    "description": "<small>Value <code>7</code></small>\n  The error when AdapterJS dependency is not loaded.<br>\nFor this error, it's recommended to load the\n  [correct AdapterJS dependency](https://github.com/Temasys/AdapterJS/releases) from the CDN.",
+                    "name": "API_WRONG_ACCESS_DOMAIN",
+                    "description": "<small>Value <code>5005</code></small>\n  The value of the failure code when App Key makes request to the incorrect Auth server.\n  <small>To resolve this, ensure that the <code>roomServer</code> is not configured. If this persists even without\n  <code>roomServer</code> configuration, contact our <a href=\"http://support.temasys.com.sg\">support portal</a>.</small>",
                     "type": "Number"
                 },
                 {
                     "name": "XML_HTTP_REQUEST_ERROR",
-                    "description": "<small>Value <code>-1</code></small>\n  The error when XMLHttpRequest failure on the network level when attempting to\n  connect to the platform server to retrieve selected room connection information.<br>\nThis might happen when connection timeouts. If this is a persistent issue, it's recommended to report this issue.",
+                    "description": "<small>Value <code>-1</code></small>\n  The value of the failure code when requesting to Auth server has timed out.",
+                    "type": "Number"
+                },
+                {
+                    "name": "NO_SOCKET_IO",
+                    "description": "<small>Value <code>1</code></small>\n  The value of the failure code when dependency <a href=\"http://socket.io/download/\">Socket.IO client</a> is not loaded.\n  <small>To resolve this, ensure that the Socket.IO client dependency is loaded before the Skylink SDK.\n  You may use the provided Socket.IO client <a href=\"http://socket.io/download/\">CDN here</a>.</small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "NO_XMLHTTPREQUEST_SUPPORT",
+                    "description": "<small>Value <code>2</code></small>\n  The value of the failure code when <a href=\"https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest\">\n  XMLHttpRequest API</a> required to make request to Auth server is not supported.\n  <small>To resolve this, display in the Web UI to ask clients to switch to the list of supported browser\n  as <a href=\"https://github.com/Temasys/SkylinkJS/tree/0.6.14#supported-browsers\">listed in here</a>.</small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "NO_WEBRTC_SUPPORT",
+                    "description": "<small>Value <code>3</code></small>\n  The value of the failure code when <a href=\"https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/\">\n  RTCPeerConnection API</a> required for Peer connections is not supported.\n  <small>To resolve this, display in the Web UI to ask clients to switch to the list of supported browser\n  as <a href=\"https://github.com/Temasys/SkylinkJS/tree/0.6.14#supported-browsers\">listed in here</a>.\n  For <a href=\"http://confluence.temasys.com.sg/display/TWPP\">plugin supported browsers</a>, if the clients\n  does not have the plugin installed, there will be an installation toolbar that will prompt for installation\n  to support the RTCPeerConnection API.</small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "NO_PATH",
+                    "description": "<small>Value <code>4</code></small>\n  The value of the failure code when provided <code>init()</code> configuration has errors.",
+                    "type": "Number"
+                },
+                {
+                    "name": "ADAPTER_NO_LOADED",
+                    "description": "<small>Value <code>7</code></small>\n  The value of the failure code when dependency <a href=\"https://github.com/Temasys/AdapterJS/\">AdapterJS</a>\n  is not loaded.\n  <small>To resolve this, ensure that the AdapterJS dependency is loaded before the Skylink dependency.\n  You may use the provided AdapterJS <a href=\"https://github.com/Temasys/AdapterJS/\">CDN here</a>.</small>",
                     "type": "Number"
                 }
             ],
+            "type": "JSON",
             "readonly": "",
-            "component": "Room",
             "since": "0.4.0",
             "class": "Skylink"
         },
         {
             "file": "source/room-init.js",
-            "line": 118,
-            "description": "These are the list of available platform signaling servers Skylink\n  should connect to for faster connectivity.",
+            "line": 126,
+            "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This constant has been deprecated.<br>Automatic nearest regional server has been implemented\n  on the platform.\n</blockquote>\nThe list of available Auth servers in these regions that\n<a href=\"#method_init\"><code>init()</code> method</a> could use for better connectivity.",
             "itemtype": "attribute",
             "name": "REGIONAL_SERVER",
-            "type": "JSON",
             "params": [
                 {
                     "name": "APAC1",
-                    "description": "<small>Value <code>\"sg\"</code></small>\n  The option to select the Asia pacific server 1 regional server.",
+                    "description": "<small>Value <code>\"sg\"</code></small>\n  The value of the option to use the Auth server in Asia Pacific (APAC).",
                     "type": "String"
                 },
                 {
                     "name": "US1",
-                    "description": "<small>Value <code>\"us2\"</code></small>\n  The option to select the US server 1 regional server.",
+                    "description": "<small>Value <code>\"us2\"</code></small>\n  The value of the option to use the Auth server in United States (US).",
                     "type": "String"
                 }
             ],
             "deprecated": true,
-            "deprecationMessage": "Signaling server selection is handled on\n   the server side based on load and latency.",
+            "type": "JSON",
             "readonly": "",
-            "component": "Room",
             "since": "0.5.0",
             "class": "Skylink"
         },
         {
             "file": "source/room-init.js",
-            "line": 139,
+            "line": 149,
             "description": "Stores the flag if HTTPS connections should be enforced when connecting to\n  the API or Signaling server if App is accessing from HTTP domain.\nHTTPS connections are enforced if App is accessing from HTTPS domains.",
             "itemtype": "attribute",
             "name": "_forceSSL",
@@ -2876,7 +2883,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 152,
+            "line": 162,
             "description": "Stores the flag if TURNS connections should be enforced when connecting to\n  the TURN server if App is accessing from HTTP domain.\nTURNS connections are enforced if App is accessing from HTTPS domains.",
             "itemtype": "attribute",
             "name": "_forceTURNSSL",
@@ -2889,7 +2896,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 165,
+            "line": 175,
             "description": "Stores the flag if TURN connections should be enforced when connecting to Peers.\nThis filters all non \"relay\" ICE candidates to enforce connections via the TURN server.",
             "itemtype": "attribute",
             "name": "_forceTURN",
@@ -2902,7 +2909,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 177,
+            "line": 187,
             "description": "Stores the construct API REST path to obtain Room credentials.",
             "itemtype": "attribute",
             "name": "_path",
@@ -2914,7 +2921,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 187,
+            "line": 197,
             "description": "Stores the server region for the Signaling to use.\nThis is already deprecated an no longer useful. To discuss and remove.",
             "itemtype": "attribute",
             "name": "_serverRegion",
@@ -2926,7 +2933,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 198,
+            "line": 208,
             "description": "Stores the API server url.",
             "itemtype": "attribute",
             "name": "_roomServer",
@@ -2938,7 +2945,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 208,
+            "line": 218,
             "description": "Stores the App Key configured in <code>init()</code>.",
             "itemtype": "attribute",
             "name": "_appKey",
@@ -2950,7 +2957,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 218,
+            "line": 228,
             "description": "Stores the default Room name to connect to when <code>joinRoom()</code> does not provide a Room name.",
             "itemtype": "attribute",
             "name": "_defaultRoom",
@@ -2962,7 +2969,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 228,
+            "line": 238,
             "description": "Stores the <code>init()</code> credentials starting DateTime stamp in ISO 8601.",
             "itemtype": "attribute",
             "name": "_roomStart",
@@ -2974,7 +2981,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 238,
+            "line": 248,
             "description": "Stores the <code>init()</code> credentials duration counted in hours.",
             "itemtype": "attribute",
             "name": "_roomDuration",
@@ -2986,7 +2993,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 248,
+            "line": 258,
             "description": "Stores the <code>init()</code> generated credentials string.",
             "itemtype": "attribute",
             "name": "_roomCredentials",
@@ -2998,7 +3005,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 258,
+            "line": 268,
             "description": "Stores the current <code>init()</code> readyState.",
             "itemtype": "attribute",
             "name": "_readyState",
@@ -3010,7 +3017,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 268,
+            "line": 278,
             "description": "Stores the \"cid\" used for <code>joinRoom()</code>.",
             "itemtype": "attribute",
             "name": "_key",
@@ -3022,7 +3029,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 278,
+            "line": 288,
             "description": "Stores the \"apiOwner\" used for <code>joinRoom()</code>.",
             "itemtype": "attribute",
             "name": "_appKeyOwner",
@@ -3034,7 +3041,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 288,
+            "line": 298,
             "description": "Stores the Room credentials information for <code>joinRoom()</code>.",
             "itemtype": "attribute",
             "name": "_room",
@@ -3073,8 +3080,8 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 304,
-            "description": "Function that authenticates the App Key to initialise the SDK.",
+            "line": 314,
+            "description": "Function that authenticates and initialises App Key used for Room connections.",
             "itemtype": "method",
             "name": "init",
             "params": [
@@ -3090,32 +3097,32 @@
                         },
                         {
                             "name": "defaultRoom",
-                            "description": "The default Room name to use when\n   no Room name is provided in <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a>.\n<small>Fallbacks to the value of <code>options.appKey</code> if this is not provided.</small>\n<small>This is the only Room name connected to when using credentials based authentication.</small>",
+                            "description": "The default Room to connect to when no <code>room</code> parameter\n   is provided in  <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a>.\n- When not provided, it's value is <code>options.appKey</code>.\n  <small>Note that switching Rooms is not available when using <code>options.credentials</code> based authentication.\n  The Room that User will be connected to is the <code>defaultRoom</code> provided.</small>",
                             "type": "String",
                             "optional": true
                         },
                         {
                             "name": "roomServer",
-                            "description": "The platform API server url.\n<small>This is a debugging feature and is not recommended to be used by developers unless\n  instructed for debugging purposes.</small>",
+                            "description": "The Auth server.\n<small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>",
                             "type": "String",
                             "optional": true
                         },
                         {
                             "name": "region",
-                            "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This option has been deprecated.<br>Automatic nearest regional server has been implemented\n  on the platform.</blockquote>\n  The platform regional server to connect to for better connectivity.\n  [Rel: Skylink.REGIONAL_SERVER]",
+                            "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This option has been deprecated.<br>Automatic nearest regional server has been implemented\n  on the platform.</blockquote>\n  The Auth server in the various regions to connect to for better connectivity.\n  [Rel: Skylink.REGIONAL_SERVER]",
                             "type": "String",
                             "optional": true
                         },
                         {
                             "name": "enableIceTrickle",
-                            "description": "The flag if trickle ICE should be\n  enabled when connecting with Peer connections.",
+                            "description": "The flag if Peer connections should\n  trickle ICE for faster connectivity.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
                         },
                         {
                             "name": "enableDataChannel",
-                            "description": "The flag if Datachannel connections\n  should be enabled with connected with Peer connections.",
+                            "description": "The flag if Datachannel connections should be enabled.\n  <small>This is required to be enabled for <a href=\"#method_sendBlobData\"><code>sendBlobData()</code> method</a>\n  <a href=\"#method_sendURLData\"><code>sendURLData()</code> method</a> and\n  <a href=\"#method_sendP2PMessage\"><code>sendP2PMessage()</code> method</a>.</small>",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
@@ -3136,27 +3143,27 @@
                         },
                         {
                             "name": "forceTURN",
-                            "description": "The flag if Peers should have enforced\n  connections over the TURN server.\n  <small>This sets <code>options.enableTURNServer</code> value to <code>true</code> and\n    <code>options.enableSTUNServer</code> value to <code>false</code>.</small>\n  <small>Filters the <code>\"relay\"</code> ICE candidates during Peer connections ICE gathering to enforce TURN connections.</small>",
+                            "description": "The flag if Peer connections should enforce connections over the TURN server.\n  <small>This sets <code>options.enableTURNServer</code> value to <code>true</code> and\n  <code>options.enableSTUNServer</code> value to <code>false</code>.</small>\n  <small>This filters the <code>\"relay\"</code> ICE candidates during Peer connections\n  ICE gathering to enforce TURN connections.</small>",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
                         },
                         {
                             "name": "usePublicSTUN",
-                            "description": "The flag if STUN ICE servers not\n  belonging to <code>temasys.com.sg</code> should be filtered out when constructing Peer connections.",
+                            "description": "The flag if publicly available STUN ICE servers should\n  be filtered out when constructing Peer connections.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
                         },
                         {
                             "name": "TURNServerTransport",
-                            "description": "The option for filtering and configuring\n  TURN ICE servers url <code>?transport=</code> query parameter when constructing a Peer connections.\n  <small>Fallbacks to <code>ANY</code> option if not provided.</small>\n  [Rel: Skylink.TURN_TRANSPORT]",
+                            "description": "The option for filtering and configuring\n  TURN ICE servers <code>?transport=</code> query parameter when constructing a Peer connections.\n- When not provided, it's value is <code>ANY</code>.\n  [Rel: Skylink.TURN_TRANSPORT]",
                             "type": "Boolean",
                             "optional": true
                         },
                         {
                             "name": "credentials",
-                            "description": "The credentials for authenticating App Key.\n  <small>By default, <code>init()</code> uses the CORS URL authentication.\n  For more details on the different authentication methods, read\n    <a href=\"http://support.temasys.com.sg/support/solutions/articles/\n12000002712-authenticating-your-application-key-to-start-a-connection\">the article here</a>.</small>\n  <small>This is also part of the persistent Room feature configuration. <a href=\"http://support.temasys.com.sg/support\n/solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings\">Read more here</a>.</small>",
+                            "description": "The credentials used for The credentials for authenticating App Key.\n  <small>By default, <code>init()</code> uses the CORS URL authentication.\n  For more details on the different authentication methods, read\n    <a href=\"http://support.temasys.com.sg/support/solutions/articles/\n12000002712-authenticating-your-application-key-to-start-a-connection\">the article here</a>.</small>\n  <small>This is also part of the persistent Room feature configuration. <a href=\"http://support.temasys.com.sg/support\n/solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings\">Read more here</a>.</small>",
                             "type": "JSON",
                             "optional": true,
                             "props": [
@@ -3356,7 +3363,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 756,
+            "line": 768,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -3367,7 +3374,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 830,
+            "line": 842,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -3378,7 +3385,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 903,
+            "line": 915,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -3389,7 +3396,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 994,
+            "line": 1006,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -8477,20 +8484,12 @@
             "line": " source/room-connection.js:554"
         },
         {
-            "message": "unknown tag: component",
-            "line": " source/room-init.js:27"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/room-init.js:118"
-        },
-        {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:304"
+            "line": " source/room-init.js:314"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:304"
+            "line": " source/room-init.js:314"
         },
         {
             "message": "unknown tag: component",

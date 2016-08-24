@@ -90,18 +90,20 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * Contains the list of &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; authentication states.
+ * The list of &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; ready states.
  * @attribute READY_STATE_CHANGE
- * @param {Number} INIT &lt;small&gt;Value &lt;code&gt;0&lt;/code&gt;&lt;/small&gt;
- *   The state when &lt;code&gt;init()&lt;/code&gt; has just started.
- * @param {Number} LOADING &lt;small&gt;Value &lt;code&gt;1&lt;/code&gt;&lt;/small&gt;
- *   The state when &lt;code&gt;init()&lt;/code&gt; is authenticating the App Key and credentials provided with the API.
+ * @param {Number} INIT      &lt;small&gt;Value &lt;code&gt;0&lt;/code&gt;&lt;/small&gt;
+ *   The value of the state when &lt;code&gt;init()&lt;/code&gt; has just started.
+ * @param {Number} LOADING   &lt;small&gt;Value &lt;code&gt;1&lt;/code&gt;&lt;/small&gt;
+ *   The value of the state when &lt;code&gt;init()&lt;/code&gt; is authenticating App Key provided
+ *   (and with credentials if provided as well) with the Auth server.
  * @param {Number} COMPLETED &lt;small&gt;Value &lt;code&gt;2&lt;/code&gt;&lt;/small&gt;
- *   The state when &lt;code&gt;init()&lt;/code&gt; has succesfully authenticated the App key and credentials provided with the API.
- *   &lt;small&gt;The API will return the Room credentials which will be used in
- *   &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt; for connection to Signaling.&lt;/small&gt;
- * @param {Number} ERROR &lt;small&gt;Value &lt;code&gt;-1&lt;/code&gt;&lt;/small&gt;
- *   The state when &lt;code&gt;init()&lt;/code&gt; had failed authenticating the App Key and credentials provided with the API.
+ *   The value of the state when &lt;code&gt;init()&lt;/code&gt; has successfully authenticated with the Auth server.
+ *   Room session token is generated for joining the &lt;code&gt;defaultRoom&lt;/code&gt; provided in &lt;code&gt;init()&lt;/code&gt;.
+ *   &lt;small&gt;Room session token has to be generated each time User switches to a different Room
+ *   in &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
+ * @param {Number} ERROR     &lt;small&gt;Value &lt;code&gt;-1&lt;/code&gt;&lt;/small&gt;
+ *   The value of the state when &lt;code&gt;init()&lt;/code&gt; has failed authenticating with the Auth server.
  *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
  * @type JSON
  * @readOnly
@@ -116,68 +118,80 @@ Skylink.prototype.READY_STATE_CHANGE = {
 };
 
 /**
- * These are the list of room initialization ready state errors that Skylink has.
- * - Ready state errors like &lt;code&gt;ROOM_LOCKED&lt;/code&gt;, &lt;code&gt;API_NOT_ENOUGH_CREDIT&lt;/code&gt;,
- *   &lt;code&gt;API_NOT_ENOUGH_PREPAID_CREDIT&lt;/code&gt;, &lt;code&gt;API_FAILED_FINDING_PREPAID_CREDIT&lt;/code&gt; and
- *   &lt;code&gt;SCRIPT_ERROR&lt;/code&gt; has been removed as they are no longer supported.
+ * The list of &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; ready state failure codes.
  * @attribute READY_STATE_CHANGE_ERROR
- * @type JSON
- * @param {Number} API_INVALID &lt;small&gt;Value &lt;code&gt;4001&lt;/code&gt;&lt;/small&gt;
- *   The error returned when App Key provided does not exists.
- *  &lt;small&gt;To resolve this, check if the App Key provided exists in the &lt;a href=&quot;https://developer.temasys.com.sg&quot;&gt;
- *     Developer Console&lt;/a&gt;.&lt;/small&gt;
- * @param {Number} API_DOMAIN_NOT_MATCH &lt;small&gt;Value &lt;code&gt;4002&lt;/code&gt;&lt;/small&gt;
- *   The error returned when accessing backend IP address does not match the &lt;code&gt;&quot;domain&quot;&lt;/code&gt;
- *   property configured in the App Key settings.
- *  &lt;small&gt;To resolve this, contact our &lt;a href=&quot;http://support.temasys.com.sg&quot;&gt;Support Portal&lt;/a&gt;.&lt;/small&gt;
- * @param {Number} API_CORS_DOMAIN_NOT_MATCH &lt;small&gt;Value &lt;code&gt;4003&lt;/code&gt;&lt;/small&gt;
- *   The error returned when accessing CORS domain does not match the &lt;code&gt;&quot;corsurl&quot;&lt;/code&gt; property
- *   configured in the App Key settings.
- *   &lt;small&gt;To resolve this, configure the App Key CORS Url setting in the &lt;a href=&quot;https://developer.temasys.com.sg&quot;&gt;
- *     Developer Console&lt;/a&gt;.&lt;/small&gt;
- * @param {Number} API_CREDENTIALS_INVALID &lt;small&gt;Value &lt;code&gt;4004&lt;/code&gt;&lt;/small&gt;
- *   The error returned when ac
- * The error when credentials provided is not valid for provided Application Key.&lt;br&gt;
- * For this error, it&#x27;s recommended to check the &lt;code&gt;credentials&lt;/code&gt; provided in
- *   {{#crossLink &quot;Skylink/init:method&quot;}}init() configuration{{/crossLink}}.
- * @param {Number} API_CREDENTIALS_NOT_MATCH &lt;small&gt;Value &lt;code&gt;4005&lt;/code&gt;&lt;/small&gt;
- *   The error when credentials does not match as expected generated credentials for provided Application Key.&lt;br&gt;
- * For this error, it&#x27;s recommended to check the &lt;code&gt;credentials&lt;/code&gt; provided in
- *   {{#crossLink &quot;Skylink/init:method&quot;}}init() configuration{{/crossLink}}.
- * @param {Number} API_INVALID_PARENT_KEY &lt;small&gt;Value &lt;code&gt;4006&lt;/code&gt;&lt;/small&gt;
- *   The error when provided alias Application Key has an error because parent Application Key does not exists.&lt;br&gt;
- * For this error, it&#x27;s recommended to provide another alias Application Key.
+ * @param {Number} API_INVALID                 &lt;small&gt;Value &lt;code&gt;4001&lt;/code&gt;&lt;/small&gt;
+ *   The value of the failure code when provided App Key in &lt;code&gt;init()&lt;/code&gt; does not exists.
+ *   &lt;small&gt;To resolve this, check that the provided App Key exists in
+ *   &lt;a href=&quot;https://console.temasys.io&quot;&gt;the Developer Console&lt;/a&gt;.&lt;/small&gt;
+ * @param {Number} API_DOMAIN_NOT_MATCH        &lt;small&gt;Value &lt;code&gt;4002&lt;/code&gt;&lt;/small&gt;
+ *   The value of the failure code when &lt;code&gt;&quot;domainName&quot;&lt;/code&gt; property in the App Key does not
+ *   match the accessing server IP address.
+ *   &lt;small&gt;To resolve this, contact our &lt;a href=&quot;http://support.temasys.com.sg&quot;&gt;support portal&lt;/a&gt;.&lt;/small&gt;
+ * @param {Number} API_CORS_DOMAIN_NOT_MATCH   &lt;small&gt;Value &lt;code&gt;4003&lt;/code&gt;&lt;/small&gt;
+ *   The value of the failure code when &lt;code&gt;&quot;corsurl&quot;&lt;/code&gt; property in the App Key does not match accessing CORS.
+ *   &lt;small&gt;To resolve this, configure the App Key CORS in
+ *   &lt;a href=&quot;https://console.temasys.io&quot;&gt;the Developer Console&lt;/a&gt;.&lt;/small&gt;
+ * @param {Number} API_CREDENTIALS_INVALID     &lt;small&gt;Value &lt;code&gt;4004&lt;/code&gt;&lt;/small&gt;
+ *   The value of the failure code when there is no CORS prsent in the HTTP headers during the request to the
+ *   Auth server present nor &lt;code&gt;options.credentials.credentials&lt;/code&gt; configuration provided in the &lt;code&gt;init()&lt;/code&gt;.
+ *   &lt;small&gt;To resolve this, ensure that CORS are present in the HTTP headers during the request to the Auth server.&lt;/small&gt;
+ * @param {Number} API_CREDENTIALS_NOT_MATCH   &lt;small&gt;Value &lt;code&gt;4005&lt;/code&gt;&lt;/small&gt;
+ *   The value of the failure code when the &lt;code&gt;options.credentials.credentials&lt;/code&gt; configuration provided in the
+ *   &lt;code&gt;init()&lt;/code&gt; does not match up with the &lt;code&gt;options.credentials.startDateTime&lt;/code&gt;,
+ *   &lt;code&gt;options.credentials.duration&lt;/code&gt; or that the &lt;code&gt;&quot;secret&quot;&lt;/code&gt; used to generate
+ *   &lt;code&gt;options.credentials.credentials&lt;/code&gt; does not match the App Key provided.
+ *   &lt;small&gt;To resolve this, check that the &lt;code&gt;options.credentials.credentials&lt;/code&gt; is generated correctly and
+ *   that the &lt;code&gt;&quot;secret&quot;&lt;/code&gt; used to generate it is from the App Key provided in the &lt;code&gt;init()&lt;/code&gt;.&lt;/small&gt;
+ * @param {Number} API_INVALID_PARENT_KEY      &lt;small&gt;Value &lt;code&gt;4006&lt;/code&gt;&lt;/small&gt;
+ *   The value of the failure code when the App Key provided does not belong to any existing App.
+ *   &lt;small&gt;To resolve this, check that the provided App Key exists in
+ *   &lt;a href=&quot;https://console.temasys.io&quot;&gt;the Developer Console&lt;/a&gt;.&lt;/small&gt;
  * @param {Number} API_NO_MEETING_RECORD_FOUND &lt;small&gt;Value &lt;code&gt;4010&lt;/code&gt;&lt;/small&gt;
- *   The error when there is no meeting currently that is open or available to join
- *   for self at the current time in the selected room.&lt;br&gt;
- * For this error, it&#x27;s recommended to retrieve the list of meetings and check if it exists using
- *   the [Meeting Resource REST API](https://temasys.atlassian.net/wiki/display/TPD/SkylinkAPI+-+Meeting+%28Persistent+Room%29+Resources).
- * @param {Number} NO_SOCKET_IO &lt;small&gt;Value &lt;code&gt;1&lt;/code&gt;&lt;/small&gt;
- *   The error when socket.io dependency is not loaded.&lt;br&gt;
- * For this error, it&#x27;s recommended to load the
- *   [correct socket.io-client dependency](http://socket.io/download/) from the CDN.
- * @param {Number} NO_XMLHTTPREQUEST_SUPPORT &lt;small&gt;Value &lt;code&gt;2&lt;/code&gt;&lt;/small&gt;
- *   The error when XMLHttpRequest is not supported in current browser.&lt;br&gt;
- * For this error, it&#x27;s recommended to ask user to switch to another browser that supports &lt;code&gt;XMLHttpRequest&lt;/code&gt;.
- * @param {Number} NO_WEBRTC_SUPPORT &lt;small&gt;Value &lt;code&gt;3&lt;/code&gt;&lt;/small&gt;
- *   The error when WebRTC is not supported in current browser.&lt;br&gt;
- * For this error, it&#x27;s recommended to ask user to switch to another browser that supports WebRTC.
- * @param {Number} NO_PATH &lt;small&gt;Value &lt;code&gt;4&lt;/code&gt;&lt;/small&gt;
- *   The error when constructed path is invalid.&lt;br&gt;
- * This rarely (and should not) occur and it&#x27;s recommended to report this issue if this occurs.
- * @param {Number} INVALID_XMLHTTPREQUEST_STATUS &lt;small&gt;Value &lt;code&gt;5&lt;/code&gt;&lt;/small&gt;
- *   The error when XMLHttpRequest does not return a HTTP status code of &lt;code&gt;200&lt;/code&gt; but a HTTP failure.&lt;br&gt;
- * This rarely (and should not) occur and it&#x27;s recommended to report this issue if this occurs.
- * @param {Number} ADAPTER_NO_LOADED &lt;small&gt;Value &lt;code&gt;7&lt;/code&gt;&lt;/small&gt;
- *   The error when AdapterJS dependency is not loaded.&lt;br&gt;
- * For this error, it&#x27;s recommended to load the
- *   [correct AdapterJS dependency](https://github.com/Temasys/AdapterJS/releases) from the CDN.
- * @param {Number} XML_HTTP_REQUEST_ERROR &lt;small&gt;Value &lt;code&gt;-1&lt;/code&gt;&lt;/small&gt;
- *   The error when XMLHttpRequest failure on the network level when attempting to
- *   connect to the platform server to retrieve selected room connection information.&lt;br&gt;
- * This might happen when connection timeouts. If this is a persistent issue, it&#x27;s recommended to report this issue.
+ *   The value of the failure code when provided &lt;code&gt;options.credentials&lt;/code&gt;
+ *   does not match any scheduled meetings available for the &quot;Persistent Room&quot; enabled App Key provided.
+ *   &lt;small&gt;See the &lt;a href=&quot;http://support.temasys.com.sg/support/solutions/articles/
+ * 12000002811-using-the-persistent-room-feature-to-configure-meetings&quot;&gt;Persistent Room article&lt;/a&gt; to learn more.&lt;/small&gt;
+ * @param {Number} API_OVER_SEAT_LIMIT         &lt;small&gt;Value &lt;code&gt;4020&lt;/code&gt;&lt;/small&gt;
+ *   The value of the failure code when App Key has reached its current concurrent users limit.
+ *   &lt;small&gt;To resolve this, use another App Key. To create App Keys dynamically, see the
+ *   &lt;a href=&quot;https://temasys.atlassian.net/wiki/display/TPD/SkylinkAPI+-+Application+Resources&quot;&gt;Application REST API
+ *   docs&lt;/a&gt; for more information.&lt;/small&gt;
+ * @param {Number} API_RETRIEVAL_FAILED        &lt;small&gt;Value &lt;code&gt;4021&lt;/code&gt;&lt;/small&gt;
+ *   The value of the failure code when App Key retrieval of authentication token fails.
+ *   &lt;small&gt;If this happens frequently, contact our &lt;a href=&quot;http://support.temasys.com.sg&quot;&gt;support portal&lt;/a&gt;.&lt;/small&gt;
+ * @param {Number} API_WRONG_ACCESS_DOMAIN     &lt;small&gt;Value &lt;code&gt;5005&lt;/code&gt;&lt;/small&gt;
+ *   The value of the failure code when App Key makes request to the incorrect Auth server.
+ *   &lt;small&gt;To resolve this, ensure that the &lt;code&gt;roomServer&lt;/code&gt; is not configured. If this persists even without
+ *   &lt;code&gt;roomServer&lt;/code&gt; configuration, contact our &lt;a href=&quot;http://support.temasys.com.sg&quot;&gt;support portal&lt;/a&gt;.&lt;/small&gt;
+ * @param {Number} XML_HTTP_REQUEST_ERROR      &lt;small&gt;Value &lt;code&gt;-1&lt;/code&gt;&lt;/small&gt;
+ *   The value of the failure code when requesting to Auth server has timed out.
+ * @param {Number} NO_SOCKET_IO                &lt;small&gt;Value &lt;code&gt;1&lt;/code&gt;&lt;/small&gt;
+ *   The value of the failure code when dependency &lt;a href=&quot;http://socket.io/download/&quot;&gt;Socket.IO client&lt;/a&gt; is not loaded.
+ *   &lt;small&gt;To resolve this, ensure that the Socket.IO client dependency is loaded before the Skylink SDK.
+ *   You may use the provided Socket.IO client &lt;a href=&quot;http://socket.io/download/&quot;&gt;CDN here&lt;/a&gt;.&lt;/small&gt;
+ * @param {Number} NO_XMLHTTPREQUEST_SUPPORT   &lt;small&gt;Value &lt;code&gt;2&lt;/code&gt;&lt;/small&gt;
+ *   The value of the failure code when &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest&quot;&gt;
+ *   XMLHttpRequest API&lt;/a&gt; required to make request to Auth server is not supported.
+ *   &lt;small&gt;To resolve this, display in the Web UI to ask clients to switch to the list of supported browser
+ *   as &lt;a href=&quot;https://github.com/Temasys/SkylinkJS/tree/0.6.14#supported-browsers&quot;&gt;listed in here&lt;/a&gt;.&lt;/small&gt;
+ * @param {Number} NO_WEBRTC_SUPPORT           &lt;small&gt;Value &lt;code&gt;3&lt;/code&gt;&lt;/small&gt;
+ *   The value of the failure code when &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/&quot;&gt;
+ *   RTCPeerConnection API&lt;/a&gt; required for Peer connections is not supported.
+ *   &lt;small&gt;To resolve this, display in the Web UI to ask clients to switch to the list of supported browser
+ *   as &lt;a href=&quot;https://github.com/Temasys/SkylinkJS/tree/0.6.14#supported-browsers&quot;&gt;listed in here&lt;/a&gt;.
+ *   For &lt;a href=&quot;http://confluence.temasys.com.sg/display/TWPP&quot;&gt;plugin supported browsers&lt;/a&gt;, if the clients
+ *   does not have the plugin installed, there will be an installation toolbar that will prompt for installation
+ *   to support the RTCPeerConnection API.&lt;/small&gt;
+ * @param {Number} NO_PATH                     &lt;small&gt;Value &lt;code&gt;4&lt;/code&gt;&lt;/small&gt;
+ *   The value of the failure code when provided &lt;code&gt;init()&lt;/code&gt; configuration has errors.
+ * @param {Number} ADAPTER_NO_LOADED           &lt;small&gt;Value &lt;code&gt;7&lt;/code&gt;&lt;/small&gt;
+ *   The value of the failure code when dependency &lt;a href=&quot;https://github.com/Temasys/AdapterJS/&quot;&gt;AdapterJS&lt;/a&gt;
+ *   is not loaded.
+ *   &lt;small&gt;To resolve this, ensure that the AdapterJS dependency is loaded before the Skylink dependency.
+ *   You may use the provided AdapterJS &lt;a href=&quot;https://github.com/Temasys/AdapterJS/&quot;&gt;CDN here&lt;/a&gt;.&lt;/small&gt;
+ * @type JSON
  * @readOnly
- * @component Room
  * @for Skylink
  * @since 0.4.0
  */
@@ -189,36 +203,32 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
   API_CREDENTIALS_NOT_MATCH: 4005,
   API_INVALID_PARENT_KEY: 4006,
   API_NO_MEETING_RECORD_FOUND: 4010,
-  
-  // New ones
   API_OVER_SEAT_LIMIT: 4020,
   API_RETRIEVAL_FAILED: 4021,
   API_WRONG_ACCESS_DOMAIN: 5005,
-  
-  //ROOM_LOCKED: 5001,
   XML_HTTP_REQUEST_ERROR: -1,
   NO_SOCKET_IO: 1,
   NO_XMLHTTPREQUEST_SUPPORT: 2,
   NO_WEBRTC_SUPPORT: 3,
   NO_PATH: 4,
-  //INVALID_XMLHTTPREQUEST_STATUS: 5,
-  //SCRIPT_ERROR: 6,
   ADAPTER_NO_LOADED: 7
 };
 
 /**
- * These are the list of available platform signaling servers Skylink
- *   should connect to for faster connectivity.
+ * &lt;blockquote class=&quot;info&quot;&gt;&lt;b&gt;Deprecation Warning!&lt;/b&gt;
+ *   This constant has been deprecated.&lt;br&gt;Automatic nearest regional server has been implemented
+ *   on the platform.
+ * &lt;/blockquote&gt;
+ * The list of available Auth servers in these regions that
+ * &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; could use for better connectivity.
  * @attribute REGIONAL_SERVER
- * @type JSON
  * @param {String} APAC1 &lt;small&gt;Value &lt;code&gt;&quot;sg&quot;&lt;/code&gt;&lt;/small&gt;
- *   The option to select the Asia pacific server 1 regional server.
- * @param {String} US1 &lt;small&gt;Value &lt;code&gt;&quot;us2&quot;&lt;/code&gt;&lt;/small&gt;
- *   The option to select the US server 1 regional server.
- * @deprecated Signaling server selection is handled on
- *    the server side based on load and latency.
+ *   The value of the option to use the Auth server in Asia Pacific (APAC).
+ * @param {String} US1   &lt;small&gt;Value &lt;code&gt;&quot;us2&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to use the Auth server in United States (US).
+ * @deprecated
+ * @type JSON
  * @readOnly
- * @component Room
  * @for Skylink
  * @since 0.5.0
  */
@@ -393,43 +403,45 @@ Skylink.prototype._appKeyOwner = null;
 Skylink.prototype._room = null;
 
 /**
- * Function that authenticates the App Key to initialise the SDK. 
+ * Function that authenticates and initialises App Key used for Room connections.
  * @method init
  * @param {JSON|String} options The configuration options.
  * - When provided as a string, it&#x27;s configured as &lt;code&gt;options.appKey&lt;/code&gt;.
  * @param {String} options.appKey The App Key.
- * @param {String} [options.defaultRoom] The default Room name to use when
- *    no Room name is provided in &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt;.
- * &lt;small&gt;Fallbacks to the value of &lt;code&gt;options.appKey&lt;/code&gt; if this is not provided.&lt;/small&gt;
- * &lt;small&gt;This is the only Room name connected to when using credentials based authentication.&lt;/small&gt;
- * @param {String} [options.roomServer] The platform API server url.
- * &lt;small&gt;This is a debugging feature and is not recommended to be used by developers unless
- *   instructed for debugging purposes.&lt;/small&gt;
+ * @param {String} [options.defaultRoom] The default Room to connect to when no &lt;code&gt;room&lt;/code&gt; parameter
+ *    is provided in  &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt;.
+ * - When not provided, it&#x27;s value is &lt;code&gt;options.appKey&lt;/code&gt;.
+ *   &lt;small&gt;Note that switching Rooms is not available when using &lt;code&gt;options.credentials&lt;/code&gt; based authentication.
+ *   The Room that User will be connected to is the &lt;code&gt;defaultRoom&lt;/code&gt; provided.&lt;/small&gt;
+ * @param {String} [options.roomServer] The Auth server.
+ * &lt;small&gt;Note that this is a debugging feature and is only used when instructed for debugging purposes.&lt;/small&gt;
  * @param {String} [options.region] &lt;blockquote class=&quot;info&quot;&gt;&lt;b&gt;Deprecation Warning!&lt;/b&gt;
  *   This option has been deprecated.&lt;br&gt;Automatic nearest regional server has been implemented
  *   on the platform.&lt;/blockquote&gt;
- *   The platform regional server to connect to for better connectivity.
+ *   The Auth server in the various regions to connect to for better connectivity.
  *   [Rel: Skylink.REGIONAL_SERVER]
- * @param {Boolean} [options.enableIceTrickle=true] The flag if trickle ICE should be
- *   enabled when connecting with Peer connections.
- * @param {Boolean} [options.enableDataChannel=true] The flag if Datachannel connections
- *   should be enabled with connected with Peer connections.
+ * @param {Boolean} [options.enableIceTrickle=true] The flag if Peer connections should
+ *   trickle ICE for faster connectivity.
+ * @param {Boolean} [options.enableDataChannel=true] The flag if Datachannel connections should be enabled.
+ *   &lt;small&gt;This is required to be enabled for &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt;
+ *   &lt;a href=&quot;#method_sendURLData&quot;&gt;&lt;code&gt;sendURLData()&lt;/code&gt; method&lt;/a&gt; and
+ *   &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
  * @param {Boolean} [options.enableTURNServer=true] The flag if TURN ICE servers should
  *   be filtered out when constructing Peer connections.
  * @param {Boolean} [options.enableSTUNServer=true] The flag if STUN ICE servers should
  *   be filtered out when constructing Peer connections.
- * @param {Boolean} [options.forceTURN=false] The flag if Peers should have enforced
- *   connections over the TURN server.
+ * @param {Boolean} [options.forceTURN=false] The flag if Peer connections should enforce connections over the TURN server.
  *   &lt;small&gt;This sets &lt;code&gt;options.enableTURNServer&lt;/code&gt; value to &lt;code&gt;true&lt;/code&gt; and
- *     &lt;code&gt;options.enableSTUNServer&lt;/code&gt; value to &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;
- *   &lt;small&gt;Filters the &lt;code&gt;&quot;relay&quot;&lt;/code&gt; ICE candidates during Peer connections ICE gathering to enforce TURN connections.&lt;/small&gt;
- * @param {Boolean} [options.usePublicSTUN=true] The flag if STUN ICE servers not
- *   belonging to &lt;code&gt;temasys.com.sg&lt;/code&gt; should be filtered out when constructing Peer connections.
+ *   &lt;code&gt;options.enableSTUNServer&lt;/code&gt; value to &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;
+ *   &lt;small&gt;This filters the &lt;code&gt;&quot;relay&quot;&lt;/code&gt; ICE candidates during Peer connections
+ *   ICE gathering to enforce TURN connections.&lt;/small&gt;
+ * @param {Boolean} [options.usePublicSTUN=true] The flag if publicly available STUN ICE servers should
+ *   be filtered out when constructing Peer connections.
  * @param {Boolean} [options.TURNServerTransport] The option for filtering and configuring
- *   TURN ICE servers url &lt;code&gt;?transport=&lt;/code&gt; query parameter when constructing a Peer connections.
- *   &lt;small&gt;Fallbacks to &lt;code&gt;ANY&lt;/code&gt; option if not provided.&lt;/small&gt;
+ *   TURN ICE servers &lt;code&gt;?transport=&lt;/code&gt; query parameter when constructing a Peer connections.
+ * - When not provided, it&#x27;s value is &lt;code&gt;ANY&lt;/code&gt;.
  *   [Rel: Skylink.TURN_TRANSPORT]
- * @param {JSON} [options.credentials] The credentials for authenticating App Key.
+ * @param {JSON} [options.credentials] The credentials used for The credentials for authenticating App Key.
  *   &lt;small&gt;By default, &lt;code&gt;init()&lt;/code&gt; uses the CORS URL authentication.
  *   For more details on the different authentication methods, read
  *     &lt;a href=&quot;http://support.temasys.com.sg/support/solutions/articles/
