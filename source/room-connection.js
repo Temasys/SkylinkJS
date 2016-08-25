@@ -1,14 +1,10 @@
 /**
- * Contains the list of Signaling action states.
+ * The list of Signaling server reaction states.
  * @attribute SYSTEM_ACTION
  * @param {String} WARNING <small>Value <code>"warning"</code></small>
- *   The action given when Signaling might be ending the User session.
- *   <small>See <a href="#attr_SYSTEM_ACTION_REASON"><code>SYSTEM_ACTION_REASON</code></a> for the
- *     list of reasons that would result in this action state.</small>
- * @param {String} REJECT <small>Value <code>"reject"</code></small>
- *   The action state where the Signaling has ended the User session.
- *   <small>See <a href="#attr_SYSTEM_ACTION_REASON"><code>SYSTEM_ACTION_REASON</code></a> for the
- *     list of reasons that would result in this action state.</small>
+ *   The value of the state when Room session is about to end.
+ * @param {String} REJECT  <small>Value <code>"reject"</code></small>
+ *   The value of the state when Room session has failed to start or has ended.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -20,74 +16,62 @@ Skylink.prototype.SYSTEM_ACTION = {
 };
 
 /**
- * Contains the list of reason codes for the Signaling action states given.
+ * The list of Signaling server reaction states reason of action code.
  * @attribute SYSTEM_ACTION_REASON
- * @param {String} FAST_MESSAGE <small>Value <code>"fastmsg"</code></small>
- *   The reason code given when User is jamming the Signaling with a flood of messages and
- *   the Signaling might end the User session to prevent User from disrupting other Peers session.
- *  <small>This is caused by messages sent too quickly within less than 1 second interval from methods
- *     like <a href="#method_sendMessage"><code>sendMessage()</code> method</a>,
- *     <a href="#method_setUserData"><code>setUserData()</code> method</a>,
- *     <a href="#method_muteStream"><code>muteStream()</code> method</a>,
- *     <a href="#method_enableAudio"><code>enableAudio()</code> method</a>,
- *     <a href="#method_enableVideo"><code>enableVideo()</code> method</a>,
- *     <a href="#method_disableAudio"><code>disableAudio()</code> method</a> and
- *     <a href="#method_disableVideo"><code>disableVideo()</code> method</a>.
- *     However this message should not occur as queueing of messages is implemented in the SDK.</small>
- *  <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>WARNING</code></small>
- * @param {String} ROOM_CLOSING <small>Value <code>"toClose"</code></small>
- *   The reason code given when User session in the Room is ending.
- *  <small>The starting datetime and duration of the User session depends on the type of authentication scheme used.<br>
- *    Read more about the different <a href="http://support.temasys.com.sg/support/solutions/articles/
- * 12000002712-authenticating-your-application-key-to-start-a-connection">authentication methods here</a>
- *    or see the <a href="#method_init"><code>init()</code> method</a>.</small>
- *  <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>WARNING</code></small>
  * @param {String} CREDENTIALS_EXPIRED <small>Value <code>"oldTimeStamp"</code></small>
- *    The reason code given when provided credentials has already expired when User is attempting to join Room.
- *  <small>The starting datetime and duration of the User session depends on the type of authentication scheme used.<br>
- *    Read more about the different <a href="http://support.temasys.com.sg/support/solutions/articles/
- * 12000002712-authenticating-your-application-key-to-start-a-connection">authentication methods here</a>
- *    or see the <a href="#method_init"><code>init()</code> method</a>.</small>
- *  <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small>
- * @param {String} CREDENTIALS_ERROR <small>Value <code>"credentialError"</code></small>
- *    The reason code given when verifying provided credentials has failed when User is attempting to join Room.
- *  <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small>
- * @param {String} DUPLICATED_LOGIN <small>Value <code>"duplicatedLogin"</code></small>
- *    The reason code given when provided credentials has already been used when User is attempting to join Room.
- *  <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small>
- * @param {String} ROOM_NOT_STARTED <small>Value <code>"notStart"</code></small>
- *    The reason code given when Room session has not started when User is attempting to join Room.
- *  <small>The starting datetime and duration of the User session depends on the type of authentication scheme used.<br>
- *    Read more about the different <a href="http://support.temasys.com.sg/support/solutions/articles/
- * 12000002712-authenticating-your-application-key-to-start-a-connection">authentication methods here</a>
- *    or see the <a href="#method_init"><code>init()</code> method</a>.</small>
- *  <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small>
- * @param {String} EXPIRED <small>Value <code>"expired"</code></small>
- *    The reason code given when Room session has already ended when User is attempting to join Room.
- *  <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small>
- *  <small>The starting datetime and duration of the User session depends on the type of authentication scheme used.<br>
- *    Read more about the different <a href="http://support.temasys.com.sg/support/solutions/articles/
- * 12000002712-authenticating-your-application-key-to-start-a-connection">authentication methods here</a>
- *    or see the <a href="#method_init"><code>init()</code> method</a>.</small>
- * @param {String} ROOM_LOCKED <small>Value <code>"locked"</code></small>
- *    The reason code given when Room session has been locked and User is blocked from joining the Room.
- *  <small>Room can be unlocked with <a href="#method_unlockRoom"><code>unlockRoom()</code> method</a> and
- *     locked with <a href="#method_lockRoom"><code>lockRoom()</code> method</a>.</small>
- *  <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small>
- * @param {String} ROOM_CLOSED <small>Value <code>"roomclose"</code></small>
- *   The reason code given when User session in the Room has already ended.
- *   <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small>
- *  <small>The starting datetime and duration of the User session depends on the type of authentication scheme used.<br>
- *    Read more about the different <a href="http://support.temasys.com.sg/support/solutions/articles/
- * 12000002712-authenticating-your-application-key-to-start-a-connection">authentication methods here</a>
- *    or see the <a href="#method_init"><code>init()</code> method</a>.</small>
- * @param {String} SERVER_ERROR <small>Value <code>"serverError"</code></small>
- *    The reason code given when there has been errors while attempting to connect User to the Room.
- *  <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small>
- * @param {String} KEY_ERROR <small>Value <code>"keyFailed"</code></small>
- *    The reason code given when there has been errors while attempting to connect with the App Key provided in
- *    <a href="#method_init"><code>init()</code> method</a>.
- *  <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small>
+ *   The value of the reason code when Room session token has expired.
+ *   <small>Happens during <a href="#method_joinRoom"><code>joinRoom()</code> method</a> request.</small>
+ *   <small>Results with: <code>REJECT</code></small>
+ * @param {String} CREDENTIALS_ERROR   <small>Value <code>"credentialError"</code></small>
+ *   The value of the reason code when Room session token provided is invalid.
+ *   <small>Happens during <a href="#method_joinRoom"><code>joinRoom()</code> method</a> request.</small>
+ * @param {String} DUPLICATED_LOGIN    <small>Value <code>"duplicatedLogin"</code></small>
+ *   The value of the reason code when Room session token has been used already.
+ *   <small>Happens during <a href="#method_joinRoom"><code>joinRoom()</code> method</a> request.</small>
+ *   <small>Results with: <code>REJECT</code></small>
+ * @param {String} ROOM_NOT_STARTED    <small>Value <code>"notStart"</code></small>
+ *   The value of the reason code when Room session has not started.
+ *   <small>Happens during <a href="#method_joinRoom"><code>joinRoom()</code> method</a> request.</small>
+ *   <small>Results with: <code>REJECT</code></small>
+ * @param {String} EXPIRED             <small>Value <code>"expired"</code></small>
+ *   The value of the reason code when Room session has ended already.
+ *   <small>Happens during <a href="#method_joinRoom"><code>joinRoom()</code> method</a> request.</small>
+ *   <small>Results with: <code>REJECT</code></small>
+ * @param {String} ROOM_LOCKED         <small>Value <code>"locked"</code></small>
+ *   The value of the reason code when Room session is locked.
+ *   <small>Happens during <a href="#method_joinRoom"><code>joinRoom()</code> method</a> request.</small>
+ *   <small>Results with: <code>REJECT</code></small>
+ * @param {String} FAST_MESSAGE        <small>Value <code>"fastmsg"</code></small>
+ *    The value of the reason code when User is flooding socket messages to the Signaling
+ *    that is sent too quickly within less than a second interval.
+ *    <small>Happens after Room session has started. This can be caused by various methods like
+ *    <a href="#method_sendMessage"><code>sendMessage()</code> method</a>,
+ *    <a href="#method_setUserData"><code>setUserData()</code> method</a>,
+ *    <a href="#method_muteStream"><code>muteStream()</code> method</a>,
+ *    <a href="#method_enableAudio"><code>enableAudio()</code> method</a>,
+ *    <a href="#method_enableVideo"><code>enableVideo()</code> method</a>,
+ *    <a href="#method_disableAudio"><code>disableAudio()</code> method</a> and
+ *    <a href="#method_disableVideo"><code>disableVideo()</code> method</a></small>
+ *    <small>Results with: <code>WARNING</code></small>
+ * @param {String} ROOM_CLOSING        <small>Value <code>"toClose"</code></small>
+ *    The value of the reason code when Room session is ending.
+ *    <small>Happens after Room session has started. This serves as a prerequisite warning before
+ *    <code>ROOM_CLOSED</code> occurs.</small>
+ *    <small>Previously, the value was <code>"toclose"</code>.</small>
+ *    <small>Results with: <code>WARNING</code></small>
+ * @param {String} ROOM_CLOSED         <small>Value <code>"roomclose"</code></small>
+ *    The value of the reason code when Room session has just ended.
+ *    <small>Happens after Room session has started.</small>
+ *    <small>Results with: <code>REJECT</code></small>
+ * @param {String} SERVER_ERROR        <small>Value <code>"serverError"</code></small>
+ *    The value of the reason code when Room session fails to start due to some technical errors.
+ *    <small>Happens during <a href="#method_joinRoom"><code>joinRoom()</code> method</a> request.</small>
+ *    <small>Results with: <code>REJECT</code></small>
+ * @param {String} KEY_ERROR           <small>Value <code>"keyFailed"</code></small>
+ *    The value of the reason code when Room session fails to start due to some technical error pertaining to
+ *    App Key initialization.
+ *    <small>Happens during <a href="#method_joinRoom"><code>joinRoom()</code> method</a> request.</small>
+ *    <small>Results with: <code>REJECT</code></small>
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -138,77 +122,126 @@ Skylink.prototype._roomLocked = false;
 Skylink.prototype._inRoom = false;
 
 /**
- * <blockquote class="info">
- *   Currently, the SDK only supports sending a single Stream to Peers.
- *   If there is <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> available, it will
- *   be the Stream sent to Peers regardless if <a href="#method_getUserMedia"><code>getUserMedia()</code>
- *   Stream</a> is available.
- * </blockquote>
- * Function that connects User to the Room.
+ * Function that starts the Room session.
  * @method joinRoom
- * @param {String} [room] The Room name to connect to.
- *   <small>If not provided, the User will be connected to the <code>defaultRoom</code>
- *     configured in the <a href="#method_init"><code>init()</code> method</a>.</small>
- * @param {JSON} [options] The Room connection settings.
+ * @param {String} [room] The Room name.
+ * - When not provided, its value is the <code>options.defaultRoom</code> provided in the
+ *   <a href="#method_init"><code>init()</code> method</a>.
+ *   <small>Note that if you are using credentials based authentication, you cannot switch the Room
+ *   that is not the same as the <code>options.defaultRoom</code> defined in the
+ *   <a href="#method_init"><code>init()</code> method</a>.</small>
+ * @param {JSON} [options] The Room session settings.
  * @param {JSON|String} [options.userData] The User custom data.
- *   <small>This can be set when User is in session with <a href="#method_setUserData"><code>setUserData()</code> method</a>.</small>
- * @param {Boolean|JSON} [options.audio] The audio settings for the Stream sent.
- *   <small>If either <code>options.audio</code> or <code>options.video</code> is defined,
- *      <code>joinRoom()</code> would invoke <a href="#method_getUserMedia"><code>getUserMedia()</code>
- *      method</a> to retrieve a new Stream, else it will use any existing Stream if any.
- *      Additionally, if <code>options.video</code> is not defined and this is, the <code>options.video</code>
- *      value will be set to <code>false</code> when retrieving the new Stream.</small>
- *      <small>Note that unless User's Stream is retrieved, <code>joinRoom()</code> will not join
- *      the Room until Stream is retrieved successfully.</small>
+ *   <small>This can be set after Room session has started using the
+ *   <a href="#method_setUserData"><code>setUserData()</code> method</a>.</small>
+ * @param {Boolean|JSON} [options.audio] The <a href="#method_getUserMedia"><code>getUserMedia()</code>
+ *   method</a> <code>options.audio</code> parameter settings.
+ *   <small>When value is defined as <code>true</code> or an object, <a href="#method_getUserMedia">
+ *   <code>getUserMedia()</code> method</a> to be invoked to retrieve new Stream. If
+ *   <code>options.video</code> is not defined, it will be defined as <code>false</code>.</small>
  *   <small>Object signature matches the <code>options.audio</code> parameter in the
- *      <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</small>
- * @param {Boolean|JSON} [options.video] The video settings for the Stream sent.
- *   <small>If either <code>options.audio</code> or <code>options.video</code> is defined,
- *     <code>joinRoom()</code> would invoke <a href="#method_getUserMedia"><code>getUserMedia()</code>
- *      method</a> to retrieve a new Stream, else it will use any existing Stream if any.
- *      Additionally, if <code>options.audio</code> is not defined and this is, the <code>options.audio</code>
- *      value will be set to <code>false</code> when retrieving the new Stream.</small>
- *      <small>Note that unless User's Stream is retrieved, <code>joinRoom()</code> will not join
- *      the Room until Stream is retrieved successfully.</small>
+ *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</small>
+ * @param {Boolean|JSON} [options.video] The <a href="#method_getUserMedia"><code>getUserMedia()</code>
+ *   method</a> <code>options.video</code> parameter settings.
+ *   <small>When value is defined as <code>true</code> or an object, <a href="#method_getUserMedia">
+ *   <code>getUserMedia()</code> method</a> to be invoked to retrieve new Stream. If
+ *   <code>options.audio</code> is not defined, it will be defined as <code>false</code>.</small>
  *   <small>Object signature matches the <code>options.video</code> parameter in the
- *      <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</small>
+ *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</small>
  * @param {JSON} [options.bandwidth] <blockquote class="info">Note that this currently does not work
- *   with Firefox browsers.</blockquote> The configuration for limiting the maximum uploading Stream bandwidth.
- * @param {Number} [options.bandwidth.audio] The maximum uploading Stream audio bandwidth.
- * @param {Number} [options.bandwidth.video] The maximum uploading Stream video bandwidth.
- * @param {Number} [options.bandwidth.data] The maximum uploading Datachannel data transfer / P2P messaging bandwidth.
- *   <small>Affects <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>,
- *      <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a> and
- *      <a href="#method_sendURLData"><code>sendURLData()</code> method</a>.</small>
- * @param {Boolean} [options.manualGetUserMedia] The flag that indicates if <code>joinRoom()</code> should trigger
- *   <a href="#event_mediaAccessRequired"><code>mediaAccessRequired</code> event</a> to allow developers to
- *   handle the retrieval of Stream using <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> or
- *   <a href="#method_shareScreen"><code>shareScreen()</code> method</a> as a requirement before joining the Room.
- *   <small>Note that unless User's Stream is retrieved, <code>joinRoom()</code> will not join the Room until Stream
- *      is retrieved succesfully.</small>
- *   <small>Even if <code>options.audio</code> or <code>options.video</code> is defined, as long as this flag is
- *      enabled, <code>joinRoom()</code> would not invoke <a href="#method_getUserMedia"><code>getUserMedia()</code>
- *      method</a> to retrieve a new Stream as it would leave to the developers to retrieve it.</small>
+ *   with Firefox browsers.</blockquote> The configuration to set the maximum streaming bandwidth sent to Peers.
+ * @param {Number} [options.bandwidth.audio] The maximum audio streaming bandwidth sent to Peers.
+ * @param {Number} [options.bandwidth.video] The maximum video streaming bandwidth sent to Peers.
+ * @param {Number} [options.bandwidth.data] The maximum data streaming bandwidth sent to Peers.
+ *   <small>This affects the P2P messaging in <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>,
+ *   and data transfers in <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a> and
+ *   <a href="#method_sendURLData"><code>sendURLData()</code> method</a>.</small>
+ * @param {Boolean} [options.manualGetUserMedia] The flag if <code>joinRoom()</code> should trigger
+ *   <a href="#event_mediaAccessRequired"><code>mediaAccessRequired</code> event</a> in which the
+ *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> or
+ *   <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>
+ *   must be retrieved as a requirement before Room session may begin.
+ *   <small>This ignores the <code>options.audio</code> and <code>options.video</code> configuration.</small>
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
+ *   <small>Function request completion is determined by the <a href="#event_peerJoined">
+ *   <code>peerJoined</code> event</a> triggering <code>isSelf</code> parameter payload value as <code>true</code>
+ *   for request success.</small>
  * @param {JSON} callback.error The error result in request.
  *   <small>Defined as <code>null</code> when there are no errors in request</small>
- * @param {Error|String} callback.error.error The <code>joinRoom()</code> error.
- * @param {Number} callback.error.errorCode The Room authentication state error code.
- *   <small>If error is not caused by Room authentication errors, this should not be defined</small>
- *   <small>Sequentially, the User has to authenticate with the Platform to retrieve credentials which is
- *      used to join the Room which is known when <a href="#event_systemAction"><code>systemAction</code> event</a>
- *      is triggered. This error occurs when the authentication with the Platform fails.</small>
- *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
- * @param {String} callback.error.room The selected Room name to connect to.
+ * @param {Error|String} callback.error.error The error received when starting Room session has failed.
+ * @param {Number} callback.error.errorCode The current <a href="#method_init"><code>init()</code> method</a> ready state.
+ *   [Rel: Skylink.READY_STATE_CHANGE]
+ * @param {String} callback.error.room The Room name.
  * @param {JSON} callback.success The success result in request.
  *   <small>Defined as <code>null</code> when there are errors in request</small>
- * @param {String} callback.success.room The selected Room name to connect to.
- * @param {String} callback.success.peerId The User's session Peer ID in Room.
- * @param {JSON} callback.success.peerInfo The User current session information.
+ * @param {String} callback.success.room The Room name.
+ * @param {String} callback.success.peerId The User's Room session Peer ID.
+ * @param {JSON} callback.success.peerInfo The User's current Room session information.
  *   <small>Object signature matches the <code>peerInfo</code> parameter payload received in the
  *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small>
- * @trigger readyStateChange, mediaAccessRequired, channelOpen, channelMessage, systemAction, peerJoined, incomingStream
+ * @example
+ *   // Example 1: Connecting to the default Room without Stream
+ *   skylinkDemo.joinRoom(function (error, success) {
+ *     if (error) return;
+ *     console.log("User connected.");
+ *   });
+ *
+ *   // Example 2: Connecting to Room "testxx" with Stream
+ *   skylinkDemo.joinRoom("testxx", {
+ *     audio: true,
+ *     video: true
+ *   }, function (error, success) {
+ *     if (error) return;
+ *     console.log("User connected with getUserMedia() Stream.")
+ *   });
+ *
+ *   // Example 3: Connecting to default Room with Stream retrieved earlier
+ *   skylinkDemo.getUserMedia(function (gUMError, gUMSuccess) {
+ *     if (gUMError) return;
+ *     skylinkDemo.joinRoom(function (error, success) {
+ *       if (error) return;
+ *       console.log("User connected with getUserMedia() Stream.");
+ *     });
+ *   });
+ *
+ *   // Example 4: Connecting to "testxx" Room with shareScreen() Stream retrieved manually
+ *   skylinkDemo.on("mediaAccessRequired", function () {
+ *     skylinkDemo.shareScreen(function (sSError, sSSuccess) {
+ *       if (sSError) return;
+ *     });
+ *   });
+ *
+ *   skylinkDemo.joinRoom("testxx", {
+ *     manualGetUserMedia: true
+ *   }, function (error, success) {
+ *     if (error) return;
+ *     console.log("User connected with shareScreen() Stream.");
+ *   });
+ *
+ *   // Example 5: Connecting to "testxx" Room with User custom data
+ *   var data = { username: "myusername" };
+ *   skylinkDemo.joinRoom("testxx", {
+ *     userData: data
+ *   }, function (error, success) {
+ *     if (error) return;
+ *     console.log("User connected with correct user data?", success.peerInfo.userData.username === data.username);
+ *   });
+ * @trigger <ol class="desc-seq">
+ *   <li>Invokes <a href="#method_init"><code>init()</code> method</a> to retrieve Room session token.</li>
+ *   <li>Starts a socket connection with the Signaling server.<ol>
+ *   <li>When socket connection to Signaling server is successfully established,
+ *   <a href="#event_channelOpen"><code>channelOpen</code> event</a> triggers.</li>
+ *   <li>When socket connection to Signaling server is fails to establish,
+ *   <a href="#event_socketError"><code>socketError</code> event</a> triggers.<small>
+ *   Triggers <a href="#event_channelRetry"><code>channelRetry</code> event</a> if there are
+ *   still existing fallback ports and transport to attempt to establish a successful
+ *   socket connection with the Signaling server.</small></li></ol></li>
+ *   <li><a href="#event_channelMessage"><code>channelMessage</code> event</a> triggers.</li>
+ *   <li><a href="#event_peerJoined"><code>peerJoined</code> event</a> triggers parameter payload
+ *   <code>isSelf</code> value as <code>true</code>. <small>If MCU is enabled for the App Key,
+ *   the <a href="#event_serverPeerJoined"><code>serverPeerJoined</code> event</a> will be triggered
+ *   when MCU is present in the Room, and then Peer connections can commence.</small></li></ol>
  * @for Skylink
  * @since 0.5.5
  */
@@ -418,9 +451,9 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
 };
 
 /**
- * Function that disconnects User from the currently connected Room and ends the User's session.
+ * Function that stops Room session.
  * @method leaveRoom
- * @param {Boolean|JSON} [stopMediaOptions=true] The flag that indicates if <code>leaveRoom()</code>
+ * @param {Boolean|JSON} [stopMediaOptions=true] The flag if The flag that indicates if <code>leaveRoom()</code>
  *   should invoke <a href="#method_stopStream"><code>stopStream()</code> method</a> and
  *   <a href="#method_stopScreen"><code>stopScreen()</code> method</a> to stop current Streams
  *   retrieved from <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> and

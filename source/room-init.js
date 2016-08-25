@@ -196,7 +196,7 @@ Skylink.prototype._forceTURN = false;
 Skylink.prototype._path = null;
 
 /**
- * Stores the server region for the Signaling to use.
+ * Stores the server region for the Signaling server to use.
  * This is already deprecated an no longer useful. To discuss and remove.
  * @attribute _serverRegion
  * @type String
@@ -404,8 +404,8 @@ Skylink.prototype._room = null;
  * - When not provided, its value is <code>AUTO</code>.
  *   <small>Note that the video codec selected will be determined by the browser video codecs supports.</small>
  *   [Rel: Skylink.VIDEO_CODEC]
- * @param {Number} [options.socketTimeout=20000] The timeout for socket to wait for
- *   a response from Signaling to indicate if connection has timed out.
+ * @param {Number} [options.socketTimeout=20000] The timeout for each attempts for socket connection
+ *   with the Signaling server to indicate that connection has timed out and has failed to establish.
  *   <small>Note that the mininum timeout value is <code>5000</code>. If less, this value will be <code>5000</code>.</small>
  * @param {Boolean} [options.forceTURNSSL=false] <blockquote class="info">
  *   Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,
@@ -449,12 +449,13 @@ Skylink.prototype._room = null;
  * @param {Boolean} callback.success.usePublicSTUN The configured value of the <code>options.usePublicSTUN</code>.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
- *   skylinkDemo(appKey, function () {
+ *   skylinkDemo(appKey, function (error, success) {
+ *     if (error) return;
  *     skylinkDemo.joinRoom(); // Goes to default Room
  *   });
  *
  *   // Example 2: Using CORS authentication and connection to a different Room
- *   skylinkDemo(appKey, function () {
+ *   skylinkDemo(appKey, function (error, success) {
  *     skylinkDemo.joinRoom("testxx"); // Goes to "testxx" Room
  *   });
  *
@@ -474,7 +475,8 @@ Skylink.prototype._room = null;
  *       startDateTime: startDateTime,
  *       credentials: credentials
  *     }
- *   }, function () {
+ *   }, function (error, success) {
+ *     if (error) return;
  *     skylinkDemo.joinRoom(); // Goes to default Room (switching to different Room is not allowed for credentials authentication)
  *   });
  * @trigger <ol class="desc-seq">

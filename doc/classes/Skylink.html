@@ -5209,7 +5209,7 @@ See confluence docs for the &quot;enter&quot; expected properties to be received
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l979"><code>source&#x2F;room-init.js:979</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l981"><code>source&#x2F;room-init.js:981</code></a>
       </small>
     
 
@@ -5447,7 +5447,7 @@ See confluence docs for the &quot;introduceError&quot; expected properties to be
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l888"><code>source&#x2F;room-init.js:888</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l890"><code>source&#x2F;room-init.js:890</code></a>
       </small>
     
 
@@ -6789,7 +6789,7 @@ This parses and sets any missing values to default.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l815"><code>source&#x2F;room-init.js:815</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l817"><code>source&#x2F;room-init.js:817</code></a>
       </small>
     
 
@@ -7896,7 +7896,7 @@ To evaluate removal of this change once we roll out H264 codec interop.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l741"><code>source&#x2F;room-init.js:741</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l743"><code>source&#x2F;room-init.js:743</code></a>
       </small>
     
 
@@ -9881,7 +9881,7 @@ See confluence docs for the &quot;updateUserEvent&quot; expected properties to b
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l575"><code>source&#x2F;room-connection.js:575</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l608"><code>source&#x2F;room-connection.js:608</code></a>
       </small>
     
 
@@ -12360,11 +12360,12 @@ Do not invoke this function when user has already joined a room as
       <h4>Example:</h4>
       <pre class="example-content prettyprint">
         <p>  // Example 1: Using CORS authentication and connection to default Room
-  skylinkDemo(appKey, function () {
+  skylinkDemo(appKey, function (error, success) {
+    if (error) return;
     skylinkDemo.joinRoom(); // Goes to default Room
   });</p>
 <p>  // Example 2: Using CORS authentication and connection to a different Room
-  skylinkDemo(appKey, function () {
+  skylinkDemo(appKey, function (error, success) {
     skylinkDemo.joinRoom(&quot;testxx&quot;); // Goes to &quot;testxx&quot; Room
   });</p>
 <p>  // Example 3: Using credentials authentication and connection to only default Room
@@ -12382,7 +12383,8 @@ Do not invoke this function when user has already joined a room as
       startDateTime: startDateTime,
       credentials: credentials
     }
-  }, function () {
+  }, function (error, success) {
+    if (error) return;
     skylinkDemo.joinRoom(); // Goes to default Room (switching to different Room is not allowed for credentials authentication)
   });</p>
 
@@ -12817,8 +12819,8 @@ Global_Objects/encodeURIComponent">encodeURIComponent() API</a>.</small></li></o
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span><code>20000</code></small>
-                      <p>The timeout for socket to wait for
-  a response from Signaling to indicate if connection has timed out.
+                      <p>The timeout for each attempts for socket connection
+  with the Signaling server to indicate that connection has timed out and has failed to establish.
   <small>Note that the mininum timeout value is <code>5000</code>. If less, this value will be <code>5000</code>.</small></p>
 
                     </div>
@@ -13426,7 +13428,7 @@ Function that introduces a pair of Peers to start Peer connection with each othe
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l140"><code>source&#x2F;room-connection.js:140</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l124"><code>source&#x2F;room-connection.js:124</code></a>
       </small>
     
 
@@ -13440,16 +13442,58 @@ Function that introduces a pair of Peers to start Peer connection with each othe
   </div>
 
   <div class="code-item-description">
-    <p><blockquote class="info">
-  Currently, the SDK only supports sending a single Stream to Peers.
-  If there is <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> available, it will
-  be the Stream sent to Peers regardless if <a href="#method_getUserMedia"><code>getUserMedia()</code>
-  Stream</a> is available.
-</blockquote>
-Function that connects User to the Room.</p>
+    <p>Function that starts the Room session.</p>
 
   </div>
 
+  
+    <div class="code-item-section">
+      <h4>Example:</h4>
+      <pre class="example-content prettyprint">
+        <p>  // Example 1: Connecting to the default Room without Stream
+  skylinkDemo.joinRoom(function (error, success) {
+    if (error) return;
+    console.log(&quot;User connected.&quot;);
+  });</p>
+<p>  // Example 2: Connecting to Room &quot;testxx&quot; with Stream
+  skylinkDemo.joinRoom(&quot;testxx&quot;, {
+    audio: true,
+    video: true
+  }, function (error, success) {
+    if (error) return;
+    console.log(&quot;User connected with getUserMedia() Stream.&quot;)
+  });</p>
+<p>  // Example 3: Connecting to default Room with Stream retrieved earlier
+  skylinkDemo.getUserMedia(function (gUMError, gUMSuccess) {
+    if (gUMError) return;
+    skylinkDemo.joinRoom(function (error, success) {
+      if (error) return;
+      console.log(&quot;User connected with getUserMedia() Stream.&quot;);
+    });
+  });</p>
+<p>  // Example 4: Connecting to &quot;testxx&quot; Room with shareScreen() Stream retrieved manually
+  skylinkDemo.on(&quot;mediaAccessRequired&quot;, function () {
+    skylinkDemo.shareScreen(function (sSError, sSSuccess) {
+      if (sSError) return;
+    });
+  });</p>
+<p>  skylinkDemo.joinRoom(&quot;testxx&quot;, {
+    manualGetUserMedia: true
+  }, function (error, success) {
+    if (error) return;
+    console.log(&quot;User connected with shareScreen() Stream.&quot;);
+  });</p>
+<p>  // Example 5: Connecting to &quot;testxx&quot; Room with User custom data
+  var data = { username: &quot;myusername&quot; };
+  skylinkDemo.joinRoom(&quot;testxx&quot;, {
+    userData: data
+  }, function (error, success) {
+    if (error) return;
+    console.log(&quot;User connected with correct user data?&quot;, success.peerInfo.userData.username === data.username);
+  });</p>
+
+      </pre>
+    </div>
   
 
   
@@ -13457,7 +13501,21 @@ Function that connects User to the Room.</p>
   
   <div class="code-item-section">
     <h4>Events Sequence:</h4>
-    <span class="code-item-trigger">readyStateChange, mediaAccessRequired, channelOpen, channelMessage, systemAction, peerJoined, incomingStream</span>
+    <span class="code-item-trigger"><ol class="desc-seq">
+  <li>Invokes <a href="#method_init"><code>init()</code> method</a> to retrieve Room session token.</li>
+  <li>Starts a socket connection with the Signaling server.<ol>
+  <li>When socket connection to Signaling server is successfully established,
+  <a href="#event_channelOpen"><code>channelOpen</code> event</a> triggers.</li>
+  <li>When socket connection to Signaling server is fails to establish,
+  <a href="#event_socketError"><code>socketError</code> event</a> triggers.<small>
+  Triggers <a href="#event_channelRetry"><code>channelRetry</code> event</a> if there are
+  still existing fallback ports and transport to attempt to establish a successful
+  socket connection with the Signaling server.</small></li></ol></li>
+  <li><a href="#event_channelMessage"><code>channelMessage</code> event</a> triggers.</li>
+  <li><a href="#event_peerJoined"><code>peerJoined</code> event</a> triggers parameter payload
+  <code>isSelf</code> value as <code>true</code>. <small>If MCU is enabled for the App Key,
+  the <a href="#event_serverPeerJoined"><code>serverPeerJoined</code> event</a> will be triggered
+  when MCU is present in the Room, and then Peer connections can commence.</small></li></ol></span>
   </div>
   
 
@@ -13476,9 +13534,14 @@ Function that connects User to the Room.</p>
 
             <div class="param-description">
               
-              <p>The Room name to connect to.
-  <small>If not provided, the User will be connected to the <code>defaultRoom</code>
-    configured in the <a href="#method_init"><code>init()</code> method</a>.</small></p>
+              <p>The Room name.</p>
+<ul>
+<li>When not provided, its value is the <code>options.defaultRoom</code> provided in the
+<a href="#method_init"><code>init()</code> method</a>.
+<small>Note that if you are using credentials based authentication, you cannot switch the Room
+that is not the same as the <code>options.defaultRoom</code> defined in the
+<a href="#method_init"><code>init()</code> method</a>.</small></li>
+</ul>
 
             </div>
 
@@ -13494,7 +13557,7 @@ Function that connects User to the Room.</p>
 
             <div class="param-description">
               
-              <p>The Room connection settings.</p>
+              <p>The Room session settings.</p>
 
             </div>
 
@@ -13511,7 +13574,8 @@ Function that connects User to the Room.</p>
                     <div class="param-description">
                       
                       <p>The User custom data.
-  <small>This can be set when User is in session with <a href="#method_setUserData"><code>setUserData()</code> method</a>.</small></p>
+  <small>This can be set after Room session has started using the
+  <a href="#method_setUserData"><code>setUserData()</code> method</a>.</small></p>
 
                     </div>
 
@@ -13527,16 +13591,13 @@ Function that connects User to the Room.</p>
 
                     <div class="param-description">
                       
-                      <p>The audio settings for the Stream sent.
-  <small>If either <code>options.audio</code> or <code>options.video</code> is defined,
-     <code>joinRoom()</code> would invoke <a href="#method_getUserMedia"><code>getUserMedia()</code>
-     method</a> to retrieve a new Stream, else it will use any existing Stream if any.
-     Additionally, if <code>options.video</code> is not defined and this is, the <code>options.video</code>
-     value will be set to <code>false</code> when retrieving the new Stream.</small>
-     <small>Note that unless User&#39;s Stream is retrieved, <code>joinRoom()</code> will not join
-     the Room until Stream is retrieved successfully.</small>
+                      <p>The <a href="#method_getUserMedia"><code>getUserMedia()</code>
+  method</a> <code>options.audio</code> parameter settings.
+  <small>When value is defined as <code>true</code> or an object, <a href="#method_getUserMedia">
+  <code>getUserMedia()</code> method</a> to be invoked to retrieve new Stream. If
+  <code>options.video</code> is not defined, it will be defined as <code>false</code>.</small>
   <small>Object signature matches the <code>options.audio</code> parameter in the
-     <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</small></p>
+  <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</small></p>
 
                     </div>
 
@@ -13552,16 +13613,13 @@ Function that connects User to the Room.</p>
 
                     <div class="param-description">
                       
-                      <p>The video settings for the Stream sent.
-  <small>If either <code>options.audio</code> or <code>options.video</code> is defined,
-    <code>joinRoom()</code> would invoke <a href="#method_getUserMedia"><code>getUserMedia()</code>
-     method</a> to retrieve a new Stream, else it will use any existing Stream if any.
-     Additionally, if <code>options.audio</code> is not defined and this is, the <code>options.audio</code>
-     value will be set to <code>false</code> when retrieving the new Stream.</small>
-     <small>Note that unless User&#39;s Stream is retrieved, <code>joinRoom()</code> will not join
-     the Room until Stream is retrieved successfully.</small>
+                      <p>The <a href="#method_getUserMedia"><code>getUserMedia()</code>
+  method</a> <code>options.video</code> parameter settings.
+  <small>When value is defined as <code>true</code> or an object, <a href="#method_getUserMedia">
+  <code>getUserMedia()</code> method</a> to be invoked to retrieve new Stream. If
+  <code>options.audio</code> is not defined, it will be defined as <code>false</code>.</small>
   <small>Object signature matches the <code>options.video</code> parameter in the
-     <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</small></p>
+  <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</small></p>
 
                     </div>
 
@@ -13578,7 +13636,7 @@ Function that connects User to the Room.</p>
                     <div class="param-description">
                       
                       <p><blockquote class="info">Note that this currently does not work
-  with Firefox browsers.</blockquote> The configuration for limiting the maximum uploading Stream bandwidth.</p>
+  with Firefox browsers.</blockquote> The configuration to set the maximum streaming bandwidth sent to Peers.</p>
 
                     </div>
 
@@ -13594,7 +13652,7 @@ Function that connects User to the Room.</p>
 
                             <div class="param-description">
                               
-                              The maximum uploading Stream audio bandwidth.
+                              The maximum audio streaming bandwidth sent to Peers.
                             </div>
                           </li>
                         
@@ -13607,7 +13665,7 @@ Function that connects User to the Room.</p>
 
                             <div class="param-description">
                               
-                              The maximum uploading Stream video bandwidth.
+                              The maximum video streaming bandwidth sent to Peers.
                             </div>
                           </li>
                         
@@ -13620,10 +13678,10 @@ Function that connects User to the Room.</p>
 
                             <div class="param-description">
                               
-                              The maximum uploading Datachannel data transfer / P2P messaging bandwidth.
-  <small>Affects <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>,
-     <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a> and
-     <a href="#method_sendURLData"><code>sendURLData()</code> method</a>.</small>
+                              The maximum data streaming bandwidth sent to Peers.
+  <small>This affects the P2P messaging in <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>,
+  and data transfers in <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a> and
+  <a href="#method_sendURLData"><code>sendURLData()</code> method</a>.</small>
                             </div>
                           </li>
                         
@@ -13640,15 +13698,12 @@ Function that connects User to the Room.</p>
 
                     <div class="param-description">
                       
-                      <p>The flag that indicates if <code>joinRoom()</code> should trigger
-  <a href="#event_mediaAccessRequired"><code>mediaAccessRequired</code> event</a> to allow developers to
-  handle the retrieval of Stream using <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> or
-  <a href="#method_shareScreen"><code>shareScreen()</code> method</a> as a requirement before joining the Room.
-  <small>Note that unless User&#39;s Stream is retrieved, <code>joinRoom()</code> will not join the Room until Stream
-     is retrieved succesfully.</small>
-  <small>Even if <code>options.audio</code> or <code>options.video</code> is defined, as long as this flag is
-     enabled, <code>joinRoom()</code> would not invoke <a href="#method_getUserMedia"><code>getUserMedia()</code>
-     method</a> to retrieve a new Stream as it would leave to the developers to retrieve it.</small></p>
+                      <p>The flag if <code>joinRoom()</code> should trigger
+  <a href="#event_mediaAccessRequired"><code>mediaAccessRequired</code> event</a> in which the
+  <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> or
+  <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>
+  must be retrieved as a requirement before Room session may begin.
+  <small>This ignores the <code>options.audio</code> and <code>options.video</code> configuration.</small></p>
 
                     </div>
 
@@ -13669,7 +13724,10 @@ Function that connects User to the Room.</p>
             <div class="param-description">
               
               <p>The callback function fired when request has completed.
-  <small>Function parameters signature is <code>function (error, success)</code></small></p>
+  <small>Function parameters signature is <code>function (error, success)</code></small>
+  <small>Function request completion is determined by the <a href="#event_peerJoined">
+  <code>peerJoined</code> event</a> triggering <code>isSelf</code> parameter payload value as <code>true</code>
+  for request success.</small></p>
 
             </div>
 
@@ -13702,7 +13760,7 @@ Function that connects User to the Room.</p>
 
                             <div class="param-description">
                               
-                              The <code>joinRoom()</code> error.
+                              The error received when starting Room session has failed.
                             </div>
                           </li>
                         
@@ -13715,12 +13773,8 @@ Function that connects User to the Room.</p>
 
                             <div class="param-description">
                               
-                              The Room authentication state error code.
-  <small>If error is not caused by Room authentication errors, this should not be defined</small>
-  <small>Sequentially, the User has to authenticate with the Platform to retrieve credentials which is
-     used to join the Room which is known when <a href="#event_systemAction"><code>systemAction</code> event</a>
-     is triggered. This error occurs when the authentication with the Platform fails.</small>
-  [Rel: Skylink.READY_STATE_CHANGE_ERROR]
+                              The current <a href="#method_init"><code>init()</code> method</a> ready state.
+  [Rel: Skylink.READY_STATE_CHANGE]
                             </div>
                           </li>
                         
@@ -13733,7 +13787,7 @@ Function that connects User to the Room.</p>
 
                             <div class="param-description">
                               
-                              The selected Room name to connect to.
+                              The Room name.
                             </div>
                           </li>
                         
@@ -13767,7 +13821,7 @@ Function that connects User to the Room.</p>
 
                             <div class="param-description">
                               
-                              The selected Room name to connect to.
+                              The Room name.
                             </div>
                           </li>
                         
@@ -13780,7 +13834,7 @@ Function that connects User to the Room.</p>
 
                             <div class="param-description">
                               
-                              The User's session Peer ID in Room.
+                              The User's Room session Peer ID.
                             </div>
                           </li>
                         
@@ -13793,7 +13847,7 @@ Function that connects User to the Room.</p>
 
                             <div class="param-description">
                               
-                              The User current session information.
+                              The User's current Room session information.
   <small>Object signature matches the <code>peerInfo</code> parameter payload received in the
   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small>
                             </div>
@@ -13875,7 +13929,7 @@ Function that connects User to the Room.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l420"><code>source&#x2F;room-connection.js:420</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l453"><code>source&#x2F;room-connection.js:453</code></a>
       </small>
     
 
@@ -14111,7 +14165,7 @@ Function that connects User to the Room.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l534"><code>source&#x2F;room-connection.js:534</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l567"><code>source&#x2F;room-connection.js:567</code></a>
       </small>
     
 
@@ -17922,7 +17976,7 @@ Reference <a href="../classes/Skylink.html#method_refreshConnection" class="cros
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l554"><code>source&#x2F;room-connection.js:554</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l587"><code>source&#x2F;room-connection.js:587</code></a>
       </small>
     
 
@@ -21110,7 +21164,7 @@ If App Key enables MCU but this is false, this means likely there are problems c
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l130"><code>source&#x2F;room-connection.js:130</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l114"><code>source&#x2F;room-connection.js:114</code></a>
       </small>
     
 
@@ -23499,7 +23553,7 @@ If Peer has a higher connection weight, it will do the offer from its Peer conne
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l120"><code>source&#x2F;room-connection.js:120</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l104"><code>source&#x2F;room-connection.js:104</code></a>
       </small>
     
 
@@ -23986,7 +24040,7 @@ If Peer has a higher connection weight, it will do the offer from its Peer conne
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l110"><code>source&#x2F;room-connection.js:110</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l94"><code>source&#x2F;room-connection.js:94</code></a>
       </small>
     
 
@@ -24149,7 +24203,7 @@ If Peer has a higher connection weight, it will do the offer from its Peer conne
   </div>
 
   <div class="code-item-description">
-    <p>Stores the server region for the Signaling to use.
+    <p>Stores the server region for the Signaling server to use.
 This is already deprecated an no longer useful. To discuss and remove.</p>
 
   </div>
@@ -29644,7 +29698,7 @@ see the Protocol version used in this Skylink version.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Contains the list of Signaling action states.</p>
+    <p>The list of Signaling server reaction states.</p>
 
   </div>
 
@@ -29667,9 +29721,7 @@ see the Protocol version used in this Skylink version.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;warning&quot;</code></small>
-  The action given when Signaling might be ending the User session.
-  <small>See <a href="#attr_SYSTEM_ACTION_REASON"><code>SYSTEM_ACTION_REASON</code></a> for the
-    list of reasons that would result in this action state.</small></p>
+  The value of the state when Room session is about to end.</p>
 
             </div>
 
@@ -29685,9 +29737,7 @@ see the Protocol version used in this Skylink version.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;reject&quot;</code></small>
-  The action state where the Signaling has ended the User session.
-  <small>See <a href="#attr_SYSTEM_ACTION_REASON"><code>SYSTEM_ACTION_REASON</code></a> for the
-    list of reasons that would result in this action state.</small></p>
+  The value of the state when Room session has failed to start or has ended.</p>
 
             </div>
 
@@ -29752,7 +29802,7 @@ see the Protocol version used in this Skylink version.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l22"><code>source&#x2F;room-connection.js:22</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l18"><code>source&#x2F;room-connection.js:18</code></a>
       </small>
     
 
@@ -29762,7 +29812,7 @@ see the Protocol version used in this Skylink version.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Contains the list of reason codes for the Signaling action states given.</p>
+    <p>The list of Signaling server reaction states reason of action code.</p>
 
   </div>
 
@@ -29777,54 +29827,6 @@ see the Protocol version used in this Skylink version.</li>
       <ul class="params-list">
       
           <li class="param">
-            <code class="param-name">FAST_MESSAGE</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-                <p><small>Value <code>&quot;fastmsg&quot;</code></small>
-  The reason code given when User is jamming the Signaling with a flood of messages and
-  the Signaling might end the User session to prevent User from disrupting other Peers session.
- <small>This is caused by messages sent too quickly within less than 1 second interval from methods
-    like <a href="#method_sendMessage"><code>sendMessage()</code> method</a>,
-    <a href="#method_setUserData"><code>setUserData()</code> method</a>,
-    <a href="#method_muteStream"><code>muteStream()</code> method</a>,
-    <a href="#method_enableAudio"><code>enableAudio()</code> method</a>,
-    <a href="#method_enableVideo"><code>enableVideo()</code> method</a>,
-    <a href="#method_disableAudio"><code>disableAudio()</code> method</a> and
-    <a href="#method_disableVideo"><code>disableVideo()</code> method</a>.
-    However this message should not occur as queueing of messages is implemented in the SDK.</small>
- <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>WARNING</code></small></p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">ROOM_CLOSING</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-                <p><small>Value <code>&quot;toClose&quot;</code></small>
-  The reason code given when User session in the Room is ending.
- <small>The starting datetime and duration of the User session depends on the type of authentication scheme used.<br>
-   Read more about the different <a href="http://support.temasys.com.sg/support/solutions/articles/
-12000002712-authenticating-your-application-key-to-start-a-connection">authentication methods here</a>
-   or see the <a href="#method_init"><code>init()</code> method</a>.</small>
- <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>WARNING</code></small></p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
             <code class="param-name">CREDENTIALS_EXPIRED</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
@@ -29833,12 +29835,9 @@ see the Protocol version used in this Skylink version.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;oldTimeStamp&quot;</code></small>
-   The reason code given when provided credentials has already expired when User is attempting to join Room.
- <small>The starting datetime and duration of the User session depends on the type of authentication scheme used.<br>
-   Read more about the different <a href="http://support.temasys.com.sg/support/solutions/articles/
-12000002712-authenticating-your-application-key-to-start-a-connection">authentication methods here</a>
-   or see the <a href="#method_init"><code>init()</code> method</a>.</small>
- <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small></p>
+  The value of the reason code when Room session token has expired.
+  <small>Happens during <a href="#method_joinRoom"><code>joinRoom()</code> method</a> request.</small>
+  <small>Results with: <code>REJECT</code></small></p>
 
             </div>
 
@@ -29854,8 +29853,8 @@ see the Protocol version used in this Skylink version.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;credentialError&quot;</code></small>
-   The reason code given when verifying provided credentials has failed when User is attempting to join Room.
- <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small></p>
+  The value of the reason code when Room session token provided is invalid.
+  <small>Happens during <a href="#method_joinRoom"><code>joinRoom()</code> method</a> request.</small></p>
 
             </div>
 
@@ -29871,8 +29870,9 @@ see the Protocol version used in this Skylink version.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;duplicatedLogin&quot;</code></small>
-   The reason code given when provided credentials has already been used when User is attempting to join Room.
- <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small></p>
+  The value of the reason code when Room session token has been used already.
+  <small>Happens during <a href="#method_joinRoom"><code>joinRoom()</code> method</a> request.</small>
+  <small>Results with: <code>REJECT</code></small></p>
 
             </div>
 
@@ -29888,12 +29888,9 @@ see the Protocol version used in this Skylink version.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;notStart&quot;</code></small>
-   The reason code given when Room session has not started when User is attempting to join Room.
- <small>The starting datetime and duration of the User session depends on the type of authentication scheme used.<br>
-   Read more about the different <a href="http://support.temasys.com.sg/support/solutions/articles/
-12000002712-authenticating-your-application-key-to-start-a-connection">authentication methods here</a>
-   or see the <a href="#method_init"><code>init()</code> method</a>.</small>
- <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small></p>
+  The value of the reason code when Room session has not started.
+  <small>Happens during <a href="#method_joinRoom"><code>joinRoom()</code> method</a> request.</small>
+  <small>Results with: <code>REJECT</code></small></p>
 
             </div>
 
@@ -29909,12 +29906,9 @@ see the Protocol version used in this Skylink version.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;expired&quot;</code></small>
-   The reason code given when Room session has already ended when User is attempting to join Room.
- <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small>
- <small>The starting datetime and duration of the User session depends on the type of authentication scheme used.<br>
-   Read more about the different <a href="http://support.temasys.com.sg/support/solutions/articles/
-12000002712-authenticating-your-application-key-to-start-a-connection">authentication methods here</a>
-   or see the <a href="#method_init"><code>init()</code> method</a>.</small></p>
+  The value of the reason code when Room session has ended already.
+  <small>Happens during <a href="#method_joinRoom"><code>joinRoom()</code> method</a> request.</small>
+  <small>Results with: <code>REJECT</code></small></p>
 
             </div>
 
@@ -29930,10 +29924,55 @@ see the Protocol version used in this Skylink version.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;locked&quot;</code></small>
-   The reason code given when Room session has been locked and User is blocked from joining the Room.
- <small>Room can be unlocked with <a href="#method_unlockRoom"><code>unlockRoom()</code> method</a> and
-    locked with <a href="#method_lockRoom"><code>lockRoom()</code> method</a>.</small>
- <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small></p>
+  The value of the reason code when Room session is locked.
+  <small>Happens during <a href="#method_joinRoom"><code>joinRoom()</code> method</a> request.</small>
+  <small>Results with: <code>REJECT</code></small></p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">FAST_MESSAGE</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p><small>Value <code>&quot;fastmsg&quot;</code></small>
+   The value of the reason code when User is flooding socket messages to the Signaling
+   that is sent too quickly within less than a second interval.
+   <small>Happens after Room session has started. This can be caused by various methods like
+   <a href="#method_sendMessage"><code>sendMessage()</code> method</a>,
+   <a href="#method_setUserData"><code>setUserData()</code> method</a>,
+   <a href="#method_muteStream"><code>muteStream()</code> method</a>,
+   <a href="#method_enableAudio"><code>enableAudio()</code> method</a>,
+   <a href="#method_enableVideo"><code>enableVideo()</code> method</a>,
+   <a href="#method_disableAudio"><code>disableAudio()</code> method</a> and
+   <a href="#method_disableVideo"><code>disableVideo()</code> method</a></small>
+   <small>Results with: <code>WARNING</code></small></p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">ROOM_CLOSING</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p><small>Value <code>&quot;toClose&quot;</code></small>
+   The value of the reason code when Room session is ending.
+   <small>Happens after Room session has started. This serves as a prerequisite warning before
+   <code>ROOM_CLOSED</code> occurs.</small>
+   <small>Previously, the value was <code>&quot;toclose&quot;</code>.</small>
+   <small>Results with: <code>WARNING</code></small></p>
 
             </div>
 
@@ -29949,12 +29988,9 @@ see the Protocol version used in this Skylink version.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;roomclose&quot;</code></small>
-  The reason code given when User session in the Room has already ended.
-  <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small>
- <small>The starting datetime and duration of the User session depends on the type of authentication scheme used.<br>
-   Read more about the different <a href="http://support.temasys.com.sg/support/solutions/articles/
-12000002712-authenticating-your-application-key-to-start-a-connection">authentication methods here</a>
-   or see the <a href="#method_init"><code>init()</code> method</a>.</small></p>
+   The value of the reason code when Room session has just ended.
+   <small>Happens after Room session has started.</small>
+   <small>Results with: <code>REJECT</code></small></p>
 
             </div>
 
@@ -29970,8 +30006,9 @@ see the Protocol version used in this Skylink version.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;serverError&quot;</code></small>
-   The reason code given when there has been errors while attempting to connect User to the Room.
- <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small></p>
+   The value of the reason code when Room session fails to start due to some technical errors.
+   <small>Happens during <a href="#method_joinRoom"><code>joinRoom()</code> method</a> request.</small>
+   <small>Results with: <code>REJECT</code></small></p>
 
             </div>
 
@@ -29987,9 +30024,10 @@ see the Protocol version used in this Skylink version.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;keyFailed&quot;</code></small>
-   The reason code given when there has been errors while attempting to connect with the App Key provided in
-   <a href="#method_init"><code>init()</code> method</a>.
- <small>Ties with <a href="#attr_SYSTEM_ACTION"><code>SYSTEM_ACTION</code></a> action state <code>REJECT</code></small></p>
+   The value of the reason code when Room session fails to start due to some technical error pertaining to
+   App Key initialization.
+   <small>Happens during <a href="#method_joinRoom"><code>joinRoom()</code> method</a> request.</small>
+   <small>Results with: <code>REJECT</code></small></p>
 
             </div>
 
