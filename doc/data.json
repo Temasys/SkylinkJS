@@ -2424,7 +2424,7 @@
                 },
                 {
                     "name": "ROOM_LOCKED",
-                    "description": "<small>Value <code>\"locked\"</code></small>\n  The value of the reason code when Room session is locked.\n  <small>Happens during <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a> request.</small>\n  <small>Results with: <code>REJECT</code></small>",
+                    "description": "<small>Value <code>\"locked\"</code></small>\n  The value of the reason code when Room is locked.\n  <small>Happens during <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a> request.</small>\n  <small>Results with: <code>REJECT</code></small>",
                     "type": "String"
                 },
                 {
@@ -2628,27 +2628,27 @@
         {
             "file": "source/room-connection.js",
             "line": 453,
-            "description": "Function that disconnects User from the currently connected Room and ends the User's session.",
+            "description": "Function that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
             "params": [
                 {
                     "name": "stopMediaOptions",
-                    "description": "The flag that indicates if <code>leaveRoom()</code>\n  should invoke <a href=\"#method_stopStream\"><code>stopStream()</code> method</a> and\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a> to stop current Streams\n  retrieved from <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> method</a> and\n  <a href=\"#method_shareScreen\"><code>shareScreen()</code> method</a>.<br>\n&#8594; When provided as an Boolean, it will set both <code>stopMediaOptions.userMedia</code> and\n   <code>stopMediaOptions.screenshare</code> to <code>true</code>.",
+                    "description": "The flag if <code>leaveRoom()</code>\n  should stop both <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>\n  and <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>.\n- When provided as a boolean, this sets both <code>stopMediaOptions.userMedia</code>\n  and <code>stopMediaOptions.screenshare</code> to its boolean value.",
                     "type": "Boolean|JSON",
                     "optional": true,
                     "optdefault": "true",
                     "props": [
                         {
                             "name": "userMedia",
-                            "description": "The flag that indicates if\n  <code>leaveRoom()</code> should stop any currently retrieved Stream from\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> method</a>.",
+                            "description": "The flag if <code>leaveRoom()</code>\n  should stop <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>.\n  <small>This invokes <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>.</small>",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
                         },
                         {
                             "name": "screenshare",
-                            "description": "The flag that indicates if\n  <code>leaveRoom()</code> should stop any currently retrieved Stream from\n  <a href=\"#method_shareScreen\"><code>shareScreen()</code> method</a>.",
+                            "description": "The flag if <code>leaveRoom()</code>\n  should stop <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>.\n  <small>This invokes <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>.</small>",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
@@ -2657,7 +2657,7 @@
                 },
                 {
                     "name": "callback",
-                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>",
+                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_peerLeft\">\n  <code>peerLeft</code> event</a> triggering <code>isSelf</code> parameter payload value as <code>true</code>\n  for request success.</small>",
                     "type": "Function",
                     "optional": true,
                     "props": [
@@ -2673,12 +2673,12 @@
                             "props": [
                                 {
                                     "name": "peerId",
-                                    "description": "The User's ended session Peer ID in Room.",
+                                    "description": "The User's Room session Peer ID.",
                                     "type": "String"
                                 },
                                 {
                                     "name": "previousRoom",
-                                    "description": "The Room name which User's session has ended.",
+                                    "description": "The Room name.",
                                     "type": "String"
                                 }
                             ]
@@ -2686,33 +2686,33 @@
                     ]
                 }
             ],
-            "trigger": "channelClose, streamEnded, peerLeft",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>When <code>stopMediaOptions.userMedia</code> is <code>true</code>, the\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a> is invoked.</li>\n  <li>When <code>stopMediaOptions.screenshare</code> is <code>true</code>, the\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a> is invoked.</li>\n  <li>Stops the socket connection with the Signaling server. <ol>\n  <li>When socket connection to Signaling server is closed,\n  <a href=\"#event_channelClose\"><code>channelClose</code> event</a> triggers.</li></ol></li>\n  <li><a href=\"#event_peerLeft\"><code>peerLeft</code> event</a> triggers for Peers in the Room and User.\n  <small>If MCU is enabled for the App Key, the <a href=\"#event_serverPeerLeft\">\n  <code>serverPeerLeft</code> event</a> will be triggered when Room session has ended.</small></li></ol>",
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/room-connection.js",
-            "line": 567,
-            "description": "Function that locks the current Room which prevent other Peers from joining the Room.",
+            "line": 578,
+            "description": "Function that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
-            "trigger": "roomLock",
+            "trigger": "<ol class=\"desc-seq\">\n  <li><a href=\"#event_roomLock\"><code>roomLock</code> event</a> triggers parameter payload\n  <code>isLocked</code> value as <code>true</code>.</li></ol>",
             "since": "0.5.0",
             "class": "Skylink"
         },
         {
             "file": "source/room-connection.js",
-            "line": 587,
-            "description": "Function that unlocks the current Room which if Room is previously lock to\n  allow other Peers to join the Room.",
+            "line": 600,
+            "description": "Function that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
-            "trigger": "roomLock",
+            "trigger": "<ol class=\"desc-seq\">\n  <li><a href=\"#event_roomLock\"><code>roomLock</code> event</a> triggers parameter payload\n  <code>isLocked</code> value as <code>false</code>.</li></ol>",
             "since": "0.5.0",
             "class": "Skylink"
         },
         {
             "file": "source/room-connection.js",
-            "line": 608,
+            "line": 622,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -8475,11 +8475,11 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:567"
+            "line": " source/room-connection.js:578"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:587"
+            "line": " source/room-connection.js:600"
         },
         {
             "message": "unknown tag: trigger",

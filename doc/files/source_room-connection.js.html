@@ -129,7 +129,7 @@ Skylink.prototype.SYSTEM_ACTION = {
  *   &lt;small&gt;Happens during &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt; request.&lt;/small&gt;
  *   &lt;small&gt;Results with: &lt;code&gt;REJECT&lt;/code&gt;&lt;/small&gt;
  * @param {String} ROOM_LOCKED         &lt;small&gt;Value &lt;code&gt;&quot;locked&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the reason code when Room session is locked.
+ *   The value of the reason code when Room is locked.
  *   &lt;small&gt;Happens during &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt; request.&lt;/small&gt;
  *   &lt;small&gt;Results with: &lt;code&gt;REJECT&lt;/code&gt;&lt;/small&gt;
  * @param {String} FAST_MESSAGE        &lt;small&gt;Value &lt;code&gt;&quot;fastmsg&quot;&lt;/code&gt;&lt;/small&gt;
@@ -542,30 +542,41 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
 };
 
 /**
- * Function that disconnects User from the currently connected Room and ends the User&#x27;s session.
+ * Function that stops Room session.
  * @method leaveRoom
- * @param {Boolean|JSON} [stopMediaOptions=true] The flag that indicates if &lt;code&gt;leaveRoom()&lt;/code&gt;
- *   should invoke &lt;a href=&quot;#method_stopStream&quot;&gt;&lt;code&gt;stopStream()&lt;/code&gt; method&lt;/a&gt; and
- *   &lt;a href=&quot;#method_stopScreen&quot;&gt;&lt;code&gt;stopScreen()&lt;/code&gt; method&lt;/a&gt; to stop current Streams
- *   retrieved from &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt; and
- *   &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; method&lt;/a&gt;.&lt;br&gt;
- * &amp;#8594; When provided as an Boolean, it will set both &lt;code&gt;stopMediaOptions.userMedia&lt;/code&gt; and
- *    &lt;code&gt;stopMediaOptions.screenshare&lt;/code&gt; to &lt;code&gt;true&lt;/code&gt;.
- * @param {Boolean} [stopMediaOptions.userMedia=true] The flag that indicates if
- *   &lt;code&gt;leaveRoom()&lt;/code&gt; should stop any currently retrieved Stream from
- *   &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt;.
- * @param {Boolean} [stopMediaOptions.screenshare=true] The flag that indicates if
- *   &lt;code&gt;leaveRoom()&lt;/code&gt; should stop any currently retrieved Stream from
- *   &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; method&lt;/a&gt;.
+ * @param {Boolean|JSON} [stopMediaOptions=true] The flag if &lt;code&gt;leaveRoom()&lt;/code&gt;
+ *   should stop both &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt;
+ *   and &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; Stream&lt;/a&gt;.
+ * - When provided as a boolean, this sets both &lt;code&gt;stopMediaOptions.userMedia&lt;/code&gt;
+ *   and &lt;code&gt;stopMediaOptions.screenshare&lt;/code&gt; to its boolean value.
+ * @param {Boolean} [stopMediaOptions.userMedia=true] The flag if &lt;code&gt;leaveRoom()&lt;/code&gt;
+ *   should stop &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; Stream&lt;/a&gt;.
+ *   &lt;small&gt;This invokes &lt;a href=&quot;#method_stopStream&quot;&gt;&lt;code&gt;stopStream()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
+ * @param {Boolean} [stopMediaOptions.screenshare=true] The flag if &lt;code&gt;leaveRoom()&lt;/code&gt;
+ *   should stop &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt;.
+ *   &lt;small&gt;This invokes &lt;a href=&quot;#method_stopScreen&quot;&gt;&lt;code&gt;stopScreen()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
+ *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_peerLeft&quot;&gt;
+ *   &lt;code&gt;peerLeft&lt;/code&gt; event&lt;/a&gt; triggering &lt;code&gt;isSelf&lt;/code&gt; parameter payload value as &lt;code&gt;true&lt;/code&gt;
+ *   for request success.&lt;/small&gt;
  * @param {Error|String} callback.error The error result in request.
  *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are no errors in request&lt;/small&gt;
  * @param {JSON} callback.success The success result in request.
  *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are errors in request&lt;/small&gt;
- * @param {String} callback.success.peerId The User&#x27;s ended session Peer ID in Room.
- * @param {String} callback.success.previousRoom The Room name which User&#x27;s session has ended.
- * @trigger channelClose, streamEnded, peerLeft
+ * @param {String} callback.success.peerId The User&#x27;s Room session Peer ID.
+ * @param {String} callback.success.previousRoom The Room name.
+ * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
+ *   &lt;li&gt;When &lt;code&gt;stopMediaOptions.userMedia&lt;/code&gt; is &lt;code&gt;true&lt;/code&gt;, the
+ *   &lt;a href=&quot;#method_stopStream&quot;&gt;&lt;code&gt;stopStream()&lt;/code&gt; method&lt;/a&gt; is invoked.&lt;/li&gt;
+ *   &lt;li&gt;When &lt;code&gt;stopMediaOptions.screenshare&lt;/code&gt; is &lt;code&gt;true&lt;/code&gt;, the
+ *   &lt;a href=&quot;#method_stopScreen&quot;&gt;&lt;code&gt;stopScreen()&lt;/code&gt; method&lt;/a&gt; is invoked.&lt;/li&gt;
+ *   &lt;li&gt;Stops the socket connection with the Signaling server. &lt;ol&gt;
+ *   &lt;li&gt;When socket connection to Signaling server is closed,
+ *   &lt;a href=&quot;#event_channelClose&quot;&gt;&lt;code&gt;channelClose&lt;/code&gt; event&lt;/a&gt; triggers.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_peerLeft&quot;&gt;&lt;code&gt;peerLeft&lt;/code&gt; event&lt;/a&gt; triggers for Peers in the Room and User.
+ *   &lt;small&gt;If MCU is enabled for the App Key, the &lt;a href=&quot;#event_serverPeerLeft&quot;&gt;
+ *   &lt;code&gt;serverPeerLeft&lt;/code&gt; event&lt;/a&gt; will be triggered when Room session has ended.&lt;/small&gt;&lt;/li&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.5.5
  */
@@ -656,9 +667,11 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
 };
 
 /**
- * Function that locks the current Room which prevent other Peers from joining the Room.
+ * Function that locks the current Room when in session to prevent other Peers from joining the Room.
  * @method lockRoom
- * @trigger roomLock
+ * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_roomLock&quot;&gt;&lt;code&gt;roomLock&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
+ *   &lt;code&gt;isLocked&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.5.0
  */
@@ -676,10 +689,11 @@ Skylink.prototype.lockRoom = function() {
 };
 
 /**
- * Function that unlocks the current Room which if Room is previously lock to
- *   allow other Peers to join the Room.
+ * Function that unlocks the current Room when in session to allow other Peers to join the Room.
  * @method unlockRoom
- * @trigger roomLock
+ * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_roomLock&quot;&gt;&lt;code&gt;roomLock&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
+ *   &lt;code&gt;isLocked&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.5.0
  */
