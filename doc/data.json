@@ -6820,84 +6820,82 @@
         {
             "file": "source/socket-channel.js",
             "line": 1,
-            "description": "These are the list of socket connection error states that Skylink would trigger.\n- These error states references the [socket.io-client events](http://socket.io/docs/client-api/).",
+            "description": "The list of <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a> socket connection failure states.",
             "itemtype": "attribute",
             "name": "SOCKET_ERROR",
-            "type": "JSON",
             "params": [
                 {
                     "name": "CONNECTION_FAILED",
-                    "description": "<small>Value <code>0</code></small>\n  The error state when Skylink have failed to establish a socket connection with\n  platform signaling in the first attempt.",
+                    "description": "<small>Value <code>0</code></small>\n  The value of the failure state when <code>joinRoom()</code> socket connection failed to establish with\n  the Signaling server at the first attempt.",
                     "type": "Number"
                 },
                 {
                     "name": "RECONNECTION_FAILED",
-                    "description": "<small>Value <code>-1</code></small>\n  The error state when Skylink have failed to\n  reestablish a socket connection with platform signaling after the first attempt\n  <code>CONNECTION_FAILED</code>.",
-                    "type": "String"
+                    "description": "<small>Value <code>-1</code></small>\n  The value of the failure state when <code>joinRoom()</code> socket connection failed to establish\n  the Signaling server after the first attempt.",
+                    "type": "Number"
                 },
                 {
                     "name": "CONNECTION_ABORTED",
-                    "description": "<small>Value <code>-2</code></small>\n  The error state when attempt to reestablish socket connection\n  with platform signaling has been aborted after the failed first attempt\n  <code>CONNECTION_FAILED</code>.",
-                    "type": "String"
+                    "description": "<small>Value <code>-2</code></small>\n  The value of the failure state when <code>joinRoom()</code> socket connection will not attempt\n  to reconnect after the failure of the first attempt in <code>CONNECTION_FAILED</code> as there\n  are no more ports or transports to attempt for reconnection.",
+                    "type": "Number"
                 },
                 {
                     "name": "RECONNECTION_ABORTED",
-                    "description": "<small>Value <code>-3</code></small>\n  The error state when attempt to reestablish socket connection\n  with platform signaling has been aborted after several failed reattempts\n  <code>RECONNECTION_FAILED</code>.",
-                    "type": "String"
+                    "description": "<small>Value <code>-3</code></small>\n  The value of the failure state when <code>joinRoom()</code> socket connection will not attempt\n  to reconnect after the failure of several attempts in <code>RECONNECTION_FAILED</code> as there\n  are no more ports or transports to attempt for reconnection.",
+                    "type": "Number"
                 },
                 {
                     "name": "RECONNECTION_ATTEMPT",
-                    "description": "<small>Value <code>-4</code></small>\n  The error state when Skylink is attempting to reestablish\n  a socket connection with platform signaling after a failed attempt\n  <code>CONNECTION_FAILED</code> or <code>RECONNECTION_FAILED</code>.",
-                    "type": "String"
+                    "description": "<small>Value <code>-4</code></small>\n  The value of the failure state when <code>joinRoom()</code> socket connection is attempting\n  to reconnect with a new port or transport after the failure of attempts in\n  <code>CONNECTION_FAILED</code> or <code>RECONNECTED_FAILED</code>.",
+                    "type": "Number"
                 }
             ],
+            "type": "JSON",
             "readonly": "",
-            "component": "Socket",
             "since": "0.5.6",
             "class": "Skylink"
         },
         {
             "file": "source/socket-channel.js",
-            "line": 38,
-            "description": "These are the list of fallback attempt types that Skylink would attempt with.",
+            "line": 35,
+            "description": "The list of <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a> socket connection reconnection states.",
             "itemtype": "attribute",
             "name": "SOCKET_FALLBACK",
-            "type": "JSON",
             "params": [
                 {
                     "name": "NON_FALLBACK",
-                    "description": "<small>Value <code>\"nonfallback\"</code> | Protocol <code>\"http:\"</code>,\n<code>\"https:\"</code> | Transports <code>\"WebSocket\"</code>, <code>\"Polling\"</code></small>\n  The current socket connection attempt\n  is using the first selected socket connection port for\n  the current selected transport <code>\"Polling\"</code> or <code>\"WebSocket\"</code>.",
+                    "description": "<small>Value <code>\"nonfallback\"</code></small>\n  The value of the reconnection state when <code>joinRoom()</code> socket connection is at its initial state\n  without transitioning to any new socket port or transports yet.",
                     "type": "String"
                 },
                 {
                     "name": "FALLBACK_PORT",
-                    "description": "<small>Value <code>\"fallbackPortNonSSL\"</code> | Protocol <code>\"http:\"</code>\n | Transports <code>\"WebSocket\"</code></small>\n  The current socket connection reattempt\n  is using the next selected socket connection port for\n  <code>HTTP</code> protocol connection with the current selected transport\n  <code>\"Polling\"</code> or <code>\"WebSocket\"</code>.",
+                    "description": "<small>Value <code>\"fallbackPortNonSSL\"</code></small>\n  The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with\n  another new HTTP port using WebSocket transports to attempt to establish connection with Signaling server.",
                     "type": "String"
                 },
                 {
                     "name": "FALLBACK_PORT_SSL",
-                    "description": "<small>Value <code>\"fallbackPortSSL\"</code> | Protocol <code>\"https:\"</code>\n | Transports <code>\"WebSocket\"</code></small>\n  The current socket connection reattempt\n  is using the next selected socket connection port for\n  <code>HTTPS</code> protocol connection with the current selected transport\n  <code>\"Polling\"</code> or <code>\"WebSocket\"</code>.",
+                    "description": "<small>Value <code>\"fallbackPortSSL\"</code></small>\n  The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with\n  another new HTTPS port using WebSocket transports to attempt to establish connection with Signaling server.",
                     "type": "String"
                 },
                 {
                     "name": "LONG_POLLING",
-                    "description": "<small>Value <code>\"fallbackLongPollingNonSSL\"</code> | Protocol <code>\"http:\"</code>\n | Transports <code>\"Polling\"</code></small>\n  The current socket connection reattempt\n  is using the next selected socket connection port for\n  <code>HTTP</code> protocol connection with <code>\"Polling\"</code> after\n  many attempts of <code>\"WebSocket\"</code> has failed.\n  This occurs only for socket connection that is originally using\n  <code>\"WebSocket\"</code> transports.",
+                    "description": "<small>Value <code>\"fallbackLongPollingNonSSL\"</code></small>\n  The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with\n  another new HTTP port using Polling transports to attempt to establish connection with Signaling server.",
                     "type": "String"
                 },
                 {
-                    "name": "LONG_POLLING_SSL",
-                    "description": "<small>Value <code>\"fallbackLongPollingSSL\"</code> | Protocol <code>\"https:\"</code>\n | Transports <code>\"Polling\"</code></small>\n  The current socket connection reattempt\n  is using the next selected socket connection port for\n  <code>HTTPS</code> protocol connection with <code>\"Polling\"</code> after\n  many attempts of <code>\"WebSocket\"</code> has failed.\n  This occurs only for socket connection that is originally using\n  <code>\"WebSocket\"</code> transports.",
+                    "name": "LONG_POLLING",
+                    "description": "<small>Value <code>\"fallbackLongPollingSSL\"</code></small>\n  The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with\n  another new HTTPS port using Polling transports to attempt to establish connection with Signaling server.",
                     "type": "String"
                 }
             ],
+            "type": "JSON",
             "readonly": "",
-            "component": "Socket",
             "since": "0.5.6",
             "class": "Skylink"
         },
         {
             "file": "source/socket-channel.js",
-            "line": 88,
+            "line": 66,
             "description": "Stores the current socket connection information.",
             "itemtype": "attribute",
             "name": "_socketSession",
@@ -6909,7 +6907,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 98,
+            "line": 76,
             "description": "Stores the queued socket messages.\nThis is to prevent too many sent over less than a second interval that might cause dropped messages\n  or jams to the Signaling connection.",
             "itemtype": "attribute",
             "name": "_socketMessageQueue",
@@ -6921,7 +6919,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 110,
+            "line": 88,
             "description": "Stores the <code>setTimeout</code> to sent queued socket messages.",
             "itemtype": "attribute",
             "name": "_socketMessageTimeout",
@@ -6933,7 +6931,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 120,
+            "line": 98,
             "description": "Stores the list of socket ports to use to connect to the Signaling.\nThese ports are defined by default which is commonly used currently by the Signaling.\nShould re-evaluate this sometime.",
             "itemtype": "attribute",
             "name": "_socketPorts",
@@ -6957,7 +6955,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 137,
+            "line": 115,
             "description": "Stores the flag that indicates if socket connection to the Signaling has opened.",
             "itemtype": "attribute",
             "name": "_channelOpen",
@@ -6969,7 +6967,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 147,
+            "line": 125,
             "description": "Stores the Signaling server url.",
             "itemtype": "attribute",
             "name": "_signalingServer",
@@ -6981,7 +6979,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 157,
+            "line": 135,
             "description": "Stores the Signaling server protocol.",
             "itemtype": "attribute",
             "name": "_signalingServerProtocol",
@@ -6993,7 +6991,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 167,
+            "line": 145,
             "description": "Stores the Signaling server port.",
             "itemtype": "attribute",
             "name": "_signalingServerPort",
@@ -7005,7 +7003,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 177,
+            "line": 155,
             "description": "Stores the Signaling socket connection object.",
             "itemtype": "attribute",
             "name": "_socket",
@@ -7017,7 +7015,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 187,
+            "line": 165,
             "description": "Stores the socket connection timeout when establishing connection to the Signaling.",
             "itemtype": "attribute",
             "name": "_socketTimeout",
@@ -7029,7 +7027,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 197,
+            "line": 175,
             "description": "Stores the flag that indicates if XDomainRequest is used for IE 8/9.",
             "itemtype": "attribute",
             "name": "_socketUseXDR",
@@ -7041,7 +7039,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 207,
+            "line": 185,
             "description": "Function that sends a socket message over the socket connection to the Signaling.",
             "itemtype": "method",
             "name": "_sendChannelMessage",
@@ -7052,7 +7050,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 328,
+            "line": 306,
             "description": "Function that creates and opens a socket connection to the Signaling.",
             "itemtype": "method",
             "name": "_createSocket",
@@ -7063,7 +7061,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 492,
+            "line": 470,
             "description": "Function that starts the socket connection to the Signaling.\nThis starts creating the socket connection and called at first not when requiring to fallback.",
             "itemtype": "method",
             "name": "_openChannel",
@@ -7074,7 +7072,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 534,
+            "line": 512,
             "description": "Function that stops the socket connection to the Signaling.",
             "itemtype": "method",
             "name": "_closeChannel",
@@ -8716,14 +8714,6 @@
         {
             "message": "unknown tag: component",
             "line": " source/skylink-events.js:1537"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/socket-channel.js:1"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/socket-channel.js:38"
         },
         {
             "message": "unknown tag: component",

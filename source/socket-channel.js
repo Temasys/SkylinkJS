@@ -1,29 +1,26 @@
 /**
- * These are the list of socket connection error states that Skylink would trigger.
- * - These error states references the [socket.io-client events](http://socket.io/docs/client-api/).
+ * The list of <a href="#method_joinRoom"><code>joinRoom()</code> method</a> socket connection failure states.
  * @attribute SOCKET_ERROR
+ * @param {Number} CONNECTION_FAILED    <small>Value <code>0</code></small>
+ *   The value of the failure state when <code>joinRoom()</code> socket connection failed to establish with
+ *   the Signaling server at the first attempt.
+ * @param {Number} RECONNECTION_FAILED  <small>Value <code>-1</code></small>
+ *   The value of the failure state when <code>joinRoom()</code> socket connection failed to establish
+ *   the Signaling server after the first attempt.
+ * @param {Number} CONNECTION_ABORTED   <small>Value <code>-2</code></small>
+ *   The value of the failure state when <code>joinRoom()</code> socket connection will not attempt
+ *   to reconnect after the failure of the first attempt in <code>CONNECTION_FAILED</code> as there
+ *   are no more ports or transports to attempt for reconnection.
+ * @param {Number} RECONNECTION_ABORTED <small>Value <code>-3</code></small>
+ *   The value of the failure state when <code>joinRoom()</code> socket connection will not attempt
+ *   to reconnect after the failure of several attempts in <code>RECONNECTION_FAILED</code> as there
+ *   are no more ports or transports to attempt for reconnection.
+ * @param {Number} RECONNECTION_ATTEMPT <small>Value <code>-4</code></small>
+ *   The value of the failure state when <code>joinRoom()</code> socket connection is attempting
+ *   to reconnect with a new port or transport after the failure of attempts in
+ *   <code>CONNECTION_FAILED</code> or <code>RECONNECTED_FAILED</code>.
  * @type JSON
- * @param {Number} CONNECTION_FAILED <small>Value <code>0</code></small>
- *   The error state when Skylink have failed to establish a socket connection with
- *   platform signaling in the first attempt.
- * @param {String} RECONNECTION_FAILED <small>Value <code>-1</code></small>
- *   The error state when Skylink have failed to
- *   reestablish a socket connection with platform signaling after the first attempt
- *   <code>CONNECTION_FAILED</code>.
- * @param {String} CONNECTION_ABORTED <small>Value <code>-2</code></small>
- *   The error state when attempt to reestablish socket connection
- *   with platform signaling has been aborted after the failed first attempt
- *   <code>CONNECTION_FAILED</code>.
- * @param {String} RECONNECTION_ABORTED <small>Value <code>-3</code></small>
- *   The error state when attempt to reestablish socket connection
- *   with platform signaling has been aborted after several failed reattempts
- *   <code>RECONNECTION_FAILED</code>.
- * @param {String} RECONNECTION_ATTEMPT <small>Value <code>-4</code></small>
- *   The error state when Skylink is attempting to reestablish
- *   a socket connection with platform signaling after a failed attempt
- *   <code>CONNECTION_FAILED</code> or <code>RECONNECTION_FAILED</code>.
  * @readOnly
- * @component Socket
  * @for Skylink
  * @since 0.5.6
  */
@@ -36,44 +33,25 @@ Skylink.prototype.SOCKET_ERROR = {
 };
 
 /**
- * These are the list of fallback attempt types that Skylink would attempt with.
+ * The list of <a href="#method_joinRoom"><code>joinRoom()</code> method</a> socket connection reconnection states.
  * @attribute SOCKET_FALLBACK
+ * @param {String} NON_FALLBACK      <small>Value <code>"nonfallback"</code></small>
+ *   The value of the reconnection state when <code>joinRoom()</code> socket connection is at its initial state
+ *   without transitioning to any new socket port or transports yet.
+ * @param {String} FALLBACK_PORT     <small>Value <code>"fallbackPortNonSSL"</code></small>
+ *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
+ *   another new HTTP port using WebSocket transports to attempt to establish connection with Signaling server.
+ * @param {String} FALLBACK_PORT_SSL <small>Value <code>"fallbackPortSSL"</code></small>
+ *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
+ *   another new HTTPS port using WebSocket transports to attempt to establish connection with Signaling server.
+ * @param {String} LONG_POLLING      <small>Value <code>"fallbackLongPollingNonSSL"</code></small>
+ *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
+ *   another new HTTP port using Polling transports to attempt to establish connection with Signaling server.
+ * @param {String} LONG_POLLING      <small>Value <code>"fallbackLongPollingSSL"</code></small>
+ *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
+ *   another new HTTPS port using Polling transports to attempt to establish connection with Signaling server.
  * @type JSON
- * @param {String} NON_FALLBACK <small>Value <code>"nonfallback"</code> | Protocol <code>"http:"</code>,
- * <code>"https:"</code> | Transports <code>"WebSocket"</code>, <code>"Polling"</code></small>
- *   The current socket connection attempt
- *   is using the first selected socket connection port for
- *   the current selected transport <code>"Polling"</code> or <code>"WebSocket"</code>.
- * @param {String} FALLBACK_PORT <small>Value <code>"fallbackPortNonSSL"</code> | Protocol <code>"http:"</code>
- *  | Transports <code>"WebSocket"</code></small>
- *   The current socket connection reattempt
- *   is using the next selected socket connection port for
- *   <code>HTTP</code> protocol connection with the current selected transport
- *   <code>"Polling"</code> or <code>"WebSocket"</code>.
- * @param {String} FALLBACK_PORT_SSL <small>Value <code>"fallbackPortSSL"</code> | Protocol <code>"https:"</code>
- *  | Transports <code>"WebSocket"</code></small>
- *   The current socket connection reattempt
- *   is using the next selected socket connection port for
- *   <code>HTTPS</code> protocol connection with the current selected transport
- *   <code>"Polling"</code> or <code>"WebSocket"</code>.
- * @param {String} LONG_POLLING <small>Value <code>"fallbackLongPollingNonSSL"</code> | Protocol <code>"http:"</code>
- *  | Transports <code>"Polling"</code></small>
- *   The current socket connection reattempt
- *   is using the next selected socket connection port for
- *   <code>HTTP</code> protocol connection with <code>"Polling"</code> after
- *   many attempts of <code>"WebSocket"</code> has failed.
- *   This occurs only for socket connection that is originally using
- *   <code>"WebSocket"</code> transports.
- * @param {String} LONG_POLLING_SSL <small>Value <code>"fallbackLongPollingSSL"</code> | Protocol <code>"https:"</code>
- *  | Transports <code>"Polling"</code></small>
- *   The current socket connection reattempt
- *   is using the next selected socket connection port for
- *   <code>HTTPS</code> protocol connection with <code>"Polling"</code> after
- *   many attempts of <code>"WebSocket"</code> has failed.
- *   This occurs only for socket connection that is originally using
- *   <code>"WebSocket"</code> transports.
  * @readOnly
- * @component Socket
  * @for Skylink
  * @since 0.5.6
  */
