@@ -1,13 +1,11 @@
 /**
- * The current version of the internal <u>Signaling Message (SM)</u> Protocol that Skylink is using.<br>
- * - This is not a feature for developers to use but rather for SDK developers to
- *   see the Protocol version used in this Skylink version.
- * - In some cases, this information may be used for reporting issues with Skylink.
- * - SM_PROTOCOL VERSION: <code>0.1.</code>.
+ * <blockquote class="info">
+ *   Note that this is used only for SDK developer purposes.<br>
+ *   Current version: <code>0.1.1</code>
+ * </blockquote>
+ * The value of the current version of the Signaling socket message protocol.
  * @attribute SM_PROTOCOL_VERSION
  * @type String
- * @required
- * @component Socket
  * @for Skylink
  * @since 0.6.0
  */
@@ -100,23 +98,32 @@ Skylink.prototype._hasMCU = false;
 Skylink.prototype._receiveOnly = false;
 
 /**
- * Send a message object or string using the platform signaling socket connection
- *   to the list of targeted PeerConnections.
- * To send message objects with DataChannel connections, see
- *   {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.
+ * Function that sends a message to Peers via the Signaling socket connection.
  * @method sendMessage
- * @param {String|JSON} message The message object.
- * @param {String|Array} [targetPeerId] The array of targeted PeerConnections to
- *   transfer the message object to. Alternatively, you may provide this parameter
- *   as a string to a specific targeted Peer to transfer the message object.
+ * @param {String|JSON} message The message.
+ * @param {String|Array} [targetPeerId] The target Peer ID to send message to.<br>
+ * - When provided as an Array, it will send the message to only Peers which IDs are in the list.
+ * - When not provided, it will broadcast the message to all connected Peers in the Room.
  * @example
- *   // Example 1: Send to all peers
- *   SkylinkDemo.sendMessage("Hi there!"");
+ *   // Example 1: Broadcasting to all Peers
+ *   skylinkDemo.sendMessage("Hi all!");
  *
- *   // Example 2: Send to a targeted peer
- *   SkylinkDemo.sendMessage("Hi there peer!", targetPeerId);
- * @trigger incomingMessage
- * @component Message
+ *   // Example 2: Sending to specific Peers
+ *   var peersInExclusiveParty = [];
+ *
+ *   skylinkDemo.on("peerJoined", function (peerId, peerInfo, isSelf) {
+ *     if (isSelf) return;
+ *     if (peerInfo.userData.exclusive) {
+ *       peersInExclusiveParty.push(peerId);
+ *     }
+ *   });
+ *
+ *   function updateExclusivePartyStatus (message) {
+ *     skylinkDemo.sendMessage(message, peersInExclusiveParty);
+ *   }
+ * @trigger <ol class="desc-seq">
+ *   <li><a href="#event_incomingMessage"><code>incomingMessage</code> event</a> triggers parameter payload
+ *   <code>message.isDataChannel</code> value as <code>false</code>.</li></ol>
  * @for Skylink
  * @since 0.4.0
  */

@@ -7084,18 +7084,16 @@
         {
             "file": "source/socket-message.js",
             "line": 1,
-            "description": "The current version of the internal <u>Signaling Message (SM)</u> Protocol that Skylink is using.<br>\n- This is not a feature for developers to use but rather for SDK developers to\n  see the Protocol version used in this Skylink version.\n- In some cases, this information may be used for reporting issues with Skylink.\n- SM_PROTOCOL VERSION: <code>0.1.</code>.",
+            "description": "<blockquote class=\"info\">\n  Note that this is used only for SDK developer purposes.<br>\n  Current version: <code>0.1.1</code>\n</blockquote>\nThe value of the current version of the Signaling socket message protocol.",
             "itemtype": "attribute",
             "name": "SM_PROTOCOL_VERSION",
             "type": "String",
-            "required": 1,
-            "component": "Socket",
             "since": "0.6.0",
             "class": "Skylink"
         },
         {
             "file": "source/socket-message.js",
-            "line": 16,
+            "line": 14,
             "description": "Stores the list of socket messaging protocol types.\nSee confluence docs for the list based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "attribute",
             "name": "_SIG_MESSAGE_TYPE",
@@ -7108,7 +7106,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 52,
+            "line": 50,
             "description": "Stores the flag if MCU environment is enabled.",
             "itemtype": "attribute",
             "name": "_hasMCU",
@@ -7120,7 +7118,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 62,
+            "line": 60,
             "description": "Stores the list of socket messaging protocol types to queue when sent less than a second interval.",
             "itemtype": "attribute",
             "name": "_groupMessageList",
@@ -7132,7 +7130,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 79,
+            "line": 77,
             "description": "Stores the flag that indicates if MCU is available in the Room.\nIf App Key enables MCU but this is false, this means likely there are problems connecting to the MCU server.",
             "itemtype": "attribute",
             "name": "_hasMCU",
@@ -7144,7 +7142,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 91,
+            "line": 89,
             "description": "Stores the flag that indicates if User should only receive Stream from Peer connections but\n  do not send User's Stream to Peer connections.",
             "itemtype": "attribute",
             "name": "_receiveOnly",
@@ -7156,34 +7154,33 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 102,
-            "description": "Send a message object or string using the platform signaling socket connection\n  to the list of targeted PeerConnections.\nTo send message objects with DataChannel connections, see\n  {{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.",
+            "line": 100,
+            "description": "Function that sends a message to Peers via the Signaling socket connection.",
             "itemtype": "method",
             "name": "sendMessage",
             "params": [
                 {
                     "name": "message",
-                    "description": "The message object.",
+                    "description": "The message.",
                     "type": "String|JSON"
                 },
                 {
                     "name": "targetPeerId",
-                    "description": "The array of targeted PeerConnections to\n  transfer the message object to. Alternatively, you may provide this parameter\n  as a string to a specific targeted Peer to transfer the message object.",
+                    "description": "The target Peer ID to send message to.<br>\n- When provided as an Array, it will send the message to only Peers which IDs are in the list.\n- When not provided, it will broadcast the message to all connected Peers in the Room.",
                     "type": "String|Array",
                     "optional": true
                 }
             ],
             "example": [
-                "\n  // Example 1: Send to all peers\n  SkylinkDemo.sendMessage(\"Hi there!\"\");\n\n  // Example 2: Send to a targeted peer\n  SkylinkDemo.sendMessage(\"Hi there peer!\", targetPeerId);"
+                "\n  // Example 1: Broadcasting to all Peers\n  skylinkDemo.sendMessage(\"Hi all!\");\n\n  // Example 2: Sending to specific Peers\n  var peersInExclusiveParty = [];\n\n  skylinkDemo.on(\"peerJoined\", function (peerId, peerInfo, isSelf) {\n    if (isSelf) return;\n    if (peerInfo.userData.exclusive) {\n      peersInExclusiveParty.push(peerId);\n    }\n  });\n\n  function updateExclusivePartyStatus (message) {\n    skylinkDemo.sendMessage(message, peersInExclusiveParty);\n  }"
             ],
-            "trigger": "incomingMessage",
-            "component": "Message",
+            "trigger": "<ol class=\"desc-seq\">\n  <li><a href=\"#event_incomingMessage\"><code>incomingMessage</code> event</a> triggers parameter payload\n  <code>message.isDataChannel</code> value as <code>false</code>.</li></ol>",
             "since": "0.4.0",
             "class": "Skylink"
         },
         {
             "file": "source/socket-message.js",
-            "line": 188,
+            "line": 195,
             "description": "Function that process and parses the socket message string received from the Signaling.",
             "itemtype": "method",
             "name": "_processSigMessage",
@@ -7194,7 +7191,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 207,
+            "line": 214,
             "description": "Function that handles and processes the socket message received.",
             "itemtype": "method",
             "name": "_processingSingleMessage",
@@ -7205,7 +7202,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 293,
+            "line": 300,
             "description": "Function that handles the \"peerList\" socket message received.\nSee confluence docs for the \"peerList\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_peerListEventHandler",
@@ -7216,7 +7213,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 309,
+            "line": 316,
             "description": "Function that handles the \"introduceError\" socket message received.\nSee confluence docs for the \"introduceError\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_introduceErrorEventHandler",
@@ -7227,7 +7224,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 325,
+            "line": 332,
             "description": "Function that handles the \"approach\" socket message received.\nSee confluence docs for the \"approach\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_approachEventHandler",
@@ -7238,7 +7235,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 355,
+            "line": 362,
             "description": "Function that handles the \"redirect\" socket message received.\nSee confluence docs for the \"redirect\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_redirectHandler",
@@ -7249,7 +7246,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 381,
+            "line": 388,
             "description": "Function that handles the \"updateUserEvent\" socket message received.\nSee confluence docs for the \"updateUserEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
@@ -7260,7 +7257,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 402,
+            "line": 409,
             "description": "Function that handles the \"roomLockEvent\" socket message received.\nSee confluence docs for the \"roomLockEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
@@ -7271,7 +7268,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 418,
+            "line": 425,
             "description": "Function that handles the \"muteAudioEvent\" socket message received.\nSee confluence docs for the \"muteAudioEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -7282,7 +7279,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 439,
+            "line": 446,
             "description": "Function that handles the \"muteVideoEvent\" socket message received.\nSee confluence docs for the \"muteVideoEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -7293,7 +7290,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 460,
+            "line": 467,
             "description": "Function that handles the \"stream\" socket message received.\nSee confluence docs for the \"stream\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_streamEventHandler",
@@ -7304,7 +7301,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 494,
+            "line": 501,
             "description": "Function that handles the \"bye\" socket message received.\nSee confluence docs for the \"bye\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -7315,7 +7312,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 515,
+            "line": 522,
             "description": "Function that handles the \"private\" socket message received.\nSee confluence docs for the \"private\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -7326,7 +7323,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 537,
+            "line": 544,
             "description": "Function that handles the \"public\" socket message received.\nSee confluence docs for the \"public\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -7337,7 +7334,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 559,
+            "line": 566,
             "description": "Function that handles the \"inRoom\" socket message received.\nSee confluence docs for the \"inRoom\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -7348,7 +7345,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 615,
+            "line": 622,
             "description": "Function that handles the \"enter\" socket message received.\nSee confluence docs for the \"enter\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -7359,7 +7356,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 683,
+            "line": 690,
             "description": "Function that handles the \"restart\" socket message received.\nSee confluence docs for the \"restart\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -7370,7 +7367,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 791,
+            "line": 798,
             "description": "Function that handles the \"welcome\" socket message received.\nSee confluence docs for the \"welcome\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -7381,7 +7378,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 885,
+            "line": 892,
             "description": "Function that handles the \"offer\" socket message received.\nSee confluence docs for the \"offer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -7392,7 +7389,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 971,
+            "line": 978,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -7403,7 +7400,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1063,
+            "line": 1070,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -8716,16 +8713,8 @@
             "line": " source/skylink-events.js:1537"
         },
         {
-            "message": "unknown tag: component",
-            "line": " source/socket-message.js:1"
-        },
-        {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:102"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/socket-message.js:102"
+            "line": " source/socket-message.js:100"
         },
         {
             "message": "unknown tag: component",
