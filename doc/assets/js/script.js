@@ -43,6 +43,13 @@ $(document).ready(function () {
     if (elementHTML.indexOf('<blockquote>') > -1) {
       elementHTML = elementHTML.replace(/\<blockquote\>(.*)\<\/blockquote\>/i, '$1');
     }
+    // set the updated content
+    $(element).html(elementHTML);
+  });
+  // remove blockquotes
+  $('.param-description, .returns-description').each(function () {
+    var element = $(this);
+    var elementHTML = $(element).html();
     // parse [Rel: XXXX]
     if (elementHTML.indexOf('[Rel:') > -1) {
       var regexOutput = '<small><i class="fa fa-book"></i>&nbsp;&nbsp;' +

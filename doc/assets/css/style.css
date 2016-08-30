@@ -218,6 +218,7 @@ h3 code {
   color: #888;
   font-size: 12px;
 }
+.returns-description .label,
 .params-list .param .label {
   font-size: 10px;
   /*font-weight: normal;*/
@@ -258,6 +259,12 @@ h3 code {
   margin: 5px 0;
   color: #888;
   display: block;
+}
+.returns-description var {
+  font-style: normal;
+  margin: 0 5px 0 10px;
+  color: #888;
+  font-size: 12px;
 }
 .param .param-name {
   background: none;
@@ -316,6 +323,11 @@ h3 code {
   margin-right: 15px;
   vertical-align: top;
   color: #888;
+}
+.returns-description ul li p,
+.returns-description ol li p {
+  margin-top: 5px;
+  display: block;
 }
 #doc-type-select {
   margin-bottom: 35px;
