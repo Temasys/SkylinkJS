@@ -2015,40 +2015,48 @@
                     "type": "JSON|String"
                 }
             ],
-            "trigger": "<ol class=\"desc-seq\">\n  <li>Updates the User current custom data. <ul>\n    <li>If User is currently in Room, it will trigger the <a href=\"#event_peerUpdated\"><code>peerUpdated</code> event</a>.</li>\n  </ul></li></ol>",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>Updates the User current custom data.</li><li><ol>\n  <li>If User is in Room, <a href=\"#event_peerUpdated\"><code>peerUpdated</code> event</a> triggers.</li>\n  </ol></li></ol>",
             "example": [
-                " &lt;body&gt;\n  skylinkDemo.on(\"peerUpdated\", function (peerId, peerInfo, isSelf) {\n    // Reflect updated custom data\n  });\n\n  skylinkDemo.on(\"peerJoined\", function (peerId, peerInfo, isSelf) {\n    if (isSelf) {\n      skylinkDemo.setUserData(\"newData\");\n    }\n  });"
+                "\n  // Example 1: Set/Update User custom data before joinRoom()\n  var userData = \"beforejoin\";\n\n  skylinkDemo.setUserData(userData);\n\n  skylinkDemo.joinRoom(function (error, success) {\n     if (error) return;\n     if (success.peerInfo.userData === userData) {\n       console.log(\"User data is sent\");\n     }\n  });\n\n  // Example 2: Update User custom data after joinRoom()\n  var userData = \"afterjoin\";\n\n  skylinkDemo.joinRoom(function (error, success) {\n    if (error) return;\n    skylinkDemo.setUserData(userData);\n    if (skylinkDemo.getPeerInfo().userData === userData) {\n      console.log(\"User data is updated and sent\");\n    }\n  });"
             ],
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/peer-data.js",
-            "line": 82,
-            "description": "Function that retrieves the User current custom data.",
+            "line": 95,
+            "description": "Function that returns the User / Peer current custom data.",
             "itemtype": "method",
             "name": "getUserData",
+            "params": [
+                {
+                    "name": "peerId",
+                    "description": "The Peer ID to return the current custom data from.\n- When not provided or that the Peer ID is does not exists, it will return\n  the User current custom data.",
+                    "type": "String",
+                    "optional": true
+                }
+            ],
             "return": {
-                "description": "The User current custom data.",
+                "description": "The User / Peer current custom data.",
                 "type": "JSON|String"
             },
-            "trigger": "<ol class=\"desc-seq\">\n  <li>Returns the User / Peer current custom data.</li></ol>",
+            "trigger": "<ol class=\"desc-seq\"><li>Returns the User / Peer current custom data.</li></ol>",
             "example": [
-                " &lt;body&gt;\n  skylinkDemo.on(\"iceConnectionState\", function (state, peerId) {\n    var peerCustomData = skylinkDemo.getUserData(peerId);\n  });"
+                "\n  // Example 1: Get Peer current custom data\n  var peerUserData = skylinkDemo.getUserData(peerId);\n\n  // Example 2: Get User current custom data\n  var userUserData = skylinkDemo.getUserData();"
             ],
             "since": "0.5.10",
             "class": "Skylink"
         },
         {
             "file": "source/peer-data.js",
-            "line": 109,
-            "description": "Function that retrieves the User / Peer current session information.",
+            "line": 126,
+            "description": "Function that returns the User / Peer current session information.",
             "itemtype": "method",
             "name": "getPeerInfo",
             "params": [
                 {
                     "name": "peerId",
-                    "description": "The Peer ID to retrieve current session information from.<br>\n&#8594; When not provided or the Peer ID is does not exists, it will return\n  the User current session information",
+                    "description": "The Peer ID to return the current session information from.\n- When not provided or that the Peer ID is does not exists, it will return\n  the User current session information.",
                     "type": "String",
                     "optional": true
                 }
@@ -2057,16 +2065,16 @@
                 "description": "The User / Peer current session information.\n  <small>Object signature matches the <code>peerInfo</code> parameter payload received in the\n  <a href=\"#event_peerJoined\"><code>peerJoined</code> event</a>.</small>",
                 "type": "JSON"
             },
-            "trigger": "<ol class=\"desc-seq\">\n  <li>Returns the User / Peer current session information.</li></ol>",
+            "trigger": "<ol class=\"desc-seq\"><li>Returns the User / Peer current session information.</li></ol>",
             "example": [
-                " &lt;body&gt;\n  skylinkDemo.on(\"iceConnectionState\", function (state, peerId) {\n    var peerInfo = skylinkDemo.getPeerInfo(peerId);\n  });"
+                "\n  // Example 1: Get Peer current session information\n  var peerPeerInfo = skylinkDemo.getPeerInfo(peerId);\n\n  // Example 2: Get User current session information\n  var userPeerInfo = skylinkDemo.getPeerInfo();"
             ],
             "since": "0.4.0",
             "class": "Skylink"
         },
         {
             "file": "source/peer-data.js",
-            "line": 179,
+            "line": 197,
             "description": "Function that parses the User custom data provided.",
             "itemtype": "method",
             "name": "_parseUserData",
@@ -8441,11 +8449,11 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-data.js:82"
+            "line": " source/peer-data.js:95"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-data.js:109"
+            "line": " source/peer-data.js:126"
         },
         {
             "message": "unknown tag: trigger",

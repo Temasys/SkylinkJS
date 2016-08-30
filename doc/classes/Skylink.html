@@ -7024,7 +7024,7 @@ This parses and sets any missing values to default.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l179"><code>source&#x2F;peer-data.js:179</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l197"><code>source&#x2F;peer-data.js:197</code></a>
       </small>
     
 
@@ -11457,7 +11457,7 @@ Function that terminates a data transfer.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l109"><code>source&#x2F;peer-data.js:109</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l126"><code>source&#x2F;peer-data.js:126</code></a>
       </small>
     
 
@@ -11471,7 +11471,7 @@ Function that terminates a data transfer.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Function that retrieves the User / Peer current session information.</p>
+    <p>Function that returns the User / Peer current session information.</p>
 
   </div>
 
@@ -11479,10 +11479,10 @@ Function that terminates a data transfer.</p>
     <div class="code-item-section">
       <h4>Example:</h4>
       <pre class="example-content prettyprint">
-        <p> &lt;body&gt;
-  skylinkDemo.on(&quot;iceConnectionState&quot;, function (state, peerId) {
-    var peerInfo = skylinkDemo.getPeerInfo(peerId);
-  });</p>
+        <p>  // Example 1: Get Peer current session information
+  var peerPeerInfo = skylinkDemo.getPeerInfo(peerId);</p>
+<p>  // Example 2: Get User current session information
+  var userPeerInfo = skylinkDemo.getPeerInfo();</p>
 
       </pre>
     </div>
@@ -11493,8 +11493,7 @@ Function that terminates a data transfer.</p>
   
   <div class="code-item-section">
     <h4>Events Sequence:</h4>
-    <span class="code-item-trigger"><ol class="desc-seq">
-  <li>Returns the User / Peer current session information.</li></ol></span>
+    <span class="code-item-trigger"><ol class="desc-seq"><li>Returns the User / Peer current session information.</li></ol></span>
   </div>
   
 
@@ -11513,9 +11512,11 @@ Function that terminates a data transfer.</p>
 
             <div class="param-description">
               
-              <p>The Peer ID to retrieve current session information from.<br>
-&#8594; When not provided or the Peer ID is does not exists, it will return
-  the User current session information</p>
+              <p>The Peer ID to return the current session information from.</p>
+<ul>
+<li>When not provided or that the Peer ID is does not exists, it will return
+the User current session information.</li>
+</ul>
 
             </div>
 
@@ -11755,7 +11756,16 @@ Function that retrieves the list of Peer IDs from Rooms within in the same App s
               <div id="method_getUserData" class="code-item method item method-item ">
   <h3 class="code-item-name"><code>getUserData</code></h3>
   
-    <span class="paren">()</span>
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code class="optional">[peerId]</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+      <span class="paren">)</span>
+    </div>
   
 
   <div class="code-item-properties">
@@ -11797,7 +11807,7 @@ Function that retrieves the list of Peer IDs from Rooms within in the same App s
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l82"><code>source&#x2F;peer-data.js:82</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l95"><code>source&#x2F;peer-data.js:95</code></a>
       </small>
     
 
@@ -11811,7 +11821,7 @@ Function that retrieves the list of Peer IDs from Rooms within in the same App s
   </div>
 
   <div class="code-item-description">
-    <p>Function that retrieves the User current custom data.</p>
+    <p>Function that returns the User / Peer current custom data.</p>
 
   </div>
 
@@ -11819,10 +11829,10 @@ Function that retrieves the list of Peer IDs from Rooms within in the same App s
     <div class="code-item-section">
       <h4>Example:</h4>
       <pre class="example-content prettyprint">
-        <p> &lt;body&gt;
-  skylinkDemo.on(&quot;iceConnectionState&quot;, function (state, peerId) {
-    var peerCustomData = skylinkDemo.getUserData(peerId);
-  });</p>
+        <p>  // Example 1: Get Peer current custom data
+  var peerUserData = skylinkDemo.getUserData(peerId);</p>
+<p>  // Example 2: Get User current custom data
+  var userUserData = skylinkDemo.getUserData();</p>
 
       </pre>
     </div>
@@ -11833,11 +11843,38 @@ Function that retrieves the list of Peer IDs from Rooms within in the same App s
   
   <div class="code-item-section">
     <h4>Events Sequence:</h4>
-    <span class="code-item-trigger"><ol class="desc-seq">
-  <li>Returns the User / Peer current custom data.</li></ol></span>
+    <span class="code-item-trigger"><ol class="desc-seq"><li>Returns the User / Peer current custom data.</li></ol></span>
   </div>
   
 
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">peerId</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+              
+              <p>The Peer ID to return the current custom data from.</p>
+<ul>
+<li>When not provided or that the Peer ID is does not exists, it will return
+the User current custom data.</li>
+</ul>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
   
 
   
@@ -11849,7 +11886,7 @@ Function that retrieves the list of Peer IDs from Rooms within in the same App s
           
             <span class="type"><b>{</b>JSON | String<b>}</b></span>
           
-          <p>The User current custom data.</p>
+          <p>The User / Peer current custom data.</p>
 
         
       </div>
@@ -17508,13 +17545,22 @@ Function that starts an uploading string data transfer from User to Peers.</p>
     <div class="code-item-section">
       <h4>Example:</h4>
       <pre class="example-content prettyprint">
-        <p> &lt;body&gt;
-  skylinkDemo.on(&quot;peerUpdated&quot;, function (peerId, peerInfo, isSelf) {
-    // Reflect updated custom data
+        <p>  // Example 1: Set/Update User custom data before joinRoom()
+  var userData = &quot;beforejoin&quot;;</p>
+<p>  skylinkDemo.setUserData(userData);</p>
+<p>  skylinkDemo.joinRoom(function (error, success) {
+     if (error) return;
+     if (success.peerInfo.userData === userData) {
+       console.log(&quot;User data is sent&quot;);
+     }
   });</p>
-<p>  skylinkDemo.on(&quot;peerJoined&quot;, function (peerId, peerInfo, isSelf) {
-    if (isSelf) {
-      skylinkDemo.setUserData(&quot;newData&quot;);
+<p>  // Example 2: Update User custom data after joinRoom()
+  var userData = &quot;afterjoin&quot;;</p>
+<p>  skylinkDemo.joinRoom(function (error, success) {
+    if (error) return;
+    skylinkDemo.setUserData(userData);
+    if (skylinkDemo.getPeerInfo().userData === userData) {
+      console.log(&quot;User data is updated and sent&quot;);
     }
   });</p>
 
@@ -17528,9 +17574,9 @@ Function that starts an uploading string data transfer from User to Peers.</p>
   <div class="code-item-section">
     <h4>Events Sequence:</h4>
     <span class="code-item-trigger"><ol class="desc-seq">
-  <li>Updates the User current custom data. <ul>
-    <li>If User is currently in Room, it will trigger the <a href="#event_peerUpdated"><code>peerUpdated</code> event</a>.</li>
-  </ul></li></ol></span>
+  <li>Updates the User current custom data.</li><li><ol>
+  <li>If User is in Room, <a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers.</li>
+  </ol></li></ol></span>
   </div>
   
 
