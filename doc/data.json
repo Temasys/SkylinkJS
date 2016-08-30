@@ -2229,18 +2229,18 @@
         {
             "file": "source/peer-privileged.js",
             "line": 1,
-            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled for the App Key, as\n  only Users connecting using the App Key with this flag enabled (which we call Privileged Users / Peers)\n  can retrieve the list of Peer IDs from Rooms within the same App space.\n  <a href=\"http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about Privileged App Key feature here</a>.\n</blockquote>\nContains the list of <a href=\"#method_getPeers\"><code>getPeers()</code> method</a> retrieval states.",
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled for the App Key\n  provided in the <a href=\"#method_init\"><code>init()</code> method</a>, as only Users connecting using\n  the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of\n  Peer IDs from Rooms within the same App space.\n  <a href=\"http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about privileged App Key feature here</a>.\n</blockquote>\nThe list of <a href=\"#method_getPeers\"><code>getPeers()</code> method</a> retrieval states.",
             "itemtype": "attribute",
             "name": "GET_PEERS_STATE",
             "params": [
                 {
                     "name": "ENQUIRED",
-                    "description": "<small>Value <code>\"enquired\"</code></small>\n  The state when retrieving the list of Peer IDs from Signaling.",
+                    "description": "<small>Value <code>\"enquired\"</code></small>\n  The value of the state when <code>getPeers()</code> is retrieving the list of Peer IDs\n  from Rooms within the same App space from the Signaling server.",
                     "type": "String"
                 },
                 {
                     "name": "RECEIVED",
-                    "description": "<small>Value <code>\"received\"</code></small>\n  The state when the list of Peer IDs has been successfully retrieved from Signaling.",
+                    "description": "<small>Value <code>\"received\"</code></small>\n  The value of the state when <code>getPeers()</code> has retrieved the list of Peer IDs\n  from Rooms within the space App space from the Signaling server successfully.",
                     "type": "String"
                 }
             ],
@@ -2251,19 +2251,19 @@
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 25,
-            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled and\n  <code>\"autoIntroduce\"</code> flag to be disabled for the App Key, as only Users connecting\n  using the App Key with this flag enabled (which we call Privileged Users / Peers)\n  can introduce Peers in the same App space from other Rooms.\n  <a href=\"http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about Privileged App Key feature here</a>.\n</blockquote>\nContains the list of <a href=\"#method_introducePeer\"><code>introducePeer</code> method</a> introduction states.",
+            "line": 28,
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled and\n  <code>\"autoIntroduce\"</code> flag to be disabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>, as only Users connecting using\n  the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of\n  Peer IDs from Rooms within the same App space.\n  <a href=\"http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about privileged App Key feature here</a>.\n</blockquote>\nThe list of <a href=\"#method_introducePeer\"><code>introducePeer</code> method</a> Peer introduction states.",
             "itemtype": "attribute",
             "name": "INTRODUCE_STATE",
             "params": [
                 {
                     "name": "INTRODUCING",
-                    "description": "<small>Value <code>\"enquired\"</code></small>\n  The state when request to introduce the pair of Peers has been made to the Signaling.",
+                    "description": "<small>Value <code>\"enquired\"</code></small>\n  The value of the state when introduction request for the selected pair of Peers has been made to the Signaling server.",
                     "type": "String"
                 },
                 {
                     "name": "ERROR",
-                    "description": "<small>Value <code>\"error\"</code></small>\n  The state when request to introduce the pair of Peers has failed.",
+                    "description": "<small>Value <code>\"error\"</code></small>\n  The value of the state when introduction request made to the Signaling server\n  for the selected pair of Peers has failed.",
                     "type": "String"
                 }
             ],
@@ -2273,7 +2273,7 @@
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 49,
+            "line": 54,
             "description": "Stores the flag that indicates if \"autoIntroduce\" is enabled.\nIf enabled, the Peers connecting the same Room will receive each others \"enter\" message ping.",
             "itemtype": "attribute",
             "name": "_autoIntroduce",
@@ -2286,7 +2286,7 @@
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 61,
+            "line": 66,
             "description": "Stores the flag that indicates if \"isPrivileged\" is enabled.\nIf enabled, the User has Privileged features which has the ability to retrieve the list of\n  Peers in the same App space with <code>getPeers()</code> method\n  and introduce Peers to each other with <code>introducePeer</code> method.",
             "itemtype": "attribute",
             "name": "isPrivileged",
@@ -2299,7 +2299,7 @@
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 75,
+            "line": 80,
             "description": "Stores the list of Peers retrieved from the Signaling from <code>getPeers()</code> method.",
             "itemtype": "attribute",
             "name": "_peerList",
@@ -2311,21 +2311,21 @@
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 85,
-            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled for the App Key, as\n  only Users connecting using the App Key with this flag enabled (which we call Privileged Users / Peers)\n  can retrieve the list of Peer IDs from Rooms within the same App space.\n  <a href=\"http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about Privileged App Key feature here</a>.\n</blockquote>\nFunction that retrieves the list of Peer IDs from Rooms within in the same App space.",
+            "line": 90,
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled for the App Key\n  provided in the <a href=\"#method_init\"><code>init()</code> method</a>, as only Users connecting using\n  the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of\n  Peer IDs from Rooms within the same App space.\n  <a href=\"http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about privileged App Key feature here</a>.\n</blockquote>\nFunction that retrieves the list of Peer IDs from Rooms within the same App space.",
             "itemtype": "method",
             "name": "getPeers",
             "params": [
                 {
                     "name": "showAll",
-                    "description": "The flag that indicates if Signaling should also retrieve\n  the list of the Privileged Peer IDs.\n<small>By default, the Signaling doesn't return the Privileged Peer IDs</small>",
+                    "description": "The flag if Signaling server should also return the list of privileged Peer IDs.\n<small>By default, the Signaling server does not include the list of privileged Peer IDs in the return result.</small>",
                     "type": "Boolean",
                     "optional": true,
                     "optdefault": "false"
                 },
                 {
                     "name": "callback",
-                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>",
+                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_getPeersStateChange\">\n  <code>getPeersStateChange</code> event</a> triggering <code>state</code> parameter payload value as\n  <code>RECEIVED</code> for request success.</small>",
                     "type": "Function",
                     "optional": true,
                     "props": [
@@ -2336,40 +2336,40 @@
                         },
                         {
                             "name": "success",
-                            "description": "The success result in request.\n  <small>Defined as <code>null</code> when there are errors in request</small>\n  <small>Object signature matches the <code>peerList</code> parameter payload received in the\n     <a href=\"#event_getPeersStateChange\"><code>getPeersStateChange</code> event</a>.</small>",
+                            "description": "The success result in request.\n  <small>Defined as <code>null</code> when there are errors in request</small>\n  <small>Object signature matches the <code>peerList</code> parameter payload received in the\n  <a href=\"#event_getPeersStateChange\"><code>getPeersStateChange</code> event</a>.</small>",
                             "type": "JSON"
                         }
                     ]
                 }
             ],
-            "trigger": "<ol class=\"desc-seq\">\n  <li>Retrieves the list of Peers ID in the App space.<ul>\n    <li>Triggers <a href=\"#event_getPeersStateChange\"><code>getPeersStateChange</code> event</a>\n      with parameter payload <code>state</code> as <code>ENQUIRED</code>.</li>\n    <li>If retrieval of the list of Peer IDs is successful, it triggers <a href=\"#event_getPeersStateChange\">\n      <code>getPeersStateChange</code> event</a> with parameter payload <code>state</code> as\n      <code>RECEIVED</code> after <code>ENQUIRED</code>.</li>\n  </ul></li></ol>",
+            "trigger": "<ol class=\"desc-seq\">\n  <li><a href=\"#event_getPeersStateChange\"><code>getPeersStateChange</code> event</a> triggers parameter\n  payload <code>state</code> value as <code>ENQUIRED</code>.</li><li><ol>\n  <li>When retrieval of the list of Peer IDs from Rooms within the same App space is successful,\n  <a href=\"#event_getPeersStateChange\"><code>getPeersStateChange</code> event</a> triggers parameter\n  payload <code>state</code> value as <code>RECEIVED</code>.</li></ol></li></ol>",
             "example": [
-                "\n  skylinkDemo.on(\"getPeersStateChange\", function (state, privilegedPeerId, peerList) {\n\t\t if (state === skylinkDemo.GET_PEERS_STATE.RECEIVED) {\n      // Display list\n    }\n  });\n\n  skylinkDemo.getPeers();"
+                "\n  // Example 1: Retrieving the un-privileged Peers\n  skylinkDemo.joinRoom(function (jRError, jRSuccess) {\n    if (jRError) return;\n    skylinkDemo.getPeers(function (error, success) {\n       if (error) return;\n       console.log(\"The list of only un-privileged Peers in the same App space ->\", success);\n    });\n  });\n\n  // Example 2: Retrieving the all Peers (privileged or un-privileged)\n  skylinkDemo.joinRoom(function (jRError, jRSuccess) {\n    if (jRError) return;\n    skylinkDemo.getPeers(true, function (error, success) {\n       if (error) return;\n       console.log(\"The list of all Peers in the same App space ->\", success);\n    });\n  });"
             ],
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 161,
-            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled and\n  <code>\"autoIntroduce\"</code> flag to be disabled for the App Key, as only Users connecting\n  using the App Key with this flag enabled (which we call Privileged Users / Peers)\n  can introduce Peers in the same App space from other Rooms.\n  <a href=\"http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about Privileged App Key feature here</a>.\n</blockquote>\nFunction that introduces a pair of Peers to start Peer connection with each other.",
+            "line": 177,
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled and\n  <code>\"autoIntroduce\"</code> flag to be disabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>, as only Users connecting using\n  the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of\n  Peer IDs from Rooms within the same App space.\n  <a href=\"http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about privileged App Key feature here</a>.\n</blockquote>\nFunction that selects and introduces a pair of Peers to start connection with each other.",
             "itemtype": "method",
             "name": "introducePeer",
             "params": [
                 {
                     "name": "sendingPeerId",
-                    "description": "The Peer ID of the Peer that will start Peer connection with <code>receivingPeerId</code>.",
+                    "description": "The Peer ID to be connected with <code>receivingPeerId</code>.",
                     "type": "String"
                 },
                 {
                     "name": "receivingPeerId",
-                    "description": "The Peer ID of the Peer that will be connected with <code>sendingPeerId</code>.",
+                    "description": "The Peer ID to be connected with <code>sendingPeerId</code>.",
                     "type": "String"
                 }
             ],
-            "trigger": "<ol class=\"desc-seq\">\n  <li>Introduces a Peer to another Peer.<ul>\n    <li>If introduction of Peer to Peer is successful, it triggers <a href=\"#event_introduceStateChange\">\n      <code>introduceStateChange</code> event</a> with parameter payload <code>state</code> as\n      <code>INTRODUCING</code>.</li>\n    <li>If introduction of Peer to Peer had failed, it triggers <a href=\"#event_introduceStateChange\">\n      <code>introduceStateChange</code> event</a> with parameter payload <code>state</code> as\n      <code>ERROR</code>.</li>\n  </ul></li></ol>",
+            "trigger": "<ol class=\"desc-seq\"><li><ol>\n  <li>When introduction request for the selected pair of Peers has been made to the Signaling server,\n  <a href=\"#event_introduceStateChange\"><code>introduceStateChange</code> event</a> triggers parameter\n  payload <code>state</code> value as <code>INTRODUCING</code>.</li>\n  <li>When introduction request made for the selected pair of Peers to the Signaling server has failed,\n  <a href=\"#event_introduceStateChange\"><code>introduceStateChange</code> event</a> triggers parameter\n  payload <code>state</code> value as <code>ERROR</code>.</li></ol></li></ol>",
             "example": [
-                "\n  skylinkDemo.on(\"introduceStateChange\", function (state, privilegedPeerId, sendingPeerId, receivingPeerId) {\n\t   if (state === skylinkDemo.INTRODUCE_STATE.INTRODUCING) {\n      // Display to UI that \"sendingPeerId\" is introducing (or connecting) to \"receivingPeerId\"\n    }\n  });\n\n  skylinkDemo.on(\"getPeersStateChange\", function (state, privilegedPeerId, peerList) {\n\t\t if (state === skylinkDemo.GET_PEERS_STATE.RECEIVED) {\n      skylinkDemo.introducePeer(peerList.roomA[0], peerList.roomB[0]);\n    }\n  });\n\n  skylinkDemo.getPeers();"
+                "\n  // Example 1: Introduce a pair of Peers\n  skylinkDemo.on(\"introduceStateChange\", function (state, privilegedPeerId, sendingPeerId, receivingPeerId) {\n\t   if (state === skylinkDemo.INTRODUCE_STATE.INTRODUCING) {\n      console.log(\"Peer '\" + sendingPeerId + \"' has been introduced to '\" + receivingPeerId + \"'\");\n    }\n  });\n\n  skylinkDemo.joinRoom(function (jRError, jRSuccess) {\n    if (jRError) return;\n    skylinkDemo.getPeers(function (gPError, gPSuccess) {\n       if (gPError) return;\n       skylinkDemo.introducePeer(gPSuccess.roomName[0], gPSuccess.roomName[1]);\n    });\n  });"
             ],
             "since": "0.6.1",
             "class": "Skylink"
@@ -2436,7 +2436,7 @@
                 },
                 {
                     "name": "FAST_MESSAGE",
-                    "description": "<small>Value <code>\"fastmsg\"</code></small>\n   The value of the reason code when User is flooding socket messages to the Signaling\n   that is sent too quickly within less than a second interval.\n   <small>Happens after Room session has started. This can be caused by various methods like\n   <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n   <a href=\"#method_setUserData\"><code>setUserData()</code> method</a>,\n   <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n   <a href=\"#method_enableAudio\"><code>enableAudio()</code> method</a>,\n   <a href=\"#method_enableVideo\"><code>enableVideo()</code> method</a>,\n   <a href=\"#method_disableAudio\"><code>disableAudio()</code> method</a> and\n   <a href=\"#method_disableVideo\"><code>disableVideo()</code> method</a></small>\n   <small>Results with: <code>WARNING</code></small>",
+                    "description": "<small>Value <code>\"fastmsg\"</code></small>\n   The value of the reason code when User is flooding socket messages to the Signaling server\n   that is sent too quickly within less than a second interval.\n   <small>Happens after Room session has started. This can be caused by various methods like\n   <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n   <a href=\"#method_setUserData\"><code>setUserData()</code> method</a>,\n   <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n   <a href=\"#method_enableAudio\"><code>enableAudio()</code> method</a>,\n   <a href=\"#method_enableVideo\"><code>enableVideo()</code> method</a>,\n   <a href=\"#method_disableAudio\"><code>disableAudio()</code> method</a> and\n   <a href=\"#method_disableVideo\"><code>disableVideo()</code> method</a></small>\n   <small>Results with: <code>WARNING</code></small>",
                     "type": "String"
                 },
                 {
@@ -8457,11 +8457,11 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-privileged.js:85"
+            "line": " source/peer-privileged.js:90"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-privileged.js:161"
+            "line": " source/peer-privileged.js:177"
         },
         {
             "message": "unknown tag: trigger",

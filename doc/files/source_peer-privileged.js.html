@@ -91,18 +91,21 @@
     <pre class="code prettyprint linenums">
 /**
  * &lt;blockquote class=&quot;info&quot;&gt;
- *   Note that this feature requires &lt;code&gt;&quot;isPrivileged&quot;&lt;/code&gt; flag to be enabled for the App Key, as
- *   only Users connecting using the App Key with this flag enabled (which we call Privileged Users / Peers)
- *   can retrieve the list of Peer IDs from Rooms within the same App space.
+ *   Note that this feature requires &lt;code&gt;&quot;isPrivileged&quot;&lt;/code&gt; flag to be enabled for the App Key
+ *   provided in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;, as only Users connecting using
+ *   the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of
+ *   Peer IDs from Rooms within the same App space.
  *   &lt;a href=&quot;http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-&quot;&gt;
- *   Read more about Privileged App Key feature here&lt;/a&gt;.
+ *   Read more about privileged App Key feature here&lt;/a&gt;.
  * &lt;/blockquote&gt;
- * Contains the list of &lt;a href=&quot;#method_getPeers&quot;&gt;&lt;code&gt;getPeers()&lt;/code&gt; method&lt;/a&gt; retrieval states.
+ * The list of &lt;a href=&quot;#method_getPeers&quot;&gt;&lt;code&gt;getPeers()&lt;/code&gt; method&lt;/a&gt; retrieval states.
  * @attribute GET_PEERS_STATE
  * @param {String} ENQUIRED &lt;small&gt;Value &lt;code&gt;&quot;enquired&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when retrieving the list of Peer IDs from Signaling.
+ *   The value of the state when &lt;code&gt;getPeers()&lt;/code&gt; is retrieving the list of Peer IDs
+ *   from Rooms within the same App space from the Signaling server.
  * @param {String} RECEIVED &lt;small&gt;Value &lt;code&gt;&quot;received&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when the list of Peer IDs has been successfully retrieved from Signaling.
+ *   The value of the state when &lt;code&gt;getPeers()&lt;/code&gt; has retrieved the list of Peer IDs
+ *   from Rooms within the space App space from the Signaling server successfully.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -116,18 +119,20 @@ Skylink.prototype.GET_PEERS_STATE = {
 /**
  * &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that this feature requires &lt;code&gt;&quot;isPrivileged&quot;&lt;/code&gt; flag to be enabled and
- *   &lt;code&gt;&quot;autoIntroduce&quot;&lt;/code&gt; flag to be disabled for the App Key, as only Users connecting
- *   using the App Key with this flag enabled (which we call Privileged Users / Peers)
- *   can introduce Peers in the same App space from other Rooms.
+ *   &lt;code&gt;&quot;autoIntroduce&quot;&lt;/code&gt; flag to be disabled for the App Key provided in the
+ *   &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;, as only Users connecting using
+ *   the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of
+ *   Peer IDs from Rooms within the same App space.
  *   &lt;a href=&quot;http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-&quot;&gt;
- *   Read more about Privileged App Key feature here&lt;/a&gt;.
+ *   Read more about privileged App Key feature here&lt;/a&gt;.
  * &lt;/blockquote&gt;
- * Contains the list of &lt;a href=&quot;#method_introducePeer&quot;&gt;&lt;code&gt;introducePeer&lt;/code&gt; method&lt;/a&gt; introduction states.
+ * The list of &lt;a href=&quot;#method_introducePeer&quot;&gt;&lt;code&gt;introducePeer&lt;/code&gt; method&lt;/a&gt; Peer introduction states.
  * @attribute INTRODUCE_STATE
  * @param {String} INTRODUCING &lt;small&gt;Value &lt;code&gt;&quot;enquired&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when request to introduce the pair of Peers has been made to the Signaling.
- * @param {String} ERROR &lt;small&gt;Value &lt;code&gt;&quot;error&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when request to introduce the pair of Peers has failed.
+ *   The value of the state when introduction request for the selected pair of Peers has been made to the Signaling server.
+ * @param {String} ERROR       &lt;small&gt;Value &lt;code&gt;&quot;error&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the state when introduction request made to the Signaling server
+ *   for the selected pair of Peers has failed.
  * @readOnly
  * @for Skylink
  * @since 0.6.1
@@ -175,41 +180,52 @@ Skylink.prototype._peerList = null;
 
 /**
  * &lt;blockquote class=&quot;info&quot;&gt;
- *   Note that this feature requires &lt;code&gt;&quot;isPrivileged&quot;&lt;/code&gt; flag to be enabled for the App Key, as
- *   only Users connecting using the App Key with this flag enabled (which we call Privileged Users / Peers)
- *   can retrieve the list of Peer IDs from Rooms within the same App space.
+ *   Note that this feature requires &lt;code&gt;&quot;isPrivileged&quot;&lt;/code&gt; flag to be enabled for the App Key
+ *   provided in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;, as only Users connecting using
+ *   the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of
+ *   Peer IDs from Rooms within the same App space.
  *   &lt;a href=&quot;http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-&quot;&gt;
- *   Read more about Privileged App Key feature here&lt;/a&gt;.
+ *   Read more about privileged App Key feature here&lt;/a&gt;.
  * &lt;/blockquote&gt;
- * Function that retrieves the list of Peer IDs from Rooms within in the same App space.
+ * Function that retrieves the list of Peer IDs from Rooms within the same App space.
  * @method getPeers
- * @param {Boolean} [showAll=false] The flag that indicates if Signaling should also retrieve
- *   the list of the Privileged Peer IDs.
- * &lt;small&gt;By default, the Signaling doesn&#x27;t return the Privileged Peer IDs&lt;/small&gt;
+ * @param {Boolean} [showAll=false] The flag if Signaling server should also return the list of privileged Peer IDs.
+ * &lt;small&gt;By default, the Signaling server does not include the list of privileged Peer IDs in the return result.&lt;/small&gt;
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
+ *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_getPeersStateChange&quot;&gt;
+ *   &lt;code&gt;getPeersStateChange&lt;/code&gt; event&lt;/a&gt; triggering &lt;code&gt;state&lt;/code&gt; parameter payload value as
+ *   &lt;code&gt;RECEIVED&lt;/code&gt; for request success.&lt;/small&gt;
  * @param {Error|String} callback.error The error result in request.
  *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are no errors in request&lt;/small&gt;
  * @param {JSON} callback.success The success result in request.
  *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are errors in request&lt;/small&gt;
  *   &lt;small&gt;Object signature matches the &lt;code&gt;peerList&lt;/code&gt; parameter payload received in the
- *      &lt;a href=&quot;#event_getPeersStateChange&quot;&gt;&lt;code&gt;getPeersStateChange&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
+ *   &lt;a href=&quot;#event_getPeersStateChange&quot;&gt;&lt;code&gt;getPeersStateChange&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
- *   &lt;li&gt;Retrieves the list of Peers ID in the App space.&lt;ul&gt;
- *     &lt;li&gt;Triggers &lt;a href=&quot;#event_getPeersStateChange&quot;&gt;&lt;code&gt;getPeersStateChange&lt;/code&gt; event&lt;/a&gt;
- *       with parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;ENQUIRED&lt;/code&gt;.&lt;/li&gt;
- *     &lt;li&gt;If retrieval of the list of Peer IDs is successful, it triggers &lt;a href=&quot;#event_getPeersStateChange&quot;&gt;
- *       &lt;code&gt;getPeersStateChange&lt;/code&gt; event&lt;/a&gt; with parameter payload &lt;code&gt;state&lt;/code&gt; as
- *       &lt;code&gt;RECEIVED&lt;/code&gt; after &lt;code&gt;ENQUIRED&lt;/code&gt;.&lt;/li&gt;
- *   &lt;/ul&gt;&lt;/li&gt;&lt;/ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_getPeersStateChange&quot;&gt;&lt;code&gt;getPeersStateChange&lt;/code&gt; event&lt;/a&gt; triggers parameter
+ *   payload &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;ENQUIRED&lt;/code&gt;.&lt;/li&gt;&lt;li&gt;&lt;ol&gt;
+ *   &lt;li&gt;When retrieval of the list of Peer IDs from Rooms within the same App space is successful,
+ *   &lt;a href=&quot;#event_getPeersStateChange&quot;&gt;&lt;code&gt;getPeersStateChange&lt;/code&gt; event&lt;/a&gt; triggers parameter
+ *   payload &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;RECEIVED&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @example
- *   skylinkDemo.on(&quot;getPeersStateChange&quot;, function (state, privilegedPeerId, peerList) {
- *		 if (state === skylinkDemo.GET_PEERS_STATE.RECEIVED) {
- *       // Display list
- *     }
+ *   // Example 1: Retrieving the un-privileged Peers
+ *   skylinkDemo.joinRoom(function (jRError, jRSuccess) {
+ *     if (jRError) return;
+ *     skylinkDemo.getPeers(function (error, success) {
+ *        if (error) return;
+ *        console.log(&quot;The list of only un-privileged Peers in the same App space -&gt;&quot;, success);
+ *     });
  *   });
  *
- *   skylinkDemo.getPeers();
+ *   // Example 2: Retrieving the all Peers (privileged or un-privileged)
+ *   skylinkDemo.joinRoom(function (jRError, jRSuccess) {
+ *     if (jRError) return;
+ *     skylinkDemo.getPeers(true, function (error, success) {
+ *        if (error) return;
+ *        console.log(&quot;The list of all Peers in the same App space -&gt;&quot;, success);
+ *     });
+ *   });
  * @for Skylink
  * @since 0.6.1
  */
@@ -252,39 +268,39 @@ Skylink.prototype.getPeers = function(showAll, callback){
 /**
  * &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that this feature requires &lt;code&gt;&quot;isPrivileged&quot;&lt;/code&gt; flag to be enabled and
- *   &lt;code&gt;&quot;autoIntroduce&quot;&lt;/code&gt; flag to be disabled for the App Key, as only Users connecting
- *   using the App Key with this flag enabled (which we call Privileged Users / Peers)
- *   can introduce Peers in the same App space from other Rooms.
+ *   &lt;code&gt;&quot;autoIntroduce&quot;&lt;/code&gt; flag to be disabled for the App Key provided in the
+ *   &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;, as only Users connecting using
+ *   the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of
+ *   Peer IDs from Rooms within the same App space.
  *   &lt;a href=&quot;http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-&quot;&gt;
- *   Read more about Privileged App Key feature here&lt;/a&gt;.
+ *   Read more about privileged App Key feature here&lt;/a&gt;.
  * &lt;/blockquote&gt;
- * Function that introduces a pair of Peers to start Peer connection with each other.
+ * Function that selects and introduces a pair of Peers to start connection with each other.
  * @method introducePeer
- * @param {String} sendingPeerId The Peer ID of the Peer that will start Peer connection with &lt;code&gt;receivingPeerId&lt;/code&gt;.
- * @param {String} receivingPeerId The Peer ID of the Peer that will be connected with &lt;code&gt;sendingPeerId&lt;/code&gt;.
- * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
- *   &lt;li&gt;Introduces a Peer to another Peer.&lt;ul&gt;
- *     &lt;li&gt;If introduction of Peer to Peer is successful, it triggers &lt;a href=&quot;#event_introduceStateChange&quot;&gt;
- *       &lt;code&gt;introduceStateChange&lt;/code&gt; event&lt;/a&gt; with parameter payload &lt;code&gt;state&lt;/code&gt; as
- *       &lt;code&gt;INTRODUCING&lt;/code&gt;.&lt;/li&gt;
-  *     &lt;li&gt;If introduction of Peer to Peer had failed, it triggers &lt;a href=&quot;#event_introduceStateChange&quot;&gt;
- *       &lt;code&gt;introduceStateChange&lt;/code&gt; event&lt;/a&gt; with parameter payload &lt;code&gt;state&lt;/code&gt; as
- *       &lt;code&gt;ERROR&lt;/code&gt;.&lt;/li&gt;
- *   &lt;/ul&gt;&lt;/li&gt;&lt;/ol&gt;
+ * @param {String} sendingPeerId The Peer ID to be connected with &lt;code&gt;receivingPeerId&lt;/code&gt;.
+ * @param {String} receivingPeerId The Peer ID to be connected with &lt;code&gt;sendingPeerId&lt;/code&gt;.
+ * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;&lt;li&gt;&lt;ol&gt;
+ *   &lt;li&gt;When introduction request for the selected pair of Peers has been made to the Signaling server,
+ *   &lt;a href=&quot;#event_introduceStateChange&quot;&gt;&lt;code&gt;introduceStateChange&lt;/code&gt; event&lt;/a&gt; triggers parameter
+ *   payload &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;INTRODUCING&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;When introduction request made for the selected pair of Peers to the Signaling server has failed,
+ *   &lt;a href=&quot;#event_introduceStateChange&quot;&gt;&lt;code&gt;introduceStateChange&lt;/code&gt; event&lt;/a&gt; triggers parameter
+ *   payload &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;ERROR&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @example
+ *   // Example 1: Introduce a pair of Peers
  *   skylinkDemo.on(&quot;introduceStateChange&quot;, function (state, privilegedPeerId, sendingPeerId, receivingPeerId) {
  *	   if (state === skylinkDemo.INTRODUCE_STATE.INTRODUCING) {
- *       // Display to UI that &quot;sendingPeerId&quot; is introducing (or connecting) to &quot;receivingPeerId&quot;
+ *       console.log(&quot;Peer &#x27;&quot; + sendingPeerId + &quot;&#x27; has been introduced to &#x27;&quot; + receivingPeerId + &quot;&#x27;&quot;);
  *     }
  *   });
  *
- *   skylinkDemo.on(&quot;getPeersStateChange&quot;, function (state, privilegedPeerId, peerList) {
- *		 if (state === skylinkDemo.GET_PEERS_STATE.RECEIVED) {
- *       skylinkDemo.introducePeer(peerList.roomA[0], peerList.roomB[0]);
- *     }
+ *   skylinkDemo.joinRoom(function (jRError, jRSuccess) {
+ *     if (jRError) return;
+ *     skylinkDemo.getPeers(function (gPError, gPSuccess) {
+ *        if (gPError) return;
+ *        skylinkDemo.introducePeer(gPSuccess.roomName[0], gPSuccess.roomName[1]);
+ *     });
  *   });
- *
- *   skylinkDemo.getPeers();
  * @for Skylink
  * @since 0.6.1
  */

@@ -42,7 +42,7 @@ Skylink.prototype.SYSTEM_ACTION = {
  *   <small>Happens during <a href="#method_joinRoom"><code>joinRoom()</code> method</a> request.</small>
  *   <small>Results with: <code>REJECT</code></small>
  * @param {String} FAST_MESSAGE        <small>Value <code>"fastmsg"</code></small>
- *    The value of the reason code when User is flooding socket messages to the Signaling
+ *    The value of the reason code when User is flooding socket messages to the Signaling server
  *    that is sent too quickly within less than a second interval.
  *    <small>Happens after Room session has started. This can be caused by various methods like
  *    <a href="#method_sendMessage"><code>sendMessage()</code> method</a>,
