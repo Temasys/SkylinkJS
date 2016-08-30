@@ -1,93 +1,28 @@
 /**
- * These are the list of Peer connection handshake states that Skylink would trigger.
- * - Do not be confused with {{#crossLink "Skylink/PEER_CONNECTION_STATE:attr"}}PEER_CONNECTION_STATE{{/crossLink}}.
- *   This is the Peer recognition connection that is established with the platform signaling protocol, and not
- *   the Peer connection signaling state itself.
- * - In this case, this happens before the {{#crossLink "Skylink/PEER_CONNECTION_STATE:attr"}}PEER_CONNECTION_STATE
- *   handshaking states. {{/crossLink}} The <code>OFFER</code> and <code>ANSWER</code> relates to the
- *   {{#crossLink "Skylink/PEER_CONNECTION_STATE:attr"}}PEER_CONNECTION_STATE states{{/crossLink}}.
- * - For example as explanation how these state works below, let's make self as the offerer and
- *   the connecting Peer as the answerer.
+ * The list of Peer connection states after <a href="#method_joinRoom"><code>joinRoom()</code> method</a>
+ * was successful.
  * @attribute HANDSHAKE_PROGRESS
- * @type JSON
- * @param {String} ENTER <small>Value <code>"enter"</code></small>
- *   The state when Peer have received <code>ENTER</code> from self,
- *   and Peer connection with self is initialised with self.<br>
- * This state will occur for both self and Peer as <code>ENTER</code>
- *   message is sent to ping for Peers in the room.<br>
- * At this state, Peer would sent <code>WELCOME</code> to the peer to
- *   start the session description connection handshake.<br>
- * <table class="table table-condensed">
- *   <thead><tr><th class="col-md-1"></th><th class="col-md-5">Self</th><th>Peer</th></thead>
- *   <tbody>
- *     <tr><td class="col-md-1">1.</td>
- *       <td class="col-md-5">Sends <code>ENTER</code></td><td>Sends <code>ENTER</code></td></tr>
- *     <tr><td class="col-md-1">2.</td>
- *       <td class="col-md-5">-</td><td>Receives self <code>ENTER</code></td></tr>
- *     <tr><td class="col-md-1">3.</td>
- *       <td class="col-md-5">-</td><td>Sends self <code>WELCOME</code></td></tr>
- *   </tbody>
- * </table>
+ * @param {String} ENTER   <small>Value <code>"enter"</code></small>
+ *   The value of the connection state when Peer has just entered the Room.
+ *   <small>At this stage, <a href="#event_peerJoined"><code>peerJoined</code> event</a>
+ *   is triggered.</small>
  * @param {String} WELCOME <small>Value <code>"welcome"</code></small>
- *   The state when self have received <code>WELCOME</code> from Peer,
- *   and Peer connection is initialised with Peer.<br>
- * At this state, self would start the session description connection handshake and
- *   send the local <code>OFFER</code> session description to Peer.
- * <table class="table table-condensed">
- *   <thead><tr><th class="col-md-1"></th><th class="col-md-5">Self</th><th>Peer</th></thead>
- *   <tbody>
- *     <tr><td class="col-md-1">4.</td>
- *       <td class="col-md-5">Receives <code>WELCOME</code></td><td>-</td></tr>
- *     <tr><td class="col-md-1">5.</td>
- *       <td class="col-md-5">Generates <code>OFFER</code></td><td>-</td></tr>
- *     <tr><td class="col-md-1">6.</td>
- *       <td class="col-md-5">Sets local <code>OFFER</code><sup>REF</sup></td><td>-</td></tr>
- *     <tr><td class="col-md-1">7.</td>
- *       <td class="col-md-5">Sends <code>OFFER</code></td><td>-</td></tr>
- *   </tbody>
- * </table>
- * <sup>REF</sup>: The will cause {{#crossLink "Skylink/PEER_CONNECTION_STATE:attr"}}PEER_CONNECTION_STATE{{/crossLink}}
- *   state go to <code>HAVE_LOCAL_OFFER</code>.
- * @param {String} OFFER <small>Value <code>"offer"</code></small>
- *   The state when Peer received <code>OFFER</code> from self.
- * At this state, Peer would set the remote <code>OFFER</code> session description and
- *   start to send local <code>ANSWER</code> session description to self.<br>
- * <table class="table table-condensed">
- *   <thead><tr><th class="col-md-1"></th><th class="col-md-5">Self</th><th>Peer</th></thead>
- *   <tbody>
- *     <tr><td class="col-md-1">8.</td>
- *        <td class="col-md-5">-</td><td>Receives <code>OFFER</code></td></tr>
- *     <tr><td class="col-md-1">9.</td>
- *        <td class="col-md-5">-</td><td>Sets remote <code>OFFER</code><sup>REF</sup></td></tr>
- *     <tr><td class="col-md-1">10.</td>
- *        <td class="col-md-5">-</td><td>Generates <code>ANSWER</code></td></tr>
- *     <tr><td class="col-md-1">11.</td>
- *        <td class="col-md-5">-</td><td>Sets local <code>ANSWER</code></td></tr>
- *     <tr><td class="col-md-1">12.</td>
- *        <td class="col-md-5">-</td><td>Sends <code>ANSWER</code></td></tr>
- *   </tbody>
- * </table>
- * <sup>REF</sup>: The will cause {{#crossLink "Skylink/PEER_CONNECTION_STATE:attr"}}PEER_CONNECTION_STATE{{/crossLink}}
- *   state go to <code>HAVE_REMOTE_OFFER</code>.
- * @param {String} ANSWER <small>Value <code>"answer"</code></small>
- *   The state when self received <code>ANSWER</code> from Peer.<br>
- * At this state, self would set the remote <code>ANSWER</code> session description and
- *   the connection handshaking progress has been completed.<br>
- * <table class="table table-condensed">
- *   <thead><tr><th class="col-md-1"></th><th class="col-md-5">Self</th><th>Peer</th></thead>
- *   <tbody>
- *     <tr><td class="col-md-1">13.</td>
- *        <td class="col-md-5">Receives <code>ANSWER</code></td><td>-</td></tr>
- *     <tr><td class="col-md-1">14.</td>
- *        <td class="col-md-5">Sets remote <code>ANSWER</code></td><td>-</td></tr>
- *   </tbody>
- * </table>
- * @param {String} ERROR <small>Value <code>"error"</code></small>
- *   The state when connection handshake has occurred and exception,
- *   in this which the connection handshake could have been aborted abruptly
- *   and no Peer connection is established.
+ *   The value of the connection state when Peer is aware that User has entered the Room.
+ *   <small>At this stage, <a href="#event_peerJoined"><code>peerJoined</code> event</a>
+ *   is triggered and Peer connection may commence.</small>
+ * @param {String} OFFER   <small>Value <code>"offer"</code></small>
+ *   The value of the connection state when Peer is generating a <code>"offer"</code> session
+ *   description to send to User to start streaming connection.
+ * @param {String} ANSWER  <small>Value <code>"answer"</code></small>
+ *   The value of the connection state when User is generating a <code>"answer"</code> session
+ *   description to send to Peer to establish streaming connection.
+ * @param {String} ERROR   <small>Value <code>"error"</code></small>
+ *   The value of the connection state when User has failed to establish connection with Peer.
+ *   <small>This happens when the <code>RTCPeerConnection</code> API interface receives
+ *   <code>setLocalDescription()</code>, <code>setRemoteDescription()</code>,
+ *   <code>createOffer()</code> or <code>createAnswer()</code> errors in result.
+ * @type JSON
  * @readOnly
- * @component Peer
  * @for Skylink
  * @since 0.1.0
  */
