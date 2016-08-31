@@ -90,23 +90,23 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * These are the list of available video codecs settings that Skylink would use
- *   when streaming video stream with Peers.
- * - The video codec would be used if the self and Peer&#x27;s browser supports the selected codec.
- * - This would default to the browser selected codec. In most cases, option &lt;code&gt;VP8&lt;/code&gt; is
- *   used by default.
+ * &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that if the video codec is not supported, the SDK will not configure the local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; or
+ *   &lt;code&gt;&quot;answer&quot;&lt;/code&gt; session description to prefer the codec.
+ * &lt;/blockquote&gt;
+ * The list of available video codecs to set as the preferred video codec to use to encode
+ * sending video data when available encoded video codec for Peer connections
+ * configured in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;.
  * @attribute VIDEO_CODEC
- * @param {String} AUTO &lt;small&gt;&lt;b&gt;DEFAULT&lt;/b&gt; | Value &lt;code&gt;&quot;auto&quot;&lt;/code&gt;&lt;/small&gt;
- *   The option to let Skylink use any video codec selected by the browser generated session description.
- * @param {String} VP8 &lt;small&gt;Value &lt;code&gt;&quot;VP8&quot;&lt;/code&gt;&lt;/small&gt;
- *   The option to let Skylink use the [VP8](https://en.wikipedia.org/wiki/VP8) codec.&lt;br&gt;
- *   This is the common and mandantory video codec used by most browsers.
+ * @param {String} AUTO &lt;small&gt;Value &lt;code&gt;&quot;auto&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to not prefer any video codec but rather use the created
+ *   local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; / &lt;code&gt;&quot;answer&quot;&lt;/code&gt; session description video codec preference.
+ * @param {String} VP8  &lt;small&gt;Value &lt;code&gt;&quot;VP8&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to prefer the &lt;a href=&quot;https://en.wikipedia.org/wiki/VP8&quot;&gt;VP8&lt;/a&gt; video codec.
  * @param {String} H264 &lt;small&gt;Value &lt;code&gt;&quot;H264&quot;&lt;/code&gt;&lt;/small&gt;
- *   The option to let Skylink use the [H264](https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC) codec.&lt;br&gt;
- *   This only works if the browser supports the H264 video codec.
+ *   The value of the option to prefer the &lt;a href=&quot;https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC&quot;&gt;H264&lt;/a&gt; video codec.
  * @type JSON
  * @readOnly
- * @component Stream
  * @for Skylink
  * @since 0.5.10
  */
@@ -114,91 +114,126 @@ Skylink.prototype.VIDEO_CODEC = {
   AUTO: &#x27;auto&#x27;,
   VP8: &#x27;VP8&#x27;,
   H264: &#x27;H264&#x27;
+  //H264UC: &#x27;H264UC&#x27;
 };
 
 /**
- * These are the list of available audio codecs settings that Skylink would use
- *   when streaming audio stream with Peers.
- * - The audio codec would be used if the self and Peer&#x27;s browser supports the selected codec.
- * - This would default to the browser selected codec. In most cases, option &lt;code&gt;OPUS&lt;/code&gt; is
- *   used by default.
+ * &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that if the audio codec is not supported, the SDK will not configure the local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; or
+ *   &lt;code&gt;&quot;answer&quot;&lt;/code&gt; session description to prefer the codec.
+ * &lt;/blockquote&gt;
+ * The list of available audio codecs to set as the preferred audio codec to use to encode
+ * sending audio data when available encoded audio codec for Peer connections
+ * configured in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;.
  * @attribute AUDIO_CODEC
- * @param {String} AUTO &lt;small&gt;&lt;b&gt;DEFAULT&lt;/b&gt; | Value &lt;code&gt;&quot;auto&quot;&lt;/code&gt;&lt;/small&gt;
- *   The option to let Skylink use any audio codec selected by the browser generated session description.
+ * @param {String} AUTO &lt;small&gt;Value &lt;code&gt;&quot;auto&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to not prefer any audio codec but rather use the created
+ *   local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; / &lt;code&gt;&quot;answer&quot;&lt;/code&gt; session description audio codec preference.
  * @param {String} OPUS &lt;small&gt;Value &lt;code&gt;&quot;opus&quot;&lt;/code&gt;&lt;/small&gt;
- *   The option to let Skylink use the [OPUS](https://en.wikipedia.org/wiki/Opus_(audio_format)) codec.&lt;br&gt;
- *   This is the common and mandantory audio codec used.
+ *   The value of the option to prefer the &lt;a href=&quot;https://en.wikipedia.org/wiki/Opus_(audio_format)&quot;&gt;OPUS&lt;/a&gt; audio codec.
  * @param {String} ISAC &lt;small&gt;Value &lt;code&gt;&quot;ISAC&quot;&lt;/code&gt;&lt;/small&gt;
- *   The option to let Skylink use the [iSAC](https://en.wikipedia.org/wiki/Internet_Speech_Audio_Codec).&lt;br&gt;
- *   This only works if the browser supports the iSAC video codec.
+ *   The value of the option to prefer the &lt;a href=&quot;https://en.wikipedia.org/wiki/Internet_Speech_Audio_Codec&quot;&gt;ISAC&lt;/a&gt; audio codec.
  * @type JSON
  * @readOnly
- * @component Stream
  * @for Skylink
  * @since 0.5.10
  */
 Skylink.prototype.AUDIO_CODEC = {
   AUTO: &#x27;auto&#x27;,
   ISAC: &#x27;ISAC&#x27;,
-  OPUS: &#x27;opus&#x27;
+  OPUS: &#x27;opus&#x27;,
+  //ILBC: &#x27;ILBC&#x27;,
+  //G711: &#x27;G711&#x27;,
+  //G722: &#x27;G722&#x27;,
+  //SILK: &#x27;SILK&#x27;
 };
 
 /**
- * These are the list of suggested video resolutions that Skylink should configure
- *   when retrieving self user media video stream.
- * - Setting the resolution may not force set the resolution provided as it
- *   depends on the how the browser handles the resolution.
- * - It&#x27;s recommended to use video resolution option to maximum &lt;code&gt;FHD&lt;/code&gt;, as the other
- *   resolution options may be unrealistic and create performance issues. However, we provide them
- *   to allow developers to test with the browser capability, but do use it at your own risk.
- * - The higher the resolution, the more CPU usage might be used, hence it&#x27;s recommended to
- *   use the default option &lt;code&gt;VGA&lt;/code&gt;.
- * - This follows the
- *   [Wikipedia Graphics display resolution page](https://en.wikipedia.org/wiki/Graphics_display_resolution#Video_Graphics_Array)
- * @param {JSON} QQVGA &lt;small&gt;Value &lt;code&gt;{ width: 160, height: 120 }&lt;/code&gt; | Aspect Ratio &lt;code&gt;4:3&lt;/code&gt;&lt;/small&gt;
- *   The option to use QQVGA resolution.
- * @param {JSON} HQVGA &lt;small&gt;Value &lt;code&gt;{ width: 240, height: 160 }&lt;/code&gt; | Aspect Ratio &lt;code&gt;3:2&lt;/code&gt;&lt;/small&gt;
- *   The option to use HQVGA resolution.
- * @param {JSON} QVGA &lt;small&gt;Value &lt;code&gt;{ width: 320, height: 240 }&lt;/code&gt; | Aspect Ratio &lt;code&gt;4:3&lt;/code&gt;&lt;/small&gt;
- *   The option to use QVGA resolution.
- * @param {JSON} WQVGA &lt;small&gt;Value &lt;code&gt;{ width: 384, height: 240 }&lt;/code&gt; | Aspect Ratio &lt;code&gt;16:10&lt;/code&gt;&lt;/small&gt;
- *   The option to use WQVGA resolution.
- * @param {JSON} HVGA &lt;small&gt;Value &lt;code&gt;{ width: 480, height: 320 }&lt;/code&gt; | Aspect Ratio &lt;code&gt;3:2&lt;/code&gt;&lt;/small&gt;
- *   The option to use HVGA resolution.
- * @param {JSON} VGA &lt;small&gt;&lt;b&gt;DEFAULT&lt;/b&gt; | Value &lt;code&gt;{ width: 640, height: 480 }&lt;/code&gt; | Aspect Ratio &lt;code&gt;4:3&lt;/code&gt;&lt;/small&gt;
- *   The option to use VGA resolution.
- * @param {JSON} WVGA &lt;small&gt;Value &lt;code&gt;{ width: 768, height: 480 }&lt;/code&gt; | Aspect Ratio &lt;code&gt;16:10&lt;/code&gt;&lt;/small&gt;
- *   The option to use WVGA resolution.
- * @param {JSON} FWVGA &lt;small&gt;Value &lt;code&gt;{ width: 854, height: 480 }&lt;/code&gt; | Aspect Ratio &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
- *   The option to use FWVGA resolution.
- * @param {JSON} SVGA &lt;small&gt;Value &lt;code&gt;{ width: 800, height: 600 }&lt;/code&gt; | Aspect Ratio &lt;code&gt;4:3&lt;/code&gt;&lt;/small&gt;
- *   The option to use SVGA resolution.
- * @param {JSON} DVGA &lt;small&gt;Value &lt;code&gt;{ width: 960, height: 640 }&lt;/code&gt; | Aspect Ratio &lt;code&gt;3:2&lt;/code&gt;&lt;/small&gt;
- *   The option to use DVGA resolution.
- * @param {JSON} WSVGA &lt;small&gt;Value &lt;code&gt;{ width: 1024, height: 576 }&lt;/code&gt; | Aspect Ratio &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
- *   The option to use WSVGA resolution.
- * @param {JSON} HD &lt;small&gt;Value &lt;code&gt;{ width: 1280, height: 720 }&lt;/code&gt; | Aspect Ratio &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
- *   The option to use HD resolution.
- * @param {JSON} HDPLUS &lt;small&gt;Value &lt;code&gt;{ width: 1600, height: 900 }&lt;/code&gt; | Aspect Ratio &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
- *   The option to use HDPLUS resolution.
- * @param {JSON} FHD &lt;small&gt;Value &lt;code&gt;{ width: 1920, height: 1080 }&lt;/code&gt; | Aspect Ratio &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
- *   The option to use FHD resolution.
- * @param {JSON} QHD &lt;small&gt;Value &lt;code&gt;{ width: 2560, height: 1440 }&lt;/code&gt; | Aspect Ratio &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
- *   The option to use QHD resolution.
- * @param {JSON} WQXGAPLUS &lt;small&gt;Value &lt;code&gt;{ width: 3200, height: 1800 }&lt;/code&gt; | Aspect Ratio &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
- *   The option to use WQXGAPLUS resolution.
- * @param {JSON} UHD &lt;small&gt;Value &lt;code&gt;{ width: 3840, height: 2160 }&lt;/code&gt; | Aspect Ratio &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
- *   The option to use UHD resolution.
- * @param {JSON} UHDPLUS &lt;small&gt;Value &lt;code&gt;{ width: 5120, height: 2880 }&lt;/code&gt; | Aspect Ratio &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
- *   The option to use UHDPLUS resolution.
- * @param {JSON} FUHD &lt;small&gt;Value &lt;code&gt;{ width: 7680, height: 4320 }&lt;/code&gt; | Aspect Ratio &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
- *   The option to use FUHD resolution.
- * @param {JSON} QUHD &lt;small&gt;Value &lt;code&gt;{ width: 15360, height: 8640 }&lt;/code&gt; | Aspect Ratio &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
- *   The option to use QUHD resolution.
+ * &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that currently &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt; only configures
+ *   the maximum resolution of the Stream due to browser interopability and support.
+ * &lt;/blockquote&gt;
+ * The list of &lt;a href=&quot;https://en.wikipedia.org/wiki/Graphics_display_resolution#Video_Graphics_Array&quot;&gt;
+ * video resolutions&lt;/a&gt; sets configured in the &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt;.
+ * @param {JSON} QQVGA &lt;small&gt;Value &lt;code&gt;{ width: 160, height: 120 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to configure QQVGA resolution.
+ *   &lt;small&gt;Aspect ratio: &lt;code&gt;4:3&lt;/code&gt;&lt;/small&gt;
+ *   &lt;small&gt;Note that configurating this resolution may not be supported.&lt;/small&gt;
+ * @param {JSON} HQVGA &lt;small&gt;Value &lt;code&gt;{ width: 240, height: 160 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to configure HQVGA resolution.
+ *   &lt;small&gt;Aspect ratio: &lt;code&gt;3:2&lt;/code&gt;&lt;/small&gt;
+ *   &lt;small&gt;Note that configurating this resolution may not be supported.&lt;/small&gt;
+ * @param {JSON} QVGA &lt;small&gt;Value &lt;code&gt;{ width: 320, height: 240 }4:3&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to configure QVGA resolution.
+ *   &lt;small&gt;Aspect ratio: &lt;code&gt;4:3&lt;/code&gt;&lt;/small&gt;
+ * @param {JSON} WQVGA &lt;small&gt;Value &lt;code&gt;{ width: 384, height: 240 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to configure WQVGA resolution.
+ *   &lt;small&gt;Aspect ratio: &lt;code&gt;16:10&lt;/code&gt;&lt;/small&gt;
+ *   &lt;small&gt;Note that configurating this resolution may not be supported.&lt;/small&gt;
+ * @param {JSON} HVGA &lt;small&gt;Value &lt;code&gt;{ width: 480, height: 320 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to configure HVGA resolution.
+ *   &lt;small&gt;Aspect ratio: &lt;code&gt;3:2&lt;/code&gt;&lt;/small&gt;
+ *   &lt;small&gt;Note that configurating this resolution may not be supported.&lt;/small&gt;
+ * @param {JSON} VGA &lt;small&gt;Value &lt;code&gt;{ width: 640, height: 480 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to configure VGA resolution.
+ *   &lt;small&gt;Aspect ratio: &lt;code&gt;4:3&lt;/code&gt;&lt;/small&gt;
+ * @param {JSON} WVGA &lt;small&gt;Value &lt;code&gt;{ width: 768, height: 480 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to configure WVGA resolution.
+ *   &lt;small&gt;Aspect ratio: &lt;code&gt;16:10&lt;/code&gt;&lt;/small&gt;
+ *   &lt;small&gt;Note that configurating this resolution may not be supported.&lt;/small&gt;
+ * @param {JSON} FWVGA &lt;small&gt;Value &lt;code&gt;{ width: 854, height: 480 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to configure FWVGA resolution.
+ *   &lt;small&gt;Aspect ratio: &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
+ *   &lt;small&gt;Note that configurating this resolution may not be supported.&lt;/small&gt;
+ * @param {JSON} SVGA &lt;small&gt;Value &lt;code&gt;{ width: 800, height: 600 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to configure SVGA resolution.
+ *   &lt;small&gt;Aspect ratio: &lt;code&gt;4:3&lt;/code&gt;&lt;/small&gt;
+ *   &lt;small&gt;Note that configurating this resolution may not be supported.&lt;/small&gt;
+ * @param {JSON} DVGA &lt;small&gt;Value &lt;code&gt;{ width: 960, height: 640 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to configure DVGA resolution.
+ *   &lt;small&gt;Aspect ratio: &lt;code&gt;3:2&lt;/code&gt;&lt;/small&gt;
+ *   &lt;small&gt;Note that configurating this resolution may not be supported.&lt;/small&gt;
+ * @param {JSON} WSVGA &lt;small&gt;Value &lt;code&gt;{ width: 1024, height: 576 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to configure WSVGA resolution.
+ *   &lt;small&gt;Aspect ratio: &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
+ * @param {JSON} HD &lt;small&gt;Value &lt;code&gt;{ width: 1280, height: 720 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to configure HD resolution.
+ *   &lt;small&gt;Aspect ratio: &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
+ * @param {JSON} HDPLUS &lt;small&gt;Value &lt;code&gt;{ width: 1600, height: 900 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to configure HDPLUS resolution.
+ *   &lt;small&gt;Aspect ratio: &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
+ *   &lt;small&gt;Note that configurating this resolution may not be supported.&lt;/small&gt;
+ * @param {JSON} FHD &lt;small&gt;Value &lt;code&gt;{ width: 1920, height: 1080 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to configure FHD resolution.
+ *   &lt;small&gt;Aspect ratio: &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
+ *   &lt;small&gt;Note that configurating this resolution may not be supported.&lt;/small&gt;
+ * @param {JSON} QHD &lt;small&gt;Value &lt;code&gt;{ width: 2560, height: 1440 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to configure QHD resolution.
+ *   &lt;small&gt;Aspect ratio: &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
+ *   &lt;small&gt;Note that configurating this resolution may not be supported.&lt;/small&gt;
+ * @param {JSON} WQXGAPLUS &lt;small&gt;Value &lt;code&gt;{ width: 3200, height: 1800 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to configure WQXGAPLUS resolution.
+ *   &lt;small&gt;Aspect ratio: &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
+ *   &lt;small&gt;Note that configurating this resolution may not be supported.&lt;/small&gt;
+ * @param {JSON} UHD &lt;small&gt;Value &lt;code&gt;{ width: 3840, height: 2160 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to configure UHD resolution.
+ *   &lt;small&gt;Aspect ratio: &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
+ *   &lt;small&gt;Note that configurating this resolution may not be supported.&lt;/small&gt;
+ * @param {JSON} UHDPLUS &lt;small&gt;Value &lt;code&gt;{ width: 5120, height: 2880 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to configure UHDPLUS resolution.
+ *   &lt;small&gt;Aspect ratio: &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
+ *   &lt;small&gt;Note that configurating this resolution may not be supported.&lt;/small&gt;
+ * @param {JSON} FUHD &lt;small&gt;Value &lt;code&gt;{ width: 7680, height: 4320 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to configure FUHD resolution.
+ *   &lt;small&gt;Aspect ratio: &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
+ *   &lt;small&gt;Note that configurating this resolution may not be supported.&lt;/small&gt;
+ * @param {JSON} QUHD &lt;small&gt;Value &lt;code&gt;{ width: 15360, height: 8640 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to configure QUHD resolution.
+ *   &lt;small&gt;Aspect ratio: &lt;code&gt;16:9&lt;/code&gt;&lt;/small&gt;
+ *   &lt;small&gt;Note that configurating this resolution may not be supported.&lt;/small&gt;
  * @attribute VIDEO_RESOLUTION
  * @type JSON
  * @readOnly
- * @component Stream
  * @for Skylink
  * @since 0.5.6
  */

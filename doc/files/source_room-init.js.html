@@ -490,15 +490,19 @@ Skylink.prototype._room = null;
  *   during request to Auth server and socket connections to Signaling server
  *   when accessing &lt;code&gt;window.location.protocol&lt;/code&gt; value is &lt;code&gt;&quot;http:&quot;&lt;/code&gt;.
  *   &lt;small&gt;By default, &lt;code&gt;&quot;https:&quot;&lt;/code&gt; protocol connections uses HTTPS connections.&lt;/small&gt;
- * @param {String} [options.audioCodec] The option to configure
- *   the preferred sending audio codec when available for Peer connection.
+ * @param {String} [options.audioCodec] &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that if the audio codec is not supported, the SDK will not configure the local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; or
+ *   &lt;code&gt;&quot;answer&quot;&lt;/code&gt; session description to prefer the codec.&lt;/blockquote&gt;
+ *   The option to configure the preferred audio codec
+ *   to use to encode sending audio data when available for Peer connection.
  * - When not provided, its value is &lt;code&gt;AUTO&lt;/code&gt;.
- *   &lt;small&gt;Note that the audio codec selected will be determined by the browser audio codecs supports.&lt;/small&gt;
  *   [Rel: Skylink.AUDIO_CODEC]
- * @param {String} [options.videoCodec] The option to configure
- *   the preferred sending video codec when available for Peer connection.
+ * @param {String} [options.videoCodec] &lt;blockquote class=&quot;info&quot;&gt;
+ *    Note that if the video codec is not supported, the SDK will not configure the local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; or
+ *   &lt;code&gt;&quot;answer&quot;&lt;/code&gt; session description to prefer the codec.&lt;/blockquote&gt;
+ *   The option to configure the preferred video codec
+ *   to use to encode sending video data when available for Peer connection.
  * - When not provided, its value is &lt;code&gt;AUTO&lt;/code&gt;.
- *   &lt;small&gt;Note that the video codec selected will be determined by the browser video codecs supports.&lt;/small&gt;
  *   [Rel: Skylink.VIDEO_CODEC]
  * @param {Number} [options.socketTimeout=20000] The timeout for each attempts for socket connection
  *   with the Signaling server to indicate that connection has timed out and has failed to establish.
