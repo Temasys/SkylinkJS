@@ -106,18 +106,18 @@
  *   The value of the state when Peer connection has found a suitable matching pair of
  *   ICE candidates to establish ICE connection but is still checking for a better
  *   suitable matching pair of ICE candidates for the best ICE connectivity.
- *   &lt;small&gt;At this stage, ICE connection is already established and audio, video and
+ *   &lt;small&gt;At this state, ICE connection is already established and audio, video and
  *   data streaming has already started.&lt;/small&gt;
  * @param {String} COMPLETED      &lt;small&gt;Value &lt;code&gt;&quot;completed&quot;&lt;/code&gt;&lt;/small&gt;
  *   The value of the state when Peer connection has found the best suitable matching pair
  *   of ICE candidates to establish ICE connection and checking has stopped.
- *   &lt;small&gt;At this stage, ICE connection is already established and audio, video and
+ *   &lt;small&gt;At this state, ICE connection is already established and audio, video and
  *   data streaming has already started. This may happpen after &lt;code&gt;CONNECTED&lt;/code&gt;.&lt;/small&gt;
  * @param {String} FAILED         &lt;small&gt;Value &lt;code&gt;&quot;failed&quot;&lt;/code&gt;&lt;/small&gt;
  *   The value of the state when Peer connection ICE connection has failed.
  * @param {String} DISCONNECTED   &lt;small&gt;Value &lt;code&gt;&quot;disconnected&quot;&lt;/code&gt;&lt;/small&gt;
  *   The value of the state when Peer connection ICE connection is disconnected.
- *   &lt;small&gt;At this stage, the Peer connection may attempt to revive the ICE connection.
+ *   &lt;small&gt;At this state, the Peer connection may attempt to revive the ICE connection.
  *   This may happen due to flaky network conditions.&lt;/small&gt;
  * @param {String} CLOSED         &lt;small&gt;Value &lt;code&gt;&quot;closed&quot;&lt;/code&gt;&lt;/small&gt;
  *   The value of the state when Peer connection ICE connection has closed.
@@ -149,7 +149,8 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
  *   This simply configures the TURN ICE server urls &lt;code?transport=(protocol)&lt;/code&gt; query option when constructing
  *   the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.
  * &lt;/blockquote&gt;
- * The list of TURN network transport protocols configuration options when constructing Peer connections.
+ * The list of TURN network transport protocols options when constructing Peer connections
+ * configured in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;.
  * &lt;small&gt;Example &lt;code&gt;.urls&lt;/code&gt; inital input: [&lt;code&gt;&quot;turn:server.com?transport=tcp&quot;&lt;/code&gt;,
  * &lt;code&gt;&quot;turn:server1.com:3478&quot;&lt;/code&gt;, &lt;code&gt;&quot;turn:server.com?transport=udp&quot;&lt;/code&gt;]&lt;/small&gt;
  * @attribute TURN_TRANSPORT

@@ -15,18 +15,18 @@
  *   The value of the state when Peer connection has found a suitable matching pair of
  *   ICE candidates to establish ICE connection but is still checking for a better
  *   suitable matching pair of ICE candidates for the best ICE connectivity.
- *   <small>At this stage, ICE connection is already established and audio, video and
+ *   <small>At this state, ICE connection is already established and audio, video and
  *   data streaming has already started.</small>
  * @param {String} COMPLETED      <small>Value <code>"completed"</code></small>
  *   The value of the state when Peer connection has found the best suitable matching pair
  *   of ICE candidates to establish ICE connection and checking has stopped.
- *   <small>At this stage, ICE connection is already established and audio, video and
+ *   <small>At this state, ICE connection is already established and audio, video and
  *   data streaming has already started. This may happpen after <code>CONNECTED</code>.</small>
  * @param {String} FAILED         <small>Value <code>"failed"</code></small>
  *   The value of the state when Peer connection ICE connection has failed.
  * @param {String} DISCONNECTED   <small>Value <code>"disconnected"</code></small>
  *   The value of the state when Peer connection ICE connection is disconnected.
- *   <small>At this stage, the Peer connection may attempt to revive the ICE connection.
+ *   <small>At this state, the Peer connection may attempt to revive the ICE connection.
  *   This may happen due to flaky network conditions.</small>
  * @param {String} CLOSED         <small>Value <code>"closed"</code></small>
  *   The value of the state when Peer connection ICE connection has closed.
@@ -58,7 +58,8 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
  *   This simply configures the TURN ICE server urls <code?transport=(protocol)</code> query option when constructing
  *   the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.
  * </blockquote>
- * The list of TURN network transport protocols configuration options when constructing Peer connections.
+ * The list of TURN network transport protocols options when constructing Peer connections
+ * configured in the <a href="#method_init"><code>init()</code> method</a>.
  * <small>Example <code>.urls</code> inital input: [<code>"turn:server.com?transport=tcp"</code>,
  * <code>"turn:server1.com:3478"</code>, <code>"turn:server.com?transport=udp"</code>]</small>
  * @attribute TURN_TRANSPORT

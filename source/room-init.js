@@ -129,8 +129,8 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
  *   This constant has been deprecated.<br>Automatic nearest regional server has been implemented
  *   on the platform.
  * </blockquote>
- * The list of available Auth servers in these regions that
- * <a href="#method_init"><code>init()</code> method</a> could use for better connectivity.
+ * The list of available Auth servers in these regions configured in the
+ * <a href="#method_init"><code>init()</code> method</a>.
  * @attribute REGIONAL_SERVER
  * @param {String} APAC1 <small>Value <code>"sg"</code></small>
  *   The value of the option to use the Auth server in Asia Pacific (APAC).
@@ -421,7 +421,7 @@ Skylink.prototype._room = null;
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_readyStateChange">
  *   <code>readyStateChange</code> event</a> <code>state</code> parameter payload value
- *   as <code>COMPLETED</code> for request success and <code>ERROR</code> for request error.</small>
+ *   as <code>COMPLETED</code> for request success.</small>
  *   [Rel: Skylink.READY_STATE_CHANGE]
  * @param {JSON|String} callback.error The error result in request.
  * - When defined as string, it's the error when required App Key is not provided.

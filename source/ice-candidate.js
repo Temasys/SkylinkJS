@@ -11,9 +11,9 @@
  *   <small>These ICE candidates are sent to Peer for its connection to check for a suitable matching
  *   pair of ICE candidates to establish an ICE connection for stream audio, video and data.
  *   See <a href="#event_iceConnectionState"><code>iceConnectionState</code> event</a> for ICE connection status.</small>
- *   <small>This state cannot happen until Peer connection <code>RTCPeerConnection</code> API
- *   <code>setLocalDescription()</code> is invoked. See <a href="#event_peerConnectionState">
- *   <code>peerConnectionState</code> event</a> for session description status.</small>
+ *   <small>This state cannot happen until Peer connection remote <code>"offer"</code> / <code>"answer"</code>
+ *   session description is set. See <a href="#event_peerConnectionState">
+ *   <code>peerConnectionState</code> event</a> for session description exchanging status.</small>
  * @param {String} COMPLETED <small>Value <code>"completed"</code></small>
  *   The value of the state when Peer connection gathering of ICE candidates has completed.
  * @type JSON

@@ -1,17 +1,27 @@
 /**
- * Contains the list of Peer connection session description exchanging states.
+ * <blockquote class="info">
+ *   Learn more about how ICE works in this
+ *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+ * </blockquote>
+ * The list of Peer connection session description exchanging states.
  * @attribute PEER_CONNECTION_STATE
- * @type JSON
- * @param {String} STABLE <small>Value <code>"stable"</code></small>
- *   The state when there is no session description being exchanged with Peer connection.
- * @param {String} HAVE_LOCAL_OFFER <small>Value <code>"have-local-offer"</code></small>
- *   The state when offer session description is generated from Peer connection and is sent.
+ * @param {String} STABLE            <small>Value <code>"stable"</code></small>
+ *   The value of the state when there is no session description being exchanged between Peer connection.
+ * @param {String} HAVE_LOCAL_OFFER  <small>Value <code>"have-local-offer"</code></small>
+ *   The value of the state when local <code>"offer"</code> session description is set.
+ *   <small>This should transition to <code>STABLE</code> state after remote <code>"answer"</code>
+ *   session description is set.</small>
+ *   <small>See <a href="#event_handshakeProgress"><code>handshakeProgress</code> event</a> for a more
+ *   detailed exchanging of session description states.</small>
  * @param {String} HAVE_REMOTE_OFFER <small>Value <code>"have-remote-offer"</code></small>
- *   The state when offer session description is received from Peer connection.
- *   The Peer connection would then generate a local session description and send to Peer,
- *   which would result in the <code>STABLE</code> state afterwards.
- * @param {String} CLOSED <small>Value <code>"closed"</code></small>
- *   The state when Peer connection is closed and no session description would be exchanged.
+ *   The value of the state when remote <code>"offer"</code> session description is set.
+ *   <small>This should transition to <code>STABLE</code> state after local <code>"answer"</code>
+ *   session description is set.</small>
+ *   <small>See <a href="#event_handshakeProgress"><code>handshakeProgress</code> event</a> for a more
+ *   detailed exchanging of session description states.</small>
+ * @param {String} CLOSED            <small>Value <code>"closed"</code></small>
+ *   The value of the state when Peer connection is closed and no session description can be exchanged and set.
+ * @type JSON
  * @readOnly
  * @for Skylink
  * @since 0.5.0
@@ -24,16 +34,16 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 };
 
 /**
- * Contains the list of <a href="#method_getConnectionStatus"><code>getConnectionStatus()</code>
- *   method</a> retrieval states.
+ * The list of <a href="#method_getConnectionStatus"><code>getConnectionStatus()</code>
+ * method</a> retrieval states.
  * @attribute GET_CONNECTION_STATUS_STATE
- * @type JSON
  * @param {Number} RETRIEVING <small>Value <code>0</code></small>
- *   The state when <code>getConnectionStatus()</code> is retrieving the Peer connection stats.
+ *   The value of the state when <code>getConnectionStatus()</code> is retrieving the Peer connection stats.
  * @param {Number} RETRIEVE_SUCCESS <small>Value <code>1</code></small>
- *   The state when <code>getConnectionStatus()</code> has retrieved the Peer connection stats.
+ *   The value of the state when <code>getConnectionStatus()</code> has retrieved the Peer connection stats successfully.
  * @param {Number} RETRIEVE_ERROR <small>Value <code>-1</code></small>
- *   The state when <code>getConnectionStatus()</code> has failed retrieving the Peer connection stats.
+ *   The value of the state when <code>getConnectionStatus()</code> has failed retrieving the Peer connection stats.
+ * @type JSON
  * @readOnly
  * @for Skylink
  * @since 0.1.0
@@ -49,11 +59,10 @@ Skylink.prototype.GET_CONNECTION_STATUS_STATE = {
  *  As there are more features getting implemented, there will be eventually more different types of
  *  server Peers.
  * </blockquote>
- * Contains the list of different types of server Peer connections.
+ * The list of available types of server Peer connections.
  * @attribute SERVER_PEER_TYPE
  * @param {String} MCU <small>Value <code>"mcu"</code></small>
- *   The server Peer type that is used for MCU connection.
- * <small>Read more about what is a MCU <a href="#">here</a>.</small>
+ *   The value of the server Peer type that is used for MCU connection.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -98,57 +107,69 @@ Skylink.prototype._peerConnections = {};
 
 /**
  * <blockquote class="info">
- *   For MCU enabled Peer connections, the restart functionality may differ.
- *   <a href="http://support.temasys.com.sg/support/discussions/topics/12000002853">Read this article here</a>.<br>
- *   Note that the functionality is throttled when invoked many times in less than 3 seconds interval.
+ *   For MCU enabled Peer connections, the restart functionality may differ, you may learn more about how to workaround
+ *   it <a href="http://support.temasys.com.sg/support/discussions/topics/12000002853">in this article here</a>.<br>
+ *   For restarts with Peers connecting from Android or iOS SDKs, restarts might not work as written in
+ *   <a href="http://support.temasys.com.sg/support/discussions/topics/12000005188">in this article here</a>.<br>
+ *   Note that this functionality should be used when Peer connection stream freezes during a connection,
+ *   and is throttled when invoked many times in less than 3 seconds interval.
  * </blockquote>
- * Function that refreshes Peer connections.
+ * Function that refreshes Peer connections to update with the current streaming.
  * @method refreshConnection
- * @param {String|Array} [targetPeerId] The target Peer ID to only refresh the Peer connection.<br>
- * - When provided as an Array, it will refresh the Peer connections with all the Peer IDs provided.<br>
- * - When not provided, it will refresh the Peer connections with all the currently connected Peers.
+ * @param {String|Array} [targetPeerId] The target Peer ID to refresh connection with.<br>
+ * - When provided as an Array, it will refresh all connections with all the Peer IDs provided.
+ * - When not provided, it will refresh all the currently connected Peers in the Room.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
+ *   <small>Function request completion is determined by the <a href="#event_peerRestart">
+ *   <code>peerRestart</code> event</a> triggering <code>isSelfInitiateRestart</code> parameter payload
+ *   value as <code>true</code> for all Peers targeted for request success.</small>
  * @param {JSON} callback.error The error result in request.
  *   <small>Defined as <code>null</code> when there are no errors in request</small>
- * @param {Array} callback.error.listOfPeers The list Peer IDs targeted for refreshing the Peer connections.
+ * @param {Array} callback.error.listOfPeers The list of Peer IDs targeted.
  * @param {JSON} callback.error.refreshErrors The list of Peer connection refresh errors.
- *   <small>If there is <code>"self"</code> property, it's likely due to having no Peers to refresh the
- *     Peer connections with.</small>
- * @param {Error|String} callback.error.refreshErrors.<#peerId> The Peer connection refresh error associated
- *   with the Peer ID property name.
+ * @param {Error|String} callback.error.refreshErrors.#peerId The Peer connection refresh error associated
+ *   with the Peer ID defined in <code>#peerId</code> property.
+ *   <small>If <code>#peerId</code> value is <code>"self"</code>, it means that it is the error when there
+ *   is no Peer connections to refresh with.</small>
  * @param {JSON} callback.success The success result in request.
  *   <small>Defined as <code>null</code> when there are errors in request</small>
- * @param {Array} callback.success.listOfPeers The list Peer IDs targeted for refreshing the Peer connections.
- * @trigger <b class="desc-seq-header">&#8594; For Peer connections without MCU enabled:</b> <ol class="desc-seq">
- *   <li>Starts re-negotiation with Peer connections. <ul>
- *     <li>Triggers <a href="#event_peerRestart"><code>peerRestart</code> event</a>.</li></ul></li>
- *   </ol>
+ * @param {Array} callback.success.listOfPeers The list of Peer IDs targeted.
+ * @trigger <b class="desc-seq-header">&#8594; For Peer connections without MCU enabled:</b>
+ *   <ol class="desc-seq"><li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter
+ *   payload <code>isSelfInitiateRestart</code> as <code>true</code> for all targeted Peer connections.</li></ol>
  *   <b class="desc-seq-header">&#8594; For Peer connections with MCU enabled:</b> <ol class="desc-seq">
- *   <li>Starts sending notifications to Peer connected in the Room that User is restarting connection.<ul>
- *      <li>Triggers <a href="#event_peerRestart"><code>peerRestart</code> event</a>.</li>
- *      <li>Triggers <a href="#event_serverPeerRestart"><code>serverPeerRestart</code> event</a> for User</li>
- *   </ul></li>
- *   <li>Invokes <a href="#method_joinRoom"><code>joinRoom()</code> method</a>. <ul>
- *     <li><code>refreshConnection()</code> will retain the User session information except the Peer ID will
- *        be a different assigned ID.</li></ul></li>
- *   </ol>
- * @example &lt;body&gt;
- *   &lt;div id="peer-list"&gt;&lt;/div&gt;
- *   &lt;script&gt;
- *     skylinkDemo.on("peerJoined", function (peerId, peerInfo, isSelf) {
- *       if (!isSelf) {
- *         var peerBtn = document.createElement("button");
- *         peerBtn.id = peerId;
- *         peerBtn.onclick = function () {
- *           skylinkDemo.refreshConnection(peerId);
- *         };
- *         peerBtn.innerHTML = "Refresh Connection?";
- *         document.getElementById("peer-list").appendChild(peerBtn);
- *       }
+ *   <li><ol><li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter
+ *   payload <code>isSelfInitiateRestart</code> as <code>true</code> for all targeted Peer connections.</li>
+ *   <li><a href="#event_serverPeerRestart"><code>serverPeerRestart</code> event</a> triggers parameter
+ *   payload <code>serverPeerType</code> as <code>MCU</code>.</li></ol></li>
+ *   <li>Invokes <a href="#method_joinRoom"><code>joinRoom()</code> method</a>.<small><code>refreshConnection</code>
+ *   will retain the User session information except the Peer ID will be a different assigned ID due to restarting
+ *   the Room session.</small></li></ol>
+ * @example
+ *   // Example 1: Refreshing a Peer connection
+ *   function refreshFrozenVideoStream (peerId) {
+ *     skylinkDemo.refreshConnection(peerId, function (error, success) {
+ *       if (error) return;
+ *       console.log("Refreshing connection for '" + peerId + "'");
  *     });
- *   &lt;/script&gt;
- *  &lt;/body&gt;
+ *   }
+ *
+ *   // Example 2: Refreshing a list of Peer connections
+ *   function refreshFrozenVideoStreamGroup (peerIdA, peerIdB) {
+ *     skylinkDemo.refreshConnection([peerIdA, peerIdB], function (error, success) {
+ *       if (error) return;
+ *       console.log("Refreshing connection for '" + peerIdA + "' and '" + peerIdB + "'");
+ *     });
+ *   }
+ *
+ *   // Example 3: Refreshing all Peer connections
+ *   function refreshFrozenVideoStreamAll () {
+ *     skylinkDemo.refreshConnection(function (error, success) {
+ *       if (error) return;
+ *       console.log("Refreshing connection for all");
+ *     });
+ *   }
  * @for Skylink
  * @since 0.5.5
  */
@@ -273,63 +294,131 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
 };
 
 /**
- * Function that retrieves the Peer connection stats.
+ * Function that retrieves Peer connection bandwidth and ICE connection stats.
  * @method getConnectionStatus
- * @param {String|Array} [targetPeerId] The target Peer ID to only retrieve the Peer connection stats.<br>
- * - When provided as an Array, it will retrieve the Peer connections stats with all the Peer IDs provided.<br>
- * - When not provided, it will retrieve the Peer connections stats with all the currently connected Peers.
- * @param {Function} [callback] he callback function fired when request has completed.
+ * @param {String|Array} [targetPeerId] The target Peer ID to retrieve connection stats from.<br>
+ * - When provided as an Array, it will retrieve all connection stats from all the Peer IDs provided.
+ * - When not provided, it will retrieve all connection stats from the currently connected Peers in the Room.
+ * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
+ *   <small>Function request completion is determined by the <a href="#event_getConnectionStatusStateChange">
+ *   <code>getConnectionStatusStateChange</code> event</a> triggering <code>state</code> parameter payload
+ *   value as <code>RETRIEVE_SUCCESS</code> for all Peers targeted for request success.</small>
+ *   [Rel: Skylink.GET_CONNECTION_STATUS_STATE]
  * @param {JSON} callback.error The error result in request.
  *   <small>Defined as <code>null</code> when there are no errors in request</small>
- * @param {Array} callback.error.listOfPeers The list Peer IDs targeted for retrieving the Peer connections stats.
- * @param {JSON} callback.error.retrievalErrors The list of retrieval of Peer connection stats errors.
- *   <small>If there is <code>"self"</code> property, it's likely due to having no Peers to retrieve the
- *     Peer connections stats from.</small>
- * @param {Error|String} callback.error.retrievalErrors.<#peerId> The Peer connection stats retrieval error associated
- *   with the Peer ID property name.
- * @param {JSON} callback.error.connectionStats The list of Peer connection stats that has been successfully retrieved.
- * @param {JSON} callback.error.connectionStats.<#peerId> The Peer connection stats associated
- *   with the Peer ID property name.
- * <small>Object signature matches the <code>stats</code> parameter payload received in the
+ * @param {Array} callback.error.listOfPeers The list of Peer IDs targeted.
+ * @param {JSON} callback.error.retrievalErrors The list of Peer connection stats retrieval errors.
+ * @param {Error|String} callback.error.retrievalErrors.#peerId The Peer connection stats retrieval error associated
+ *   with the Peer ID defined in <code>#peerId</code> property.
+ *   <small>If <code>#peerId</code> value is <code>"self"</code>, it means that it is the error when there
+ *   is no Peer connections to refresh with.</small>
+ * @param {JSON} callback.error.connectionStats The list of Peer connection stats.
+ *   <small>These are the Peer connection stats that has been managed to be successfully retrieved.</small>
+ * @param {JSON} callback.error.connectionStats.#peerId The Peer connection stats associated with
+ *   the Peer ID defined in <code>#peerId</code> property.
+ *   <small>Object signature matches the <code>stats</code> parameter payload received in the
  *   <a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>.</small>
  * @param {JSON} callback.success The success result in request.
  *   <small>Defined as <code>null</code> when there are errors in request</small>
- * @param {Array} callback.success.listOfPeers The list Peer IDs targeted for retrieving the Peer connections stats.
+ * @param {Array} callback.success.listOfPeers The list of Peer IDs targeted.
  * @param {JSON} callback.success.connectionStats The list of Peer connection stats.
- * @param {JSON} callback.success.connectionStats.<#peerId> The Peer connection stats associated
- *   with the Peer ID property name.
- * <small>Object signature matches the <code>stats</code> parameter payload received in the
+ * @param {JSON} callback.success.connectionStats.#peerId The Peer connection stats associated with
+ *   the Peer ID defined in <code>#peerId</code> property.
+ *   <small>Object signature matches the <code>stats</code> parameter payload received in the
  *   <a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>.</small>
  * @trigger <ol class="desc-seq">
- *   <li>Retrieves the Peer connections stats.<ul>
- *     <li>Triggers <a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>
- *       with parameter payload <code>state</code> as <code>RETRIEVING</code>.</li>
- *     <li>If retrieval of Peer connection stats is successful, it triggers <a href="#event_getConnectionStatusStateChange">
- *       <code>getConnectionStatusStateChange</code> event</a> with parameter payload <code>state</code> as
- *       <code>RETRIEVE_SUCCESS</code> after <code>RETRIEVING</code>.</li>
- *     <li>If retrieval of Peer connection stats had failed, it triggers <a href="#event_getConnectionStatusStateChange">
- *       <code>getConnectionStatusStateChange</code> event</a> with parameter payload <code>state</code> as
- *       <code>RETRIEVE_ERROR</code> after <code>RETRIEVING</code>.</li>
- *   </ul></li></ol>
+ *   <li><a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>
+ *   triggers parameter payload <code>state</code> value as <code>RETRIEVING</code>.</li>
+ *   <li><ol><li>When retrieval of Peer connection stats is successful, <a href="#event_getConnectionStatusStateChange">
+ *   <code>getConnectionStatusStateChange</code> event</a> triggers parameter payload
+ *   <code>state</code> value as <code>RETRIEVE_SUCCESS</code>.</li>
+ *   <li>When retrieval of Peer connection stats had failed, <a href="#event_getConnectionStatusStateChange">
+ *   <code>getConnectionStatusStateChange</code> event</a> triggers parameter payload
+ *   <code>state</code> value as <code>RETRIEVE_ERROR</code>.</li></ol></li></ol>
  * @example
- *   var peerIntervals = {};
+ *   // Example 1: Retrieve a Peer connection stats
+ *   function startBWStatsInterval (peerId) {
+ *     setInterval(function () {
+ *       skylinkDemo.getConnectionStatus(peerId, function (error, success) {
+ *         if (error) return;
+ *         var sendVideoBytes  = success.connectionStats[peerId].video.sending.bytes;
+ *         var sendAudioBytes  = success.connectionStats[peerId].audio.sending.bytes;
+ *         var recvVideoBytes  = success.connectionStats[peerId].video.receiving.bytes;
+ *         var recvAudioBytes  = success.connectionStats[peerId].audio.receiving.bytes;
+ *         var localCandidate  = success.connectionStats[peerId].selectedCandidate.local;
+ *         var remoteCandidate = success.connectionStats[peerId].selectedCandidate.remote;
+ *         console.log("Sending audio (" + sendAudioBytes + "bps) video (" + sendVideoBytes + ")");
+ *         console.log("Receiving audio (" + recvAudioBytes + "bps) video (" + recvVideoBytes + ")");
+ *         console.log("Local candidate: " + localCandidate.ipAddress + ":" + localCandidate.portNumber +
+ *           "?transport=" + localCandidate.transport + " (type: " + localCandidate.candidateType + ")");
+ *         console.log("Remote candidate: " + remoteCandidate.ipAddress + ":" + remoteCandidate.portNumber +
+ *           "?transport=" + remoteCandidate.transport + " (type: " + remoteCandidate.candidateType + ")");
+ *       });
+ *     }, 1000);
+ *   }
  *
- *   skylinkDemo.on("getConnectionStatusStateChange", function (state, peerId, stats, error) {
- *     if (state === skylinkDemo.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS) {
- *       // Display connection stats
- *     } else if (state === skylinkDemo.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR) {
- *       // Display retrieval error
- *     }
- *   });
+ *   // Example 2: Retrieve a list of Peer connection stats
+ *   function printConnStats (peerId, data) {
+ *     if (!data.connectionStats[peerId]) return;
+ *     var sendVideoBytes  = data.connectionStats[peerId].video.sending.bytes;
+ *     var sendAudioBytes  = data.connectionStats[peerId].audio.sending.bytes;
+ *     var recvVideoBytes  = data.connectionStats[peerId].video.receiving.bytes;
+ *     var recvAudioBytes  = data.connectionStats[peerId].audio.receiving.bytes;
+ *     var localCandidate  = data.connectionStats[peerId].selectedCandidate.local;
+ *     var remoteCandidate = data.connectionStats[peerId].selectedCandidate.remote;
+ *     console.log(peerId + " - Sending audio (" + sendAudioBytes + "bps) video (" + sendVideoBytes + ")");
+ *     console.log(peerId + " - Receiving audio (" + recvAudioBytes + "bps) video (" + recvVideoBytes + ")");
+ *     console.log(peerId + " - Local candidate: " + localCandidate.ipAddress + ":" + localCandidate.portNumber +
+ *       "?transport=" + localCandidate.transport + " (type: " + localCandidate.candidateType + ")");
+ *     console.log(peerId + " - Remote candidate: " + remoteCandidate.ipAddress + ":" + remoteCandidate.portNumber +
+ *       "?transport=" + remoteCandidate.transport + " (type: " + remoteCandidate.candidateType + ")");
+ *   }
  *
- *   skylinkDemo.on("peerJoined", function (peerId, peerInfo, isSelf) {
- *     if (!isSelf) {
- *       peerIntervals[peerId] = setInterval(function () {
- *         skylinkDemo.getConnectionStatus(peerId);
- *       }, 1000);
- *     }
- *   });
+ *   function startBWStatsInterval (peerIdA, peerIdB) {
+ *     setInterval(function () {
+ *       skylinkDemo.getConnectionStatus([peerIdA, peerIdB], function (error, success) {
+ *         if (error) {
+ *           printConnStats(peerIdA, error.connectionStats);
+ *           printConnStats(peerIdB, error.connectionStats);
+ *         } else {
+ *           printConnStats(peerIdA, success.connectionStats);
+ *           printConnStats(peerIdB, success.connectionStats);
+ *         }
+ *       });
+ *     }, 1000);
+ *   }
+ *
+ *   // Example 3: Retrieve all Peer connection stats
+ *   function printConnStats (listOfPeers, data) {
+ *     listOfPeers.forEach(function (peerId) {
+ *       if (!data.connectionStats[peerId]) return;
+ *       var sendVideoBytes  = data.connectionStats[peerId].video.sending.bytes;
+ *       var sendAudioBytes  = data.connectionStats[peerId].audio.sending.bytes;
+ *       var recvVideoBytes  = data.connectionStats[peerId].video.receiving.bytes;
+ *       var recvAudioBytes  = data.connectionStats[peerId].audio.receiving.bytes;
+ *       var localCandidate  = data.connectionStats[peerId].selectedCandidate.local;
+ *       var remoteCandidate = data.connectionStats[peerId].selectedCandidate.remote;
+ *       console.log(peerId + " - Sending audio (" + sendAudioBytes + "bps) video (" + sendVideoBytes + ")");
+ *       console.log(peerId + " - Receiving audio (" + recvAudioBytes + "bps) video (" + recvVideoBytes + ")");
+ *       console.log(peerId + " - Local candidate: " + localCandidate.ipAddress + ":" + localCandidate.portNumber +
+ *         "?transport=" + localCandidate.transport + " (type: " + localCandidate.candidateType + ")");
+ *       console.log(peerId + " - Remote candidate: " + remoteCandidate.ipAddress + ":" + remoteCandidate.portNumber +
+ *         "?transport=" + remoteCandidate.transport + " (type: " + remoteCandidate.candidateType + ")");
+ *     });
+ *   }
+ *
+ *   function startBWStatsInterval (peerIdA, peerIdB) {
+ *     setInterval(function () {
+ *       skylinkDemo.getConnectionStatus(function (error, success) {
+ *         if (error) {
+ *           printConnStats(error.listOfPeers, error.connectionStats);
+ *         } else {
+ *           printConnStats(success.listOfPeers, success.connectionStats);
+ *         }
+ *       });
+ *     }, 1000);
+ *   }
  * @for Skylink
  * @since 0.6.14
  */

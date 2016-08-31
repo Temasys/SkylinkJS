@@ -11,16 +11,15 @@
  *   <small>At this stage, <a href="#event_peerJoined"><code>peerJoined</code> event</a>
  *   is triggered and Peer connection may commence.</small>
  * @param {String} OFFER   <small>Value <code>"offer"</code></small>
- *   The value of the connection state when Peer is generating a <code>"offer"</code> session
- *   description to send to User to start streaming connection.
+ *   The value of the connection state when Peer connection has set the local / remote <code>"offer"</code>
+ *   session description to start streaming connection.
  * @param {String} ANSWER  <small>Value <code>"answer"</code></small>
- *   The value of the connection state when User is generating a <code>"answer"</code> session
- *   description to send to Peer to establish streaming connection.
+ *   The value of the connection state when Peer connection has set the local / remote <code>"answer"</code>
+ *   session description to establish streaming connection.
  * @param {String} ERROR   <small>Value <code>"error"</code></small>
- *   The value of the connection state when User has failed to establish connection with Peer.
- *   <small>This happens when the <code>RTCPeerConnection</code> API interface receives
- *   <code>setLocalDescription()</code>, <code>setRemoteDescription()</code>,
- *   <code>createOffer()</code> or <code>createAnswer()</code> errors in result.</small>
+ *   The value of the connection state when Peer connection has failed to establish streaming connection.
+ *   <small>This happens when there are errors that occurs in creating local <code>"offer"</code> /
+ *   <code>"answer"</code>, or when setting remote / local <code>"offer"</code> / <code>"answer"</code>.</small>
  * @type JSON
  * @readOnly
  * @for Skylink

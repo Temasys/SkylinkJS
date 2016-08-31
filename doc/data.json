@@ -1277,7 +1277,7 @@
             "params": [
                 {
                     "name": "GATHERING",
-                    "description": "<small>Value <code>\"gathering\"</code></small>\n  The value of the state when Peer connection is gathering ICE candidates.\n  <small>These ICE candidates are sent to Peer for its connection to check for a suitable matching\n  pair of ICE candidates to establish an ICE connection for stream audio, video and data.\n  See <a href=\"#event_iceConnectionState\"><code>iceConnectionState</code> event</a> for ICE connection status.</small>\n  <small>This state cannot happen until Peer connection <code>RTCPeerConnection</code> API\n  <code>setLocalDescription()</code> is invoked. See <a href=\"#event_peerConnectionState\">\n  <code>peerConnectionState</code> event</a> for session description status.</small>",
+                    "description": "<small>Value <code>\"gathering\"</code></small>\n  The value of the state when Peer connection is gathering ICE candidates.\n  <small>These ICE candidates are sent to Peer for its connection to check for a suitable matching\n  pair of ICE candidates to establish an ICE connection for stream audio, video and data.\n  See <a href=\"#event_iceConnectionState\"><code>iceConnectionState</code> event</a> for ICE connection status.</small>\n  <small>This state cannot happen until Peer connection remote <code>\"offer\"</code> / <code>\"answer\"</code>\n  session description is set. See <a href=\"#event_peerConnectionState\">\n  <code>peerConnectionState</code> event</a> for session description exchanging status.</small>",
                     "type": "String"
                 },
                 {
@@ -1417,12 +1417,12 @@
                 },
                 {
                     "name": "CONNECTED",
-                    "description": "<small>Value <code>\"connected\"</code></small>\n  The value of the state when Peer connection has found a suitable matching pair of\n  ICE candidates to establish ICE connection but is still checking for a better\n  suitable matching pair of ICE candidates for the best ICE connectivity.\n  <small>At this stage, ICE connection is already established and audio, video and\n  data streaming has already started.</small>",
+                    "description": "<small>Value <code>\"connected\"</code></small>\n  The value of the state when Peer connection has found a suitable matching pair of\n  ICE candidates to establish ICE connection but is still checking for a better\n  suitable matching pair of ICE candidates for the best ICE connectivity.\n  <small>At this state, ICE connection is already established and audio, video and\n  data streaming has already started.</small>",
                     "type": "String"
                 },
                 {
                     "name": "COMPLETED",
-                    "description": "<small>Value <code>\"completed\"</code></small>\n  The value of the state when Peer connection has found the best suitable matching pair\n  of ICE candidates to establish ICE connection and checking has stopped.\n  <small>At this stage, ICE connection is already established and audio, video and\n  data streaming has already started. This may happpen after <code>CONNECTED</code>.</small>",
+                    "description": "<small>Value <code>\"completed\"</code></small>\n  The value of the state when Peer connection has found the best suitable matching pair\n  of ICE candidates to establish ICE connection and checking has stopped.\n  <small>At this state, ICE connection is already established and audio, video and\n  data streaming has already started. This may happpen after <code>CONNECTED</code>.</small>",
                     "type": "String"
                 },
                 {
@@ -1432,7 +1432,7 @@
                 },
                 {
                     "name": "DISCONNECTED",
-                    "description": "<small>Value <code>\"disconnected\"</code></small>\n  The value of the state when Peer connection ICE connection is disconnected.\n  <small>At this stage, the Peer connection may attempt to revive the ICE connection.\n  This may happen due to flaky network conditions.</small>",
+                    "description": "<small>Value <code>\"disconnected\"</code></small>\n  The value of the state when Peer connection ICE connection is disconnected.\n  <small>At this state, the Peer connection may attempt to revive the ICE connection.\n  This may happen due to flaky network conditions.</small>",
                     "type": "String"
                 },
                 {
@@ -1454,7 +1454,7 @@
         {
             "file": "source/ice-connection.js",
             "line": 54,
-            "description": "<blockquote class=\"info\">\n  Note that configuring the protocol may not necessarily result in the desired network transports protocol\n  used in the actual TURN network traffic as it depends which protocol the browser selects and connects with.\n  This simply configures the TURN ICE server urls <code?transport=(protocol)</code> query option when constructing\n  the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.\n</blockquote>\nThe list of TURN network transport protocols configuration options when constructing Peer connections.\n<small>Example <code>.urls</code> inital input: [<code>\"turn:server.com?transport=tcp\"</code>,\n<code>\"turn:server1.com:3478\"</code>, <code>\"turn:server.com?transport=udp\"</code>]</small>",
+            "description": "<blockquote class=\"info\">\n  Note that configuring the protocol may not necessarily result in the desired network transports protocol\n  used in the actual TURN network traffic as it depends which protocol the browser selects and connects with.\n  This simply configures the TURN ICE server urls <code?transport=(protocol)</code> query option when constructing\n  the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.\n</blockquote>\nThe list of TURN network transport protocols options when constructing Peer connections\nconfigured in the <a href=\"#method_init\"><code>init()</code> method</a>.\n<small>Example <code>.urls</code> inital input: [<code>\"turn:server.com?transport=tcp\"</code>,\n<code>\"turn:server1.com:3478\"</code>, <code>\"turn:server.com?transport=udp\"</code>]</small>",
             "itemtype": "attribute",
             "name": "TURN_TRANSPORT",
             "params": [
@@ -1491,7 +1491,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 101,
+            "line": 102,
             "description": "Stores the flag that indicates if Peer connections should trickle ICE.",
             "itemtype": "attribute",
             "name": "_enableIceTrickle",
@@ -1504,7 +1504,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 112,
+            "line": 113,
             "description": "Stores the flag that indicates if STUN ICE servers should be used when constructing Peer connection.",
             "itemtype": "attribute",
             "name": "_enableSTUN",
@@ -1517,7 +1517,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 123,
+            "line": 124,
             "description": "Stores the flag that indicates if TURN ICE servers should be used when constructing Peer connection.",
             "itemtype": "attribute",
             "name": "_enableTURN",
@@ -1530,7 +1530,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 134,
+            "line": 135,
             "description": "Stores the flag that indicates if public STUN ICE servers should be used when constructing Peer connection.",
             "itemtype": "attribute",
             "name": "_usePublicSTUN",
@@ -1543,7 +1543,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 145,
+            "line": 146,
             "description": "Stores the option for the TURN protocols to use.\nThis should configure the TURN ICE servers urls <code>?transport=protocol</code> flag.",
             "itemtype": "attribute",
             "name": "_TURNTransport",
@@ -1557,7 +1557,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 158,
+            "line": 159,
             "description": "Stores the list of Peer connections ICE failures counter.",
             "itemtype": "attribute",
             "name": "_ICEConnectionFailures",
@@ -1576,7 +1576,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 169,
+            "line": 170,
             "description": "Function that filters and configures the ICE servers received from Signaling\n  based on the <code>init()</code> configuration and returns the updated\n  list of ICE servers to be used when constructing Peer connection.",
             "itemtype": "method",
             "name": "_setIceServers",
@@ -1588,74 +1588,74 @@
         {
             "file": "source/peer-connection.js",
             "line": 1,
-            "description": "Contains the list of Peer connection session description exchanging states.",
+            "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.\n</blockquote>\nThe list of Peer connection session description exchanging states.",
             "itemtype": "attribute",
             "name": "PEER_CONNECTION_STATE",
-            "type": "JSON",
             "params": [
                 {
                     "name": "STABLE",
-                    "description": "<small>Value <code>\"stable\"</code></small>\n  The state when there is no session description being exchanged with Peer connection.",
+                    "description": "<small>Value <code>\"stable\"</code></small>\n  The value of the state when there is no session description being exchanged between Peer connection.",
                     "type": "String"
                 },
                 {
                     "name": "HAVE_LOCAL_OFFER",
-                    "description": "<small>Value <code>\"have-local-offer\"</code></small>\n  The state when offer session description is generated from Peer connection and is sent.",
+                    "description": "<small>Value <code>\"have-local-offer\"</code></small>\n  The value of the state when local <code>\"offer\"</code> session description is set.\n  <small>This should transition to <code>STABLE</code> state after remote <code>\"answer\"</code>\n  session description is set.</small>\n  <small>See <a href=\"#event_handshakeProgress\"><code>handshakeProgress</code> event</a> for a more\n  detailed exchanging of session description states.</small>",
                     "type": "String"
                 },
                 {
                     "name": "HAVE_REMOTE_OFFER",
-                    "description": "<small>Value <code>\"have-remote-offer\"</code></small>\n  The state when offer session description is received from Peer connection.\n  The Peer connection would then generate a local session description and send to Peer,\n  which would result in the <code>STABLE</code> state afterwards.",
+                    "description": "<small>Value <code>\"have-remote-offer\"</code></small>\n  The value of the state when remote <code>\"offer\"</code> session description is set.\n  <small>This should transition to <code>STABLE</code> state after local <code>\"answer\"</code>\n  session description is set.</small>\n  <small>See <a href=\"#event_handshakeProgress\"><code>handshakeProgress</code> event</a> for a more\n  detailed exchanging of session description states.</small>",
                     "type": "String"
                 },
                 {
                     "name": "CLOSED",
-                    "description": "<small>Value <code>\"closed\"</code></small>\n  The state when Peer connection is closed and no session description would be exchanged.",
+                    "description": "<small>Value <code>\"closed\"</code></small>\n  The value of the state when Peer connection is closed and no session description can be exchanged and set.",
                     "type": "String"
                 }
             ],
+            "type": "JSON",
             "readonly": "",
             "since": "0.5.0",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 26,
-            "description": "Contains the list of <a href=\"#method_getConnectionStatus\"><code>getConnectionStatus()</code>\n  method</a> retrieval states.",
+            "line": 36,
+            "description": "The list of <a href=\"#method_getConnectionStatus\"><code>getConnectionStatus()</code>\nmethod</a> retrieval states.",
             "itemtype": "attribute",
             "name": "GET_CONNECTION_STATUS_STATE",
-            "type": "JSON",
             "params": [
                 {
                     "name": "RETRIEVING",
-                    "description": "<small>Value <code>0</code></small>\n  The state when <code>getConnectionStatus()</code> is retrieving the Peer connection stats.",
+                    "description": "<small>Value <code>0</code></small>\n  The value of the state when <code>getConnectionStatus()</code> is retrieving the Peer connection stats.",
                     "type": "Number"
                 },
                 {
                     "name": "RETRIEVE_SUCCESS",
-                    "description": "<small>Value <code>1</code></small>\n  The state when <code>getConnectionStatus()</code> has retrieved the Peer connection stats.",
+                    "description": "<small>Value <code>1</code></small>\n  The value of the state when <code>getConnectionStatus()</code> has retrieved the Peer connection stats successfully.",
                     "type": "Number"
                 },
                 {
                     "name": "RETRIEVE_ERROR",
-                    "description": "<small>Value <code>-1</code></small>\n  The state when <code>getConnectionStatus()</code> has failed retrieving the Peer connection stats.",
+                    "description": "<small>Value <code>-1</code></small>\n  The value of the state when <code>getConnectionStatus()</code> has failed retrieving the Peer connection stats.",
                     "type": "Number"
                 }
             ],
+            "type": "JSON",
             "readonly": "",
             "since": "0.1.0",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 47,
-            "description": "<blockquote class=\"info\">\n As there are more features getting implemented, there will be eventually more different types of\n server Peers.\n</blockquote>\nContains the list of different types of server Peer connections.",
+            "line": 57,
+            "description": "<blockquote class=\"info\">\n As there are more features getting implemented, there will be eventually more different types of\n server Peers.\n</blockquote>\nThe list of available types of server Peer connections.",
             "itemtype": "attribute",
             "name": "SERVER_PEER_TYPE",
             "params": [
                 {
                     "name": "MCU",
-                    "description": "<small>Value <code>\"mcu\"</code></small>\n  The server Peer type that is used for MCU connection.\n<small>Read more about what is a MCU <a href=\"#\">here</a>.</small>",
+                    "description": "<small>Value <code>\"mcu\"</code></small>\n  The value of the server Peer type that is used for MCU connection.",
                     "type": "String"
                 }
             ],
@@ -1666,7 +1666,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 67,
+            "line": 76,
             "description": "Stores the restart initiated timestamp to throttle the <code>refreshConnection</code> functionality.",
             "itemtype": "attribute",
             "name": "_lastRestart",
@@ -1678,7 +1678,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 77,
+            "line": 86,
             "description": "Stores the global number of Peer connection retries that would increase the wait-for-response timeout\n  for the Peer connection health timer.",
             "itemtype": "attribute",
             "name": "_retryCount",
@@ -1690,7 +1690,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 88,
+            "line": 97,
             "description": "Stores the list of the Peer connections.",
             "itemtype": "attribute",
             "name": "_peerConnections",
@@ -1709,20 +1709,20 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 99,
-            "description": "<blockquote class=\"info\">\n  For MCU enabled Peer connections, the restart functionality may differ.\n  <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002853\">Read this article here</a>.<br>\n  Note that the functionality is throttled when invoked many times in less than 3 seconds interval.\n</blockquote>\nFunction that refreshes Peer connections.",
+            "line": 108,
+            "description": "<blockquote class=\"info\">\n  For MCU enabled Peer connections, the restart functionality may differ, you may learn more about how to workaround\n  it <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002853\">in this article here</a>.<br>\n  For restarts with Peers connecting from Android or iOS SDKs, restarts might not work as written in\n  <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000005188\">in this article here</a>.<br>\n  Note that this functionality should be used when Peer connection stream freezes during a connection,\n  and is throttled when invoked many times in less than 3 seconds interval.\n</blockquote>\nFunction that refreshes Peer connections to update with the current streaming.",
             "itemtype": "method",
             "name": "refreshConnection",
             "params": [
                 {
                     "name": "targetPeerId",
-                    "description": "The target Peer ID to only refresh the Peer connection.<br>\n- When provided as an Array, it will refresh the Peer connections with all the Peer IDs provided.<br>\n- When not provided, it will refresh the Peer connections with all the currently connected Peers.",
+                    "description": "The target Peer ID to refresh connection with.<br>\n- When provided as an Array, it will refresh all connections with all the Peer IDs provided.\n- When not provided, it will refresh all the currently connected Peers in the Room.",
                     "type": "String|Array",
                     "optional": true
                 },
                 {
                     "name": "callback",
-                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>",
+                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_peerRestart\">\n  <code>peerRestart</code> event</a> triggering <code>isSelfInitiateRestart</code> parameter payload\n  value as <code>true</code> for all Peers targeted for request success.</small>",
                     "type": "Function",
                     "optional": true,
                     "props": [
@@ -1733,17 +1733,17 @@
                             "props": [
                                 {
                                     "name": "listOfPeers",
-                                    "description": "The list Peer IDs targeted for refreshing the Peer connections.",
+                                    "description": "The list of Peer IDs targeted.",
                                     "type": "Array"
                                 },
                                 {
                                     "name": "refreshErrors",
-                                    "description": "The list of Peer connection refresh errors.\n  <small>If there is <code>\"self\"</code> property, it's likely due to having no Peers to refresh the\n    Peer connections with.</small>",
+                                    "description": "The list of Peer connection refresh errors.",
                                     "type": "JSON"
                                 },
                                 {
-                                    "name": "refreshErrors.<#peerId>",
-                                    "description": "The Peer connection refresh error associated\n  with the Peer ID property name.",
+                                    "name": "refreshErrors.#peerId",
+                                    "description": "The Peer connection refresh error associated\n  with the Peer ID defined in <code>#peerId</code> property.\n  <small>If <code>#peerId</code> value is <code>\"self\"</code>, it means that it is the error when there\n  is no Peer connections to refresh with.</small>",
                                     "type": "Error|String"
                                 }
                             ]
@@ -1755,7 +1755,7 @@
                             "props": [
                                 {
                                     "name": "listOfPeers",
-                                    "description": "The list Peer IDs targeted for refreshing the Peer connections.",
+                                    "description": "The list of Peer IDs targeted.",
                                     "type": "Array"
                                 }
                             ]
@@ -1763,29 +1763,29 @@
                     ]
                 }
             ],
-            "trigger": "<b class=\"desc-seq-header\">&#8594; For Peer connections without MCU enabled:</b> <ol class=\"desc-seq\">\n  <li>Starts re-negotiation with Peer connections. <ul>\n    <li>Triggers <a href=\"#event_peerRestart\"><code>peerRestart</code> event</a>.</li></ul></li>\n  </ol>\n  <b class=\"desc-seq-header\">&#8594; For Peer connections with MCU enabled:</b> <ol class=\"desc-seq\">\n  <li>Starts sending notifications to Peer connected in the Room that User is restarting connection.<ul>\n     <li>Triggers <a href=\"#event_peerRestart\"><code>peerRestart</code> event</a>.</li>\n     <li>Triggers <a href=\"#event_serverPeerRestart\"><code>serverPeerRestart</code> event</a> for User</li>\n  </ul></li>\n  <li>Invokes <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a>. <ul>\n    <li><code>refreshConnection()</code> will retain the User session information except the Peer ID will\n       be a different assigned ID.</li></ul></li>\n  </ol>",
+            "trigger": "<b class=\"desc-seq-header\">&#8594; For Peer connections without MCU enabled:</b>\n  <ol class=\"desc-seq\"><li><a href=\"#event_peerRestart\"><code>peerRestart</code> event</a> triggers parameter\n  payload <code>isSelfInitiateRestart</code> as <code>true</code> for all targeted Peer connections.</li></ol>\n  <b class=\"desc-seq-header\">&#8594; For Peer connections with MCU enabled:</b> <ol class=\"desc-seq\">\n  <li><ol><li><a href=\"#event_peerRestart\"><code>peerRestart</code> event</a> triggers parameter\n  payload <code>isSelfInitiateRestart</code> as <code>true</code> for all targeted Peer connections.</li>\n  <li><a href=\"#event_serverPeerRestart\"><code>serverPeerRestart</code> event</a> triggers parameter\n  payload <code>serverPeerType</code> as <code>MCU</code>.</li></ol></li>\n  <li>Invokes <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a>.<small><code>refreshConnection</code>\n  will retain the User session information except the Peer ID will be a different assigned ID due to restarting\n  the Room session.</small></li></ol>",
             "example": [
-                " &lt;body&gt;\n  &lt;div id=\"peer-list\"&gt;&lt;/div&gt;\n  &lt;script&gt;\n    skylinkDemo.on(\"peerJoined\", function (peerId, peerInfo, isSelf) {\n      if (!isSelf) {\n        var peerBtn = document.createElement(\"button\");\n        peerBtn.id = peerId;\n        peerBtn.onclick = function () {\n          skylinkDemo.refreshConnection(peerId);\n        };\n        peerBtn.innerHTML = \"Refresh Connection?\";\n        document.getElementById(\"peer-list\").appendChild(peerBtn);\n      }\n    });\n  &lt;/script&gt;\n &lt;/body&gt;"
+                "\n  // Example 1: Refreshing a Peer connection\n  function refreshFrozenVideoStream (peerId) {\n    skylinkDemo.refreshConnection(peerId, function (error, success) {\n      if (error) return;\n      console.log(\"Refreshing connection for '\" + peerId + \"'\");\n    });\n  }\n\n  // Example 2: Refreshing a list of Peer connections\n  function refreshFrozenVideoStreamGroup (peerIdA, peerIdB) {\n    skylinkDemo.refreshConnection([peerIdA, peerIdB], function (error, success) {\n      if (error) return;\n      console.log(\"Refreshing connection for '\" + peerIdA + \"' and '\" + peerIdB + \"'\");\n    });\n  }\n\n  // Example 3: Refreshing all Peer connections\n  function refreshFrozenVideoStreamAll () {\n    skylinkDemo.refreshConnection(function (error, success) {\n      if (error) return;\n      console.log(\"Refreshing connection for all\");\n    });\n  }"
             ],
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 275,
-            "description": "Function that retrieves the Peer connection stats.",
+            "line": 296,
+            "description": "Function that retrieves Peer connection bandwidth and ICE connection stats.",
             "itemtype": "method",
             "name": "getConnectionStatus",
             "params": [
                 {
                     "name": "targetPeerId",
-                    "description": "The target Peer ID to only retrieve the Peer connection stats.<br>\n- When provided as an Array, it will retrieve the Peer connections stats with all the Peer IDs provided.<br>\n- When not provided, it will retrieve the Peer connections stats with all the currently connected Peers.",
+                    "description": "The target Peer ID to retrieve connection stats from.<br>\n- When provided as an Array, it will retrieve all connection stats from all the Peer IDs provided.\n- When not provided, it will retrieve all connection stats from the currently connected Peers in the Room.",
                     "type": "String|Array",
                     "optional": true
                 },
                 {
                     "name": "callback",
-                    "description": "he callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>",
+                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_getConnectionStatusStateChange\">\n  <code>getConnectionStatusStateChange</code> event</a> triggering <code>state</code> parameter payload\n  value as <code>RETRIEVE_SUCCESS</code> for all Peers targeted for request success.</small>\n  [Rel: Skylink.GET_CONNECTION_STATUS_STATE]",
                     "type": "Function",
                     "optional": true,
                     "props": [
@@ -1796,27 +1796,27 @@
                             "props": [
                                 {
                                     "name": "listOfPeers",
-                                    "description": "The list Peer IDs targeted for retrieving the Peer connections stats.",
+                                    "description": "The list of Peer IDs targeted.",
                                     "type": "Array"
                                 },
                                 {
                                     "name": "retrievalErrors",
-                                    "description": "The list of retrieval of Peer connection stats errors.\n  <small>If there is <code>\"self\"</code> property, it's likely due to having no Peers to retrieve the\n    Peer connections stats from.</small>",
+                                    "description": "The list of Peer connection stats retrieval errors.",
                                     "type": "JSON"
                                 },
                                 {
-                                    "name": "retrievalErrors.<#peerId>",
-                                    "description": "The Peer connection stats retrieval error associated\n  with the Peer ID property name.",
+                                    "name": "retrievalErrors.#peerId",
+                                    "description": "The Peer connection stats retrieval error associated\n  with the Peer ID defined in <code>#peerId</code> property.\n  <small>If <code>#peerId</code> value is <code>\"self\"</code>, it means that it is the error when there\n  is no Peer connections to refresh with.</small>",
                                     "type": "Error|String"
                                 },
                                 {
                                     "name": "connectionStats",
-                                    "description": "The list of Peer connection stats that has been successfully retrieved.",
+                                    "description": "The list of Peer connection stats.\n  <small>These are the Peer connection stats that has been managed to be successfully retrieved.</small>",
                                     "type": "JSON"
                                 },
                                 {
-                                    "name": "connectionStats.<#peerId>",
-                                    "description": "The Peer connection stats associated\n  with the Peer ID property name.\n<small>Object signature matches the <code>stats</code> parameter payload received in the\n  <a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>.</small>",
+                                    "name": "connectionStats.#peerId",
+                                    "description": "The Peer connection stats associated with\n  the Peer ID defined in <code>#peerId</code> property.\n  <small>Object signature matches the <code>stats</code> parameter payload received in the\n  <a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>.</small>",
                                     "type": "JSON"
                                 }
                             ]
@@ -1828,7 +1828,7 @@
                             "props": [
                                 {
                                     "name": "listOfPeers",
-                                    "description": "The list Peer IDs targeted for retrieving the Peer connections stats.",
+                                    "description": "The list of Peer IDs targeted.",
                                     "type": "Array"
                                 },
                                 {
@@ -1837,8 +1837,8 @@
                                     "type": "JSON"
                                 },
                                 {
-                                    "name": "connectionStats.<#peerId>",
-                                    "description": "The Peer connection stats associated\n  with the Peer ID property name.\n<small>Object signature matches the <code>stats</code> parameter payload received in the\n  <a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>.</small>",
+                                    "name": "connectionStats.#peerId",
+                                    "description": "The Peer connection stats associated with\n  the Peer ID defined in <code>#peerId</code> property.\n  <small>Object signature matches the <code>stats</code> parameter payload received in the\n  <a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>.</small>",
                                     "type": "JSON"
                                 }
                             ]
@@ -1846,16 +1846,16 @@
                     ]
                 }
             ],
-            "trigger": "<ol class=\"desc-seq\">\n  <li>Retrieves the Peer connections stats.<ul>\n    <li>Triggers <a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>\n      with parameter payload <code>state</code> as <code>RETRIEVING</code>.</li>\n    <li>If retrieval of Peer connection stats is successful, it triggers <a href=\"#event_getConnectionStatusStateChange\">\n      <code>getConnectionStatusStateChange</code> event</a> with parameter payload <code>state</code> as\n      <code>RETRIEVE_SUCCESS</code> after <code>RETRIEVING</code>.</li>\n    <li>If retrieval of Peer connection stats had failed, it triggers <a href=\"#event_getConnectionStatusStateChange\">\n      <code>getConnectionStatusStateChange</code> event</a> with parameter payload <code>state</code> as\n      <code>RETRIEVE_ERROR</code> after <code>RETRIEVING</code>.</li>\n  </ul></li></ol>",
+            "trigger": "<ol class=\"desc-seq\">\n  <li><a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>\n  triggers parameter payload <code>state</code> value as <code>RETRIEVING</code>.</li>\n  <li><ol><li>When retrieval of Peer connection stats is successful, <a href=\"#event_getConnectionStatusStateChange\">\n  <code>getConnectionStatusStateChange</code> event</a> triggers parameter payload\n  <code>state</code> value as <code>RETRIEVE_SUCCESS</code>.</li>\n  <li>When retrieval of Peer connection stats had failed, <a href=\"#event_getConnectionStatusStateChange\">\n  <code>getConnectionStatusStateChange</code> event</a> triggers parameter payload\n  <code>state</code> value as <code>RETRIEVE_ERROR</code>.</li></ol></li></ol>",
             "example": [
-                "\n  var peerIntervals = {};\n\n  skylinkDemo.on(\"getConnectionStatusStateChange\", function (state, peerId, stats, error) {\n    if (state === skylinkDemo.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS) {\n      // Display connection stats\n    } else if (state === skylinkDemo.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR) {\n      // Display retrieval error\n    }\n  });\n\n  skylinkDemo.on(\"peerJoined\", function (peerId, peerInfo, isSelf) {\n    if (!isSelf) {\n      peerIntervals[peerId] = setInterval(function () {\n        skylinkDemo.getConnectionStatus(peerId);\n      }, 1000);\n    }\n  });"
+                "\n  // Example 1: Retrieve a Peer connection stats\n  function startBWStatsInterval (peerId) {\n    setInterval(function () {\n      skylinkDemo.getConnectionStatus(peerId, function (error, success) {\n        if (error) return;\n        var sendVideoBytes  = success.connectionStats[peerId].video.sending.bytes;\n        var sendAudioBytes  = success.connectionStats[peerId].audio.sending.bytes;\n        var recvVideoBytes  = success.connectionStats[peerId].video.receiving.bytes;\n        var recvAudioBytes  = success.connectionStats[peerId].audio.receiving.bytes;\n        var localCandidate  = success.connectionStats[peerId].selectedCandidate.local;\n        var remoteCandidate = success.connectionStats[peerId].selectedCandidate.remote;\n        console.log(\"Sending audio (\" + sendAudioBytes + \"bps) video (\" + sendVideoBytes + \")\");\n        console.log(\"Receiving audio (\" + recvAudioBytes + \"bps) video (\" + recvVideoBytes + \")\");\n        console.log(\"Local candidate: \" + localCandidate.ipAddress + \":\" + localCandidate.portNumber +\n          \"?transport=\" + localCandidate.transport + \" (type: \" + localCandidate.candidateType + \")\");\n        console.log(\"Remote candidate: \" + remoteCandidate.ipAddress + \":\" + remoteCandidate.portNumber +\n          \"?transport=\" + remoteCandidate.transport + \" (type: \" + remoteCandidate.candidateType + \")\");\n      });\n    }, 1000);\n  }\n\n  // Example 2: Retrieve a list of Peer connection stats\n  function printConnStats (peerId, data) {\n    if (!data.connectionStats[peerId]) return;\n    var sendVideoBytes  = data.connectionStats[peerId].video.sending.bytes;\n    var sendAudioBytes  = data.connectionStats[peerId].audio.sending.bytes;\n    var recvVideoBytes  = data.connectionStats[peerId].video.receiving.bytes;\n    var recvAudioBytes  = data.connectionStats[peerId].audio.receiving.bytes;\n    var localCandidate  = data.connectionStats[peerId].selectedCandidate.local;\n    var remoteCandidate = data.connectionStats[peerId].selectedCandidate.remote;\n    console.log(peerId + \" - Sending audio (\" + sendAudioBytes + \"bps) video (\" + sendVideoBytes + \")\");\n    console.log(peerId + \" - Receiving audio (\" + recvAudioBytes + \"bps) video (\" + recvVideoBytes + \")\");\n    console.log(peerId + \" - Local candidate: \" + localCandidate.ipAddress + \":\" + localCandidate.portNumber +\n      \"?transport=\" + localCandidate.transport + \" (type: \" + localCandidate.candidateType + \")\");\n    console.log(peerId + \" - Remote candidate: \" + remoteCandidate.ipAddress + \":\" + remoteCandidate.portNumber +\n      \"?transport=\" + remoteCandidate.transport + \" (type: \" + remoteCandidate.candidateType + \")\");\n  }\n\n  function startBWStatsInterval (peerIdA, peerIdB) {\n    setInterval(function () {\n      skylinkDemo.getConnectionStatus([peerIdA, peerIdB], function (error, success) {\n        if (error) {\n          printConnStats(peerIdA, error.connectionStats);\n          printConnStats(peerIdB, error.connectionStats);\n        } else {\n          printConnStats(peerIdA, success.connectionStats);\n          printConnStats(peerIdB, success.connectionStats);\n        }\n      });\n    }, 1000);\n  }\n\n  // Example 3: Retrieve all Peer connection stats\n  function printConnStats (listOfPeers, data) {\n    listOfPeers.forEach(function (peerId) {\n      if (!data.connectionStats[peerId]) return;\n      var sendVideoBytes  = data.connectionStats[peerId].video.sending.bytes;\n      var sendAudioBytes  = data.connectionStats[peerId].audio.sending.bytes;\n      var recvVideoBytes  = data.connectionStats[peerId].video.receiving.bytes;\n      var recvAudioBytes  = data.connectionStats[peerId].audio.receiving.bytes;\n      var localCandidate  = data.connectionStats[peerId].selectedCandidate.local;\n      var remoteCandidate = data.connectionStats[peerId].selectedCandidate.remote;\n      console.log(peerId + \" - Sending audio (\" + sendAudioBytes + \"bps) video (\" + sendVideoBytes + \")\");\n      console.log(peerId + \" - Receiving audio (\" + recvAudioBytes + \"bps) video (\" + recvVideoBytes + \")\");\n      console.log(peerId + \" - Local candidate: \" + localCandidate.ipAddress + \":\" + localCandidate.portNumber +\n        \"?transport=\" + localCandidate.transport + \" (type: \" + localCandidate.candidateType + \")\");\n      console.log(peerId + \" - Remote candidate: \" + remoteCandidate.ipAddress + \":\" + remoteCandidate.portNumber +\n        \"?transport=\" + remoteCandidate.transport + \" (type: \" + remoteCandidate.candidateType + \")\");\n    });\n  }\n\n  function startBWStatsInterval (peerIdA, peerIdB) {\n    setInterval(function () {\n      skylinkDemo.getConnectionStatus(function (error, success) {\n        if (error) {\n          printConnStats(error.listOfPeers, error.connectionStats);\n        } else {\n          printConnStats(success.listOfPeers, success.connectionStats);\n        }\n      });\n    }, 1000);\n  }"
             ],
             "since": "0.6.14",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 614,
+            "line": 703,
             "description": "Function that starts the Peer connection session.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_addPeer",
@@ -1866,7 +1866,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 666,
+            "line": 755,
             "description": "Function that re-negotiates a Peer connection.\nWe currently do not implement the ICE restart functionality.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -1877,7 +1877,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 796,
+            "line": 885,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -1888,7 +1888,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 852,
+            "line": 941,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -1899,13 +1899,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 991,
+            "line": 1080,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1054,
+            "line": 1143,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -2102,17 +2102,17 @@
                 },
                 {
                     "name": "OFFER",
-                    "description": "<small>Value <code>\"offer\"</code></small>\n  The value of the connection state when Peer is generating a <code>\"offer\"</code> session\n  description to send to User to start streaming connection.",
+                    "description": "<small>Value <code>\"offer\"</code></small>\n  The value of the connection state when Peer connection has set the local / remote <code>\"offer\"</code>\n  session description to start streaming connection.",
                     "type": "String"
                 },
                 {
                     "name": "ANSWER",
-                    "description": "<small>Value <code>\"answer\"</code></small>\n  The value of the connection state when User is generating a <code>\"answer\"</code> session\n  description to send to Peer to establish streaming connection.",
+                    "description": "<small>Value <code>\"answer\"</code></small>\n  The value of the connection state when Peer connection has set the local / remote <code>\"answer\"</code>\n  session description to establish streaming connection.",
                     "type": "String"
                 },
                 {
                     "name": "ERROR",
-                    "description": "<small>Value <code>\"error\"</code></small>\n  The value of the connection state when User has failed to establish connection with Peer.\n  <small>This happens when the <code>RTCPeerConnection</code> API interface receives\n  <code>setLocalDescription()</code>, <code>setRemoteDescription()</code>,\n  <code>createOffer()</code> or <code>createAnswer()</code> errors in result.</small>",
+                    "description": "<small>Value <code>\"error\"</code></small>\n  The value of the connection state when Peer connection has failed to establish streaming connection.\n  <small>This happens when there are errors that occurs in creating local <code>\"offer\"</code> /\n  <code>\"answer\"</code>, or when setting remote / local <code>\"offer\"</code> / <code>\"answer\"</code>.</small>",
                     "type": "String"
                 }
             ],
@@ -2123,7 +2123,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 37,
+            "line": 36,
             "description": "Stores the list of Peer connection health timers.\nThis timers sets a timeout which checks and waits if Peer connection is successfully established,\n  or else it will attempt to re-negotiate with the Peer connection again.",
             "itemtype": "attribute",
             "name": "_peerConnectionHealthTimers",
@@ -2142,7 +2142,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 50,
+            "line": 49,
             "description": "Stores the list of Peer connection \"healthy\" flags, which indicates if Peer connection is\n  successfully established, and when the health timers expires, it will clear the timer\n  and not attempt to re-negotiate with the Peer connection again.",
             "itemtype": "attribute",
             "name": "_peerConnectionHealth",
@@ -2161,7 +2161,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 62,
+            "line": 61,
             "description": "Stores the User connection priority weight.\nIf Peer has a higher connection weight, it will do the offer from its Peer connection first.",
             "itemtype": "attribute",
             "name": "_peerPriorityWeight",
@@ -2173,7 +2173,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 73,
+            "line": 72,
             "description": "Function that creates the Peer connection offer session description.",
             "itemtype": "method",
             "name": "_doOffer",
@@ -2184,7 +2184,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 171,
+            "line": 170,
             "description": "Function that creates the Peer connection answer session description.\nThis comes after receiving and setting the offer session description.",
             "itemtype": "method",
             "name": "_doAnswer",
@@ -2195,7 +2195,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 211,
+            "line": 210,
             "description": "Function that starts the Peer connection health timer.\nTo count as a \"healthy\" successful established Peer connection, the\n  ICE connection state has to be \"connected\" or \"completed\",\n  messaging Datachannel type state has to be \"opened\" (if Datachannel is enabled)\n  and Signaling state has to be \"stable\".\nShould consider dropping of counting messaging Datachannel type being opened as\n  it should not involve the actual Peer connection for media (audio/video) streaming.",
             "itemtype": "method",
             "name": "_startPeerConnectionHealthCheck",
@@ -2206,7 +2206,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 297,
+            "line": 296,
             "description": "Function that stops the Peer connection health timer.\nThis happens when Peer connection has been successfully established or when\n  Peer leaves the Room.",
             "itemtype": "method",
             "name": "_stopPeerConnectionHealthCheck",
@@ -2217,7 +2217,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 322,
+            "line": 321,
             "description": "Function that sets the local session description and sends to Peer.\nIf trickle ICE is disabled, the local session description will be sent after\n  ICE gathering has been completed.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -2325,7 +2325,7 @@
                 },
                 {
                     "name": "callback",
-                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_getPeersStateChange\">\n  <code>getPeersStateChange</code> event</a> triggering <code>state</code> parameter payload value as\n  <code>RECEIVED</code> for request success.</small>",
+                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_getPeersStateChange\">\n  <code>getPeersStateChange</code> event</a> triggering <code>state</code> parameter payload value as\n  <code>RECEIVED</code> for request success.</small>\n  [Rel: Skylink.GET_PEERS_STATE]",
                     "type": "Function",
                     "optional": true,
                     "props": [
@@ -2351,7 +2351,7 @@
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 177,
+            "line": 178,
             "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled and\n  <code>\"autoIntroduce\"</code> flag to be disabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>, as only Users connecting using\n  the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of\n  Peer IDs from Rooms within the same App space.\n  <a href=\"http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about privileged App Key feature here</a>.\n</blockquote>\nFunction that selects and introduces a pair of Peers to start connection with each other.",
             "itemtype": "method",
             "name": "introducePeer",
@@ -2377,7 +2377,7 @@
         {
             "file": "source/room-connection.js",
             "line": 1,
-            "description": "The list of Signaling server reaction states.",
+            "description": "The list of Signaling server reaction states during <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a>.",
             "itemtype": "attribute",
             "name": "SYSTEM_ACTION",
             "params": [
@@ -2400,7 +2400,7 @@
         {
             "file": "source/room-connection.js",
             "line": 18,
-            "description": "The list of Signaling server reaction states reason of action code.",
+            "description": "The list of Signaling server reaction states reason of action code during\n<a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a>.",
             "itemtype": "attribute",
             "name": "SYSTEM_ACTION_REASON",
             "params": [
@@ -2467,7 +2467,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 94,
+            "line": 95,
             "description": "Stores the current Room name that User is connected to.",
             "itemtype": "attribute",
             "name": "_selectedRoom",
@@ -2479,7 +2479,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 104,
+            "line": 105,
             "description": "Stores the flag that indicates if Room is locked.",
             "itemtype": "attribute",
             "name": "_roomLocked",
@@ -2491,7 +2491,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 114,
+            "line": 115,
             "description": "Stores the flag that indicates if User is connected to the Room.",
             "itemtype": "attribute",
             "name": "_inRoom",
@@ -2503,7 +2503,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 124,
+            "line": 125,
             "description": "Function that starts the Room session.",
             "itemtype": "method",
             "name": "joinRoom",
@@ -2634,7 +2634,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 453,
+            "line": 454,
             "description": "Function that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -2699,7 +2699,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 578,
+            "line": 579,
             "description": "Function that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -2709,7 +2709,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 600,
+            "line": 601,
             "description": "Function that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -2719,7 +2719,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 622,
+            "line": 623,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -2857,7 +2857,7 @@
         {
             "file": "source/room-init.js",
             "line": 127,
-            "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This constant has been deprecated.<br>Automatic nearest regional server has been implemented\n  on the platform.\n</blockquote>\nThe list of available Auth servers in these regions that\n<a href=\"#method_init\"><code>init()</code> method</a> could use for better connectivity.",
+            "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This constant has been deprecated.<br>Automatic nearest regional server has been implemented\n  on the platform.\n</blockquote>\nThe list of available Auth servers in these regions configured in the\n<a href=\"#method_init\"><code>init()</code> method</a>.",
             "itemtype": "attribute",
             "name": "REGIONAL_SERVER",
             "params": [
@@ -3238,7 +3238,7 @@
                 },
                 {
                     "name": "callback",
-                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_readyStateChange\">\n  <code>readyStateChange</code> event</a> <code>state</code> parameter payload value\n  as <code>COMPLETED</code> for request success and <code>ERROR</code> for request error.</small>\n  [Rel: Skylink.READY_STATE_CHANGE]",
+                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_readyStateChange\">\n  <code>readyStateChange</code> event</a> <code>state</code> parameter payload value\n  as <code>COMPLETED</code> for request success.</small>\n  [Rel: Skylink.READY_STATE_CHANGE]",
                     "type": "Function",
                     "optional": true,
                     "props": [
@@ -8422,11 +8422,11 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:99"
+            "line": " source/peer-connection.js:108"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:275"
+            "line": " source/peer-connection.js:296"
         },
         {
             "message": "unknown tag: trigger",
@@ -8446,23 +8446,23 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-privileged.js:177"
+            "line": " source/peer-privileged.js:178"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:124"
+            "line": " source/room-connection.js:125"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:453"
+            "line": " source/room-connection.js:454"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:578"
+            "line": " source/room-connection.js:579"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:600"
+            "line": " source/room-connection.js:601"
         },
         {
             "message": "unknown tag: trigger",
@@ -8810,7 +8810,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:991"
+            "line": " source/peer-connection.js:1080"
         }
     ]
 }

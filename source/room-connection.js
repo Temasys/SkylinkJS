@@ -1,5 +1,5 @@
 /**
- * The list of Signaling server reaction states.
+ * The list of Signaling server reaction states during <a href="#method_joinRoom"><code>joinRoom()</code> method</a>.
  * @attribute SYSTEM_ACTION
  * @param {String} WARNING <small>Value <code>"warning"</code></small>
  *   The value of the state when Room session is about to end.
@@ -16,7 +16,8 @@ Skylink.prototype.SYSTEM_ACTION = {
 };
 
 /**
- * The list of Signaling server reaction states reason of action code.
+ * The list of Signaling server reaction states reason of action code during
+ * <a href="#method_joinRoom"><code>joinRoom()</code> method</a>.
  * @attribute SYSTEM_ACTION_REASON
  * @param {String} CREDENTIALS_EXPIRED <small>Value <code>"oldTimeStamp"</code></small>
  *   The value of the reason code when Room session token has expired.

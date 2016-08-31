@@ -102,16 +102,15 @@
  *   &lt;small&gt;At this stage, &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;
  *   is triggered and Peer connection may commence.&lt;/small&gt;
  * @param {String} OFFER   &lt;small&gt;Value &lt;code&gt;&quot;offer&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the connection state when Peer is generating a &lt;code&gt;&quot;offer&quot;&lt;/code&gt; session
- *   description to send to User to start streaming connection.
+ *   The value of the connection state when Peer connection has set the local / remote &lt;code&gt;&quot;offer&quot;&lt;/code&gt;
+ *   session description to start streaming connection.
  * @param {String} ANSWER  &lt;small&gt;Value &lt;code&gt;&quot;answer&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the connection state when User is generating a &lt;code&gt;&quot;answer&quot;&lt;/code&gt; session
- *   description to send to Peer to establish streaming connection.
+ *   The value of the connection state when Peer connection has set the local / remote &lt;code&gt;&quot;answer&quot;&lt;/code&gt;
+ *   session description to establish streaming connection.
  * @param {String} ERROR   &lt;small&gt;Value &lt;code&gt;&quot;error&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the connection state when User has failed to establish connection with Peer.
- *   &lt;small&gt;This happens when the &lt;code&gt;RTCPeerConnection&lt;/code&gt; API interface receives
- *   &lt;code&gt;setLocalDescription()&lt;/code&gt;, &lt;code&gt;setRemoteDescription()&lt;/code&gt;,
- *   &lt;code&gt;createOffer()&lt;/code&gt; or &lt;code&gt;createAnswer()&lt;/code&gt; errors in result.&lt;/small&gt;
+ *   The value of the connection state when Peer connection has failed to establish streaming connection.
+ *   &lt;small&gt;This happens when there are errors that occurs in creating local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; /
+ *   &lt;code&gt;&quot;answer&quot;&lt;/code&gt;, or when setting remote / local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; / &lt;code&gt;&quot;answer&quot;&lt;/code&gt;.&lt;/small&gt;
  * @type JSON
  * @readOnly
  * @for Skylink

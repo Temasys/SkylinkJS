@@ -105,6 +105,7 @@ Skylink.prototype._peerList = null;
  *   <small>Function request completion is determined by the <a href="#event_getPeersStateChange">
  *   <code>getPeersStateChange</code> event</a> triggering <code>state</code> parameter payload value as
  *   <code>RECEIVED</code> for request success.</small>
+ *   [Rel: Skylink.GET_PEERS_STATE]
  * @param {Error|String} callback.error The error result in request.
  *   <small>Defined as <code>null</code> when there are no errors in request</small>
  * @param {JSON} callback.success The success result in request.

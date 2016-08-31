@@ -220,8 +220,8 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
  *   This constant has been deprecated.&lt;br&gt;Automatic nearest regional server has been implemented
  *   on the platform.
  * &lt;/blockquote&gt;
- * The list of available Auth servers in these regions that
- * &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; could use for better connectivity.
+ * The list of available Auth servers in these regions configured in the
+ * &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;.
  * @attribute REGIONAL_SERVER
  * @param {String} APAC1 &lt;small&gt;Value &lt;code&gt;&quot;sg&quot;&lt;/code&gt;&lt;/small&gt;
  *   The value of the option to use the Auth server in Asia Pacific (APAC).
@@ -512,7 +512,7 @@ Skylink.prototype._room = null;
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_readyStateChange&quot;&gt;
  *   &lt;code&gt;readyStateChange&lt;/code&gt; event&lt;/a&gt; &lt;code&gt;state&lt;/code&gt; parameter payload value
- *   as &lt;code&gt;COMPLETED&lt;/code&gt; for request success and &lt;code&gt;ERROR&lt;/code&gt; for request error.&lt;/small&gt;
+ *   as &lt;code&gt;COMPLETED&lt;/code&gt; for request success.&lt;/small&gt;
  *   [Rel: Skylink.READY_STATE_CHANGE]
  * @param {JSON|String} callback.error The error result in request.
  * - When defined as string, it&#x27;s the error when required App Key is not provided.
