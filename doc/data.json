@@ -1271,18 +1271,18 @@
         {
             "file": "source/ice-candidate.js",
             "line": 1,
-            "description": "Contains the list of Peer connection ICE gathering states.",
+            "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.\n</blockquote>\nThe list of Peer connection ICE gathering states after\n<a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a> was successful.",
             "itemtype": "attribute",
             "name": "CANDIDATE_GENERATION_STATE",
             "params": [
                 {
                     "name": "GATHERING",
-                    "description": "<small>Value <code>\"gathering\"</code></small>\n  The state when Peer connection ICE is gathering candidates. The ICE\n  candidates that are gathered would be sent to the Peers so that the ICE\n  connection may be established after a suitable matching pair is found.",
+                    "description": "<small>Value <code>\"gathering\"</code></small>\n  The value of the state when Peer connection is gathering ICE candidates.\n  <small>These ICE candidates are sent to Peer for its connection to check for a suitable\n  pair of ICE candidates to establish an ICE connection for stream audio, video and data.\n  See <a href=\"#event_iceConnectionState\"><code>iceConnectionState</code> event</a> for ICE connection status.</small>\n  <small>This state cannot happen until Peer connection <code>RTCPeerConnection</code> API\n  <code>setLocalDescription()</code> is invoked. See <a href=\"#event_peerConnectionState\">\n  <code>peerConnectionState</code> event</a> for session description status.</small>",
                     "type": "String"
                 },
                 {
                     "name": "COMPLETED",
-                    "description": "<small>Value <code>\"completed\"</code></small>\n  The state when Peer connection ICE has completed gathering candidates.",
+                    "description": "<small>Value <code>\"completed\"</code></small>\n  The value of the state when Peer connection gathering of ICE candidates has completed.",
                     "type": "String"
                 }
             ],
@@ -1293,7 +1293,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 21,
+            "line": 30,
             "description": "Stores the list of buffered ICE candidates that is received before\n  remote session description is received and set.",
             "itemtype": "attribute",
             "name": "_peerCandidatesQueue",
@@ -1319,7 +1319,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 34,
+            "line": 43,
             "description": "Stores the list of Peer connection ICE candidates.",
             "itemtype": "attribute",
             "name": "_gatheredCandidates",
@@ -1350,7 +1350,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 47,
+            "line": 56,
             "description": "Function that handles the Peer connection gathered ICE candidate to be sent.",
             "itemtype": "method",
             "name": "_onIceCandidate",
@@ -1361,7 +1361,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 148,
+            "line": 157,
             "description": "Function that buffers the Peer connection ICE candidate when received\n  before remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateToQueue",
@@ -1372,7 +1372,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 164,
+            "line": 173,
             "description": "Function that handles when the Peer connection received ICE candidate\n  has been added or processed successfully.\nSeparated in a function to prevent jshint errors.",
             "itemtype": "method",
             "name": "_onAddIceCandidateSuccess",
@@ -1383,7 +1383,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 177,
+            "line": 186,
             "description": "Function that handles when the Peer connection received ICE candidate\n  has failed adding or processing.\nSeparated in a function to prevent jshint errors.",
             "itemtype": "method",
             "name": "_onAddIceCandidateFailure",
@@ -1394,7 +1394,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 190,
+            "line": 199,
             "description": "Function that adds all the Peer connection buffered ICE candidates received.\nThis should be called only after the remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateFromQueue",

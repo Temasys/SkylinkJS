@@ -90,14 +90,23 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * Contains the list of Peer connection ICE gathering states.
+ * &lt;blockquote class=&quot;info&quot;&gt;
+ *   Learn more about how ICE works in this
+ *   &lt;a href=&quot;https://temasys.com.sg/ice-what-is-this-sorcery/&quot;&gt;article here&lt;/a&gt;.
+ * &lt;/blockquote&gt;
+ * The list of Peer connection ICE gathering states after
+ * &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt; was successful.
  * @attribute CANDIDATE_GENERATION_STATE
  * @param {String} GATHERING &lt;small&gt;Value &lt;code&gt;&quot;gathering&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when Peer connection ICE is gathering candidates. The ICE
- *   candidates that are gathered would be sent to the Peers so that the ICE
- *   connection may be established after a suitable matching pair is found.
+ *   The value of the state when Peer connection is gathering ICE candidates.
+ *   &lt;small&gt;These ICE candidates are sent to Peer for its connection to check for a suitable
+ *   pair of ICE candidates to establish an ICE connection for stream audio, video and data.
+ *   See &lt;a href=&quot;#event_iceConnectionState&quot;&gt;&lt;code&gt;iceConnectionState&lt;/code&gt; event&lt;/a&gt; for ICE connection status.&lt;/small&gt;
+ *   &lt;small&gt;This state cannot happen until Peer connection &lt;code&gt;RTCPeerConnection&lt;/code&gt; API
+ *   &lt;code&gt;setLocalDescription()&lt;/code&gt; is invoked. See &lt;a href=&quot;#event_peerConnectionState&quot;&gt;
+ *   &lt;code&gt;peerConnectionState&lt;/code&gt; event&lt;/a&gt; for session description status.&lt;/small&gt;
  * @param {String} COMPLETED &lt;small&gt;Value &lt;code&gt;&quot;completed&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when Peer connection ICE has completed gathering candidates.
+ *   The value of the state when Peer connection gathering of ICE candidates has completed.
  * @type JSON
  * @readOnly
  * @for Skylink

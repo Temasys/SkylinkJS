@@ -2764,7 +2764,7 @@ Before using any Skylink functionalities, you will need to authenticate your App
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l190"><code>source&#x2F;ice-candidate.js:190</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l199"><code>source&#x2F;ice-candidate.js:199</code></a>
       </small>
     
 
@@ -2843,7 +2843,7 @@ This should be called only after the remote session description is received and 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l148"><code>source&#x2F;ice-candidate.js:148</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l157"><code>source&#x2F;ice-candidate.js:157</code></a>
       </small>
     
 
@@ -6001,7 +6001,7 @@ See confluence docs for the &quot;offer&quot; expected properties to be received
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l177"><code>source&#x2F;ice-candidate.js:177</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l186"><code>source&#x2F;ice-candidate.js:186</code></a>
       </small>
     
 
@@ -6081,7 +6081,7 @@ Separated in a function to prevent jshint errors.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l164"><code>source&#x2F;ice-candidate.js:164</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l173"><code>source&#x2F;ice-candidate.js:173</code></a>
       </small>
     
 
@@ -6161,7 +6161,7 @@ Separated in a function to prevent jshint errors.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l47"><code>source&#x2F;ice-candidate.js:47</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l56"><code>source&#x2F;ice-candidate.js:56</code></a>
       </small>
     
 
@@ -20751,7 +20751,7 @@ TURNS connections are enforced if App is accessing from HTTPS domains.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l34"><code>source&#x2F;ice-candidate.js:34</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l43"><code>source&#x2F;ice-candidate.js:43</code></a>
       </small>
     
 
@@ -22414,7 +22414,7 @@ These events are only triggered once.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l21"><code>source&#x2F;ice-candidate.js:21</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l30"><code>source&#x2F;ice-candidate.js:30</code></a>
       </small>
     
 
@@ -26303,7 +26303,12 @@ used by default.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Contains the list of Peer connection ICE gathering states.</p>
+    <p><blockquote class="info">
+  Learn more about how ICE works in this
+  <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+</blockquote>
+The list of Peer connection ICE gathering states after
+<a href="#method_joinRoom"><code>joinRoom()</code> method</a> was successful.</p>
 
   </div>
 
@@ -26326,9 +26331,13 @@ used by default.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;gathering&quot;</code></small>
-  The state when Peer connection ICE is gathering candidates. The ICE
-  candidates that are gathered would be sent to the Peers so that the ICE
-  connection may be established after a suitable matching pair is found.</p>
+  The value of the state when Peer connection is gathering ICE candidates.
+  <small>These ICE candidates are sent to Peer for its connection to check for a suitable
+  pair of ICE candidates to establish an ICE connection for stream audio, video and data.
+  See <a href="#event_iceConnectionState"><code>iceConnectionState</code> event</a> for ICE connection status.</small>
+  <small>This state cannot happen until Peer connection <code>RTCPeerConnection</code> API
+  <code>setLocalDescription()</code> is invoked. See <a href="#event_peerConnectionState">
+  <code>peerConnectionState</code> event</a> for session description status.</small></p>
 
             </div>
 
@@ -26344,7 +26353,7 @@ used by default.</li>
 
             <div class="param-description">
                 <p><small>Value <code>&quot;completed&quot;</code></small>
-  The state when Peer connection ICE has completed gathering candidates.</p>
+  The value of the state when Peer connection gathering of ICE candidates has completed.</p>
 
             </div>
 

@@ -1,12 +1,21 @@
 /**
- * Contains the list of Peer connection ICE gathering states.
+ * <blockquote class="info">
+ *   Learn more about how ICE works in this
+ *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+ * </blockquote>
+ * The list of Peer connection ICE gathering states after
+ * <a href="#method_joinRoom"><code>joinRoom()</code> method</a> was successful.
  * @attribute CANDIDATE_GENERATION_STATE
  * @param {String} GATHERING <small>Value <code>"gathering"</code></small>
- *   The state when Peer connection ICE is gathering candidates. The ICE
- *   candidates that are gathered would be sent to the Peers so that the ICE
- *   connection may be established after a suitable matching pair is found.
+ *   The value of the state when Peer connection is gathering ICE candidates.
+ *   <small>These ICE candidates are sent to Peer for its connection to check for a suitable
+ *   pair of ICE candidates to establish an ICE connection for stream audio, video and data.
+ *   See <a href="#event_iceConnectionState"><code>iceConnectionState</code> event</a> for ICE connection status.</small>
+ *   <small>This state cannot happen until Peer connection <code>RTCPeerConnection</code> API
+ *   <code>setLocalDescription()</code> is invoked. See <a href="#event_peerConnectionState">
+ *   <code>peerConnectionState</code> event</a> for session description status.</small>
  * @param {String} COMPLETED <small>Value <code>"completed"</code></small>
- *   The state when Peer connection ICE has completed gathering candidates.
+ *   The value of the state when Peer connection gathering of ICE candidates has completed.
  * @type JSON
  * @readOnly
  * @for Skylink
