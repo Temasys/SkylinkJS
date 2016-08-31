@@ -399,15 +399,19 @@ Skylink.prototype._room = null;
  *   during request to Auth server and socket connections to Signaling server
  *   when accessing <code>window.location.protocol</code> value is <code>"http:"</code>.
  *   <small>By default, <code>"https:"</code> protocol connections uses HTTPS connections.</small>
- * @param {String} [options.audioCodec] The option to configure
- *   the preferred sending audio codec when available for Peer connection.
+ * @param {String} [options.audioCodec] <blockquote class="info">
+ *   Note that if the audio codec is not supported, the SDK will not configure the local <code>"offer"</code> or
+ *   <code>"answer"</code> session description to prefer the codec.</blockquote>
+ *   The option to configure the preferred audio codec
+ *   to use to encode sending audio data when available for Peer connection.
  * - When not provided, its value is <code>AUTO</code>.
- *   <small>Note that the audio codec selected will be determined by the browser audio codecs supports.</small>
  *   [Rel: Skylink.AUDIO_CODEC]
- * @param {String} [options.videoCodec] The option to configure
- *   the preferred sending video codec when available for Peer connection.
+ * @param {String} [options.videoCodec] <blockquote class="info">
+ *    Note that if the video codec is not supported, the SDK will not configure the local <code>"offer"</code> or
+ *   <code>"answer"</code> session description to prefer the codec.</blockquote>
+ *   The option to configure the preferred video codec
+ *   to use to encode sending video data when available for Peer connection.
  * - When not provided, its value is <code>AUTO</code>.
- *   <small>Note that the video codec selected will be determined by the browser video codecs supports.</small>
  *   [Rel: Skylink.VIDEO_CODEC]
  * @param {Number} [options.socketTimeout=20000] The timeout for each attempts for socket connection
  *   with the Signaling server to indicate that connection has timed out and has failed to establish.
