@@ -199,6 +199,8 @@ Skylink.prototype._peerList = null;
  *   [Rel: Skylink.GET_PEERS_STATE]
  * @param {Error|String} callback.error The error result in request.
  *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are no errors in request&lt;/small&gt;
+ *   &lt;small&gt;Object signature is the &lt;code&gt;getPeers()&lt;/code&gt; error when retrieving list of Peer IDs from Rooms
+ *   within the same App space.&lt;/small&gt;
  * @param {JSON} callback.success The success result in request.
  *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are errors in request&lt;/small&gt;
  *   &lt;small&gt;Object signature matches the &lt;code&gt;peerList&lt;/code&gt; parameter payload received in the

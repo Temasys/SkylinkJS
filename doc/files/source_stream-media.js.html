@@ -414,109 +414,138 @@ Skylink.prototype._mediaStreamsStatus = {};
 Skylink.prototype._audioFallback = false;
 
 /**
- * Gets self user media Stream object to attach to Skylink.
- * Do not invoke this function when user has already joined a room as
- *   this may affect any currently attached stream. You may use
- *  {{#crossLink &quot;Skylink/sendStream:method&quot;}}sendStream(){{/crossLink}}
- *  instead if self is already in the room, and allows application to
- *  attach application own MediaStream object to Skylink.
+ * Function that retrieves camera Stream.
  * @method getUserMedia
- * @param {JSON} [options] The self Stream streaming settings for the new Stream
- *   object attached to Skylink. If this parameter is not provided, the
- *   options value would be &lt;code&gt;{ audio: true, video: true }&lt;/code&gt;.
- * @param {Boolean|JSON} [options.audio=false] The self Stream streaming audio settings.
- *   If &lt;code&gt;false&lt;/code&gt;, it means that audio streaming is disabled in
- *   the self Stream. If this option is set to &lt;code&gt;true&lt;/code&gt; or is defined with
- *   settings, {{#crossLink &quot;Skylink/getUserMedia:method&quot;}}getUserMedia(){{/crossLink}}
- *   will be invoked. Self will not connect to the room unless the Stream audio
- *   user media access is given.
- * @param {Boolean} [options.audio.stereo=false] The flag that indicates if
- *   stereo should be enabled in self connection Stream
- *   audio streaming.
- * @param {Boolean} [options.audio.mute=false] The flag that
- *   indicates if the self Stream object audio streaming is muted.
- * @param {Array} [options.audio.optional] The optional constraints for audio streaming
- *   in self user media Stream object. This follows the &lt;code&gt;optional&lt;/code&gt;
- *   setting in the &lt;code&gt;MediaStreamConstraints&lt;/code&gt; when &lt;code&gt;getUserMedia()&lt;/code&gt; is invoked.
- *   Tampering this may cause errors in retrieval of self user media Stream object.
- *   Refer to this [site for more reference](http://www.sitepoint.com/introduction-getusermedia-api/).
- * @param {Boolean|JSON} [options.video=false] The self Stream streaming video settings.
- *   If &lt;code&gt;false&lt;/code&gt;, it means that video streaming is disabled in
- *   the self Stream. If this option is set to &lt;code&gt;true&lt;/code&gt; or is defined with
- *   settings, {{#crossLink &quot;Skylink/getUserMedia:method&quot;}}getUserMedia(){{/crossLink}}
- *   will be invoked. Self will not connect to the room unless the Stream video
- *   user media access is given.
- * @param {Boolean} [options.video.mute=false] The flag that
- *   indicates if the self Stream object video streaming is muted.
- * @param {JSON} [options.video.resolution] The self Stream streaming video
- *   resolution settings. Setting the resolution may
- *   not force set the resolution provided as it depends on the how the
- *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Number} [options.video.resolution.width] The self
- *   Stream streaming video resolution width.
- *   &lt;i&gt;This sets the &lt;code&gt;maxWidth&lt;/code&gt; of the &lt;code&gt;video&lt;/code&gt;
- *   constraints passed in &lt;code&gt;getUserMedia()&lt;/code&gt;&lt;/i&gt;.
- * @param {Number} [options.video.resolution.height] The self
- *   Stream streaming video resolution height.
- *   &lt;i&gt;This sets the &lt;code&gt;maxHeight&lt;/code&gt; of the &lt;code&gt;video&lt;/code&gt;
- *   constraints passed in &lt;code&gt;getUserMedia()&lt;/code&gt;&lt;/i&gt;.
- * @param {Number} [options.video.frameRate=50] The self
- *   Stream streaming video maximum frameRate.
- *   &lt;i&gt;This sets the &lt;code&gt;maxFramerate&lt;/code&gt; of the &lt;code&gt;video&lt;/code&gt;
- *   constraints passed in &lt;code&gt;getUserMedia()&lt;/code&gt;&lt;/i&gt;.
- * @param {Array} [options.video.optional] The optional constraints for video streaming
- *   in self user media Stream object. This follows the &lt;code&gt;optional&lt;/code&gt;
- *   setting in the &lt;code&gt;MediaStreamConstraints&lt;/code&gt; when &lt;code&gt;getUserMedia()&lt;/code&gt; is invoked.
- *   Tampering this may cause errors in retrieval of self user media Stream object.
- *   Refer to this [site for more reference](http://www.sitepoint.com/introduction-getusermedia-api/).
- * @param {Function} [callback] The callback fired after Skylink has gained
- *   access to self media stream and attached it successfully with the provided
- *   media settings or have met with an exception.
- *   The callback signature is &lt;code&gt;function (error, success)&lt;/code&gt;.
- * @param {Object} callback.error The error object received in the callback.
- *   This is the exception thrown that caused the failure for getting self user media.
- *   If received as &lt;code&gt;null&lt;/code&gt;, it means that there is no errors.
- * @param {Object} callback.success The success object received in the callback.
- *   The self user media [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_API)
- *   object. To display the MediaStream object to a &lt;code&gt;video&lt;/code&gt; or &lt;code&gt;audio&lt;/code&gt;, simply invoke:&lt;br&gt;
- *   &lt;code&gt;attachMediaStream(domElement, stream);&lt;/code&gt;.
- *   If received as &lt;code&gt;null&lt;/code&gt;, it means that there are errors.
+ * @param {JSON} [options] The Stream configuration options.
+ * - When not provided, the value is set to &lt;code&gt;{ audio: true, video: true }&lt;/code&gt;.
+ *   &lt;small&gt;To fallback to retrieve audio only Stream when retrieving of audio and video tracks failed,
+ *   enable the &lt;code&gt;audioFallback&lt;/code&gt; flag in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
+ * @param {Boolean|JSON} [options.audio=false] The audio configuration options.
+ * @param {Boolean} [options.audio.stereo=false] The flag if stereo band should be configured
+ *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
+ * @param {Array} [options.audio.optional] The &lt;code&gt;navigator.getUserMedia()&lt;/code&gt; API
+ *   &lt;code&gt;audio: { optional [..] }&lt;/code&gt; property.
+ * @param {Boolean|JSON} [options.video=false] The video configuration options.
+ * @param {Boolean} [options.video.mute=false] The flag if video tracks should be muted upon receiving them.
+ * @param {JSON} [options.video.resolution] &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that currently &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt; only configures
+ *   the maximum resolution of the Stream due to browser interopability and support. &lt;/blockquote&gt; The video resolution.
+ *   &lt;small&gt;By default, &lt;a href=&quot;#attr_VIDEO_RESOLUTION&quot;&gt;&lt;code&gt;VGA&lt;/code&gt;&lt;/a&gt; resolution option is selected when not provided.&lt;/small&gt;
+ *   [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Number} [options.video.resolution.width] The video resolution width.
+ * @param {Number} [options.video.resolution.height] The video resolution height.
+ * @param {Number} [options.video.frameRate=50] &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that currently &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt; only configures
+ *   the maximum frameRate of the Stream due to browser interopability and support. For Safari and IE browsers
+ *   (plugin-enabled), the maximum frameRate is not configured due to the lack of support.&lt;/blockquote&gt;
+ *   The video &lt;a href=&quot;https://en.wikipedia.org/wiki/Frame_rate&quot;&gt;frameRate&lt;/a&gt; per second (fps).
+ * @param {Array} [options.video.optional] The &lt;code&gt;navigator.getUserMedia()&lt;/code&gt; API
+ *   &lt;code&gt;video: { optional [..] }&lt;/code&gt; property.
+ * @param {Function} [callback] The callback function fired when request has completed.
+ *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
+ *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;
+ *   &lt;code&gt;mediaAccessSuccess&lt;/code&gt; event&lt;/a&gt; triggering &lt;code&gt;isScreensharing&lt;/code&gt; parameter
+ *   payload value as &lt;code&gt;false&lt;/code&gt; for request success.&lt;/small&gt;
+ * @param {Error|String} callback.error The error result in request.
+ *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are no errors in request&lt;/small&gt;
+ *   &lt;small&gt;Object signature is the &lt;code&gt;getUserMedia()&lt;/code&gt; error when retrieving camera Stream.&lt;/small&gt;
+ * @param {MediaStream} callback.success The success result in request.
+ *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are errors in request&lt;/small&gt;
+ *   &lt;small&gt;Object signature is the camera Stream object.&lt;/small&gt;
  * @example
- *   // Default is to get both audio and video
- *   // Example 1: Get both audio and video by default.
- *   SkylinkDemo.getUserMedia();
- *
- *   // Example 2: Get the audio stream only
- *   SkylinkDemo.getUserMedia({
- *     video: false,
- *     audio: true
+ *   // Example 1: Get both audio and video.
+ *   skylinkDemo.getUserMedia(function (error, success) {
+ *     if (error) return;
+ *     attachMediaStream(document.getElementById(&quot;my-video&quot;), success);
  *   });
  *
- *   // Example 3: Set the stream settings for the audio and video
- *   SkylinkDemo.getUserMedia({
+ *   // Example 2: Get only audio.
+ *   skylinkDemo.getUserMedia({
+ *     audio: true
+ *   }, function (error, success) {
+ *     if (error) return;
+ *     attachMediaStream(document.getElementById(&quot;my-audio&quot;), success);
+ *   });
+ *
+ *   // Example 3: Configure resolution for video
+ *   skylinkDemo.getUserMedia({
+ *     audio: true,
  *     video: {
- *        resolution: SkylinkDemo.VIDEO_RESOLUTION.HD,
- *        frameRate: 50
- *      },
- *     audio: {
- *       stereo: true
+ *       resolution: skylinkDemo.VIDEO_RESOLUTION.HD
  *     }
+ *   }, function (error, success) {
+ *     if (error) return;
+ *     attachMediaStream(document.getElementById(&quot;my-video&quot;), success);
  *   });
  *
- *   // Example 4: Get user media with callback
- *   SkylinkDemo.getUserMedia({
- *     video: false,
- *     audio: true
- *   },function(error,success){
- *      if (error){
- *        console.log(error);
- *      }
- *      else{
- *        console.log(success);
- *     }
+ *   // Example 4: Configure stereo flag for OPUS codec audio (OPUS is always used by default)
+ *   skylinkDemo.init({
+ *     appKey: &quot;xxxxxx&quot;,
+ *     audioCodec: skylinkDemo.AUDIO_CODEC.OPUS
+ *   }, function (initErr, initSuccess) {
+ *     skylinkDemo.getUserMedia({
+ *       audio: {
+ *         stereo: true
+ *       },
+ *       video: true
+ *     }, function (error, success) {
+ *       if (error) return;
+ *       attachMediaStream(document.getElementById(&quot;my-video&quot;), success);
+ *     });
  *   });
- * @trigger mediaAccessSuccess, mediaAccessError
- * @component Stream
+ *
+ *   // Example 5: Configure frameRate for video
+ *   skylinkDemo.getUserMedia({
+ *     audio: true,
+ *     video: {
+ *       frameRate: 50
+ *     }
+ *   }, function (error, success) {
+ *     if (error) return;
+ *     attachMediaStream(document.getElementById(&quot;my-video&quot;), success);
+ *   });
+ *
+ *   // Example 6: Configure video and audio based on selected sources. Does not work for Firefox currently.
+ *   var sources = { audio: [], video: [] };
+ *
+ *   function selectStream (audioSourceId, videoSourceId) {
+ *     skylinkDemo.getUserMedia({
+ *       audio: {
+ *         optional: [{ sourceId: audioSourceId }]
+ *       },
+ *       video: {
+ *         optional: [{ sourceId: videoSourceId }]
+ *       }
+ *     }, function (error, success) {
+ *       if (error) return;
+ *       attachMediaStream(document.getElementById(&quot;my-video&quot;), success);
+ *     });
+ *   }
+ *
+ *   navigator.mediaDevices.enumerateDevices().then(function(devices) {
+ *     var selectedAudioSourceId = &quot;&quot;;
+ *     var selectedVideoSourceId = &quot;&quot;;
+ *     devices.forEach(function(device) {
+ *       console.log(device.kind + &quot;: &quot; + device.label + &quot; source ID = &quot; + device.deviceId);
+ *       if (device.kind === &quot;audio&quot;) {
+ *         selectedAudioSourceId = device.deviceId;
+ *       } else {
+ *         selectedVideoSourceId = device.deviceId;
+ *       }
+ *     });
+ *     selectStream(selectedAudioSourceId, selectedVideoSourceId);
+ *   }).catch(function (error) {
+ *      console.error(&quot;Failed&quot;, error);
+ *   });
+ * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
+ *   &lt;li&gt;When retrieval of camera Stream is successful, &lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;&lt;code&gt;mediaAccessSuccess&lt;/code&gt;
+ *   event&lt;/a&gt; triggers parameter payload &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;When retrieval of camera Stream has failed: &lt;ol&gt;
+ *   &lt;li&gt;If &lt;code&gt;audioFallback&lt;code&gt; is enabled in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; configuration,
+ *   and &lt;code&gt;options.video&lt;/code&gt; and &lt;code&gt;options.audio&lt;/code&gt; is requested, invoke &lt;code&gt;getUserMedia()&lt;/code&gt; to
+ *   to retrieve audio only.&lt;ol&gt;&lt;li&gt;When retrieval of audio Stream is successful, &lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;&lt;code&gt;mediaAccessSuccess&lt;/code&gt;
+ *   event&lt;/a&gt; triggers parameter payload &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt;.&lt;/li&gt;
  * @for Skylink
  * @since 0.5.6
  */

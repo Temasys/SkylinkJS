@@ -131,7 +131,7 @@ Skylink.prototype._inRoom = false;
  *   <small>Note that if you are using credentials based authentication, you cannot switch the Room
  *   that is not the same as the <code>options.defaultRoom</code> defined in the
  *   <a href="#method_init"><code>init()</code> method</a>.</small>
- * @param {JSON} [options] The Room session settings.
+ * @param {JSON} [options] The Room session configuration options.
  * @param {JSON|String} [options.userData] The User custom data.
  *   <small>This can be set after Room session has started using the
  *   <a href="#method_setUserData"><code>setUserData()</code> method</a>.</small>
@@ -472,6 +472,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  *   for request success.</small>
  * @param {Error|String} callback.error The error result in request.
  *   <small>Defined as <code>null</code> when there are no errors in request</small>
+ *   <small>Object signature is the <code>leaveRoom()</code> error when stopping Room session.</small>
  * @param {JSON} callback.success The success result in request.
  *   <small>Defined as <code>null</code> when there are errors in request</small>
  * @param {String} callback.success.peerId The User's Room session Peer ID.

@@ -222,7 +222,7 @@ Skylink.prototype._inRoom = false;
  *   &lt;small&gt;Note that if you are using credentials based authentication, you cannot switch the Room
  *   that is not the same as the &lt;code&gt;options.defaultRoom&lt;/code&gt; defined in the
  *   &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
- * @param {JSON} [options] The Room session settings.
+ * @param {JSON} [options] The Room session configuration options.
  * @param {JSON|String} [options.userData] The User custom data.
  *   &lt;small&gt;This can be set after Room session has started using the
  *   &lt;a href=&quot;#method_setUserData&quot;&gt;&lt;code&gt;setUserData()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
@@ -563,6 +563,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  *   for request success.&lt;/small&gt;
  * @param {Error|String} callback.error The error result in request.
  *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are no errors in request&lt;/small&gt;
+ *   &lt;small&gt;Object signature is the &lt;code&gt;leaveRoom()&lt;/code&gt; error when stopping Room session.&lt;/small&gt;
  * @param {JSON} callback.success The success result in request.
  *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are errors in request&lt;/small&gt;
  * @param {String} callback.success.peerId The User&#x27;s Room session Peer ID.
