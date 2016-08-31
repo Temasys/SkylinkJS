@@ -253,6 +253,7 @@ h3 code {
 .desc-seq ol li {
   margin: 5px 0;
 }
+.code-item-description small,
 .desc-seq small,
 .returns-description small,
 .param .param-description small {

@@ -8,7 +8,7 @@
  * @attribute CANDIDATE_GENERATION_STATE
  * @param {String} GATHERING <small>Value <code>"gathering"</code></small>
  *   The value of the state when Peer connection is gathering ICE candidates.
- *   <small>These ICE candidates are sent to Peer for its connection to check for a suitable
+ *   <small>These ICE candidates are sent to Peer for its connection to check for a suitable matching
  *   pair of ICE candidates to establish an ICE connection for stream audio, video and data.
  *   See <a href="#event_iceConnectionState"><code>iceConnectionState</code> event</a> for ICE connection status.</small>
  *   <small>This state cannot happen until Peer connection <code>RTCPeerConnection</code> API

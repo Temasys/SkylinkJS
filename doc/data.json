@@ -1277,7 +1277,7 @@
             "params": [
                 {
                     "name": "GATHERING",
-                    "description": "<small>Value <code>\"gathering\"</code></small>\n  The value of the state when Peer connection is gathering ICE candidates.\n  <small>These ICE candidates are sent to Peer for its connection to check for a suitable\n  pair of ICE candidates to establish an ICE connection for stream audio, video and data.\n  See <a href=\"#event_iceConnectionState\"><code>iceConnectionState</code> event</a> for ICE connection status.</small>\n  <small>This state cannot happen until Peer connection <code>RTCPeerConnection</code> API\n  <code>setLocalDescription()</code> is invoked. See <a href=\"#event_peerConnectionState\">\n  <code>peerConnectionState</code> event</a> for session description status.</small>",
+                    "description": "<small>Value <code>\"gathering\"</code></small>\n  The value of the state when Peer connection is gathering ICE candidates.\n  <small>These ICE candidates are sent to Peer for its connection to check for a suitable matching\n  pair of ICE candidates to establish an ICE connection for stream audio, video and data.\n  See <a href=\"#event_iceConnectionState\"><code>iceConnectionState</code> event</a> for ICE connection status.</small>\n  <small>This state cannot happen until Peer connection <code>RTCPeerConnection</code> API\n  <code>setLocalDescription()</code> is invoked. See <a href=\"#event_peerConnectionState\">\n  <code>peerConnectionState</code> event</a> for session description status.</small>",
                     "type": "String"
                 },
                 {
@@ -1406,81 +1406,81 @@
         {
             "file": "source/ice-connection.js",
             "line": 1,
-            "description": "Contains the list of Peer connection ICE connection states.",
+            "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.\n</blockquote>\nThe list of Peer connection ICE connection states after\n<a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a> was successful.",
             "itemtype": "attribute",
             "name": "ICE_CONNECTION_STATE",
-            "type": "JSON",
             "params": [
                 {
                     "name": "CHECKING",
-                    "description": "<small>Value <code>\"checking\"</code></small>\n  The state when Peer connection is still checking for a suitable matching ICE\n  candidate pair sent and received.",
+                    "description": "<small>Value <code>\"checking\"</code></small>\n  The value of the state when Peer connection is checking for a suitable matching pair of\n  ICE candidates to establish ICE connection.\n  <small>ICE candidates are exchanged from <a href=\"#event_candidateGenerationState\">\n  <code>candidateGenerationState</code> event</a>.</small>",
                     "type": "String"
                 },
                 {
                     "name": "CONNECTED",
-                    "description": "<small>Value <code>\"connected\"</code></small>\n  The state when Peer connection has found a suitable matching ICE candidate pair\n  sent and received but is actively looking for other ICE candidates sent and received\n  for better ICE connection.\n  <small>At this stage, the ICE connection is established already and\n    media is streaming with Datachannel starting connections.</small>",
+                    "description": "<small>Value <code>\"connected\"</code></small>\n  The value of the state when Peer connection has found a suitable matching pair of\n  ICE candidates to establish ICE connection but is still checking for a better\n  suitable matching pair of ICE candidates for the best ICE connectivity.\n  <small>At this stage, ICE connection is already established and audio, video and\n  data streaming has already started.</small>",
                     "type": "String"
                 },
                 {
                     "name": "COMPLETED",
-                    "description": "<small>Value <code>\"completed\"</code></small>\n  The state when Peer connection had found the best ICE connection.\n  <small>At this stage, the ICE connection is established already and\n    media is streaming with Datachannel starting connections.</small>",
+                    "description": "<small>Value <code>\"completed\"</code></small>\n  The value of the state when Peer connection has found the best suitable matching pair\n  of ICE candidates to establish ICE connection and checking has stopped.\n  <small>At this stage, ICE connection is already established and audio, video and\n  data streaming has already started. This may happpen after <code>CONNECTED</code>.</small>",
                     "type": "String"
                 },
                 {
                     "name": "FAILED",
-                    "description": "<small>Value <code>\"failed\"</code></small>\n  The state when Peer connection has failed to find a suitable matching ICE candidate pair\n  for a connection.\n  <small>As a workaround, you may just simply invoke\n    <a href=\"#method_joinRoom\"><code>joinRoom()</code></a> again when this state happens to reconnect to\n    the room again to retrieve new ICE credentials and see if it helps the Peer to establish a\n    successful ICE connection.</small>",
+                    "description": "<small>Value <code>\"failed\"</code></small>\n  The value of the state when Peer connection ICE connection has failed.",
                     "type": "String"
                 },
                 {
                     "name": "DISCONNECTED",
-                    "description": "<small>Value <code>\"disconnected\"</code></small>\n  The state when Peer connection ICE connection has been disconnected.\n  This may be caused by a flaky network connection.",
+                    "description": "<small>Value <code>\"disconnected\"</code></small>\n  The value of the state when Peer connection ICE connection is disconnected.\n  <small>At this stage, the Peer connection may attempt to revive the ICE connection.\n  This may happen due to flaky network conditions.</small>",
                     "type": "String"
                 },
                 {
                     "name": "CLOSED",
-                    "description": "<small>Value <code>\"closed\"</code></small>\n  The state when Peer connection ICE connection has closed and no media could be streamed from\n  the Peer connection nor any Datachannel connection could be established.",
+                    "description": "<small>Value <code>\"closed\"</code></small>\n  The value of the state when Peer connection ICE connection has closed.\n  <small>This happens when Peer connection is closed and no streaming can occur at this stage.</small>",
                     "type": "String"
                 },
                 {
                     "name": "TRICKLE_FAILED",
-                    "description": "<small>Value <code>\"trickeFailed\"</code></small>\n  The state is the same as <code>FAILED</code> state except that the failure occurs with\n  trickle ICE enabled.\n  <small>To disable trickle ICE, configure the <code>enableIceTrickle</code> option in\n    the <a href=\"#method_init\"><code>init()</code> method</a>.</small>",
+                    "description": "<small>Value <code>\"trickeFailed\"</code></small>\n  The value of the state when Peer connection ICE connection has failed during trickle ICE.\n  <small>Trickle ICE is enabled in <a href=\"#method_init\"><code>init()</code> method</a>\n  <code>enableIceTrickle</code> option.</small>",
                     "type": "String"
                 }
             ],
+            "type": "JSON",
             "readonly": "",
             "since": "0.1.0",
             "class": "Skylink"
         },
         {
             "file": "source/ice-connection.js",
-            "line": 51,
-            "description": "<blockquote class=\"info\">\n  Note that configuring the protocol may not necessarily result in the desired protocol\n  used in the actual TURN IP traffic as it depends which protocol the browser selects and connects with.<br>\n  For an advanced explaination, this configures the ICE server urls passed in <code?transport=<protocol></code>\n  when constructing the Peer connection. When both protocols are selected, the ICE servers urls are duplicated\n  with both protocols.\n</blockquote>\nContains the list of configurations to use when Peer connection ICE connection using the TURN server.",
+            "line": 54,
+            "description": "<blockquote class=\"info\">\n  Note that configuring the protocol may not necessarily result in the desired network transports protocol\n  used in the actual TURN network traffic as it depends which protocol the browser selects and connects with.\n  This simply configures the TURN ICE server urls <code?transport=(protocol)</code> query option when constructing\n  the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.\n</blockquote>\nThe list of TURN network transport protocols configuration options when constructing Peer connections.\n<small>Example <code>.urls</code> inital input: [<code>\"turn:server.com?transport=tcp\"</code>,\n<code>\"turn:server1.com:3478\"</code>, <code>\"turn:server.com?transport=udp\"</code>]</small>",
             "itemtype": "attribute",
             "name": "TURN_TRANSPORT",
             "params": [
                 {
                     "name": "TCP",
-                    "description": "<small>Value <code>\"tcp\"</code></small>\n  The option to configure using only TCP protocol.",
+                    "description": "<small>Value  <code>\"tcp\"</code></small>\n  The value of the option to configure using only TCP network transport protocol.\n  <small>Example <code>.urls</code> output: [<code>\"turn:server.com?transport=tcp\"</code>,\n  <code>\"turn:server1.com:3478?transport=tcp\"</code>]</small>",
                     "type": "String"
                 },
                 {
                     "name": "UDP",
-                    "description": "<small>Value <code>\"udp\"</code></small>\n  The option to configure using only UDP protocol.",
+                    "description": "<small>Value  <code>\"udp\"</code></small>\n  The value of the option to configure using only UDP network transport protocol.\n  <small>Example <code>.urls</code> output: [<code>\"turn:server.com?transport=udp\"</code>,\n  <code>\"turn:server1.com:3478?transport=udp\"</code>]</small>",
                     "type": "String"
                 },
                 {
                     "name": "ANY",
-                    "description": "<small><b>DEFAULT</b> | Value <code>\"any\"</code></small>\n  The option to configure using any protocols provided by default.",
+                    "description": "<small>Value  <code>\"any\"</code></small>\n  The value of the option to configure using any network transport protocols configured from the Signaling server.\n  <small>Example <code>.urls</code> output: [<code>\"turn:server.com?transport=tcp\"</code>,\n  <code>\"turn:server1.com:3478\"</code>, <code>\"turn:server.com?transport=udp\"</code>]</small>",
                     "type": "String"
                 },
                 {
                     "name": "NONE",
-                    "description": "<small>Value <code>\"none\"</code></small>\n  The option to not configure using only protocols.\n  <small>Configuring this does not mean that no protocols will be used, but\n    rather removing <code>?transport</code> flags in the ICE server urls when constructing the Peer connection.</small>",
+                    "description": "<small>Value <code>\"none\"</code></small>\n  The value of the option to not configure using any network transport protocols.\n  <small>Example <code>.urls</code> output: [<code>\"turn:server.com\"</code>, <code>\"turn:server1.com:3478\"</code>]</small>\n  <small>Configuring this does not mean that no protocols will be used, but\n  rather removing <code>?transport=(protocol)</code> query option in\n  the TURN ICE server <code>.urls</code> when constructing the Peer connection.</small>",
                     "type": "String"
                 },
                 {
                     "name": "ALL",
-                    "description": "<small>Value <code>\"all\"</code></small>\n  The option to configure using both TCP and UDP protocols.",
+                    "description": "<small>Value  <code>\"all\"</code></small>\n  The value of the option to configure using both TCP and UDP network transport protocols.\n  <small>Example <code>.urls</code> output: [<code>\"turn:server.com?transport=tcp\"</code>,\n  <code>\"turn:server.com?transport=udp\"</code>, <code>\"turn:server1.com:3478?transport=tcp\"</code>,\n  <code>\"turn:server1.com:3478?transport=udp\"</code>]</small>",
                     "type": "String"
                 }
             ],
@@ -1491,7 +1491,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 86,
+            "line": 101,
             "description": "Stores the flag that indicates if Peer connections should trickle ICE.",
             "itemtype": "attribute",
             "name": "_enableIceTrickle",
@@ -1504,7 +1504,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 97,
+            "line": 112,
             "description": "Stores the flag that indicates if STUN ICE servers should be used when constructing Peer connection.",
             "itemtype": "attribute",
             "name": "_enableSTUN",
@@ -1517,7 +1517,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 108,
+            "line": 123,
             "description": "Stores the flag that indicates if TURN ICE servers should be used when constructing Peer connection.",
             "itemtype": "attribute",
             "name": "_enableTURN",
@@ -1530,7 +1530,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 119,
+            "line": 134,
             "description": "Stores the flag that indicates if public STUN ICE servers should be used when constructing Peer connection.",
             "itemtype": "attribute",
             "name": "_usePublicSTUN",
@@ -1543,7 +1543,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 130,
+            "line": 145,
             "description": "Stores the option for the TURN protocols to use.\nThis should configure the TURN ICE servers urls <code>?transport=protocol</code> flag.",
             "itemtype": "attribute",
             "name": "_TURNTransport",
@@ -1557,7 +1557,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 143,
+            "line": 158,
             "description": "Stores the list of Peer connections ICE failures counter.",
             "itemtype": "attribute",
             "name": "_ICEConnectionFailures",
@@ -1576,7 +1576,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 154,
+            "line": 169,
             "description": "Function that filters and configures the ICE servers received from Signaling\n  based on the <code>init()</code> configuration and returns the updated\n  list of ICE servers to be used when constructing Peer connection.",
             "itemtype": "method",
             "name": "_setIceServers",
@@ -2112,7 +2112,7 @@
                 },
                 {
                     "name": "ERROR",
-                    "description": "<small>Value <code>\"error\"</code></small>\n  The value of the connection state when User has failed to establish connection with Peer.\n  <small>This happens when the <code>RTCPeerConnection</code> API interface receives\n  <code>setLocalDescription()</code>, <code>setRemoteDescription()</code>,\n  <code>createOffer()</code> or <code>createAnswer()</code> errors in result.",
+                    "description": "<small>Value <code>\"error\"</code></small>\n  The value of the connection state when User has failed to establish connection with Peer.\n  <small>This happens when the <code>RTCPeerConnection</code> API interface receives\n  <code>setLocalDescription()</code>, <code>setRemoteDescription()</code>,\n  <code>createOffer()</code> or <code>createAnswer()</code> errors in result.</small>",
                     "type": "String"
                 }
             ],
@@ -3167,7 +3167,7 @@
                         },
                         {
                             "name": "TURNServerTransport",
-                            "description": "The option to configure the <code>?transport=</code>\n  query parameter in TURN ICE servers when constructing a Peer connections.\n- When not provided, its value is <code>ANY</code>.\n  [Rel: Skylink.TURN_TRANSPORT]",
+                            "description": "<blockquote class=\"info\">\n  Note that configuring the protocol may not necessarily result in the desired network transports protocol\n  used in the actual TURN network traffic as it depends which protocol the browser selects and connects with.\n  This simply configures the TURN ICE server urls <code?transport=(protocol)</code> query option when constructing\n  the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.\n  </blockquote> The option to configure the <code>?transport=</code>\n  query parameter in TURN ICE servers when constructing a Peer connections.\n- When not provided, its value is <code>ANY</code>.\n  [Rel: Skylink.TURN_TRANSPORT]",
                             "type": "Boolean",
                             "optional": true
                         },
@@ -3368,7 +3368,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 743,
+            "line": 748,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -3379,7 +3379,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 817,
+            "line": 822,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -3390,7 +3390,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 890,
+            "line": 895,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -3401,7 +3401,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 981,
+            "line": 986,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",

@@ -448,7 +448,12 @@ Skylink.prototype._room = null;
  *   ensure that TURN connections is enforced.&lt;/small&gt;
  * @param {Boolean} [options.usePublicSTUN=true] The flag if publicly available STUN ICE servers should
  *   be used if &lt;code&gt;options.enableSTUNServer&lt;/code&gt; is enabled.
- * @param {Boolean} [options.TURNServerTransport] The option to configure the &lt;code&gt;?transport=&lt;/code&gt;
+ * @param {Boolean} [options.TURNServerTransport] &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that configuring the protocol may not necessarily result in the desired network transports protocol
+ *   used in the actual TURN network traffic as it depends which protocol the browser selects and connects with.
+ *   This simply configures the TURN ICE server urls &lt;code?transport=(protocol)&lt;/code&gt; query option when constructing
+ *   the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.
+ *   &lt;/blockquote&gt; The option to configure the &lt;code&gt;?transport=&lt;/code&gt;
  *   query parameter in TURN ICE servers when constructing a Peer connections.
  * - When not provided, its value is &lt;code&gt;ANY&lt;/code&gt;.
  *   [Rel: Skylink.TURN_TRANSPORT]

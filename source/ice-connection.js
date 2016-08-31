@@ -1,38 +1,41 @@
 /**
- * Contains the list of Peer connection ICE connection states.
+ * <blockquote class="info">
+ *   Learn more about how ICE works in this
+ *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+ * </blockquote>
+ * The list of Peer connection ICE connection states after
+ * <a href="#method_joinRoom"><code>joinRoom()</code> method</a> was successful.
  * @attribute ICE_CONNECTION_STATE
- * @type JSON
- * @param {String} CHECKING <small>Value <code>"checking"</code></small>
- *   The state when Peer connection is still checking for a suitable matching ICE
- *   candidate pair sent and received.
- * @param {String} CONNECTED <small>Value <code>"connected"</code></small>
- *   The state when Peer connection has found a suitable matching ICE candidate pair
- *   sent and received but is actively looking for other ICE candidates sent and received
- *   for better ICE connection.
- *   <small>At this stage, the ICE connection is established already and
- *     media is streaming with Datachannel starting connections.</small>
- * @param {String} COMPLETED <small>Value <code>"completed"</code></small>
- *   The state when Peer connection had found the best ICE connection.
- *   <small>At this stage, the ICE connection is established already and
- *     media is streaming with Datachannel starting connections.</small>
- * @param {String} FAILED <small>Value <code>"failed"</code></small>
- *   The state when Peer connection has failed to find a suitable matching ICE candidate pair
- *   for a connection.
- *   <small>As a workaround, you may just simply invoke
- *     <a href="#method_joinRoom"><code>joinRoom()</code></a> again when this state happens to reconnect to
- *     the room again to retrieve new ICE credentials and see if it helps the Peer to establish a
- *     successful ICE connection.</small>
- * @param {String} DISCONNECTED <small>Value <code>"disconnected"</code></small>
- *   The state when Peer connection ICE connection has been disconnected.
- *   This may be caused by a flaky network connection.
- * @param {String} CLOSED <small>Value <code>"closed"</code></small>
- *   The state when Peer connection ICE connection has closed and no media could be streamed from
- *   the Peer connection nor any Datachannel connection could be established.
+ * @param {String} CHECKING       <small>Value <code>"checking"</code></small>
+ *   The value of the state when Peer connection is checking for a suitable matching pair of
+ *   ICE candidates to establish ICE connection.
+ *   <small>ICE candidates are exchanged from <a href="#event_candidateGenerationState">
+ *   <code>candidateGenerationState</code> event</a>.</small>
+ * @param {String} CONNECTED      <small>Value <code>"connected"</code></small>
+ *   The value of the state when Peer connection has found a suitable matching pair of
+ *   ICE candidates to establish ICE connection but is still checking for a better
+ *   suitable matching pair of ICE candidates for the best ICE connectivity.
+ *   <small>At this stage, ICE connection is already established and audio, video and
+ *   data streaming has already started.</small>
+ * @param {String} COMPLETED      <small>Value <code>"completed"</code></small>
+ *   The value of the state when Peer connection has found the best suitable matching pair
+ *   of ICE candidates to establish ICE connection and checking has stopped.
+ *   <small>At this stage, ICE connection is already established and audio, video and
+ *   data streaming has already started. This may happpen after <code>CONNECTED</code>.</small>
+ * @param {String} FAILED         <small>Value <code>"failed"</code></small>
+ *   The value of the state when Peer connection ICE connection has failed.
+ * @param {String} DISCONNECTED   <small>Value <code>"disconnected"</code></small>
+ *   The value of the state when Peer connection ICE connection is disconnected.
+ *   <small>At this stage, the Peer connection may attempt to revive the ICE connection.
+ *   This may happen due to flaky network conditions.</small>
+ * @param {String} CLOSED         <small>Value <code>"closed"</code></small>
+ *   The value of the state when Peer connection ICE connection has closed.
+ *   <small>This happens when Peer connection is closed and no streaming can occur at this stage.</small>
  * @param {String} TRICKLE_FAILED <small>Value <code>"trickeFailed"</code></small>
- *   The state is the same as <code>FAILED</code> state except that the failure occurs with
- *   trickle ICE enabled.
- *   <small>To disable trickle ICE, configure the <code>enableIceTrickle</code> option in
- *     the <a href="#method_init"><code>init()</code> method</a>.</small>
+ *   The value of the state when Peer connection ICE connection has failed during trickle ICE.
+ *   <small>Trickle ICE is enabled in <a href="#method_init"><code>init()</code> method</a>
+ *   <code>enableIceTrickle</code> option.</small>
+ * @type JSON
  * @readOnly
  * @for Skylink
  * @since 0.1.0
@@ -50,26 +53,38 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
 
 /**
  * <blockquote class="info">
- *   Note that configuring the protocol may not necessarily result in the desired protocol
- *   used in the actual TURN IP traffic as it depends which protocol the browser selects and connects with.<br>
- *   For an advanced explaination, this configures the ICE server urls passed in <code?transport=<protocol></code>
- *   when constructing the Peer connection. When both protocols are selected, the ICE servers urls are duplicated
- *   with both protocols.
+ *   Note that configuring the protocol may not necessarily result in the desired network transports protocol
+ *   used in the actual TURN network traffic as it depends which protocol the browser selects and connects with.
+ *   This simply configures the TURN ICE server urls <code?transport=(protocol)</code> query option when constructing
+ *   the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.
  * </blockquote>
- * Contains the list of configurations to use when Peer connection ICE connection using the TURN server.
+ * The list of TURN network transport protocols configuration options when constructing Peer connections.
+ * <small>Example <code>.urls</code> inital input: [<code>"turn:server.com?transport=tcp"</code>,
+ * <code>"turn:server1.com:3478"</code>, <code>"turn:server.com?transport=udp"</code>]</small>
  * @attribute TURN_TRANSPORT
- * @param {String} TCP <small>Value <code>"tcp"</code></small>
- *   The option to configure using only TCP protocol.
- * @param {String} UDP <small>Value <code>"udp"</code></small>
- *   The option to configure using only UDP protocol.
- * @param {String} ANY <small><b>DEFAULT</b> | Value <code>"any"</code></small>
- *   The option to configure using any protocols provided by default.
+ * @param {String} TCP <small>Value  <code>"tcp"</code></small>
+ *   The value of the option to configure using only TCP network transport protocol.
+ *   <small>Example <code>.urls</code> output: [<code>"turn:server.com?transport=tcp"</code>,
+ *   <code>"turn:server1.com:3478?transport=tcp"</code>]</small>
+ * @param {String} UDP <small>Value  <code>"udp"</code></small>
+ *   The value of the option to configure using only UDP network transport protocol.
+ *   <small>Example <code>.urls</code> output: [<code>"turn:server.com?transport=udp"</code>,
+ *   <code>"turn:server1.com:3478?transport=udp"</code>]</small>
+ * @param {String} ANY <small>Value  <code>"any"</code></small>
+ *   The value of the option to configure using any network transport protocols configured from the Signaling server.
+ *   <small>Example <code>.urls</code> output: [<code>"turn:server.com?transport=tcp"</code>,
+ *   <code>"turn:server1.com:3478"</code>, <code>"turn:server.com?transport=udp"</code>]</small>
  * @param {String} NONE <small>Value <code>"none"</code></small>
- *   The option to not configure using only protocols.
+ *   The value of the option to not configure using any network transport protocols.
+ *   <small>Example <code>.urls</code> output: [<code>"turn:server.com"</code>, <code>"turn:server1.com:3478"</code>]</small>
  *   <small>Configuring this does not mean that no protocols will be used, but
- *     rather removing <code>?transport</code> flags in the ICE server urls when constructing the Peer connection.</small>
- * @param {String} ALL <small>Value <code>"all"</code></small>
- *   The option to configure using both TCP and UDP protocols.
+ *   rather removing <code>?transport=(protocol)</code> query option in
+ *   the TURN ICE server <code>.urls</code> when constructing the Peer connection.</small>
+ * @param {String} ALL <small>Value  <code>"all"</code></small>
+ *   The value of the option to configure using both TCP and UDP network transport protocols.
+ *   <small>Example <code>.urls</code> output: [<code>"turn:server.com?transport=tcp"</code>,
+ *   <code>"turn:server.com?transport=udp"</code>, <code>"turn:server1.com:3478?transport=tcp"</code>,
+ *   <code>"turn:server1.com:3478?transport=udp"</code>]</small>
  * @type JSON
  * @readOnly
  * @for Skylink

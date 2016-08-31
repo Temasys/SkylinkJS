@@ -20,7 +20,7 @@
  *   The value of the connection state when User has failed to establish connection with Peer.
  *   <small>This happens when the <code>RTCPeerConnection</code> API interface receives
  *   <code>setLocalDescription()</code>, <code>setRemoteDescription()</code>,
- *   <code>createOffer()</code> or <code>createAnswer()</code> errors in result.
+ *   <code>createOffer()</code> or <code>createAnswer()</code> errors in result.</small>
  * @type JSON
  * @readOnly
  * @for Skylink
