@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.12 - Fri Apr 22 2016 11:45:29 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.12 - Thu Sep 01 2016 15:40:05 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7248,7 +7248,7 @@ function toArray(list, index) {
 },{}]},{},[31])(31)
 });
 
-/*! adapterjs - v0.13.2 - 2016-03-18 */
+/*! adapterjs - v0.13.3 - 2016-04-13 */
 
 // Adapter's interface.
 var AdapterJS = AdapterJS || {};
@@ -7267,7 +7267,7 @@ AdapterJS.options = AdapterJS.options || {};
 // AdapterJS.options.hidePluginInstallPrompt = true;
 
 // AdapterJS version
-AdapterJS.VERSION = '0.13.2';
+AdapterJS.VERSION = '0.13.3';
 
 // This function will be called when the WebRTC API is ready to be used
 // Whether it is the native implementation (Chrome, Firefox, Opera) or
@@ -9959,24 +9959,30 @@ if ( navigator.mozGetUserMedia ||
 
       // Call relevant PeerConnection constructor according to plugin version
       AdapterJS.WebRTCPlugin.WaitForPluginReady();
+
+      // RTCPeerConnection prototype from the old spec
+      var iceServers = null;
+      if (servers && Array.isArray(servers.iceServers)) {
+        iceServers = servers.iceServers;
+        for (var i = 0; i < iceServers.length; i++) {
+          // Legacy plugin versions compatibility
+          if (iceServers[i].urls && !iceServers[i].url) {
+            iceServers[i].url = iceServers[i].urls;
+          }
+          iceServers[i].hasCredentials = AdapterJS.
+            isDefined(iceServers[i].username) &&
+            AdapterJS.isDefined(iceServers[i].credential);
+        }
+      }
+
       if (AdapterJS.WebRTCPlugin.plugin.PEER_CONNECTION_VERSION &&
           AdapterJS.WebRTCPlugin.plugin.PEER_CONNECTION_VERSION > 1) {
         // RTCPeerConnection prototype from the new spec
+        if (iceServers) {
+          servers.iceServers = iceServers;
+        }
         return AdapterJS.WebRTCPlugin.plugin.PeerConnection(servers);
       } else {
-        // RTCPeerConnection prototype from the old spec
-        var iceServers = null;
-        if (servers && Array.isArray(servers.iceServers)) {
-          iceServers = servers.iceServers;
-          for (var i = 0; i < iceServers.length; i++) {
-            if (iceServers[i].urls && !iceServers[i].url) {
-              iceServers[i].url = iceServers[i].urls;
-            }
-            iceServers[i].hasCredentials = AdapterJS.
-              isDefined(iceServers[i].username) &&
-              AdapterJS.isDefined(iceServers[i].credential);
-          }
-        }
         var mandatory = (constraints && constraints.mandatory) ?
           constraints.mandatory : null;
         var optional = (constraints && constraints.optional) ?
@@ -10455,7 +10461,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.12 - Fri Apr 22 2016 11:45:29 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.12 - Thu Sep 01 2016 15:40:05 GMT+0800 (SGT) */
 
 (function() {
 
@@ -21558,45 +21564,72 @@ Skylink.prototype._publicMessageHandler = function(message) {
  * @since 0.6.-
  */
 Skylink.prototype._recordingEventHandler = function (message) {
+  var self = this;
+
   log.debug(['MCU', 'Recording', null, 'Received recording message ->'], message);
+
   if (message.action === 'on') {
-    if (!this._recordings[message.recordingId]) {
+    if (!self._recordings[message.recordingId]) {
       log.debug(['MCU', 'Recording', message.recordingId, 'Started recording']);
-      this._recordings[message.recordingId] = {
+
+      self._isRecording = true;
+      self._recordings[message.recordingId] = {
         isOn: true,
         url: null,
         error: null
       };
-      this._trigger('recordingState', this.RECORDING_STATE.START, message.recordingId, null, null);
+      self._recordingStartInterval = setTimeout(function () {
+        log.log(['MCU', 'Recording', message.recordingId, '4 seconds has been recorded. Recording can be stopped now']);
+        self._recordingStartInterval = null;
+      }, 4000);
+      self._trigger('recordingState', self.RECORDING_STATE.START, message.recordingId, null, null);
     }
+
   } else if (message.action === 'off') {
-    if (!this._recordings[message.recordingId]) {
+    if (!self._recordings[message.recordingId]) {
       log.error(['MCU', 'Recording', message.recordingId, 'Received request of "off" but the session is empty']);
       return;
     }
+
+    self._isRecording = false;
+
+    if (self._recordingStartInterval) {
+      clearTimeout(self._recordingStartInterval);
+      log.warn(['MCU', 'Recording', message.recordingId, 'Recording stopped abruptly before 4 seconds']);
+      self._recordingStartInterval = null;
+    }
+  
     log.debug(['MCU', 'Recording', message.recordingId, 'Stopped recording']);
-    this._recordings[message.recordingId].isOn = false;
-    this._trigger('recordingState', this.RECORDING_STATE.STOP, message.recordingId, null, null);
+    
+    self._recordings[message.recordingId].isOn = false;
+    self._trigger('recordingState', self.RECORDING_STATE.STOP, message.recordingId, null, null);
+  
   } else if (message.action === 'url') {
-    if (!this._recordings[message.recordingId]) {
+    if (!self._recordings[message.recordingId]) {
       log.error(['MCU', 'Recording', message.recordingId, 'Received URL but the session is empty']);
       return;
     }
-    this._recordings[message.recordingId].url = message.url;
-    this._trigger('recordingState', this.RECORDING_STATE.LINK, message.recordingId, message.url, null);
+    
+    self._recordings[message.recordingId].url = message.url;
+    self._trigger('recordingState', self.RECORDING_STATE.LINK, message.recordingId, message.url, null);
+  
   } else {
     var recordingError = new Error(message.error || 'Unknown error');
-    if (!this._recordings[message.recordingId]) {
+    if (!self._recordings[message.recordingId]) {
       log.error(['MCU', 'Recording', message.recordingId, 'Received error but the session is empty ->'], recordingError);
       return;
     }
+    
     log.error(['MCU', 'Recording', message.recordingId, 'Recording failure ->'], recordingError);
-    this._recordings[message.recordingId].error = recordingError;
-    this._trigger('recordingState', this.RECORDING_STATE.ERROR, message.recordingId, null, recordingError);
-    if (this._recordings[message.recordingId].isOn) {
+    
+    self._recordings[message.recordingId].error = recordingError;
+    self._trigger('recordingState', self.RECORDING_STATE.ERROR, message.recordingId, null, recordingError);
+    
+    if (self._recordings[message.recordingId].isOn) {
       log.debug(['MCU', 'Recording', message.recordingId, 'Stopped recording abruptly']);
-      this._recordings[message.recordingId].isOn = false;
-      this._trigger('recordingState', this.RECORDING_STATE.STOP, message.recordingId, null, recordingError);
+      
+      self._recordings[message.recordingId].isOn = false;
+      self._trigger('recordingState', self.RECORDING_STATE.STOP, message.recordingId, null, recordingError);
     }
   }
 };
@@ -22576,18 +22609,15 @@ Skylink.prototype.startRecording = function () {
     return;
   }
 
-  // NOTE: Not sure if this is needed? just return as log.error?
-  /*if (this._isRecording) {
+  if (this._isRecording) {
     log.error('Unable to start recording as there is an existing recording in-progress');
     return;
-  }*/
+  }
 
   this._sendChannelMessage({
-
     type: this._SIG_MESSAGE_TYPE.START_RECORDING,
     rid: this._room.id,
     target: 'MCU'
-
   });
 
   log.debug(['MCU', 'Recording', null, 'Starting recording']);
@@ -22607,18 +22637,20 @@ Skylink.prototype.stopRecording = function () {
     return;
   }
 
-  // NOTE: Not sure if this is needed? just return as log.error?
-  /*if (!this._isRecording) {
+  if (!this._isRecording) {
     log.error('Unable to stop recording as there is no recording in-progress');
     return;
-  }*/
+  }
+
+  if (this._recordingStartInterval) {
+    log.error('Unable to stop recording as 4 seconds has not been recorded yet');
+    return;
+  }
 
   this._sendChannelMessage({
-
     type: this._SIG_MESSAGE_TYPE.STOP_RECORDING,
     rid: this._room.id,
     target: 'MCU'
-
   });
 
   log.debug(['MCU', 'Recording', null, 'Stopping recording']);
@@ -22799,6 +22831,29 @@ Skylink.prototype.RECORDING_STATE = {
  * @since 0.6.-
  */
 Skylink.prototype._recordings = {};
+
+/**
+ * Stores the flag if recording is in session.
+ * There can only be 1 recording session at a time in a Room
+ * @attribute _isRecording
+ * @type JSON
+ * @private
+ * @beta
+ * @for Skylink
+ * @since 0.6.-
+ */
+Skylink.prototype._isRecording = false;
+
+/**
+ * Stores the recording session timeout to ensure 4 seconds has been recorded.
+ * @attribute _recordingStartInterval
+ * @type JSON
+ * @private
+ * @beta
+ * @for Skylink
+ * @since 0.6.-
+ */
+Skylink.prototype._recordingStartInterval = null;
 
 /**
  * Stores the self user media MediaStream object.

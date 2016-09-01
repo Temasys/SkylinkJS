@@ -197,6 +197,29 @@ Skylink.prototype.RECORDING_STATE = {
 Skylink.prototype._recordings = {};
 
 /**
+ * Stores the flag if recording is in session.
+ * There can only be 1 recording session at a time in a Room
+ * @attribute _isRecording
+ * @type JSON
+ * @private
+ * @beta
+ * @for Skylink
+ * @since 0.6.-
+ */
+Skylink.prototype._isRecording = false;
+
+/**
+ * Stores the recording session timeout to ensure 4 seconds has been recorded.
+ * @attribute _recordingStartInterval
+ * @type JSON
+ * @private
+ * @beta
+ * @for Skylink
+ * @since 0.6.-
+ */
+Skylink.prototype._recordingStartInterval = null;
+
+/**
  * Stores the self user media MediaStream object.
  * @attribute _mediaStream
  * @type Object
