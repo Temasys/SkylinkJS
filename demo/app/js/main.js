@@ -804,18 +804,15 @@ $(document).ready(function () {
   $('#stop_screen_btn').click(function () {
     Demo.Skylink.stopScreen();
   });
-<<<<<<< HEAD
   $('#start_recording_btn').click(function () {
     Demo.Skylink.startRecording();
   });
   $('#stop_recording_btn').click(function () {
     Demo.Skylink.stopRecording();
-=======
   $('#peer_video_list').on('click', '.toggle-connstats', function () {
     $(this).parent().find('.connstats').slideToggle();
     $(this).attr('toggled', $(this).attr('toggled') ? '' : 'true');
     $(this).html($(this).attr('toggled') ? 'Hide Stats' : 'Show Stats');
->>>>>>> 0.6.x-development
   });
 
   window.selectTargetPeer = function(dom) {
