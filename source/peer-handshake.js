@@ -236,9 +236,12 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       return;
     }
 
-    self._dataChannels[targetMid].main =
-      self._createDataChannel(targetMid, self.DATA_CHANNEL_TYPE.MESSAGING, null, targetMid);
-    self._peerConnections[targetMid].hasMainChannel = true;
+    // Edge doesn't support datachannels yet
+    if (!self._dataChannels[targetMid].main && window.webrtcDetectedBrowser !== 'edge') {
+      self._dataChannels[targetMid].main =
+        self._createDataChannel(targetMid, self.DATA_CHANNEL_TYPE.MESSAGING, null, targetMid);
+      self._peerConnections[targetMid].hasMainChannel = true;
+    }
   }
 
   log.debug([targetMid, null, null, 'Creating offer with config:'], offerConstraints);

@@ -19,20 +19,25 @@
 Skylink.prototype._peerCandidatesQueue = {};
 
 /**
- * Stores the list of candidates sent <code>local</code> and added <code>remote</code> information.
- * @attribute _addedCandidates
- * @param {JSON} (#peerId) The list of candidates sent and added associated with the Peer ID.
- * @param {Array} (#peerId).relay The number of relay candidates added and sent.
- * @param {Array} (#peerId).srflx The number of server reflexive candidates added and sent.
- * @param {Array} (#peerId).host The number of host candidates added and sent.
+ * Stores the list of local and remote candidates sent and received.
+ * @attribute _gatheredCandidates
+ * @param {JSON} (#peerId) The list of candidates associated with the Peer ID.
+ * @param {JSON} (#peerId).sending The list of local candidates gathered for Peer sent.
+ * @param {JSON} (#peerId).sending.host The list of local <code>"host"</code> type of candidates sent.
+ * @param {JSON} (#peerId).sending.srflx The list of local <code>"srflx"</code> type of candidates sent.
+ * @param {JSON} (#peerId).sending.relay The list of local <code>"relay"</code> type of candidates sent.
+ * @param {JSON} (#peerId).receiving The list of remote candidates gathered for Peer received.
+ * @param {JSON} (#peerId).receiving.host The list of remote <code>"host"</code> type of candidates received.
+ * @param {JSON} (#peerId).receiving.srflx The list of remote <code>"srflx"</code> type of candidates received.
+ * @param {JSON} (#peerId).receiving.relay The list of remote <code>"relay"</code> type of candidates received.
  * @type JSON
  * @private
  * @required
- * @since 0.6.4
+ * @since 0.6.14
  * @component ICE
  * @for Skylink
  */
-Skylink.prototype._addedCandidates = {};
+Skylink.prototype._gatheredCandidates = {};
 
 /**
  * The list of Peer connection ICE candidate generation states that Skylink would trigger.
@@ -83,12 +88,6 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
     log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
       candidateType + ' candidate:'], candidate);
 
-    if (!self._enableIceTrickle) {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
-        '" candidate as trickle ICE is disabled'], candidate);
-      return;
-    }
-
     if (self._forceTURN && candidateType !== 'relay') {
       if (!self._hasMCU) {
         log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
@@ -100,6 +99,25 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
         '" candidate although TURN connections is forced as MCU is present'], candidate);
     }
 
+    if (!self._gatheredCandidates[targetMid]) {
+      self._gatheredCandidates[targetMid] = {
+        sending: { host: [], srflx: [], relay: [] },
+        receiving: { host: [], srflx: [], relay: [] }
+      };
+    }
+
+    self._gatheredCandidates[targetMid].sending[candidateType].push({
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex,
+      candidate: candidate.candidate
+    });
+
+    if (!self._enableIceTrickle) {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
+        '" candidate as trickle ICE is disabled'], candidate);
+      return;
+    }
+
     self._sendChannelMessage({
       type: self._SIG_MESSAGE_TYPE.CANDIDATE,
       label: candidate.sdpMLineIndex,
@@ -109,23 +127,6 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       target: targetMid,
       rid: self._room.id
     });
-
-    if (!self._addedCandidates[targetMid]) {
-      self._addedCandidates[targetMid] = {
-        relay: [],
-        host: [],
-        srflx: []
-      };
-    }
-
-    // shouldnt happen but just incase
-    if (!self._addedCandidates[targetMid][candidateType]) {
-      self._addedCandidates[targetMid][candidateType] = [];
-    }
-
-    self._addedCandidates[targetMid][candidateType].push('local:' + messageCan[4] +
-      (messageCan[5] !== '0' ? ':' + messageCan[5] : '') +
-      (messageCan[2] ? '?transport=' + messageCan[2].toLowerCase() : ''));
 
   } else {
     log.debug([targetMid, 'RTCIceCandidate', null, 'End of gathering']);

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.12 (recording beta)</title>
+    <title>SkylinkJS 0.6.13</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.12 (recording beta)</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.13</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -748,45 +748,72 @@ Skylink.prototype._publicMessageHandler = function(message) {
  * @since 0.6.-
  */
 Skylink.prototype._recordingEventHandler = function (message) {
+  var self = this;
+
   log.debug([&#x27;MCU&#x27;, &#x27;Recording&#x27;, null, &#x27;Received recording message -&gt;&#x27;], message);
+
   if (message.action === &#x27;on&#x27;) {
-    if (!this._recordings[message.recordingId]) {
+    if (!self._recordings[message.recordingId]) {
       log.debug([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Started recording&#x27;]);
-      this._recordings[message.recordingId] = {
+
+      self._isRecording = true;
+      self._recordings[message.recordingId] = {
         isOn: true,
         url: null,
         error: null
       };
-      this._trigger(&#x27;recordingState&#x27;, this.RECORDING_STATE.START, message.recordingId, null, null);
+      self._recordingStartInterval = setTimeout(function () {
+        log.log([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;4 seconds has been recorded. Recording can be stopped now&#x27;]);
+        self._recordingStartInterval = null;
+      }, 4000);
+      self._trigger(&#x27;recordingState&#x27;, self.RECORDING_STATE.START, message.recordingId, null, null);
     }
+
   } else if (message.action === &#x27;off&#x27;) {
-    if (!this._recordings[message.recordingId]) {
+    if (!self._recordings[message.recordingId]) {
       log.error([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Received request of &quot;off&quot; but the session is empty&#x27;]);
       return;
     }
+
+    self._isRecording = false;
+
+    if (self._recordingStartInterval) {
+      clearTimeout(self._recordingStartInterval);
+      log.warn([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Recording stopped abruptly before 4 seconds&#x27;]);
+      self._recordingStartInterval = null;
+    }
+  
     log.debug([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Stopped recording&#x27;]);
-    this._recordings[message.recordingId].isOn = false;
-    this._trigger(&#x27;recordingState&#x27;, this.RECORDING_STATE.STOP, message.recordingId, null, null);
+    
+    self._recordings[message.recordingId].isOn = false;
+    self._trigger(&#x27;recordingState&#x27;, self.RECORDING_STATE.STOP, message.recordingId, null, null);
+  
   } else if (message.action === &#x27;url&#x27;) {
-    if (!this._recordings[message.recordingId]) {
+    if (!self._recordings[message.recordingId]) {
       log.error([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Received URL but the session is empty&#x27;]);
       return;
     }
-    this._recordings[message.recordingId].url = message.url;
-    this._trigger(&#x27;recordingState&#x27;, this.RECORDING_STATE.LINK, message.recordingId, message.url, null);
+    
+    self._recordings[message.recordingId].url = message.url;
+    self._trigger(&#x27;recordingState&#x27;, self.RECORDING_STATE.LINK, message.recordingId, message.url, null);
+  
   } else {
     var recordingError = new Error(message.error || &#x27;Unknown error&#x27;);
-    if (!this._recordings[message.recordingId]) {
+    if (!self._recordings[message.recordingId]) {
       log.error([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Received error but the session is empty -&gt;&#x27;], recordingError);
       return;
     }
+    
     log.error([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Recording failure -&gt;&#x27;], recordingError);
-    this._recordings[message.recordingId].error = recordingError;
-    this._trigger(&#x27;recordingState&#x27;, this.RECORDING_STATE.ERROR, message.recordingId, null, recordingError);
-    if (this._recordings[message.recordingId].isOn) {
+    
+    self._recordings[message.recordingId].error = recordingError;
+    self._trigger(&#x27;recordingState&#x27;, self.RECORDING_STATE.ERROR, message.recordingId, null, recordingError);
+    
+    if (self._recordings[message.recordingId].isOn) {
       log.debug([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Stopped recording abruptly&#x27;]);
-      this._recordings[message.recordingId].isOn = false;
-      this._trigger(&#x27;recordingState&#x27;, this.RECORDING_STATE.STOP, message.recordingId, null, recordingError);
+      
+      self._recordings[message.recordingId].isOn = false;
+      self._trigger(&#x27;recordingState&#x27;, self.RECORDING_STATE.STOP, message.recordingId, null, recordingError);
     }
   }
 };
@@ -1538,22 +1565,18 @@ Skylink.prototype._candidateHandler = function(message) {
     this._addIceCandidateToQueue(targetMid, candidate);
   }
 
-  if (!this._addedCandidates[targetMid]) {
-    this._addedCandidates[targetMid] = {
-      relay: [],
-      host: [],
-      srflx: []
+  if (!this._gatheredCandidates[targetMid]) {
+    this._gatheredCandidates[targetMid] = {
+      sending: { host: [], srflx: [], relay: [] },
+      receiving: { host: [], srflx: [], relay: [] }
     };
   }
 
-  // shouldnt happen but just incase
-  if (!this._addedCandidates[targetMid][canType]) {
-    this._addedCandidates[targetMid][canType] = [];
-  }
-
-  this._addedCandidates[targetMid][canType].push(&#x27;remote:&#x27; + messageCan[4] +
-    (messageCan[5] !== &#x27;0&#x27; ? &#x27;:&#x27; + messageCan[5] : &#x27;&#x27;) +
-    (messageCan[2] ? &#x27;?transport=&#x27; + messageCan[2].toLowerCase() : &#x27;&#x27;));
+  this._gatheredCandidates[targetMid].receiving[canType].push({
+    sdpMid: candidate.sdpMid,
+    sdpMLineIndex: candidate.sdpMLineIndex,
+    candidate: candidate.candidate
+  });
 };
 
 /**
@@ -1766,18 +1789,15 @@ Skylink.prototype.startRecording = function () {
     return;
   }
 
-  // NOTE: Not sure if this is needed? just return as log.error?
-  /*if (this._isRecording) {
+  if (this._isRecording) {
     log.error(&#x27;Unable to start recording as there is an existing recording in-progress&#x27;);
     return;
-  }*/
+  }
 
   this._sendChannelMessage({
-
     type: this._SIG_MESSAGE_TYPE.START_RECORDING,
     rid: this._room.id,
     target: &#x27;MCU&#x27;
-
   });
 
   log.debug([&#x27;MCU&#x27;, &#x27;Recording&#x27;, null, &#x27;Starting recording&#x27;]);
@@ -1797,18 +1817,20 @@ Skylink.prototype.stopRecording = function () {
     return;
   }
 
-  // NOTE: Not sure if this is needed? just return as log.error?
-  /*if (!this._isRecording) {
+  if (!this._isRecording) {
     log.error(&#x27;Unable to stop recording as there is no recording in-progress&#x27;);
     return;
-  }*/
+  }
+
+  if (this._recordingStartInterval) {
+    log.error(&#x27;Unable to stop recording as 4 seconds has not been recorded yet&#x27;);
+    return;
+  }
 
   this._sendChannelMessage({
-
     type: this._SIG_MESSAGE_TYPE.STOP_RECORDING,
     rid: this._room.id,
     target: &#x27;MCU&#x27;
-
   });
 
   log.debug([&#x27;MCU&#x27;, &#x27;Recording&#x27;, null, &#x27;Stopping recording&#x27;]);

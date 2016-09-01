@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.12 (recording beta)</title>
+    <title>SkylinkJS 0.6.13</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.12 (recording beta)</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.13</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -1098,6 +1098,15 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
                     </span>
                   </a>
                 
+                  <a href="#method_getConnectionStatus" class="list-group-item code-menu-item method-item ">
+                    &nbsp;&nbsp;getConnectionStatus
+                    <span class="settings">
+                      
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#method_getPeerInfo" class="list-group-item code-menu-item method-item ">
                     &nbsp;&nbsp;getPeerInfo
                     <span class="settings">
@@ -1443,15 +1452,6 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
               
               
                 
-                  <a href="#attr__addedCandidates" class="list-group-item code-menu-item  private-attr-item ">
-                    &nbsp;&nbsp;_addedCandidates
-                    <span class="settings">
-                      
-                      
-                      
-                    </span>
-                  </a>
-                
                   <a href="#attr__appKey" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_appKey
                     <span class="settings">
@@ -1677,6 +1677,15 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
                     </span>
                   </a>
                 
+                  <a href="#attr__gatheredCandidates" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_gatheredCandidates
+                    <span class="settings">
+                      
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#attr__getUserMediaSettings" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_getUserMediaSettings
                     <span class="settings">
@@ -1736,6 +1745,17 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
                     <span class="settings">
                       
                       
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#attr__isRecording" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_isRecording
+                    <span class="settings">
+                      
+                      
+                      
+                        <small class="label label-info">beta</small>
                       
                     </span>
                   </a>
@@ -1940,6 +1960,17 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
                     </span>
                   </a>
                 
+                  <a href="#attr__recordingStartInterval" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_recordingStartInterval
+                    <span class="settings">
+                      
+                      
+                      
+                        <small class="label label-info">beta</small>
+                      
+                    </span>
+                  </a>
+                
                   <a href="#attr__retryCount" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_retryCount
                     <span class="settings">
@@ -2129,6 +2160,15 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
                     </span>
                   </a>
                 
+                  <a href="#attr__socketSession" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_socketSession
+                    <span class="settings">
+                      
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#attr__socketTimeout" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_socketTimeout
                     <span class="settings">
@@ -2302,6 +2342,15 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
                 
                   <a href="#attr_DT_PROTOCOL_VERSION" class="list-group-item code-menu-item attr-item ">
                     &nbsp;&nbsp;DT_PROTOCOL_VERSION
+                    <span class="settings">
+                      
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#attr_GET_CONNECTION_STATUS_STATE" class="list-group-item code-menu-item attr-item ">
+                    &nbsp;&nbsp;GET_CONNECTION_STATUS_STATE
                     <span class="settings">
                       
                       
@@ -3265,7 +3314,7 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l225"><code>source&#x2F;ice-candidate.js:225</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l226"><code>source&#x2F;ice-candidate.js:226</code></a>
       </small>
     
 
@@ -3382,7 +3431,7 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l175"><code>source&#x2F;ice-candidate.js:175</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l176"><code>source&#x2F;ice-candidate.js:176</code></a>
       </small>
     
 
@@ -3512,7 +3561,7 @@ that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1055"><code>source&#x2F;stream-media.js:1055</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1074"><code>source&#x2F;stream-media.js:1074</code></a>
       </small>
     
 
@@ -3654,7 +3703,7 @@ If self does not have any Stream object to send, it will a connection without
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l93"><code>source&#x2F;peer-connection.js:93</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l116"><code>source&#x2F;peer-connection.js:116</code></a>
       </small>
     
 
@@ -4171,7 +4220,7 @@ If self does not have any Stream object to send, it will a connection without
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1468"><code>source&#x2F;socket-message.js:1468</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1491"><code>source&#x2F;socket-message.js:1491</code></a>
       </small>
     
 
@@ -5319,7 +5368,7 @@ If self does not have any Stream object to send, it will a connection without
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1359"><code>source&#x2F;socket-message.js:1359</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1386"><code>source&#x2F;socket-message.js:1386</code></a>
       </small>
     
 
@@ -6111,7 +6160,7 @@ If provided dataURL binary string (base64)
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l571"><code>source&#x2F;socket-channel.js:571</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l589"><code>source&#x2F;socket-channel.js:589</code></a>
       </small>
     
 
@@ -6357,7 +6406,7 @@ If provided dataURL binary string (base64)
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1556"><code>source&#x2F;skylink-events.js:1556</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1686"><code>source&#x2F;skylink-events.js:1686</code></a>
       </small>
     
 
@@ -6756,7 +6805,7 @@ This method will do a event subscription with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l363"><code>source&#x2F;peer-connection.js:363</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l386"><code>source&#x2F;peer-connection.js:386</code></a>
       </small>
     
 
@@ -6900,7 +6949,7 @@ This method will do a event subscription with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l356"><code>source&#x2F;socket-channel.js:356</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l368"><code>source&#x2F;socket-channel.js:368</code></a>
       </small>
     
 
@@ -7369,7 +7418,7 @@ In this handler, it actually handles and manipulates the received data transfer 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l259"><code>source&#x2F;peer-handshake.js:259</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l262"><code>source&#x2F;peer-handshake.js:262</code></a>
       </small>
     
 
@@ -7691,7 +7740,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l768"><code>source&#x2F;socket-message.js:768</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l795"><code>source&#x2F;socket-message.js:795</code></a>
       </small>
     
 
@@ -8597,7 +8646,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l788"><code>source&#x2F;room-init.js:788</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l789"><code>source&#x2F;room-init.js:789</code></a>
       </small>
     
 
@@ -8760,7 +8809,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l703"><code>source&#x2F;socket-message.js:703</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l730"><code>source&#x2F;socket-message.js:730</code></a>
       </small>
     
 
@@ -9131,7 +9180,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l693"><code>source&#x2F;room-init.js:693</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l694"><code>source&#x2F;room-init.js:694</code></a>
       </small>
     
 
@@ -9857,7 +9906,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1152"><code>source&#x2F;stream-media.js:1152</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1171"><code>source&#x2F;stream-media.js:1171</code></a>
       </small>
     
 
@@ -10152,7 +10201,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1266"><code>source&#x2F;socket-message.js:1266</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1293"><code>source&#x2F;socket-message.js:1293</code></a>
       </small>
     
 
@@ -10352,7 +10401,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l210"><code>source&#x2F;ice-candidate.js:210</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l211"><code>source&#x2F;ice-candidate.js:211</code></a>
       </small>
     
 
@@ -10455,7 +10504,7 @@ This is mainly to prevent JShint errors.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l197"><code>source&#x2F;ice-candidate.js:197</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l198"><code>source&#x2F;ice-candidate.js:198</code></a>
       </small>
     
 
@@ -10547,7 +10596,7 @@ This is mainly to prevent JShint errors.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l63"><code>source&#x2F;ice-candidate.js:63</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l68"><code>source&#x2F;ice-candidate.js:68</code></a>
       </small>
     
 
@@ -10691,7 +10740,7 @@ This is mainly to prevent JShint errors.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l621"><code>source&#x2F;stream-media.js:621</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l644"><code>source&#x2F;stream-media.js:644</code></a>
       </small>
     
 
@@ -10850,7 +10899,7 @@ This is mainly to prevent JShint errors.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l565"><code>source&#x2F;stream-media.js:565</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l588"><code>source&#x2F;stream-media.js:588</code></a>
       </small>
     
 
@@ -11004,7 +11053,7 @@ This is mainly to prevent JShint errors.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l455"><code>source&#x2F;stream-media.js:455</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l478"><code>source&#x2F;stream-media.js:478</code></a>
       </small>
     
 
@@ -11127,7 +11176,7 @@ This is mainly to prevent JShint errors.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l524"><code>source&#x2F;socket-channel.js:524</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l540"><code>source&#x2F;socket-channel.js:540</code></a>
       </small>
     
 
@@ -11224,7 +11273,7 @@ Once URI is formed, it will start a new socket.io connection with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l668"><code>source&#x2F;stream-media.js:668</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l687"><code>source&#x2F;stream-media.js:687</code></a>
       </small>
     
 
@@ -11395,7 +11444,7 @@ Once URI is formed, it will start a new socket.io connection with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l828"><code>source&#x2F;stream-media.js:828</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l847"><code>source&#x2F;stream-media.js:847</code></a>
       </small>
     
 
@@ -11423,7 +11472,7 @@ Once URI is formed, it will start a new socket.io connection with
       
           <li class="param">
             <code class="param-name">options</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
+            <span class="type"><b>{</b>JSON<b>}</b></span>
 
             <span class="label">Optional</span>
             
@@ -11443,7 +11492,7 @@ Once URI is formed, it will start a new socket.io connection with
                 
                   <li class="param">
                     <code class="param-name">audio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
+                    <span class="type"><b>{</b>Number<b>}</b></span>
 
                     <span class="label">Optional</span>
                     
@@ -11461,7 +11510,7 @@ Once URI is formed, it will start a new socket.io connection with
                 
                   <li class="param">
                     <code class="param-name">video</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
+                    <span class="type"><b>{</b>Number<b>}</b></span>
 
                     <span class="label">Optional</span>
                     
@@ -11479,7 +11528,7 @@ Once URI is formed, it will start a new socket.io connection with
                 
                   <li class="param">
                     <code class="param-name">data</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
+                    <span class="type"><b>{</b>Number<b>}</b></span>
 
                     <span class="label">Optional</span>
                     
@@ -11567,7 +11616,7 @@ Once URI is formed, it will start a new socket.io connection with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l940"><code>source&#x2F;stream-media.js:940</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l959"><code>source&#x2F;stream-media.js:959</code></a>
       </small>
     
 
@@ -11823,7 +11872,7 @@ Once URI is formed, it will start a new socket.io connection with
                 
                   <li class="param">
                     <code class="param-name">bandwidth</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
 
                     
                     
@@ -11843,7 +11892,7 @@ Once URI is formed, it will start a new socket.io connection with
                         
                           <li class="param">
                             <code class="param-name">audio</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
 
                             
                             
@@ -11858,7 +11907,7 @@ Once URI is formed, it will start a new socket.io connection with
                         
                           <li class="param">
                             <code class="param-name">video</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
 
                             
                             
@@ -11873,7 +11922,7 @@ Once URI is formed, it will start a new socket.io connection with
                         
                           <li class="param">
                             <code class="param-name">data</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
 
                             
                             
@@ -12184,7 +12233,7 @@ Once URI is formed, it will start a new socket.io connection with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l974"><code>source&#x2F;stream-media.js:974</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l993"><code>source&#x2F;stream-media.js:993</code></a>
       </small>
     
 
@@ -12381,7 +12430,7 @@ Once URI is formed, it will start a new socket.io connection with
                 
                   <li class="param">
                     <code class="param-name">bandwidth</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
 
                     <span class="label">Optional</span>
                     
@@ -12399,7 +12448,7 @@ Once URI is formed, it will start a new socket.io connection with
                         
                           <li class="param">
                             <code class="param-name">audio</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
@@ -12414,7 +12463,7 @@ Once URI is formed, it will start a new socket.io connection with
                         
                           <li class="param">
                             <code class="param-name">video</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
@@ -12429,7 +12478,7 @@ Once URI is formed, it will start a new socket.io connection with
                         
                           <li class="param">
                             <code class="param-name">data</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
@@ -12523,7 +12572,7 @@ Once URI is formed, it will start a new socket.io connection with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l872"><code>source&#x2F;stream-media.js:872</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l891"><code>source&#x2F;stream-media.js:891</code></a>
       </small>
     
 
@@ -12944,7 +12993,7 @@ Once URI is formed, it will start a new socket.io connection with
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l727"><code>source&#x2F;stream-media.js:727</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l746"><code>source&#x2F;stream-media.js:746</code></a>
       </small>
     
 
@@ -14441,7 +14490,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l304"><code>source&#x2F;peer-connection.js:304</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l327"><code>source&#x2F;peer-connection.js:327</code></a>
       </small>
     
 
@@ -14879,7 +14928,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
                         
                           <li class="param">
                             <code class="param-name">bandwidth</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
 
                             
                             
@@ -14896,7 +14945,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
                         
                           <li class="param">
                             <code class="param-name">bandwidth.audio</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
 
                             
                             
@@ -14911,7 +14960,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
                         
                           <li class="param">
                             <code class="param-name">bandwidth.video</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
 
                             
                             
@@ -14926,7 +14975,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
                         
                           <li class="param">
                             <code class="param-name">bandwidth.data</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
 
                             
                             
@@ -15255,7 +15304,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l904"><code>source&#x2F;socket-message.js:904</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l931"><code>source&#x2F;socket-message.js:931</code></a>
       </small>
     
 
@@ -15907,7 +15956,7 @@ If the message is not <code>GROUP</code> type of message received, it will send
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l728"><code>source&#x2F;peer-connection.js:728</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l755"><code>source&#x2F;peer-connection.js:755</code></a>
       </small>
     
 
@@ -16148,7 +16197,7 @@ This would require the current user to leave the room and restart all
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l158"><code>source&#x2F;peer-connection.js:158</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l181"><code>source&#x2F;peer-connection.js:181</code></a>
       </small>
     
 
@@ -16779,7 +16828,7 @@ This is usually done for replacing the previous Stream attached and restarting
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l232"><code>source&#x2F;socket-channel.js:232</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l244"><code>source&#x2F;socket-channel.js:244</code></a>
       </small>
     
 
@@ -17391,7 +17440,7 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l421"><code>source&#x2F;peer-handshake.js:421</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l424"><code>source&#x2F;peer-handshake.js:424</code></a>
       </small>
     
 
@@ -18739,7 +18788,7 @@ Setting the bandwidth flags may not
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l302"><code>source&#x2F;peer-handshake.js:302</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l305"><code>source&#x2F;peer-handshake.js:305</code></a>
       </small>
     
 
@@ -18874,7 +18923,7 @@ This sets the timeout object associated with the Peer into
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1264"><code>source&#x2F;stream-media.js:1264</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1283"><code>source&#x2F;stream-media.js:1283</code></a>
       </small>
     
 
@@ -19025,7 +19074,7 @@ This sets the timeout object associated with the Peer into
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l394"><code>source&#x2F;peer-handshake.js:394</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l397"><code>source&#x2F;peer-handshake.js:397</code></a>
       </small>
     
 
@@ -19363,7 +19412,7 @@ This sets the timeout object associated with the Peer into
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1657"><code>source&#x2F;skylink-events.js:1657</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1787"><code>source&#x2F;skylink-events.js:1787</code></a>
       </small>
     
 
@@ -19504,7 +19553,7 @@ This sets the timeout object associated with the Peer into
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1374"><code>source&#x2F;skylink-events.js:1374</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1504"><code>source&#x2F;skylink-events.js:1504</code></a>
       </small>
     
 
@@ -19814,7 +19863,7 @@ This sets the timeout object associated with the Peer into
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1607"><code>source&#x2F;skylink-events.js:1607</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1737"><code>source&#x2F;skylink-events.js:1737</code></a>
       </small>
     
 
@@ -19973,7 +20022,7 @@ This utilises <code>setInterval()</code> function.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1367"><code>source&#x2F;stream-media.js:1367</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1386"><code>source&#x2F;stream-media.js:1386</code></a>
       </small>
     
 
@@ -20255,7 +20304,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                 
                   <li class="param">
                     <code class="param-name">bandwidth</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
 
                     <span class="label">Optional</span>
                     
@@ -20273,7 +20322,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                         
                           <li class="param">
                             <code class="param-name">audio</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
@@ -20288,7 +20337,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                         
                           <li class="param">
                             <code class="param-name">video</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
@@ -20303,7 +20352,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                         
                           <li class="param">
                             <code class="param-name">data</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
@@ -20619,7 +20668,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                 
                   <li class="param">
                     <code class="param-name">bandwidth</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
 
                     <span class="label">Optional</span>
                     
@@ -20637,7 +20686,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                         
                           <li class="param">
                             <code class="param-name">audio</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
@@ -20652,7 +20701,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                         
                           <li class="param">
                             <code class="param-name">video</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
@@ -20667,7 +20716,7 @@ This will stop any currently attached Stream object to Skylink.</p>
                         
                           <li class="param">
                             <code class="param-name">data</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
@@ -20818,7 +20867,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1098"><code>source&#x2F;socket-message.js:1098</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1125"><code>source&#x2F;socket-message.js:1125</code></a>
       </small>
     
 
@@ -22193,7 +22242,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2090"><code>source&#x2F;stream-media.js:2090</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2109"><code>source&#x2F;stream-media.js:2109</code></a>
       </small>
     
 
@@ -22281,7 +22330,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2126"><code>source&#x2F;stream-media.js:2126</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2145"><code>source&#x2F;stream-media.js:2145</code></a>
       </small>
     
 
@@ -22373,7 +22422,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2072"><code>source&#x2F;stream-media.js:2072</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2091"><code>source&#x2F;stream-media.js:2091</code></a>
       </small>
     
 
@@ -22465,7 +22514,7 @@ This will stop any currently attached Stream object to Skylink.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2108"><code>source&#x2F;stream-media.js:2108</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2127"><code>source&#x2F;stream-media.js:2127</code></a>
       </small>
     
 
@@ -22597,6 +22646,1157 @@ This will stop any currently attached Stream object to Skylink.</p>
       <pre class="example-content prettyprint">
         <p>   // Get Unique ID (UUID)
    var uuid = SkylinkDemo.generateUUID();</p>
+
+      </pre>
+    </div>
+  
+  <hr>
+</div>
+            
+              <div id="method_getConnectionStatus" class="code-item method item method-item ">
+  <h3 class="code-item-name"><code>getConnectionStatus</code></h3>
+  
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code class="optional">[targetPeerId]</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
+          <code class="optional">[callback]</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+      <span class="paren">)</span>
+    </div>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l877"><code>source&#x2F;peer-connection.js:877</code></a>
+      </small>
+    
+
+    <small>
+      
+        <i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.14</span>
+      
+
+      
+    </small>
+  </div>
+
+  <div class="code-item-description">
+    <p>Gets the Peer connection status.</p>
+
+  </div>
+
+  
+  <div class="code-item-section">
+    <h4>Triggers:</h4>
+    <span class="code-item-trigger">getConnectionStatusStateChange</span>
+  </div>
+  
+
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">targetPeerId</code>
+            <span class="type"><b>{</b>String | Array<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+              
+              <p>The array of targeted Peers connection to refresh
+  the connection with.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">callback</code>
+            <span class="type"><b>{</b>Function<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+              
+              <p>The callback fired after all targeted Peers connection has
+  connection status retrieved or have met with an exception.
+  The callback signature is <code>function (error, success)</code>.</p>
+
+            </div>
+
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">error</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The error object received in the callback.
+  If received as <code>null</code>, it means that there is no errors.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">listOfPeers</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The list of Peers which connection statuses
+  to retrieve.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">retrievalErrors</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The list of errors occurred
+  based on per Peer basis. It returns the Error to an ID of <code>"self"</code> if there is no Peers.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">retrievalErrors.(#peerId)</code>
+                            <span class="type"><b>{</b>Object | String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer ID that
+  is associated with the error that occurred when retrieving the connection status.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The list of Peers connection statuses.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId)</code>
+                            <span class="type"><b>{</b>Error<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer ID that
+  is associated with the connection status retrieved data.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">success</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The success object received in the callback.
+  If received as <code>null</code>, it means that there are errors.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">listOfPeers</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The list of Peers which connection statuses
+  to retrieve.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The list of Peers connection statuses.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId)</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer ID that
+  is associated with the retrieved connection stats
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">raw</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The received raw connection stats data before parsing.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).audio</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection audio stats.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).audio.sending</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection audio sending stats.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).audio.sending.bytes</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection audio sending bytes.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).audio.sending.packets</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer
+  connection audio sending packets.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).audio.sending.packetsLost</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer
+  connection audio sending packets lost.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).audio.sending.ssrc</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer
+  connection audio sending ssrc.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).audio.sending.rtt</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer
+  connection audio sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not
+  defined in the original raw stats data.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).audio.receiving</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection audio receiving stats.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).audio.receiving.bytes</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection audio receiving bytes.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).audio.receiving.packets</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer
+  connection audio receiving packets.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).audio.receiving.packetsLost</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer
+  connection audio receiving packets lost.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).audio.receiving.ssrc</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer
+  connection audio receiving ssrc.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).video</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection video stats.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).video.sending</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection video sending stats.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).video.sending.bytes</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection video sending bytes.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).video.sending.packets</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer
+  connection video sending packets.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).video.sending.packetsLost</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer
+  connection video sending packets lost.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).video.sending.ssrc</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer
+  connection video sending ssrc ID.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).video.sending.rtt</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer
+  connection video sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not
+  defined in the original raw stats data.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).video.receiving</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection video receiving stats.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).video.receiving.bytes</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection video receiving bytes.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).video.receiving.packets</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer
+  connection video receiving packets.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).video.receiving.packetsLost</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer
+  connection video receiving packets lost.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).video.receiving.ssrc</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer
+  connection video receiving ssrc.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).selectedCandidate</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection selected candidate
+  pair details.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).selectedCandidate.local</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection
+  selected local candidate.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).selectedCandidate.local.ipAddress</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection
+  selected local candidate IP address.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).selectedCandidate.local.portNumber</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection
+  selected local candidate port number.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).selectedCandidate.local.transport</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection
+  selected local candidate transport.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).selectedCandidate.local.candidateType</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection
+  selected local candidate candidate type.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).selectedCandidate.remote</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection
+  selected remote candidate.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).selectedCandidate.remote.ipAddress</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection
+  selected remote candidate IP address.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).selectedCandidate.remote.portNumber</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection
+  selected remote candidate port number.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).selectedCandidate.remote.transport</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection
+  selected remote candidate transport.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).selectedCandidate.remote.candidateType</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection
+  selected remote candidate candidate type.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection details.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.iceConnectionState</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection ICE
+  connection state.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.iceGatheringState</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection ICE
+  gathering state.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.signalingState</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection
+  signaling state.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.localDescription</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection
+  local session description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.localDescription.type</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection
+  local session description type.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.localDescription.sdp</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection
+  local session description sdp.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.remoteDescription</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection
+  remote session description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.remoteDescription.type</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection
+  remote session description type.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.remoteDescription.sdp</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection
+  remote session description sdp.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.candidates</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection list of
+  candidates received or sent.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.candidates.sending</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection list of
+  candidates sent.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.candidates.sending.host</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection list of
+  <code>"host"</code> candidates sent.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.candidates.sending.host.(#index)</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The <code>"host"</code>
+  candidate sent.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.candidates.sending.srflx</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection list of
+  <code>"srflx"</code> candidates sent.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.candidates.sending.srflx.(#index)</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The <code>"srflx"</code>
+  candidate sent.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.candidates.sending.relay</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection list of
+  <code>"relay"</code> candidates sent.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.candidates.sending.relay.(#index)</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The <code>"relay"</code>
+  candidate sent.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.candidates.receiving</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection list of
+  candidates received.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.candidates.receiving.host</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection list of
+  <code>"host"</code> candidates received.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.candidates.receiving.host.(#index)</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The <code>"host"</code>
+  candidate received.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.candidates.receiving.srflx</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection list of
+  <code>"srflx"</code> candidates received.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.candidates.receiving.srflx.(#index)</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The <code>"srflx"</code>
+  candidate received.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.candidates.receiving.relay</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The Peer connection list of
+  <code>"relay"</code> candidates received.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">connectionStats.(#peerId).connection.candidates.receiving.relay.(#index)</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The <code>"relay"</code>
+  candidate received.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Example:</h4>
+      <pre class="example-content prettyprint">
+        <p>  SkylinkDemo.getConnectionStatus(peerId, function (error, success) {
+     if (error) {
+       console.error(&quot;Failed retrieving connection status for peer &quot;, peerId);
+     } else {
+       print(success.connectionStats);
+     }
+  });</p>
 
       </pre>
     </div>
@@ -23116,7 +24316,7 @@ You may set the current customer user data information for self in
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1502"><code>source&#x2F;stream-media.js:1502</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1521"><code>source&#x2F;stream-media.js:1521</code></a>
       </small>
     
 
@@ -23534,7 +24734,7 @@ Do not invoke this function when user has already joined a room as
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l839"><code>source&#x2F;room-init.js:839</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l840"><code>source&#x2F;room-init.js:840</code></a>
       </small>
     
 
@@ -24918,7 +26118,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                 
                   <li class="param">
                     <code class="param-name">bandwidth</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
 
                     <span class="label">Optional</span>
                     
@@ -24936,7 +26136,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                         
                           <li class="param">
                             <code class="param-name">audio</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
@@ -24951,7 +26151,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                         
                           <li class="param">
                             <code class="param-name">video</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
@@ -24966,7 +26166,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                         
                           <li class="param">
                             <code class="param-name">data</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
@@ -25298,7 +26498,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                         
                           <li class="param">
                             <code class="param-name">peerInfo.bandwidth</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
@@ -25313,7 +26513,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                         
                           <li class="param">
                             <code class="param-name">peerInfo.bandwidth.audio</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
@@ -25328,7 +26528,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                         
                           <li class="param">
                             <code class="param-name">peerInfo.bandwidth.video</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
@@ -25343,7 +26543,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
                         
                           <li class="param">
                             <code class="param-name">peerInfo.bandwidth.data</code>
-                            <span class="type"><b>{</b>String<b>}</b></span>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
@@ -25967,7 +27167,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1970"><code>source&#x2F;stream-media.js:1970</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1989"><code>source&#x2F;stream-media.js:1989</code></a>
       </small>
     
 
@@ -26138,7 +27338,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1509"><code>source&#x2F;skylink-events.js:1509</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1639"><code>source&#x2F;skylink-events.js:1639</code></a>
       </small>
     
 
@@ -26280,7 +27480,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1433"><code>source&#x2F;skylink-events.js:1433</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1563"><code>source&#x2F;skylink-events.js:1563</code></a>
       </small>
     
 
@@ -26433,7 +27633,7 @@ This event handler will always be triggered when the event name is triggered. If
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1460"><code>source&#x2F;skylink-events.js:1460</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1590"><code>source&#x2F;skylink-events.js:1590</code></a>
       </small>
     
 
@@ -26616,7 +27816,7 @@ This event handler will always be triggered when the event name is triggered. If
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l569"><code>source&#x2F;peer-connection.js:569</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l596"><code>source&#x2F;peer-connection.js:596</code></a>
       </small>
     
 
@@ -27675,7 +28875,7 @@ For Peers connecting from the Web platform, the DataChannel connection channel t
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1578"><code>source&#x2F;socket-message.js:1578</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1601"><code>source&#x2F;socket-message.js:1601</code></a>
       </small>
     
 
@@ -27981,7 +29181,7 @@ to send longer strings (for that instance base64 binary strings are long).</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1737"><code>source&#x2F;stream-media.js:1737</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1756"><code>source&#x2F;stream-media.js:1756</code></a>
       </small>
     
 
@@ -29440,7 +30640,7 @@ You may get the current customer user data information for self in
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2143"><code>source&#x2F;stream-media.js:2143</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2162"><code>source&#x2F;stream-media.js:2162</code></a>
       </small>
     
 
@@ -29636,7 +30836,7 @@ This does not replace the currently attached user media Stream object in Skylink
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1664"><code>source&#x2F;socket-message.js:1664</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1687"><code>source&#x2F;socket-message.js:1687</code></a>
       </small>
     
 
@@ -29716,7 +30916,7 @@ This does not replace the currently attached user media Stream object in Skylink
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1695"><code>source&#x2F;socket-message.js:1695</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1715"><code>source&#x2F;socket-message.js:1715</code></a>
       </small>
     
 
@@ -29794,7 +30994,7 @@ This does not replace the currently attached user media Stream object in Skylink
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2355"><code>source&#x2F;stream-media.js:2355</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2374"><code>source&#x2F;stream-media.js:2374</code></a>
       </small>
     
 
@@ -29886,7 +31086,7 @@ Reference <a href="../classes/Skylink.html#method_refreshConnection" class="cros
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1136"><code>source&#x2F;stream-media.js:1136</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1155"><code>source&#x2F;stream-media.js:1155</code></a>
       </small>
     
 
@@ -31038,156 +32238,6 @@ must be set as <code>true</code> to enable the storage of logs.</li>
         
           <section id="attrs">
             
-              <div id="attr__addedCandidates" class="code-item attr item private-attr-item ">
-  <a name="config__addedCandidates"></a> 
-  <h3 class="code-item-name"><code>_addedCandidates</code></h3>
-  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>JSON<b>}</b></span>
-
-  <div class="code-item-properties">
-    <div class="properties-wrapper">
-      
-
-      
-
-      
-        <span class="label label-warning" title="This attribute is required for communication.">required</span>
-      
-
-      
-
-      
-        <span class="label label-default" title="This attribute is private.">private</span>
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-    </div>
-
-    <div class="code-item-information">
-      
-        
-          
-        
-      
-      
-      
-    </div>
-
-    
-      <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l21"><code>source&#x2F;ice-candidate.js:21</code></a>
-      </small>
-    
-
-    
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.4</span></small>
-    
-  </div>
-
-  <div class="code-item-description">
-    <p>Stores the list of candidates sent <code>local</code> and added <code>remote</code> information.</p>
-
-  </div>
-
-  
-
-  
-
-  
-    <div class="code-item-section">
-      <h4>Keys:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">(#peerId)</code>
-            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-                <p>The list of candidates sent and added associated with the Peer ID.</p>
-
-            </div>
-
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">relay</code>
-                    <span class="type"><b>{</b>Array<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>The number of relay candidates added and sent.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">srflx</code>
-                    <span class="type"><b>{</b>Array<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>The number of server reflexive candidates added and sent.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">host</code>
-                    <span class="type"><b>{</b>Array<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>The number of host candidates added and sent.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
-            
-          </li>
-      
-      </ul>
-    </div>
-  
-
-  
-
-  
-  <hr>
-</div>
-            
               <div id="attr__appKey" class="code-item attr item private-attr-item ">
   <a name="config__appKey"></a> 
   <h3 class="code-item-name"><code>_appKey</code></h3>
@@ -31393,7 +32443,7 @@ must be set as <code>true</code> to enable the storage of logs.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l440"><code>source&#x2F;stream-media.js:440</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l463"><code>source&#x2F;stream-media.js:463</code></a>
       </small>
     
 
@@ -31559,7 +32609,7 @@ must be set as <code>true</code> to enable the storage of logs.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l139"><code>source&#x2F;socket-channel.js:139</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l151"><code>source&#x2F;socket-channel.js:151</code></a>
       </small>
     
 
@@ -32318,7 +33368,7 @@ If the value is not provided in <a href="../classes/Skylink.html#method_init" cl
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l237"><code>source&#x2F;stream-media.js:237</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l260"><code>source&#x2F;stream-media.js:260</code></a>
       </small>
     
 
@@ -32468,7 +33518,7 @@ If the value is not provided in <a href="../classes/Skylink.html#method_init" cl
       
           <li class="param">
             <code class="param-name">bandwidth</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
+            <span class="type"><b>{</b>JSON<b>}</b></span>
 
             <span class="label">Optional</span>
             
@@ -33845,6 +34895,221 @@ This will configure TURN server connection using port <code>443</code> only and
   <hr>
 </div>
             
+              <div id="attr__gatheredCandidates" class="code-item attr item private-attr-item ">
+  <a name="config__gatheredCandidates"></a> 
+  <h3 class="code-item-name"><code>_gatheredCandidates</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>JSON<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+        <span class="label label-warning" title="This attribute is required for communication.">required</span>
+      
+
+      
+
+      
+        <span class="label label-default" title="This attribute is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l21"><code>source&#x2F;ice-candidate.js:21</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.14</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Stores the list of local and remote candidates sent and received.</p>
+
+  </div>
+
+  
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Keys:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">(#peerId)</code>
+            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The list of candidates associated with the Peer ID.</p>
+
+            </div>
+
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">sending</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The list of local candidates gathered for Peer sent.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">host</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The list of local <code>"host"</code> type of candidates sent.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">srflx</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The list of local <code>"srflx"</code> type of candidates sent.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">relay</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The list of local <code>"relay"</code> type of candidates sent.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">receiving</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The list of remote candidates gathered for Peer received.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">host</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The list of remote <code>"host"</code> type of candidates received.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">srflx</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The list of remote <code>"srflx"</code> type of candidates received.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">relay</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The list of remote <code>"relay"</code> type of candidates received.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
               <div id="attr__getUserMediaSettings" class="code-item attr item private-attr-item ">
   <a name="config__getUserMediaSettings"></a> 
   <h3 class="code-item-name"><code>_getUserMediaSettings</code></h3>
@@ -33895,7 +35160,7 @@ This will configure TURN server connection using port <code>443</code> only and
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l389"><code>source&#x2F;stream-media.js:389</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l412"><code>source&#x2F;stream-media.js:412</code></a>
       </small>
     
 
@@ -34558,6 +35823,85 @@ After an third attempt of ICE connection failure, the
   <hr>
 </div>
             
+              <div id="attr__isRecording" class="code-item attr item private-attr-item ">
+  <a name="config__isRecording"></a> 
+  <h3 class="code-item-name"><code>_isRecording</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>JSON<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This attribute is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-info label-info" title="This attribute is beta.">beta</span>
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l199"><code>source&#x2F;stream-media.js:199</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.-</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Stores the flag if recording is in session.
+There can only be 1 recording session at a time in a Room</p>
+
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+  <hr>
+</div>
+            
               <div id="attr__key" class="code-item attr item private-attr-item ">
   <a name="config__key"></a> 
   <h3 class="code-item-name"><code>_key</code></h3>
@@ -34686,7 +36030,7 @@ After an third attempt of ICE connection failure, the
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l54"><code>source&#x2F;peer-connection.js:54</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l77"><code>source&#x2F;peer-connection.js:77</code></a>
       </small>
     
 
@@ -35010,7 +36354,7 @@ By default, the value is <code>ERROR</code>.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l210"><code>source&#x2F;stream-media.js:210</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l233"><code>source&#x2F;stream-media.js:233</code></a>
       </small>
     
 
@@ -35086,7 +36430,7 @@ By default, the value is <code>ERROR</code>.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l221"><code>source&#x2F;stream-media.js:221</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l244"><code>source&#x2F;stream-media.js:244</code></a>
       </small>
     
 
@@ -35167,7 +36511,7 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l199"><code>source&#x2F;stream-media.js:199</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l222"><code>source&#x2F;stream-media.js:222</code></a>
       </small>
     
 
@@ -35243,7 +36587,7 @@ The current <a href="../classes/Skylink.html#attr__mediaScreen" class="crosslink
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l421"><code>source&#x2F;stream-media.js:421</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l444"><code>source&#x2F;stream-media.js:444</code></a>
       </small>
     
 
@@ -35449,7 +36793,7 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1337"><code>source&#x2F;skylink-events.js:1337</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1467"><code>source&#x2F;skylink-events.js:1467</code></a>
       </small>
     
 
@@ -35996,7 +37340,7 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l80"><code>source&#x2F;peer-connection.js:80</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l103"><code>source&#x2F;peer-connection.js:103</code></a>
       </small>
     
 
@@ -36862,6 +38206,84 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
   <hr>
 </div>
             
+              <div id="attr__recordingStartInterval" class="code-item attr item private-attr-item ">
+  <a name="config__recordingStartInterval"></a> 
+  <h3 class="code-item-name"><code>_recordingStartInterval</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>JSON<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This attribute is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-info label-info" title="This attribute is beta.">beta</span>
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l211"><code>source&#x2F;stream-media.js:211</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.-</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Stores the recording session timeout to ensure 4 seconds has been recorded.</p>
+
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+  <hr>
+</div>
+            
               <div id="attr__retryCount" class="code-item attr item private-attr-item ">
   <a name="config__retryCount"></a> 
   <h3 class="code-item-name"><code>_retryCount</code></h3>
@@ -36914,7 +38336,7 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l67"><code>source&#x2F;peer-connection.js:67</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l90"><code>source&#x2F;peer-connection.js:90</code></a>
       </small>
     
 
@@ -37675,7 +39097,7 @@ The persistent room feature is configurable in the Application Key
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l375"><code>source&#x2F;stream-media.js:375</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l398"><code>source&#x2F;stream-media.js:398</code></a>
       </small>
     
 
@@ -37758,7 +39180,7 @@ Currently, Opera does not support screensharing and only premium
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l344"><code>source&#x2F;stream-media.js:344</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l367"><code>source&#x2F;stream-media.js:367</code></a>
       </small>
     
 
@@ -37861,7 +39283,7 @@ Currently, Opera does not support screensharing and only premium
       
           <li class="param">
             <code class="param-name">bandwidth</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
+            <span class="type"><b>{</b>JSON<b>}</b></span>
 
             <span class="label">Optional</span>
             
@@ -38734,7 +40156,7 @@ The selected room will be usually defaulted to
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l152"><code>source&#x2F;socket-channel.js:152</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l164"><code>source&#x2F;socket-channel.js:164</code></a>
       </small>
     
 
@@ -38810,7 +40232,7 @@ The selected room will be usually defaulted to
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l174"><code>source&#x2F;socket-channel.js:174</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l186"><code>source&#x2F;socket-channel.js:186</code></a>
       </small>
     
 
@@ -38886,7 +40308,7 @@ The selected room will be usually defaulted to
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l163"><code>source&#x2F;socket-channel.js:163</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l175"><code>source&#x2F;socket-channel.js:175</code></a>
       </small>
     
 
@@ -38964,7 +40386,7 @@ The selected room will be usually defaulted to
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l185"><code>source&#x2F;socket-channel.js:185</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l197"><code>source&#x2F;socket-channel.js:197</code></a>
       </small>
     
 
@@ -39043,7 +40465,7 @@ The selected room will be usually defaulted to
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l38"><code>source&#x2F;socket-channel.js:38</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l50"><code>source&#x2F;socket-channel.js:50</code></a>
       </small>
     
 
@@ -39123,7 +40545,7 @@ The selected room will be usually defaulted to
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l52"><code>source&#x2F;socket-channel.js:52</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l64"><code>source&#x2F;socket-channel.js:64</code></a>
       </small>
     
 
@@ -39205,7 +40627,7 @@ The messaegs are stored in
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l69"><code>source&#x2F;socket-channel.js:69</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l81"><code>source&#x2F;socket-channel.js:81</code></a>
       </small>
     
 
@@ -39272,6 +40694,84 @@ The messaegs are stored in
   <hr>
 </div>
             
+              <div id="attr__socketSession" class="code-item attr item private-attr-item ">
+  <a name="config__socketSession"></a> 
+  <h3 class="code-item-name"><code>_socketSession</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>JSON<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+        <span class="label label-warning" title="This attribute is required for communication.">required</span>
+      
+
+      
+
+      
+        <span class="label label-default" title="This attribute is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l38"><code>source&#x2F;socket-channel.js:38</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.13</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Stores the socket connection session information.</p>
+
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+  <hr>
+</div>
+            
               <div id="attr__socketTimeout" class="code-item attr item private-attr-item ">
   <a name="config__socketTimeout"></a> 
   <h3 class="code-item-name"><code>_socketTimeout</code></h3>
@@ -39324,7 +40824,7 @@ The messaegs are stored in
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l198"><code>source&#x2F;socket-channel.js:198</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l210"><code>source&#x2F;socket-channel.js:210</code></a>
       </small>
     
 
@@ -39411,7 +40911,7 @@ If the value is <code>0</code>, it will use the default timeout from
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l215"><code>source&#x2F;socket-channel.js:215</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l227"><code>source&#x2F;socket-channel.js:227</code></a>
       </small>
     
 
@@ -39576,7 +41076,7 @@ If the value is <code>0</code>, it will use the default timeout from
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l287"><code>source&#x2F;stream-media.js:287</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l310"><code>source&#x2F;stream-media.js:310</code></a>
       </small>
     
 
@@ -39782,7 +41282,7 @@ If the value is <code>0</code>, it will use the default timeout from
       
           <li class="param">
             <code class="param-name">bandwidth</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
+            <span class="type"><b>{</b>JSON<b>}</b></span>
 
             <span class="label">Optional</span>
             
@@ -39799,7 +41299,7 @@ If the value is <code>0</code>, it will use the default timeout from
                 
                   <li class="param">
                     <code class="param-name">audio</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
+                    <span class="type"><b>{</b>Number<b>}</b></span>
 
                     <span class="label">Optional</span>
                     
@@ -39816,7 +41316,7 @@ If the value is <code>0</code>, it will use the default timeout from
                 
                   <li class="param">
                     <code class="param-name">video</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
+                    <span class="type"><b>{</b>Number<b>}</b></span>
 
                     <span class="label">Optional</span>
                     
@@ -39833,7 +41333,7 @@ If the value is <code>0</code>, it will use the default timeout from
                 
                   <li class="param">
                     <code class="param-name">data</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
+                    <span class="type"><b>{</b>Number<b>}</b></span>
 
                     <span class="label">Optional</span>
                     
@@ -39914,7 +41414,7 @@ If the value is <code>0</code>, it will use the default timeout from
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1358"><code>source&#x2F;skylink-events.js:1358</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1488"><code>source&#x2F;skylink-events.js:1488</code></a>
       </small>
     
 
@@ -40981,7 +42481,7 @@ used by default.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l37"><code>source&#x2F;ice-candidate.js:37</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l42"><code>source&#x2F;ice-candidate.js:42</code></a>
       </small>
     
 
@@ -41977,6 +43477,142 @@ see the Protocol version used in this Skylink version.</li>
 
   
 
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="attr_GET_CONNECTION_STATUS_STATE" class="code-item attr item attr-item ">
+  <a name="config_GET_CONNECTION_STATUS_STATE"></a> 
+  <h3 class="code-item-name"><code>GET_CONNECTION_STATUS_STATE</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>JSON<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-info" title="This attribute is reference only.">readonly</span>
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l33"><code>source&#x2F;peer-connection.js:33</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.1.0</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>These are the list of Peer connection status retrieval ready states that Skylink would trigger.</p>
+<ul>
+<li>These states are triggered when
+<a href="../classes/Skylink.html#method_getConnectionStatus" class="crosslink">getConnectionStatus()</a> is invoked.</li>
+</ul>
+
+  </div>
+
+  
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Keys:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">RETRIEVING</code>
+            <span class="type"><b>{</b>Number<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p><small>Value <code>0</code></small>
+  The state when Skylink is retrieving the Peer connection status.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">RETRIEVE_SUCCESS</code>
+            <span class="type"><b>{</b>Number<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p><small>Value <code>1</code></small>
+  The state when Skylink has retrieved the Peer connection status succesfully.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">RETRIEVE_ERROR</code>
+            <span class="type"><b>{</b>Number<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p><small>Value <code>-1</code></small>
+  The state when Skylink has failed retrieving the Peer connection status.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
   
 
   
@@ -44093,7 +45729,7 @@ This might happen when connection timeouts. If this is a persistent issue, it&#3
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l33"><code>source&#x2F;peer-connection.js:33</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l56"><code>source&#x2F;peer-connection.js:56</code></a>
       </small>
     
 
@@ -44458,7 +46094,7 @@ see the Protocol version used in this Skylink version.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l89"><code>source&#x2F;socket-channel.js:89</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l101"><code>source&#x2F;socket-channel.js:101</code></a>
       </small>
     
 
@@ -46769,7 +48405,8 @@ settings</a>, this event will not be triggered at all.</li>
             
 
             <div class="param-description">
-                <p>The retrieval current status.</p>
+                <p>The retrieval current status.
+  [Rel: Skylink.GET_PEERS_STATE]</p>
 
             </div>
 
@@ -48563,7 +50200,7 @@ and is sending this Stream object to other Peers connected in the room.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1299"><code>source&#x2F;skylink-events.js:1299</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1300"><code>source&#x2F;skylink-events.js:1300</code></a>
       </small>
     
 
@@ -48595,7 +50232,8 @@ and is sending this Stream object to other Peers connected in the room.</li>
             
 
             <div class="param-description">
-                <p>The Peer introduction state.</p>
+                <p>The Peer introduction state.
+  [Rel: Skylink.INTRODUCE_STATE]</p>
 
             </div>
 
@@ -51439,7 +53077,7 @@ not get triggered but stops at <u>readyStateChange</u> event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1319"><code>source&#x2F;skylink-events.js:1319</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1321"><code>source&#x2F;skylink-events.js:1321</code></a>
       </small>
     
 

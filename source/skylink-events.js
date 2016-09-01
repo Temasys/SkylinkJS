@@ -1287,6 +1287,7 @@ Skylink.prototype._EVENTS = {
    * - This requires that the provided alias Application Key has privileged feature configured.
    * @event getPeersStateChange
    * @param {String} state The retrieval current status.
+   *   [Rel: Skylink.GET_PEERS_STATE]
    * @param {String} privilegedPeerId The Peer ID of the privileged Peer.
    * @param {JSON} peerList The retrieved list of rooms and peers under the same realm based on
    *   the Application Key configured in <code>init()</code>.
@@ -1302,6 +1303,7 @@ Skylink.prototype._EVENTS = {
    * - This requires that the provided alias Application Key has privileged feature configured.
    * @event introduceStateChange
    * @param {String} state The Peer introduction state.
+   *   [Rel: Skylink.INTRODUCE_STATE]
    * @param {String} privilegedPeerId The Peer ID of the privileged Peer.
    * @param {String} sendingPeerId The Peer ID of the peer
    *   that initiates the connection with the introduced Peer.
@@ -1331,7 +1333,135 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.-
    */
-  recordingState: []
+  recordingState: [],
+
+  /*
+   * Event triggered when the retrieval of the Peer connection status state has changed.
+   * @event getConnectionStatusStateChange
+   * @param {Number} state The retrieval state of the Peer connection status.
+   *   [Rel: Skylink.GET_CONNECTION_STATUS_STATE]
+   * @param {String} peerId The Peer ID of the peer connection status.
+   * @param {JSON} stats The Peer retrieved connection stats.
+   *   Returned as <code>null</code> unless <code>RETRIEVE_SUCCESS</code> state.
+   * @param {JSON} stats.raw The received raw connection stats data before parsing.
+   * @param {JSON} stats.audio The Peer connection audio stats.
+   * @param {JSON} stats.audio.sending The Peer connection audio sending stats.
+   * @param {Number} stats.audio.sending.bytes The Peer connection audio sending bytes.
+   * @param {Number} stats.audio.sending.packets The Peer
+   *   connection audio sending packets.
+   * @param {Number} stats.audio.sending.packetsLost The Peer
+   *   connection audio sending packets lost.
+   * @param {Number} stats.audio.sending.ssrc The Peer
+   *   connection audio sending ssrc.
+   * @param {Number} stats.audio.sending.rtt The Peer
+   *   connection audio sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not
+   *   defined in the original raw stats data.
+   * @param {JSON} stats.audio.receiving The Peer connection audio receiving stats.
+   * @param {Number} stats.audio.receiving.bytes The Peer connection audio receiving bytes.
+   * @param {Number} stats.audio.receiving.packets The Peer
+   *   connection audio receiving packets.
+   * @param {Number} stats.audio.receiving.packetsLost The Peer
+   *   connection audio receiving packets lost.
+   * @param {Number} stats.audio.receiving.ssrc The Peer
+   *   connection audio receiving ssrc.
+   * @param {JSON} stats.video The Peer connection video stats.
+   * @param {JSON} stats.video.sending The Peer connection video sending stats.
+   * @param {Number} stats.video.sending.bytes The Peer connection video sending bytes.
+   * @param {Number} stats.video.sending.packets The Peer
+   *   connection video sending packets.
+   * @param {Number} stats.video.sending.packetsLost The Peer
+   *   connection video sending packets lost.
+   * @param {JSON} stats.video.sending.ssrc The Peer
+   *   connection video sending ssrc ID.
+   * @param {Number} stats.video.sending.rtt The Peer
+   *   connection video sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not
+   *   defined in the original raw stats data.
+   * @param {JSON} stats.video.receiving The Peer connection video receiving stats.
+   * @param {Number} stats.video.receiving.bytes The Peer connection video receiving bytes.
+   * @param {Number} stats.video.receiving.packets The Peer
+   *   connection video receiving packets.
+   * @param {Number} stats.video.receiving.packetsLost The Peer
+   *   connection video receiving packets lost.
+   * @param {Number} stats.video.receiving.ssrc The Peer
+   *   connection video receiving ssrc.
+   * @param {JSON} stats.selectedCandidate The Peer connection selected candidate
+   *   pair details.
+   * @param {JSON} stats.selectedCandidate.local The Peer connection
+   *   selected local candidate.
+   * @param {String} stats.selectedCandidate.local.ipAddress The Peer connection
+   *   selected local candidate IP address.
+   * @param {Number} stats.selectedCandidate.local.portNumber The Peer connection
+   *   selected local candidate port number.
+   * @param {String} stats.selectedCandidate.local.transport The Peer connection
+   *   selected local candidate transport.
+   * @param {String} stats.selectedCandidate.local.candidateType The Peer connection
+   *   selected local candidate candidate type.
+   * @param {JSON} stats.selectedCandidate.remote The Peer connection
+   *   selected remote candidate.
+   * @param {String} stats.selectedCandidate.remote.ipAddress The Peer connection
+   *   selected remote candidate IP address.
+   * @param {Number} stats.selectedCandidate.remote.portNumber The Peer connection
+   *   selected remote candidate port number.
+   * @param {String} stats.selectedCandidate.remote.transport The Peer connection
+   *   selected remote candidate transport.
+   * @param {String} stats.selectedCandidate.remote.candidateType The Peer connection
+   *   selected remote candidate candidate type.
+   * @param {JSON} stats.connection The Peer connection details.
+   * @param {String} stats.connection.iceConnectionState The Peer connection ICE
+   *   connection state.
+   * @param {String} stats.connection.iceGatheringState The Peer connection ICE
+   *   gathering state.
+   * @param {String} stats.connection.signalingState The Peer connection
+   *   signaling state.
+   * @param {JSON} stats.connection.localDescription The Peer connection
+   *   local session description.
+   * @param {String} stats.connection.localDescription.type The Peer connection
+   *   local session description type.
+   * @param {String} stats.connection.localDescription.sdp The Peer connection
+   *   local session description sdp.
+   * @param {JSON} stats.connection.remoteDescription The Peer connection
+   *   remote session description.
+   * @param {String} stats.connection.remoteDescription.type The Peer connection
+   *   remote session description type.
+   * @param {String} stats.connection.remoteDescription.sdp The Peer connection
+   *   remote session description sdp.
+   * @param {JSON} stats.connection.candidates The Peer connection list of
+   *   candidates received or sent.
+   * @param {JSON} stats.connection.candidates.sending The Peer connection list of
+   *   candidates sent.
+   * @param {Array} stats.connection.candidates.sending.host The Peer connection list of
+   *   <code>"host"</code> candidates sent.
+   * @param {JSON} stats.connection.candidates.sending.host.(#index) The <code>"host"</code>
+   *   candidate sent.
+   * @param {Array} stats.connection.candidates.sending.srflx The Peer connection list of
+   *   <code>"srflx"</code> candidates sent.
+   * @param {JSON} stats.connection.candidates.sending.srflx.(#index) The <code>"srflx"</code>
+   *   candidate sent.
+   * @param {Array} stats.connection.candidates.sending.relay The Peer connection list of
+   *   <code>"relay"</code> candidates sent.
+   * @param {JSON} stats.connection.candidates.sending.relay.(#index) The <code>"relay"</code>
+   *   candidate sent.
+   * @param {JSON} stats.connection.candidates.receiving The Peer connection list of
+   *   candidates received.
+   * @param {Array} stats.connection.candidates.receiving.host The Peer connection list of
+   *   <code>"host"</code> candidates received.
+   * @param {JSON} stats.connection.candidates.receiving.host.(#index) The <code>"host"</code>
+   *   candidate received.
+   * @param {Array} stats.connection.candidates.receiving.srflx The Peer connection list of
+   *   <code>"srflx"</code> candidates received.
+   * @param {JSON} stats.connection.candidates.receiving.srflx.(#index) The <code>"srflx"</code>
+   *   candidate received.
+   * @param {Array} stats.connection.candidates.receiving.relay The Peer connection list of
+   *   <code>"relay"</code> candidates received.
+   * @param {JSON} stats.connection.candidates.receiving.relay.(#index) The <code>"relay"</code>
+   *   candidate received.
+   * @param {Error} error The Error object received when failed retrieving the
+   *   Peer connection status.
+   * @component Events
+   * @for Skylink
+   * @since 0.6.14
+   */
+  getConnectionStatusStateChange: []
 };
 
 /**

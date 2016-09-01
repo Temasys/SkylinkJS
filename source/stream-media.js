@@ -281,7 +281,7 @@ Skylink.prototype._mediaScreenClone = null;
  *   streaming video resolution height.
  * @param {Number} [video.frameRate] The default
  *   streaming video maximum frameRate.
- * @param {String} [bandwidth] The configuration for
+ * @param {JSON} [bandwidth] The configuration for
  *   the maximum sending bandwidth. Setting the flags may or may not work depending
  *   on the browser implementations and how it handles it. By default, this is empty.
  * @private
@@ -345,16 +345,16 @@ Skylink.prototype._defaultStreamSettings = {
  *   in self user media Stream object. Some of the values are
  *   set by the <code>video.optional</code> setting in
  *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}.
- * @param {String} [bandwidth] The configuration for
+ * @param {JSON} [bandwidth] The configuration for
  *   the maximum sending bandwidth. The flags set may or may not work depending
  *   on the browser implementations and how it handles it.
- * @param {String} [bandwidth.audio] The maximum
+ * @param {Number} [bandwidth.audio] The maximum
  *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the audio bitrate to the browser defaults.
- * @param {String} [bandwidth.video] The maximum
+ * @param {Number} [bandwidth.video] The maximum
  *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the video bitrate to the browser defaults.
- * @param {String} [bandwidth.data] The maximum
+ * @param {Number} [bandwidth.data] The maximum
  *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the data bitrate to the browser defaults.
  * @private
@@ -381,7 +381,7 @@ Skylink.prototype._streamSettings = {};
  *   that indicates if the self connection Stream object sent
  *   is a screensharing stream or not. In this case, the
  *   value is <code>true</code> for screensharing Stream object.
- * @param {String} [bandwidth] The self
+ * @param {JSON} [bandwidth] The self
  *   streaming bandwidth settings. Setting the bandwidth flags may not
  *   force set the bandwidth for each connection stream channels as it depends
  *   on how the browser handles the bandwidth bitrate. Values are configured
@@ -658,34 +658,30 @@ Skylink.prototype._onUserMediaError = function(error, isScreenSharing, audioFall
 Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSharing) {
   var self = this;
 
-  if(targetMid !== 'MCU') {
-    if (!self._peerInformations[targetMid]) {
-      log.error([targetMid, 'MediaStream', stream.id,
-          'Received remote stream when peer is not connected. ' +
-          'Ignoring stream ->'], stream);
-      return;
-    }
-
-    if (!self._peerInformations[targetMid].settings.audio &&
-      !self._peerInformations[targetMid].settings.video && !isScreenSharing) {
-      log.log([targetMid, 'MediaStream', stream.id,
-        'Receive remote stream but ignoring stream as it is empty ->'
-        ], stream);
-      return;
-    }
-    log.log([targetMid, 'MediaStream', stream.id,
-      'Received remote stream ->'], stream);
-
-    if (isScreenSharing) {
-      log.log([targetMid, 'MediaStream', stream.id,
-        'Peer is having a screensharing session with user']);
-    }
-
-    self._trigger('incomingStream', targetMid, stream,
-      false, self.getPeerInfo(targetMid), !!isScreenSharing);
-  } else {
-    log.log([targetMid, null, null, 'MCU is listening']);
+  if (!self._peerInformations[targetMid]) {
+    log.error([targetMid, 'MediaStream', stream.id,
+        'Received remote stream when peer is not connected. ' +
+        'Ignoring stream ->'], stream);
+    return;
   }
+
+  if (!self._peerInformations[targetMid].settings.audio &&
+    !self._peerInformations[targetMid].settings.video && !isScreenSharing) {
+    log.log([targetMid, 'MediaStream', stream.id,
+      'Receive remote stream but ignoring stream as it is empty ->'
+      ], stream);
+    return;
+  }
+  log.log([targetMid, 'MediaStream', stream.id,
+    'Received remote stream ->'], stream);
+
+  if (isScreenSharing) {
+    log.log([targetMid, 'MediaStream', stream.id,
+      'Peer is having a screensharing session with user']);
+  }
+
+  self._trigger('incomingStream', targetMid, stream,
+    false, self.getPeerInfo(targetMid), !!isScreenSharing);
 };
 
 /**
@@ -851,18 +847,18 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
 /**
  * Parses the streaming bandwidth settings for self provided.
  * @method _parseBandwidthSettings
- * @param {String} [options] The self
+ * @param {JSON} [options] The self
  *   streaming bandwidth settings. Setting the bandwidth flags may not
  *   force set the bandwidth for each connection stream channels as it depends
  *   on how the browser handles the bandwidth bitrate. Values are configured
  *   in <var>kb/s</var>.
- * @param {String} [options.audio] The configured
+ * @param {Number} [options.audio] The configured
  *   audio stream channel for self connection Stream object bandwidth
  *   that audio streaming should use in <var>kb/s</var>.
- * @param {String} [options.video] The configured
+ * @param {Number} [options.video] The configured
  *   video stream channel for the self connection Stream object bandwidth
  *   that video streaming should use in <var>kb/s</var>.
- * @param {String} [options.data] The configured
+ * @param {Number} [options.data] The configured
  *   datachannel channel for self DataChannel connection bandwidth
  *   that datachannel connection per packet should be able use in <var>kb/s</var>.
  * @private
@@ -1029,16 +1025,16 @@ Skylink.prototype._parseDefaultMediaStreamSettings = function(options) {
  *   Stream streaming video resolution height.
  * @param {Number} [options.video.frameRate=50] The self
  *   Stream streaming video maximum frameRate.
- * @param {String} [options.bandwidth] The configuration for
+ * @param {JSON} [options.bandwidth] The configuration for
  *   the maximum sending bandwidth. Setting the flags may or may not work depending
  *   on the browser implementations and how it handles it.
- * @param {String} [options.bandwidth.audio] The maximum
+ * @param {Number} [options.bandwidth.audio] The maximum
  *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the audio bitrate to the browser defaults.
- * @param {String} [options.bandwidth.video] The maximum
+ * @param {Number} [options.bandwidth.video] The maximum
  *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the video bitrate to the browser defaults.
- * @param {String} [options.bandwidth.data] The maximum
+ * @param {Number} [options.bandwidth.data] The maximum
  *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the data bitrate to the browser defaults.
  * @private
@@ -1434,16 +1430,16 @@ Skylink.prototype._stopLocalMediaStreams = function (options) {
  *   Stream streaming video resolution height.
  * @param {Number} [options.video.frameRate=50] The self
  *   Stream streaming video maximum frameRate.
- * @param {String} [options.bandwidth] The configuration for
+ * @param {JSON} [options.bandwidth] The configuration for
  *   the maximum sending bandwidth. Setting the flags may or may not work depending
  *   on the browser implementations and how it handles it.
- * @param {String} [options.bandwidth.audio] The maximum
+ * @param {Number} [options.bandwidth.audio] The maximum
  *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the audio bitrate to the browser defaults.
- * @param {String} [options.bandwidth.video] The maximum
+ * @param {Number} [options.bandwidth.video] The maximum
  *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the video bitrate to the browser defaults.
- * @param {String} [options.bandwidth.data] The maximum
+ * @param {Number} [options.bandwidth.data] The maximum
  *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the data bitrate to the browser defaults.
  * @trigger mediaAccessSuccess, mediaAccessError, mediaAccessRequired

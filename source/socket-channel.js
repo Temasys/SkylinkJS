@@ -36,6 +36,18 @@ Skylink.prototype.SOCKET_ERROR = {
 };
 
 /**
+ * Stores the socket connection session information.
+ * @attribute _socketSession
+ * @type JSON
+ * @private
+ * @required
+ * @component Socket
+ * @for Skylink
+ * @since 0.6.13
+ */
+Skylink.prototype._socketSession = {};
+
+/**
  * Stores the queued socket messages to sent to the platform signaling to
  *   prevent messages from being dropped due to messages being sent in
  *   less than a second interval.
@@ -391,8 +403,6 @@ Skylink.prototype._createSocket = function (type) {
 
     // re-refresh to long-polling port
     if (type === 'WebSocket') {
-      console.log(type, self._signalingServerPort);
-
       type = 'Polling';
       self._signalingServerPort = ports[0];
 
@@ -438,6 +448,12 @@ Skylink.prototype._createSocket = function (type) {
     useXDR: self._socketUseXDR,
     options: options
   });
+
+  self._socketSession = {
+    type: type,
+    options: options,
+    url: url
+  };
 
   self._socket = io.connect(url, options);
 
@@ -563,6 +579,8 @@ Skylink.prototype._openChannel = function() {
   if (!window.WebSocket) {
     socketType = 'Polling';
   }
+
+  self._signalingServerPort = null;
 
   // Begin with a websocket connection
   self._createSocket(socketType);

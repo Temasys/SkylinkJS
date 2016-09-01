@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.12 - Thu Sep 01 2016 15:40:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.13 - Thu Sep 01 2016 15:45:54 GMT+0800 (SGT) */
 
 (function() {
 
@@ -190,7 +190,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.1.0
    */
-  this.VERSION = '0.6.12';
+  this.VERSION = '0.6.13';
 
   /**
    * Helper function that generates an Unique ID (UUID) string.
@@ -3219,20 +3219,25 @@ Skylink.prototype.sendURLData = function(data, timeout, targetPeerId, callback) 
 Skylink.prototype._peerCandidatesQueue = {};
 
 /**
- * Stores the list of candidates sent <code>local</code> and added <code>remote</code> information.
- * @attribute _addedCandidates
- * @param {JSON} (#peerId) The list of candidates sent and added associated with the Peer ID.
- * @param {Array} (#peerId).relay The number of relay candidates added and sent.
- * @param {Array} (#peerId).srflx The number of server reflexive candidates added and sent.
- * @param {Array} (#peerId).host The number of host candidates added and sent.
+ * Stores the list of local and remote candidates sent and received.
+ * @attribute _gatheredCandidates
+ * @param {JSON} (#peerId) The list of candidates associated with the Peer ID.
+ * @param {JSON} (#peerId).sending The list of local candidates gathered for Peer sent.
+ * @param {JSON} (#peerId).sending.host The list of local <code>"host"</code> type of candidates sent.
+ * @param {JSON} (#peerId).sending.srflx The list of local <code>"srflx"</code> type of candidates sent.
+ * @param {JSON} (#peerId).sending.relay The list of local <code>"relay"</code> type of candidates sent.
+ * @param {JSON} (#peerId).receiving The list of remote candidates gathered for Peer received.
+ * @param {JSON} (#peerId).receiving.host The list of remote <code>"host"</code> type of candidates received.
+ * @param {JSON} (#peerId).receiving.srflx The list of remote <code>"srflx"</code> type of candidates received.
+ * @param {JSON} (#peerId).receiving.relay The list of remote <code>"relay"</code> type of candidates received.
  * @type JSON
  * @private
  * @required
- * @since 0.6.4
+ * @since 0.6.14
  * @component ICE
  * @for Skylink
  */
-Skylink.prototype._addedCandidates = {};
+Skylink.prototype._gatheredCandidates = {};
 
 /**
  * The list of Peer connection ICE candidate generation states that Skylink would trigger.
@@ -3283,12 +3288,6 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
     log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
       candidateType + ' candidate:'], candidate);
 
-    if (!self._enableIceTrickle) {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
-        '" candidate as trickle ICE is disabled'], candidate);
-      return;
-    }
-
     if (self._forceTURN && candidateType !== 'relay') {
       if (!self._hasMCU) {
         log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
@@ -3300,6 +3299,25 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
         '" candidate although TURN connections is forced as MCU is present'], candidate);
     }
 
+    if (!self._gatheredCandidates[targetMid]) {
+      self._gatheredCandidates[targetMid] = {
+        sending: { host: [], srflx: [], relay: [] },
+        receiving: { host: [], srflx: [], relay: [] }
+      };
+    }
+
+    self._gatheredCandidates[targetMid].sending[candidateType].push({
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex,
+      candidate: candidate.candidate
+    });
+
+    if (!self._enableIceTrickle) {
+      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
+        '" candidate as trickle ICE is disabled'], candidate);
+      return;
+    }
+
     self._sendChannelMessage({
       type: self._SIG_MESSAGE_TYPE.CANDIDATE,
       label: candidate.sdpMLineIndex,
@@ -3309,23 +3327,6 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       target: targetMid,
       rid: self._room.id
     });
-
-    if (!self._addedCandidates[targetMid]) {
-      self._addedCandidates[targetMid] = {
-        relay: [],
-        host: [],
-        srflx: []
-      };
-    }
-
-    // shouldnt happen but just incase
-    if (!self._addedCandidates[targetMid][candidateType]) {
-      self._addedCandidates[targetMid][candidateType] = [];
-    }
-
-    self._addedCandidates[targetMid][candidateType].push('local:' + messageCan[4] +
-      (messageCan[5] !== '0' ? ':' + messageCan[5] : '') +
-      (messageCan[2] ? '?transport=' + messageCan[2].toLowerCase() : ''));
 
   } else {
     log.debug([targetMid, 'RTCIceCandidate', null, 'End of gathering']);
@@ -3823,6 +3824,29 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 };
 
 /**
+ * These are the list of Peer connection status retrieval ready states that Skylink would trigger.
+ * - These states are triggered when
+ *   {{#crossLink "Skylink/getConnectionStatus:method"}}getConnectionStatus(){{/crossLink}} is invoked.
+ * @attribute GET_CONNECTION_STATUS_STATE
+ * @type JSON
+ * @param {Number} RETRIEVING <small>Value <code>0</code></small>
+ *   The state when Skylink is retrieving the Peer connection status.
+ * @param {Number} RETRIEVE_SUCCESS <small>Value <code>1</code></small>
+ *   The state when Skylink has retrieved the Peer connection status succesfully.
+ * @param {Number} RETRIEVE_ERROR <small>Value <code>-1</code></small>
+ *   The state when Skylink has failed retrieving the Peer connection status.
+ * @readOnly
+ * @component Room
+ * @for Skylink
+ * @since 0.1.0
+ */
+Skylink.prototype.GET_CONNECTION_STATUS_STATE = {
+  RETRIEVING: 0,
+  RETRIEVE_SUCCESS: 1,
+  RETRIEVE_ERROR: -1
+};
+
+/**
  * These are the types of server Peers that Skylink would connect with.
  * - Different server Peers that serves different functionalities.
  * - The server Peers functionalities are only available depending on the
@@ -4171,10 +4195,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   var pc, self = this;
   // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
   // using .urls feature
-  var newRTCPeerConnection = window.webkitRTCPeerConnection || window.mozRTCPeerConnection ||
-    window.RTCPeerConnection;
   try {
-    pc = new newRTCPeerConnection(
+    pc = new window.RTCPeerConnection(
       self._room.connection.peerConfig,
       self._room.connection.peerConstraints);
     log.info([targetMid, null, null, 'Created peer connection']);
@@ -4200,10 +4222,9 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   // datachannels
   self._dataChannels[targetMid] = {};
   // candidates
-  self._addedCandidates[targetMid] = {
-    relay: [],
-    host: [],
-    srflx: []
+  self._gatheredCandidates[targetMid] = {
+    sending: { host: [], srflx: [], relay: [] },
+    receiving: { host: [], srflx: [], relay: [] }
   };
 
   // callbacks
@@ -4233,6 +4254,13 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   };
   pc.onaddstream = function(event) {
     var stream = event.stream || event;
+
+    if (targetMid === 'MCU') {
+      log.debug([targetMid, 'MediaStream', stream.id,
+        'Ignoring received remote stream from MCU ->'], stream);
+      return;
+    }
+
     pc.hasStream = true;
 
     var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
@@ -4638,6 +4666,436 @@ Skylink.prototype._restartMCUConnection = function(callback) {
     }
   });
 };
+
+/**
+ * Gets the Peer connection status.
+ * @method getConnectionStatus
+ * @param {String|Array} [targetPeerId] The array of targeted Peers connection to refresh
+ *   the connection with.
+ * @param {Function} [callback] The callback fired after all targeted Peers connection has
+ *   connection status retrieved or have met with an exception.
+ *   The callback signature is <code>function (error, success)</code>.
+ * @param {JSON} callback.error The error object received in the callback.
+ *   If received as <code>null</code>, it means that there is no errors.
+ * @param {Array} callback.error.listOfPeers The list of Peers which connection statuses
+ *   to retrieve.
+ * @param {JSON} callback.error.retrievalErrors The list of errors occurred
+ *   based on per Peer basis. It returns the Error to an ID of <code>"self"</code> if there is no Peers.
+ * @param {Object|String} callback.error.retrievalErrors.(#peerId) The Peer ID that
+ *   is associated with the error that occurred when retrieving the connection status.
+ * @param {JSON} callback.error.connectionStats The list of Peers connection statuses.
+ * @param {Error} callback.error.connectionStats.(#peerId) The Peer ID that
+ *   is associated with the connection status retrieved data.
+ * @param {JSON} callback.success The success object received in the callback.
+ *   If received as <code>null</code>, it means that there are errors.
+ * @param {Array} callback.success.listOfPeers The list of Peers which connection statuses
+ *   to retrieve.
+ * @param {JSON} callback.success.connectionStats The list of Peers connection statuses.
+ * @param {JSON} callback.success.connectionStats.(#peerId) The Peer ID that
+ *   is associated with the retrieved connection stats
+ * @param {JSON} callback.success.raw The received raw connection stats data before parsing.
+ * @param {JSON} callback.success.connectionStats.(#peerId).audio The Peer connection audio stats.
+ * @param {JSON} callback.success.connectionStats.(#peerId).audio.sending The Peer connection audio sending stats.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.bytes The Peer connection audio sending bytes.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.packets The Peer
+ *   connection audio sending packets.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.packetsLost The Peer
+ *   connection audio sending packets lost.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.ssrc The Peer
+ *   connection audio sending ssrc.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.sending.rtt The Peer
+ *   connection audio sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not
+ *   defined in the original raw stats data.
+ * @param {JSON} callback.success.connectionStats.(#peerId).audio.receiving The Peer connection audio receiving stats.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.bytes The Peer connection audio receiving bytes.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.packets The Peer
+ *   connection audio receiving packets.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.packetsLost The Peer
+ *   connection audio receiving packets lost.
+ * @param {Number} callback.success.connectionStats.(#peerId).audio.receiving.ssrc The Peer
+ *   connection audio receiving ssrc.
+ * @param {JSON} callback.success.connectionStats.(#peerId).video The Peer connection video stats.
+ * @param {JSON} callback.success.connectionStats.(#peerId).video.sending The Peer connection video sending stats.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.sending.bytes The Peer connection video sending bytes.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.sending.packets The Peer
+ *   connection video sending packets.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.sending.packetsLost The Peer
+ *   connection video sending packets lost.
+ * @param {JSON} callback.success.connectionStats.(#peerId).video.sending.ssrc The Peer
+ *   connection video sending ssrc ID.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.sending.rtt The Peer
+ *   connection video sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not
+ *   defined in the original raw stats data.
+ * @param {JSON} callback.success.connectionStats.(#peerId).video.receiving The Peer connection video receiving stats.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.bytes The Peer connection video receiving bytes.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.packets The Peer
+ *   connection video receiving packets.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.packetsLost The Peer
+ *   connection video receiving packets lost.
+ * @param {Number} callback.success.connectionStats.(#peerId).video.receiving.ssrc The Peer
+ *   connection video receiving ssrc.
+ * @param {JSON} callback.success.connectionStats.(#peerId).selectedCandidate The Peer connection selected candidate
+ *   pair details.
+ * @param {JSON} callback.success.connectionStats.(#peerId).selectedCandidate.local The Peer connection
+ *   selected local candidate.
+ * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.local.ipAddress The Peer connection
+ *   selected local candidate IP address.
+ * @param {Number} callback.success.connectionStats.(#peerId).selectedCandidate.local.portNumber The Peer connection
+ *   selected local candidate port number.
+ * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.local.transport The Peer connection
+ *   selected local candidate transport.
+ * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.local.candidateType The Peer connection
+ *   selected local candidate candidate type.
+ * @param {JSON} callback.success.connectionStats.(#peerId).selectedCandidate.remote The Peer connection
+ *   selected remote candidate.
+ * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.remote.ipAddress The Peer connection
+ *   selected remote candidate IP address.
+ * @param {Number} callback.success.connectionStats.(#peerId).selectedCandidate.remote.portNumber The Peer connection
+ *   selected remote candidate port number.
+ * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.remote.transport The Peer connection
+ *   selected remote candidate transport.
+ * @param {String} callback.success.connectionStats.(#peerId).selectedCandidate.remote.candidateType The Peer connection
+ *   selected remote candidate candidate type.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection The Peer connection details.
+ * @param {String} callback.success.connectionStats.(#peerId).connection.iceConnectionState The Peer connection ICE
+ *   connection state.
+ * @param {String} callback.success.connectionStats.(#peerId).connection.iceGatheringState The Peer connection ICE
+ *   gathering state.
+ * @param {String} callback.success.connectionStats.(#peerId).connection.signalingState The Peer connection
+ *   signaling state.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.localDescription The Peer connection
+ *   local session description.
+ * @param {String} callback.success.connectionStats.(#peerId).connection.localDescription.type The Peer connection
+ *   local session description type.
+ * @param {String} callback.success.connectionStats.(#peerId).connection.localDescription.sdp The Peer connection
+ *   local session description sdp.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.remoteDescription The Peer connection
+ *   remote session description.
+ * @param {String} callback.success.connectionStats.(#peerId).connection.remoteDescription.type The Peer connection
+ *   remote session description type.
+ * @param {String} callback.success.connectionStats.(#peerId).connection.remoteDescription.sdp The Peer connection
+ *   remote session description sdp.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates The Peer connection list of
+ *   candidates received or sent.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending The Peer connection list of
+ *   candidates sent.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.sending.host The Peer connection list of
+ *   <code>"host"</code> candidates sent.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending.host.(#index) The <code>"host"</code>
+ *   candidate sent.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.sending.srflx The Peer connection list of
+ *   <code>"srflx"</code> candidates sent.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending.srflx.(#index) The <code>"srflx"</code>
+ *   candidate sent.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.sending.relay The Peer connection list of
+ *   <code>"relay"</code> candidates sent.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.sending.relay.(#index) The <code>"relay"</code>
+ *   candidate sent.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving The Peer connection list of
+ *   candidates received.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.receiving.host The Peer connection list of
+ *   <code>"host"</code> candidates received.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving.host.(#index) The <code>"host"</code>
+ *   candidate received.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.receiving.srflx The Peer connection list of
+ *   <code>"srflx"</code> candidates received.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving.srflx.(#index) The <code>"srflx"</code>
+ *   candidate received.
+ * @param {Array} callback.success.connectionStats.(#peerId).connection.candidates.receiving.relay The Peer connection list of
+ *   <code>"relay"</code> candidates received.
+ * @param {JSON} callback.success.connectionStats.(#peerId).connection.candidates.receiving.relay.(#index) The <code>"relay"</code>
+ *   candidate received.
+ * @example
+ *   SkylinkDemo.getConnectionStatus(peerId, function (error, success) {
+ *      if (error) {
+ *        console.error("Failed retrieving connection status for peer ", peerId);
+ *      } else {
+ *        print(success.connectionStats);
+ *      }
+ *   });
+ * @trigger getConnectionStatusStateChange
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.14
+ */
+Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
+  var self = this;
+  var listOfPeers = Object.keys(self._peerConnections);
+  var listOfPeerStats = {};
+  var listOfPeerErrors = {};
+
+  // getConnectionStatus([])
+  if (Array.isArray(targetPeerId)) {
+    listOfPeers = targetPeerId;
+
+  // getConnectionStatus('...')
+  } else if (typeof targetPeerId === 'string' && !!targetPeerId) {
+    listOfPeers = [targetPeerId];
+
+  // getConnectionStatus(function () {})
+  } else if (typeof targetPeerId === 'function') {
+    callback = targetPeerId;
+    targetPeerId = undefined;
+  }
+
+  // Check if Peers list is empty, in which we throw an Error if there isn't any
+  if (listOfPeers.length === 0) {
+    listOfPeerErrors.self = new Error('There is currently no peer connections to retrieve connection status');
+
+    log.error([null, 'RTCStatsReport', null, 'Retrieving request failure ->'], listOfPeerErrors.self);
+
+    if (typeof callback === 'function') {
+      callback({
+        listOfPeers: listOfPeers,
+        retrievalErrors: listOfPeerErrors,
+        connectionStats: listOfPeerStats
+      }, null);
+    }
+    return;
+  }
+
+  var completedTaskCounter = [];
+
+  var checkCompletedFn = function (peerId) {
+    if (completedTaskCounter.indexOf(peerId) === -1) {
+      completedTaskCounter.push(peerId);
+    }
+
+    if (completedTaskCounter.length === listOfPeers.length) {
+      if (typeof callback === 'function') {
+        if (Object.keys(listOfPeerErrors).length > 0) {
+          callback({
+            listOfPeers: listOfPeers,
+            retrievalErrors: listOfPeerErrors,
+            connectionStats: listOfPeerStats
+          }, null);
+
+        } else {
+          callback(null, {
+            listOfPeers: listOfPeers,
+            connectionStats: listOfPeerStats
+          });
+        }
+      }
+    }
+  };
+
+  var statsFn = function (peerId) {
+    log.debug([peerId, 'RTCStatsReport', null, 'Retrieivng connection status']);
+
+    var pc = self._peerConnections[peerId];
+    var result = {
+      raw: null,
+      connection: {
+        iceConnectionState: pc.iceConnectionState,
+        iceGatheringState: pc.iceGatheringState,
+        signalingState: pc.signalingState,
+        remoteDescription: pc.remoteDescription,
+        localDescription: pc.localDescription,
+        candidates: clone(self._gatheredCandidates[peerId] || {
+          sending: { host: [], srflx: [], relay: [] },
+          receiving: { host: [], srflx: [], relay: [] }
+        })
+      },
+      audio: {
+        sending: {
+          ssrc: null,
+          bytes: 0,
+          packets: 0,
+          packetsLost: 0,
+          rtt: 0
+        },
+        receiving: {
+          ssrc: null,
+          bytes: 0,
+          packets: 0,
+          packetsLost: 0
+        }
+      },
+      video: {
+        sending: {
+          ssrc: null,
+          bytes: 0,
+          packets: 0,
+          packetsLost: 0,
+          rtt: 0
+        },
+        receiving: {
+          ssrc: null,
+          bytes: 0,
+          packets: 0,
+          packetsLost: 0
+        }
+      },
+      selectedCandidate: {
+        local: { ipAddress: null, candidateType: null, portNumber: null, transport: null },
+        remote: { ipAddress: null, candidateType: null, portNumber: null, transport: null }
+      }
+    };
+    var loopFn = function (obj, fn) {
+      for (var prop in obj) {
+        if (obj.hasOwnProperty(prop) && obj[prop]) {
+          fn(obj[prop], prop);
+        }
+      }
+    };
+    var formatCandidateFn = function (candidateDirType, candidate) {
+      result.selectedCandidate[candidateDirType].ipAddress = candidate.ipAddress;
+      result.selectedCandidate[candidateDirType].candidateType = candidate.candidateType;
+      result.selectedCandidate[candidateDirType].portNumber = typeof candidate.portNumber !== 'number' ?
+        parseInt(candidate.portNumber, 10) || null : candidate.portNumber;
+      result.selectedCandidate[candidateDirType].transport = candidate.transport;
+    };
+
+    pc.getStats(null, function (stats) {
+      log.debug([peerId, 'RTCStatsReport', null, 'Retrieval success ->'], stats);
+
+      result.raw = stats;
+
+      if (window.webrtcDetectedBrowser === 'firefox') {
+        loopFn(stats, function (obj, prop) {
+          var dirType = '';
+
+          // Receiving/Sending RTP packets
+          if (prop.indexOf('inbound_rtp') === 0 || prop.indexOf('outbound_rtp') === 0) {
+            dirType = prop.indexOf('inbound_rtp') === 0 ? 'receiving' : 'sending';
+
+            result[obj.mediaType][dirType].bytes = dirType === 'sending' ? obj.bytesSent : obj.bytesReceived;
+            result[obj.mediaType][dirType].packets = dirType === 'sending' ? obj.packetsSent : obj.packetsReceived;
+            result[obj.mediaType][dirType].ssrc = obj.ssrc;
+
+            if (dirType === 'receiving') {
+              result[obj.mediaType][dirType].packetsLost = obj.packetsLost || 0;
+            }
+
+          // Sending RTP packets lost
+          } else if (prop.indexOf('outbound_rtcp') === 0) {
+            dirType = prop.indexOf('inbound_rtp') === 0 ? 'receiving' : 'sending';
+
+            result[obj.mediaType][dirType].packetsLost = obj.packetsLost || 0;
+
+            if (dirType === 'sending') {
+              result[obj.mediaType].sending.rtt = obj.mozRtt || 0;
+            }
+
+          // Candidates
+          } else if (obj.nominated && obj.selected) {
+            formatCandidateFn('remote', stats[obj.remoteCandidateId]);
+            formatCandidateFn('local', stats[obj.localCandidateId]);
+          }
+        });
+
+      } else if (window.webrtcDetectedBrowser === 'edge') {
+        if (pc.getRemoteStreams().length > 0) {
+          var tracks = pc.getRemoteStreams()[0].getTracks();
+
+          loopFn(tracks, function (track) {
+            loopFn(stats, function (obj, prop) {
+              if (obj.type === 'track' && obj.trackIdentifier === track.id) {
+                loopFn(stats, function (streamObj) {
+                  if (streamObj.associateStatsId === obj.id &&
+                    ['outboundrtp', 'inboundrtp'].indexOf(streamObj.type) > -1) {
+                    var dirType = streamObj.type === 'outboundrtp' ? 'sending' : 'receiving';
+
+                    result[track.kind][dirType].bytes = dirType === 'sending' ? streamObj.bytesSent : streamObj.bytesReceived;
+                    result[track.kind][dirType].packets = dirType === 'sending' ? streamObj.packetsSent : streamObj.packetsReceived;
+                    result[track.kind][dirType].packetsLost = streamObj.packetsLost || 0;
+                    result[track.kind][dirType].ssrc = parseInt(streamObj.ssrc || '0', 10);
+
+                    if (dirType === 'sending') {
+                      result[track.kind].sending.rtt = obj.roundTripTime || 0;
+                    }
+                  }
+                });
+              }
+            });
+          });
+        }
+
+      } else {
+        var reportedCandidate = false;
+
+        loopFn(stats, function (obj, prop) {
+          if (prop.indexOf('ssrc_') === 0) {
+            var dirType = prop.indexOf('_recv') > 0 ? 'receiving' : 'sending';
+
+            // Polyfill fix for plugin. Plugin should fix this though
+            if (!obj.mediaType) {
+              obj.mediaType = obj.hasOwnProperty('audioOutputLevel') ||
+                obj.hasOwnProperty('audioInputLevel') ? 'audio' : 'video';
+            }
+
+            // Receiving/Sending RTP packets
+            result[obj.mediaType][dirType].bytes = parseInt((dirType === 'receiving' ?
+              obj.bytesReceived : obj.bytesSent) || '0', 10);
+            result[obj.mediaType][dirType].packets = parseInt((dirType === 'receiving' ?
+              obj.packetsReceived : obj.packetsSent) || '0', 10);
+            result[obj.mediaType][dirType].ssrc = parseInt(obj.ssrc || '0', 10);
+            result[obj.mediaType][dirType].packetsLost = parseInt(obj.packetsLost || '0', 10);
+
+            if (dirType === 'sending') {
+              // NOTE: Chrome sending audio does have it but plugin has..
+              result[obj.mediaType].sending.rtt = parseInt(obj.googRtt || '0', 10);
+            }
+
+            if (!reportedCandidate) {
+              loopFn(stats, function (canObj, canProp) {
+                if (!reportedCandidate && canProp.indexOf('Conn-') === 0) {
+                  if (obj.transportId === canObj.googChannelId) {
+                    formatCandidateFn('local', stats[canObj.localCandidateId]);
+                    formatCandidateFn('remote', stats[canObj.remoteCandidateId]);
+                    reportedCandidate = true;
+                  }
+                }
+              });
+            }
+          }
+        });
+      }
+
+      listOfPeerStats[peerId] = result;
+
+      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,
+        peerId, listOfPeerStats[peerId], null);
+
+      checkCompletedFn(peerId);
+
+    }, function (error) {
+      log.error([peerId, 'RTCStatsReport', null, 'Retrieval failure ->'], error);
+
+      listOfPeerErrors[peerId] = error;
+
+      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR,
+        peerId, null, error);
+
+      checkCompletedFn(peerId);
+    });
+  };
+
+  // Loop through all the list of Peers selected to retrieve connection status
+  for (var i = 0; i < listOfPeers.length; i++) {
+    var peerId = listOfPeers[i];
+
+    self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVING,
+      peerId, null, null);
+
+    // Check if the Peer connection exists first
+    if (self._peerConnections.hasOwnProperty(peerId) && self._peerConnections[peerId]) {
+      statsFn(peerId);
+
+    } else {
+      listOfPeerErrors[peerId] = new Error('The peer connection object does not exists');
+
+      log.error([peerId, 'RTCStatsReport', null, 'Retrieval failure ->'], listOfPeerErrors[peerId]);
+
+      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR,
+        peerId, null, listOfPeerErrors[peerId]);
+
+      checkCompletedFn(peerId);
+    }
+  }
+};
+
 Skylink.prototype._peerInformations = {};
 
 /**
@@ -4985,9 +5443,12 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       return;
     }
 
-    self._dataChannels[targetMid].main =
-      self._createDataChannel(targetMid, self.DATA_CHANNEL_TYPE.MESSAGING, null, targetMid);
-    self._peerConnections[targetMid].hasMainChannel = true;
+    // Edge doesn't support datachannels yet
+    if (!self._dataChannels[targetMid].main && window.webrtcDetectedBrowser !== 'edge') {
+      self._dataChannels[targetMid].main =
+        self._createDataChannel(targetMid, self.DATA_CHANNEL_TYPE.MESSAGING, null, targetMid);
+      self._peerConnections[targetMid].hasMainChannel = true;
+    }
   }
 
   log.debug([targetMid, null, null, 'Creating offer with config:'], offerConstraints);
@@ -5702,16 +6163,16 @@ Skylink.prototype._inRoom = false;
  *   Stream streaming video resolution height.
  * @param {Number} [options.video.frameRate=50] The self
  *   Stream streaming video maximum frameRate.
- * @param {String} [options.bandwidth] The configuration for
+ * @param {JSON} [options.bandwidth] The configuration for
  *   the maximum sending bandwidth. Setting the flags may or may not work depending
  *   on the browser implementations and how it handles it.
- * @param {String} [options.bandwidth.audio] The maximum
+ * @param {Number} [options.bandwidth.audio] The maximum
  *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the audio bitrate to the browser defaults.
- * @param {String} [options.bandwidth.video] The maximum
+ * @param {Number} [options.bandwidth.video] The maximum
  *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the video bitrate to the browser defaults.
- * @param {String} [options.bandwidth.data] The maximum
+ * @param {Number} [options.bandwidth.data] The maximum
  *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the data bitrate to the browser defaults.
  * @param {Boolean} [options.manualGetUserMedia] The flag that indicates if
@@ -5779,16 +6240,16 @@ Skylink.prototype._inRoom = false;
  * @param {Boolean} [callback.success.peerInfo.video.screenshare=false] The flag
  *   that indicates if the self connection Stream object sent
  *   is a screensharing stream or not.
- * @param {String} [callback.success.peerInfo.bandwidth] The configuration for
+ * @param {JSON} [callback.success.peerInfo.bandwidth] The configuration for
  *   the maximum sending bandwidth. Setting the flags may or may not work depending
  *   on the browser implementations and how it handles it.
- * @param {String} [callback.success.peerInfo.bandwidth.audio] The maximum
+ * @param {Number} [callback.success.peerInfo.bandwidth.audio] The maximum
  *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the audio bitrate to the browser defaults.
- * @param {String} [callback.success.peerInfo.bandwidth.video] The maximum
+ * @param {Number} [callback.success.peerInfo.bandwidth.video] The maximum
  *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the video bitrate to the browser defaults.
- * @param {String} [callback.success.peerInfo.bandwidth.data] The maximum
+ * @param {Number} [callback.success.peerInfo.bandwidth.data] The maximum
  *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the data bitrate to the browser defaults.
  * @param {JSON} callback.success.peerInfo.mediaStatus The self Stream mute
@@ -6127,16 +6588,16 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  *   Stream streaming video resolution height.
  * @param {Number} [options.video.frameRate=50] The self
  *   Stream streaming video maximum frameRate.
- * @param {String} [options.bandwidth] The configuration for
+ * @param {JSON} [options.bandwidth] The configuration for
  *   the maximum sending bandwidth. Setting the flags may or may not work depending
  *   on the browser implementations and how it handles it.
- * @param {String} [options.bandwidth.audio] The maximum
+ * @param {Number} [options.bandwidth.audio] The maximum
  *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the audio bitrate to the browser defaults.
- * @param {String} [options.bandwidth.video] The maximum
+ * @param {Number} [options.bandwidth.video] The maximum
  *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the video bitrate to the browser defaults.
- * @param {String} [options.bandwidth.data] The maximum
+ * @param {Number} [options.bandwidth.data] The maximum
  *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the data bitrate to the browser defaults.
  * @param {Boolean} [options.manualGetUserMedia] The flag that indicates if
@@ -6767,18 +7228,18 @@ Skylink.prototype._room = null;
  *   {{#crossLink "Skylink/_parseInfo:method"}}_parseInfo(){{/crossLink}}.
  *   The data is in JSON stringified string and requires converting the JSON string
  *      to an JSON object to use the object.
- * @param {String} callback.response.bandwidth For success state. The self
+ * @param {JSON} callback.response.bandwidth For success state. The self
  *   streaming bandwidth settings. Setting the bandwidth flags may not
  *   force set the bandwidth for each connection stream channels as it depends
  *   on how the browser handles the bandwidth bitrate. Values are configured
  *   in <var>kb/s</var>.
- * @param {String} callback.response.bandwidth.audio The default
+ * @param {Number} callback.response.bandwidth.audio The default
  *   audio stream channel for self Stream object bandwidth
  *   that audio streaming should use in <var>kb/s</var>.
- * @param {String} callback.response.bandwidth.video The default
+ * @param {Number} callback.response.bandwidth.video The default
  *   video stream channel for self Stream object bandwidth
  *   that video streaming should use in <var>kb/s</var>.
- * @param {String} callback.response.bandwidth.data The default
+ * @param {Number} callback.response.bandwidth.data The default
  *   datachannel channel for the DataChannel connection bandwidth
  *   that datachannel connection per packet should be able use in <var>kb/s</var>.
  * @param {String} callback.response.cid For success state. The Skylink server connection key for the
@@ -6915,18 +7376,18 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  * @param {String} info.offer_constraints The RTCPeerConnection RTCOfferOptions.
  *   The data is in JSON stringified string and requires converting the JSON string
  *      to an JSON object to use the object.
- * @param {String} info.bandwidth The self
+ * @param {JSON} info.bandwidth The self
  *   streaming bandwidth settings. Setting the bandwidth flags may not
  *   force set the bandwidth for each connection stream channels as it depends
  *   on how the browser handles the bandwidth bitrate. Values are configured
  *   in <var>kb/s</var>.
- * @param {String} info.bandwidth.audio The default
+ * @param {Number} info.bandwidth.audio The default
  *   audio stream channel for self Stream object bandwidth
  *   that audio streaming should use in <var>kb/s</var>.
- * @param {String} info.bandwidth.video The default
+ * @param {Number} info.bandwidth.video The default
  *   video stream channel for self Stream object bandwidth
  *   that video streaming should use in <var>kb/s</var>.
- * @param {String} info.bandwidth.data The default
+ * @param {Number} info.bandwidth.data The default
  *   datachannel channel for the DataChannel connection bandwidth
  *   that datachannel connection per packet should be able use in <var>kb/s</var>.
  * @param {String} info.cid The Skylink server connection key for starting the
@@ -6979,6 +7440,7 @@ Skylink.prototype._parseInfo = function(info) {
   this._appKeyOwner = info.apiOwner;
 
   this._signalingServer = info.ipSigserver;
+  this._signalingServerPort = null;
 
   this._isPrivileged = info.isPrivileged;
   this._autoIntroduce = info.autoIntroduce;
@@ -9492,6 +9954,7 @@ Skylink.prototype._EVENTS = {
    * - This requires that the provided alias Application Key has privileged feature configured.
    * @event getPeersStateChange
    * @param {String} state The retrieval current status.
+   *   [Rel: Skylink.GET_PEERS_STATE]
    * @param {String} privilegedPeerId The Peer ID of the privileged Peer.
    * @param {JSON} peerList The retrieved list of rooms and peers under the same realm based on
    *   the Application Key configured in <code>init()</code>.
@@ -9507,6 +9970,7 @@ Skylink.prototype._EVENTS = {
    * - This requires that the provided alias Application Key has privileged feature configured.
    * @event introduceStateChange
    * @param {String} state The Peer introduction state.
+   *   [Rel: Skylink.INTRODUCE_STATE]
    * @param {String} privilegedPeerId The Peer ID of the privileged Peer.
    * @param {String} sendingPeerId The Peer ID of the peer
    *   that initiates the connection with the introduced Peer.
@@ -9536,7 +10000,135 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.-
    */
-  recordingState: []
+  recordingState: [],
+
+  /*
+   * Event triggered when the retrieval of the Peer connection status state has changed.
+   * @event getConnectionStatusStateChange
+   * @param {Number} state The retrieval state of the Peer connection status.
+   *   [Rel: Skylink.GET_CONNECTION_STATUS_STATE]
+   * @param {String} peerId The Peer ID of the peer connection status.
+   * @param {JSON} stats The Peer retrieved connection stats.
+   *   Returned as <code>null</code> unless <code>RETRIEVE_SUCCESS</code> state.
+   * @param {JSON} stats.raw The received raw connection stats data before parsing.
+   * @param {JSON} stats.audio The Peer connection audio stats.
+   * @param {JSON} stats.audio.sending The Peer connection audio sending stats.
+   * @param {Number} stats.audio.sending.bytes The Peer connection audio sending bytes.
+   * @param {Number} stats.audio.sending.packets The Peer
+   *   connection audio sending packets.
+   * @param {Number} stats.audio.sending.packetsLost The Peer
+   *   connection audio sending packets lost.
+   * @param {Number} stats.audio.sending.ssrc The Peer
+   *   connection audio sending ssrc.
+   * @param {Number} stats.audio.sending.rtt The Peer
+   *   connection audio sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not
+   *   defined in the original raw stats data.
+   * @param {JSON} stats.audio.receiving The Peer connection audio receiving stats.
+   * @param {Number} stats.audio.receiving.bytes The Peer connection audio receiving bytes.
+   * @param {Number} stats.audio.receiving.packets The Peer
+   *   connection audio receiving packets.
+   * @param {Number} stats.audio.receiving.packetsLost The Peer
+   *   connection audio receiving packets lost.
+   * @param {Number} stats.audio.receiving.ssrc The Peer
+   *   connection audio receiving ssrc.
+   * @param {JSON} stats.video The Peer connection video stats.
+   * @param {JSON} stats.video.sending The Peer connection video sending stats.
+   * @param {Number} stats.video.sending.bytes The Peer connection video sending bytes.
+   * @param {Number} stats.video.sending.packets The Peer
+   *   connection video sending packets.
+   * @param {Number} stats.video.sending.packetsLost The Peer
+   *   connection video sending packets lost.
+   * @param {JSON} stats.video.sending.ssrc The Peer
+   *   connection video sending ssrc ID.
+   * @param {Number} stats.video.sending.rtt The Peer
+   *   connection video sending RTT (Round-trip delay time). This will be defined as <code>0</code> if it's not
+   *   defined in the original raw stats data.
+   * @param {JSON} stats.video.receiving The Peer connection video receiving stats.
+   * @param {Number} stats.video.receiving.bytes The Peer connection video receiving bytes.
+   * @param {Number} stats.video.receiving.packets The Peer
+   *   connection video receiving packets.
+   * @param {Number} stats.video.receiving.packetsLost The Peer
+   *   connection video receiving packets lost.
+   * @param {Number} stats.video.receiving.ssrc The Peer
+   *   connection video receiving ssrc.
+   * @param {JSON} stats.selectedCandidate The Peer connection selected candidate
+   *   pair details.
+   * @param {JSON} stats.selectedCandidate.local The Peer connection
+   *   selected local candidate.
+   * @param {String} stats.selectedCandidate.local.ipAddress The Peer connection
+   *   selected local candidate IP address.
+   * @param {Number} stats.selectedCandidate.local.portNumber The Peer connection
+   *   selected local candidate port number.
+   * @param {String} stats.selectedCandidate.local.transport The Peer connection
+   *   selected local candidate transport.
+   * @param {String} stats.selectedCandidate.local.candidateType The Peer connection
+   *   selected local candidate candidate type.
+   * @param {JSON} stats.selectedCandidate.remote The Peer connection
+   *   selected remote candidate.
+   * @param {String} stats.selectedCandidate.remote.ipAddress The Peer connection
+   *   selected remote candidate IP address.
+   * @param {Number} stats.selectedCandidate.remote.portNumber The Peer connection
+   *   selected remote candidate port number.
+   * @param {String} stats.selectedCandidate.remote.transport The Peer connection
+   *   selected remote candidate transport.
+   * @param {String} stats.selectedCandidate.remote.candidateType The Peer connection
+   *   selected remote candidate candidate type.
+   * @param {JSON} stats.connection The Peer connection details.
+   * @param {String} stats.connection.iceConnectionState The Peer connection ICE
+   *   connection state.
+   * @param {String} stats.connection.iceGatheringState The Peer connection ICE
+   *   gathering state.
+   * @param {String} stats.connection.signalingState The Peer connection
+   *   signaling state.
+   * @param {JSON} stats.connection.localDescription The Peer connection
+   *   local session description.
+   * @param {String} stats.connection.localDescription.type The Peer connection
+   *   local session description type.
+   * @param {String} stats.connection.localDescription.sdp The Peer connection
+   *   local session description sdp.
+   * @param {JSON} stats.connection.remoteDescription The Peer connection
+   *   remote session description.
+   * @param {String} stats.connection.remoteDescription.type The Peer connection
+   *   remote session description type.
+   * @param {String} stats.connection.remoteDescription.sdp The Peer connection
+   *   remote session description sdp.
+   * @param {JSON} stats.connection.candidates The Peer connection list of
+   *   candidates received or sent.
+   * @param {JSON} stats.connection.candidates.sending The Peer connection list of
+   *   candidates sent.
+   * @param {Array} stats.connection.candidates.sending.host The Peer connection list of
+   *   <code>"host"</code> candidates sent.
+   * @param {JSON} stats.connection.candidates.sending.host.(#index) The <code>"host"</code>
+   *   candidate sent.
+   * @param {Array} stats.connection.candidates.sending.srflx The Peer connection list of
+   *   <code>"srflx"</code> candidates sent.
+   * @param {JSON} stats.connection.candidates.sending.srflx.(#index) The <code>"srflx"</code>
+   *   candidate sent.
+   * @param {Array} stats.connection.candidates.sending.relay The Peer connection list of
+   *   <code>"relay"</code> candidates sent.
+   * @param {JSON} stats.connection.candidates.sending.relay.(#index) The <code>"relay"</code>
+   *   candidate sent.
+   * @param {JSON} stats.connection.candidates.receiving The Peer connection list of
+   *   candidates received.
+   * @param {Array} stats.connection.candidates.receiving.host The Peer connection list of
+   *   <code>"host"</code> candidates received.
+   * @param {JSON} stats.connection.candidates.receiving.host.(#index) The <code>"host"</code>
+   *   candidate received.
+   * @param {Array} stats.connection.candidates.receiving.srflx The Peer connection list of
+   *   <code>"srflx"</code> candidates received.
+   * @param {JSON} stats.connection.candidates.receiving.srflx.(#index) The <code>"srflx"</code>
+   *   candidate received.
+   * @param {Array} stats.connection.candidates.receiving.relay The Peer connection list of
+   *   <code>"relay"</code> candidates received.
+   * @param {JSON} stats.connection.candidates.receiving.relay.(#index) The <code>"relay"</code>
+   *   candidate received.
+   * @param {Error} error The Error object received when failed retrieving the
+   *   Peer connection status.
+   * @component Events
+   * @for Skylink
+   * @since 0.6.14
+   */
+  getConnectionStatusStateChange: []
 };
 
 /**
@@ -9895,6 +10487,18 @@ Skylink.prototype.SOCKET_ERROR = {
 };
 
 /**
+ * Stores the socket connection session information.
+ * @attribute _socketSession
+ * @type JSON
+ * @private
+ * @required
+ * @component Socket
+ * @for Skylink
+ * @since 0.6.13
+ */
+Skylink.prototype._socketSession = {};
+
+/**
  * Stores the queued socket messages to sent to the platform signaling to
  *   prevent messages from being dropped due to messages being sent in
  *   less than a second interval.
@@ -10250,8 +10854,6 @@ Skylink.prototype._createSocket = function (type) {
 
     // re-refresh to long-polling port
     if (type === 'WebSocket') {
-      console.log(type, self._signalingServerPort);
-
       type = 'Polling';
       self._signalingServerPort = ports[0];
 
@@ -10297,6 +10899,12 @@ Skylink.prototype._createSocket = function (type) {
     useXDR: self._socketUseXDR,
     options: options
   });
+
+  self._socketSession = {
+    type: type,
+    options: options,
+    url: url
+  };
 
   self._socket = io.connect(url, options);
 
@@ -10422,6 +11030,8 @@ Skylink.prototype._openChannel = function() {
   if (!window.WebSocket) {
     socketType = 'Polling';
   }
+
+  self._signalingServerPort = null;
 
   // Begin with a websocket connection
   self._createSocket(socketType);
@@ -11918,22 +12528,18 @@ Skylink.prototype._candidateHandler = function(message) {
     this._addIceCandidateToQueue(targetMid, candidate);
   }
 
-  if (!this._addedCandidates[targetMid]) {
-    this._addedCandidates[targetMid] = {
-      relay: [],
-      host: [],
-      srflx: []
+  if (!this._gatheredCandidates[targetMid]) {
+    this._gatheredCandidates[targetMid] = {
+      sending: { host: [], srflx: [], relay: [] },
+      receiving: { host: [], srflx: [], relay: [] }
     };
   }
 
-  // shouldnt happen but just incase
-  if (!this._addedCandidates[targetMid][canType]) {
-    this._addedCandidates[targetMid][canType] = [];
-  }
-
-  this._addedCandidates[targetMid][canType].push('remote:' + messageCan[4] +
-    (messageCan[5] !== '0' ? ':' + messageCan[5] : '') +
-    (messageCan[2] ? '?transport=' + messageCan[2].toLowerCase() : ''));
+  this._gatheredCandidates[targetMid].receiving[canType].push({
+    sdpMid: candidate.sdpMid,
+    sdpMLineIndex: candidate.sdpMLineIndex,
+    candidate: candidate.candidate
+  });
 };
 
 /**
@@ -12454,7 +13060,7 @@ Skylink.prototype._mediaScreenClone = null;
  *   streaming video resolution height.
  * @param {Number} [video.frameRate] The default
  *   streaming video maximum frameRate.
- * @param {String} [bandwidth] The configuration for
+ * @param {JSON} [bandwidth] The configuration for
  *   the maximum sending bandwidth. Setting the flags may or may not work depending
  *   on the browser implementations and how it handles it. By default, this is empty.
  * @private
@@ -12518,16 +13124,16 @@ Skylink.prototype._defaultStreamSettings = {
  *   in self user media Stream object. Some of the values are
  *   set by the <code>video.optional</code> setting in
  *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}.
- * @param {String} [bandwidth] The configuration for
+ * @param {JSON} [bandwidth] The configuration for
  *   the maximum sending bandwidth. The flags set may or may not work depending
  *   on the browser implementations and how it handles it.
- * @param {String} [bandwidth.audio] The maximum
+ * @param {Number} [bandwidth.audio] The maximum
  *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the audio bitrate to the browser defaults.
- * @param {String} [bandwidth.video] The maximum
+ * @param {Number} [bandwidth.video] The maximum
  *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the video bitrate to the browser defaults.
- * @param {String} [bandwidth.data] The maximum
+ * @param {Number} [bandwidth.data] The maximum
  *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the data bitrate to the browser defaults.
  * @private
@@ -12554,7 +13160,7 @@ Skylink.prototype._streamSettings = {};
  *   that indicates if the self connection Stream object sent
  *   is a screensharing stream or not. In this case, the
  *   value is <code>true</code> for screensharing Stream object.
- * @param {String} [bandwidth] The self
+ * @param {JSON} [bandwidth] The self
  *   streaming bandwidth settings. Setting the bandwidth flags may not
  *   force set the bandwidth for each connection stream channels as it depends
  *   on how the browser handles the bandwidth bitrate. Values are configured
@@ -12831,34 +13437,30 @@ Skylink.prototype._onUserMediaError = function(error, isScreenSharing, audioFall
 Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSharing) {
   var self = this;
 
-  if(targetMid !== 'MCU') {
-    if (!self._peerInformations[targetMid]) {
-      log.error([targetMid, 'MediaStream', stream.id,
-          'Received remote stream when peer is not connected. ' +
-          'Ignoring stream ->'], stream);
-      return;
-    }
-
-    if (!self._peerInformations[targetMid].settings.audio &&
-      !self._peerInformations[targetMid].settings.video && !isScreenSharing) {
-      log.log([targetMid, 'MediaStream', stream.id,
-        'Receive remote stream but ignoring stream as it is empty ->'
-        ], stream);
-      return;
-    }
-    log.log([targetMid, 'MediaStream', stream.id,
-      'Received remote stream ->'], stream);
-
-    if (isScreenSharing) {
-      log.log([targetMid, 'MediaStream', stream.id,
-        'Peer is having a screensharing session with user']);
-    }
-
-    self._trigger('incomingStream', targetMid, stream,
-      false, self.getPeerInfo(targetMid), !!isScreenSharing);
-  } else {
-    log.log([targetMid, null, null, 'MCU is listening']);
+  if (!self._peerInformations[targetMid]) {
+    log.error([targetMid, 'MediaStream', stream.id,
+        'Received remote stream when peer is not connected. ' +
+        'Ignoring stream ->'], stream);
+    return;
   }
+
+  if (!self._peerInformations[targetMid].settings.audio &&
+    !self._peerInformations[targetMid].settings.video && !isScreenSharing) {
+    log.log([targetMid, 'MediaStream', stream.id,
+      'Receive remote stream but ignoring stream as it is empty ->'
+      ], stream);
+    return;
+  }
+  log.log([targetMid, 'MediaStream', stream.id,
+    'Received remote stream ->'], stream);
+
+  if (isScreenSharing) {
+    log.log([targetMid, 'MediaStream', stream.id,
+      'Peer is having a screensharing session with user']);
+  }
+
+  self._trigger('incomingStream', targetMid, stream,
+    false, self.getPeerInfo(targetMid), !!isScreenSharing);
 };
 
 /**
@@ -13024,18 +13626,18 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
 /**
  * Parses the streaming bandwidth settings for self provided.
  * @method _parseBandwidthSettings
- * @param {String} [options] The self
+ * @param {JSON} [options] The self
  *   streaming bandwidth settings. Setting the bandwidth flags may not
  *   force set the bandwidth for each connection stream channels as it depends
  *   on how the browser handles the bandwidth bitrate. Values are configured
  *   in <var>kb/s</var>.
- * @param {String} [options.audio] The configured
+ * @param {Number} [options.audio] The configured
  *   audio stream channel for self connection Stream object bandwidth
  *   that audio streaming should use in <var>kb/s</var>.
- * @param {String} [options.video] The configured
+ * @param {Number} [options.video] The configured
  *   video stream channel for the self connection Stream object bandwidth
  *   that video streaming should use in <var>kb/s</var>.
- * @param {String} [options.data] The configured
+ * @param {Number} [options.data] The configured
  *   datachannel channel for self DataChannel connection bandwidth
  *   that datachannel connection per packet should be able use in <var>kb/s</var>.
  * @private
@@ -13202,16 +13804,16 @@ Skylink.prototype._parseDefaultMediaStreamSettings = function(options) {
  *   Stream streaming video resolution height.
  * @param {Number} [options.video.frameRate=50] The self
  *   Stream streaming video maximum frameRate.
- * @param {String} [options.bandwidth] The configuration for
+ * @param {JSON} [options.bandwidth] The configuration for
  *   the maximum sending bandwidth. Setting the flags may or may not work depending
  *   on the browser implementations and how it handles it.
- * @param {String} [options.bandwidth.audio] The maximum
+ * @param {Number} [options.bandwidth.audio] The maximum
  *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the audio bitrate to the browser defaults.
- * @param {String} [options.bandwidth.video] The maximum
+ * @param {Number} [options.bandwidth.video] The maximum
  *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the video bitrate to the browser defaults.
- * @param {String} [options.bandwidth.data] The maximum
+ * @param {Number} [options.bandwidth.data] The maximum
  *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the data bitrate to the browser defaults.
  * @private
@@ -13607,16 +14209,16 @@ Skylink.prototype._stopLocalMediaStreams = function (options) {
  *   Stream streaming video resolution height.
  * @param {Number} [options.video.frameRate=50] The self
  *   Stream streaming video maximum frameRate.
- * @param {String} [options.bandwidth] The configuration for
+ * @param {JSON} [options.bandwidth] The configuration for
  *   the maximum sending bandwidth. Setting the flags may or may not work depending
  *   on the browser implementations and how it handles it.
- * @param {String} [options.bandwidth.audio] The maximum
+ * @param {Number} [options.bandwidth.audio] The maximum
  *   sending audio bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the audio bitrate to the browser defaults.
- * @param {String} [options.bandwidth.video] The maximum
+ * @param {Number} [options.bandwidth.video] The maximum
  *   sending video bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the video bitrate to the browser defaults.
- * @param {String} [options.bandwidth.data] The maximum
+ * @param {Number} [options.bandwidth.data] The maximum
  *   sending data bandwidth bitrate in <var>kb/s</var>. If this is not provided,
  *   it will leave the data bitrate to the browser defaults.
  * @trigger mediaAccessSuccess, mediaAccessError, mediaAccessRequired
