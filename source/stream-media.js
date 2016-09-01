@@ -170,6 +170,101 @@ Skylink.prototype.VIDEO_RESOLUTION = {
 };
 
 /**
+ * <blockquote class="info">
+ *   Note that currently <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> only configures
+ *   the maximum resolution of the Stream due to browser interopability and support.
+ * </blockquote>
+ * The list of <a href="https://en.wikipedia.org/wiki/Graphics_display_resolution#Video_Graphics_Array">
+ * video resolutions</a> sets configured in the <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.
+ * @param {JSON} QQVGA <small>Value <code>{ width: 160, height: 120 }</code></small>
+ *   The value of the option to configure QQVGA resolution.
+ *   <small>Aspect ratio: <code>4:3</code></small>
+ *   <small>Note that configurating this resolution may not be supported.</small>
+ * @param {JSON} HQVGA <small>Value <code>{ width: 240, height: 160 }</code></small>
+ *   The value of the option to configure HQVGA resolution.
+ *   <small>Aspect ratio: <code>3:2</code></small>
+ *   <small>Note that configurating this resolution may not be supported.</small>
+ * @param {JSON} QVGA <small>Value <code>{ width: 320, height: 240 }4:3</code></small>
+ *   The value of the option to configure QVGA resolution.
+ *   <small>Aspect ratio: <code>4:3</code></small>
+ * @param {JSON} WQVGA <small>Value <code>{ width: 384, height: 240 }</code></small>
+ *   The value of the option to configure WQVGA resolution.
+ *   <small>Aspect ratio: <code>16:10</code></small>
+ *   <small>Note that configurating this resolution may not be supported.</small>
+ * @param {JSON} HVGA <small>Value <code>{ width: 480, height: 320 }</code></small>
+ *   The value of the option to configure HVGA resolution.
+ *   <small>Aspect ratio: <code>3:2</code></small>
+ *   <small>Note that configurating this resolution may not be supported.</small>
+ * @param {JSON} VGA <small>Value <code>{ width: 640, height: 480 }</code></small>
+ *   The value of the option to configure VGA resolution.
+ *   <small>Aspect ratio: <code>4:3</code></small>
+ * @param {JSON} WVGA <small>Value <code>{ width: 768, height: 480 }</code></small>
+ *   The value of the option to configure WVGA resolution.
+ *   <small>Aspect ratio: <code>16:10</code></small>
+ *   <small>Note that configurating this resolution may not be supported.</small>
+ * @param {JSON} FWVGA <small>Value <code>{ width: 854, height: 480 }</code></small>
+ *   The value of the option to configure FWVGA resolution.
+ *   <small>Aspect ratio: <code>16:9</code></small>
+ *   <small>Note that configurating this resolution may not be supported.</small>
+ * @param {JSON} SVGA <small>Value <code>{ width: 800, height: 600 }</code></small>
+ *   The value of the option to configure SVGA resolution.
+ *   <small>Aspect ratio: <code>4:3</code></small>
+ *   <small>Note that configurating this resolution may not be supported.</small>
+ * @param {JSON} DVGA <small>Value <code>{ width: 960, height: 640 }</code></small>
+ *   The value of the option to configure DVGA resolution.
+ *   <small>Aspect ratio: <code>3:2</code></small>
+ *   <small>Note that configurating this resolution may not be supported.</small>
+ * @param {JSON} WSVGA <small>Value <code>{ width: 1024, height: 576 }</code></small>
+ *   The value of the option to configure WSVGA resolution.
+ *   <small>Aspect ratio: <code>16:9</code></small>
+ * @param {JSON} HD <small>Value <code>{ width: 1280, height: 720 }</code></small>
+ *   The value of the option to configure HD resolution.
+ *   <small>Aspect ratio: <code>16:9</code></small>
+ * @param {JSON} HDPLUS <small>Value <code>{ width: 1600, height: 900 }</code></small>
+ *   The value of the option to configure HDPLUS resolution.
+ *   <small>Aspect ratio: <code>16:9</code></small>
+ *   <small>Note that configurating this resolution may not be supported.</small>
+ * @param {JSON} FHD <small>Value <code>{ width: 1920, height: 1080 }</code></small>
+ *   The value of the option to configure FHD resolution.
+ *   <small>Aspect ratio: <code>16:9</code></small>
+ *   <small>Note that configurating this resolution may not be supported.</small>
+ * @param {JSON} QHD <small>Value <code>{ width: 2560, height: 1440 }</code></small>
+ *   The value of the option to configure QHD resolution.
+ *   <small>Aspect ratio: <code>16:9</code></small>
+ *   <small>Note that configurating this resolution may not be supported.</small>
+ * @param {JSON} WQXGAPLUS <small>Value <code>{ width: 3200, height: 1800 }</code></small>
+ *   The value of the option to configure WQXGAPLUS resolution.
+ *   <small>Aspect ratio: <code>16:9</code></small>
+ *   <small>Note that configurating this resolution may not be supported.</small>
+ * @param {JSON} UHD <small>Value <code>{ width: 3840, height: 2160 }</code></small>
+ *   The value of the option to configure UHD resolution.
+ *   <small>Aspect ratio: <code>16:9</code></small>
+ *   <small>Note that configurating this resolution may not be supported.</small>
+ * @param {JSON} UHDPLUS <small>Value <code>{ width: 5120, height: 2880 }</code></small>
+ *   The value of the option to configure UHDPLUS resolution.
+ *   <small>Aspect ratio: <code>16:9</code></small>
+ *   <small>Note that configurating this resolution may not be supported.</small>
+ * @param {JSON} FUHD <small>Value <code>{ width: 7680, height: 4320 }</code></small>
+ *   The value of the option to configure FUHD resolution.
+ *   <small>Aspect ratio: <code>16:9</code></small>
+ *   <small>Note that configurating this resolution may not be supported.</small>
+ * @param {JSON} QUHD <small>Value <code>{ width: 15360, height: 8640 }</code></small>
+ *   The value of the option to configure QUHD resolution.
+ *   <small>Aspect ratio: <code>16:9</code></small>
+ *   <small>Note that configurating this resolution may not be supported.</small>
+ * @attribute MEDIA_ACCESS_FALLBACK_STATE
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.14
+ */
+Skylink.prototype.MEDIA_ACCESS_FALLBACK_STATE = {
+  FALLBACKING: 0,
+  FALLBACKED: 1,
+  ERROR: -1
+};
+
+/**
  * Stores the preferred sending Peer connection streaming audio codec.
  * @attribute _selectedAudioCodec
  * @type String
@@ -450,8 +545,8 @@ Skylink.prototype._audioFallback = false;
  * @trigger <ol class="desc-seq">
  *   <li>When retrieval of camera Stream is successful, <a href="#event_mediaAccessSuccess"><code>mediaAccessSuccess</code>
  *   event</a> triggers parameter payload <code>isScreensharing</code> value as <code>false</code>.</li>
- *   <li>When retrieval of camera Stream has failed: <ol>
- *   <li>If <code>audioFallback<code> is enabled in the <a href="#method_init"><code>init()</code> method</a> configuration,
+ *   <li>When retrieval of camera Stream has failed, <ol>
+ *   <li>If <code>audioFallback</code> is enabled in the <a href="#method_init"><code>init()</code> method</a> configuration,
  *   and <code>options.video</code> and <code>options.audio</code> is requested, invoke <code>getUserMedia()</code> to
  *   to retrieve audio only.<ol><li>When retrieval of audio Stream is successful, <a href="#event_mediaAccessSuccess"><code>mediaAccessSuccess</code>
  *   event</a> triggers parameter payload <code>isScreensharing</code> value as <code>false</code>.</li>
