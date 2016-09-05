@@ -249,6 +249,16 @@ h3 code {
   font-size: 13px;
   padding-left: 25px;
 }
+
+.desc-seq ol ol {
+  list-style-type: lower-roman;
+}
+.desc-seq ol ol ol {
+  list-style-type: upper-alpha;
+}
+.desc-seq ol ol ol ol {
+  list-style-type: upper-roman;
+}
 .desc-seq ul li,
 .desc-seq ol li {
   margin: 5px 0;

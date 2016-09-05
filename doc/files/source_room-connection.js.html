@@ -333,7 +333,11 @@ Skylink.prototype._inRoom = false;
  *   &lt;li&gt;&lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
  *   &lt;code&gt;isSelf&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;. &lt;small&gt;If MCU is enabled for the App Key,
  *   the &lt;a href=&quot;#event_serverPeerJoined&quot;&gt;&lt;code&gt;serverPeerJoined&lt;/code&gt; event&lt;/a&gt; will be triggered
- *   when MCU is present in the Room, and then Peer connections can commence.&lt;/small&gt;&lt;/li&gt;&lt;/ol&gt;
+ *   when MCU is present in the Room, and then Peer connections can commence.&lt;/small&gt;&lt;small&gt;If
+ *   &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt; is available despite having
+ *   &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; Stream&lt;/a&gt; available, the
+ *   &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt; is sent instead of the
+ *   &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; Stream&lt;/a&gt; to Peers.&lt;/small&gt;&lt;/li&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.5.5
  */

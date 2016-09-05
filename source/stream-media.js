@@ -64,6 +64,7 @@ Skylink.prototype.AUDIO_CODEC = {
  * </blockquote>
  * The list of <a href="https://en.wikipedia.org/wiki/Graphics_display_resolution#Video_Graphics_Array">
  * video resolutions</a> sets configured in the <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.
+ * @attribute VIDEO_RESOLUTION
  * @param {JSON} QQVGA <small>Value <code>{ width: 160, height: 120 }</code></small>
  *   The value of the option to configure QQVGA resolution.
  *   <small>Aspect ratio: <code>4:3</code></small>
@@ -72,7 +73,7 @@ Skylink.prototype.AUDIO_CODEC = {
  *   The value of the option to configure HQVGA resolution.
  *   <small>Aspect ratio: <code>3:2</code></small>
  *   <small>Note that configurating this resolution may not be supported.</small>
- * @param {JSON} QVGA <small>Value <code>{ width: 320, height: 240 }4:3</code></small>
+ * @param {JSON} QVGA <small>Value <code>{ width: 320, height: 240 }</code></small>
  *   The value of the option to configure QVGA resolution.
  *   <small>Aspect ratio: <code>4:3</code></small>
  * @param {JSON} WQVGA <small>Value <code>{ width: 384, height: 240 }</code></small>
@@ -140,7 +141,6 @@ Skylink.prototype.AUDIO_CODEC = {
  *   The value of the option to configure QUHD resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
  *   <small>Note that configurating this resolution may not be supported.</small>
- * @attribute VIDEO_RESOLUTION
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -170,90 +170,19 @@ Skylink.prototype.VIDEO_RESOLUTION = {
 };
 
 /**
- * <blockquote class="info">
- *   Note that currently <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> only configures
- *   the maximum resolution of the Stream due to browser interopability and support.
- * </blockquote>
- * The list of <a href="https://en.wikipedia.org/wiki/Graphics_display_resolution#Video_Graphics_Array">
- * video resolutions</a> sets configured in the <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.
- * @param {JSON} QQVGA <small>Value <code>{ width: 160, height: 120 }</code></small>
- *   The value of the option to configure QQVGA resolution.
- *   <small>Aspect ratio: <code>4:3</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
- * @param {JSON} HQVGA <small>Value <code>{ width: 240, height: 160 }</code></small>
- *   The value of the option to configure HQVGA resolution.
- *   <small>Aspect ratio: <code>3:2</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
- * @param {JSON} QVGA <small>Value <code>{ width: 320, height: 240 }4:3</code></small>
- *   The value of the option to configure QVGA resolution.
- *   <small>Aspect ratio: <code>4:3</code></small>
- * @param {JSON} WQVGA <small>Value <code>{ width: 384, height: 240 }</code></small>
- *   The value of the option to configure WQVGA resolution.
- *   <small>Aspect ratio: <code>16:10</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
- * @param {JSON} HVGA <small>Value <code>{ width: 480, height: 320 }</code></small>
- *   The value of the option to configure HVGA resolution.
- *   <small>Aspect ratio: <code>3:2</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
- * @param {JSON} VGA <small>Value <code>{ width: 640, height: 480 }</code></small>
- *   The value of the option to configure VGA resolution.
- *   <small>Aspect ratio: <code>4:3</code></small>
- * @param {JSON} WVGA <small>Value <code>{ width: 768, height: 480 }</code></small>
- *   The value of the option to configure WVGA resolution.
- *   <small>Aspect ratio: <code>16:10</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
- * @param {JSON} FWVGA <small>Value <code>{ width: 854, height: 480 }</code></small>
- *   The value of the option to configure FWVGA resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
- * @param {JSON} SVGA <small>Value <code>{ width: 800, height: 600 }</code></small>
- *   The value of the option to configure SVGA resolution.
- *   <small>Aspect ratio: <code>4:3</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
- * @param {JSON} DVGA <small>Value <code>{ width: 960, height: 640 }</code></small>
- *   The value of the option to configure DVGA resolution.
- *   <small>Aspect ratio: <code>3:2</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
- * @param {JSON} WSVGA <small>Value <code>{ width: 1024, height: 576 }</code></small>
- *   The value of the option to configure WSVGA resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- * @param {JSON} HD <small>Value <code>{ width: 1280, height: 720 }</code></small>
- *   The value of the option to configure HD resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- * @param {JSON} HDPLUS <small>Value <code>{ width: 1600, height: 900 }</code></small>
- *   The value of the option to configure HDPLUS resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
- * @param {JSON} FHD <small>Value <code>{ width: 1920, height: 1080 }</code></small>
- *   The value of the option to configure FHD resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
- * @param {JSON} QHD <small>Value <code>{ width: 2560, height: 1440 }</code></small>
- *   The value of the option to configure QHD resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
- * @param {JSON} WQXGAPLUS <small>Value <code>{ width: 3200, height: 1800 }</code></small>
- *   The value of the option to configure WQXGAPLUS resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
- * @param {JSON} UHD <small>Value <code>{ width: 3840, height: 2160 }</code></small>
- *   The value of the option to configure UHD resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
- * @param {JSON} UHDPLUS <small>Value <code>{ width: 5120, height: 2880 }</code></small>
- *   The value of the option to configure UHDPLUS resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
- * @param {JSON} FUHD <small>Value <code>{ width: 7680, height: 4320 }</code></small>
- *   The value of the option to configure FUHD resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
- * @param {JSON} QUHD <small>Value <code>{ width: 15360, height: 8640 }</code></small>
- *   The value of the option to configure QUHD resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ * The list of <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> Stream fallback states.
  * @attribute MEDIA_ACCESS_FALLBACK_STATE
- * @type JSON
+ * @param {JSON} FALLBACKING <small>Value <code>0</code></small>
+ *   The value of the state when <code>getUserMedia()</code> will retrieve audio track only
+ *   when retrieving audio and video tracks failed.
+ *   <small>This can be configured by <a href="#method_init"><code>init()</code> method</a>
+ *   <code>audioFallback</code> option.</small>
+ * @param {JSON} FALLBACKED  <small>Value <code>1</code></small>
+ *   The value of the state when <code>getUserMedia()</code> retrieves camera Stream successfully but with
+ *   missing originally required audio or video tracks.
+ * @param {JSON} ERROR       <small>-1</code></small>
+ *   The value of the state when <code>getUserMedia()</code> failed to retrieve audio track only
+ *   after retrieving audio and video tracks failed.
  * @readOnly
  * @for Skylink
  * @since 0.6.14
@@ -420,9 +349,9 @@ Skylink.prototype._audioFallback = false;
 /**
  * Function that retrieves camera Stream.
  * @method getUserMedia
- * @param {JSON} [options] The Stream configuration options.
+ * @param {JSON} [options] The camera Stream configuration options.
  * - When not provided, the value is set to <code>{ audio: true, video: true }</code>.
- *   <small>To fallback to retrieve audio only Stream when retrieving of audio and video tracks failed,
+ *   <small>To fallback to retrieve audio track only when retrieving of audio and video tracks failed,
  *   enable the <code>audioFallback</code> flag in the <a href="#method_init"><code>init()</code> method</a>.</small>
  * @param {Boolean|JSON} [options.audio=false] The audio configuration options.
  * @param {Boolean} [options.audio.stereo=false] The flag if stereo band should be configured
@@ -434,14 +363,16 @@ Skylink.prototype._audioFallback = false;
  * @param {Boolean} [options.video.mute=false] The flag if video tracks should be muted upon receiving them.
  * @param {JSON} [options.video.resolution] <blockquote class="info">
  *   Note that currently <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> only configures
- *   the maximum resolution of the Stream due to browser interopability and support. </blockquote> The video resolution.
- *   <small>By default, <a href="#attr_VIDEO_RESOLUTION"><code>VGA</code></a> resolution option is selected when not provided.</small>
+ *   the maximum resolution of the camera Stream due to browser interopability and support. </blockquote>
+ *   The video resolution.
+ *   <small>By default, <a href="#attr_VIDEO_RESOLUTION"><code>VGA</code></a> resolution option
+ *   is selected when not provided.</small>
  *   [Rel: Skylink.VIDEO_RESOLUTION]
  * @param {Number} [options.video.resolution.width] The video resolution width.
  * @param {Number} [options.video.resolution.height] The video resolution height.
  * @param {Number} [options.video.frameRate=50] <blockquote class="info">
  *   Note that currently <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> only configures
- *   the maximum frameRate of the Stream due to browser interopability and support. For Safari and IE browsers
+ *   the maximum frameRate of the camera Stream due to browser interopability and support. For Safari and IE browsers
  *   (plugin-enabled), the maximum frameRate is not configured due to the lack of support.</blockquote>
  *   The video <a href="https://en.wikipedia.org/wiki/Frame_rate">frameRate</a> per second (fps).
  * @param {Array} [options.video.optional] The <code>navigator.getUserMedia()</code> API
@@ -543,13 +474,37 @@ Skylink.prototype._audioFallback = false;
  *      console.error("Failed", error);
  *   });
  * @trigger <ol class="desc-seq">
- *   <li>When retrieval of camera Stream is successful, <a href="#event_mediaAccessSuccess"><code>mediaAccessSuccess</code>
- *   event</a> triggers parameter payload <code>isScreensharing</code> value as <code>false</code>.</li>
- *   <li>When retrieval of camera Stream has failed, <ol>
- *   <li>If <code>audioFallback</code> is enabled in the <a href="#method_init"><code>init()</code> method</a> configuration,
- *   and <code>options.video</code> and <code>options.audio</code> is requested, invoke <code>getUserMedia()</code> to
- *   to retrieve audio only.<ol><li>When retrieval of audio Stream is successful, <a href="#event_mediaAccessSuccess"><code>mediaAccessSuccess</code>
- *   event</a> triggers parameter payload <code>isScreensharing</code> value as <code>false</code>.</li>
+ *   <li>When retrieval of camera Stream is successful, <a href="#event_mediaAccessSuccess">
+ *   <code>mediaAccessSuccess</code> event</a> triggers parameter payload <code>isScreensharing</code>
+ *   value as <code>false</code>.<ol>
+ *   <li>When there are missing required audio or video tracks, <a href="#event_mediaAccessFallback">
+ *   <code>mediaAccessFallback</code> event</a> triggers parameter payload <code>state</code> as <code>FALLBACKED</code>
+ *   , <code>isScreensharing</code> value as <code>false</code>, <code>isAudioFallback</code> as
+ *   <code>false</code> and <code>error</code> is defined.</li></ol></li>
+ *   <li>When retrieval of camera Stream has failed<ol>
+ *   <li>If <code>audioFallback</code> is enabled in the <a href="#method_init"><code>init()</code> method</a>
+ *   configuration, and <code>options.video</code> and <code>options.audio</code> is requested <ol>
+ *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> is triggers parameter payload
+ *   <code>state</code> value as <code>FALLBACKING</code>, <code>isScreensharing</code> value as <code>false</code>,
+ *   <code>isAudioFallback</code> as <code>true</code> and <code>error</code> is defined.</li>
+ *   <li>Invokes <code>getUserMedia()</code> with <code>options.audio</code> value as <code>true</code> and
+ *   <code>options.video</code> value as <code>false</code>.<ol>
+ *   <li>When retrieval of camera Stream (fallbacked audio only) is successful<ol>
+ *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> triggers parameter payload
+ *   <code>state</code> as <code>FALLBACKED</code>, <code>isScreensharing</code> value as <code>false</code> and
+ *   <code>isAudioFallback</code> as <code>true</code>.</li>
+ *   <li><a href="#event_mediaAccessSuccess"><code>mediaAccessSuccess</code> event</a> triggers parameter
+ *   payload <code>isScreensharing</code> value as <code>false</code></li></ol></li>
+ *   <li>When retrieval of camera Stream (fallbacked audio only) has failed <ol>
+ *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> triggers parameter payload
+ *   <code>state</code> as <code>ERROR</code>, <code>isScreensharing</code> value as <code>false</code> and
+ *   <code>isAudioFallback</code> as <code>true</code>.</li>
+ *   <li><a href="#event_mediaAccessError"><code>mediaAccessError</code> event</a> triggers parameter payload
+ *   <code>isScreensharing</code> value as <code>false</code> and <code>isAudioFallbackError</code>
+ *   as <code>true</code>.</li></ol></li></ol></li></ol></li>
+ *   <li>Else, <a href="#event_mediaAccessError"><code>mediaAccessError</code> event</a>
+ *   triggers parameter payload <code>isScreensharing</code> value as <code>false</code> and
+ *   <code>isAudioFallbackError</code> as <code>false</code></li></ol></li></ol>
  * @for Skylink
  * @since 0.5.6
  */
@@ -682,103 +637,83 @@ Skylink.prototype.getUserMedia = function(options,callback) {
 };
 
 /**
- * Replaces the currently attached Stream object in Skylink and refreshes all
- *   connection with Peer connections to send the updated Stream object.
- * The application may provide their own MediaStream object to send to
- *   all PeerConnections connection.
- * Reference {{#crossLink "Skylink/refreshConnection:method"}}refreshConnection(){{/crossLink}}
- *    on the events triggered and restart mechanism.
+ * <blockquote class="info">
+ *   Note that if <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> is available despite having
+ *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> available, the
+ *   <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> is sent instead of the
+ *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> to Peers.
+ * </blockquote>
+ * Function that sends a new <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a>
+ * to all connected Peers in the Room.
  * @method sendStream
- * @param {Object|JSON} options The self Stream streaming settings for the new Stream
- *   object to replace the current Stream object attached to Skylink.
- *   If this parameter is provided as a MediaStream object, the
- *   MediaStream object settings for <code>mediaStatus</code> would be
- *   detected as unmuted by default.
- * @param {Boolean|JSON} [options.audio=false] The self Stream streaming audio settings.
- *   If <code>false</code>, it means that audio streaming is disabled in
- *   the self Stream. If this option is set to <code>true</code> or is defined with
- *   settings, {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
- *   will be invoked. Self will not connect to the room unless the Stream audio
- *   user media access is given.
- * @param {Boolean} [options.audio.stereo=false] The flag that indicates if
- *   stereo should be enabled in self connection Stream
- *   audio streaming.
- * @param {Boolean} [options.audio.mute=false] The flag that
- *   indicates if the self Stream object audio streaming is muted.
- * @param {Boolean|JSON} [options.video=false] The self Stream streaming video settings.
- *   If <code>false</code>, it means that video streaming is disabled in
- *   the self Stream. If this option is set to <code>true</code> or is defined with
- *   settings, {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
- *   will be invoked. Self will not connect to the room unless the Stream video
- *   user media access is given.
- * @param {Array} [options.audio.optional] The optional constraints for audio streaming
- *   in self user media Stream object. This follows the <code>optional</code>
- *   setting in the <code>MediaStreamConstraints</code> when <code>getUserMedia()</code> is invoked.
- *   Tampering this may cause errors in retrieval of self user media Stream object.
- *   Refer to this [site for more reference](http://www.sitepoint.com/introduction-getusermedia-api/).
- * @param {Boolean} [options.video.mute=false] The flag that
- *   indicates if the self Stream object video streaming is muted.
- * @param {JSON} [options.video.resolution] The self Stream streaming video
- *   resolution settings. Setting the resolution may
- *   not force set the resolution provided as it depends on the how the
- *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Number} [options.video.resolution.width] The self
- *   Stream streaming video resolution width.
- * @param {Number} [options.video.resolution.height] The self
- *   Stream streaming video resolution height.
- * @param {Number} [options.video.frameRate=50] The self
- *   Stream streaming video maximum frameRate.
- * @param {Array} [options.video.optional] The optional constraints for video streaming
- *   in self user media Stream object. This follows the <code>optional</code>
- *   setting in the <code>MediaStreamConstraints</code> when <code>getUserMedia()</code> is invoked.
- *   Tampering this may cause errors in retrieval of self user media Stream object.
- *   Refer to this [site for more reference](http://www.sitepoint.com/introduction-getusermedia-api/).
- * @param {Function} [callback] The callback fired after Skylink has replaced
- *   the current Stream object successfully with the provided
- *   media settings / MediaStream object or have met with an exception.
- *   The callback signature is <code>function (error, success)</code>.
- * @param {Object} callback.error The error object received in the callback.
- *   This is the exception thrown that caused the failure for replacing the current
- *   Stream object. If received as <code>null</code>, it means that there is no errors.
- * @param {Object} callback.success The success object received in the callback.
- *   The self user media [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_API)
- *   object. To display the MediaStream object to a <code>video</code> or <code>audio</code>, simply invoke:<br>
- *   <code>attachMediaStream(domElement, stream);</code>.
- *   If received as <code>null</code>, it means that there are errors.
+ * @param {JSON|MediaStream} options The <a href="#method_getUserMedia"><code>getUserMedia()</code>
+ *   method</a> <code>options</code> parameter settings.
+ * - When provided as a <code>MediaStream</code> object, this configures the <code>options.audio</code> and
+ *   <code>options.video</code> based on the tracks available in the <code>MediaStream</code> object,
+ *   and configures the <code>options.audio.mute</code> and <code>options.video.mute</code> based on the tracks
+ *   <code>.enabled</code> flags in the tracks provided in the <code>MediaStream</code> object without
+ *   invoking <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.
+ *   <small>Object signature matches the <code>options</code> parameter in the
+ *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</small>
+ * @param {Function} [callback] The callback function fired when request has completed.
+ *   <small>Function parameters signature is <code>function (error, success)</code></small>
+ *   <small>Function request completion is determined by the <a href="#event_peerRestart">
+ *   <code>peerRestart</code> event</a> triggering <code>isSelfInitiateRestart</code> parameter payload
+ *   value as <code>true</code> for all Peers currently in the Room targeted for request success.</small>
+ * @param {Error|String} callback.error The error result in request.
+ *   <small>Defined as <code>null</code> when there are no errors in request</small>
+ *   <small>Object signature is the <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> error or
+ *   when invalid <code>options</code> is provided.</small>
+ * @param {MediaStream} callback.success The success result in request.
+ *   <small>Defined as <code>null</code> when there are errors in request</small>
+ *   <small>Object signature is the <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>
+ *   Stream object.</small>
  * @example
- *   // Example 1: Send a stream object instead
- *   SkylinkDemo.on('mediaAccessSuccess', function (stream) {
- *     SkylinkDemo.sendStream(stream);
- *   });
+ *   // Example 1: Send MediaStream object
+ *   function retrieveStreamBySourceForFirefox (sourceId) {
+ *     navigator.mediaDevices.getUserMedia({
+ *       audio: true,
+ *       video: {
+ *         sourceId: { exact: sourceId }
+ *       }
+ *     }).then(function (stream) {
+ *       skylinkDemo.sendStream(stream, function (error, success) {
+ *         if (err) return;
+ *         if (stream === success) {
+ *           console.info("Same MediaStream has been sent");
+ *         }
+ *         console.log("Stream is now being sent to Peers");
+ *       });
+ *     });
+ *   }
  *
- *   // Example 2: Send stream with getUserMedia automatically called for you
- *   SkylinkDemo.sendStream({
- *     audio: true,
- *     video: false
- *   });
+ *   // Example 2: Send video later
+ *   var inRoom = false;
  *
- *   // Example 3: Send stream with getUserMedia automatically called for you
- *   // and audio is muted
- *   SkylinkDemo.sendStream({
- *     audio: { mute: true },
- *     video: false
- *   });
+ *   function sendVideo () {
+ *     if (!inRoom) return;
+ *     skylinkDemo.sendStream({
+ *       audio: true,
+ *       video: true
+ *     }, function (error, success) {
+ *       if (error) return;
+ *       console.log("getUserMedia() Stream with video is now being sent to Peers");
+ *     });
+ *   }
  *
- *   // Example 4: Send stream with callback
- *   SkylinkDemo.sendStream({
- *    audio: true,
- *    video: true
- *   },function(error,success){
- *    if (error){
- *      console.log('Error occurred. Stream was not sent: '+error)
- *    }
- *    else{
- *      console.log('Stream successfully sent: '+success);
- *    }
+ *   skylinkDemo.joinRoom({
+ *     audio: true
+ *   }, function (jRError, jRSuccess) {
+ *     if (jRError) return;
+ *     inRoom = true;
  *   });
- *
- * @trigger peerRestart, serverPeerRestart, incomingStream
- * @component Stream
+ * @trigger <ol class="desc-seq">
+ *   <li>Invokes <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</li>
+ *   <li>Invokes <a href="#method_refreshConnection"><code>refreshConnection()</code> method</a>.</li>
+ *   <li>When User is in the Room, <a href="#event_incomingStream"><code>incomingStream</code> event</a> triggers with
+ *   parameter payload <code>isSelf</code> as <code>true</code>.</li>
+ *   <li>When User is in the Room, <a href="#event_peerUpdate"><code>peerUpdated</code> event</a> triggers with
+ *   parameter payload <code>isSelf</code> as <code>true</code>.</li></ol></li></ol>
  * @for Skylink
  * @since 0.5.6
  */
@@ -915,11 +850,22 @@ Skylink.prototype.sendStream = function(stream, callback) {
 };
 
 /**
- * Stops self user media Stream object attached to Skylink.
+ * Function that stops <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a>.
  * @method stopStream
- * @trigger mediaAccessStopped, streamEnded
  * @example
- *   SkylinkDemo.stopStream();
+ *   function stopStream () {
+ *     skylinkDemo.stopStream();
+ *   }
+ *
+ *   skylinkDemo.getUserMedia();
+ * @trigger <ol class="desc-seq">
+ *   <li><a href="#event_mediaAccessStopped"><code>mediaAccessStopped</code> event</a> triggers parameter payload
+ *   <code>isScreensharing</code> value as <code>false</code>.</li>
+ *   <li>When User is in the Room, <a href="#event_streamEnded"><code>streamEnded</code> event</a> triggers
+ *   parameter payload <code>isScreensharing</code> value as <code>false</code> and <code>isSelf</code> value
+ *   as <code>true</code>.</li>
+ *   <li>When User is in the Room, <a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers
+ *   parameter payload <code>isSelf</code> value as <code>true</code>.</li></ol>
  * @for Skylink
  * @since 0.5.6
  */
@@ -931,24 +877,37 @@ Skylink.prototype.stopStream = function () {
 };
 
 /**
- * Mutes the currently attached Stream object in Skylink.
+ * Function that mutes both <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> and
+ * <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> audio or video tracks.
  * @method muteStream
- * @param {JSON} options The self Stream streaming muted settings.
- * @param {Boolean} [options.audioMuted=true]  The flag that
- *   indicates if self connection Stream object audio streaming is muted. If
- *   there is no audio streaming enabled for self connection, by default,
- *   it is set to <code>true</code>.
- * @param {Boolean} [options.videoMuted=true] The flag that
- *   indicates if self connection Stream object video streaming is muted. If
- *   there is no video streaming enabled for self connection, by default,
- *   it is set to <code>true</code>.
+ * @param {JSON} options The Streams muting options.
+ * @param {Boolean} [options.audioMuted=true] The flag if all Streams audio
+ *   tracks should be muted or not.
+ * @param {Boolean} [options.videoMuted=true] The flag if all Streams video
+ *   tracks should be muted or not.
  * @example
- *   SkylinkDemo.muteStream({
+ *   // Example 1: Mute both audio and video tracks in all Streams
+ *   skylinkDemo.muteStream({
+ *     audioMuted: true,
+ *     videoMuted: true
+ *   });
+ *
+ *   // Example 2: Mute only audio tracks in all Streams
+ *   skylinkDemo.muteStream({
  *     audioMuted: true,
  *     videoMuted: false
  *   });
- * @trigger streamMuted, peerUpdated
- * @component Stream
+ *
+ *   // Example 3: Mute only video tracks in all Streams
+ *   skylinkDemo.muteStream({
+ *     audioMuted: false,
+ *     videoMuted: true
+ *   });
+ * @trigger <ol class="desc-seq">
+ *   <li>When User is in the Room, <a href="#event_streamMuted"><code>streamMuted</code> event</a> triggers
+ *   parameter payload <code>isSelf</code> value as <code>true</code>.</li>
+ *   <li>When User is in the Room, <a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers
+ *   parameter payload <code>isSelf</code> value as <code>true</code>.</li></ol>
  * @for Skylink
  * @since 0.5.7
  */
@@ -1033,14 +992,20 @@ Skylink.prototype.muteStream = function(options) {
 };
 
 /**
- * Unmutes the currently attached Stream object audio stream.
+ * <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This method has been deprecated. Use <a href="#method_muteStream"><code>muteStream()</code> method</a> instead.
+ * </blockquote>
+ * Function that unmutes both <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> and
+ * <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> audio tracks.
  * @method enableAudio
- * @trigger peerUpdated
- * @deprecated Use .muteStream()
+ * @deprecated true
  * @example
- *   SkylinkDemo.enableAudio();
- * @trigger streamMuted, peerUpdated
- * @component Stream
+ *   function unmuteAudio () {
+ *     skylinkDemo.enableAudio();
+ *   }
+ * @trigger <ol class="desc-seq">
+ *   <li>Invokes <a href="#method_muteStream"><code>muteStream()</code> method</a> with
+ *   <code>options.audioMuted</code> value as <code>false</code>.</li></ol>
  * @for Skylink
  * @since 0.5.5
  */
@@ -1051,14 +1016,20 @@ Skylink.prototype.enableAudio = function() {
 };
 
 /**
- * Mutes the currently attached Stream object audio stream.
+ * <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This method has been deprecated. Use <a href="#method_muteStream"><code>muteStream()</code> method</a> instead.
+ * </blockquote>
+ * Function that mutes both <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> and
+ * <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> audio tracks.
  * @method disableAudio
- * @deprecated Use .muteStream()
+ * @deprecated true
  * @example
- *   SkylinkDemo.disableAudio();
- * @trigger peerUpdated
- * @trigger streamMuted, peerUpdated
- * @component Stream
+ *   function muteAudio () {
+ *     skylinkDemo.disableAudio();
+ *   }
+ * @trigger <ol class="desc-seq">
+ *   <li>Invokes <a href="#method_muteStream"><code>muteStream()</code> method</a> with
+ *   <code>options.audioMuted</code> value as <code>true</code>.</li></ol>
  * @for Skylink
  * @since 0.5.5
  */
@@ -1069,14 +1040,20 @@ Skylink.prototype.disableAudio = function() {
 };
 
 /**
- * Unmutes the currently attached Stream object video stream.
+ * <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This method has been deprecated. Use <a href="#method_muteStream"><code>muteStream()</code> method</a> instead.
+ * </blockquote>
+ * Function that unmutes both <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> and
+ * <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> video tracks.
  * @method enableVideo
- * @deprecated Use .muteStream()
+ * @deprecated true
  * @example
- *   SkylinkDemo.enableVideo();
- * @trigger peerUpdated
- * @trigger streamMuted, peerUpdated
- * @component Stream
+ *   function unmuteVideo () {
+ *     skylinkDemo.enableVideo();
+ *   }
+ * @trigger <ol class="desc-seq">
+ *   <li>Invokes <a href="#method_muteStream"><code>muteStream()</code> method</a> with
+ *   <code>options.videoMuted</code> value as <code>false</code>.</li></ol>
  * @for Skylink
  * @since 0.5.5
  */
@@ -1087,13 +1064,21 @@ Skylink.prototype.enableVideo = function() {
 };
 
 /**
- * Mutes the currently attached Stream object video stream.
+ /**
+ * <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This method has been deprecated. Use <a href="#method_muteStream"><code>muteStream()</code> method</a> instead.
+ * </blockquote>
+ * Function that mutes both <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> and
+ * <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> video tracks.
  * @method disableVideo
- * @depcreated Use .muteStream()
+ * @deprecated true
  * @example
- *   SkylinkDemo.disableVideo();
- * @trigger streamMuted, peerUpdated
- * @component Stream
+ *   function muteVideo () {
+ *     skylinkDemo.disableVideo();
+ *   }
+ * @trigger <ol class="desc-seq">
+ *   <li>Invokes <a href="#method_muteStream"><code>muteStream()</code> method</a> with
+ *   <code>options.videoMuted</code> value as <code>true</code>.</li></ol>
  * @for Skylink
  * @since 0.5.5
  */
@@ -1104,16 +1089,7 @@ Skylink.prototype.disableVideo = function() {
 };
 
 /**
- * Shares the current screen with Peer connections and will refresh all
- *    Peer connections to send the screensharing Stream object with
- *    <code>HTTPS</code> protocol accessing application.
- * Reference {{#crossLink "Skylink/refreshConnection:method"}}refreshConnection(){{/crossLink}}
- *    on the events triggered and restart mechanism.
- * This will require our own Temasys Skylink extension to do screensharing.
- * For screensharing feature in IE / Safari with our Temasys Plugin, please
- *   [contact us](https://www.temasys.com.sg/contact-us).
- * Currently, Opera does not support screensharing feature.
- * This does not replace the currently attached user media Stream object in Skylink.
+ * Function that retrieves screensharing Stream.
  * @method shareScreen
  * @param {JSON} [enableAudio=false] The flag that indicates if self screensharing
  *   Stream streaming should have audio. If

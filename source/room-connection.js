@@ -242,7 +242,11 @@ Skylink.prototype._inRoom = false;
  *   <li><a href="#event_peerJoined"><code>peerJoined</code> event</a> triggers parameter payload
  *   <code>isSelf</code> value as <code>true</code>. <small>If MCU is enabled for the App Key,
  *   the <a href="#event_serverPeerJoined"><code>serverPeerJoined</code> event</a> will be triggered
- *   when MCU is present in the Room, and then Peer connections can commence.</small></li></ol>
+ *   when MCU is present in the Room, and then Peer connections can commence.</small><small>If
+ *   <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> is available despite having
+ *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> available, the
+ *   <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> is sent instead of the
+ *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> to Peers.</small></li></ol>
  * @for Skylink
  * @since 0.5.5
  */
