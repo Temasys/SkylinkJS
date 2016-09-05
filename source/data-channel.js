@@ -1,16 +1,16 @@
 /**
- * Contains the list of Datachannel connection states.
+ * The list of Datachannel connection states.
  * @attribute DATA_CHANNEL_STATE
  * @param {String} CONNECTING <small>Value <code>"connecting"</code></small>
- *   The state when Datachannel is attempting to establish a connection.
- * @param {String} OPEN <small>Value <code>"open"</code></small>
- *   The state when Datachannel has established a connection.
- * @param {String} CLOSING <small>Value <code>"closing"</code></small>
- *   The state when Datachannel connection is closing.
- * @param {String} CLOSED <small>Value <code>"closed"</code></small>
- *   The state when Datachannel connection has closed.
- * @param {String} ERROR <small>Value <code>"error"</code></small>
- *   The state when Datachannel connection has errors.
+ *   The value of the state when Datachannel is attempting to establish a connection.
+ * @param {String} OPEN       <small>Value <code>"open"</code></small>
+ *   The value of the state when Datachannel has established a connection.
+ * @param {String} CLOSING    <small>Value <code>"closing"</code></small>
+ *   The value of the state when Datachannel connection is closing.
+ * @param {String} CLOSED     <small>Value <code>"closed"</code></small>
+ *   The value of the state when Datachannel connection has closed.
+ * @param {String} ERROR      <small>Value <code>"error"</code></small>
+ *   The value of the state when Datachannel connection has errors.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -25,7 +25,7 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
 };
 
 /**
- * Contains the list of Datachannel types.
+ * The list of Datachannel types.
  * @attribute DATA_CHANNEL_TYPE
  * @param {String} MESSAGING <small>Value <code>"messaging"</code></small>
  *   The Datachannel type that is used for messaging in
