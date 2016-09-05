@@ -683,6 +683,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *           console.info("Same MediaStream has been sent");
  *         }
  *         console.log("Stream is now being sent to Peers");
+ *         attachMediaStream(document.getElementById("my-video"), success);
  *       });
  *     });
  *   }
@@ -698,6 +699,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *     }, function (error, success) {
  *       if (error) return;
  *       console.log("getUserMedia() Stream with video is now being sent to Peers");
+ *       attachMediaStream(document.getElementById("my-video"), success);
  *     });
  *   }
  *
@@ -710,10 +712,10 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  * @trigger <ol class="desc-seq">
  *   <li>Invokes <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</li>
  *   <li>Invokes <a href="#method_refreshConnection"><code>refreshConnection()</code> method</a>.</li>
- *   <li>When User is in the Room, <a href="#event_incomingStream"><code>incomingStream</code> event</a> triggers with
- *   parameter payload <code>isSelf</code> as <code>true</code>.</li>
- *   <li>When User is in the Room, <a href="#event_peerUpdate"><code>peerUpdated</code> event</a> triggers with
- *   parameter payload <code>isSelf</code> as <code>true</code>.</li></ol></li></ol>
+ *   <li>If User is in the Room, <a href="#event_incomingStream"><code>incomingStream</code> event</a> triggers with
+ *   parameter payload <code>isSelf</code> as <code>true</code>, and <a href="#event_peerUpdate">
+ *   <code>peerUpdated</code> event</a> triggers with parameter payload <code>isSelf</code>
+ *   as <code>true</code>.</li></ol></li></ol>
  * @for Skylink
  * @since 0.5.6
  */
@@ -861,10 +863,9 @@ Skylink.prototype.sendStream = function(stream, callback) {
  * @trigger <ol class="desc-seq">
  *   <li><a href="#event_mediaAccessStopped"><code>mediaAccessStopped</code> event</a> triggers parameter payload
  *   <code>isScreensharing</code> value as <code>false</code>.</li>
- *   <li>When User is in the Room, <a href="#event_streamEnded"><code>streamEnded</code> event</a> triggers
+ *   <li>If User is in the Room, <a href="#event_streamEnded"><code>streamEnded</code> event</a> triggers
  *   parameter payload <code>isScreensharing</code> value as <code>false</code> and <code>isSelf</code> value
- *   as <code>true</code>.</li>
- *   <li>When User is in the Room, <a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers
+ *   as <code>true</code>, and <a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers
  *   parameter payload <code>isSelf</code> value as <code>true</code>.</li></ol>
  * @for Skylink
  * @since 0.5.6
@@ -904,10 +905,10 @@ Skylink.prototype.stopStream = function () {
  *     videoMuted: true
  *   });
  * @trigger <ol class="desc-seq">
- *   <li>When User is in the Room, <a href="#event_streamMuted"><code>streamMuted</code> event</a> triggers
- *   parameter payload <code>isSelf</code> value as <code>true</code>.</li>
- *   <li>When User is in the Room, <a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers
- *   parameter payload <code>isSelf</code> value as <code>true</code>.</li></ol>
+ *   <li>If User is in the Room, <a href="#event_streamMuted"><code>streamMuted</code> event</a> triggers
+ *   parameter payload <code>isSelf</code> value as <code>true</code>, and <a href="#event_peerUpdated">
+ *   <code>peerUpdated</code> event</a> triggers parameter payload <code>isSelf</code>
+ *   value as <code>true</code>.</li></ol>
  * @for Skylink
  * @since 0.5.7
  */
@@ -1091,36 +1092,44 @@ Skylink.prototype.disableVideo = function() {
 /**
  * Function that retrieves screensharing Stream.
  * @method shareScreen
- * @param {JSON} [enableAudio=false] The flag that indicates if self screensharing
- *   Stream streaming should have audio. If
- *   <code>false</code>, it means that audio streaming is disabled in
- *   the remote Stream of self connection.
- * @param {Function} [callback] The callback fired after Skylink has shared
- *   the screen successfully or have met with an exception.
- *   The callback signature is <code>function (error, success)</code>.
- * @param {Object} callback.error The error object received in the callback.
- *   This is the exception thrown that caused the failure for sharing the screen.
- *   If received as <code>null</code>, it means that there is no errors.
- * @param {Object} callback.success The success object received in the callback.
- *   The self screensharing [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_API)
- *   object. To display the MediaStream object to a <code>video</code> or <code>audio</code>, simply invoke:<br>
- *   <code>attachMediaStream(domElement, stream);</code>.
- *   If received as <code>null</code>, it means that there are errors.
+ * @param {JSON} [enableAudio=false] The flag if audio tracks should be retrieved.
+
+ * @param {Function} [callback] The callback function fired when request has completed.
+ *   <small>Function parameters signature is <code>function (error, success)</code></small>
+ *   <small>Function request completion is determined by the <a href="#event_mediaAccessSuccess">
+ *   <code>mediaAccessSuccess</code> event</a> triggering <code>isScreensharing</code> parameter
+ *   payload value as <code>true</code> for request success.</small>
+ * @param {Error|String} callback.error The error result in request.
+ *   <small>Defined as <code>null</code> when there are no errors in request</small>
+ *   <small>Object signature is the <code>shareScreen()</code> error when retrieving screensharing Stream.</small>
+ * @param {MediaStream} callback.success The success result in request.
+ *   <small>Defined as <code>null</code> when there are errors in request</small>
+ *   <small>Object signature is the screensharing Stream object.</small>
  * @example
- *   // Example 1: Share the screen
- *   SkylinkDemo.shareScreen();
- *
- *   // Example 2: Share screen with callback when screen is ready and shared
- *   SkylinkDemo.shareScreen(function(error,success){
- *      if (error){
- *        console.log(error);
- *      }
- *      else{
- *        console.log(success);
- *     }
+ *   // Example 1: Share screen with audio
+ *   skylinkDemo.shareScreen(function (error, success) {
+ *     if (error) return;
+ *     attachMediaStream(document.getElementById("my-screen"), success);
  *   });
- * @trigger mediaAccessSuccess, mediaAccessError, incomingStream, peerRestart, serverPeerRestart, peerUpdated
- * @component Stream
+ *
+ *   // Example 2: Share screen without audio
+ *   skylinkDemo.shareScreen(false, function (error, success) {
+ *     if (error) return;
+ *     attachMediaStream(document.getElementById("my-screen"), success);
+ *   });
+ * @trigger <ol class="desc-seq">
+ *   <li>When retrieval of screensharing Stream is successful, <a href="#event_mediaAccessSuccess">
+ *   <code>mediaAccessSuccess</code> event</a> triggers parameter payload <code>isScreensharing</code>
+ *   value as <code>true</code>.<ol>
+ *   <li>When there are missing required audio tracks, <a href="#event_mediaAccessFallback">
+ *   <code>mediaAccessFallback</code> event</a> triggers parameter payload <code>state</code> as <code>FALLBACKED</code>
+ *   , <code>isScreensharing</code> value as <code>true</code>, <code>isAudioFallback</code> as
+ *   <code>false</code> and <code>error</code> is defined.</li>
+ *   <li>If User is in Room, <a href="#event_incomingStream"><code>incomingStream</code> event</a> triggers.</li>
+ *   <li>Invokes <a href="#method_refreshConnection"><code>refreshConnection()</code> method</a>.</li></ol></li>
+ *   <li>When retrieval of screensharing Stream has failed, <a href="#event_mediaAccessError">
+ *   <code>mediaAccessError</code> event</a> triggers parameter payload <code>isScreensharing</code>
+ *   value as <code>true</code> and <code>isAudioFallbackError</code> as <code>false</code></li></ol></li></ol>
  * @for Skylink
  * @since 0.6.0
  */
@@ -1292,15 +1301,26 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 };
 
 /**
- * Stops self screensharing Stream object attached to Skylink.
- * If user media Stream object is available, Skylink will refresh all
- *    Peer connections to send the user media Stream object.
- * Reference {{#crossLink "Skylink/refreshConnection:method"}}refreshConnection(){{/crossLink}}
- *    on the events triggered and restart mechanism.
+ * Function that stops <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>.
  * @method stopScreen
  * @example
- *   SkylinkDemo.stopScreen();
- * @trigger mediaAccessStopped, streamEnded, incomingStream, peerRestart, serverPeerRestart
+ *   function stopScreen () {
+ *     skylinkDemo.stopScreen();
+ *   }
+ *
+ *   skylinkDemo.shareScreen();
+ * @trigger <ol class="desc-seq">
+ *   <li><a href="#event_mediaAccessStopped"><code>mediaAccessStopped</code> event</a> triggers parameter payload
+ *   <code>isScreensharing</code> value as <code>true</code>.</li>
+ *   <li>If User is in the Room, <a href="#event_streamEnded"><code>streamEnded</code> event</a> triggers
+ *   parameter payload <code>isScreensharing</code> value as <code>true</code> and <code>isSelf</code> value
+ *   as <code>true</code>, and <a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers
+ *   parameter payload <code>isSelf</code> value as <code>true</code>.</li>
+ *   <li>If User has <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> and is in the Room,
+ *   the Stream will be sent to Peers and <a href="#event_incomingStream"><code>incomingStream</code> event</a>
+ *   triggers with parameter payload <code>isSelf</code> value as <code>true</code> using the
+ *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a>.</li>
+ *   <li>Invokes <a href="#method_refreshConnection"><code>refreshConnection()</code> method</a>.</li></ol>
  * @for Skylink
  * @since 0.6.0
  */
