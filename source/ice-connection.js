@@ -3,8 +3,7 @@
  *   Learn more about how ICE works in this
  *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
  * </blockquote>
- * The list of Peer connection ICE connection states after
- * <a href="#method_joinRoom"><code>joinRoom()</code> method</a> was successful.
+ * The list of Peer connection ICE connection states.
  * @attribute ICE_CONNECTION_STATE
  * @param {String} CHECKING       <small>Value <code>"checking"</code></small>
  *   The value of the state when Peer connection is checking for a suitable matching pair of

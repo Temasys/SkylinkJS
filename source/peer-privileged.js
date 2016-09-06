@@ -14,7 +14,7 @@
  *   from Rooms within the same App space from the Signaling server.
  * @param {String} RECEIVED <small>Value <code>"received"</code></small>
  *   The value of the state when <code>getPeers()</code> has retrieved the list of Peer IDs
- *   from Rooms within the space App space from the Signaling server successfully.
+ *   from Rooms within the same App space from the Signaling server successfully.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -35,7 +35,7 @@ Skylink.prototype.GET_PEERS_STATE = {
  *   <a href="http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-">
  *   Read more about privileged App Key feature here</a>.
  * </blockquote>
- * The list of <a href="#method_introducePeer"><code>introducePeer</code> method</a> Peer introduction states.
+ * The list of <a href="#method_introducePeer"><code>introducePeer</code> method</a> Peer introduction request states.
  * @attribute INTRODUCE_STATE
  * @param {String} INTRODUCING <small>Value <code>"enquired"</code></small>
  *   The value of the state when introduction request for the selected pair of Peers has been made to the Signaling server.

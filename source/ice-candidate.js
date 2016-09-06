@@ -3,8 +3,7 @@
  *   Learn more about how ICE works in this
  *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
  * </blockquote>
- * The list of Peer connection ICE gathering states after
- * <a href="#method_joinRoom"><code>joinRoom()</code> method</a> was successful.
+ * The list of Peer connection ICE gathering states.
  * @attribute CANDIDATE_GENERATION_STATE
  * @param {String} GATHERING <small>Value <code>"gathering"</code></small>
  *   The value of the state when Peer connection is gathering ICE candidates.

@@ -101,80 +101,65 @@
  */
 Skylink.prototype._EVENTS = {
   /**
-   * Event triggered when the socket connection to the platform signaling is opened.
-   * - This event means that socket connection is open and self is ready to join the room.
+   * Event triggered when socket connection to Signaling server has opened.
    * @event channelOpen
-   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
   channelOpen: [],
 
   /**
-   * Event triggered when the socket connection to the platform signaling is closed.
-   * - This event means that socket connection is closed and self has left the room.
+   * Event triggered when socket connection to Signaling server has closed.
    * @event channelClose
-   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
   channelClose: [],
 
   /**
-   * Event triggered when the socket connection is exchanging messages with the platform signaling.
-   * - This event is a debugging feature, and it&#x27;s not advisable to subscribe to
-   *   this event unless you are debugging the socket messages
-   *   received from the platform signaling.
+   * &lt;blockquote class=&quot;info&quot;&gt;
+   *   Note that this is used only for SDK developer purposes.
+   * &lt;/blockquote&gt;
+   * Event triggered when receiving socket message from the Signaling server.
    * @event channelMessage
-   * @param {JSON} message The socket message object data received from the platform signaling.
-   * @component Events
+   * @param {JSON} message The socket message object.
    * @for Skylink
    * @since 0.1.0
    */
   channelMessage: [],
 
   /**
-   * Event triggered when the socket connection has occurred an exception
-   *   during a connection with the platform signaling.
-   * - After this event is triggered, it may result in &lt;a href=&quot;#event_channelClose&quot;&gt;channelClose&lt;/a&gt;,
-   *   and the socket connection with the platform signaling could be disrupted.
+   * &lt;blockquote class=&quot;info&quot;&gt;
+   *   This may be caused by Javascript errors in the event handlers when subscribing to events.&lt;br&gt;
+   *   It may be resolved by checking for code errors in your Web App in the event subscription handlers.&lt;br&gt;
+   *   &lt;code&gt;skylinkDemo.on(&quot;eventName&quot;, function () { // Errors here });&lt;/code&gt;
+   * &lt;/blockquote&gt;
+   * Event triggered when socket connection encountered exception.
    * @event channelError
-   * @param {Object|String} error The error object thrown that caused the exception.
-   * @component Events
+   * @param {Error|String} error The error object.
    * @for Skylink
    * @since 0.1.0
    */
   channelError: [],
 
   /**
-   * Event triggered when attempting to reconnect the socket connection with the platform signaling.
-   * - Depending on the current &lt;code&gt;type&lt;/code&gt; triggered in &lt;a href=&quot;#event_socketError&quot;&gt;
-   *   socketError&lt;/a&gt; event before, it may or may not attempt the socket reconnection and
-   *   this event may not be triggered.
-   * - If reconnection attempt fails, it will trigger &lt;a href=&quot;#event_socketError&quot;&gt;socketError&lt;/a&gt; event
-   *   again and repeat the stage from there.
+   * Event triggered when attempting to establish socket connection to Signaling server when failed.
    * @event channelRetry
-   * @param {String} fallbackType The fallback socket transport that Skylink is attempting to reconnect with.
+   * @param {String} fallbackType The fallback state of the socket reconnection attempt.
    *   [Rel: Skylink.SOCKET_FALLBACK]
    * @param {Number} currentAttempt The current reconnection attempt.
-   * @component Events
    * @for Skylink
    * @since 0.5.6
    */
   channelRetry: [],
 
   /**
-   * Event triggered when attempt to &lt;em&gt;(re)&lt;/em&gt;connect the socket connection with the platform signaling has failed.
-   * - Depending on the current &lt;code&gt;type&lt;/code&gt; payload, it may or may not attempt the
-   *   socket reconnection and &lt;a href=&quot;#event_channelRetry&quot;&gt;channelRetry&lt;/a&gt; event may not be triggered.
-   * - If reconnection attempt fails and there are still available ports to reconnect with,
-   *   it will trigger &lt;a href=&quot;#event_channelRetry&quot;&gt;channelRetry&lt;/a&gt; event again and
-   *   repeat the stage from there.
+   * Event triggered when attempt to establish socket connection to Signaling server has failed.
    * @event socketError
-   * @param {String} errorCode The socket connection error code received.
+   * @param {String} errorCode The socket connection error code.
    *   [Rel: Skylink.SOCKET_ERROR]
-   * @param {Number|String|Object} error The error object thrown that caused the failure.
-   * @param {String} type The socket transport that Skylink has failed to connect with.
+   * @param {Error|String|Number} error The error object.
+   * @param {String} type The fallback state of the socket connection attempt.
    *   [Rel: Skylink.SOCKET_FALLBACK]
    * @component Events
    * @for Skylink
@@ -183,15 +168,12 @@ Skylink.prototype._EVENTS = {
   socketError: [],
 
   /**
-   * Event triggered when room connection information is being retrieved from platform server.
-   * - This is also triggered when &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt; is invoked, but
-   *   the socket connection events like &lt;a href=&quot;#event_channelOpen&quot;&gt;channelOpen&lt;/a&gt; does
-   *   not get triggered but stops at &lt;u&gt;readyStateChange&lt;/u&gt; event.
+   * Event triggered when &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; ready state changes.
    * @event readyStateChange
-   * @param {String} readyState The current ready state of the retrieval when the event is triggered.
+   * @param {String} readyState The current &lt;code&gt;init()&lt;/code&gt; ready state.
    *   [Rel: Skylink.READY_STATE_CHANGE]
-   * @param {JSON} [error=null] The error object thrown when there is a failure in retrieval.
-   *   If received as &lt;code&gt;null&lt;/code&gt;, it means that there is no errors.
+   * @param {JSON} [error] The error object.
+   *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; is &lt;code&gt;ERROR&lt;/code&gt;.&lt;/small&gt;
    * @param {Number} error.status Http status when retrieving information.
    *   May be empty for other errors.
    * @param {Number} error.errorCode The
@@ -205,7 +187,6 @@ Skylink.prototype._EVENTS = {
    *   when exception is thrown that caused the failure for initialising Skylink.
    * @param {String} room The selected room connection information that Skylink is attempting
    *   to retrieve the information for to start connection to.
-   * @component Events
    * @for Skylink
    * @since 0.4.0
    */

@@ -1,6 +1,5 @@
 /**
- * The list of Peer connection states after <a href="#method_joinRoom"><code>joinRoom()</code> method</a>
- * was successful.
+ * The list of Peer connection states.
  * @attribute HANDSHAKE_PROGRESS
  * @param {String} ENTER   <small>Value <code>"enter"</code></small>
  *   The value of the connection state when Peer has just entered the Room.

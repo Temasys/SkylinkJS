@@ -235,7 +235,7 @@ Skylink.prototype._dataTransfersTimeout = {};
  * @param {Boolean} callback.error.isPrivate <blockquote class="info">
  *   <b>Deprecation Warning!</b> This property has been deprecated.
  *   Please use <code>callback.error.transferInfo.isPrivate</code> instead.
- *   </blockquote> The flag that indicates if data transfer is targeted or not, basing
+ *   </blockquote> The flag if data transfer is targeted or not, basing
  *   off the <code>targetPeerId</code> parameter being defined.
  *   <small>Defined only for single targeted Peer data transfer.</small>
  * @param {Error|String} callback.error.error <blockquote class="info">
@@ -251,7 +251,7 @@ Skylink.prototype._dataTransfersTimeout = {};
  *   are no Peer connections to start data transfer with.</small>
  * @param {JSON} callback.error.transferInfo The data transfer information.
  *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
- *      <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
+ *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
  * @param {JSON} callback.success The success result in request.
  *   <small>Defined as <code>null</code> when there are errors in request</small>
  * @param {String} callback.success.transferId <blockquote class="info">
@@ -271,13 +271,13 @@ Skylink.prototype._dataTransfersTimeout = {};
  * @param {Boolean} callback.success.isPrivate <blockquote class="info">
  *   <b>Deprecation Warning!</b> This property has been deprecated.
  *   Please use <code>callback.success.transferInfo.isPrivate</code> instead.
- *   </blockquote> The flag that indicates if data transfer is targeted or not, basing
+ *   </blockquote> The flag if data transfer is targeted or not, basing
  *   off the <code>targetPeerId</code> parameter being defined.
  *   <small>Defined only for single targeted Peer data transfer.</small>
  * @param {Array} callback.success.listOfPeers The list Peer IDs targeted for the data transfer.
  * @param {JSON} callback.success.transferInfo The data transfer information.
  *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
- *      <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
+ *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
  * @trigger <ol class="desc-seq">
  *   <li>When Peer supports simultaneous data transfers, <ol>
  *   <li><a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggers parameter payload
