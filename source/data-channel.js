@@ -28,15 +28,17 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
  * The list of Datachannel types.
  * @attribute DATA_CHANNEL_TYPE
  * @param {String} MESSAGING <small>Value <code>"messaging"</code></small>
- *   The Datachannel type that is used for messaging in
+ *   The value of the Datachannel type that is used only for messaging in
  *   <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>.
- *   This Datachannel type exists only once and may be used for data transfers (1 simultaneously) when
- *   Peer does not support simultaneous data transfers.
- *   The connection will only close when the Peer connection is closed.
+ *   <small>However for Android/iOS SDKs that do not support simultaneous data transfers, this Datachannel
+ *   type will be used to do data transfers (1 at a time).</small>
+ *   <small>Each Peer connections will only have one of this Datachannel type and the
+ *   connection will only close when the Peer connection is closed.</small>
  * @param {String} DATA <small>Value <code>"data"</code></small>
- *   The Datachannel type that is used only for a data transfer.
- *   This Datachannel type may exists multiple times depending on the number of data transfers that
- *   is currently going on. The connection will close after the data transfer has been completed or terminated.
+ *   The value of the Datachannel type that is used only for a data transfer in
+ *   <a href="#method_sendURLData"><code>sendURLData()</code> method</a> and
+ *   <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>.
+ *   <small>The connection will close after the data transfer has been completed or terminated.</small>
  * @type JSON
  * @readOnly
  * @for Skylink

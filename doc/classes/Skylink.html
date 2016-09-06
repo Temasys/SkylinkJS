@@ -4266,7 +4266,7 @@ If provided string length is lesser than or equals to the chunk size, it should 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l297"><code>source&#x2F;data-channel.js:297</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l299"><code>source&#x2F;data-channel.js:299</code></a>
       </small>
     
 
@@ -4423,7 +4423,7 @@ If provided string length is lesser than or equals to the chunk size, it should 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l74"><code>source&#x2F;data-channel.js:74</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l76"><code>source&#x2F;data-channel.js:76</code></a>
       </small>
     
 
@@ -8453,7 +8453,7 @@ This will open a new data type of Datachannel connection with Peer if
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l239"><code>source&#x2F;data-channel.js:239</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l241"><code>source&#x2F;data-channel.js:241</code></a>
       </small>
     
 
@@ -19024,7 +19024,7 @@ If enabled, the Peers connecting the same Room will receive each others &quot;en
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l61"><code>source&#x2F;data-channel.js:61</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l63"><code>source&#x2F;data-channel.js:63</code></a>
       </small>
     
 
@@ -19779,7 +19779,7 @@ If enabled, the Peers connecting the same Room will receive each others &quot;en
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l50"><code>source&#x2F;data-channel.js:50</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l52"><code>source&#x2F;data-channel.js:52</code></a>
       </small>
     
 
@@ -26374,7 +26374,7 @@ The list of Peer connection ICE gathering states after
   </div>
 
   <div class="code-item-description">
-    <p>Contains the list of Datachannel connection states.</p>
+    <p>The list of Datachannel connection states.</p>
 
   </div>
 
@@ -26397,7 +26397,7 @@ The list of Peer connection ICE gathering states after
 
             <div class="param-description">
                 <p><small>Value <code>&quot;connecting&quot;</code></small>
-  The state when Datachannel is attempting to establish a connection.</p>
+  The value of the state when Datachannel is attempting to establish a connection.</p>
 
             </div>
 
@@ -26413,7 +26413,7 @@ The list of Peer connection ICE gathering states after
 
             <div class="param-description">
                 <p><small>Value <code>&quot;open&quot;</code></small>
-  The state when Datachannel has established a connection.</p>
+  The value of the state when Datachannel has established a connection.</p>
 
             </div>
 
@@ -26429,7 +26429,7 @@ The list of Peer connection ICE gathering states after
 
             <div class="param-description">
                 <p><small>Value <code>&quot;closing&quot;</code></small>
-  The state when Datachannel connection is closing.</p>
+  The value of the state when Datachannel connection is closing.</p>
 
             </div>
 
@@ -26445,7 +26445,7 @@ The list of Peer connection ICE gathering states after
 
             <div class="param-description">
                 <p><small>Value <code>&quot;closed&quot;</code></small>
-  The state when Datachannel connection has closed.</p>
+  The value of the state when Datachannel connection has closed.</p>
 
             </div>
 
@@ -26461,7 +26461,7 @@ The list of Peer connection ICE gathering states after
 
             <div class="param-description">
                 <p><small>Value <code>&quot;error&quot;</code></small>
-  The state when Datachannel connection has errors.</p>
+  The value of the state when Datachannel connection has errors.</p>
 
             </div>
 
@@ -26536,7 +26536,7 @@ The list of Peer connection ICE gathering states after
   </div>
 
   <div class="code-item-description">
-    <p>Contains the list of Datachannel types.</p>
+    <p>The list of Datachannel types.</p>
 
   </div>
 
@@ -26559,11 +26559,12 @@ The list of Peer connection ICE gathering states after
 
             <div class="param-description">
                 <p><small>Value <code>&quot;messaging&quot;</code></small>
-  The Datachannel type that is used for messaging in
+  The value of the Datachannel type that is used only for messaging in
   <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>.
-  This Datachannel type exists only once and may be used for data transfers (1 simultaneously) when
-  Peer does not support simultaneous data transfers.
-  The connection will only close when the Peer connection is closed.</p>
+  <small>However for Android/iOS SDKs that do not support simultaneous data transfers, this Datachannel
+  type will be used to do data transfers (1 at a time).</small>
+  <small>Each Peer connections will only have one of this Datachannel type and the
+  connection will only close when the Peer connection is closed.</small></p>
 
             </div>
 
@@ -26579,9 +26580,10 @@ The list of Peer connection ICE gathering states after
 
             <div class="param-description">
                 <p><small>Value <code>&quot;data&quot;</code></small>
-  The Datachannel type that is used only for a data transfer.
-  This Datachannel type may exists multiple times depending on the number of data transfers that
-  is currently going on. The connection will close after the data transfer has been completed or terminated.</p>
+  The value of the Datachannel type that is used only for a data transfer in
+  <a href="#method_sendURLData"><code>sendURLData()</code> method</a> and
+  <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>.
+  <small>The connection will close after the data transfer has been completed or terminated.</small></p>
 
             </div>
 

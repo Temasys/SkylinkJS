@@ -90,18 +90,18 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * Contains the list of Datachannel connection states.
+ * The list of Datachannel connection states.
  * @attribute DATA_CHANNEL_STATE
  * @param {String} CONNECTING &lt;small&gt;Value &lt;code&gt;&quot;connecting&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when Datachannel is attempting to establish a connection.
- * @param {String} OPEN &lt;small&gt;Value &lt;code&gt;&quot;open&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when Datachannel has established a connection.
- * @param {String} CLOSING &lt;small&gt;Value &lt;code&gt;&quot;closing&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when Datachannel connection is closing.
- * @param {String} CLOSED &lt;small&gt;Value &lt;code&gt;&quot;closed&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when Datachannel connection has closed.
- * @param {String} ERROR &lt;small&gt;Value &lt;code&gt;&quot;error&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when Datachannel connection has errors.
+ *   The value of the state when Datachannel is attempting to establish a connection.
+ * @param {String} OPEN       &lt;small&gt;Value &lt;code&gt;&quot;open&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the state when Datachannel has established a connection.
+ * @param {String} CLOSING    &lt;small&gt;Value &lt;code&gt;&quot;closing&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the state when Datachannel connection is closing.
+ * @param {String} CLOSED     &lt;small&gt;Value &lt;code&gt;&quot;closed&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the state when Datachannel connection has closed.
+ * @param {String} ERROR      &lt;small&gt;Value &lt;code&gt;&quot;error&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the state when Datachannel connection has errors.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -116,18 +116,20 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
 };
 
 /**
- * Contains the list of Datachannel types.
+ * The list of Datachannel types.
  * @attribute DATA_CHANNEL_TYPE
  * @param {String} MESSAGING &lt;small&gt;Value &lt;code&gt;&quot;messaging&quot;&lt;/code&gt;&lt;/small&gt;
- *   The Datachannel type that is used for messaging in
+ *   The value of the Datachannel type that is used only for messaging in
  *   &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt;.
- *   This Datachannel type exists only once and may be used for data transfers (1 simultaneously) when
- *   Peer does not support simultaneous data transfers.
- *   The connection will only close when the Peer connection is closed.
+ *   &lt;small&gt;However for Android/iOS SDKs that do not support simultaneous data transfers, this Datachannel
+ *   type will be used to do data transfers (1 at a time).&lt;/small&gt;
+ *   &lt;small&gt;Each Peer connections will only have one of this Datachannel type and the
+ *   connection will only close when the Peer connection is closed.&lt;/small&gt;
  * @param {String} DATA &lt;small&gt;Value &lt;code&gt;&quot;data&quot;&lt;/code&gt;&lt;/small&gt;
- *   The Datachannel type that is used only for a data transfer.
- *   This Datachannel type may exists multiple times depending on the number of data transfers that
- *   is currently going on. The connection will close after the data transfer has been completed or terminated.
+ *   The value of the Datachannel type that is used only for a data transfer in
+ *   &lt;a href=&quot;#method_sendURLData&quot;&gt;&lt;code&gt;sendURLData()&lt;/code&gt; method&lt;/a&gt; and
+ *   &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt;.
+ *   &lt;small&gt;The connection will close after the data transfer has been completed or terminated.&lt;/small&gt;
  * @type JSON
  * @readOnly
  * @for Skylink

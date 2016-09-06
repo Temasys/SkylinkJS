@@ -243,33 +243,33 @@
         {
             "file": "source/data-channel.js",
             "line": 1,
-            "description": "Contains the list of Datachannel connection states.",
+            "description": "The list of Datachannel connection states.",
             "itemtype": "attribute",
             "name": "DATA_CHANNEL_STATE",
             "params": [
                 {
                     "name": "CONNECTING",
-                    "description": "<small>Value <code>\"connecting\"</code></small>\n  The state when Datachannel is attempting to establish a connection.",
+                    "description": "<small>Value <code>\"connecting\"</code></small>\n  The value of the state when Datachannel is attempting to establish a connection.",
                     "type": "String"
                 },
                 {
                     "name": "OPEN",
-                    "description": "<small>Value <code>\"open\"</code></small>\n  The state when Datachannel has established a connection.",
+                    "description": "<small>Value <code>\"open\"</code></small>\n  The value of the state when Datachannel has established a connection.",
                     "type": "String"
                 },
                 {
                     "name": "CLOSING",
-                    "description": "<small>Value <code>\"closing\"</code></small>\n  The state when Datachannel connection is closing.",
+                    "description": "<small>Value <code>\"closing\"</code></small>\n  The value of the state when Datachannel connection is closing.",
                     "type": "String"
                 },
                 {
                     "name": "CLOSED",
-                    "description": "<small>Value <code>\"closed\"</code></small>\n  The state when Datachannel connection has closed.",
+                    "description": "<small>Value <code>\"closed\"</code></small>\n  The value of the state when Datachannel connection has closed.",
                     "type": "String"
                 },
                 {
                     "name": "ERROR",
-                    "description": "<small>Value <code>\"error\"</code></small>\n  The state when Datachannel connection has errors.",
+                    "description": "<small>Value <code>\"error\"</code></small>\n  The value of the state when Datachannel connection has errors.",
                     "type": "String"
                 }
             ],
@@ -281,18 +281,18 @@
         {
             "file": "source/data-channel.js",
             "line": 27,
-            "description": "Contains the list of Datachannel types.",
+            "description": "The list of Datachannel types.",
             "itemtype": "attribute",
             "name": "DATA_CHANNEL_TYPE",
             "params": [
                 {
                     "name": "MESSAGING",
-                    "description": "<small>Value <code>\"messaging\"</code></small>\n  The Datachannel type that is used for messaging in\n  <a href=\"#method_sendP2PMessage\"><code>sendP2PMessage()</code> method</a>.\n  This Datachannel type exists only once and may be used for data transfers (1 simultaneously) when\n  Peer does not support simultaneous data transfers.\n  The connection will only close when the Peer connection is closed.",
+                    "description": "<small>Value <code>\"messaging\"</code></small>\n  The value of the Datachannel type that is used only for messaging in\n  <a href=\"#method_sendP2PMessage\"><code>sendP2PMessage()</code> method</a>.\n  <small>However for Android/iOS SDKs that do not support simultaneous data transfers, this Datachannel\n  type will be used to do data transfers (1 at a time).</small>\n  <small>Each Peer connections will only have one of this Datachannel type and the\n  connection will only close when the Peer connection is closed.</small>",
                     "type": "String"
                 },
                 {
                     "name": "DATA",
-                    "description": "<small>Value <code>\"data\"</code></small>\n  The Datachannel type that is used only for a data transfer.\n  This Datachannel type may exists multiple times depending on the number of data transfers that\n  is currently going on. The connection will close after the data transfer has been completed or terminated.",
+                    "description": "<small>Value <code>\"data\"</code></small>\n  The value of the Datachannel type that is used only for a data transfer in\n  <a href=\"#method_sendURLData\"><code>sendURLData()</code> method</a> and\n  <a href=\"#method_sendBlobData\"><code>sendBlobData()</code> method</a>.\n  <small>The connection will close after the data transfer has been completed or terminated.</small>",
                     "type": "String"
                 }
             ],
@@ -303,7 +303,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 50,
+            "line": 52,
             "description": "Stores the flag if Peers should have any Datachannel connections.",
             "itemtype": "attribute",
             "name": "_enableDataChannel",
@@ -316,7 +316,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 61,
+            "line": 63,
             "description": "Stores the list of Peer Datachannel connections.",
             "itemtype": "attribute",
             "name": "_dataChannels",
@@ -342,7 +342,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 74,
+            "line": 76,
             "description": "Function that starts a Datachannel connection with Peer.",
             "itemtype": "method",
             "name": "_createDataChannel",
@@ -353,7 +353,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 239,
+            "line": 241,
             "description": "Function that sends data over the Datachannel connection.",
             "itemtype": "method",
             "name": "_sendDataChannelMessage",
@@ -364,7 +364,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 297,
+            "line": 299,
             "description": "Function that stops the Datachannel connection and removes object references.",
             "itemtype": "method",
             "name": "_closeDataChannel",
