@@ -134,6 +134,7 @@ footer {
   right: 2px;
   margin: 0;
   text-align: right;
+  display: none;
 }
 
 .peervideo .connstats-wrapper button {

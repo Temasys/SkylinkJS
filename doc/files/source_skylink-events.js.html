@@ -90,152 +90,107 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * Stores the list of {{#crossLink &quot;Skylink/on:method&quot;}}on(){{/crossLink}}
- *   event subscription handlers.
+ * Stores the list of &lt;code&gt;on()&lt;/code&gt; event handlers.
  * @attribute _EVENTS
- * @param {Array} (#eventName) The array of event subscription handlers that is
- *   subscribed using {{#crossLink &quot;Skylink/on:method&quot;}}on() method{{/crossLink}}
- *   associated with the event name.
- * @param {Function} (#eventName).(#index) The event subscription handler
- *   associated with the event name. This is to be triggered multiple times
- *   until {{#crossLink &quot;Skylink/off:method&quot;}}off(){{/crossLink}} is invoked for
- *   this event subscription handler.
+ * @param {Array} &lt;#event&gt; The list of event handlers associated with the event.
+ * @param {Function} &lt;#event&gt;.&lt;#index&gt; The event handler function.
  * @type JSON
  * @private
- * @required
- * @component Events
  * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._EVENTS = {
   /**
-   * Event triggered when the socket connection to the platform signaling is opened.
-   * - This event means that socket connection is open and self is ready to join the room.
+   * Event triggered when socket connection to Signaling server has opened.
    * @event channelOpen
-   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
   channelOpen: [],
 
   /**
-   * Event triggered when the socket connection to the platform signaling is closed.
-   * - This event means that socket connection is closed and self has left the room.
+   * Event triggered when socket connection to Signaling server has closed.
    * @event channelClose
-   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
   channelClose: [],
 
   /**
-   * Event triggered when the socket connection is exchanging messages with the platform signaling.
-   * - This event is a debugging feature, and it&#x27;s not advisable to subscribe to
-   *   this event unless you are debugging the socket messages
-   *   received from the platform signaling.
+   * &lt;blockquote class=&quot;info&quot;&gt;
+   *   Note that this is used only for SDK developer purposes.
+   * &lt;/blockquote&gt;
+   * Event triggered when receiving socket message from the Signaling server.
    * @event channelMessage
-   * @param {JSON} message The socket message object data received from the platform signaling.
-   * @component Events
+   * @param {JSON} message The socket message object.
    * @for Skylink
    * @since 0.1.0
    */
   channelMessage: [],
 
   /**
-   * Event triggered when the socket connection has occurred an exception
-   *   during a connection with the platform signaling.
-   * - After this event is triggered, it may result in &lt;a href=&quot;#event_channelClose&quot;&gt;channelClose&lt;/a&gt;,
-   *   and the socket connection with the platform signaling could be disrupted.
+   * &lt;blockquote class=&quot;info&quot;&gt;
+   *   This may be caused by Javascript errors in the event listener when subscribing to events.&lt;br&gt;
+   *   It may be resolved by checking for code errors in your Web App in the event subscribing listener.&lt;br&gt;
+   *   &lt;code&gt;skylinkDemo.on(&quot;eventName&quot;, function () { // Errors here });&lt;/code&gt;
+   * &lt;/blockquote&gt;
+   * Event triggered when socket connection encountered exception.
    * @event channelError
-   * @param {Object|String} error The error object thrown that caused the exception.
-   * @component Events
+   * @param {Error|String} error The error object.
    * @for Skylink
    * @since 0.1.0
    */
   channelError: [],
 
   /**
-   * Event triggered when attempting to reconnect the socket connection with the platform signaling.
-   * - Depending on the current &lt;code&gt;type&lt;/code&gt; triggered in &lt;a href=&quot;#event_socketError&quot;&gt;
-   *   socketError&lt;/a&gt; event before, it may or may not attempt the socket reconnection and
-   *   this event may not be triggered.
-   * - If reconnection attempt fails, it will trigger &lt;a href=&quot;#event_socketError&quot;&gt;socketError&lt;/a&gt; event
-   *   again and repeat the stage from there.
+   * Event triggered when attempting to establish socket connection to Signaling server when failed.
    * @event channelRetry
-   * @param {String} fallbackType The fallback socket transport that Skylink is attempting to reconnect with.
+   * @param {String} fallbackType The current fallback state.
    *   [Rel: Skylink.SOCKET_FALLBACK]
    * @param {Number} currentAttempt The current reconnection attempt.
-   * @component Events
    * @for Skylink
    * @since 0.5.6
    */
   channelRetry: [],
 
   /**
-   * Event triggered when attempt to &lt;em&gt;(re)&lt;/em&gt;connect the socket connection with the platform signaling has failed.
-   * - Depending on the current &lt;code&gt;type&lt;/code&gt; payload, it may or may not attempt the
-   *   socket reconnection and &lt;a href=&quot;#event_channelRetry&quot;&gt;channelRetry&lt;/a&gt; event may not be triggered.
-   * - If reconnection attempt fails and there are still available ports to reconnect with,
-   *   it will trigger &lt;a href=&quot;#event_channelRetry&quot;&gt;channelRetry&lt;/a&gt; event again and
-   *   repeat the stage from there.
+   * Event triggered when attempt to establish socket connection to Signaling server has failed.
    * @event socketError
-   * @param {String} errorCode The socket connection error code received.
+   * @param {String} errorCode The socket connection error code.
    *   [Rel: Skylink.SOCKET_ERROR]
-   * @param {Number|String|Object} error The error object thrown that caused the failure.
-   * @param {String} type The socket transport that Skylink has failed to connect with.
+   * @param {Error|String|Number} error The error object.
+   * @param {String} type The fallback state of the socket connection attempt.
    *   [Rel: Skylink.SOCKET_FALLBACK]
-   * @component Events
    * @for Skylink
    * @since 0.5.5
    */
   socketError: [],
 
   /**
-   * Event triggered when room connection information is being retrieved from platform server.
-   * - This is also triggered when &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt; is invoked, but
-   *   the socket connection events like &lt;a href=&quot;#event_channelOpen&quot;&gt;channelOpen&lt;/a&gt; does
-   *   not get triggered but stops at &lt;u&gt;readyStateChange&lt;/u&gt; event.
+   * Event triggered when &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; ready state changes.
    * @event readyStateChange
-   * @param {String} readyState The current ready state of the retrieval when the event is triggered.
+   * @param {String} readyState The current &lt;code&gt;init()&lt;/code&gt; ready state.
    *   [Rel: Skylink.READY_STATE_CHANGE]
-   * @param {JSON} [error=null] The error object thrown when there is a failure in retrieval.
-   *   If received as &lt;code&gt;null&lt;/code&gt;, it means that there is no errors.
-   * @param {Number} error.status Http status when retrieving information.
-   *   May be empty for other errors.
-   * @param {Number} error.errorCode The
-   *   &lt;a href=&quot;#attr_READY_STATE_CHANGE_ERROR&quot;&gt;READY_STATE_CHANGE_ERROR&lt;/a&gt;
-   *   if there is an &lt;a href=&quot;#event_readyStateChange&quot;&gt;readyStateChange&lt;/a&gt;
-   *   event error that caused the failure for initialising Skylink.
+   * @param {JSON} [error] The error result.
+   *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; is &lt;code&gt;ERROR&lt;/code&gt;.&lt;/small&gt;
+   * @param {Number} error.status The HTTP status code when failed.
+   * @param {Number} error.errorCode The ready state change failure code.
    *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
-   * @param {Object} error.content The exception thrown that caused the failure
-   *   for initialising Skylink.
-   * @param {Number} error.status The XMLHttpRequest status code received
-   *   when exception is thrown that caused the failure for initialising Skylink.
-   * @param {String} room The selected room connection information that Skylink is attempting
-   *   to retrieve the information for to start connection to.
-   * @component Events
+   * @param {Error} error.content The error object.
+   * @param {String} room The Room to The Room to retrieve session token for.
    * @for Skylink
    * @since 0.4.0
    */
   readyStateChange: [],
 
   /**
-   * Event triggered when a Peer handshaking state has changed.
-   * - This event may trigger &lt;code&gt;state&lt;/code&gt; &lt;code&gt;HANDSHAKE_PROGRESS.ENTER&lt;/code&gt; for
-   *   self to indicate that broadcast to ping for any existing Peers in the room has
-   *   been made.
-   * - This event is a debugging feature, and it&#x27;s used to check the
-   *   Peer handshaking connection status.
-   * - This starts the Peer connection handshaking, where it retrieves all the Peer
-   *   information and then proceeds to start the ICE connection.
+   * Event triggered when a Peer connection establishment state has changed.
    * @event handshakeProgress
-   * @param {String} state The Peer connection handshake state.
+   * @param {String} state The current Peer connection establishment state.
    *   [Rel: Skylink.HANDSHAKE_PROGRESS]
-   * @param {String} peerId The Peer ID associated with the connection
-   *   handshake state.
-   * @param {Object|String} [error] The error object thrown when there is a failure in
-   *   the connection handshaking.
-   * @component Events
+   * @param {String} peerId The Peer ID.
+   * @param {Error|String} [error] The error object.
+   *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; is &lt;code&gt;ERROR&lt;/code&gt;.&lt;/small&gt;
    * @for Skylink
    * @since 0.3.0
    */
@@ -243,33 +198,21 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when a Peer connection ICE gathering state has changed.
-   * - This event is a debugging feature, and it&#x27;s used to check the
-   *   Peer ICE candidate gathering status.
-   * - This indicates if the ICE gathering has been completed to
-   *   start ICE connection for DataChannel and media streaming connection.
    * @event candidateGenerationState
-   * @param {String} state The current ICE gathering state.
-   *   &lt;small&gt;See the list of available triggered states in the related link.&lt;/small&gt;
+   * @param {String} state The current Peer connection ICE gathering state.
    *   [Rel: Skylink.CANDIDATE_GENERATION_STATE]
-   * @param {String} peerId The Peer ID associated with the connection
-   * @component Events
+   * @param {String} peerId The Peer ID.
    * @for Skylink
    * @since 0.1.0
    */
   candidateGenerationState: [],
 
   /**
-   * Event triggered when a Peer connection signaling state has changed.
-   * - This event is a debugging feature, and it&#x27;s used to check the
-   *   Peer signaling connection status.
-   * - This event indicates if the session description is received
-   *   to start ICE gathering for DataChannel and media streaming connection.
+   * Event triggered when a Peer connection session description exchanging state has changed.
    * @event peerConnectionState
-   * @param {String} state The current connection signaling state.
+   * @param {String} state The current Peer connection session description exchanging state.
    *   [Rel: Skylink.PEER_CONNECTION_STATE]
-   * @param {String} peerId The Peer ID associated with the current connection
-   *   signaling state.
-   * @component Events
+   * @param {String} peerId The Peer ID.
    * @for Skylink
    * @since 0.1.0
    */
@@ -277,111 +220,84 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when a Peer connection ICE connection state has changed.
-   * - This event is a debugging feature, and it&#x27;s used to check the
-   *   Peer ICE connection of added ICE candidates status.
-   * - This event indicates if the ICE connection is established for successful
-   *   DataChannel and media streaming connection.
    * @event iceConnectionState
-   * @param {String} state The current ICE connection state.
+   * @param {String} state The current Peer connection ICE connection state.
    *   [Rel: Skylink.ICE_CONNECTION_STATE]
-   * @param {String} peerId The Peer ID associated with the current ICE connection state.
-   * @component Events
+   * @param {String} peerId The Peer ID.
    * @for Skylink
    * @since 0.1.0
    */
   iceConnectionState: [],
 
   /**
-   * Event triggered when access to self user media stream has failed.
-   * - If &lt;code&gt;audioFallback&lt;/code&gt; is enabled in &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;,
-   *   it will throw an error if audio only user media stream failed after
-   *   a failed attempt to retrieve video and audio user media.
+   * Event triggered when retrieval of Stream failed.
    * @event mediaAccessError
-   * @param {Object|String} error The error object thrown that caused the failure.
-   * @param {Boolean} isScreensharing The flag that indicates if self
-   *    Stream object is a screensharing stream or not.
-   * @param {Boolean} isAudioFallbackError The flag that indicates if Skylink throws
-   *    the error after an audio fallback has been attempted.
-   * @component Events
+   * @param {Error|String} error The error object.
+   * @param {Boolean} isScreensharing The flag if event occurred during
+   *   &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; method&lt;/a&gt; and not
+   *   &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt;.
+   * @param {Boolean} isAudioFallbackError The flag if event occurred during
+   *   retrieval of audio tracks only when &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt;
+   *   had failed to retrieve both audio and video tracks.
    * @for Skylink
    * @since 0.1.0
    */
   mediaAccessError: [],
 
   /**
-   * Event triggered when media access fallback has been made.
-   * - If &lt;code&gt;audioFallback&lt;/code&gt; is enabled in &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;,
-   *   and if there is a failed attempt to retrieve video and audio user media,
-   *   it will attempt to do the audio fallback.
-   * - If MediaStream successfully received does not meet to expected tracks, this
-   *   event would be triggered.
+   * Event triggered when Stream retrieval fallback state has changed.
    * @event mediaAccessFallback
-   * @param {JSON} error The error object information.
-   * @param {Object|String} error.error The error object thrown that caused the failure
-   *   from retrieve video and audio user media stream.
-   *   is triggered because (video+audio) error is fallbacking to audio only.
-   * @param {JSON} [error.diff=null] The list of expected audio and video tracks and received
-   *   tracks.&lt;br&gt;This is only defined when &lt;code&gt;state&lt;/code&gt; payload is &lt;code&gt;1&lt;/code&gt;.
+   * @param {JSON} error The error result.
+   * @param {Error|String} error.error The error object.
+   * @param {JSON} [error.diff=null] The list of excepted but received audio and video tracks in Stream.
+   *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; payload is &lt;code&gt;FALLBACKED&lt;/code&gt;.&lt;/small&gt;
    * @param {JSON} error.diff.video The expected and received video tracks.
    * @param {Number} error.diff.video.expected The expected video tracks.
    * @param {Number} error.diff.video.received The received video tracks.
    * @param {JSON} error.diff.audio The expected and received audio tracks.
    * @param {Number} error.diff.audio.expected The expected audio tracks.
    * @param {Number} error.diff.audio.received The received audio tracks.
-   * @param {Number} state The access fallback state.
-   * &lt;small&gt;&lt;ul&gt;
-   * &lt;li&gt;&lt;code&gt;0&lt;/code&gt;: Attempting to retrieve access for fallback state.&lt;/li&gt;
-   * &lt;li&gt;&lt;code&gt;1&lt;/code&gt;: Fallback access has been completed successfully&lt;/li&gt;
-   * &lt;li&gt;&lt;code&gt;-1&lt;/code&gt;: Failed retrieving fallback access&lt;/li&gt;
-   * &lt;/ul&gt;&lt;/small&gt;
-   * @param {Boolean} [isScreensharing=false] The flag that indicates if this event ia an
-   *   fallback from failed screensharing retrieval or attaching of audio.
-   * @component Events
-   * @param {Boolean} [isAudioFallback=false] The flag that indicates if this event is an
-   *   audio fallbacking from failed attempt to retrieve video and audio user media.
+   * @param {Number} state The fallback state.
+   *   [Rel: Skylink.MEDIA_ACCESS_FALLBACK_STATE]
+   * @param {Boolean} isScreensharing The flag if event occurred during
+   *   &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; method&lt;/a&gt; and not
+   *   &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt;.
+   * @param {Boolean} isAudioFallback The flag if event occurred during
+   *   retrieval of audio tracks only when &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt;
+   *   had failed to retrieve both audio and video tracks.
    * @for Skylink
    * @since 0.6.3
    */
   mediaAccessFallback: [],
 
   /**
-   * Event triggered when access to self user media stream is successfully
-   *   attached to Skylink.
+   * Event triggered when retrieval of Stream is successful.
    * @event mediaAccessSuccess
-   * @param {Object} stream The self user [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_API)
-   *   object. To display the MediaStream object to a &lt;code&gt;video&lt;/code&gt; or &lt;code&gt;audio&lt;/code&gt;, simply invoke:&lt;br&gt;
-   *   &lt;code&gt;attachMediaStream(domElement, stream);&lt;/code&gt;.
-   * @param {Boolean} isScreensharing The flag that indicates if self
-   *    Stream object is a screensharing stream or not.
-   * @component Events
+   * @param {MediaStream} stream The Stream object.
+   *   &lt;small&gt;To attach it to an element: &lt;code&gt;attachMediaStream(videoElement, stream);&lt;/code&gt;.&lt;/small&gt;
+   * @param {Boolean} isScreensharing The flag if event occurred during
+   *   &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; method&lt;/a&gt; and not
+   *   &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt;.
    * @for Skylink
    * @since 0.1.0
    */
   mediaAccessSuccess: [],
 
   /**
-   * Event triggered when the application requires to retrieve self
-   *   user media stream manually instead of doing it automatically in
-   *   {{#crossLink &quot;Skylink/joinRoom:method&quot;}}joinRoom(){{/crossLink}}.
-   * - This event triggers based on the configuration of &lt;code&gt;manualGetUserMedia&lt;/code&gt;
-   *   in the &lt;a href=&quot;#method_joinRoom&quot;&gt;joinRoom() configuration settings&lt;/a&gt;.
-   * - Developers must manually invoke &lt;a href=&quot;#method_getUserMedia&quot;&gt;getUserMedia()&lt;/a&gt;
-   *   to retrieve the user media stream before self would join the room.
-   *   Once the user media stream is attached, self would proceed to join the room
-   *   automatically.
+   * Event triggered when retrieval of Stream is required to complete &lt;a href=&quot;#method_joinRoom&quot;&gt;
+   * &lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt; request.
    * @event mediaAccessRequired
-   * @component Events
    * @for Skylink
    * @since 0.5.5
    */
   mediaAccessRequired: [],
 
   /**
-   * Event triggered when self user media stream attached to Skylink has been stopped.
+   * Event triggered when Stream has stopped streaming.
    * @event mediaAccessStopped
-   * @param {Boolean} isScreensharing The flag that indicates if self
-   *    Stream object is a screensharing stream or not.
-   * @component Events
+   * @param {Boolean} isScreensharing The flag if event occurred during
+   *   &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; method&lt;/a&gt; and not
+   *   &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt;.
    * @for Skylink
    * @since 0.5.6
    */
@@ -390,232 +306,67 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when a Peer joins the room.
    * @event peerJoined
-   * @param {String} peerId The Peer ID of the new peer
-   *   that has joined the room.
-   * @param {Object} peerInfo The peer information associated
-   *   with the Peer Connection.
-   * @param {String|JSON} peerInfo.userData The custom user data
-   *   information set by developer. This custom user data can also
-   *   be set in &lt;a href=&quot;#method_setUserData&quot;&gt;setUserData()&lt;/a&gt;.
-   * @param {JSON} peerInfo.settings The Peer Stream
-   *   streaming settings information. If both audio and video
-   *   option is &lt;code&gt;false&lt;/code&gt;, there should be no
-   *   receiving remote Stream object from this associated Peer.
-   * @param {Boolean|JSON} [peerInfo.settings.audio=false] The
-   *   Peer Stream streaming audio settings. If
-   *   &lt;code&gt;false&lt;/code&gt;, it means that audio streaming is disabled in
-   *   the remote Stream of the Peer.
-   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
-   *   stereo option should be explictly enabled to an OPUS enabled audio stream.
-   *   Check the &lt;code&gt;audioCodec&lt;/code&gt; configuration settings in
-   *   &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
-   *   to enable OPUS as the audio codec. Note that stereo is already enabled
-   *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
-   *   enable stereo in the audio streaming.
-   * @param {Boolean|JSON} [peerInfo.settings.video=false] The Peer
-   *   Stream streaming video settings. If &lt;code&gt;false&lt;/code&gt;, it means that
-   *   video streaming is disabled in the remote Stream of the Peer.
-   * @param {JSON} [peerInfo.settings.video.resolution] The Peer
-   *   Stream streaming video resolution settings. Setting the resolution may
-   *   not force set the resolution provided as it depends on the how the
-   *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} [peerInfo.settings.video.resolution.width] The Peer
-   *   Stream streaming video resolution width.
-   * @param {Number} [peerInfo.settings.video.resolution.height] The Peer
-   *   Stream streaming video resolution height.
-   * @param {Number} [peerInfo.settings.video.frameRate] The Peer
-   *   Stream streaming video maximum frameRate.
-   * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
-   *   that indicates if the Peer connection Stream object sent
-   *   is a screensharing stream or not.
-   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
-   *   the maximum sending bandwidth. The flags set may or may not work depending
-   *   on the browser implementations and how it handles it.
-   * @param {String} [peerInfo.settings.bandwidth.audio] The maximum
-   *   sending audio bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the audio bitrate to the browser defaults.
-   * @param {String} [peerInfo.settings.bandwidth.video] The maximum
-   *   sending video bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the video bitrate to the browser defaults.
-   * @param {String} [peerInfo.settings.bandwidth.data] The maximum
-   *   sending data bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the data bitrate to the browser defaults.
-   * @param {JSON} peerInfo.mediaStatus The Peer Stream mute
-   *   settings for both audio and video streamings.
-   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
-   *   indicates if the remote Stream object audio streaming is muted. If
-   *   there is no audio streaming enabled for the Peer, by default,
-   *   it is set to &lt;code&gt;true&lt;/code&gt;.
-   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] The flag that
-   *   indicates if the remote Stream object video streaming is muted. If
-   *   there is no video streaming enabled for the Peer, by default,
-   *   it is set to &lt;code&gt;true&lt;/code&gt;.
-   * @param {JSON} peerInfo.agent The Peer platform agent information.
-   * @param {String} peerInfo.agent.name The Peer platform browser or agent name.
-   * @param {Number} peerInfo.agent.version The Peer platform browser or agent version.
-   * @param {Number} peerInfo.agent.os The Peer platform name.
-   * @param {String} peerInfo.room The current room that the Peer is in.
-   * @param {Boolean} isSelf The flag that indicates if self is the Peer.
-   * @component Events
+   * @param {String} peerId The Peer ID.
+   * @param {JSON} peerInfo The Peer session information.
+   * @param {JSON|String} peerInfo.userData The Peer current custom data.
+   * @param {JSON} peerInfo.settings The Peer sending Stream settings.
+   * @param {Boolean|JSON} peerInfo.settings.audio The Peer Stream audio settings.
+   *   &lt;small&gt;When defined as &lt;code&gt;false&lt;/code&gt;, it means there is no audio being sent from Peer.&lt;/small&gt;
+   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag if stereo band is configured
+   *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for receiving audio data.
+   * @param {Boolean|JSON} peerInfo.settings.video The Peer Stream video settings.
+   *   &lt;small&gt;When defined as &lt;code&gt;false&lt;/code&gt;, it means there is no video being sent from Peer.&lt;/small&gt;
+   * @param {JSON} peerInfo.settings.video.resolution The Peer Stream video resolution.
+   *   [Rel: Skylink.VIDEO_RESOLUTION]
+   * @param {Number} [peerInfo.settings.video.resolution.width] The Peer Stream video resolution width.
+   * @param {Number} [peerInfo.settings.video.resolution.height] The Peer Stream video resolution height.
+   * @param {Number} [peerInfo.settings.video.frameRate] The Peer Stream video
+   *   &lt;a href=&quot;https://en.wikipedia.org/wiki/Frame_rate&quot;&gt;frameRate&lt;/a&gt; per second (fps).
+   * @param {Boolean} [peerInfo.settings.video.screenshare] The flag if Peer Stream is a screensharing Stream.
+   * @param {JSON} [peerInfo.settings.bandwidth] The maximum streaming bandwidth sent from Peer.
+   * @param {Number} [peerInfo.settings.bandwidth.audio] The maximum audio streaming bandwidth sent from Peer.
+   * @param {Number} [peerInfo.settings.bandwidth.video] The maximum video streaming bandwidth sent from Peer.
+   * @param {Number} [peerInfo.settings.bandwidth.data] The maximum data streaming bandwidth sent from Peer.
+   * @param {JSON} peerInfo.mediaStatus The Peer Stream muted settings.
+   * @param {Boolean} peerInfo.mediaStatus.audioMuted The flag if Peer Stream audio tracks is muted or not.
+   *   &lt;small&gt;If Peer &lt;code&gt;peerInfo.settings.audio&lt;/code&gt; is false, this will be defined as &lt;code&gt;true&lt;/code&gt;.&lt;/small&gt;
+   * @param {Boolean} peerInfo.mediaStatus.videoMuted The flag if Peer Stream audio tracks is muted or not.
+   *   &lt;small&gt;If Peer &lt;code&gt;peerInfo.settings.video&lt;/code&gt; is false, this will be defined as &lt;code&gt;true&lt;/code&gt;.&lt;/small&gt;
+   * @param {JSON} peerInfo.agent The Peer agent information.
+   * @param {String} peerInfo.agent.name The Peer agent name.
+   *   &lt;small&gt;Data may be accessing browser or non-Web SDK name.&lt;/small&gt;
+   * @param {Number} peerInfo.agent.version The Peer agent version.
+   *   &lt;small&gt;Data may be accessing browser or non-Web SDK version.&lt;/small&gt;
+   * @param {String} [peerInfo.agent.os] The Peer platform name.
+   *  &lt;small&gt;Data may be accessing OS platform version from Web SDK.&lt;/small&gt;
+   * @param {String} peerInfo.room The Room Peer is from.
+   * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
    * @since 0.5.2
    */
   peerJoined: [],
 
   /**
-   * Event triggered when a Peer connection has been restarted for
-   *   a reconnection.
+   * Event triggered when a Peer connection has been refreshed.
    * @event peerRestart
-   * @param {String} peerId The Peer ID of the connection that
-   *   is restarted for a reconnection.
-   * @param {Object} peerInfo The peer information associated
-   *   with the Peer Connection.
-   * @param {String|JSON} peerInfo.userData The custom user data
-   *   information set by developer. This custom user data can also
-   *   be set in &lt;a href=&quot;#method_setUserData&quot;&gt;setUserData()&lt;/a&gt;.
-   * @param {JSON} peerInfo.settings The Peer Stream
-   *   streaming settings information. If both audio and video
-   *   option is &lt;code&gt;false&lt;/code&gt;, there should be no
-   *   receiving remote Stream object from this associated Peer.
-   * @param {Boolean|JSON} [peerInfo.settings.audio=false] The
-   *   Peer Stream streaming audio settings. If
-   *   &lt;code&gt;false&lt;/code&gt;, it means that audio streaming is disabled in
-   *   the remote Stream of the Peer.
-   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
-   *   stereo option should be explictly enabled to an OPUS enabled audio stream.
-   *   Check the &lt;code&gt;audioCodec&lt;/code&gt; configuration settings in
-   *   &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
-   *   to enable OPUS as the audio codec. Note that stereo is already enabled
-   *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
-   *   enable stereo in the audio streaming.
-   * @param {Boolean|JSON} [peerInfo.settings.video=false] The Peer
-   *   Stream streaming video settings. If &lt;code&gt;false&lt;/code&gt;, it means that
-   *   video streaming is disabled in the remote Stream of the Peer.
-   * @param {JSON} [peerInfo.settings.video.resolution] The Peer
-   *   Stream streaming video resolution settings. Setting the resolution may
-   *   not force set the resolution provided as it depends on the how the
-   *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} [peerInfo.settings.video.resolution.width] The Peer
-   *   Stream streaming video resolution width.
-   * @param {Number} [peerInfo.settings.video.resolution.height] The Peer
-   *   Stream streaming video resolution height.
-   * @param {Number} [peerInfo.settings.video.frameRate] The Peer
-   *   Stream streaming video maximum frameRate.
-   * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
-   *   that indicates if the Peer connection Stream object sent
-   *   is a screensharing stream or not.
-   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
-   *   the maximum sending bandwidth. The flags set may or may not work depending
-   *   on the browser implementations and how it handles it.
-   * @param {String} [peerInfo.settings.bandwidth.audio] The maximum
-   *   sending audio bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the audio bitrate to the browser defaults.
-   * @param {String} [peerInfo.settings.bandwidth.video] The maximum
-   *   sending video bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the video bitrate to the browser defaults.
-   * @param {String} [peerInfo.settings.bandwidth.data] The maximum
-   *   sending data bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the data bitrate to the browser defaults.
-   * @param {JSON} peerInfo.mediaStatus The Peer Stream mute
-   *   settings for both audio and video streamings.
-   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
-   *   indicates if the remote Stream object audio streaming is muted. If
-   *   there is no audio streaming enabled for the Peer, by default,
-   *   it is set to &lt;code&gt;true&lt;/code&gt;.
-   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] The flag that
-   *   indicates if the remote Stream object video streaming is muted. If
-   *   there is no video streaming enabled for the Peer, by default,
-   *   it is set to &lt;code&gt;true&lt;/code&gt;.
-   * @param {JSON} peerInfo.agent The Peer platform agent information.
-   * @param {String} peerInfo.agent.name The Peer platform browser or agent name.
-   * @param {Number} peerInfo.agent.version The Peer platform browser or agent version.
-   * @param {Number} peerInfo.agent.os The Peer platform name.
-   * @param {String} peerInfo.room The current room that the Peer is in.
-   * @param {Boolean} isSelfInitiateRestart The flag that indicates if self is
-   *    the one who have initiated the Peer connection restart.
-   * @component Events
+   * @param {String} peerId The Peer ID.
+   * @param {JSON} peerInfo The Peer session information.
+   *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo&lt;/code&gt; parameter payload received in the
+   *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
+   * @param {Boolean} isSelfInitiateRestart The flag if User is initiating the Peer connection refresh.
    * @for Skylink
    * @since 0.5.5
    */
   peerRestart: [],
 
   /**
-   * Event triggered when a Peer information have been updated.
-   * - This event would only be triggered if self is in the room.
-   * - This event triggers when the &lt;code&gt;peerInfo&lt;/code&gt; data is updated,
-   *   like &lt;code&gt;peerInfo.mediaStatus&lt;/code&gt; or the &lt;code&gt;peerInfo.userData&lt;/code&gt;,
-   *   which is invoked through &lt;a href=&quot;#method_muteStream&quot;&gt;muteStream()&lt;/a&gt; or
-   *   &lt;a href=&quot;#method_setUserData&quot;&gt;setUserData()&lt;/a&gt;.
+   * Event triggered when a Peer session information has been updated.
    * @event peerUpdated
-   * @param {String} peerId The Peer ID of the peer with updated information.
-   * @param {Object} peerInfo The peer information associated
-   *   with the Peer Connection.
-   * @param {String|JSON} peerInfo.userData The custom user data
-   *   information set by developer. This custom user data can also
-   *   be set in &lt;a href=&quot;#method_setUserData&quot;&gt;setUserData()&lt;/a&gt;.
-   * @param {JSON} peerInfo.settings The Peer Stream
-   *   streaming settings information. If both audio and video
-   *   option is &lt;code&gt;false&lt;/code&gt;, there should be no
-   *   receiving remote Stream object from this associated Peer.
-   * @param {Boolean|JSON} [peerInfo.settings.audio=false] The
-   *   Peer Stream streaming audio settings. If
-   *   &lt;code&gt;false&lt;/code&gt;, it means that audio streaming is disabled in
-   *   the remote Stream of the Peer.
-   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
-   *   stereo option should be explictly enabled to an OPUS enabled audio stream.
-   *   Check the &lt;code&gt;audioCodec&lt;/code&gt; configuration settings in
-   *   &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
-   *   to enable OPUS as the audio codec. Note that stereo is already enabled
-   *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
-   *   enable stereo in the audio streaming.
-   * @param {Boolean|JSON} [peerInfo.settings.video=false] The Peer
-   *   Stream streaming video settings. If &lt;code&gt;false&lt;/code&gt;, it means that
-   *   video streaming is disabled in the remote Stream of the Peer.
-   * @param {JSON} [peerInfo.settings.video.resolution] The Peer
-   *   Stream streaming video resolution settings. Setting the resolution may
-   *   not force set the resolution provided as it depends on the how the
-   *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} [peerInfo.settings.video.resolution.width] The Peer
-   *   Stream streaming video resolution width.
-   * @param {Number} [peerInfo.settings.video.resolution.height] The Peer
-   *   Stream streaming video resolution height.
-   * @param {Number} [peerInfo.settings.video.frameRate] The Peer
-   *   Stream streaming video maximum frameRate.
-   * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
-   *   that indicates if the Peer connection Stream object sent
-   *   is a screensharing stream or not.
-   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
-   *   the maximum sending bandwidth. The flags set may or may not work depending
-   *   on the browser implementations.
-   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
-   *   the maximum sending bandwidth. The flags set may or may not work depending
-   *   on the browser implementations and how it handles it.
-   * @param {String} [peerInfo.settings.bandwidth.audio] The maximum
-   *   sending audio bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the audio bitrate to the browser defaults.
-   * @param {String} [peerInfo.settings.bandwidth.video] The maximum
-   *   sending video bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the video bitrate to the browser defaults.
-   * @param {String} [peerInfo.settings.bandwidth.data] The maximum
-   *   sending data bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the data bitrate to the browser defaults.
-   * @param {JSON} peerInfo.mediaStatus The Peer Stream mute
-   *   settings for both audio and video streamings.
-   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
-   *   indicates if the remote Stream object audio streaming is muted. If
-   *   there is no audio streaming enabled for the Peer, by default,
-   *   it is set to &lt;code&gt;true&lt;/code&gt;.
-   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] The flag that
-   *   indicates if the remote Stream object video streaming is muted. If
-   *   there is no video streaming enabled for the Peer, by default,
-   *   it is set to &lt;code&gt;true&lt;/code&gt;.
-   * @param {JSON} peerInfo.agent The Peer platform agent information.
-   * @param {String} peerInfo.agent.name The Peer platform browser or agent name.
-   * @param {Number} peerInfo.agent.version The Peer platform browser or agent version.
-   * @param {Number} peerInfo.agent.os The Peer platform name.
-   * @param {String} peerInfo.room The current room that the Peer is in.
-   * @param {Boolean} isSelf The flag that indicates if self is the Peer.
-   * @component Events
+   * @param {String} peerId The Peer ID.
+   * @param {JSON} peerInfo The Peer session information.
+   *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo&lt;/code&gt; parameter payload received in the
+   *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
+   * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
    * @since 0.5.2
    */
@@ -624,353 +375,77 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when a Peer leaves the room.
    * @event peerLeft
-   * @param {String} peerId The Peer ID of the peer
-   *   that had left the room.
-   * @param {Object} peerInfo The peer information associated
-   *   with the Peer Connection.
-   * @param {String|JSON} peerInfo.userData The custom user data
-   *   information set by developer. This custom user data can also
-   *   be set in &lt;a href=&quot;#method_setUserData&quot;&gt;setUserData()&lt;/a&gt;.
-   * @param {JSON} peerInfo.settings The Peer Stream
-   *   streaming settings information. If both audio and video
-   *   option is &lt;code&gt;false&lt;/code&gt;, there should be no
-   *   receiving remote Stream object from this associated Peer.
-   * @param {Boolean|JSON} [peerInfo.settings.audio=false] The
-   *   Peer Stream streaming audio settings. If
-   *   &lt;code&gt;false&lt;/code&gt;, it means that audio streaming is disabled in
-   *   the remote Stream of the Peer.
-   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
-   *   stereo option should be explictly enabled to an OPUS enabled audio stream.
-   *   Check the &lt;code&gt;audioCodec&lt;/code&gt; configuration settings in
-   *   &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
-   *   to enable OPUS as the audio codec. Note that stereo is already enabled
-   *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
-   *   enable stereo in the audio streaming.
-   * @param {Boolean|JSON} [peerInfo.settings.video=false] The Peer
-   *   Stream streaming video settings. If &lt;code&gt;false&lt;/code&gt;, it means that
-   *   video streaming is disabled in the remote Stream of the Peer.
-   * @param {JSON} [peerInfo.settings.video.resolution] The Peer
-   *   Stream streaming video resolution settings. Setting the resolution may
-   *   not force set the resolution provided as it depends on the how the
-   *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} [peerInfo.settings.video.resolution.width] The Peer
-   *   Stream streaming video resolution width.
-   * @param {Number} [peerInfo.settings.video.resolution.height] The Peer
-   *   Stream streaming video resolution height.
-   * @param {Number} [peerInfo.settings.video.frameRate] The Peer
-   *   Stream streaming video maximum frameRate.
-   * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
-   *   that indicates if the Peer connection Stream object sent
-   *   is a screensharing stream or not.
-   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
-   *   the maximum sending bandwidth. The flags set may or may not work depending
-   *   on the browser implementations and how it handles it.
-   * @param {String} [peerInfo.settings.bandwidth.audio] The maximum
-   *   sending audio bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the audio bitrate to the browser defaults.
-   * @param {String} [peerInfo.settings.bandwidth.video] The maximum
-   *   sending video bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the video bitrate to the browser defaults.
-   * @param {String} [peerInfo.settings.bandwidth.data] The maximum
-   *   sending data bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the data bitrate to the browser defaults.
-   * @param {JSON} peerInfo.mediaStatus The Peer Stream mute
-   *   settings for both audio and video streamings.
-   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
-   *   indicates if the remote Stream object audio streaming is muted. If
-   *   there is no audio streaming enabled for the Peer, by default,
-   *   it is set to &lt;code&gt;true&lt;/code&gt;.
-   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] The flag that
-   *   indicates if the remote Stream object video streaming is muted. If
-   *   there is no video streaming enabled for the Peer, by default,
-   *   it is set to &lt;code&gt;true&lt;/code&gt;.
-   * @param {JSON} peerInfo.agent The Peer platform agent information.
-   * @param {String} peerInfo.agent.name The Peer platform browser or agent name.
-   * @param {Number} peerInfo.agent.version The Peer platform browser or agent version.
-   * @param {Number} peerInfo.agent.os The Peer platform name.
-   * @param {String} peerInfo.room The current room that the Peer is in.
-   * @param {Boolean} isSelf The flag that indicates if self is the Peer.
-   * @component Events
+   * @param {String} peerId The Peer ID.
+   * @param {JSON} peerInfo The Peer session information.
+   *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo&lt;/code&gt; parameter payload received in the
+   *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
+   * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
    * @since 0.5.2
    */
   peerLeft: [],
 
   /**
-   * Event triggered when self is disconnected from room.
+   * Event triggered when Room session has ended abruptly due to network disconnections.
    * @event sessionDisconnect
-   * @param {String} peerId The Peer ID of the peer
-   *   that had left the room.
-   * @param {Object} peerInfo The peer information associated
-   *   with the Peer Connection.
-   * @param {String|JSON} peerInfo.userData The custom user data
-   *   information set by developer. This custom user data can also
-   *   be set in &lt;a href=&quot;#method_setUserData&quot;&gt;setUserData()&lt;/a&gt;.
-   * @param {JSON} peerInfo.settings The Peer Stream
-   *   streaming settings information. If both audio and video
-   *   option is &lt;code&gt;false&lt;/code&gt;, there should be no
-   *   receiving remote Stream object from this associated Peer.
-   * @param {Boolean|JSON} [peerInfo.settings.audio=false] The
-   *   Peer Stream streaming audio settings. If
-   *   &lt;code&gt;false&lt;/code&gt;, it means that audio streaming is disabled in
-   *   the remote Stream of the Peer.
-   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
-   *   stereo option should be explictly enabled to an OPUS enabled audio stream.
-   *   Check the &lt;code&gt;audioCodec&lt;/code&gt; configuration settings in
-   *   &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
-   *   to enable OPUS as the audio codec. Note that stereo is already enabled
-   *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
-   *   enable stereo in the audio streaming.
-   * @param {Boolean|JSON} [peerInfo.settings.video=false] The Peer
-   *   Stream streaming video settings. If &lt;code&gt;false&lt;/code&gt;, it means that
-   *   video streaming is disabled in the remote Stream of the Peer.
-   * @param {JSON} [peerInfo.settings.video.resolution] The Peer
-   *   Stream streaming video resolution settings. Setting the resolution may
-   *   not force set the resolution provided as it depends on the how the
-   *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} [peerInfo.settings.video.resolution.width] The Peer
-   *   Stream streaming video resolution width.
-   * @param {Number} [peerInfo.settings.video.resolution.height] The Peer
-   *   Stream streaming video resolution height.
-   * @param {Number} [peerInfo.settings.video.frameRate] The Peer
-   *   Stream streaming video maximum frameRate.
-   * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
-   *   that indicates if the Peer connection Stream object sent
-   *   is a screensharing stream or not.
-   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
-   *   the maximum sending bandwidth. The flags set may or may not work depending
-   *   on the browser implementations and how it handles it.
-   * @param {String} [peerInfo.settings.bandwidth.audio] The maximum
-   *   sending audio bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the audio bitrate to the browser defaults.
-   * @param {String} [peerInfo.settings.bandwidth.video] The maximum
-   *   sending video bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the video bitrate to the browser defaults.
-   * @param {String} [peerInfo.settings.bandwidth.data] The maximum
-   *   sending data bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the data bitrate to the browser defaults.
-   * @param {JSON} peerInfo.mediaStatus The Peer Stream mute
-   *   settings for both audio and video streamings.
-   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
-   *   indicates if the remote Stream object audio streaming is muted. If
-   *   there is no audio streaming enabled for the Peer, by default,
-   *   it is set to &lt;code&gt;true&lt;/code&gt;.
-   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] The flag that
-   *   indicates if the remote Stream object video streaming is muted. If
-   *   there is no video streaming enabled for the Peer, by default,
-   *   it is set to &lt;code&gt;true&lt;/code&gt;.
-   * @param {JSON} peerInfo.agent The Peer platform agent information.
-   * @param {String} peerInfo.agent.name The Peer platform browser or agent name.
-   * @param {Number} peerInfo.agent.version The Peer platform browser or agent version.
-   * @param {Number} peerInfo.agent.os The Peer platform name.
-   * @param {String} peerInfo.room The current room that the Peer is in.
-   * @component Events
+   * @param {String} peerId The User&#x27;s Room session Peer ID.
+   * @param {JSON} peerInfo The User&#x27;s Room session information.
+   *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo&lt;/code&gt; parameter payload received in the
+   *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
    * @for Skylink
    * @since 0.6.10
    */
   sessionDisconnect: [],
 
   /**
-   * Event triggered when a Stream is sent by Peer.
-   * - This event may trigger for self, which indicates that self has joined the room
-   *   and is sending this Stream object to other Peers connected in the room.
+   * Event triggered when receiving Peer Stream.
    * @event incomingStream
-   * @param {String} peerId The Peer ID associated to the Stream object.
-   * @param {Object} stream The Peer
-   *   [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_API)
-   *   object that is sent in this connection.
-   *   To display the MediaStream object to a &lt;code&gt;video&lt;/code&gt; or &lt;code&gt;audio&lt;/code&gt;, simply invoke:&lt;br&gt;
-   *   &lt;code&gt;attachMediaStream(domElement, stream);&lt;/code&gt;.
-   * @param {Boolean} isSelf The flag that indicates if self is the Peer.
-   * @param {Object} peerInfo The peer information associated
-   *   with the Peer Connection.
-   * @param {String|JSON} peerInfo.userData The custom user data
-   *   information set by developer. This custom user data can also
-   *   be set in &lt;a href=&quot;#method_setUserData&quot;&gt;setUserData()&lt;/a&gt;.
-   * @param {JSON} peerInfo.settings The Peer Stream
-   *   streaming settings information. If both audio and video
-   *   option is &lt;code&gt;false&lt;/code&gt;, there should be no
-   *   receiving remote Stream object from this associated Peer.
-   * @param {Boolean|JSON} [peerInfo.settings.audio=false] The
-   *   Peer Stream streaming audio settings. If
-   *   &lt;code&gt;false&lt;/code&gt;, it means that audio streaming is disabled in
-   *   the remote Stream of the Peer.
-   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
-   *   stereo option should be explictly enabled to an OPUS enabled audio stream.
-   *   Check the &lt;code&gt;audioCodec&lt;/code&gt; configuration settings in
-   *   &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
-   *   to enable OPUS as the audio codec. Note that stereo is already enabled
-   *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
-   *   enable stereo in the audio streaming.
-   * @param {Boolean|JSON} [peerInfo.settings.video=false] The Peer
-   *   Stream streaming video settings. If &lt;code&gt;false&lt;/code&gt;, it means that
-   *   video streaming is disabled in the remote Stream of the Peer.
-   * @param {JSON} [peerInfo.settings.video.resolution] The Peer
-   *   Stream streaming video resolution settings. Setting the resolution may
-   *   not force set the resolution provided as it depends on the how the
-   *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} [peerInfo.settings.video.resolution.width] The Peer
-   *   Stream streaming video resolution width.
-   * @param {Number} [peerInfo.settings.video.resolution.height] The Peer
-   *   Stream streaming video resolution height.
-   * @param {Number} [peerInfo.settings.video.frameRate] The Peer
-   *   Stream streaming video maximum frameRate.
-   * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
-   *   that indicates if the Peer connection Stream object sent
-   *   is a screensharing stream or not.
-   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
-   *   the maximum sending bandwidth. The flags set may or may not work depending
-   *   on the browser implementations and how it handles it.
-   * @param {String} [peerInfo.settings.bandwidth.audio] The maximum
-   *   sending audio bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the audio bitrate to the browser defaults.
-   * @param {String} [peerInfo.settings.bandwidth.video] The maximum
-   *   sending video bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the video bitrate to the browser defaults.
-   * @param {String} [peerInfo.settings.bandwidth.data] The maximum
-   *   sending data bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the data bitrate to the browser defaults.
-   * @param {JSON} peerInfo.mediaStatus The Peer Stream mute
-   *   settings for both audio and video streamings.
-   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
-   *   indicates if the remote Stream object audio streaming is muted. If
-   *   there is no audio streaming enabled for the Peer, by default,
-   *   it is set to &lt;code&gt;true&lt;/code&gt;.
-   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] The flag that
-   *   indicates if the remote Stream object video streaming is muted. If
-   *   there is no video streaming enabled for the Peer, by default,
-   *   it is set to &lt;code&gt;true&lt;/code&gt;.
-   * @param {JSON} peerInfo.agent The Peer platform agent information.
-   * @param {String} peerInfo.agent.name The Peer platform browser or agent name.
-   * @param {Number} peerInfo.agent.version The Peer platform browser or agent version.
-   * @param {Number} peerInfo.agent.os The Peer platform name.
-   * @param {String} peerInfo.room The current room that the Peer is in.
-   * @component Events
+   * @param {String} peerId The Peer ID.
+   * @param {MediaStream} stream The Stream object.
+   *   &lt;small&gt;To attach it to an element: &lt;code&gt;attachMediaStream(videoElement, stream);&lt;/code&gt;.&lt;/small&gt;
+   * @param {Boolean} isSelf The flag if Peer is User.
+   * @param {JSON} peerInfo The Peer session information.
+   *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo&lt;/code&gt; parameter payload received in the
+   *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
    * @for Skylink
    * @since 0.5.5
    */
   incomingStream: [],
 
   /**
-   * Event triggered when message data is received from Peer.
-   * - This event may trigger for self when sending message data to Peer,
-   *   which indicates that self has sent the message data.
+   * Event triggered when receiving message from Peer.
    * @event incomingMessage
-   * @param {JSON} message The message object received from Peer.
-   * @param {JSON|String} message.content The message object content. This is the
-   *   message data content passed in {{#crossLink &quot;Skylink/sendMessage:method&quot;}}sendMessage(){{/crossLink}}
-   *   and {{#crossLink &quot;Skylink/sendP2PMessage:method&quot;}}sendP2PMessage(){{/crossLink}}.
-   * @param {String} message.senderPeerId The Peer ID of the peer who
-   *   sent the message object.
-   * @param {String|Array} [message.targetPeerId=null] The array of targeted Peer
-   *   peers or the single targeted Peer the message is
-   *   targeted to received the message object. If the value is &lt;code&gt;null&lt;/code&gt;, the message
-   *   object is broadcasted to all Peer peers in the room.
-   * @param {Boolean} message.isPrivate The flag that indicates if the message object is sent to
-   *   targeted Peer peers and not broadcasted to all Peer peers.
-   * @param {Boolean} message.isDataChannel The flag that indicates if the message object is sent
-   *   from the platform signaling socket connection or P2P channel connection (DataChannel connection).
-   * @param {String} peerId The Peer ID of peer who sent the
-   *   message object.
-   * @param {Object} peerInfo The peer information associated
-   *   with the Peer Connection.
-   * @param {String|JSON} peerInfo.userData The custom user data
-   *   information set by developer. This custom user data can also
-   *   be set in &lt;a href=&quot;#method_setUserData&quot;&gt;setUserData()&lt;/a&gt;.
-   * @param {JSON} peerInfo.settings The Peer Stream
-   *   streaming settings information. If both audio and video
-   *   option is &lt;code&gt;false&lt;/code&gt;, there should be no
-   *   receiving remote Stream object from this associated Peer.
-   * @param {Boolean|JSON} [peerInfo.settings.audio=false] The
-   *   Peer Stream streaming audio settings. If
-   *   &lt;code&gt;false&lt;/code&gt;, it means that audio streaming is disabled in
-   *   the remote Stream of the Peer.
-   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
-   *   stereo option should be explictly enabled to an OPUS enabled audio stream.
-   *   Check the &lt;code&gt;audioCodec&lt;/code&gt; configuration settings in
-   *   &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
-   *   to enable OPUS as the audio codec. Note that stereo is already enabled
-   *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
-   *   enable stereo in the audio streaming.
-   * @param {Boolean|JSON} [peerInfo.settings.video=false] The Peer
-   *   Stream streaming video settings. If &lt;code&gt;false&lt;/code&gt;, it means that
-   *   video streaming is disabled in the remote Stream of the Peer.
-   * @param {JSON} [peerInfo.settings.video.resolution] The Peer
-   *   Stream streaming video resolution settings. Setting the resolution may
-   *   not force set the resolution provided as it depends on the how the
-   *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} [peerInfo.settings.video.resolution.width] The Peer
-   *   Stream streaming video resolution width.
-   * @param {Number} [peerInfo.settings.video.resolution.height] The Peer
-   *   Stream streaming video resolution height.
-   * @param {Number} [peerInfo.settings.video.frameRate] The Peer
-   *   Stream streaming video maximum frameRate.
-   * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
-   *   that indicates if the Peer connection Stream object sent
-   *   is a screensharing stream or not.
-   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
-   *   the maximum sending bandwidth. The flags set may or may not work depending
-   *   on the browser implementations and how it handles it.
-   * @param {String} [peerInfo.settings.bandwidth.audio] The maximum
-   *   sending audio bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the audio bitrate to the browser defaults.
-   * @param {String} [peerInfo.settings.bandwidth.video] The maximum
-   *   sending video bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the video bitrate to the browser defaults.
-   * @param {String} [peerInfo.settings.bandwidth.data] The maximum
-   *   sending data bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the data bitrate to the browser defaults.
-   * @param {JSON} peerInfo.mediaStatus The Peer Stream mute
-   *   settings for both audio and video streamings.
-   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
-   *   indicates if the remote Stream object audio streaming is muted. If
-   *   there is no audio streaming enabled for the Peer, by default,
-   *   it is set to &lt;code&gt;true&lt;/code&gt;.
-   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] The flag that
-   *   indicates if the remote Stream object video streaming is muted. If
-   *   there is no video streaming enabled for the Peer, by default,
-   *   it is set to &lt;code&gt;true&lt;/code&gt;.
-   * @param {JSON} peerInfo.agent The Peer platform agent information.
-   * @param {String} peerInfo.agent.name The Peer platform browser or agent name.
-   * @param {Number} peerInfo.agent.version The Peer platform browser or agent version.
-   * @param {Number} peerInfo.agent.os The Peer platform name.
-   * @param {String} peerInfo.room The current room that the Peer is in.
-   * @param {Boolean} isSelf The flag that indicates if self is the Peer.
-   * @component Events
+   * @param {JSON} message The message result.
+   * @param {JSON|String} message.content The message object.
+   * @param {String} message.senderPeerId The sender Peer ID.
+   * @param {String|Array} [message.targetPeerId=null] The value of the &lt;code&gt;targetPeerId&lt;/code&gt;
+   *   defined in &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt; or
+   *   &lt;a href=&quot;#method_sendMessage&quot;&gt;&lt;code&gt;sendMessage()&lt;/code&gt; method&lt;/a&gt;.
+   * @param {Boolean} message.isPrivate The flag if message is targeted or not, basing
+   *   off the &lt;code&gt;targetPeerId&lt;/code&gt; parameter being defined in
+   *   &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt; or
+   *   &lt;a href=&quot;#method_sendMessage&quot;&gt;&lt;code&gt;sendMessage()&lt;/code&gt; method&lt;/a&gt;.
+   * @param {Boolean} message.isDataChannel The flag if message is sent from
+   *   &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt;.
+   * @param {JSON} peerInfo The Peer session information.
+   *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo&lt;/code&gt; parameter payload received in the
+   *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
+   * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
    * @since 0.5.2
    */
   incomingMessage: [],
 
   /**
-   * Event triggered when a data transfer is completed.
-   * - This event may trigger for self when transferring data to Peer,
-   *   which indicates that self has transferred the data successfully.
-   * - For more extensive states like the outgoing and incoming
-   *   data transfer progress and rejection of data transfer requests,
-   *   you may subscribe to the &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; event.
-   * - If &lt;code&gt;enableDataChannel&lt;/code&gt; disabled in &lt;a href=&quot;#method_init&quot;&gt;init() configuration
-   *   settings&lt;/a&gt;, this event will not be triggered at all.
+   * Event triggered when receiving completed data transfer from Peer.
    * @event incomingData
-   * @param {Blob|String} data The transferred data object.&lt;br&gt;
-   *   For Blob data object, see the
-   *   [createObjectURL](https://developer.mozilla.org/en-US/docs/Web/API/URL.createObjectURL)
-   *   method on how you can convert the Blob data object to a download link.
-   * @param {String} transferId The transfer ID of the completed data transfer.
-   * @param {String} peerId The Peer ID associated with the data transfer.
-   * @param {JSON} transferInfo The transfer data object information.
-   * @param {String} [transferInfo.name=transferId] The transfer data object name.
-   *   If there is no name based on the Blob given, the name would be the transfer ID.
-   * @param {Number} transferInfo.size The transfer data size.
-   * @param {String} transferInfo.dataType The type of data transfer initiated.
-   *   Available types are &lt;code&gt;&quot;dataURL&quot;&lt;/code&gt; and &lt;code&gt;&quot;blob&quot;&lt;/code&gt;.
-   * @param {String} transferInfo.timeout The waiting timeout in seconds that the DataChannel
-   *   connection data transfer should wait before throwing an exception and terminating the data transfer.
-   * @param {Boolean} transferInfo.isPrivate The flag to indicate if the data transferred
-   *   targeted Peer peers and not broadcasted to all Peer peers.
-   * @param {Boolean} isSelf The flag that indicates if the data transfer is from self or from
-   *   associated Peer.
-   * @component Events
+   * @param {Blob|String} data The data.
+   * @param {String} transferId The data transfer ID.
+   * @param {String} peerId The Peer ID.
+   * @param {JSON} transferInfo The data transfer information.
+   *   &lt;small&gt;Object signature matches the &lt;code&gt;transferInfo&lt;/code&gt; parameter payload received in the
+   *   &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
+   * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
    * @since 0.6.1
    */
@@ -978,139 +453,43 @@ Skylink.prototype._EVENTS = {
 
 
   /**
-   * Event triggered when there is a request to start a data transfer.
-   * - This event may trigger for self when requesting a data transfer to Peer,
-   *   which indicates that self has sent the data transfer request.
-   * - For more extensive states like the outgoing and incoming
-   *   data transfer progress and rejection of data transfer requests,
-   *   you may subscribe to the &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; event.
-   * - If &lt;code&gt;enableDataChannel&lt;/code&gt; disabled in &lt;a href=&quot;#method_init&quot;&gt;init() configuration
-   *   settings&lt;/a&gt;, this event will not be triggered at all.
-   * - &lt;sub&gt;DATA TRANSFER STAGE&lt;/sub&gt;&lt;br&gt;
-   *   &lt;small&gt;
-   *   &lt;a href=&quot;#event_dataTransferState&quot;&gt;dataTransferState&lt;/a&gt; &amp;#8594;
-   *   &lt;b&gt;incomingDataRequest&lt;/b&gt; &amp;#8594;
-   *   &lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt;
-   *   &lt;/small&gt;
+   * Event triggered when receiving upload data transfer from Peer.
    * @event incomingDataRequest
-   * @param {String} transferId The transfer ID of the data transfer request.
-   * @param {String} peerId The Peer ID associated with the data transfer request.
-   * @param {JSON} transferInfo The transfer data object information.
-   * @param {String} [transferInfo.name=transferId] The transfer data object name.
-   *   If there is no name based on the Blob given, the name would be the transfer ID.
-   * @param {Number} transferInfo.size The transfer data size.
-   * @param {String} transferInfo.dataType The type of data transfer initiated.
-   *   Available types are &lt;code&gt;&quot;dataURL&quot;&lt;/code&gt; and &lt;code&gt;&quot;blob&quot;&lt;/code&gt;.
-   * @param {String} transferInfo.timeout The waiting timeout in seconds that the DataChannel
-   *   connection data transfer should wait before throwing an exception and terminating the data transfer.
-   * @param {Boolean} transferInfo.isPrivate The flag to indicate if the data transferred
-   *   targeted Peer peers and not broadcasted to all Peer peers.
-   * @param {Boolean} isSelf The flag that indicates if the data transfer request is from self or from
-   *   associated Peer.
-   * @component Events
+   * @param {String} transferId The transfer ID.
+   * @param {String} peerId The Peer ID.
+   * @param {String} transferInfo The data transfer information.
+   *   &lt;small&gt;Object signature matches the &lt;code&gt;transferInfo&lt;/code&gt; parameter payload received in the
+   *   &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
+   * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
    * @since 0.6.1
    */
   incomingDataRequest: [],
 
   /**
-   * Event triggered when the currently connected room lock status have been updated.
-   * - If this event is triggered, this means that the room is locked / unlocked which
-   *   may allow or prevent any other Peers from joining the room.
+   * Event triggered when Room locked status has changed.
    * @event roomLock
-   * @param {Boolean} isLocked The flag that indicates if the currently connected room is locked.
-   * @param {String} peerId The Peer ID of the peer that updated the
-   *   currently connected room lock status.
-   * @param {Object} peerInfo The peer information associated
-   *   with the Peer Connection.
-   * @param {String|JSON} peerInfo.userData The custom user data
-   *   information set by developer. This custom user data can also
-   *   be set in &lt;a href=&quot;#method_setUserData&quot;&gt;setUserData()&lt;/a&gt;.
-   * @param {JSON} peerInfo.settings The Peer Stream
-   *   streaming settings information. If both audio and video
-   *   option is &lt;code&gt;false&lt;/code&gt;, there should be no
-   *   receiving remote Stream object from this associated Peer.
-   * @param {Boolean|JSON} [peerInfo.settings.audio=false] The
-   *   Peer Stream streaming audio settings. If
-   *   &lt;code&gt;false&lt;/code&gt;, it means that audio streaming is disabled in
-   *   the remote Stream of the Peer.
-   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
-   *   stereo option should be explictly enabled to an OPUS enabled audio stream.
-   *   Check the &lt;code&gt;audioCodec&lt;/code&gt; configuration settings in
-   *   &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
-   *   to enable OPUS as the audio codec. Note that stereo is already enabled
-   *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
-   *   enable stereo in the audio streaming.
-   * @param {Boolean|JSON} [peerInfo.settings.video=false] The Peer
-   *   Stream streaming video settings. If &lt;code&gt;false&lt;/code&gt;, it means that
-   *   video streaming is disabled in the remote Stream of the Peer.
-   * @param {JSON} [peerInfo.settings.video.resolution] The Peer
-   *   Stream streaming video resolution settings. Setting the resolution may
-   *   not force set the resolution provided as it depends on the how the
-   *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} [peerInfo.settings.video.resolution.width] The Peer
-   *   Stream streaming video resolution width.
-   * @param {Number} [peerInfo.settings.video.resolution.height] The Peer
-   *   Stream streaming video resolution height.
-   * @param {Number} [peerInfo.settings.video.frameRate] The Peer
-   *   Stream streaming video maximum frameRate.
-   * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
-   *   that indicates if the Peer connection Stream object sent
-   *   is a screensharing stream or not.
-   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
-   *   the maximum sending bandwidth. The flags set may or may not work depending
-   *   on the browser implementations and how it handles it.
-   * @param {String} [peerInfo.settings.bandwidth.audio] The maximum
-   *   sending audio bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the audio bitrate to the browser defaults.
-   * @param {String} [peerInfo.settings.bandwidth.video] The maximum
-   *   sending video bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the video bitrate to the browser defaults.
-   * @param {String} [peerInfo.settings.bandwidth.data] The maximum
-   *   sending data bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the data bitrate to the browser defaults.
-   * @param {JSON} peerInfo.mediaStatus The Peer Stream mute
-   *   settings for both audio and video streamings.
-   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
-   *   indicates if the remote Stream object audio streaming is muted. If
-   *   there is no audio streaming enabled for the Peer, by default,
-   *   it is set to &lt;code&gt;true&lt;/code&gt;.
-   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] The flag that
-   *   indicates if the remote Stream object video streaming is muted. If
-   *   there is no video streaming enabled for the Peer, by default,
-   *   it is set to &lt;code&gt;true&lt;/code&gt;.
-   * @param {JSON} peerInfo.agent The Peer platform agent information.
-   * @param {String} peerInfo.agent.name The Peer platform browser or agent name.
-   * @param {Number} peerInfo.agent.version The Peer platform browser or agent version.
-   * @param {Number} peerInfo.agent.os The Peer platform name.
-   * @param {String} peerInfo.room The current room that the Peer is in.
-   * @param {Boolean} isSelf The flag that indicates if self is the Peer.
-   * @component Events
+   * @param {Boolean} isLocked The flag if Room is locked.
+   * @param {JSON} peerInfo The Peer session information.
+   *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo&lt;/code&gt; parameter payload received in the
+   *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
+   * @param {Boolean} isSelf The flag if User changed the Room locked status.
    * @for Skylink
    * @since 0.5.2
    */
   roomLock: [],
 
   /**
-   * Event triggered when a Peer connection DataChannel connection state has changed.
-   * - This event is a debugging feature, and it&#x27;s used to check the
-   *   Peer DataChannel connection, which is used for P2P messaging and transfers for
-   *   methods like &lt;a href=&quot;#method_sendBlobData&quot;&gt;sendBlobData()&lt;/a&gt;,
-   *   &lt;a href=&quot;#method_sendURLData&quot;&gt;sendURLData()&lt;/a&gt; and
-   *   &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;sendP2PMessage()&lt;/a&gt;.
-   * - If &lt;code&gt;enableDataChannel&lt;/code&gt; disabled in &lt;a href=&quot;#method_init&quot;&gt;init() configuration
-   *   settings&lt;/a&gt;, this event will not be triggered at all.
+   * Event triggered when a Datachannel connection state has changed.
    * @event dataChannelState
-   * @param {String} state The current DataChannel connection state.
+   * @param {String} state The current Datachannel connection state.
    *   [Rel: Skylink.DATA_CHANNEL_STATE]
-   * @param {String} peerId The Peer ID associated with the current DataChannel connection state.
-   * @param {Object} [error=null] The error object thrown when there is a failure in
-   *   the DataChannel connection.
-   *   If received as &lt;code&gt;null&lt;/code&gt;, it means that there is no errors.
-   * @param {String} channelName The DataChannel connection ID.
-   * @param {String} channelType The DataChannel connection functionality type.
+   * @param {String} peerId The Peer ID.
+   * @param {Error} [error] The error object.
+   *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; payload is &lt;code&gt;ERROR&lt;/code&gt;.&lt;/small&gt;
+   * @param {String} channelName The DataChannel ID.
+   * @param {String} channelType The DataChannel type.
    *   [Rel: Skylink.DATA_CHANNEL_TYPE]
-   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
@@ -1118,59 +497,42 @@ Skylink.prototype._EVENTS = {
 
   /**
    * Event triggered when a data transfer state has changed.
-   * - This event triggers more extensive states like the outgoing and incoming
-   *   data transfer progress and rejection of data transfer requests.
-   *   For simplified events, you may subscribe to the
-   *   &lt;a href=&quot;#event_incomingDataRequest&quot;&gt;incomingDataRequest&lt;/a&gt; and
-   *   &lt;a href=&quot;#event_incomingData&quot;&gt;incomingData&lt;/a&gt; events.
-   * - If &lt;code&gt;enableDataChannel&lt;/code&gt; disabled in &lt;a href=&quot;#method_init&quot;&gt;init() configuration
-   *   settings&lt;/a&gt;, this event will not be triggered at all.
    * @event dataTransferState
-   * @param {String} state The data transfer made to Peer
-   *   in a DataChannel connection state.
+   * @param {String} state The current data transfer state.
    *   [Rel: Skylink.DATA_TRANSFER_STATE]
-   * @param {String} transferId The transfer ID of the completed data transfer.
-   * @param {String} peerId The Peer ID associated with the data transfer.
-   * @param {JSON} transferInfo The transfer data object information.
-   * @param {Blob|String} transferInfo.data The transfer data object. This is defined
-   *   only after the transfer data is completed, when the state is
-   *   &lt;code&gt;DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED&lt;/code&gt; and
-   *   &lt;code&gt;DATA_TRANSFER_STATE.UPLOAD_STARTED&lt;/code&gt;&lt;br&gt;
-   *   For Blob data object, see the
-   *   [createObjectURL](https://developer.mozilla.org/en-US/docs/Web/API/URL.createObjectURL)
-   *   method on how you can convert the Blob data object to a download link.
-   * @param {String} [transferInfo.name=transferId] The transfer data object name.
-   *   If there is no name based on the Blob given, the name would be the transfer ID.
-   * @param {Number} transferInfo.size The transfer data size.
-   * @param {String} transferInfo.dataType The type of data transfer initiated.
-   *   Available types are &lt;code&gt;&quot;dataURL&quot;&lt;/code&gt; and &lt;code&gt;&quot;blob&quot;&lt;/code&gt;.
-   * @param {String} transferInfo.timeout The waiting timeout in seconds that the DataChannel
-   *   connection data transfer should wait before throwing an exception and terminating the data transfer.
-   * @param {Boolean} transferInfo.isPrivate The flag to indicate if the data transferred
-   *   targeted Peer peers and not broadcasted to all Peer peers.
-   * @param {JSON} [error] The error object thrown when there is a failure in transferring data.
-   * @param {Object} error.message The exception thrown that caused the failure
-   *   for transferring data.
-   * @param {String} error.transferType The data transfer type to indicate if the DataChannel is
-   *   uploading or downloading the data transfer when the exception occurred.
+   * @param {String} transferId The data transfer ID.
+   * @param {String} peerId The Peer ID.
+   * @param {JSON} transferInfo The data transfer information.
+   * @param {Blob|String} [transferInfo.data] The data object.
+   *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; payload is &lt;code&gt;UPLOAD_STARTED&lt;/code&gt; or
+   *   &lt;code&gt;DOWNLOAD_COMPLETED&lt;/code&gt;.&lt;/small&gt;
+   * @param {String} transferInfo.name The data transfer name.
+   * @param {Number} transferInfo.size The data transfer data object original size.
+   * @param {String} transferInfo.dataType The data transfer session type.
+   *   [Rel: Skylink.DATA_TRANSFER_SESSION_TYPE]
+   * @param {Number} transferInfo.timeout The flag if message is targeted or not, basing
+   *   off the &lt;code&gt;targetPeerId&lt;/code&gt; parameter being defined in
+   *   &lt;a href=&quot;#method_sendURLData&quot;&gt;&lt;code&gt;sendURLData()&lt;/code&gt; method&lt;/a&gt; or
+   *   &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt;.
+   * @param {Boolean} transferInfo.isPrivate The flag if data transfer
+   * @param {JSON} [error] The error result.
+   *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; payload is &lt;code&gt;ERROR&lt;/code&gt; or &lt;code&gt;CANCEL&lt;/code&gt;.&lt;/small&gt;
+   * @param {Error|String} error.message The error object.
+   * @param {String} error.transferType The data transfer direction from where the error occurred.
    *   [Rel: Skylink.DATA_TRANSFER_TYPE]
-   * @component Events
    * @for Skylink
    * @since 0.4.1
    */
   dataTransferState: [],
 
   /**
-   * Event triggered when Skylink receives an system action from the platform signaling.
+   * Event triggered when Signaling server reaction state has changed.
    * @event systemAction
-   * @param {String} action The system action that is received from the platform signaling.
+   * @param {String} action The current Signaling server reaction state.
    *   [Rel: Skylink.SYSTEM_ACTION]
-   * @param {String} message The message received from the platform signaling when
-   *   the system action and reason is given.
-   * @param {String} reason The reason received from the platform signaling behind the
-   *   system action given.
+   * @param {String} message The message.
+   * @param {String} reason The Signaling server reaction state reason of action code.
    *   [Rel: Skylink.SYSTEM_ACTION_REASON]
-   * @component Events
    * @for Skylink
    * @since 0.5.1
    */
@@ -1179,11 +541,9 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when a server Peer joins the room.
    * @event serverPeerJoined
-   * @param {String} peerId The Peer ID of the new server peer
-   *   that has joined the room.
+   * @param {String} peerId The Peer ID.
    * @param {String} serverPeerType The server Peer type
    *   [Rel: Skylink.SERVER_PEER_TYPE]
-   * @component Events
    * @for Skylink
    * @since 0.6.1
    */
@@ -1192,346 +552,164 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when a server Peer leaves the room.
    * @event serverPeerLeft
-   * @param {String} peerId The Peer ID of the new server peer
-   *   that has left the room.
+   * @param {String} peerId The Peer ID.
    * @param {String} serverPeerType The server Peer type
    *   [Rel: Skylink.SERVER_PEER_TYPE]
-   * @component Events
    * @for Skylink
    * @since 0.6.1
    */
   serverPeerLeft: [],
 
   /**
-   * Event triggered when a sever Peer connection has been restarted for
-   *   a reconnection.
+   * Event triggered when a server Peer connection has been refreshed.
    * @event serverPeerRestart
-   * @param {String} peerId The Peer ID of the new server peer
-   *   that has joined the room.
+   * @param {String} peerId The Peer ID.
    * @param {String} serverPeerType The server Peer type
    *   [Rel: Skylink.SERVER_PEER_TYPE]
-   * @component Events
    * @for Skylink
    * @since 0.6.1
    */
   serverPeerRestart: [],
 
   /**
-   * Event triggered when a Peer connection Stream streaming has stopped.
+   * Event triggered when Peer Stream streaming has stopped.
    * @event streamEnded
-   * @param {String} [peerId=null] The Peer ID associated to the Stream object.
-   *   If self is not in the room, the value returned would be &lt;code&gt;null&lt;/code&gt;.
-   * @param {Object} peerInfo The peer information associated
-   *   with the Peer Connection.
-   * @param {String|JSON} peerInfo.userData The custom user data
-   *   information set by developer. This custom user data can also
-   *   be set in &lt;a href=&quot;#method_setUserData&quot;&gt;setUserData()&lt;/a&gt;.
-   * @param {JSON} peerInfo.settings The Peer Stream
-   *   streaming settings information. If both audio and video
-   *   option is &lt;code&gt;false&lt;/code&gt;, there should be no
-   *   receiving remote Stream object from this associated Peer.
-   * @param {Boolean|JSON} [peerInfo.settings.audio=false] The
-   *   Peer Stream streaming audio settings. If
-   *   &lt;code&gt;false&lt;/code&gt;, it means that audio streaming is disabled in
-   *   the remote Stream of the Peer.
-   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
-   *   stereo option should be explictly enabled to an OPUS enabled audio stream.
-   *   Check the &lt;code&gt;audioCodec&lt;/code&gt; configuration settings in
-   *   &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
-   *   to enable OPUS as the audio codec. Note that stereo is already enabled
-   *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
-   *   enable stereo in the audio streaming.
-   * @param {Boolean|JSON} [peerInfo.settings.video=false] The Peer
-   *   Stream streaming video settings. If &lt;code&gt;false&lt;/code&gt;, it means that
-   *   video streaming is disabled in the remote Stream of the Peer.
-   * @param {JSON} [peerInfo.settings.video.resolution] The Peer
-   *   Stream streaming video resolution settings. Setting the resolution may
-   *   not force set the resolution provided as it depends on the how the
-   *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} [peerInfo.settings.video.resolution.width] The Peer
-   *   Stream streaming video resolution width.
-   * @param {Number} [peerInfo.settings.video.resolution.height] The Peer
-   *   Stream streaming video resolution height.
-   * @param {Number} [peerInfo.settings.video.frameRate] The Peer
-   *   Stream streaming video maximum frameRate.
-   * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
-   *   that indicates if the Peer connection Stream object sent
-   *   is a screensharing stream or not.
-   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
-   *   the maximum sending bandwidth. The flags set may or may not work depending
-   *   on the browser implementations and how it handles it.
-   * @param {String} [peerInfo.settings.bandwidth.audio] The maximum
-   *   sending audio bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the audio bitrate to the browser defaults.
-   * @param {String} [peerInfo.settings.bandwidth.video] The maximum
-   *   sending video bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the video bitrate to the browser defaults.
-   * @param {String} [peerInfo.settings.bandwidth.data] The maximum
-   *   sending data bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the data bitrate to the browser defaults.
-   * @param {JSON} peerInfo.mediaStatus The Peer Stream mute
-   *   settings for both audio and video streamings.
-   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
-   *   indicates if the remote Stream object audio streaming is muted. If
-   *   there is no audio streaming enabled for the Peer, by default,
-   *   it is set to &lt;code&gt;true&lt;/code&gt;.
-   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] The flag that
-   *   indicates if the remote Stream object video streaming is muted. If
-   *   there is no video streaming enabled for the Peer, by default,
-   *   it is set to &lt;code&gt;true&lt;/code&gt;.
-   * @param {JSON} peerInfo.agent The Peer platform agent information.
-   * @param {String} peerInfo.agent.name The Peer platform browser or agent name.
-   * @param {Number} peerInfo.agent.version The Peer platform browser or agent version.
-   * @param {Number} peerInfo.agent.os The Peer platform name.
-   * @param {String} peerInfo.room The current room that the Peer is in.
-   * @param {Boolean} isSelf The flag that indicates if self is the Peer.
-   * @param {Boolean} isScreensharing The flag that indicates if Peer connection
-   *    Stream object is a screensharing stream or not.
-   * @component Events
+   * @param {String} peerId The Peer ID.
+   * @param {JSON} peerInfo The Peer session information.
+   *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo&lt;/code&gt; parameter payload received in the
+   *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
+   * @param {Boolean} isSelf The flag if Peer is User.
+   * @param {Boolean} isScreensharing The flag if Peer Stream is a screensharing Stream.
    * @for Skylink
    * @since 0.5.10
    */
   streamEnded: [],
 
   /**
-   * Event triggered when a Peer connection Stream streaming audio or video
-   *   stream muted status have been updated.
+   * Event triggered when Peer Stream audio or video tracks has been muted.
    * @event streamMuted
-   * @param {String} peerId The Peer ID associated to the Stream object.
-   *   If self is not in the room, the value returned would be &lt;code&gt;null&lt;/code&gt;.
-   * @param {Object} peerInfo The peer information associated
-   *   with the Peer Connection.
-   * @param {String|JSON} peerInfo.userData The custom user data
-   *   information set by developer. This custom user data can also
-   *   be set in &lt;a href=&quot;#method_setUserData&quot;&gt;setUserData()&lt;/a&gt;.
-   * @param {JSON} peerInfo.settings The Peer Stream
-   *   streaming settings information. If both audio and video
-   *   option is &lt;code&gt;false&lt;/code&gt;, there should be no
-   *   receiving remote Stream object from this associated Peer.
-   * @param {Boolean|JSON} [peerInfo.settings.audio=false] The
-   *   Peer Stream streaming audio settings. If
-   *   &lt;code&gt;false&lt;/code&gt;, it means that audio streaming is disabled in
-   *   the remote Stream of the Peer.
-   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
-   *   stereo option should be explictly enabled to an OPUS enabled audio stream.
-   *   Check the &lt;code&gt;audioCodec&lt;/code&gt; configuration settings in
-   *   &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
-   *   to enable OPUS as the audio codec. Note that stereo is already enabled
-   *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
-   *   enable stereo in the audio streaming.
-   * @param {Boolean|JSON} [peerInfo.settings.video=false] The Peer
-   *   Stream streaming video settings. If &lt;code&gt;false&lt;/code&gt;, it means that
-   *   video streaming is disabled in the remote Stream of the Peer.
-   * @param {JSON} [peerInfo.settings.video.resolution] The Peer
-   *   Stream streaming video resolution settings. Setting the resolution may
-   *   not force set the resolution provided as it depends on the how the
-   *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} [peerInfo.settings.video.resolution.width] The Peer
-   *   Stream streaming video resolution width.
-   * @param {Number} [peerInfo.settings.video.resolution.height] The Peer
-   *   Stream streaming video resolution height.
-   * @param {Number} [peerInfo.settings.video.frameRate] The Peer
-   *   Stream streaming video maximum frameRate.
-   * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
-   *   that indicates if the Peer connection Stream object sent
-   *   is a screensharing stream or not.
-   * @param {String} [peerInfo.settings.bandwidth] The Peer configuration for
-   *   the maximum sending bandwidth. The flags set may or may not work depending
-   *   on the browser implementations and how it handles it.
-   * @param {String} [peerInfo.settings.bandwidth.audio] The maximum
-   *   sending audio bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the audio bitrate to the browser defaults.
-   * @param {String} [peerInfo.settings.bandwidth.video] The maximum
-   *   sending video bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the video bitrate to the browser defaults.
-   * @param {String} [peerInfo.settings.bandwidth.data] The maximum
-   *   sending data bandwidth bitrate in &lt;var&gt;kb/s&lt;/var&gt;. If this is not provided,
-   *   it will leave the data bitrate to the browser defaults.
-   * @param {JSON} peerInfo.mediaStatus The Peer Stream mute
-   *   settings for both audio and video streamings.
-   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
-   *   indicates if the remote Stream object audio streaming is muted. If
-   *   there is no audio streaming enabled for the Peer, by default,
-   *   it is set to &lt;code&gt;true&lt;/code&gt;.
-   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] The flag that
-   *   indicates if the remote Stream object video streaming is muted. If
-   *   there is no video streaming enabled for the Peer, by default,
-   *   it is set to &lt;code&gt;true&lt;/code&gt;.
-   * @param {JSON} peerInfo.agent The Peer platform agent information.
-   * @param {String} peerInfo.agent.name The Peer platform browser or agent name.
-   * @param {Number} peerInfo.agent.version The Peer platform browser or agent version.
-   * @param {Number} peerInfo.agent.os The Peer platform name.
-   * @param {String} peerInfo.room The current room that the Peer is in.
-   * @param {Boolean} isSelf The flag that indicates if self is the Peer.
-   * @param {Boolean} isScreensharing The flag that indicates if Peer connection
-   *    Stream object is a screensharing stream or not.
-   * @component Events
+   * @param {String} peerId The Peer ID.
+   * @param {JSON} peerInfo The Peer session information.
+   *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo&lt;/code&gt; parameter payload received in the
+   *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
+   * @param {Boolean} isSelf The flag if Peer is User.
+   * @param {Boolean} isScreensharing The flag if Peer Stream is a screensharing Stream.
    * @for Skylink
    * @since 0.6.1
    */
   streamMuted: [],
 
   /**
-   * Event triggered when the retrieval of the list of rooms and peers under the same realm based
-   *   on the Application Key configured in &lt;a href=&quot;#method_init&quot;&gt;init()&lt;/a&gt;
-   *   from the platform signaling state has changed.
-   * - This requires that the provided alias Application Key has privileged feature configured.
+   * Event triggered when &lt;a href=&quot;#method_getPeers&quot;&gt;&lt;code&gt;getPeers()&lt;/code&gt; method&lt;/a&gt; retrieval state changes.
    * @event getPeersStateChange
-   * @param {String} state The retrieval current status.
+   * @param {String} state The current &lt;code&gt;getPeers()&lt;/code&gt; retrieval state.
    *   [Rel: Skylink.GET_PEERS_STATE]
-   * @param {String} privilegedPeerId The Peer ID of the privileged Peer.
-   * @param {JSON} peerList The retrieved list of rooms and peers under the same realm based on
-   *   the Application Key configured in &lt;code&gt;init()&lt;/code&gt;.
-   * @component Events
+   * @param {String} privilegedPeerId The User&#x27;s privileged Peer ID.
+   * @param {JSON} peerList The list of Peer IDs Rooms within the same App space.
+   * @param {Array} peerList.#room The list of Peer IDs associated with the Room defined in &lt;code&gt;#room&lt;/code&gt; property.
    * @for Skylink
    * @since 0.6.1
    */
   getPeersStateChange: [],
 
   /**
-   * Event triggered when introductory state of two Peer peers to each other
-   *   selected by the privileged Peer state has changed.
-   * - This requires that the provided alias Application Key has privileged feature configured.
+   * Event triggered when &lt;a href=&quot;#method_introducePeer&quot;&gt;&lt;code&gt;introducePeer()&lt;/code&gt; method&lt;/a&gt;
+   * introduction request state changes.
    * @event introduceStateChange
-   * @param {String} state The Peer introduction state.
+   * @param {String} state The current &lt;code&gt;introducePeer()&lt;/code&gt; introduction request state.
    *   [Rel: Skylink.INTRODUCE_STATE]
-   * @param {String} privilegedPeerId The Peer ID of the privileged Peer.
-   * @param {String} sendingPeerId The Peer ID of the peer
-   *   that initiates the connection with the introduced Peer.
-   * @param {String} receivingPeerId The Peer ID of the
-   *   introduced peer who would be introduced to the initiator Peer.
-   * @param {String} reason The error object thrown when there is a failure in
-   *   the introduction with the two Peer peers.
-   *   If received as &lt;code&gt;null&lt;/code&gt;, it means that there is no errors.
-   * @component Events
+   * @param {String} privilegedPeerId The User&#x27;s privileged Peer ID.
+   * @param {String} sendingPeerId The Peer ID to be connected with &lt;code&gt;receivingPeerId&lt;/code&gt;.
+   * @param {String} receivingPeerId The Peer ID to be connected with &lt;code&gt;sendingPeerId&lt;/code&gt;.
+   * @param {String} [reason] The error object.
+   *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; payload is &lt;code&gt;ERROR&lt;/code&gt;.&lt;/small&gt;
    * @for Skylink
    * @since 0.6.1
    */
   introduceStateChange: [],
 
   /**
-   * Event triggered when the retrieval of the Peer connection status state has changed.
+   * Event triggered when &lt;a href=&quot;#method_getConnectionStatus&quot;&gt;&lt;code&gt;getConnectionStatus()&lt;/code&gt; method&lt;/a&gt;
+   * retrieval state changes.
    * @event getConnectionStatusStateChange
-   * @param {Number} state The retrieval state of the Peer connection status.
+   * @param {Number} state The current &lt;code&gt;getConnectionStatus()&lt;/code&gt; retrieval state.
    *   [Rel: Skylink.GET_CONNECTION_STATUS_STATE]
-   * @param {String} peerId The Peer ID of the peer connection status.
-   * @param {JSON} stats The Peer retrieved connection stats.
-   *   Returned as &lt;code&gt;null&lt;/code&gt; unless &lt;code&gt;RETRIEVE_SUCCESS&lt;/code&gt; state.
-   * @param {JSON} stats.raw The received raw connection stats data before parsing.
-   * @param {JSON} stats.audio The Peer connection audio stats.
-   * @param {JSON} stats.audio.sending The Peer connection audio sending stats.
-   * @param {Number} stats.audio.sending.bytes The Peer connection audio sending bytes.
-   * @param {Number} stats.audio.sending.packets The Peer
-   *   connection audio sending packets.
-   * @param {Number} stats.audio.sending.packetsLost The Peer
-   *   connection audio sending packets lost.
-   * @param {Number} stats.audio.sending.ssrc The Peer
-   *   connection audio sending ssrc.
-   * @param {Number} stats.audio.sending.rtt The Peer
-   *   connection audio sending RTT (Round-trip delay time). This will be defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not
-   *   defined in the original raw stats data.
-   * @param {JSON} stats.audio.receiving The Peer connection audio receiving stats.
-   * @param {Number} stats.audio.receiving.bytes The Peer connection audio receiving bytes.
-   * @param {Number} stats.audio.receiving.packets The Peer
-   *   connection audio receiving packets.
-   * @param {Number} stats.audio.receiving.packetsLost The Peer
-   *   connection audio receiving packets lost.
-   * @param {Number} stats.audio.receiving.ssrc The Peer
-   *   connection audio receiving ssrc.
-   * @param {JSON} stats.video The Peer connection video stats.
-   * @param {JSON} stats.video.sending The Peer connection video sending stats.
-   * @param {Number} stats.video.sending.bytes The Peer connection video sending bytes.
-   * @param {Number} stats.video.sending.packets The Peer
-   *   connection video sending packets.
-   * @param {Number} stats.video.sending.packetsLost The Peer
-   *   connection video sending packets lost.
-   * @param {JSON} stats.video.sending.ssrc The Peer
-   *   connection video sending ssrc ID.
-   * @param {Number} stats.video.sending.rtt The Peer
-   *   connection video sending RTT (Round-trip delay time). This will be defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not
-   *   defined in the original raw stats data.
-   * @param {JSON} stats.video.receiving The Peer connection video receiving stats.
-   * @param {Number} stats.video.receiving.bytes The Peer connection video receiving bytes.
-   * @param {Number} stats.video.receiving.packets The Peer
-   *   connection video receiving packets.
-   * @param {Number} stats.video.receiving.packetsLost The Peer
-   *   connection video receiving packets lost.
-   * @param {Number} stats.video.receiving.ssrc The Peer
-   *   connection video receiving ssrc.
-   * @param {JSON} stats.selectedCandidate The Peer connection selected candidate
-   *   pair details.
-   * @param {JSON} stats.selectedCandidate.local The Peer connection
-   *   selected local candidate.
-   * @param {String} stats.selectedCandidate.local.ipAddress The Peer connection
-   *   selected local candidate IP address.
-   * @param {Number} stats.selectedCandidate.local.portNumber The Peer connection
-   *   selected local candidate port number.
-   * @param {String} stats.selectedCandidate.local.transport The Peer connection
-   *   selected local candidate transport.
-   * @param {String} stats.selectedCandidate.local.candidateType The Peer connection
-   *   selected local candidate candidate type.
-   * @param {JSON} stats.selectedCandidate.remote The Peer connection
-   *   selected remote candidate.
-   * @param {String} stats.selectedCandidate.remote.ipAddress The Peer connection
-   *   selected remote candidate IP address.
-   * @param {Number} stats.selectedCandidate.remote.portNumber The Peer connection
-   *   selected remote candidate port number.
-   * @param {String} stats.selectedCandidate.remote.transport The Peer connection
-   *   selected remote candidate transport.
-   * @param {String} stats.selectedCandidate.remote.candidateType The Peer connection
-   *   selected remote candidate candidate type.
-   * @param {JSON} stats.connection The Peer connection details.
-   * @param {String} stats.connection.iceConnectionState The Peer connection ICE
-   *   connection state.
-   * @param {String} stats.connection.iceGatheringState The Peer connection ICE
-   *   gathering state.
-   * @param {String} stats.connection.signalingState The Peer connection
-   *   signaling state.
-   * @param {JSON} stats.connection.localDescription The Peer connection
-   *   local session description.
-   * @param {String} stats.connection.localDescription.type The Peer connection
-   *   local session description type.
-   * @param {String} stats.connection.localDescription.sdp The Peer connection
-   *   local session description sdp.
-   * @param {JSON} stats.connection.remoteDescription The Peer connection
-   *   remote session description.
-   * @param {String} stats.connection.remoteDescription.type The Peer connection
-   *   remote session description type.
-   * @param {String} stats.connection.remoteDescription.sdp The Peer connection
-   *   remote session description sdp.
-   * @param {JSON} stats.connection.candidates The Peer connection list of
-   *   candidates received or sent.
-   * @param {JSON} stats.connection.candidates.sending The Peer connection list of
-   *   candidates sent.
-   * @param {Array} stats.connection.candidates.sending.host The Peer connection list of
-   *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; candidates sent.
-   * @param {JSON} stats.connection.candidates.sending.host.(#index) The &lt;code&gt;&quot;host&quot;&lt;/code&gt;
-   *   candidate sent.
-   * @param {Array} stats.connection.candidates.sending.srflx The Peer connection list of
-   *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; candidates sent.
-   * @param {JSON} stats.connection.candidates.sending.srflx.(#index) The &lt;code&gt;&quot;srflx&quot;&lt;/code&gt;
-   *   candidate sent.
-   * @param {Array} stats.connection.candidates.sending.relay The Peer connection list of
+   * @param {String} peerId The Peer ID.
+   * @param {JSON} [stats] The Peer connection current stats.
+   *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; payload is &lt;code&gt;RETRIEVE_SUCCESS&lt;/code&gt;.&lt;/small&gt;
+   * @param {JSON} stats.raw The Peer connection raw stats before parsing.
+   * @param {JSON} stats.audio The Peer connection audio streaming stats.
+   * @param {JSON} stats.audio.sending The Peer connection sending audio streaming stats.
+   * @param {Number} stats.audio.sending.bytes The Peer connection sending audio streaming bytes.
+   * @param {Number} stats.audio.sending.packets The Peer connection sending audio streaming packets.
+   * @param {Number} stats.audio.sending.packetsLost The Peer connection sending audio streaming packets lost.
+   * @param {Number} stats.audio.sending.ssrc The Peer connection sending audio streaming RTP packets SSRC.
+   * @param {Number} stats.audio.sending.rtt The Peer connection sending audio streaming RTT (Round-trip delay time).
+   *   &lt;small&gt;Defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing.&lt;/small&gt;
+   * @param {JSON} stats.audio.receiving The Peer connection receiving audio streaming stats.
+   * @param {Number} stats.audio.receiving.bytes The Peer connection sending audio streaming bytes.
+   * @param {Number} stats.audio.receiving.packets The Peer connection receiving audio streaming packets.
+   * @param {Number} stats.audio.receiving.packetsLost The Peer connection receiving audio streaming packets lost.
+   * @param {Number} stats.audio.receiving.ssrc The Peer connection receiving audio streaming RTP packets SSRC.
+   * @param {JSON} stats.video The Peer connection video streaming stats.
+   * @param {JSON} stats.video.sending The Peer connection sending video streaming stats.
+   * @param {Number} stats.video.sending.bytes The Peer connection sending video streaming bytes.
+   * @param {Number} stats.video.sending.packets The Peer connection sending video streaming packets.
+   * @param {Number} stats.video.sending.packetsLost The Peer connection sending video streaming packets lost.
+   * @param {JSON} stats.video.sending.ssrc The Peer connection sending video streaming RTP packets SSRC.
+   * @param {Number} stats.video.sending.rtt The Peer connection sending video streaming RTT (Round-trip delay time).
+   *   &lt;small&gt;Defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing.&lt;/small&gt;
+   * @param {JSON} stats.video.receiving The Peer connection receiving video streaming stats.
+   * @param {Number} stats.video.receiving.bytes The Peer connection receiving video streaming bytes.
+   * @param {Number} stats.video.receiving.packets The Peer connection receiving video streaming packets.
+   * @param {Number} stats.video.receiving.packetsLost The Peer connection receiving video streaming packets lost.
+   * @param {Number} stats.video.receiving.ssrc The Peer connection receiving video streaming RTP packets SSRC.
+   * @param {JSON} stats.selectedCandidate The Peer connection selected ICE candidate pair stats.
+   * @param {JSON} stats.selectedCandidate.local The Peer connection selected local ICE candidate.
+   * @param {String} stats.selectedCandidate.local.ipAddress The Peer connection selected
+   *   local ICE candidate IP address.
+   * @param {Number} stats.selectedCandidate.local.portNumber The Peer connection selected
+   *   local ICE candidate port number.
+   * @param {String} stats.selectedCandidate.local.transport The Peer connection selected
+   *   local ICE candidate IP transport type.
+   * @param {String} stats.selectedCandidate.local.candidateType The Peer connection selected
+   *   local ICE candidate type.
+   * @param {JSON} stats.selectedCandidate.remote The Peer connection selected remote ICE candidate.
+   * @param {String} stats.selectedCandidate.remote.ipAddress The Peer connection selected
+   *   remote ICE candidate IP address.
+   * @param {Number} stats.selectedCandidate.remote.portNumber The Peer connection selected
+   *   remote ICE candidate port number.
+   * @param {String} stats.selectedCandidate.remote.transport The Peer connection selected
+   *   remote ICE candidate IP transport type.
+   * @param {String} stats.selectedCandidate.remote.candidateType The Peer connection selected
+   *   remote ICE candidate type.
+   * @param {JSON} stats.connection The Peer connection object stats.
+   * @param {String} stats.connection.iceConnectionState The Peer connection ICE connection state.
+   * @param {String} stats.connection.iceGatheringState The Peer connection ICE gathering state.
+   * @param {String} stats.connection.signalingState The Peer connection signaling state.
+   * @param {JSON} stats.connection.localDescription The Peer connection local session description.
+   * @param {String} stats.connection.localDescription.type The Peer connection local session description type.
+   * @param {String} stats.connection.localDescription.sdp The Peer connection local session description SDP.
+   * @param {JSON} stats.connection.remoteDescription The Peer connection remote session description.
+   * @param {String} stats.connection.remoteDescription.type The Peer connection remote session description type.
+   * @param {String} stats.connection.remoteDescription.sdp The Peer connection remote session description sdp.
+   * @param {JSON} stats.connection.candidates The Peer connection list of ICE candidates sent or received.
+   * @param {JSON} stats.connection.candidates.sending The Peer connection list of local ICE candidates sent.
+   * @param {Array} stats.connection.candidates.sending.host The Peer connection list of local
+   *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; ICE candidates sent.
+   * @param {Array} stats.connection.candidates.sending.srflx The Peer connection list of local
+   *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; ICE candidates sent.
+   * @param {Array} stats.connection.candidates.sending.relay The Peer connection list of local
    *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; candidates sent.
-   * @param {JSON} stats.connection.candidates.sending.relay.(#index) The &lt;code&gt;&quot;relay&quot;&lt;/code&gt;
-   *   candidate sent.
-   * @param {JSON} stats.connection.candidates.receiving The Peer connection list of
-   *   candidates received.
-   * @param {Array} stats.connection.candidates.receiving.host The Peer connection list of
-   *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; candidates received.
-   * @param {JSON} stats.connection.candidates.receiving.host.(#index) The &lt;code&gt;&quot;host&quot;&lt;/code&gt;
-   *   candidate received.
-   * @param {Array} stats.connection.candidates.receiving.srflx The Peer connection list of
-   *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; candidates received.
-   * @param {JSON} stats.connection.candidates.receiving.srflx.(#index) The &lt;code&gt;&quot;srflx&quot;&lt;/code&gt;
-   *   candidate received.
-   * @param {Array} stats.connection.candidates.receiving.relay The Peer connection list of
-   *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; candidates received.
-   * @param {JSON} stats.connection.candidates.receiving.relay.(#index) The &lt;code&gt;&quot;relay&quot;&lt;/code&gt;
-   *   candidate received.
-   * @param {Error} error The Error object received when failed retrieving the
-   *   Peer connection status.
-   * @component Events
+   * @param {JSON} stats.connection.candidates.receiving The Peer connection list of remote ICE candidates received.
+   * @param {Array} stats.connection.candidates.receiving.host The Peer connection list of remote
+   *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; ICE candidates received.
+   * @param {Array} stats.connection.candidates.receiving.srflx The Peer connection list of remote
+   *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; ICE candidates received.
+   * @param {Array} stats.connection.candidates.receiving.relay The Peer connection list of remote
+   *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; ICE candidates received.
+   * @param {Error} error The error object received.
+   *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; payload is &lt;code&gt;RETRIEVE_ERROR&lt;/code&gt;.&lt;/small&gt;
    * @for Skylink
    * @since 0.6.14
    */
@@ -1539,34 +717,23 @@ Skylink.prototype._EVENTS = {
 };
 
 /**
- * Stores the list of {{#crossLink &quot;Skylink/once:method&quot;}}once(){{/crossLink}}
- *   event subscription handlers.
+ * Stores the list of &lt;code&gt;once()&lt;/code&gt; event handlers.
+ * These events are only triggered once.
  * @attribute _onceEvents
- * @param {Array} (#eventName) The array of event subscription handlers that is
- *   subscribed using {{#crossLink &quot;Skylink/once:method&quot;}}once() method{{/crossLink}}
- *   associated with the event name.
- * @param {Function} (#eventName).(#index) The event subscription handler
- *   associated with the event name. This is to be triggered once when condition is met.
- *   Alternatively, the &lt;code&gt;once()&lt;/code&gt; event subscription handler can be
- *   unsubscribed with {{#crossLink &quot;Skylink/off:method&quot;}}off(){{/crossLink}} before
- *   condition is met.
+ * @param {Array} &lt;#event&gt; The list of event handlers associated with the event.
+ * @param {Array} &lt;#event&gt;.&lt;#index&gt; The array of event handler function and its condition function.
  * @type JSON
  * @private
- * @required
- * @component Events
  * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._onceEvents = {};
 
 /**
- * The throttling function datetime stamp in
- *   [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601).
+ * Stores the timestamps data used for throttling.
  * @attribute _timestamp
  * @type JSON
  * @private
- * @required
- * @component Events
  * @for Skylink
  * @since 0.5.8
  */
@@ -1576,17 +743,141 @@ Skylink.prototype._timestamp = {
 };
 
 /**
- * Triggers event subscription handlers that is associated with the event name.
- * {{#crossLink &quot;Skylink/on:method&quot;}}on() event subscription handlers{{/crossLink}}
- *   will be triggered always, but
- *   {{#crossLink &quot;Skylink/once:method&quot;}}once() event subscription hadlers{{/crossLink}}
- *   will only be triggered once the condition is met.
- * @method _trigger
- * @param {String} eventName The Skylink event name to trigger that would trigger event subscription
- *   handlers associated to the event name with the &lt;code&gt;arguments&lt;/code&gt; parameters payload.
+ * Function that subscribes a listener to an event.
+ * @method on
+ * @param {String} eventName The event.
+ * @param {Function} callback The listener.
+ *   &lt;small&gt;This will be invoked when event is triggered.&lt;/small&gt;
+ * @example
+ *   // Example 1: Subscribing to &quot;peerJoined&quot; event
+ *   skylinkDemo.on(&quot;peerJoined&quot;, function (peerId, peerInfo, isSelf) {
+ *     console.info(&quot;peerJoined event has been triggered with:&quot;, peerId, peerInfo, isSelf);
+ *   });
  * @for Skylink
+ * @since 0.1.0
+ */
+Skylink.prototype.on = function(eventName, callback) {
+  if (&#x27;function&#x27; === typeof callback) {
+    this._EVENTS[eventName] = this._EVENTS[eventName] || [];
+    this._EVENTS[eventName].push(callback);
+    log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is subscribed&#x27;]);
+  } else {
+    log.error([null, &#x27;Event&#x27;, eventName, &#x27;Provided parameter is not a function&#x27;]);
+  }
+};
+
+/**
+ * Function that subscribes a listener to an event once.
+ * @method once
+ * @param {String} eventName The event.
+ * @param {Function} callback The listener.
+ *   &lt;small&gt;This will be invoked once when event is triggered and conditional function is satisfied.&lt;/small&gt;
+ * @param {Function} [condition] The conditional function that will be invoked when event is triggered.
+ *   &lt;small&gt;Return &lt;code&gt;true&lt;/code&gt; when invoked to satisfy condition.&lt;/small&gt;
+ *   &lt;small&gt;When not provided, the conditional function will always return &lt;code&gt;true&lt;/code&gt;.&lt;/small&gt;
+ * @param {Boolean} [fireAlways=false] The flag that indicates if &lt;code&gt;once()&lt;/code&gt; should act like
+ *   &lt;code&gt;on()&lt;/code&gt; but only invoke listener only when conditional function is satisfied.
+ * @example
+ *   // Example 1: Subscribing to &quot;peerJoined&quot; event that triggers without condition
+ *   skylinkDemo.once(&quot;peerJoined&quot;, function (peerId, peerInfo, isSelf) {
+ *     console.info(&quot;peerJoined event has been triggered once with:&quot;, peerId, peerInfo, isSelf);
+ *   });
+ *
+ *   // Example 2: Subscribing to &quot;incomingStream&quot; event that triggers with condition
+ *   skylinkDemo.once(&quot;incomingStream&quot;, function (peerId, stream, isSelf, peerInfo) {
+ *     console.info(&quot;incomingStream event has been triggered with User stream:&quot;, stream);
+ *   }, function (peerId, peerInfo, isSelf) {
+ *     return isSelf;
+ *   });
+ *
+ *   // Example 3: Subscribing to &quot;dataTransferState&quot; event that triggers always only when condition is satisfied
+ *   skylinkDemo.once(&quot;dataTransferState&quot;, function (state, transferId, peerId, transferInfo) {
+ *     console.info(&quot;Received data transfer from Peer:&quot;, transferInfo.data);
+ *   }, function (state, transferId, peerId) {
+ *     if (state === skylinkDemo.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {
+ *       skylinkDemo.acceptDataTransfer(peerId, transferId);
+ *     }
+ *     return state === skylinkDemo.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED;
+ *   }, true);
+ * @for Skylink
+ * @since 0.5.4
+ */
+Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
+  if (typeof condition === &#x27;boolean&#x27;) {
+    fireAlways = condition;
+    condition = null;
+  }
+  fireAlways = (typeof fireAlways === &#x27;undefined&#x27; ? false : fireAlways);
+  condition = (typeof condition !== &#x27;function&#x27;) ? function () {
+    return true;
+  } : condition;
+
+  if (typeof callback === &#x27;function&#x27;) {
+
+    this._EVENTS[eventName] = this._EVENTS[eventName] || [];
+    // prevent undefined error
+    this._onceEvents[eventName] = this._onceEvents[eventName] || [];
+    this._onceEvents[eventName].push([callback, condition, fireAlways]);
+    log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is subscribed on condition&#x27;]);
+  } else {
+    log.error([null, &#x27;Event&#x27;, eventName, &#x27;Provided callback is not a function&#x27;]);
+  }
+};
+
+/**
+ * Function that unsubscribes listeners from an event.
+ * @method off
+ * @param {String} eventName The event.
+ * @param {Function} [callback] The listener to unsubscribe.
+ * - When not provided, all listeners associated to the event will be unsubscribed.
+ * @example
+ *   // Example 1: Unsubscribe all &quot;peerJoined&quot; event
+ *   skylinkDemo.off(&quot;peerJoined&quot;);
+ *
+ *   // Example 2: Unsubscribe only one listener from &quot;peerJoined event&quot;
+ *   var pJListener = function (peerId, peerInfo, isSelf) {
+ *     console.info(&quot;peerJoined event has been triggered with:&quot;, peerId, peerInfo, isSelf);
+ *   };
+ *
+ *   skylinkDemo.off(&quot;peerJoined&quot;, pJListener);
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype.off = function(eventName, callback) {
+  if (callback === undefined) {
+    this._EVENTS[eventName] = [];
+    this._onceEvents[eventName] = [];
+    log.log([null, &#x27;Event&#x27;, eventName, &#x27;All events are unsubscribed&#x27;]);
+    return;
+  }
+  var arr = this._EVENTS[eventName];
+  var once = this._onceEvents[eventName];
+
+  // unsubscribe events that is triggered always
+  for (var i = 0; i &lt; arr.length; i++) {
+    if (arr[i] === callback) {
+      log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is unsubscribed&#x27;]);
+      arr.splice(i, 1);
+      break;
+    }
+  }
+  // unsubscribe events fired only once
+  if(once !== undefined) {
+    for (var j = 0; j &lt; once.length; j++) {
+      if (once[j][0] === callback) {
+        log.log([null, &#x27;Event&#x27;, eventName, &#x27;One-time Event is unsubscribed&#x27;]);
+        once.splice(j, 1);
+        break;
+      }
+    }
+  }
+};
+
+/**
+ * Function that triggers an event.
+ * The rest of the parameters after the &lt;code&gt;eventName&lt;/code&gt; parameter is considered as the event parameter payloads.
+ * @method _trigger
  * @private
- * @component Events
  * @for Skylink
  * @since 0.1.0
  */
@@ -1634,159 +925,13 @@ Skylink.prototype._trigger = function(eventName) {
   log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is triggered&#x27;]);
 };
 
-/**
- * Subscribes an event handler associated to the event name.
- * This event handler will always be triggered when the event name is triggered. If you
- *   are looking for subscription event handler to be triggered once, check out
- *   {{#crossLink &quot;Skylink/once:method&quot;}}once() event subscription{{/crossLink}}.
- * @method on
- * @param {String} eventName The Skylink event name to subscribe to.
- * @param {Function} callback The event handler to subsribe to the associated
- *   Skylink event name that would be triggered once the event name is triggered.
- * @example
- *   SkylinkDemo.on(&quot;peerJoined&quot;, function (peerId, peerInfo) {
- *      alert(peerId + &quot; has joined the room&quot;);
- *   });
- * @component Events
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype.on = function(eventName, callback) {
-  if (&#x27;function&#x27; === typeof callback) {
-    this._EVENTS[eventName] = this._EVENTS[eventName] || [];
-    this._EVENTS[eventName].push(callback);
-    log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is subscribed&#x27;]);
-  } else {
-    log.error([null, &#x27;Event&#x27;, eventName, &#x27;Provided parameter is not a function&#x27;]);
-  }
-};
+
 
 /**
- * Subscribes an event handler associated to the event name that
- *    would only be triggered once the provided condition function has been met.
- * @method once
- * @param {String} eventName The Skylink event name to subscribe to.
- * @param {Function} callback The event handler to subscribe to the associated
- *   Skylink event name to trigger once the condition has met. If
- *   &lt;code&gt;fireAlways&lt;/code&gt; option is set toe &lt;code&gt;true&lt;/code&gt;, this will
- *   always be fired when condition is met.
- * @param {Function} [condition] The condition function that once the condition has
- *   been met, trigger the event handler once. Return in the condition function &lt;code&gt;true&lt;/code&gt;
- *   to pass as meeting the condition.
- *   If the condition function is not provided, the event handler will be triggered
- *     once the Skylink event name is triggered.
- * @param {Boolean} [fireAlways=false] The flag that indicates if Skylink should interrupt this
- *   &lt;code&gt;once()&lt;/code&gt; function once the function has been triggered to not unsubscribe the
- *   event handler but to always trigger when the condition has been met.
- * @example
- *   SkylinkDemo.once(&quot;peerConnectionState&quot;, function (state, peerId) {
- *     alert(&quot;Peer has left&quot;);
- *   }, function (state, peerId) {
- *     return state === SkylinkDemo.PEER_CONNECTION_STATE.CLOSED;
- *   });
- * @component Events
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
-  if (typeof condition === &#x27;boolean&#x27;) {
-    fireAlways = condition;
-    condition = null;
-  }
-  fireAlways = (typeof fireAlways === &#x27;undefined&#x27; ? false : fireAlways);
-  condition = (typeof condition !== &#x27;function&#x27;) ? function () {
-    return true;
-  } : condition;
-
-  if (typeof callback === &#x27;function&#x27;) {
-
-    this._EVENTS[eventName] = this._EVENTS[eventName] || [];
-    // prevent undefined error
-    this._onceEvents[eventName] = this._onceEvents[eventName] || [];
-    this._onceEvents[eventName].push([callback, condition, fireAlways]);
-    log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is subscribed on condition&#x27;]);
-  } else {
-    log.error([null, &#x27;Event&#x27;, eventName, &#x27;Provided callback is not a function&#x27;]);
-  }
-};
-
-/**
- * Unsubscribes an event handler associated to the event name.
- * @method off
- * @param {String} eventName The Skylink event name to unsubscribe to.
- * @param {Function} [callback] The event handler to unsubscribe to the associated
- *   Skylink event name. If the event handler is not provided, Skylink would
- *   unsubscribe all event handlers subscribed to the associated event name.
- * @example
- *   // Example 1: Unsubscribe all event handlers related to the event
- *   SkylinkDemo.off(&quot;peerJoined&quot;);
- *
- *   // Example 2: Unsubscribe to one event handler
- *   SkylinkDemo.off(&quot;peerJoined&quot;, callback);
- * @component Events
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype.off = function(eventName, callback) {
-  if (callback === undefined) {
-    this._EVENTS[eventName] = [];
-    this._onceEvents[eventName] = [];
-    log.log([null, &#x27;Event&#x27;, eventName, &#x27;All events are unsubscribed&#x27;]);
-    return;
-  }
-  var arr = this._EVENTS[eventName];
-  var once = this._onceEvents[eventName];
-
-  // unsubscribe events that is triggered always
-  for (var i = 0; i &lt; arr.length; i++) {
-    if (arr[i] === callback) {
-      log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is unsubscribed&#x27;]);
-      arr.splice(i, 1);
-      break;
-    }
-  }
-  // unsubscribe events fired only once
-  if(once !== undefined) {
-    for (var j = 0; j &lt; once.length; j++) {
-      if (once[j][0] === callback) {
-        log.log([null, &#x27;Event&#x27;, eventName, &#x27;One-time Event is unsubscribed&#x27;]);
-        once.splice(j, 1);
-        break;
-      }
-    }
-  }
-};
-
-/**
- * Checks if the first condition is already met before doing an event
- *   handler subscription to wait for the second condition to be met.
- * This method will do a event subscription with
- *   {{#crossLink &quot;Skylink/once:method&quot;}}once(){{/crossLink}} as this
- *   &lt;code&gt;_condition()&lt;/code&gt; would only trigger once, unless &lt;code&gt;fireAlways&lt;/code&gt;
- *   is set to &lt;code&gt;true&lt;/code&gt;.
+ * Function that checks if the current state condition is met before subscribing
+ *   event handler to wait for condition to be fulfilled.
  * @method _condition
- * @param {String} eventName The Skylink event name to subscribe to.
- * @param {Function} callback The event handler to subscribe to the associated
- *   Skylink event name to trigger once the condition has met. If
- *   &lt;code&gt;fireAlways&lt;/code&gt; option is set to &lt;code&gt;true&lt;/code&gt;, this will
- *   always be fired when condition is met.
- * @param {Function} [checkFirst] The first condition to check before
- *   doing an event subscription to wait for second condition to meet.
- *   Return in the first condition function &lt;code&gt;true&lt;/code&gt; to pass as meeting the condition.
- *   If the first condition is met, the event handler would be triggered
- *   and the event handler will not be subscribed to the event or wait
- *   for second condition to pass.
- * @param {Function} [condition] The second condition function that once the it has
- *   been met, it will trigger the event handler once.
- *   Return in the second condition function &lt;code&gt;true&lt;/code&gt; to pass as meeting the condition.
- *   If the second condition is met, the event handler would be triggered and
- *   depending if &lt;code&gt;fireAlways&lt;/code&gt; option is set to &lt;code&gt;true&lt;/code&gt;, this will
- *   always be fired when condition is met.
- * @param {Boolean} [fireAlways=false] The flag that indicates if Skylink should interrupt the
- *   second condition function once the function has been triggered to not unsubscribe the
- *   event handler but to always trigger when the second condition has been met.
  * @private
- * @component Events
  * @for Skylink
  * @since 0.5.5
  */
@@ -1809,21 +954,9 @@ Skylink.prototype._condition = function(eventName, callback, checkFirst, conditi
 };
 
 /**
- * Starts the interval check for the condition provided to meet before clearing
- *   the interval and triggering the callback provided.
- * This utilises &lt;code&gt;setInterval()&lt;/code&gt; function.
+ * Function that starts an interval check to wait for a condition to be resolved.
  * @method _wait
- * @param {Function} callback The callback fired after the condition provided
- *   has been met.
- * @param {Function} condition The condition function that once the condition has
- *   been met, trigger the callback. Return in the condition function &lt;code&gt;true&lt;/code&gt;
- *   to pass as meeting the condition.
- * @param {Number} [intervalTime=50] The interval loop timeout that the interval
- *   check should iterate based on the timeout provided (in ms).
- *   By default, if the value is not configured, it is &lt;code&gt;50&lt;/code&gt;ms.
- * @for Skylink
  * @private
- * @component Events
  * @for Skylink
  * @since 0.5.5
  */
@@ -1859,14 +992,10 @@ Skylink.prototype._wait = function(callback, condition, intervalTime, fireAlways
 };
 
 /**
- * Returns a wrapper of the original function, which fires only once during
- *  a specified amount of time.
+ * Function that throttles a method function to prevent multiple invokes over a specified amount of time.
+ * Returns a function to be invoked &lt;code&gt;._throttle(fn, 1000)()&lt;/code&gt; to make throttling functionality work.
  * @method _throttle
- * @param {Function} func The function that should be throttled.
- * @param {Number} wait The amount of time that function need to throttled (in ms).
- * @return {Function} The throttled function.
  * @private
- * @component Events
  * @for Skylink
  * @since 0.5.8
  */

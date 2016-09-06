@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>SkylinkJS - Video Call Demo</title>
+  <title>SkylinkJS Demo : Stream Settings Selection</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel='shortcut icon' href='../favicon.ico'>
   <style>
@@ -9,6 +9,8 @@
       background: #000;
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/hmac-sha1.js" type="text/javascript"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/enc-base64.js" type="text/javascript"></script>
 </head>
 <body>
   <div>
@@ -24,7 +26,7 @@
     <button id="toggleVideo" onclick="toggleVideo()" style="float:right;display:none;">-</button>
   </div>
   <hr>
-  
+
   <script src="../../publish/skylink.complete.js"  type="text/javascript"></script>
   <script src="../config.js"   type="text/javascript"></script>
   <script src="script.js"   type="text/javascript"></script>
