@@ -296,9 +296,9 @@ window.SkylinkLogs = {
    *
    *  // Example 2: Get all the logs
    *  var allLogs = SkylinkLogs.getLogs();
-   * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;&lt;li&gt;Returns the stored SDK &lt;code&gt;console&lt;/code&gt; logs.&lt;/li&gt;&lt;/ol&gt;
    * @type Function
    * @global true
+   * @triggerForPropHackNone true
    * @for Skylink
    * @since 0.5.5
    */
@@ -311,8 +311,8 @@ window.SkylinkLogs = {
    * @example
    *   // Example 1: Clear all the logs
    *   SkylinkLogs.clearAllLogs();
-   * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;&lt;li&gt;Clears all the stored SDK &lt;code&gt;console&lt;/code&gt; logs.&lt;/li&gt;&lt;/ol&gt;
    * @global true
+   * @triggerForPropHackNone true
    * @for Skylink
    * @since 0.5.5
    */
@@ -326,8 +326,8 @@ window.SkylinkLogs = {
    * @example
    *   // Example 1: Print all the logs
    *   SkylinkLogs.printAllLogs();
-   * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;&lt;li&gt;Prints all the stored SDK &lt;code&gt;console&lt;/code&gt; logs.&lt;/li&gt;&lt;/ol&gt;
    * @global true
+   * @triggerForPropHackNone true
    * @for Skylink
    * @since 0.5.5
    */
@@ -462,7 +462,6 @@ var log = {
  *
  *   // Example 5: Print only the console.error logs. This is done by default.
  *   skylinkDemo.setLogLevel(skylinkDemo.LOG_LEVEL.ERROR);
- * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;&lt;li&gt;Sets the current SDK &lt;code&gt;console&lt;/code&gt; log level.&lt;/li&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.5.5
  */

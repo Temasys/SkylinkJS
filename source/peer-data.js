@@ -44,9 +44,7 @@ Skylink.prototype._userData = '';
  * @method setUserData
  * @param {JSON|String} userData The updated custom data.
  * @trigger <ol class="desc-seq">
- *   <li>Updates the User current custom data.</li><li><ol>
- *   <li>If User is in Room, <a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers.</li>
- *   </ol></li></ol>
+ *   <li>If User is in Room, <a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers.</li></ol>
  * @example
  *   // Example 1: Set/Update User custom data before joinRoom()
  *   var userData = "beforejoin";
@@ -99,7 +97,6 @@ Skylink.prototype.setUserData = function(userData) {
  * - When not provided or that the Peer ID is does not exists, it will return
  *   the User current custom data.
  * @return {JSON|String} The User / Peer current custom data.
- * @trigger <ol class="desc-seq"><li>Returns the User / Peer current custom data.</li></ol>
  * @example
  *   // Example 1: Get Peer current custom data
  *   var peerUserData = skylinkDemo.getUserData(peerId);
@@ -132,7 +129,6 @@ Skylink.prototype.getUserData = function(peerId) {
  * @return {JSON} The User / Peer current session information.
  *   <small>Object signature matches the <code>peerInfo</code> parameter payload received in the
  *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small>
- * @trigger <ol class="desc-seq"><li>Returns the User / Peer current session information.</li></ol>
  * @example
  *   // Example 1: Get Peer current session information
  *   var peerPeerInfo = skylinkDemo.getPeerInfo(peerId);

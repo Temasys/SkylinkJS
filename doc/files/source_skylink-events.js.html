@@ -130,8 +130,8 @@ Skylink.prototype._EVENTS = {
 
   /**
    * &lt;blockquote class=&quot;info&quot;&gt;
-   *   This may be caused by Javascript errors in the event handlers when subscribing to events.&lt;br&gt;
-   *   It may be resolved by checking for code errors in your Web App in the event subscription handlers.&lt;br&gt;
+   *   This may be caused by Javascript errors in the event listener when subscribing to events.&lt;br&gt;
+   *   It may be resolved by checking for code errors in your Web App in the event subscribing listener.&lt;br&gt;
    *   &lt;code&gt;skylinkDemo.on(&quot;eventName&quot;, function () { // Errors here });&lt;/code&gt;
    * &lt;/blockquote&gt;
    * Event triggered when socket connection encountered exception.
@@ -743,19 +743,16 @@ Skylink.prototype._timestamp = {
 };
 
 /**
- * Subscribes an event handler associated to the event name.
- * This event handler will always be triggered when the event name is triggered. If you
- *   are looking for subscription event handler to be triggered once, check out
- *   {{#crossLink &quot;Skylink/once:method&quot;}}once() event subscription{{/crossLink}}.
+ * Function that subscribes a listener to an event.
  * @method on
- * @param {String} eventName The Skylink event name to subscribe to.
- * @param {Function} callback The event handler to subsribe to the associated
- *   Skylink event name that would be triggered once the event name is triggered.
+ * @param {String} eventName The event.
+ * @param {Function} callback The listener.
+ *   &lt;small&gt;This will be invoked when event is triggered.&lt;/small&gt;
  * @example
- *   SkylinkDemo.on(&quot;peerJoined&quot;, function (peerId, peerInfo) {
- *      alert(peerId + &quot; has joined the room&quot;);
+ *   // Example 1: Subscribing to &quot;peerJoined&quot; event
+ *   skylinkDemo.on(&quot;peerJoined&quot;, function (peerId, peerInfo, isSelf) {
+ *     console.info(&quot;peerJoined event has been triggered with:&quot;, peerId, peerInfo, isSelf);
  *   });
- * @component Events
  * @for Skylink
  * @since 0.1.0
  */
@@ -770,29 +767,38 @@ Skylink.prototype.on = function(eventName, callback) {
 };
 
 /**
- * Subscribes an event handler associated to the event name that
- *    would only be triggered once the provided condition function has been met.
+ * Function that subscribes a listener to an event once.
  * @method once
- * @param {String} eventName The Skylink event name to subscribe to.
- * @param {Function} callback The event handler to subscribe to the associated
- *   Skylink event name to trigger once the condition has met. If
- *   &lt;code&gt;fireAlways&lt;/code&gt; option is set toe &lt;code&gt;true&lt;/code&gt;, this will
- *   always be fired when condition is met.
- * @param {Function} [condition] The condition function that once the condition has
- *   been met, trigger the event handler once. Return in the condition function &lt;code&gt;true&lt;/code&gt;
- *   to pass as meeting the condition.
- *   If the condition function is not provided, the event handler will be triggered
- *     once the Skylink event name is triggered.
- * @param {Boolean} [fireAlways=false] The flag that indicates if Skylink should interrupt this
- *   &lt;code&gt;once()&lt;/code&gt; function once the function has been triggered to not unsubscribe the
- *   event handler but to always trigger when the condition has been met.
+ * @param {String} eventName The event.
+ * @param {Function} callback The listener.
+ *   &lt;small&gt;This will be invoked once when event is triggered and conditional function is satisfied.&lt;/small&gt;
+ * @param {Function} [condition] The conditional function that will be invoked when event is triggered.
+ *   &lt;small&gt;Return &lt;code&gt;true&lt;/code&gt; when invoked to satisfy condition.&lt;/small&gt;
+ *   &lt;small&gt;When not provided, the conditional function will always return &lt;code&gt;true&lt;/code&gt;.&lt;/small&gt;
+ * @param {Boolean} [fireAlways=false] The flag that indicates if &lt;code&gt;once()&lt;/code&gt; should act like
+ *   &lt;code&gt;on()&lt;/code&gt; but only invoke listener only when conditional function is satisfied.
  * @example
- *   SkylinkDemo.once(&quot;peerConnectionState&quot;, function (state, peerId) {
- *     alert(&quot;Peer has left&quot;);
- *   }, function (state, peerId) {
- *     return state === SkylinkDemo.PEER_CONNECTION_STATE.CLOSED;
+ *   // Example 1: Subscribing to &quot;peerJoined&quot; event that triggers without condition
+ *   skylinkDemo.once(&quot;peerJoined&quot;, function (peerId, peerInfo, isSelf) {
+ *     console.info(&quot;peerJoined event has been triggered once with:&quot;, peerId, peerInfo, isSelf);
  *   });
- * @component Events
+ *
+ *   // Example 2: Subscribing to &quot;incomingStream&quot; event that triggers with condition
+ *   skylinkDemo.once(&quot;incomingStream&quot;, function (peerId, stream, isSelf, peerInfo) {
+ *     console.info(&quot;incomingStream event has been triggered with User stream:&quot;, stream);
+ *   }, function (peerId, peerInfo, isSelf) {
+ *     return isSelf;
+ *   });
+ *
+ *   // Example 3: Subscribing to &quot;dataTransferState&quot; event that triggers always only when condition is satisfied
+ *   skylinkDemo.once(&quot;dataTransferState&quot;, function (state, transferId, peerId, transferInfo) {
+ *     console.info(&quot;Received data transfer from Peer:&quot;, transferInfo.data);
+ *   }, function (state, transferId, peerId) {
+ *     if (state === skylinkDemo.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {
+ *       skylinkDemo.acceptDataTransfer(peerId, transferId);
+ *     }
+ *     return state === skylinkDemo.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED;
+ *   }, true);
  * @for Skylink
  * @since 0.5.4
  */
@@ -819,19 +825,21 @@ Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
 };
 
 /**
- * Unsubscribes an event handler associated to the event name.
+ * Function that unsubscribes listeners from an event.
  * @method off
- * @param {String} eventName The Skylink event name to unsubscribe to.
- * @param {Function} [callback] The event handler to unsubscribe to the associated
- *   Skylink event name. If the event handler is not provided, Skylink would
- *   unsubscribe all event handlers subscribed to the associated event name.
+ * @param {String} eventName The event.
+ * @param {Function} [callback] The listener to unsubscribe.
+ * - When not provided, all listeners associated to the event will be unsubscribed.
  * @example
- *   // Example 1: Unsubscribe all event handlers related to the event
- *   SkylinkDemo.off(&quot;peerJoined&quot;);
+ *   // Example 1: Unsubscribe all &quot;peerJoined&quot; event
+ *   skylinkDemo.off(&quot;peerJoined&quot;);
  *
- *   // Example 2: Unsubscribe to one event handler
- *   SkylinkDemo.off(&quot;peerJoined&quot;, callback);
- * @component Events
+ *   // Example 2: Unsubscribe only one listener from &quot;peerJoined event&quot;
+ *   var pJListener = function (peerId, peerInfo, isSelf) {
+ *     console.info(&quot;peerJoined event has been triggered with:&quot;, peerId, peerInfo, isSelf);
+ *   };
+ *
+ *   skylinkDemo.off(&quot;peerJoined&quot;, pJListener);
  * @for Skylink
  * @since 0.5.5
  */

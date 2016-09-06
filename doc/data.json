@@ -1897,7 +1897,7 @@
                     "type": "JSON|String"
                 }
             ],
-            "trigger": "<ol class=\"desc-seq\">\n  <li>Updates the User current custom data.</li><li><ol>\n  <li>If User is in Room, <a href=\"#event_peerUpdated\"><code>peerUpdated</code> event</a> triggers.</li>\n  </ol></li></ol>",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>If User is in Room, <a href=\"#event_peerUpdated\"><code>peerUpdated</code> event</a> triggers.</li></ol>",
             "example": [
                 "\n  // Example 1: Set/Update User custom data before joinRoom()\n  var userData = \"beforejoin\";\n\n  skylinkDemo.setUserData(userData);\n\n  skylinkDemo.joinRoom(function (error, success) {\n     if (error) return;\n     if (success.peerInfo.userData === userData) {\n       console.log(\"User data is sent\");\n     }\n  });\n\n  // Example 2: Update User custom data after joinRoom()\n  var userData = \"afterjoin\";\n\n  skylinkDemo.joinRoom(function (error, success) {\n    if (error) return;\n    skylinkDemo.setUserData(userData);\n    if (skylinkDemo.getPeerInfo().userData === userData) {\n      console.log(\"User data is updated and sent\");\n    }\n  });"
             ],
@@ -1906,7 +1906,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 95,
+            "line": 93,
             "description": "Function that returns the User / Peer current custom data.",
             "itemtype": "method",
             "name": "getUserData",
@@ -1922,7 +1922,6 @@
                 "description": "The User / Peer current custom data.",
                 "type": "JSON|String"
             },
-            "trigger": "<ol class=\"desc-seq\"><li>Returns the User / Peer current custom data.</li></ol>",
             "example": [
                 "\n  // Example 1: Get Peer current custom data\n  var peerUserData = skylinkDemo.getUserData(peerId);\n\n  // Example 2: Get User current custom data\n  var userUserData = skylinkDemo.getUserData();"
             ],
@@ -1931,7 +1930,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 126,
+            "line": 123,
             "description": "Function that returns the User / Peer current session information.",
             "itemtype": "method",
             "name": "getPeerInfo",
@@ -1947,7 +1946,6 @@
                 "description": "The User / Peer current session information.\n  <small>Object signature matches the <code>peerInfo</code> parameter payload received in the\n  <a href=\"#event_peerJoined\"><code>peerJoined</code> event</a>.</small>",
                 "type": "JSON"
             },
-            "trigger": "<ol class=\"desc-seq\"><li>Returns the User / Peer current session information.</li></ol>",
             "example": [
                 "\n  // Example 1: Get Peer current session information\n  var peerPeerInfo = skylinkDemo.getPeerInfo(peerId);\n\n  // Example 2: Get User current session information\n  var userPeerInfo = skylinkDemo.getPeerInfo();"
             ],
@@ -1956,7 +1954,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 197,
+            "line": 193,
             "description": "Function that parses the User custom data provided.",
             "itemtype": "method",
             "name": "_parseUserData",
@@ -3500,9 +3498,9 @@
             "example": [
                 "\n // Example 1: Get logs of specific level\n var debugLogs = SkylinkLogs.getLogs(skylinkDemo.LOG_LEVEL.DEBUG);\n\n // Example 2: Get all the logs\n var allLogs = SkylinkLogs.getLogs();"
             ],
-            "trigger": "<ol class=\"desc-seq\"><li>Returns the stored SDK <code>console</code> logs.</li></ol>",
             "type": "Function",
             "global": "true",
+            "triggerforprophacknone": "true",
             "since": "0.5.5",
             "class": "Skylink",
             "subprops": [
@@ -3524,8 +3522,8 @@
             "example": [
                 "\n  // Example 1: Clear all the logs\n  SkylinkLogs.clearAllLogs();"
             ],
-            "trigger": "<ol class=\"desc-seq\"><li>Clears all the stored SDK <code>console</code> logs.</li></ol>",
             "global": "true",
+            "triggerforprophacknone": "true",
             "since": "0.5.5",
             "class": "Skylink"
         },
@@ -3539,8 +3537,8 @@
             "example": [
                 "\n  // Example 1: Print all the logs\n  SkylinkLogs.printAllLogs();"
             ],
-            "trigger": "<ol class=\"desc-seq\"><li>Prints all the stored SDK <code>console</code> logs.</li></ol>",
             "global": "true",
+            "triggerforprophacknone": "true",
             "since": "0.5.5",
             "class": "Skylink"
         },
@@ -3614,13 +3612,12 @@
             "example": [
                 "\n  // Example 1: Print all of the console.debug, console.log, console.info, console.warn and console.error logs.\n  skylinkDemo.setLogLevel(skylinkDemo.LOG_LEVEL.DEBUG);\n\n  // Example 2: Print only the console.log, console.info, console.warn and console.error logs.\n  skylinkDemo.setLogLevel(skylinkDemo.LOG_LEVEL.LOG);\n\n  // Example 3: Print only the console.info, console.warn and console.error logs.\n  skylinkDemo.setLogLevel(skylinkDemo.LOG_LEVEL.INFO);\n\n  // Example 4: Print only the console.warn and console.error logs.\n  skylinkDemo.setLogLevel(skylinkDemo.LOG_LEVEL.WARN);\n\n  // Example 5: Print only the console.error logs. This is done by default.\n  skylinkDemo.setLogLevel(skylinkDemo.LOG_LEVEL.ERROR);"
             ],
-            "trigger": "<ol class=\"desc-seq\"><li>Sets the current SDK <code>console</code> log level.</li></ol>",
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 392,
+            "line": 391,
             "description": "Function that configures the debugging mode of the SDK.",
             "itemtype": "method",
             "name": "setDebugMode",
@@ -3718,7 +3715,7 @@
         {
             "file": "source/skylink-events.js",
             "line": 40,
-            "description": "<blockquote class=\"info\">\n  This may be caused by Javascript errors in the event handlers when subscribing to events.<br>\n  It may be resolved by checking for code errors in your Web App in the event subscription handlers.<br>\n  <code>skylinkDemo.on(\"eventName\", function () { // Errors here });</code>\n</blockquote>\nEvent triggered when socket connection encountered exception.",
+            "description": "<blockquote class=\"info\">\n  This may be caused by Javascript errors in the event listener when subscribing to events.<br>\n  It may be resolved by checking for code errors in your Web App in the event subscribing listener.<br>\n  <code>skylinkDemo.on(\"eventName\", function () { // Errors here });</code>\n</blockquote>\nEvent triggered when socket connection encountered exception.",
             "itemtype": "event",
             "name": "channelError",
             "params": [
@@ -5191,95 +5188,92 @@
         {
             "file": "source/skylink-events.js",
             "line": 654,
-            "description": "Subscribes an event handler associated to the event name.\nThis event handler will always be triggered when the event name is triggered. If you\n  are looking for subscription event handler to be triggered once, check out\n  {{#crossLink \"Skylink/once:method\"}}once() event subscription{{/crossLink}}.",
+            "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
             "params": [
                 {
                     "name": "eventName",
-                    "description": "The Skylink event name to subscribe to.",
+                    "description": "The event.",
                     "type": "String"
                 },
                 {
                     "name": "callback",
-                    "description": "The event handler to subsribe to the associated\n  Skylink event name that would be triggered once the event name is triggered.",
+                    "description": "The listener.\n  <small>This will be invoked when event is triggered.</small>",
                     "type": "Function"
                 }
             ],
             "example": [
-                "\n  SkylinkDemo.on(\"peerJoined\", function (peerId, peerInfo) {\n     alert(peerId + \" has joined the room\");\n  });"
+                "\n  // Example 1: Subscribing to \"peerJoined\" event\n  skylinkDemo.on(\"peerJoined\", function (peerId, peerInfo, isSelf) {\n    console.info(\"peerJoined event has been triggered with:\", peerId, peerInfo, isSelf);\n  });"
             ],
-            "component": "Events",
             "since": "0.1.0",
             "class": "Skylink"
         },
         {
             "file": "source/skylink-events.js",
-            "line": 681,
-            "description": "Subscribes an event handler associated to the event name that\n   would only be triggered once the provided condition function has been met.",
+            "line": 678,
+            "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
             "params": [
                 {
                     "name": "eventName",
-                    "description": "The Skylink event name to subscribe to.",
+                    "description": "The event.",
                     "type": "String"
                 },
                 {
                     "name": "callback",
-                    "description": "The event handler to subscribe to the associated\n  Skylink event name to trigger once the condition has met. If\n  <code>fireAlways</code> option is set toe <code>true</code>, this will\n  always be fired when condition is met.",
+                    "description": "The listener.\n  <small>This will be invoked once when event is triggered and conditional function is satisfied.</small>",
                     "type": "Function"
                 },
                 {
                     "name": "condition",
-                    "description": "The condition function that once the condition has\n  been met, trigger the event handler once. Return in the condition function <code>true</code>\n  to pass as meeting the condition.\n  If the condition function is not provided, the event handler will be triggered\n    once the Skylink event name is triggered.",
+                    "description": "The conditional function that will be invoked when event is triggered.\n  <small>Return <code>true</code> when invoked to satisfy condition.</small>\n  <small>When not provided, the conditional function will always return <code>true</code>.</small>",
                     "type": "Function",
                     "optional": true
                 },
                 {
                     "name": "fireAlways",
-                    "description": "The flag that indicates if Skylink should interrupt this\n  <code>once()</code> function once the function has been triggered to not unsubscribe the\n  event handler but to always trigger when the condition has been met.",
+                    "description": "The flag that indicates if <code>once()</code> should act like\n  <code>on()</code> but only invoke listener only when conditional function is satisfied.",
                     "type": "Boolean",
                     "optional": true,
                     "optdefault": "false"
                 }
             ],
             "example": [
-                "\n  SkylinkDemo.once(\"peerConnectionState\", function (state, peerId) {\n    alert(\"Peer has left\");\n  }, function (state, peerId) {\n    return state === SkylinkDemo.PEER_CONNECTION_STATE.CLOSED;\n  });"
+                "\n  // Example 1: Subscribing to \"peerJoined\" event that triggers without condition\n  skylinkDemo.once(\"peerJoined\", function (peerId, peerInfo, isSelf) {\n    console.info(\"peerJoined event has been triggered once with:\", peerId, peerInfo, isSelf);\n  });\n\n  // Example 2: Subscribing to \"incomingStream\" event that triggers with condition\n  skylinkDemo.once(\"incomingStream\", function (peerId, stream, isSelf, peerInfo) {\n    console.info(\"incomingStream event has been triggered with User stream:\", stream);\n  }, function (peerId, peerInfo, isSelf) {\n    return isSelf;\n  });\n\n  // Example 3: Subscribing to \"dataTransferState\" event that triggers always only when condition is satisfied\n  skylinkDemo.once(\"dataTransferState\", function (state, transferId, peerId, transferInfo) {\n    console.info(\"Received data transfer from Peer:\", transferInfo.data);\n  }, function (state, transferId, peerId) {\n    if (state === skylinkDemo.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {\n      skylinkDemo.acceptDataTransfer(peerId, transferId);\n    }\n    return state === skylinkDemo.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED;\n  }, true);"
             ],
-            "component": "Events",
             "since": "0.5.4",
             "class": "Skylink"
         },
         {
             "file": "source/skylink-events.js",
-            "line": 730,
-            "description": "Unsubscribes an event handler associated to the event name.",
+            "line": 736,
+            "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
             "params": [
                 {
                     "name": "eventName",
-                    "description": "The Skylink event name to unsubscribe to.",
+                    "description": "The event.",
                     "type": "String"
                 },
                 {
                     "name": "callback",
-                    "description": "The event handler to unsubscribe to the associated\n  Skylink event name. If the event handler is not provided, Skylink would\n  unsubscribe all event handlers subscribed to the associated event name.",
+                    "description": "The listener to unsubscribe.\n- When not provided, all listeners associated to the event will be unsubscribed.",
                     "type": "Function",
                     "optional": true
                 }
             ],
             "example": [
-                "\n  // Example 1: Unsubscribe all event handlers related to the event\n  SkylinkDemo.off(\"peerJoined\");\n\n  // Example 2: Unsubscribe to one event handler\n  SkylinkDemo.off(\"peerJoined\", callback);"
+                "\n  // Example 1: Unsubscribe all \"peerJoined\" event\n  skylinkDemo.off(\"peerJoined\");\n\n  // Example 2: Unsubscribe only one listener from \"peerJoined event\"\n  var pJListener = function (peerId, peerInfo, isSelf) {\n    console.info(\"peerJoined event has been triggered with:\", peerId, peerInfo, isSelf);\n  };\n\n  skylinkDemo.off(\"peerJoined\", pJListener);"
             ],
-            "component": "Events",
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/skylink-events.js",
-            "line": 777,
+            "line": 785,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -5290,7 +5284,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 831,
+            "line": 839,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -5301,7 +5295,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 857,
+            "line": 865,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -5312,7 +5306,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 895,
+            "line": 903,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",
@@ -6880,14 +6874,6 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-data.js:95"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/peer-data.js:126"
-        },
-        {
-            "message": "unknown tag: trigger",
             "line": " source/peer-privileged.js:90"
         },
         {
@@ -6955,15 +6941,15 @@
             "line": " source/skylink-debug.js:150"
         },
         {
-            "message": "unknown tag: trigger",
+            "message": "unknown tag: triggerforprophacknone",
             "line": " source/skylink-debug.js:189"
         },
         {
-            "message": "unknown tag: trigger",
+            "message": "unknown tag: triggerforprophacknone",
             "line": " source/skylink-debug.js:216"
         },
         {
-            "message": "unknown tag: trigger",
+            "message": "unknown tag: triggerforprophacknone",
             "line": " source/skylink-debug.js:230"
         },
         {
@@ -6973,22 +6959,6 @@
         {
             "message": "unknown tag: scoped",
             "line": " source/skylink-debug.js:315"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/skylink-debug.js:351"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/skylink-events.js:654"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/skylink-events.js:681"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/skylink-events.js:730"
         },
         {
             "message": "unknown tag: trigger",
