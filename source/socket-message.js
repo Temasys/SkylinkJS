@@ -631,41 +631,37 @@ Skylink.prototype._inRoomHandler = function(message) {
 Skylink.prototype._enterHandler = function(message) {
   var self = this;
   var targetMid = message.mid;
-  log.log([targetMid, null, message.type, 'Incoming peer have initiated ' +
-    'handshake. Peer\'s information:'], message.userInfo);
-  // need to check entered user is new or not.
-  // peerInformations because it takes a sequence before creating the
-  // peerconnection object. peerInformations are stored at the start of the
-  // handshake, so user knows if there is a peer already.
-  if (self._peerInformations[targetMid]) {
-    // NOTE ALEX: and if we already have a connection when the peer enter,
-    // what should we do? what are the possible use case?
-    log.log([targetMid, null, message.type, 'Ignoring message as peer is already added']);
-    return;
-  }
-  // add peer
-  self._addPeer(targetMid, {
-    agent: message.agent,
-    version: message.version,
-    os: message.os
-  }, false, false, message.receiveOnly, message.sessionType === 'screensharing');
-  self._peerInformations[targetMid] = message.userInfo || {};
-  self._peerInformations[targetMid].agent = {
-    name: message.agent,
-    version: message.version,
-    os: message.os || ''
-  };
-  if (targetMid !== 'MCU') {
-    self._trigger('peerJoined', targetMid, message.userInfo, false);
+  var isNewPeer = false;
 
-  } else {
-    log.info([targetMid, 'RTCPeerConnection', 'MCU', 'MCU feature has been enabled'], message);
-    log.log([targetMid, null, message.type, 'MCU has joined'], message.userInfo);
-    this._hasMCU = true;
-    this._trigger('serverPeerJoined', targetMid, this.SERVER_PEER_TYPE.MCU);
-  }
+  log.log([targetMid, null, message.type, 'Received Peer\'s presence ->'], message.userInfo);
 
-  self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
+  if (!self._peerInformations[targetMid]) {
+    isNewPeer = true;
+    self._addPeer(targetMid, {
+      agent: message.agent,
+      version: message.version,
+      os: message.os
+    }, false, false, message.receiveOnly, message.sessionType === 'screensharing');
+
+    self._peerInformations[targetMid] = message.userInfo || {};
+    self._peerInformations[targetMid].agent = {
+      name: message.agent,
+      version: message.version,
+      os: message.os || ''
+    };
+
+    if (targetMid !== 'MCU') {
+      self._trigger('peerJoined', targetMid, message.userInfo, false);
+
+    } else {
+      log.info([targetMid, 'RTCPeerConnection', 'MCU', 'MCU feature has been enabled'], message);
+      log.log([targetMid, null, message.type, 'MCU has joined'], message.userInfo);
+      this._hasMCU = true;
+      this._trigger('serverPeerJoined', targetMid, this.SERVER_PEER_TYPE.MCU);
+    }
+
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
+  }
 
   self._sendChannelMessage({
     type: self._SIG_MESSAGE_TYPE.WELCOME,
@@ -684,7 +680,9 @@ Skylink.prototype._enterHandler = function(message) {
     sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
   });
 
-  self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+  if (isNewPeer) {
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+  }
 };
 
 /**
@@ -808,54 +806,12 @@ Skylink.prototype._welcomeHandler = function(message) {
   var targetMid = message.mid;
   var restartConn = false;
   var beOfferer = this._peerPriorityWeight > message.weight;
+  var isNewPeer = false;
 
-  log.log([targetMid, null, message.type, 'Received peer\'s response ' +
-    'to handshake initiation. Peer\'s information:'], message.userInfo);
+  log.log([targetMid, null, message.type, 'Received Peer\'s presence ->'], message.userInfo);
 
-  message.agent = (!message.agent) ? 'chrome' : message.agent;
-  /*this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
-    message.enableIceTrickle : this._enableIceTrickle;
-  this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
-    message.enableDataChannel : this._enableDataChannel;*/
-
-  // mcu has joined
-  if (targetMid === 'MCU') {
-    log.info([targetMid, 'RTCPeerConnection', 'MCU', 'MCU feature is currently enabled'],
-      message);
-    log.log([targetMid, null, message.type, 'MCU has ' +
-      ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
-    this._hasMCU = true;
-    this._trigger('serverPeerJoined', targetMid, this.SERVER_PEER_TYPE.MCU);
-    log.log([targetMid, null, message.type, 'Always setting as offerer because peer is MCU']);
-    beOfferer = true;
-  }
-
-  if (this._hasMCU) {
-    log.log([targetMid, null, message.type, 'Always setting as offerer because MCU is present']);
-    beOfferer = true;
-  }
-
-  if (!this._peerInformations[targetMid]) {
-    this._peerInformations[targetMid] = message.userInfo || {};
-    this._peerInformations[targetMid].agent = {
-      name: message.agent,
-      version: message.version,
-      os: message.os || ''
-    };
-    // disable mcu for incoming peer sent by MCU
-    /*if (message.agent === 'MCU') {
-    	this._enableDataChannel = false;
-
-    }*/
-    // user is not mcu
-    if (targetMid !== 'MCU') {
-      this._trigger('peerJoined', targetMid, message.userInfo, false);
-    }
-
-    this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-  }
-
-  log.debug([targetMid, 'RTCPeerConnection', null, 'Should peer start the connection'], beOfferer);
+  // We shouldn't assume as chrome
+  message.agent = (!message.agent) ? 'unknown' : message.agent;
 
   var agent = {
     agent: message.agent,
@@ -863,9 +819,46 @@ Skylink.prototype._welcomeHandler = function(message) {
     os: message.os
   };
 
-  if (!this._peerConnections[targetMid]) {
-    this._addPeer(targetMid, agent, false, restartConn, message.receiveOnly, message.sessionType === 'screensharing');
+  if (!this._peerInformations[targetMid]) {
+    this._peerInformations[targetMid] = message.userInfo || {};
+    this._peerInformations[targetMid].agent = agent;
+    // disable mcu for incoming peer sent by MCU
+    /*if (message.agent === 'MCU') {
+      this._enableDataChannel = false;
+
+    }*/
+    // user is not mcu
+    if (targetMid !== 'MCU') {
+      this._trigger('peerJoined', targetMid, message.userInfo, false);
+
+    } else {
+      log.info([targetMid, 'RTCPeerConnection', 'MCU', 'MCU feature is currently enabled'], message);
+      log.log([targetMid, null, message.type, 'MCU has ' +
+        ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
+      this._hasMCU = true;
+      this._trigger('serverPeerJoined', targetMid, this.SERVER_PEER_TYPE.MCU);
+      log.log([targetMid, null, message.type, 'Always setting as offerer because peer is MCU']);
+      beOfferer = true;
+    }
+
+    if (!this._peerConnections[targetMid]) {
+      this._addPeer(targetMid, agent, false, restartConn, message.receiveOnly, message.sessionType === 'screensharing');
+    }
+
+    this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
   }
+
+  if (this._hasMCU) {
+    log.log([targetMid, null, message.type, 'Always setting as offerer because MCU is present']);
+    beOfferer = true;
+  }
+
+  /*this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
+    message.enableIceTrickle : this._enableIceTrickle;
+  this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
+    message.enableDataChannel : this._enableDataChannel;*/
+
+  log.debug([targetMid, 'RTCPeerConnection', null, 'Peer should start connection ->'], beOfferer);
 
   if (beOfferer) {
     log.debug([targetMid, 'RTCPeerConnection', null, 'Starting negotiation'], agent);
