@@ -3,11 +3,11 @@
  *   Currently, we do not support Blob or ArrayBuffer data type of transfers, but we
  *   will look into implementing it in the future.
  * </blockquote>
- * Contains the list of supported data transfer data types.
+ * The list of supported data transfer data types.
  * @attribute DATA_TRANSFER_DATA_TYPE
  * @param {String} BINARY_STRING <small>Value <code>"binaryString"</code></small>
- *   The type that sends all data packets as string (or converts them into string) when
- *   transferring data over the Datachannel connection.
+ *   The value of the transfer type that sends all data packets as string
+ *   (or converts them into string) when transferring data over the Datachannel connection.
  * @type JSON
  * @readOnly
  * @for Skylink

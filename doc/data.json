@@ -376,13 +376,13 @@
         {
             "file": "source/data-process.js",
             "line": 1,
-            "description": "<blockquote class=\"info\">\n  Currently, we do not support Blob or ArrayBuffer data type of transfers, but we\n  will look into implementing it in the future.\n</blockquote>\nContains the list of supported data transfer data types.",
+            "description": "<blockquote class=\"info\">\n  Currently, we do not support Blob or ArrayBuffer data type of transfers, but we\n  will look into implementing it in the future.\n</blockquote>\nThe list of supported data transfer data types.",
             "itemtype": "attribute",
             "name": "DATA_TRANSFER_DATA_TYPE",
             "params": [
                 {
                     "name": "BINARY_STRING",
-                    "description": "<small>Value <code>\"binaryString\"</code></small>\n  The type that sends all data packets as string (or converts them into string) when\n  transferring data over the Datachannel connection.",
+                    "description": "<small>Value <code>\"binaryString\"</code></small>\n  The value of the transfer type that sends all data packets as string\n  (or converts them into string) when transferring data over the Datachannel connection.",
                     "type": "String"
                 }
             ],
