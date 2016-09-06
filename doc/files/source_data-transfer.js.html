@@ -326,7 +326,7 @@ Skylink.prototype._dataTransfersTimeout = {};
  * @param {Boolean} callback.error.isPrivate &lt;blockquote class=&quot;info&quot;&gt;
  *   &lt;b&gt;Deprecation Warning!&lt;/b&gt; This property has been deprecated.
  *   Please use &lt;code&gt;callback.error.transferInfo.isPrivate&lt;/code&gt; instead.
- *   &lt;/blockquote&gt; The flag that indicates if data transfer is targeted or not, basing
+ *   &lt;/blockquote&gt; The flag if data transfer is targeted or not, basing
  *   off the &lt;code&gt;targetPeerId&lt;/code&gt; parameter being defined.
  *   &lt;small&gt;Defined only for single targeted Peer data transfer.&lt;/small&gt;
  * @param {Error|String} callback.error.error &lt;blockquote class=&quot;info&quot;&gt;
@@ -342,7 +342,7 @@ Skylink.prototype._dataTransfersTimeout = {};
  *   are no Peer connections to start data transfer with.&lt;/small&gt;
  * @param {JSON} callback.error.transferInfo The data transfer information.
  *   &lt;small&gt;Object signature matches the &lt;code&gt;transferInfo&lt;/code&gt; parameter payload received in the
- *      &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
+ *   &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
  * @param {JSON} callback.success The success result in request.
  *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are errors in request&lt;/small&gt;
  * @param {String} callback.success.transferId &lt;blockquote class=&quot;info&quot;&gt;
@@ -362,13 +362,13 @@ Skylink.prototype._dataTransfersTimeout = {};
  * @param {Boolean} callback.success.isPrivate &lt;blockquote class=&quot;info&quot;&gt;
  *   &lt;b&gt;Deprecation Warning!&lt;/b&gt; This property has been deprecated.
  *   Please use &lt;code&gt;callback.success.transferInfo.isPrivate&lt;/code&gt; instead.
- *   &lt;/blockquote&gt; The flag that indicates if data transfer is targeted or not, basing
+ *   &lt;/blockquote&gt; The flag if data transfer is targeted or not, basing
  *   off the &lt;code&gt;targetPeerId&lt;/code&gt; parameter being defined.
  *   &lt;small&gt;Defined only for single targeted Peer data transfer.&lt;/small&gt;
  * @param {Array} callback.success.listOfPeers The list Peer IDs targeted for the data transfer.
  * @param {JSON} callback.success.transferInfo The data transfer information.
  *   &lt;small&gt;Object signature matches the &lt;code&gt;transferInfo&lt;/code&gt; parameter payload received in the
- *      &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
+ *   &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
  *   &lt;li&gt;When Peer supports simultaneous data transfers, &lt;ol&gt;
  *   &lt;li&gt;&lt;a href=&quot;#event_dataChannelState&quot;&gt;&lt;code&gt;dataChannelState&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
