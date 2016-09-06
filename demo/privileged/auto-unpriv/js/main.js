@@ -13,8 +13,7 @@ var _peerId = null;
 
 var selectedPeers = [];
 
-//Demo.Skylink.setLogLevel(4);
-
+Demo.Skylink.setLogLevel(Demo.Skylink.LOG_LEVEL.DEBUG);
 
 Demo.Methods.displayFileItemHTML = function (content) {
   return '<p>' + content.name + '<small style="float:right;color:#aaa;">' + content.size + ' B</small></p>' +
@@ -59,7 +58,6 @@ Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
   var timestamp = new Date();
   var isFile = typeof content === 'object';
 
-  //console.info(isFile);
   var element = (isFile) ? '#file_log' : '#chat_log';
   var element_body = (isFile) ? '#file_body' : '#chat_body';
   if (isFile) {
@@ -78,7 +76,6 @@ Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
 //---------------------------------------------------
 Demo.Skylink.on('incomingData', function (data, transferId, peerId, transferInfo, isSelf) {
   if (transferInfo.dataType !== 'blob') {
-    console.info('incomingData', data, transferId, peerId, transferInfo, isSelf);
     //displayChatItemHTML = function (peerId, timestamp, content, isPrivate)
     Demo.Methods.displayChatMessage(peerId, '<img src="' + data + '">', false);
   }
@@ -276,7 +273,6 @@ Demo.Skylink.on('readyStateChange', function (state, error){
 });
 //---------------------------------------------------
 Demo.Skylink.on('peerLeft', function (peerId, peerInfo, isSelf){
-  //console.info('peerLeft', peerId, peerInfo, isSelf);
   Demo.Methods.displayChatMessage('System', 'Peer ' + peerId + ' has left the room');
   Demo.Peers -= 1;
   $('#video' + peerId).remove();
@@ -431,34 +427,6 @@ Demo.Skylink.on('channelMessage', function (){
 Demo.Skylink.on('channelError', function (error) {
   Demo.Methods.displayChatMessage('System', 'Channel Error:<br>' + (error.message || error));
 });
-//---------------------------------------------------
-Demo.Skylink.on('mediaAccessError', function (error) {
-  alert((error.message || error));
-});
-
-Demo.Skylink.on('serverPeerJoined', function (serverPeerId, serverPeerType) {
-  console.info('serverPeerJoined', serverPeerId, serverPeerType);
-});
-
-Demo.Skylink.on('serverPeerLeft', function (serverPeerId, serverPeerType) {
-  console.info('serverPeerLeft', serverPeerId, serverPeerType);
-});
-
-Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf) {
-  console.info('peerJoined', peerId, peerInfo, isSelf);
-});
-
-Demo.Skylink.on('peerLeft', function (peerId, peerInfo, isSelf) {
-  console.info('peerLeft', peerId, peerInfo, isSelf);
-});
-
-Demo.Skylink.on('peerRestart', function (peerId, peerInfo, isSelf) {
-  console.info('peerRestart', peerId, peerInfo, isSelf);
-});
-
-Demo.Skylink.on('serverPeerRestart', function (serverPeerId, serverPeerType) {
-  console.info('serverPeerRestart', serverPeerId, serverPeerType);
-});
 
 //------------- join room ---------------------------
 var displayName = 'name_' + 'user_' + Math.floor((Math.random() * 1000) + 1);
@@ -483,7 +451,7 @@ Demo.Skylink.init(config, function (error, success) {
 *********************************************************/
 $(document).ready(function () {
   //---------------------------------------------------
-  $('#display_app_id').html(config.apiKey);
+  $('#display_app_id').html(config.appKey || config.apiKey || 'Not Provided');
   //---------------------------------------------------
   $('#chat_input').keyup(function(e) {
     e.preventDefault();
@@ -619,9 +587,7 @@ $(document).ready(function () {
     }
   });
   $('#share_screen_btn').click(function () {
-    Demo.Skylink.shareScreen(function (data, error) {
-      console.info(data, error);
-    });
+    Demo.Skylink.shareScreen();
   });
   $('#stop_screen_btn').click(function () {
     Demo.Skylink.stopScreen();

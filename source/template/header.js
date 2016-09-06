@@ -122,7 +122,7 @@ var clone = function (obj) {
  * Before using any Skylink functionalities, you will need to authenticate your App Key using
  *   the <a href="#method_init">`init()` method</a>.
  *
- * To manage or create App Keys, you may access the [Skylink Developer Portal here](http://developer.temasys.com.sg/).
+ * To manage or create App Keys, you may access the [Skylink Developer Portal here](https://console.temasys.io).
  *
  * To view the list of supported browsers, visit [the list here](
  * https://github.com/Temasys/SkylinkJS#supported-browsers).

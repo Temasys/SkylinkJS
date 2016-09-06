@@ -450,7 +450,7 @@ Skylink.prototype._room = null;
  * @param {Boolean} callback.success.enableDataChannel The configured value of the <code>options.enableDataChannel</code>.
  * @param {Boolean} callback.success.enableTURNServer The configured value of the <code>options.enableTURNServer</code>.
  * @param {Boolean} callback.success.enableSTUNServer The configured value of the <code>options.enableSTUNServer</code>.
- * @param {Boolean} callback.success.TURNServerTransport The configured value of the <code>options.TURNServerTransport</code>.
+ * @param {Boolean} callback.success.TURNTransport The configured value of the <code>options.TURNServerTransport</code>.
  * @param {String} callback.success.serverRegion The configured value of the <code>options.region</code>.
  * @param {Boolean} callback.success.audioFallback The configured value of the <code>options.audioFallback</code>.
  * @param {Boolean} callback.success.forceSSL The configured value of the <code>options.forceSSL</code>.
