@@ -530,6 +530,10 @@ Skylink.prototype._room = null;
  *   event&lt;/a&gt; &lt;code&gt;error.status&lt;/code&gt; parameter payload value.
  * @param {JSON} callback.success The success result in request.
  *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are errors in request&lt;/small&gt;
+ * @param {String} callback.success.serverUrl The constructed REST URL requested to Auth server.
+ * @param {String} callback.success.readyState The current ready state.
+ *   [Rel: Skylink.READY_STATE_CHANGE]
+ * @param {String} callback.success.selectedRoom The Room based on the current Room session token retrieved for.
  * @param {String} callback.success.appKey The configured value of the &lt;code&gt;options.appKey&lt;/code&gt;.
  * @param {String} callback.success.defaultRoom The configured value of the &lt;code&gt;options.defaultRoom&lt;/code&gt;.
  * @param {String} callback.success.roomServer The configured value of the &lt;code&gt;options.roomServer&lt;/code&gt;.

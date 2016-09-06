@@ -116,7 +116,7 @@ Skylink.prototype._peerConnections = {};
  * </blockquote>
  * Function that refreshes Peer connections to update with the current streaming.
  * @method refreshConnection
- * @param {String|Array} [targetPeerId] The target Peer ID to refresh connection with.<br>
+ * @param {String|Array} [targetPeerId] The target Peer ID to refresh connection with.
  * - When provided as an Array, it will refresh all connections with all the Peer IDs provided.
  * - When not provided, it will refresh all the currently connected Peers in the Room.
  * @param {Function} [callback] The callback function fired when request has completed.
@@ -158,16 +158,37 @@ Skylink.prototype._peerConnections = {};
  *   // Example 2: Refreshing a list of Peer connections
  *   function refreshFrozenVideoStreamGroup (peerIdA, peerIdB) {
  *     skylinkDemo.refreshConnection([peerIdA, peerIdB], function (error, success) {
- *       if (error) return;
- *       console.log("Refreshing connection for '" + peerIdA + "' and '" + peerIdB + "'");
+ *       if (error) {
+ *         if (error.transferErrors[peerIdA]) {
+ *           console.error("Failed refreshing connection for '" + peerIdA + "'");
+ *         } else {
+ *           console.log("Refreshing connection for '" + peerIdA + "'");
+ *         }
+ *         if (error.transferErrors[peerIdB]) {
+ *           console.error("Failed refreshing connection for '" + peerIdB + "'");
+ *         } else {
+ *           console.log("Refreshing connection for '" + peerIdB + "'");
+ *         }
+ *       } else {
+ *         console.log("Refreshing connection for '" + peerIdA + "' and '" + peerIdB + "'");
+ *       }
  *     });
  *   }
  *
  *   // Example 3: Refreshing all Peer connections
  *   function refreshFrozenVideoStreamAll () {
  *     skylinkDemo.refreshConnection(function (error, success) {
- *       if (error) return;
- *       console.log("Refreshing connection for all");
+ *       if (error) {
+ *         for (var i = 0; i < error.listOfPeers.length; i++) {
+ *           if (error.refreshErrors[error.listOfPeers[i]]) {
+ *             console.error("Failed refreshing connection for '" + error.listOfPeers[i] + "'");
+ *           } else {
+ *             console.info("Refreshing connection for '" + error.listOfPeers[i] + "'");
+ *           }
+ *         }
+ *       } else {
+ *         console.log("Refreshing connection for all Peers", success.listOfPeers);
+ *       }
  *     });
  *   }
  * @for Skylink
@@ -296,7 +317,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
 /**
  * Function that retrieves Peer connection bandwidth and ICE connection stats.
  * @method getConnectionStatus
- * @param {String|Array} [targetPeerId] The target Peer ID to retrieve connection stats from.<br>
+ * @param {String|Array} [targetPeerId] The target Peer ID to retrieve connection stats from.
  * - When provided as an Array, it will retrieve all connection stats from all the Peer IDs provided.
  * - When not provided, it will retrieve all connection stats from the currently connected Peers in the Room.
  * @param {Function} [callback] The callback function fired when request has completed.
@@ -312,7 +333,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
  * @param {Error|String} callback.error.retrievalErrors.#peerId The Peer connection stats retrieval error associated
  *   with the Peer ID defined in <code>#peerId</code> property.
  *   <small>If <code>#peerId</code> value is <code>"self"</code>, it means that it is the error when there
- *   is no Peer connections to refresh with.</small>
+ *   are no Peer connections to refresh with.</small>
  * @param {JSON} callback.error.connectionStats The list of Peer connection stats.
  *   <small>These are the Peer connection stats that has been managed to be successfully retrieved.</small>
  * @param {JSON} callback.error.connectionStats.#peerId The Peer connection stats associated with

@@ -101,7 +101,7 @@ Skylink.prototype._receiveOnly = false;
  * Function that sends a message to Peers via the Signaling socket connection.
  * @method sendMessage
  * @param {String|JSON} message The message.
- * @param {String|Array} [targetPeerId] The target Peer ID to send message to.<br>
+ * @param {String|Array} [targetPeerId] The target Peer ID to send message to.
  * - When provided as an Array, it will send the message to only Peers which IDs are in the list.
  * - When not provided, it will broadcast the message to all connected Peers in the Room.
  * @example
