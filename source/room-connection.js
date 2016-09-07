@@ -58,7 +58,6 @@ Skylink.prototype.SYSTEM_ACTION = {
  *    The value of the reason code when Room session is ending.
  *    <small>Happens after Room session has started. This serves as a prerequisite warning before
  *    <code>ROOM_CLOSED</code> occurs.</small>
- *    <small>Previously, the value was <code>"toclose"</code>.</small>
  *    <small>Results with: <code>WARNING</code></small>
  * @param {String} ROOM_CLOSED         <small>Value <code>"roomclose"</code></small>
  *    The value of the reason code when Room session has just ended.
@@ -86,7 +85,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
   EXPIRED: 'expired',
   ROOM_LOCKED: 'locked',
   FAST_MESSAGE: 'fastmsg',
-  ROOM_CLOSING: 'toClose',
+  ROOM_CLOSING: 'toclose',
   ROOM_CLOSED: 'roomclose',
   SERVER_ERROR: 'serverError',
   KEY_ERROR: 'keyFailed'
