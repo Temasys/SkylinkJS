@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Wed Sep 07 2016 16:26:36 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Wed Sep 07 2016 17:06:20 GMT+0800 (SGT) */
 
 (function() {
 
@@ -10048,7 +10048,11 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   if (!this._peerInformations[targetMid]) {
     this._peerInformations[targetMid] = message.userInfo || {};
-    this._peerInformations[targetMid].agent = agent;
+    this._peerInformations[targetMid].agent = {
+      name: message.agent,
+      version: message.version,
+      os: message.os || ''
+    };
     // disable mcu for incoming peer sent by MCU
     /*if (message.agent === 'MCU') {
       this._enableDataChannel = false;

@@ -827,7 +827,11 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   if (!this._peerInformations[targetMid]) {
     this._peerInformations[targetMid] = message.userInfo || {};
-    this._peerInformations[targetMid].agent = agent;
+    this._peerInformations[targetMid].agent = {
+      name: message.agent,
+      version: message.version,
+      os: message.os || ''
+    };
     // disable mcu for incoming peer sent by MCU
     /*if (message.agent === 'MCU') {
       this._enableDataChannel = false;
