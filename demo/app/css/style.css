@@ -180,6 +180,10 @@ footer {
   margin: 0;
 }
 
+.peervideo .connstats .agent {
+  text-transform: capitalize;
+}
+
 @media screen and (max-width:1999px){
   #credential_panel .panel-body {
     margin-bottom:15px;
