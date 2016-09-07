@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "SkylinkJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.13",
+        "version": "0.6.14",
         "url": "https://temasys.github.io/"
     },
     "files": {
@@ -183,7 +183,7 @@
             "extension_for": [],
             "file": "source/template/header.js",
             "line": 120,
-            "description": "<h2>Prerequisites on using Skylink</h2>\nBefore using any Skylink functionalities, you will need to authenticate your App Key using\n  the <a href=\"#method_init\">`init()` method</a>.\n\nTo manage or create App Keys, you may access the [Skylink Developer Portal here](http://developer.temasys.com.sg/).\n\nTo view the list of supported browsers, visit [the list here](\nhttps://github.com/Temasys/SkylinkJS#supported-browsers).\n\nHere are some articles to help you get started:\n- [How to setup a simple video call](https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/)\n- [How to setup screensharing](https://temasys.com.sg/screensharing-with-skylinkjs/)\n- [How to create a chatroom like feature](https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/)\n\nHere are some demos you may use to aid your development:\n- Getaroom.io [[Demo](https://getaroom.io) / [Source code](https://github.com/Temasys/getaroom)]\n- Creating a component [[Link](https://github.com/Temasys/skylink-call-button)]\n\nYou may see the example below in the <a href=\"#\">Constructor tab</a> to have a general idea how event subscription\n  and the ordering of <a href=\"#method_init\"><code>init()</code></a> and\n  <a href=\"#method_joinRoom\"><code>joinRoom()</code></a> methods should be called.\n\nIf you have any issues, you may find answers to your questions in the FAQ section on [our support portal](\nhttp://support.temasys.com.sg), asks questions, request features or raise bug tickets as well.\n\nIf you would like to contribute to our SkylinkJS codebase, see [the contributing README](\nhttps://github.com/Temasys/SkylinkJS/blob/master/CONTRIBUTING.md).\n\n[See License (Apache 2.0)](https://github.com/Temasys/SkylinkJS/blob/master/LICENSE)",
+            "description": "<h2>Prerequisites on using Skylink</h2>\nBefore using any Skylink functionalities, you will need to authenticate your App Key using\n  the <a href=\"#method_init\">`init()` method</a>.\n\nTo manage or create App Keys, you may access the [Skylink Developer Portal here](https://console.temasys.io).\n\nTo view the list of supported browsers, visit [the list here](\nhttps://github.com/Temasys/SkylinkJS#supported-browsers).\n\nHere are some articles to help you get started:\n- [How to setup a simple video call](https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/)\n- [How to setup screensharing](https://temasys.com.sg/screensharing-with-skylinkjs/)\n- [How to create a chatroom like feature](https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/)\n\nHere are some demos you may use to aid your development:\n- Getaroom.io [[Demo](https://getaroom.io) / [Source code](https://github.com/Temasys/getaroom)]\n- Creating a component [[Link](https://github.com/Temasys/skylink-call-button)]\n\nYou may see the example below in the <a href=\"#\">Constructor tab</a> to have a general idea how event subscription\n  and the ordering of <a href=\"#method_init\"><code>init()</code></a> and\n  <a href=\"#method_joinRoom\"><code>joinRoom()</code></a> methods should be called.\n\nIf you have any issues, you may find answers to your questions in the FAQ section on [our support portal](\nhttp://support.temasys.com.sg), asks questions, request features or raise bug tickets as well.\n\nIf you would like to contribute to our SkylinkJS codebase, see [the contributing README](\nhttps://github.com/Temasys/SkylinkJS/blob/master/CONTRIBUTING.md).\n\n[See License (Apache 2.0)](https://github.com/Temasys/SkylinkJS/blob/master/LICENSE)",
             "is_constructor": 1,
             "example": [
                 "\n  // Here's a simple example on how you can start using Skylink.\n  var skylinkDemo = new Skylink();\n\n  // Subscribe all events first as a general guideline\n  skylinkDemo.on(\"incomingStream\", function (peerId, stream, peerInfo, isSelf) {\n    if (isSelf) {\n      attachMediaStream(document.getElementById(\"selfVideo\"), stream);\n    } else {\n      var peerVideo = document.createElement(\"video\");\n      peerVideo.id = peerId;\n      peerVideo.autoplay = \"autoplay\";\n      document.getElementById(\"peersVideo\").appendChild(peerVideo);\n      attachMediaStream(peerVideo, stream);\n    }\n  });\n\n  skylinkDemo.on(\"peerLeft\", function (peerId, peerInfo, isSelf) {\n    if (!isSelf) {\n      var peerVideo = document.getElementById(peerId);\n      // do a check if peerVideo exists first\n      if (peerVideo) {\n        document.getElementById(\"peersVideo\").removeChild(peerVideo);\n      } else {\n        console.error(\"Peer video for \" + peerId + \" is not found.\");\n      }\n    }\n  });\n\n // init() should always be called first before other methods other than event methods like on() or off().\n skylinkDemo.init(\"YOUR_APP_KEY_HERE\", function (error, success) {\n   if (success) {\n     skylinkDemo.joinRoom(\"my_room\", {\n       userData: \"My Username\",\n       audio: true,\n       video: true\n     });\n   }\n });"
@@ -2321,7 +2321,7 @@
                 },
                 {
                     "name": "ROOM_CLOSING",
-                    "description": "<small>Value <code>\"toClose\"</code></small>\n   The value of the reason code when Room session is ending.\n   <small>Happens after Room session has started. This serves as a prerequisite warning before\n   <code>ROOM_CLOSED</code> occurs.</small>\n   <small>Previously, the value was <code>\"toclose\"</code>.</small>\n   <small>Results with: <code>WARNING</code></small>",
+                    "description": "<small>Value <code>\"toClose\"</code></small>\n   The value of the reason code when Room session is ending.\n   <small>Happens after Room session has started. This serves as a prerequisite warning before\n   <code>ROOM_CLOSED</code> occurs.</small>\n   <small>Results with: <code>WARNING</code></small>",
                     "type": "String"
                 },
                 {
@@ -2347,7 +2347,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 95,
+            "line": 94,
             "description": "Stores the current Room name that User is connected to.",
             "itemtype": "attribute",
             "name": "_selectedRoom",
@@ -2359,7 +2359,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 105,
+            "line": 104,
             "description": "Stores the flag that indicates if Room is locked.",
             "itemtype": "attribute",
             "name": "_roomLocked",
@@ -2371,7 +2371,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 115,
+            "line": 114,
             "description": "Stores the flag that indicates if User is connected to the Room.",
             "itemtype": "attribute",
             "name": "_inRoom",
@@ -2383,7 +2383,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 125,
+            "line": 124,
             "description": "Function that starts the Room session.",
             "itemtype": "method",
             "name": "joinRoom",
@@ -2514,7 +2514,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 458,
+            "line": 457,
             "description": "Function that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -2579,7 +2579,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 584,
+            "line": 583,
             "description": "Function that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -2589,7 +2589,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 606,
+            "line": 605,
             "description": "Function that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -2599,7 +2599,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 628,
+            "line": 627,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -3200,7 +3200,7 @@
                                     "type": "Boolean"
                                 },
                                 {
-                                    "name": "TURNServerTransport",
+                                    "name": "TURNTransport",
                                     "description": "The configured value of the <code>options.TURNServerTransport</code>.",
                                     "type": "Boolean"
                                 },
@@ -5744,7 +5744,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 388,
+            "line": 394,
             "description": "Function that handles the \"updateUserEvent\" socket message received.\nSee confluence docs for the \"updateUserEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
@@ -5755,7 +5755,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 409,
+            "line": 415,
             "description": "Function that handles the \"roomLockEvent\" socket message received.\nSee confluence docs for the \"roomLockEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
@@ -5766,7 +5766,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 425,
+            "line": 431,
             "description": "Function that handles the \"muteAudioEvent\" socket message received.\nSee confluence docs for the \"muteAudioEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -5777,7 +5777,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 446,
+            "line": 452,
             "description": "Function that handles the \"muteVideoEvent\" socket message received.\nSee confluence docs for the \"muteVideoEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -5788,7 +5788,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 467,
+            "line": 473,
             "description": "Function that handles the \"stream\" socket message received.\nSee confluence docs for the \"stream\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_streamEventHandler",
@@ -5799,7 +5799,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 501,
+            "line": 507,
             "description": "Function that handles the \"bye\" socket message received.\nSee confluence docs for the \"bye\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -5810,7 +5810,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 522,
+            "line": 528,
             "description": "Function that handles the \"private\" socket message received.\nSee confluence docs for the \"private\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -5821,7 +5821,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 544,
+            "line": 550,
             "description": "Function that handles the \"public\" socket message received.\nSee confluence docs for the \"public\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -5832,7 +5832,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 566,
+            "line": 572,
             "description": "Function that handles the \"inRoom\" socket message received.\nSee confluence docs for the \"inRoom\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -5843,7 +5843,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 622,
+            "line": 628,
             "description": "Function that handles the \"enter\" socket message received.\nSee confluence docs for the \"enter\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -5854,7 +5854,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 690,
+            "line": 694,
             "description": "Function that handles the \"restart\" socket message received.\nSee confluence docs for the \"restart\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -5865,7 +5865,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 798,
+            "line": 802,
             "description": "Function that handles the \"welcome\" socket message received.\nSee confluence docs for the \"welcome\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -5876,7 +5876,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 892,
+            "line": 895,
             "description": "Function that handles the \"offer\" socket message received.\nSee confluence docs for the \"offer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -5887,7 +5887,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 978,
+            "line": 981,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -5898,7 +5898,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1070,
+            "line": 1073,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -6882,19 +6882,19 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:125"
+            "line": " source/room-connection.js:124"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:458"
+            "line": " source/room-connection.js:457"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:584"
+            "line": " source/room-connection.js:583"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:606"
+            "line": " source/room-connection.js:605"
         },
         {
             "message": "unknown tag: trigger",
