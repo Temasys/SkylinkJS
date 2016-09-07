@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Wed Sep 07 2016 00:46:27 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Wed Sep 07 2016 16:26:36 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10461,7 +10461,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.14 - Wed Sep 07 2016 00:46:27 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Wed Sep 07 2016 16:26:36 GMT+0800 (SGT) */
 
 (function() {
 
@@ -16230,7 +16230,6 @@ Skylink.prototype.SYSTEM_ACTION = {
  *    The value of the reason code when Room session is ending.
  *    <small>Happens after Room session has started. This serves as a prerequisite warning before
  *    <code>ROOM_CLOSED</code> occurs.</small>
- *    <small>Previously, the value was <code>"toclose"</code>.</small>
  *    <small>Results with: <code>WARNING</code></small>
  * @param {String} ROOM_CLOSED         <small>Value <code>"roomclose"</code></small>
  *    The value of the reason code when Room session has just ended.
@@ -16258,7 +16257,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
   EXPIRED: 'expired',
   ROOM_LOCKED: 'locked',
   FAST_MESSAGE: 'fastmsg',
-  ROOM_CLOSING: 'toClose',
+  ROOM_CLOSING: 'toclose',
   ROOM_CLOSED: 'roomclose',
   SERVER_ERROR: 'serverError',
   KEY_ERROR: 'keyFailed'
@@ -20067,6 +20066,12 @@ Skylink.prototype._redirectHandler = function(message) {
   		}
   	}
   }
+
+  // Handle the differences provided in Signaling server
+  if (message.reason === 'toClose') {
+    message.reason = 'toclose';
+  }
+
   this._trigger('systemAction', message.action, message.info, message.reason);
 };
 

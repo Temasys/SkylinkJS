@@ -382,6 +382,12 @@ Skylink.prototype._redirectHandler = function(message) {
   		}
   	}
   }
+
+  // Handle the differences provided in Signaling server
+  if (message.reason === 'toClose') {
+    message.reason = 'toclose';
+  }
+
   this._trigger('systemAction', message.action, message.info, message.reason);
 };
 
