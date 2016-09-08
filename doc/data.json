@@ -4833,13 +4833,13 @@
         {
             "file": "source/skylink-events.js",
             "line": 540,
-            "description": "Event triggered when the current state of the recording session has changed.\n- See {{#crossLink \"Skylink/startRecording:method\"}}startRecording(){{/crossLink}} and\n  {{#crossLink \"Skylink/stopRecording:method\"}}stopRecording(){{/crossLink}}.",
+            "description": "Event triggered when recording session state has changed.",
             "itemtype": "event",
             "name": "recordingState",
             "params": [
                 {
                     "name": "state",
-                    "description": "The current recording state.\n  [Rel: Skylink.RECORDING_STATE]",
+                    "description": "The current recording session state.\n  [Rel: Skylink.RECORDING_STATE]",
                     "type": "Number"
                 },
                 {
@@ -4849,23 +4849,29 @@
                 },
                 {
                     "name": "link",
-                    "description": "The recording session URL compiled once the recording has mixing and completed.",
-                    "type": "String"
+                    "description": "The recording session mixin videos link in\n  <a href=\"https://en.wikipedia.org/wiki/MPEG-4_Part_14\">MP4</a> format.\n  <small>Defined only when <code>state</code> payload is <code>LINK</code>.</small>",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "#peerId",
+                            "description": "The recording session recorded Peer only video associated \n  with the Peer ID defined in <code>#peerId</code> property.\n  <small>If <code>#peerId</code> value is <code>\"mixin\"</code>, it means that is the mixin\n  video of all Peers in the Room.</small>",
+                            "type": "String"
+                        }
+                    ]
                 },
                 {
                     "name": "error",
-                    "description": "The error object received when there's an exception for the recording session.",
-                    "type": "Object"
+                    "description": "The error object.\n  <small>Defined only when <code>state</code> payload is <code>ERROR</code>.</small>",
+                    "type": "Error|String"
                 }
             ],
             "beta": 1,
-            "component": "Events",
             "since": "0.6.-",
             "class": "Skylink"
         },
         {
             "file": "source/skylink-events.js",
-            "line": 645,
+            "line": 649,
             "description": "Stores the list of <code>once()</code> event handlers.\nThese events are only triggered once.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -4891,7 +4897,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 658,
+            "line": 662,
             "description": "Stores the timestamps data used for throttling.",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -4903,7 +4909,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 671,
+            "line": 675,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -4927,7 +4933,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 695,
+            "line": 699,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -4964,7 +4970,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 753,
+            "line": 757,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -4989,7 +4995,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 802,
+            "line": 806,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -5000,7 +5006,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 856,
+            "line": 860,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -5011,7 +5017,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 882,
+            "line": 886,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -5022,7 +5028,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 920,
+            "line": 924,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",
@@ -5395,6 +5401,93 @@
         {
             "file": "source/socket-message.js",
             "line": 198,
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"mcu\"</code> value to be <code>\"ON\"</code> and recording\n  to be enabled for the App Key provided in the <a href=\"#method_init\"><code>init()</code> method</a>.\n  To enable recording for the App Key, please <a href=\"http://support.temasys.com.sg\">contact us\n  on our support portal</a>.\n</blockquote>\nStarts a recording session.",
+            "itemtype": "method",
+            "name": "startRecording",
+            "params": [
+                {
+                    "name": "callback",
+                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_recordingState\">\n  <code>recordingState</code> event</a> triggering <code>state</code> parameter payload as <code>START</code>.</small>",
+                    "type": "Function",
+                    "optional": true,
+                    "props": [
+                        {
+                            "name": "error",
+                            "description": "The error result in request.\n  <small>Defined as <code>null</code> when there are no errors in request</small>\n  <small>Object signature is the <code>startRecording()</code> error when starting a new recording session.</small>",
+                            "type": "Error|String"
+                        },
+                        {
+                            "name": "success",
+                            "description": "The success result in request.\n  <small>Defined as <code>null</code> when there are errors in request</small>\n  <small>Object signature is the <a href=\"#event_recordingState\">\n  <code>recordingState</code> event</a> triggered <code>recordingId</code> parameter payload.</small>",
+                            "type": "String|JSON"
+                        }
+                    ]
+                }
+            ],
+            "example": [
+                "\n  // Example 1: Start recording session\n  skylinkDemo.startRecording(function (error, success) {\n    if (error) return;\n    console.info(\"Recording session has started. ID ->\", success);\n  });"
+            ],
+            "trigger": "<ol class=\"desc-seq\">\n  <li><a href=\"#event_recordingState\"><code>recordingState</code> event</a> triggers parameter payload\n  <code>state</code> as <code>START</code>.</li>\n  <li>When recording session has errors (and aborted), \n  <a href=\"#event_recordingState\"><code>recordingState</code> event</a> triggers parameter payload\n  <code>state</code> as <code>ERROR</code>.</li></ol>",
+            "beta": 1,
+            "since": "0.6.x",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/socket-message.js",
+            "line": 272,
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"mcu\"</code> value to be <code>\"ON\"</code> and recording\n  to be enabled for the App Key provided in the <a href=\"#method_init\"><code>init()</code> method</a>.\n  To enable recording for the App Key, please <a href=\"http://support.temasys.com.sg\">contact us\n  on our support portal</a>.\n</blockquote>\nStops a recording session.",
+            "params": [
+                {
+                    "name": "callback",
+                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_recordingState\">\n  <code>recordingState</code> event</a> triggering <code>state</code> parameter payload as <code>STOP</code>\n  or as <code>LINK</code> when the value of <code>callbackSuccessWhenLink</code> is <code>true</code>.</small>",
+                    "type": "Function",
+                    "optional": true,
+                    "props": [
+                        {
+                            "name": "error",
+                            "description": "The error result in request.\n  <small>Defined as <code>null</code> when there are no errors in request</small>\n  <small>Object signature is the <code>stopRecording()</code> error when stopping current recording session.</small>",
+                            "type": "Error|String"
+                        },
+                        {
+                            "name": "success",
+                            "description": "The success result in request.\n- When <code>callbackSuccessWhenLink</code> value is <code>false</code>, it is defined as string as\n  the recording session ID.\n- when <code>callbackSuccessWhenLink</code> value is <code>true</code>, it is defined as an object as\n  the recording session information.\n  <small>Defined as <code>null</code> when there are errors in request</small>",
+                            "type": "String|JSON",
+                            "props": [
+                                {
+                                    "name": "recordingId",
+                                    "description": "The recording session ID.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "link",
+                                    "description": "The recording session mixin videos link in\n  <a href=\"https://en.wikipedia.org/wiki/MPEG-4_Part_14\">MP4</a> format.\n  <small>Object signature matches the <code>link</code> parameter payload received in the\n  <a href=\"#event_recordingState\"><code>recordingState</code> event</a>.</small>",
+                                    "type": "JSON"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "callbackSuccessWhenLink",
+                    "description": "The flag if <code>callback</code> function provided\n  should result in success only when <a href=\"#event_recordingState\"><code>recordingState</code> event</a>\n  triggering <code>state</code> parameter payload as <code>LINK</code>.",
+                    "type": "Boolean",
+                    "optional": true,
+                    "optdefault": "false"
+                }
+            ],
+            "itemtype": "method",
+            "name": "stopRecording",
+            "example": [
+                "\n  // Example 1: Stop recording session\n  skylinkDemo.stopRecording(function (error, success) {\n    if (error) return;\n    console.info(\"Recording session has stopped. ID ->\", success);\n  });\n\n  // Example 2: Stop recording session with mixin videos link\n  skylinkDemo.stopRecording(function (error, success) {\n    if (error) return;\n    console.info(\"Recording session has compiled with links ->\", success.link);\n  }, true);"
+            ],
+            "trigger": "<ol class=\"desc-seq\">\n  <li><a href=\"#event_recordingState\"><code>recordingState</code> event</a> triggers parameter payload\n  <code>state</code> as <code>STOP</code>.</li>\n  <li>When recording session mixin has errors (and aborted), \n  <a href=\"#event_recordingState\"><code>recordingState</code> event</a> triggers parameter payload\n  <code>state</code> as <code>ERROR</code>.</li>\n  <li>When recording session mixin has completed with video links, \n  <a href=\"#event_recordingState\"><code>recordingState</code> event</a> triggers parameter payload\n  <code>state</code> as <code>LINK</code>.</li></ol>",
+            "beta": 1,
+            "since": "0.6.x",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/socket-message.js",
+            "line": 396,
             "description": "Function that process and parses the socket message string received from the Signaling.",
             "itemtype": "method",
             "name": "_processSigMessage",
@@ -5405,7 +5498,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 217,
+            "line": 415,
             "description": "Function that handles and processes the socket message received.",
             "itemtype": "method",
             "name": "_processingSingleMessage",
@@ -5416,7 +5509,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 306,
+            "line": 504,
             "description": "Function that handles the \"peerList\" socket message received.\nSee confluence docs for the \"peerList\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_peerListEventHandler",
@@ -5427,7 +5520,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 322,
+            "line": 520,
             "description": "Function that handles the \"introduceError\" socket message received.\nSee confluence docs for the \"introduceError\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_introduceErrorEventHandler",
@@ -5438,7 +5531,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 338,
+            "line": 536,
             "description": "Function that handles the \"approach\" socket message received.\nSee confluence docs for the \"approach\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_approachEventHandler",
@@ -5449,7 +5542,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 368,
+            "line": 566,
             "description": "Function that handles the \"redirect\" socket message received.\nSee confluence docs for the \"redirect\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_redirectHandler",
@@ -5460,7 +5553,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 400,
+            "line": 598,
             "description": "Function that handles the \"updateUserEvent\" socket message received.\nSee confluence docs for the \"updateUserEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
@@ -5471,7 +5564,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 421,
+            "line": 619,
             "description": "Function that handles the \"roomLockEvent\" socket message received.\nSee confluence docs for the \"roomLockEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
@@ -5482,7 +5575,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 437,
+            "line": 635,
             "description": "Function that handles the \"muteAudioEvent\" socket message received.\nSee confluence docs for the \"muteAudioEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -5493,7 +5586,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 458,
+            "line": 656,
             "description": "Function that handles the \"muteVideoEvent\" socket message received.\nSee confluence docs for the \"muteVideoEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -5504,7 +5597,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 479,
+            "line": 677,
             "description": "Function that handles the \"stream\" socket message received.\nSee confluence docs for the \"stream\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_streamEventHandler",
@@ -5515,7 +5608,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 513,
+            "line": 711,
             "description": "Function that handles the \"bye\" socket message received.\nSee confluence docs for the \"bye\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -5526,7 +5619,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 534,
+            "line": 732,
             "description": "Function that handles the \"private\" socket message received.\nSee confluence docs for the \"private\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -5537,7 +5630,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 556,
+            "line": 754,
             "description": "Function that handles the \"public\" socket message received.\nSee confluence docs for the \"public\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -5548,7 +5641,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 578,
+            "line": 776,
             "description": "Handles the RECORDING Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_recordingEventHandler",
@@ -5584,7 +5677,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 662,
+            "line": 862,
             "description": "Function that handles the \"inRoom\" socket message received.\nSee confluence docs for the \"inRoom\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -5595,7 +5688,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 718,
+            "line": 918,
             "description": "Function that handles the \"enter\" socket message received.\nSee confluence docs for the \"enter\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -5606,7 +5699,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 784,
+            "line": 984,
             "description": "Function that handles the \"restart\" socket message received.\nSee confluence docs for the \"restart\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -5617,7 +5710,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 892,
+            "line": 1092,
             "description": "Function that handles the \"welcome\" socket message received.\nSee confluence docs for the \"welcome\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -5628,7 +5721,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 985,
+            "line": 1185,
             "description": "Function that handles the \"offer\" socket message received.\nSee confluence docs for the \"offer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -5639,7 +5732,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1071,
+            "line": 1271,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -5650,33 +5743,13 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1163,
+            "line": 1363,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
             "access": "private",
             "tagname": "",
             "since": "0.5.1",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/socket-message.js",
-            "line": 1266,
-            "description": "Starts a recording session.\n- This can only be used for a recording enabled MCU key.",
-            "beta": 1,
-            "itemtype": "method",
-            "name": "startRecording",
-            "since": "0.6.-",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/socket-message.js",
-            "line": 1294,
-            "description": "Stops a recording session.\n- This can only be used for a recording enabled MCU key.",
-            "itemtype": "method",
-            "name": "stopRecording",
-            "beta": 1,
-            "since": "0.6.-",
             "class": "Skylink"
         },
         {
@@ -5850,35 +5923,35 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 172,
-            "description": "Contains the list of recording states.",
+            "line": 196,
+            "description": "The list of recording states.",
             "itemtype": "attribute",
             "name": "RECORDING_STATE",
             "params": [
                 {
                     "name": "START",
-                    "description": "Value <code>0</code></small>\n  The state when recording session has started.",
+                    "description": "<small>Value <code>0</code></small>\n  The value of the state when recording session has started.",
                     "type": "Number"
                 },
                 {
                     "name": "STOP",
-                    "description": "<small>Value <code>1</code></small>\n  The state when recording session has stopped.<br>\n  During this time, the recorded videos will go\n  throught the mixin server to compile the videos into one video link.",
+                    "description": "<small>Value <code>1</code></small>\n  The value of the state when recording session has stopped.<br>\n  <small>At this stage, the recorded videos will go through the mixin server to compile the videos.</small>",
                     "type": "Number"
                 },
                 {
                     "name": "LINK",
-                    "description": "<small>Value <code>2</code></small>\n  The state when recording session mixing for the video has been completed.<br>\n  At this stage, the link to the mixin video is available.",
+                    "description": "<small>Value <code>2</code></small>\n  The value of the state when recording session mixin request has been completed.",
                     "type": "Number"
                 },
                 {
                     "name": "ERROR",
-                    "description": "<small>Value <code>-1</code></small>\n  The state when recording session has exception.",
+                    "description": "<small>Value <code>-1</code></small>\n  The value of the state state when recording session has errors.\n  <small>This can happen during recording session or during mixin of recording videos,\n  and at this stage, the recording session or mixin is aborted.</small>",
                     "type": "Number"
                 }
             ],
-            "beta": 1,
             "type": "JSON",
-            "since": "0.6.-",
+            "beta": 1,
+            "since": "0.6.x",
             "class": "Skylink"
         },
         {
@@ -5897,9 +5970,9 @@
         {
             "file": "source/stream-media.js",
             "line": 233,
-            "description": "Stores the flag if recording is in session.\nThere can only be 1 recording session at a time in a Room",
+            "description": "Stores the current active recording session ID.\nThere can only be 1 recording session at a time in a Room",
             "itemtype": "attribute",
-            "name": "_isRecording",
+            "name": "_currentRecordingId",
             "type": "JSON",
             "access": "private",
             "tagname": "",
@@ -6778,12 +6851,16 @@
             "line": " source/skylink-debug.js:315"
         },
         {
-            "message": "unknown tag: component",
-            "line": " source/skylink-events.js:540"
+            "message": "unknown tag: trigger",
+            "line": " source/socket-message.js:103"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:103"
+            "line": " source/socket-message.js:198"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/socket-message.js:272"
         },
         {
             "message": "unknown tag: trigger",

@@ -629,17 +629,21 @@ Skylink.prototype._EVENTS = {
   introduceStateChange: [],
 
   /**
-   * Event triggered when the current state of the recording session has changed.
-   * - See {{#crossLink &quot;Skylink/startRecording:method&quot;}}startRecording(){{/crossLink}} and
-   *   {{#crossLink &quot;Skylink/stopRecording:method&quot;}}stopRecording(){{/crossLink}}.
+   * Event triggered when recording session state has changed.
    * @event recordingState
-   * @param {Number} state The current recording state.
+   * @param {Number} state The current recording session state.
    *   [Rel: Skylink.RECORDING_STATE]
    * @param {String} recordingId The recording session ID.
-   * @param {String} link The recording session URL compiled once the recording has mixing and completed.
-   * @param {Object} error The error object received when there&#x27;s an exception for the recording session.
+   * @param {JSON} link The recording session mixin videos link in
+   *   &lt;a href=&quot;https://en.wikipedia.org/wiki/MPEG-4_Part_14&quot;&gt;MP4&lt;/a&gt; format.
+   *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; payload is &lt;code&gt;LINK&lt;/code&gt;.&lt;/small&gt;
+   * @param {String} link.#peerId The recording session recorded Peer only video associated 
+   *   with the Peer ID defined in &lt;code&gt;#peerId&lt;/code&gt; property.
+   *   &lt;small&gt;If &lt;code&gt;#peerId&lt;/code&gt; value is &lt;code&gt;&quot;mixin&quot;&lt;/code&gt;, it means that is the mixin
+   *   video of all Peers in the Room.&lt;/small&gt;
+   * @param {Error|String} error The error object.
+   *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; payload is &lt;code&gt;ERROR&lt;/code&gt;.&lt;/small&gt;
    * @beta
-   * @component Events
    * @for Skylink
    * @since 0.6.-
    */

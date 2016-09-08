@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Thu Sep 08 2016 18:11:39 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Thu Sep 08 2016 20:19:22 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8333,17 +8333,21 @@ Skylink.prototype._EVENTS = {
   introduceStateChange: [],
 
   /**
-   * Event triggered when the current state of the recording session has changed.
-   * - See {{#crossLink "Skylink/startRecording:method"}}startRecording(){{/crossLink}} and
-   *   {{#crossLink "Skylink/stopRecording:method"}}stopRecording(){{/crossLink}}.
+   * Event triggered when recording session state has changed.
    * @event recordingState
-   * @param {Number} state The current recording state.
+   * @param {Number} state The current recording session state.
    *   [Rel: Skylink.RECORDING_STATE]
    * @param {String} recordingId The recording session ID.
-   * @param {String} link The recording session URL compiled once the recording has mixing and completed.
-   * @param {Object} error The error object received when there's an exception for the recording session.
+   * @param {JSON} link The recording session mixin videos link in
+   *   <a href="https://en.wikipedia.org/wiki/MPEG-4_Part_14">MP4</a> format.
+   *   <small>Defined only when <code>state</code> payload is <code>LINK</code>.</small>
+   * @param {String} link.#peerId The recording session recorded Peer only video associated 
+   *   with the Peer ID defined in <code>#peerId</code> property.
+   *   <small>If <code>#peerId</code> value is <code>"mixin"</code>, it means that is the mixin
+   *   video of all Peers in the Room.</small>
+   * @param {Error|String} error The error object.
+   *   <small>Defined only when <code>state</code> payload is <code>ERROR</code>.</small>
    * @beta
-   * @component Events
    * @for Skylink
    * @since 0.6.-
    */
@@ -9434,6 +9438,204 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
 };
 
 /**
+ * <blockquote class="info">
+ *   Note that this feature requires <code>"mcu"</code> value to be <code>"ON"</code> and recording
+ *   to be enabled for the App Key provided in the <a href="#method_init"><code>init()</code> method</a>.
+ *   To enable recording for the App Key, please <a href="http://support.temasys.com.sg">contact us
+ *   on our support portal</a>.
+ * </blockquote>
+ * Starts a recording session.
+ * @method startRecording
+ * @param {Function} [callback] The callback function fired when request has completed.
+ *   <small>Function parameters signature is <code>function (error, success)</code></small>
+ *   <small>Function request completion is determined by the <a href="#event_recordingState">
+ *   <code>recordingState</code> event</a> triggering <code>state</code> parameter payload as <code>START</code>.</small>
+ * @param {Error|String} callback.error The error result in request.
+ *   <small>Defined as <code>null</code> when there are no errors in request</small>
+ *   <small>Object signature is the <code>startRecording()</code> error when starting a new recording session.</small>
+ * @param {String|JSON} callback.success The success result in request.
+ *   <small>Defined as <code>null</code> when there are errors in request</small>
+ *   <small>Object signature is the <a href="#event_recordingState">
+ *   <code>recordingState</code> event</a> triggered <code>recordingId</code> parameter payload.</small>
+ * @example
+ *   // Example 1: Start recording session
+ *   skylinkDemo.startRecording(function (error, success) {
+ *     if (error) return;
+ *     console.info("Recording session has started. ID ->", success);
+ *   });
+ * @trigger <ol class="desc-seq">
+ *   <li><a href="#event_recordingState"><code>recordingState</code> event</a> triggers parameter payload
+ *   <code>state</code> as <code>START</code>.</li>
+ *   <li>When recording session has errors (and aborted), 
+ *   <a href="#event_recordingState"><code>recordingState</code> event</a> triggers parameter payload
+ *   <code>state</code> as <code>ERROR</code>.</li></ol>
+ * @beta
+ * @for Skylink
+ * @since 0.6.x
+ */
+Skylink.prototype.startRecording = function (callback) {
+  var self = this;
+
+  if (!self._hasMCU) {
+    var noMCUError = 'Unable to start recording as MCU is not connected';
+    log.error(noMCUError);
+    if (typeof callback === 'function') {
+      callback(new Error(noMCUError), null);
+    }
+    return;
+  }
+
+  if (self._currentRecordingId) {
+    var hasRecordingSessionError = 'Unable to start recording as there is an existing recording in-progress';
+    log.error(hasRecordingSessionError);
+    if (typeof callback === 'function') {
+      callback(new Error(hasRecordingSessionError), null);
+    }
+    return;
+  }
+
+  if (typeof callback === 'function') {
+    self.once('recordingState', function (state, recordingId) {
+      callback(null, recordingId);
+    }, function (state) {
+      return state === self.RECORDING_STATE.START;
+    });
+  }
+
+  self._sendChannelMessage({
+    type: self._SIG_MESSAGE_TYPE.START_RECORDING,
+    rid: self._room.id,
+    target: 'MCU'
+  });
+
+  log.debug(['MCU', 'Recording', null, 'Starting recording']);
+};
+
+/**
+ * <blockquote class="info">
+ *   Note that this feature requires <code>"mcu"</code> value to be <code>"ON"</code> and recording
+ *   to be enabled for the App Key provided in the <a href="#method_init"><code>init()</code> method</a>.
+ *   To enable recording for the App Key, please <a href="http://support.temasys.com.sg">contact us
+ *   on our support portal</a>.
+ * </blockquote>
+ * Stops a recording session.
+ * @param {Function} [callback] The callback function fired when request has completed.
+ *   <small>Function parameters signature is <code>function (error, success)</code></small>
+ *   <small>Function request completion is determined by the <a href="#event_recordingState">
+ *   <code>recordingState</code> event</a> triggering <code>state</code> parameter payload as <code>STOP</code>
+ *   or as <code>LINK</code> when the value of <code>callbackSuccessWhenLink</code> is <code>true</code>.</small>
+ * @param {Error|String} callback.error The error result in request.
+ *   <small>Defined as <code>null</code> when there are no errors in request</small>
+ *   <small>Object signature is the <code>stopRecording()</code> error when stopping current recording session.</small>
+ * @param {String|JSON} callback.success The success result in request.
+ * - When <code>callbackSuccessWhenLink</code> value is <code>false</code>, it is defined as string as
+ *   the recording session ID.
+ * - when <code>callbackSuccessWhenLink</code> value is <code>true</code>, it is defined as an object as
+ *   the recording session information.
+ *   <small>Defined as <code>null</code> when there are errors in request</small>
+ * @param {JSON} callback.success.recordingId The recording session ID.
+ * @param {JSON} callback.success.link The recording session mixin videos link in
+ *   <a href="https://en.wikipedia.org/wiki/MPEG-4_Part_14">MP4</a> format.
+ *   <small>Object signature matches the <code>link</code> parameter payload received in the
+ *   <a href="#event_recordingState"><code>recordingState</code> event</a>.</small>
+ * @param {Boolean} [callbackSuccessWhenLink=false] The flag if <code>callback</code> function provided
+ *   should result in success only when <a href="#event_recordingState"><code>recordingState</code> event</a>
+ *   triggering <code>state</code> parameter payload as <code>LINK</code>.
+ * @method stopRecording
+ * @example
+ *   // Example 1: Stop recording session
+ *   skylinkDemo.stopRecording(function (error, success) {
+ *     if (error) return;
+ *     console.info("Recording session has stopped. ID ->", success);
+ *   });
+ *
+ *   // Example 2: Stop recording session with mixin videos link
+ *   skylinkDemo.stopRecording(function (error, success) {
+ *     if (error) return;
+ *     console.info("Recording session has compiled with links ->", success.link);
+ *   }, true);
+ * @trigger <ol class="desc-seq">
+ *   <li><a href="#event_recordingState"><code>recordingState</code> event</a> triggers parameter payload
+ *   <code>state</code> as <code>STOP</code>.</li>
+ *   <li>When recording session mixin has errors (and aborted), 
+ *   <a href="#event_recordingState"><code>recordingState</code> event</a> triggers parameter payload
+ *   <code>state</code> as <code>ERROR</code>.</li>
+ *   <li>When recording session mixin has completed with video links, 
+ *   <a href="#event_recordingState"><code>recordingState</code> event</a> triggers parameter payload
+ *   <code>state</code> as <code>LINK</code>.</li></ol>
+ * @beta
+ * @for Skylink
+ * @since 0.6.x
+ */
+Skylink.prototype.stopRecording = function (callback, callbackSuccessWhenLink) {
+  var self = this;
+
+  if (!self._hasMCU) {
+    var noMCUError = 'Unable to stop recording as MCU is not connected';
+    log.error(noMCUError);
+    if (typeof callback === 'function') {
+      callback(new Error(noMCUError), null);
+    }
+    return;
+  }
+
+  if (!self._currentRecordingId) {
+    var noRecordingSessionError = 'Unable to stop recording as there is no recording in-progress';
+    log.error(noRecordingSessionError);
+    if (typeof callback === 'function') {
+      callback(new Error(noRecordingSessionError), null);
+    }
+    return;
+  }
+
+  if (self._recordingStartInterval) {
+    var recordingSecsRequiredError = 'Unable to stop recording as 4 seconds has not been recorded yet';
+    log.error(recordingSecsRequiredError);
+    if (typeof callback === 'function') {
+      callback(new Error(recordingSecsRequiredError), null);
+    }
+    return;
+  }
+
+  if (typeof callback === 'function') {
+    var expectedRecordingId = self._currentRecordingId;
+
+    self.once('recordingState', function (state, recordingId, link, error) {
+      if (callbackSuccessWhenLink) {
+        if (error) {
+          callback(error, null);
+          return;
+        }
+
+        callback(null, {
+          link: link,
+          recordingId: recordingId
+        });
+        return;
+      }
+
+      callback(null, recordingId);
+
+    }, function (state, recordingId) {
+      if (expectedRecordingId === recordingId) {
+        if (callbackSuccessWhenLink) {
+          return [self.RECORDING_STATE.LINK, self.RECORDING_STATE.ERROR].indexOf(state) > -1;
+        }
+        return state === self.RECORDING_STATE.STOP;
+      }
+    });
+  }
+
+  self._sendChannelMessage({
+    type: self._SIG_MESSAGE_TYPE.STOP_RECORDING,
+    rid: self._room.id,
+    target: 'MCU'
+  });
+
+  log.debug(['MCU', 'Recording', null, 'Stopping recording']);
+};
+
+/**
  * Function that process and parses the socket message string received from the Signaling.
  * @method _processSigMessage
  * @private
@@ -9835,7 +10037,7 @@ Skylink.prototype._recordingEventHandler = function (message) {
     if (!self._recordings[message.recordingId]) {
       log.debug(['MCU', 'Recording', message.recordingId, 'Started recording']);
 
-      self._isRecording = true;
+      self._currentRecordingId = message.recordingId;
       self._recordings[message.recordingId] = {
         isOn: true,
         url: null,
@@ -9854,7 +10056,7 @@ Skylink.prototype._recordingEventHandler = function (message) {
       return;
     }
 
-    self._isRecording = false;
+    self._currentRecordingId = null;
 
     if (self._recordingStartInterval) {
       clearTimeout(self._recordingStartInterval);
@@ -9872,9 +10074,11 @@ Skylink.prototype._recordingEventHandler = function (message) {
       log.error(['MCU', 'Recording', message.recordingId, 'Received URL but the session is empty']);
       return;
     }
-    
+
     self._recordings[message.recordingId].url = message.url;
-    self._trigger('recordingState', self.RECORDING_STATE.LINK, message.recordingId, message.url, null);
+    var links = message.url && typeof message.url === 'object' ? message.url : { mixin: message.url };
+       
+    self._trigger('recordingState', self.RECORDING_STATE.LINK, message.recordingId, links, null);
   
   } else {
     var recordingError = new Error(message.error || 'Unknown error');
@@ -10501,67 +10705,6 @@ Skylink.prototype._answerHandler = function(message) {
   });
 };
 
-/**
- * Starts a recording session.
- * - This can only be used for a recording enabled MCU key.
- * @beta
- * @method startRecording
- * @for Skylink
- * @since 0.6.-
- */
-Skylink.prototype.startRecording = function () {
-  if (!this._hasMCU) {
-    log.error('Unable to start recording as MCU is not connected');
-    return;
-  }
-
-  if (this._isRecording) {
-    log.error('Unable to start recording as there is an existing recording in-progress');
-    return;
-  }
-
-  this._sendChannelMessage({
-    type: this._SIG_MESSAGE_TYPE.START_RECORDING,
-    rid: this._room.id,
-    target: 'MCU'
-  });
-
-  log.debug(['MCU', 'Recording', null, 'Starting recording']);
-};
-
-/**
- * Stops a recording session.
- * - This can only be used for a recording enabled MCU key.
- * @method stopRecording
- * @beta
- * @for Skylink
- * @since 0.6.-
- */
-Skylink.prototype.stopRecording = function () {
-  if (!this._hasMCU) {
-    log.error('Unable to stop recording as MCU is not connected');
-    return;
-  }
-
-  if (!this._isRecording) {
-    log.error('Unable to stop recording as there is no recording in-progress');
-    return;
-  }
-
-  if (this._recordingStartInterval) {
-    log.error('Unable to stop recording as 4 seconds has not been recorded yet');
-    return;
-  }
-
-  this._sendChannelMessage({
-    type: this._SIG_MESSAGE_TYPE.STOP_RECORDING,
-    rid: this._room.id,
-    target: 'MCU'
-  });
-
-  log.debug(['MCU', 'Recording', null, 'Stopping recording']);
-};
-
 Skylink.prototype.VIDEO_CODEC = {
   AUTO: 'auto',
   VP8: 'VP8',
@@ -10712,32 +10855,6 @@ Skylink.prototype.VIDEO_RESOLUTION = {
   QUHD: { width: 15360, height: 8640, aspectRatio: '16:9' }
 };
 
-/**
- * Contains the list of recording states.
- * @attribute RECORDING_STATE
- * @param {Number} START Value <code>0</code></small>
- *   The state when recording session has started.
- * @param {Number} STOP <small>Value <code>1</code></small>
- *   The state when recording session has stopped.<br>
- *   During this time, the recorded videos will go
- *   throught the mixin server to compile the videos into one video link.
- * @param {Number} LINK <small>Value <code>2</code></small>
- *   The state when recording session mixing for the video has been completed.<br>
- *   At this stage, the link to the mixin video is available.
- * @param {Number} ERROR <small>Value <code>-1</code></small>
- *   The state when recording session has exception.
- * @beta
- * @type JSON
- * @for Skylink
- * @since 0.6.-
- */
-Skylink.prototype.RECORDING_STATE = {
-  START: 0,
-  STOP: 1,
-  LINK: 2,
-  ERROR: -1
-};
-
 /*
  * The list of <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> Stream fallback states.
  * @attribute MEDIA_ACCESS_FALLBACK_STATE
@@ -10763,6 +10880,32 @@ Skylink.prototype.MEDIA_ACCESS_FALLBACK_STATE = {
 };
 
 /**
+ * The list of recording states.
+ * @attribute RECORDING_STATE
+ * @param {Number} START <small>Value <code>0</code></small>
+ *   The value of the state when recording session has started.
+ * @param {Number} STOP <small>Value <code>1</code></small>
+ *   The value of the state when recording session has stopped.<br>
+ *   <small>At this stage, the recorded videos will go through the mixin server to compile the videos.</small>
+ * @param {Number} LINK <small>Value <code>2</code></small>
+ *   The value of the state when recording session mixin request has been completed.
+ * @param {Number} ERROR <small>Value <code>-1</code></small>
+ *   The value of the state state when recording session has errors.
+ *   <small>This can happen during recording session or during mixin of recording videos,
+ *   and at this stage, the recording session or mixin is aborted.</small>
+ * @type JSON
+ * @beta
+ * @for Skylink
+ * @since 0.6.x
+ */
+Skylink.prototype.RECORDING_STATE = {
+  START: 0,
+  STOP: 1,
+  LINK: 2,
+  ERROR: -1
+};
+
+/**
  * Stores the list of recordings.
  * @attribute _recordings
  * @type JSON
@@ -10774,16 +10917,16 @@ Skylink.prototype.MEDIA_ACCESS_FALLBACK_STATE = {
 Skylink.prototype._recordings = {};
 
 /**
- * Stores the flag if recording is in session.
+ * Stores the current active recording session ID.
  * There can only be 1 recording session at a time in a Room
- * @attribute _isRecording
+ * @attribute _currentRecordingId
  * @type JSON
  * @private
  * @beta
  * @for Skylink
  * @since 0.6.-
  */
-Skylink.prototype._isRecording = false;
+Skylink.prototype._currentRecordingId = false;
 
 /**
  * Stores the recording session timeout to ensure 4 seconds has been recorded.

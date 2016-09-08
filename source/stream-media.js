@@ -169,32 +169,6 @@ Skylink.prototype.VIDEO_RESOLUTION = {
   QUHD: { width: 15360, height: 8640, aspectRatio: '16:9' }
 };
 
-/**
- * Contains the list of recording states.
- * @attribute RECORDING_STATE
- * @param {Number} START Value <code>0</code></small>
- *   The state when recording session has started.
- * @param {Number} STOP <small>Value <code>1</code></small>
- *   The state when recording session has stopped.<br>
- *   During this time, the recorded videos will go
- *   throught the mixin server to compile the videos into one video link.
- * @param {Number} LINK <small>Value <code>2</code></small>
- *   The state when recording session mixing for the video has been completed.<br>
- *   At this stage, the link to the mixin video is available.
- * @param {Number} ERROR <small>Value <code>-1</code></small>
- *   The state when recording session has exception.
- * @beta
- * @type JSON
- * @for Skylink
- * @since 0.6.-
- */
-Skylink.prototype.RECORDING_STATE = {
-  START: 0,
-  STOP: 1,
-  LINK: 2,
-  ERROR: -1
-};
-
 /*
  * The list of <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> Stream fallback states.
  * @attribute MEDIA_ACCESS_FALLBACK_STATE
@@ -220,6 +194,32 @@ Skylink.prototype.MEDIA_ACCESS_FALLBACK_STATE = {
 };
 
 /**
+ * The list of recording states.
+ * @attribute RECORDING_STATE
+ * @param {Number} START <small>Value <code>0</code></small>
+ *   The value of the state when recording session has started.
+ * @param {Number} STOP <small>Value <code>1</code></small>
+ *   The value of the state when recording session has stopped.<br>
+ *   <small>At this stage, the recorded videos will go through the mixin server to compile the videos.</small>
+ * @param {Number} LINK <small>Value <code>2</code></small>
+ *   The value of the state when recording session mixin request has been completed.
+ * @param {Number} ERROR <small>Value <code>-1</code></small>
+ *   The value of the state state when recording session has errors.
+ *   <small>This can happen during recording session or during mixin of recording videos,
+ *   and at this stage, the recording session or mixin is aborted.</small>
+ * @type JSON
+ * @beta
+ * @for Skylink
+ * @since 0.6.x
+ */
+Skylink.prototype.RECORDING_STATE = {
+  START: 0,
+  STOP: 1,
+  LINK: 2,
+  ERROR: -1
+};
+
+/**
  * Stores the list of recordings.
  * @attribute _recordings
  * @type JSON
@@ -231,16 +231,16 @@ Skylink.prototype.MEDIA_ACCESS_FALLBACK_STATE = {
 Skylink.prototype._recordings = {};
 
 /**
- * Stores the flag if recording is in session.
+ * Stores the current active recording session ID.
  * There can only be 1 recording session at a time in a Room
- * @attribute _isRecording
+ * @attribute _currentRecordingId
  * @type JSON
  * @private
  * @beta
  * @for Skylink
  * @since 0.6.-
  */
-Skylink.prototype._isRecording = false;
+Skylink.prototype._currentRecordingId = false;
 
 /**
  * Stores the recording session timeout to ensure 4 seconds has been recorded.
