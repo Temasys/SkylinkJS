@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.13</title>
+    <title>SkylinkJS 0.6.14</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.13</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.14</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -93,8 +93,10 @@
 
 &#x27;use strict&#x27;;
 
-/* IE &lt; 10 Polyfills */
-// Mozilla provided polyfill for Object.keys()
+/**
+ * Polyfill for Object.keys() from Mozilla
+ * From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
+ */
 if (!Object.keys) {
   Object.keys = (function() {
     var hasOwnProperty = Object.prototype.hasOwnProperty,
@@ -131,7 +133,10 @@ if (!Object.keys) {
   })()
 }
 
-// Mozilla provided polyfill for Date.getISOString()
+/**
+ * Polyfill for Date.getISOString() from Mozilla
+ * From https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString
+ */
 (function() {
   function pad(number) {
     if (number &lt; 10) {
@@ -152,7 +157,11 @@ if (!Object.keys) {
   };
 })();
 
-// addEventListener polyfill 1.0 / Eirik Backer / MIT Licence
+/**
+ * Polyfill for addEventListener() from Eirik Backer @eirikbacker (github.com).
+ * From https://gist.github.com/eirikbacker/2864711
+ * MIT Licensed
+ */
 (function(win, doc){
   if(win.addEventListener) return; //No need to polyfill
 
@@ -182,7 +191,9 @@ if (!Object.keys) {
   }
 })(window, document);
 
-// global clone function
+/**
+ * Global function that clones an object.
+ */
 var clone = function (obj) {
   if (obj === null || typeof obj !== &#x27;object&#x27;) {
     return obj;
@@ -198,27 +209,44 @@ var clone = function (obj) {
 };
 
 /**
- * &lt;h2&gt;Before using Skylink&lt;/h2&gt;
- * Please invoke {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}} method
- * first to initialise the Application Key before using any functionalities in Skylink.
+ * &lt;h2&gt;Prerequisites on using Skylink&lt;/h2&gt;
+ * Before using any Skylink functionalities, you will need to authenticate your App Key using
+ *   the &lt;a href=&quot;#method_init&quot;&gt;&#x60;init()&#x60; method&lt;/a&gt;.
  *
- * If you do not have an Application Key, you may register for a Skylink platform developer account
- *   [to create one](http://developer.temasys.com.sg/register).
+ * To manage or create App Keys, you may access the [Skylink Developer Portal here](https://console.temasys.io).
  *
- * To get started you may [visit the getting started page](https://temasys.github.io/how-to/2014/08/08/
- * Getting_started_with_WebRTC_and_SkylinkJS/), or alternatively fork a ready made demo application
- * that uses Skylink Web SDK at [getaroom.io](http://getaroom.io/).
+ * To view the list of supported browsers, visit [the list here](
+ * https://github.com/Temasys/SkylinkJS#supported-browsers).
  *
- * For tips on using skylink and troubleshooting you can visit
- *   [our support portal](http://support.temasys.com.sg/support/solutions/folders/5000267498).
+ * Here are some articles to help you get started:
+ * - [How to setup a simple video call](https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/)
+ * - [How to setup screensharing](https://temasys.com.sg/screensharing-with-skylinkjs/)
+ * - [How to create a chatroom like feature](https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/)
+ *
+ * Here are some demos you may use to aid your development:
+ * - Getaroom.io [[Demo](https://getaroom.io) / [Source code](https://github.com/Temasys/getaroom)]
+ * - Creating a component [[Link](https://github.com/Temasys/skylink-call-button)]
+ *
+ * You may see the example below in the &lt;a href=&quot;#&quot;&gt;Constructor tab&lt;/a&gt; to have a general idea how event subscription
+ *   and the ordering of &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt;&lt;/a&gt; and
+ *   &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt;&lt;/a&gt; methods should be called.
+ *
+ * If you have any issues, you may find answers to your questions in the FAQ section on [our support portal](
+ * http://support.temasys.com.sg), asks questions, request features or raise bug tickets as well.
+ *
+ * If you would like to contribute to our SkylinkJS codebase, see [the contributing README](
+ * https://github.com/Temasys/SkylinkJS/blob/master/CONTRIBUTING.md).
+ *
+ * [See License (Apache 2.0)](https://github.com/Temasys/SkylinkJS/blob/master/LICENSE)
+ *
  * @class Skylink
  * @constructor
  * @example
- *   // Here&#x27;s a simple example on how you can start using Skylink
- *   var SkylinkDemo = new Skylink();
+ *   // Here&#x27;s a simple example on how you can start using Skylink.
+ *   var skylinkDemo = new Skylink();
  *
- *   // Subscribe all events first before init()
- *   SkylinkDemo.on(&quot;incomingStream&quot;, function (peerId, stream, peerInfo, isSelf) {
+ *   // Subscribe all events first as a general guideline
+ *   skylinkDemo.on(&quot;incomingStream&quot;, function (peerId, stream, peerInfo, isSelf) {
  *     if (isSelf) {
  *       attachMediaStream(document.getElementById(&quot;selfVideo&quot;), stream);
  *     } else {
@@ -230,7 +258,7 @@ var clone = function (obj) {
  *     }
  *   });
  *
- *   SkylinkDemo.on(&quot;peerLeft&quot;, function (peerId, peerInfo, isSelf) {
+ *   skylinkDemo.on(&quot;peerLeft&quot;, function (peerId, peerInfo, isSelf) {
  *     if (!isSelf) {
  *       var peerVideo = document.getElementById(peerId);
  *       // do a check if peerVideo exists first
@@ -242,19 +270,10 @@ var clone = function (obj) {
  *     }
  *   });
  *
- *  // never call joinRoom in readyStateChange event subscription.
- *  // call joinRoom after init() callback if you want to joinRoom instantly.
- *  SkylinkDemo.on(&quot;readyStateChange&quot;, function (state, room) {
- *    console.log(&quot;Room (&quot; + room + &quot;) state: &quot;, room);
- *  })
- *
- *  // always remember to call init()
- *  SkylinkDemo.init(&quot;YOUR_APP_KEY_HERE&quot;, function (error, success) {
- *    // do a check for error or success
- *    if (error) {
- *      console.error(&quot;Init failed: &quot;, error);
- *    } else {
- *      SkylinkDemo.joinRoom(&quot;my_room&quot;, {
+ *  // init() should always be called first before other methods other than event methods like on() or off().
+ *  skylinkDemo.init(&quot;YOUR_APP_KEY_HERE&quot;, function (error, success) {
+ *    if (success) {
+ *      skylinkDemo.joinRoom(&quot;my_room&quot;, {
  *        userData: &quot;My Username&quot;,
  *        audio: true,
  *        video: true
@@ -268,38 +287,34 @@ function Skylink() {
   if (!(this instanceof Skylink)) {
     return new Skylink();
   }
-
-  /**
-   * The current version of Skylink Web SDK.
-   * @attribute VERSION
-   * @type String
-   * @readOnly
-   * @for Skylink
-   * @since 0.1.0
-   */
-  this.VERSION = &#x27;@@version&#x27;;
-
-  /**
-   * Helper function that generates an Unique ID (UUID) string.
-   * @method generateUUID
-   * @return {String} Generated Unique ID (UUID) string.
-   * @example
-   *    // Get Unique ID (UUID)
-   *    var uuid = SkylinkDemo.generateUUID();
-   * @for Skylink
-   * @since 0.5.9
-   */
-  this.generateUUID = function() {
-    var d = new Date().getTime();
-    var uuid = &#x27;xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx&#x27;.replace(/[xy]/g, function(c) {
-      var r = (d + Math.random() * 16) % 16 | 0;
-      d = Math.floor(d / 16);
-      return (c == &#x27;x&#x27; ? r : (r &amp; 0x7 | 0x8)).toString(16);
-    });
-    return uuid;
-  };
 }
-this.Skylink = Skylink;
+
+/**
+ * Contains the current version of Skylink Web SDK.
+ * @attribute VERSION
+ * @type String
+ * @readOnly
+ * @for Skylink
+ * @since 0.1.0
+ */
+Skylink.prototype.VERSION = &#x27;@@version&#x27;;
+
+/**
+ * Function that generates an &lt;a href=&quot;https://en.wikipedia.org/wiki/Universally_unique_identifier&quot;&gt;UUID&lt;/a&gt; (Unique ID).
+ * @method generateUUID
+ * @return {String} Returns a generated UUID (Unique ID).
+ * @for Skylink
+ * @since 0.5.9
+ */
+Skylink.prototype.generateUUID = function() {
+  var d = new Date().getTime();
+  var uuid = &#x27;xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx&#x27;.replace(/[xy]/g, function(c) {
+    var r = (d + Math.random() * 16) % 16 | 0;
+    d = Math.floor(d / 16);
+    return (c == &#x27;x&#x27; ? r : (r &amp; 0x7 | 0x8)).toString(16);
+  });
+  return uuid;
+};
 
     </pre>
 </div>

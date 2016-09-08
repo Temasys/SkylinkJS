@@ -168,12 +168,9 @@ h3 code {
   min-height: 0;
 }
 .code-item h4 {
-  font-size: 15px;
+  font-size: 12px;
   text-transform: uppercase;
-}
-.code-item-trigger a {
-  font-weight: normal;
-  margin-right: 15px;
+  font-weight: 600;
 }
 .code-item-properties {
   margin: 15px 0;
@@ -221,6 +218,7 @@ h3 code {
   color: #888;
   font-size: 12px;
 }
+.returns-description .label,
 .params-list .param .label {
   font-size: 10px;
   /*font-weight: normal;*/
@@ -234,18 +232,100 @@ h3 code {
   background: #f0ad4e;
   color: #fff;
 }
+.desc-seq-header {
+  color: #575757;
+  font-weight: 600;
+  font-size: 12px;
+  display: block;
+  margin-bottom: 5px;
+}
+.desc-seq ol {
+  list-style-type: lower-alpha;
+  padding-left: 10px;
+}
+.desc-seq ul {
+  list-style-type: disc;
+  color: #828282;
+  font-size: 13px;
+  padding-left: 25px;
+}
+
+.desc-seq ol ol {
+  list-style-type: lower-roman;
+}
+.desc-seq ol ol ol {
+  list-style-type: upper-alpha;
+}
+.desc-seq ol ol ol ol {
+  list-style-type: upper-roman;
+}
+.desc-seq ul li,
+.desc-seq ol li {
+  margin: 5px 0;
+}
+.code-item-description small,
+.desc-seq small,
+.returns-description small,
 .param .param-description small {
   margin: 5px 0;
   color: #888;
   display: block;
 }
+.returns-description var {
+  font-style: normal;
+  margin: 0 5px 0 10px;
+  color: #888;
+  font-size: 12px;
+}
+.param .param-name {
+  background: none;
+  font-weight: bold;
+}
+.param .param-description code {
+  background: #f9f7f3;
+  color: #8a6d3b;
+  font-weight: bold;
+}
+.param .param-description small code {
+  color: #c7254e;
+  background-color: #f9f2f4;
+  font-weight: normal;
+}
 .param .param-description small.default {
-  border-left: solid 2px #ccc;
-  padding-left: 15px;
+  border-left: solid 3px #eee;
+  display: inline-block;
+  margin: 5px 0;
+  padding: 5px 7px;
+  display: block;
 }
 .param .param-description small.default span {
   margin-right: 8px;
   font-weight: 600;
+  color: #a8a8a8;
+}
+.param .param-description small.default code {
+  background: none;
+  color: #868686;
+  font-weight: 600;
+  padding: 0 5px 0 0;
+  font-size: 12px;
+}
+.param .param-description ul {
+  padding-left: 0;
+  margin-bottom: 15px;
+  list-style-type: none;
+  list-style-position: inside;
+}
+.param .param-description ul li:before {
+  content: "\21D2 \0020";
+  color: #aaa;
+  font-size: 16px;
+  padding-top:5px;
+}
+.param .param-description ul li {
+  color: #888;
+  font-size: 14px;
+  padding-top:0;
 }
 .returns-description span,
 .returns-description p {
@@ -253,6 +333,13 @@ h3 code {
 }
 .returns-description .type {
   margin-right: 15px;
+  vertical-align: top;
+  color: #888;
+}
+.returns-description ul li p,
+.returns-description ol li p {
+  margin-top: 5px;
+  display: block;
 }
 #doc-type-select {
   margin-bottom: 35px;
@@ -359,6 +446,37 @@ blockquote small:before,
 blockquote small:after {
   content: ""!important;
 }
+
+blockquote.info {
+  background: #d9edf7;
+  color: #31708f;
+  border-left: solid 3px #31708f!important;
+  padding: 7px 12px!important;
+  margin: 16px 0;
+}
+
+.params-list blockquote.info {
+  font-size: 13px;
+}
+
+blockquote.details {
+  padding: 5px 12px!important;
+  margin: 15px 0;
+  border-left: solid 3px #f8f8f8!important;
+}
+
+blockquote.details h5 {
+  margin-top: 0;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: #888;
+}
+
+blockquote.details ol li {
+  margin: 5px 0 12px;
+}
+
 @media (max-width: 991px) {
   .section-doc-group .col-md-3 {
     display: none;

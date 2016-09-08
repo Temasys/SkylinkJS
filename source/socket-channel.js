@@ -1,29 +1,26 @@
 /**
- * These are the list of socket connection error states that Skylink would trigger.
- * - These error states references the [socket.io-client events](http://socket.io/docs/client-api/).
+ * The list of <a href="#method_joinRoom"><code>joinRoom()</code> method</a> socket connection failure states.
  * @attribute SOCKET_ERROR
+ * @param {Number} CONNECTION_FAILED    <small>Value <code>0</code></small>
+ *   The value of the failure state when <code>joinRoom()</code> socket connection failed to establish with
+ *   the Signaling server at the first attempt.
+ * @param {Number} RECONNECTION_FAILED  <small>Value <code>-1</code></small>
+ *   The value of the failure state when <code>joinRoom()</code> socket connection failed to establish
+ *   the Signaling server after the first attempt.
+ * @param {Number} CONNECTION_ABORTED   <small>Value <code>-2</code></small>
+ *   The value of the failure state when <code>joinRoom()</code> socket connection will not attempt
+ *   to reconnect after the failure of the first attempt in <code>CONNECTION_FAILED</code> as there
+ *   are no more ports or transports to attempt for reconnection.
+ * @param {Number} RECONNECTION_ABORTED <small>Value <code>-3</code></small>
+ *   The value of the failure state when <code>joinRoom()</code> socket connection will not attempt
+ *   to reconnect after the failure of several attempts in <code>RECONNECTION_FAILED</code> as there
+ *   are no more ports or transports to attempt for reconnection.
+ * @param {Number} RECONNECTION_ATTEMPT <small>Value <code>-4</code></small>
+ *   The value of the failure state when <code>joinRoom()</code> socket connection is attempting
+ *   to reconnect with a new port or transport after the failure of attempts in
+ *   <code>CONNECTION_FAILED</code> or <code>RECONNECTED_FAILED</code>.
  * @type JSON
- * @param {Number} CONNECTION_FAILED <small>Value <code>0</code></small>
- *   The error state when Skylink have failed to establish a socket connection with
- *   platform signaling in the first attempt.
- * @param {String} RECONNECTION_FAILED <small>Value <code>-1</code></small>
- *   The error state when Skylink have failed to
- *   reestablish a socket connection with platform signaling after the first attempt
- *   <code>CONNECTION_FAILED</code>.
- * @param {String} CONNECTION_ABORTED <small>Value <code>-2</code></small>
- *   The error state when attempt to reestablish socket connection
- *   with platform signaling has been aborted after the failed first attempt
- *   <code>CONNECTION_FAILED</code>.
- * @param {String} RECONNECTION_ABORTED <small>Value <code>-3</code></small>
- *   The error state when attempt to reestablish socket connection
- *   with platform signaling has been aborted after several failed reattempts
- *   <code>RECONNECTION_FAILED</code>.
- * @param {String} RECONNECTION_ATTEMPT <small>Value <code>-4</code></small>
- *   The error state when Skylink is attempting to reestablish
- *   a socket connection with platform signaling after a failed attempt
- *   <code>CONNECTION_FAILED</code> or <code>RECONNECTION_FAILED</code>.
  * @readOnly
- * @component Socket
  * @for Skylink
  * @since 0.5.6
  */
@@ -36,107 +33,25 @@ Skylink.prototype.SOCKET_ERROR = {
 };
 
 /**
- * Stores the socket connection session information.
- * @attribute _socketSession
- * @type JSON
- * @private
- * @required
- * @component Socket
- * @for Skylink
- * @since 0.6.13
- */
-Skylink.prototype._socketSession = {};
-
-/**
- * Stores the queued socket messages to sent to the platform signaling to
- *   prevent messages from being dropped due to messages being sent in
- *   less than a second interval.
- * @attribute _socketMessageQueue
- * @type Array
- * @private
- * @required
- * @component Socket
- * @for Skylink
- * @since 0.5.8
- */
-Skylink.prototype._socketMessageQueue = [];
-
-/**
- * Limits the socket messages being sent in less than a second interval
- *   using the <code>setTimeout</code> object to prevent messages being sent
- *   in less than a second interval.
- * The messaegs are stored in
- *   {{#crossLink "Skylink/_socketMessageQueue:attribute"}}_socketMessageQueue{{/crossLink}}.
- * @attribute _socketMessageTimeout
- * @type Object
- * @private
- * @required
- * @component Socket
- * @for Skylink
- * @since 0.5.8
- */
-Skylink.prototype._socketMessageTimeout = null;
-
-
-/**
- * Stores the list of fallback ports that Skylink can attempt
- *   to establish a socket connection with platform signaling.
- * @attribute _socketPorts
- * @type JSON
- * @param {Array} http:// The array of <code>HTTP</code> protocol fallback ports.
- *    By default, the ports are <code>[80, 3000]</code>.
- * @param {Array} https:// The The array of <code>HTTP</code> protocol fallback ports.
- *    By default, the ports are <code>[443, 3443]</code>.
- * @private
- * @required
- * @component Socket
- * @for Skylink
- * @since 0.5.8
- */
-Skylink.prototype._socketPorts = {
-  'http:': [80, 3000],
-  'https:': [443, 3443]
-};
-
-/**
- * These are the list of fallback attempt types that Skylink would attempt with.
+ * The list of <a href="#method_joinRoom"><code>joinRoom()</code> method</a> socket connection reconnection states.
  * @attribute SOCKET_FALLBACK
+ * @param {String} NON_FALLBACK      <small>Value <code>"nonfallback"</code></small>
+ *   The value of the reconnection state when <code>joinRoom()</code> socket connection is at its initial state
+ *   without transitioning to any new socket port or transports yet.
+ * @param {String} FALLBACK_PORT     <small>Value <code>"fallbackPortNonSSL"</code></small>
+ *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
+ *   another new HTTP port using WebSocket transports to attempt to establish connection with Signaling server.
+ * @param {String} FALLBACK_PORT_SSL <small>Value <code>"fallbackPortSSL"</code></small>
+ *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
+ *   another new HTTPS port using WebSocket transports to attempt to establish connection with Signaling server.
+ * @param {String} LONG_POLLING      <small>Value <code>"fallbackLongPollingNonSSL"</code></small>
+ *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
+ *   another new HTTP port using Polling transports to attempt to establish connection with Signaling server.
+ * @param {String} LONG_POLLING      <small>Value <code>"fallbackLongPollingSSL"</code></small>
+ *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
+ *   another new HTTPS port using Polling transports to attempt to establish connection with Signaling server.
  * @type JSON
- * @param {String} NON_FALLBACK <small>Value <code>"nonfallback"</code> | Protocol <code>"http:"</code>,
- * <code>"https:"</code> | Transports <code>"WebSocket"</code>, <code>"Polling"</code></small>
- *   The current socket connection attempt
- *   is using the first selected socket connection port for
- *   the current selected transport <code>"Polling"</code> or <code>"WebSocket"</code>.
- * @param {String} FALLBACK_PORT <small>Value <code>"fallbackPortNonSSL"</code> | Protocol <code>"http:"</code>
- *  | Transports <code>"WebSocket"</code></small>
- *   The current socket connection reattempt
- *   is using the next selected socket connection port for
- *   <code>HTTP</code> protocol connection with the current selected transport
- *   <code>"Polling"</code> or <code>"WebSocket"</code>.
- * @param {String} FALLBACK_PORT_SSL <small>Value <code>"fallbackPortSSL"</code> | Protocol <code>"https:"</code>
- *  | Transports <code>"WebSocket"</code></small>
- *   The current socket connection reattempt
- *   is using the next selected socket connection port for
- *   <code>HTTPS</code> protocol connection with the current selected transport
- *   <code>"Polling"</code> or <code>"WebSocket"</code>.
- * @param {String} LONG_POLLING <small>Value <code>"fallbackLongPollingNonSSL"</code> | Protocol <code>"http:"</code>
- *  | Transports <code>"Polling"</code></small>
- *   The current socket connection reattempt
- *   is using the next selected socket connection port for
- *   <code>HTTP</code> protocol connection with <code>"Polling"</code> after
- *   many attempts of <code>"WebSocket"</code> has failed.
- *   This occurs only for socket connection that is originally using
- *   <code>"WebSocket"</code> transports.
- * @param {String} LONG_POLLING_SSL <small>Value <code>"fallbackLongPollingSSL"</code> | Protocol <code>"https:"</code>
- *  | Transports <code>"Polling"</code></small>
- *   The current socket connection reattempt
- *   is using the next selected socket connection port for
- *   <code>HTTPS</code> protocol connection with <code>"Polling"</code> after
- *   many attempts of <code>"WebSocket"</code> has failed.
- *   This occurs only for socket connection that is originally using
- *   <code>"WebSocket"</code> transports.
  * @readOnly
- * @component Socket
  * @for Skylink
  * @since 0.5.6
  */
@@ -149,92 +64,118 @@ Skylink.prototype.SOCKET_FALLBACK = {
 };
 
 /**
- * The flag that indicates if the current socket connection with
- *   platform signaling is opened.
+ * Stores the current socket connection information.
+ * @attribute _socketSession
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.13
+ */
+Skylink.prototype._socketSession = {};
+
+/**
+ * Stores the queued socket messages.
+ * This is to prevent too many sent over less than a second interval that might cause dropped messages
+ *   or jams to the Signaling connection.
+ * @attribute _socketMessageQueue
+ * @type Array
+ * @private
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._socketMessageQueue = [];
+
+/**
+ * Stores the <code>setTimeout</code> to sent queued socket messages.
+ * @attribute _socketMessageTimeout
+ * @type Object
+ * @private
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._socketMessageTimeout = null;
+
+/**
+ * Stores the list of socket ports to use to connect to the Signaling.
+ * These ports are defined by default which is commonly used currently by the Signaling.
+ * Should re-evaluate this sometime.
+ * @attribute _socketPorts
+ * @param {Array} http: The list of HTTP socket ports.
+ * @param {Array} https: The list of HTTPS socket ports.
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._socketPorts = {
+  'http:': [80, 3000],
+  'https:': [443, 3443]
+};
+
+/**
+ * Stores the flag that indicates if socket connection to the Signaling has opened.
  * @attribute _channelOpen
  * @type Boolean
  * @private
- * @required
- * @component Socket
  * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._channelOpen = false;
 
 /**
- * Stores the platform signaling endpoint URI to open socket connection with.
+ * Stores the Signaling server url.
  * @attribute _signalingServer
  * @type String
  * @private
- * @component Socket
  * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._signalingServer = null;
 
 /**
- * Stores the current platform signaling protocol to open socket connection with.
+ * Stores the Signaling server protocol.
  * @attribute _signalingServerProtocol
  * @type String
  * @private
- * @component Socket
  * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._signalingServerProtocol = window.location.protocol;
 
 /**
- * Stores the current platform signaling port to open socket connection with.
+ * Stores the Signaling server port.
  * @attribute _signalingServerPort
  * @type Number
  * @private
- * @component Socket
  * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._signalingServerPort = null;
 
 /**
- * Stores the [socket.io-client <code>io</code> object](http://socket.io/docs/client-api/) that
- *   handles the middleware socket connection with platform signaling.
+ * Stores the Signaling socket connection object.
  * @attribute _socket
- * @type Object
- * @required
+ * @type io
  * @private
- * @component Socket
  * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._socket = null;
 
 /**
- * Stores the timeout (in ms) set to await in seconds for response from platform signaling
- *   before throwing a connection timeout exception when Skylink is attemtping
- *   to establish a connection with platform signaling.
- * If the value is <code>0</code>, it will use the default timeout from
- *   socket.io-client that is in <code>20000</code>.
+ * Stores the socket connection timeout when establishing connection to the Signaling.
  * @attribute _socketTimeout
  * @type Number
- * @default 0
- * @required
  * @private
- * @component Socket
  * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._socketTimeout = 0;
 
 /**
- * The flag that indicates if the current socket connection for
- *   transports types with <code>"Polling"</code> uses
- *   [XDomainRequest](https://msdn.microsoft.com/en-us/library/cc288060(v=vs.85).aspx)
- *   instead of [XMLHttpRequest](http://www.w3schools.com/Xml/dom_httprequest.asp)
- *   due to the IE 8 / 9 <code>XMLHttpRequest</code> not supporting CORS access.
+ * Stores the flag that indicates if XDomainRequest is used for IE 8/9.
  * @attribute _socketUseXDR
  * @type Boolean
- * @default false
- * @required
- * @component Socket
  * @private
  * @for Skylink
  * @since 0.5.4
@@ -242,12 +183,9 @@ Skylink.prototype._socketTimeout = 0;
 Skylink.prototype._socketUseXDR = false;
 
 /**
- * Sends socket message over the platform signaling socket connection.
+ * Function that sends a socket message over the socket connection to the Signaling.
  * @method _sendChannelMessage
- * @param {JSON} message The socket message object.
- * @param {String} message.type Required. Protocol type of the socket message object.
  * @private
- * @component Socket
  * @for Skylink
  * @since 0.5.8
  */
@@ -366,17 +304,9 @@ Skylink.prototype._sendChannelMessage = function(message) {
 };
 
 /**
- * Starts a socket.io connection with the platform signaling.
+ * Function that creates and opens a socket connection to the Signaling.
  * @method _createSocket
- * @param {String} type The transport type of socket.io connection to use.
- * <ul>
- * <li><code>"WebSocket"</code>: Uses the WebSocket connection.<br>
- *   <code>options.transports = ["websocket"]</code></li>
- * <li><code>"Polling"</code>: Uses the Polling connection.<br>
- *   <code>options.transports = ["xhr-polling", "jsonp-polling", "polling"]</code></li>
- * </ul>
  * @private
- * @component Socket
  * @for Skylink
  * @since 0.5.10
  */
@@ -538,17 +468,10 @@ Skylink.prototype._createSocket = function (type) {
 };
 
 /**
- * Connects to the socket connection endpoint URI to platform signaling that is constructed with
- *  {{#crossLink "Skylink/_signalingServerProtocol:attribute"}}_signalingServerProtocol{{/crossLink}},
- *  {{#crossLink "Skylink/_signalingServer:attribute"}}_signalingServer{{/crossLink}} and
- *  {{#crossLink "Skylink/_signalingServerPort:attribute"}}_signalingServerPort{{/crossLink}}.
- *  <small>Example format: <code>protocol//serverUrl:port</code></small>.<br>
- * Once URI is formed, it will start a new socket.io connection with
- *  {{#crossLink "Skylink/_createSocket:method"}}_createSocket(){{/crossLink}}.
+ * Function that starts the socket connection to the Signaling.
+ * This starts creating the socket connection and called at first not when requiring to fallback.
  * @method _openChannel
- * @trigger channelMessage, channelOpen, channelError, channelClose
  * @private
- * @component Socket
  * @for Skylink
  * @since 0.5.5
  */
@@ -587,10 +510,9 @@ Skylink.prototype._openChannel = function() {
 };
 
 /**
- * Disconnects the current socket connection with the platform signaling.
+ * Function that stops the socket connection to the Signaling.
  * @method _closeChannel
  * @private
- * @component Socket
  * @for Skylink
  * @since 0.5.5
  */
