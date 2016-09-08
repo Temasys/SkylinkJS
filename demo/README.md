@@ -10,7 +10,7 @@ You may choose to use other types of hosting servers like python etc. It's recom
 ### 2. Setting up the Demo Configuration (`config.js`) file
 Before you run any demos, you will require to create a `config.js` file in the `/demo` folder. The sample format is provided in the `config-example.js` file. Modify the `config-example.js` file and simply replace the Application key with your own and save it as `config.js`.
 
-Please check that in your own Application key, the CORS has been configured with `localhost` as the domain. You may check your [Developer Console](http://developer.temasys.com.sg) account Application key settings.
+Please check that in your own Application key, the CORS has been configured with `localhost` as the domain. You may check your [Developer Console](http://console.temasys.io) account Application key settings.
 
 ## List of Demos
 In the `/demo` folder, this contains all the examples of how you can use Skylink for your solutions.
@@ -21,10 +21,10 @@ You may also choose to access the `/demo/index.html` page for the list of all de
 In this demo, you can find an example of the overview of all functionalities of Skylink which you can choose to integrate in your Web Application.
 
 ##### Functionalities covered
-`disableAudio()`, `disableVideo()`, `enableAudio()`, `enableVideo()`, `getPeerInfo()`, `getUserData()`, `init()`, `getUserMedia()`, `joinRoom()`, `leaveRoom()`, `lockRoom()`, `muteStream()`, `on()`, `refreshConnection()`, `respondBlobRequest()`, `sendBlobData()`, `sendMessage()`, `sendP2PMessage()`, `sendStream()`, `setUserData()`, `shareScreen()`, `stopScreen()`, `stopStream()`, `unlockRoom()`
+`disableAudio()`, `disableVideo()`, `enableAudio()`, `enableVideo()`, `getPeerInfo()`, `getUserData()`, `init()`, `getUserMedia()`, `joinRoom()`, `leaveRoom()`, `lockRoom()`, `muteStream()`, `on()`, `refreshConnection()`, `respondBlobRequest()`, `sendBlobData()`, `sendMessage()`, `sendP2PMessage()`, `sendStream()`, `setUserData()`, `shareScreen()`, `stopScreen()`, `stopStream()`, `unlockRoom()`, `getConnectionStatus()`
 
 ##### Events used
-`candidateGenerationState`, `channelClose`, `channelError`, `channelMessage`, `channelOpen`, `dataChannelState`, `dataTransferState`, `handshakeProgress`, `incomingMessage`, `incomingStream`, `mediaAccessError`, `mediaAccessSuccess`, `peerConnectionState`, `peerJoined`, `peerLeft`, `peerRestart`, `peerUpdated`, `readyStateChange`, `roomLock`
+`candidateGenerationState`, `channelClose`, `channelError`, `channelMessage`, `channelOpen`, `dataChannelState`, `dataTransferState`, `handshakeProgress`, `incomingMessage`, `incomingStream`, `mediaAccessError`, `mediaAccessSuccess`, `peerConnectionState`, `peerJoined`, `peerLeft`, `peerRestart`, `peerUpdated`, `readyStateChange`, `roomLock`, `getConnectionStatusStateChange`
 
 ### demo/audio-only-call
 In this demo, you can find an example of how you can use Skylink to make an audio only call.

@@ -3,7 +3,7 @@
 
 We've gone to great length to make this library work in as many browsers as possible. SkylinkJS is build on top of [AdapterJS](http://github.com/Temasys/AdapterJS) and works with our [Temasys WebRTC Plugin](http://skylink.io/plugin/) even in Internet Explorer and Safari on Mac and PC.
 
-You'll need a Temasys Developer Account and an App key to use this. [Register here to get your App key](https://developer.temasys.com.sg).
+You'll need a Temasys Developer Account and an App key to use this. [Register here to get your App key](https://console.temasys.io).
 
 #### Supported Browsers
 | Features       | Chrome<br>`45`-`51`+ | Firefox<br>`40`-`48`+ | Opera<br>`32`-`36`+ | IE<br>`9`-`11`+     | Safari<br>`7`-`9`  |
@@ -16,7 +16,7 @@ You'll need a Temasys Developer Account and an App key to use this. [Register he
 
 - (+) Latest browser versions indicates the last tested browser version. It should work with the updated next versions, but if it doesn't, open a bug ticket.
 - (*) Commerical Temasys Plugin incorporates additional features from Temasys Free Plugin.
-- (**) Our extensions works with Temasys demos and localhost demos. You will have to modify the extension to work on your hosted Web Applications. For Chrome extensions source code, [contact us](http://support.temasys.com.sg). For Firefox extensions source code, [you may download from your Application Key in developer.temasys.com.sg](https://developer.temasys.com.sg).
+- (**) Our extensions works with Temasys demos and localhost demos. You will have to modify the extension to work on your hosted Web Applications. For Chrome extensions source code, [contact us](http://support.temasys.com.sg). For Firefox extensions source code, [you may download from your Application Key in console.temasys.io](https://console.temasys.io).
 
 ##### Installation
 Install SkylinkJS with [npm](https://www.npmjs.com/):
@@ -33,19 +33,19 @@ bower install skylinkjs
 - [Getting started](https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/)
 - [API Docs](http://cdn.temasys.com.sg/skylink/skylinkjs/latest/doc/classes/Skylink.html)
 - [Versions](http://github.com/Temasys/SkylinkJS/releases)
-- [Developer Console  - Get your App key](https://developer.temasys.com.sg)
+- [Developer Console  - Get your App key](https://console.temasys.io)
 - [View Code Examples](https://github.com/Temasys/SkylinkJS/tree/master/demo)
 - [Run tests](https://github.com/Temasys/SkylinkJS/tree/master/tests)
 
 
 
 ##### Need help or want something changed?
-You can raise tickets on [our support portal](http://support.temasys.com.sg) or on [our Github Page](https://developer.temasys.com.sg/support).
+You can raise tickets on [our support portal](http://support.temasys.com.sg) or on [our Github Page](https://console.temasys.io/support).
 
 ##### Current versions and stability
 Always use the latest versions of the SkylinkJS library as WebRTC is still evolving and we adapt to changes very frequently.
 
-[Latest version: `0.6.13`](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.13).
+[Latest version: `0.6.14`](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.14).
 
 #### Noted Issues and Solutions
 ##### Installing `0.6.3` - `0.6.10` versions in NPM

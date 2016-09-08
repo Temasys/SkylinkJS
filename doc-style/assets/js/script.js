@@ -43,6 +43,13 @@ $(document).ready(function () {
     if (elementHTML.indexOf('<blockquote>') > -1) {
       elementHTML = elementHTML.replace(/\<blockquote\>(.*)\<\/blockquote\>/i, '$1');
     }
+    // set the updated content
+    $(element).html(elementHTML);
+  });
+  // remove blockquotes
+  $('.param-description, .returns-description').each(function () {
+    var element = $(this);
+    var elementHTML = $(element).html();
     // parse [Rel: XXXX]
     if (elementHTML.indexOf('[Rel:') > -1) {
       var regexOutput = '<small><i class="fa fa-book"></i>&nbsp;&nbsp;' +
@@ -53,7 +60,7 @@ $(document).ready(function () {
     $(element).html(elementHTML);
   });
   // seperate every code-item-trigger
-  $('.code-item-trigger').each(function () {
+  /*$('.code-item-trigger').each(function () {
     var element = $(this);
     var elementTriggerList = $(element).html().split(',');
     var elementOutputHTML = '';
@@ -64,7 +71,7 @@ $(document).ready(function () {
         '" class="label label-primary">' + elementTriggerList[i] + '</a>';
     }
     $(element).html(elementOutputHTML);
-  });
+  });*/
   // remove unwanted code information
   $('.code-item-information').each(function () {
     var element = $(this);

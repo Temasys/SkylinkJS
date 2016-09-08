@@ -17,7 +17,7 @@ JOINING_ROOM = "Joining room _room";
 
 SkylinkDemo.on('peerJoined', function(peerId, peerInfo, isSelf) {
   //return;
-  addMessage(JOINED_NOT_CALLING, peerId, SkylinkDemo._room.id);
+  addMessage(JOINED_NOT_CALLING, peerId, peerInfo.room);
 
   if(isSelf) {
     return;
