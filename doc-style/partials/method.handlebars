@@ -93,9 +93,9 @@
           {{/providedBy}}
         {{/if}}
       {{/if}}
-      {{#if deprecationMessage}}
+      <!--{{#if deprecationMessage}}
         <span>Deprecated: {{deprecationMessage}}</span>
-      {{/if}}
+      {{/if}}-->
       {{#if providedBy}}
         {{#providedBy}}
           <span>Provided by the <a href="../modules/{{.}}.html">{{.}}</a> module.</span>
@@ -124,10 +124,31 @@
     {{{methodDescription}}}
   </div>
 
+  {{#example}}
+    <div class="code-item-section">
+      <h4>Example:</h4>
+      <pre class="example-content prettyprint">
+        {{{.}}}
+      </pre>
+    </div>
+  {{/example}}
+
+  {{#requires}}
+    <div class="code-item-section">
+      <h4>Requires:</h4>
+      {{{.}}}
+    </div>
+  {{/requires}}
+
   {{#if trigger}}
   <div class="code-item-section">
-    <h4>Triggers:</h4>
-    <span class="code-item-trigger">{{trigger}}</span>
+    <h4>Events Sequence:</h4>
+    <span class="code-item-trigger">{{{trigger}}}</span>
+  </div>
+  {{else}}
+  <div class="code-item-section">
+    <h4>Events Sequence:</h4>
+    <span class="code-item-trigger"><small>There is no event sequence for this method.</small></span>
   </div>
   {{/if}}
 
@@ -145,7 +166,7 @@
             {{#if multiple}}<span class="label multiple" title="This argument may occur one or more times.">Multiple</span>{{/if}}
 
             <div class="param-description">
-              {{#if optdefault}}<small class="default"><span>DEFAULT: </span>{{optdefault}}</small>{{/if}}
+              {{#if optdefault}}<small class="default"><span>DEFAULT: </span><code>{{optdefault}}</code></small>{{/if}}
               {{{description}}}
             </div>
 
@@ -160,7 +181,7 @@
                     {{#if multiple}}<span class="label multiple" title="This argument may occur one or more times.">Multiple</span>{{/if}}
 
                     <div class="param-description">
-                      {{#if optdefault}}<small class="default"><span>DEFAULT: </span>{{optdefault}}</small>{{/if}}
+                      {{#if optdefault}}<small class="default"><span>DEFAULT: </span><code>{{optdefault}}</code></small>{{/if}}
                       {{{description}}}
                     </div>
 
@@ -175,7 +196,7 @@
                             {{#if multiple}}<span class="label multiple" title="This argument may occur one or more times.">Multiple</span>{{/if}}
 
                             <div class="param-description">
-                              {{#if optdefault}}<small class="default"><span>DEFAULT: </span>{{optdefault}}</small>{{/if}}
+                              {{#if optdefault}}<small class="default"><span>DEFAULT: </span><code>{{optdefault}}</code></small>{{/if}}
                               {{{description}}}
                             </div>
                           </li>
@@ -199,25 +220,17 @@
       <div class="returns-description">
         {{#if description}}
           {{#if type}}
-            <span class="type"><b>{</b>{{#crossLink type}}{{/crossLink}}<b>}</b></span>:
+            <span class="type"><b>{</b>{{#crossLink type}}{{/crossLink}}<b>}</b></span>
           {{/if}}
           {{{description}}}
         {{else}}
           {{#if type}}
-            <span class="type"><b>{</b>{{#crossLink type}}{{/crossLink}}<b>}</b></span>:
+            <span class="type"><b>{</b>{{#crossLink type}}{{/crossLink}}<b>}</b></span>
           {{/if}}
         {{/if}}
       </div>
     </div>
   {{/return}}
 
-  {{#example}}
-    <div class="code-item-section">
-      <h4>Example:</h4>
-      <pre class="example-content prettyprint">
-        {{{.}}}
-      </pre>
-    </div>
-  {{/example}}
   <hr>
 </div>

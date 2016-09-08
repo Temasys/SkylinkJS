@@ -134,6 +134,7 @@ footer {
   right: 2px;
   margin: 0;
   text-align: right;
+  display: none;
 }
 
 .peervideo .connstats-wrapper button {
@@ -177,6 +178,10 @@ footer {
 
 .peervideo .connstats div p {
   margin: 0;
+}
+
+.peervideo .connstats .agent {
+  text-transform: capitalize;
 }
 
 @media screen and (max-width:1999px){

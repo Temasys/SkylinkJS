@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.13</title>
+    <title>SkylinkJS 0.6.14</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.13</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.14</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -90,95 +90,28 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * These are the list of Peer connection handshake states that Skylink would trigger.
- * - Do not be confused with {{#crossLink &quot;Skylink/PEER_CONNECTION_STATE:attr&quot;}}PEER_CONNECTION_STATE{{/crossLink}}.
- *   This is the Peer recognition connection that is established with the platform signaling protocol, and not
- *   the Peer connection signaling state itself.
- * - In this case, this happens before the {{#crossLink &quot;Skylink/PEER_CONNECTION_STATE:attr&quot;}}PEER_CONNECTION_STATE
- *   handshaking states. {{/crossLink}} The &lt;code&gt;OFFER&lt;/code&gt; and &lt;code&gt;ANSWER&lt;/code&gt; relates to the
- *   {{#crossLink &quot;Skylink/PEER_CONNECTION_STATE:attr&quot;}}PEER_CONNECTION_STATE states{{/crossLink}}.
- * - For example as explanation how these state works below, let&#x27;s make self as the offerer and
- *   the connecting Peer as the answerer.
+ * The list of Peer connection states.
  * @attribute HANDSHAKE_PROGRESS
- * @type JSON
- * @param {String} ENTER &lt;small&gt;Value &lt;code&gt;&quot;enter&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when Peer have received &lt;code&gt;ENTER&lt;/code&gt; from self,
- *   and Peer connection with self is initialised with self.&lt;br&gt;
- * This state will occur for both self and Peer as &lt;code&gt;ENTER&lt;/code&gt;
- *   message is sent to ping for Peers in the room.&lt;br&gt;
- * At this state, Peer would sent &lt;code&gt;WELCOME&lt;/code&gt; to the peer to
- *   start the session description connection handshake.&lt;br&gt;
- * &lt;table class=&quot;table table-condensed&quot;&gt;
- *   &lt;thead&gt;&lt;tr&gt;&lt;th class=&quot;col-md-1&quot;&gt;&lt;/th&gt;&lt;th class=&quot;col-md-5&quot;&gt;Self&lt;/th&gt;&lt;th&gt;Peer&lt;/th&gt;&lt;/thead&gt;
- *   &lt;tbody&gt;
- *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;1.&lt;/td&gt;
- *       &lt;td class=&quot;col-md-5&quot;&gt;Sends &lt;code&gt;ENTER&lt;/code&gt;&lt;/td&gt;&lt;td&gt;Sends &lt;code&gt;ENTER&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;
- *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;2.&lt;/td&gt;
- *       &lt;td class=&quot;col-md-5&quot;&gt;-&lt;/td&gt;&lt;td&gt;Receives self &lt;code&gt;ENTER&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;
- *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;3.&lt;/td&gt;
- *       &lt;td class=&quot;col-md-5&quot;&gt;-&lt;/td&gt;&lt;td&gt;Sends self &lt;code&gt;WELCOME&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;
- *   &lt;/tbody&gt;
- * &lt;/table&gt;
+ * @param {String} ENTER   &lt;small&gt;Value &lt;code&gt;&quot;enter&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the connection state when Peer has just entered the Room.
+ *   &lt;small&gt;At this stage, &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;
+ *   is triggered.&lt;/small&gt;
  * @param {String} WELCOME &lt;small&gt;Value &lt;code&gt;&quot;welcome&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when self have received &lt;code&gt;WELCOME&lt;/code&gt; from Peer,
- *   and Peer connection is initialised with Peer.&lt;br&gt;
- * At this state, self would start the session description connection handshake and
- *   send the local &lt;code&gt;OFFER&lt;/code&gt; session description to Peer.
- * &lt;table class=&quot;table table-condensed&quot;&gt;
- *   &lt;thead&gt;&lt;tr&gt;&lt;th class=&quot;col-md-1&quot;&gt;&lt;/th&gt;&lt;th class=&quot;col-md-5&quot;&gt;Self&lt;/th&gt;&lt;th&gt;Peer&lt;/th&gt;&lt;/thead&gt;
- *   &lt;tbody&gt;
- *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;4.&lt;/td&gt;
- *       &lt;td class=&quot;col-md-5&quot;&gt;Receives &lt;code&gt;WELCOME&lt;/code&gt;&lt;/td&gt;&lt;td&gt;-&lt;/td&gt;&lt;/tr&gt;
- *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;5.&lt;/td&gt;
- *       &lt;td class=&quot;col-md-5&quot;&gt;Generates &lt;code&gt;OFFER&lt;/code&gt;&lt;/td&gt;&lt;td&gt;-&lt;/td&gt;&lt;/tr&gt;
- *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;6.&lt;/td&gt;
- *       &lt;td class=&quot;col-md-5&quot;&gt;Sets local &lt;code&gt;OFFER&lt;/code&gt;&lt;sup&gt;REF&lt;/sup&gt;&lt;/td&gt;&lt;td&gt;-&lt;/td&gt;&lt;/tr&gt;
- *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;7.&lt;/td&gt;
- *       &lt;td class=&quot;col-md-5&quot;&gt;Sends &lt;code&gt;OFFER&lt;/code&gt;&lt;/td&gt;&lt;td&gt;-&lt;/td&gt;&lt;/tr&gt;
- *   &lt;/tbody&gt;
- * &lt;/table&gt;
- * &lt;sup&gt;REF&lt;/sup&gt;: The will cause {{#crossLink &quot;Skylink/PEER_CONNECTION_STATE:attr&quot;}}PEER_CONNECTION_STATE{{/crossLink}}
- *   state go to &lt;code&gt;HAVE_LOCAL_OFFER&lt;/code&gt;.
- * @param {String} OFFER &lt;small&gt;Value &lt;code&gt;&quot;offer&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when Peer received &lt;code&gt;OFFER&lt;/code&gt; from self.
- * At this state, Peer would set the remote &lt;code&gt;OFFER&lt;/code&gt; session description and
- *   start to send local &lt;code&gt;ANSWER&lt;/code&gt; session description to self.&lt;br&gt;
- * &lt;table class=&quot;table table-condensed&quot;&gt;
- *   &lt;thead&gt;&lt;tr&gt;&lt;th class=&quot;col-md-1&quot;&gt;&lt;/th&gt;&lt;th class=&quot;col-md-5&quot;&gt;Self&lt;/th&gt;&lt;th&gt;Peer&lt;/th&gt;&lt;/thead&gt;
- *   &lt;tbody&gt;
- *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;8.&lt;/td&gt;
- *        &lt;td class=&quot;col-md-5&quot;&gt;-&lt;/td&gt;&lt;td&gt;Receives &lt;code&gt;OFFER&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;
- *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;9.&lt;/td&gt;
- *        &lt;td class=&quot;col-md-5&quot;&gt;-&lt;/td&gt;&lt;td&gt;Sets remote &lt;code&gt;OFFER&lt;/code&gt;&lt;sup&gt;REF&lt;/sup&gt;&lt;/td&gt;&lt;/tr&gt;
- *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;10.&lt;/td&gt;
- *        &lt;td class=&quot;col-md-5&quot;&gt;-&lt;/td&gt;&lt;td&gt;Generates &lt;code&gt;ANSWER&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;
- *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;11.&lt;/td&gt;
- *        &lt;td class=&quot;col-md-5&quot;&gt;-&lt;/td&gt;&lt;td&gt;Sets local &lt;code&gt;ANSWER&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;
- *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;12.&lt;/td&gt;
- *        &lt;td class=&quot;col-md-5&quot;&gt;-&lt;/td&gt;&lt;td&gt;Sends &lt;code&gt;ANSWER&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;
- *   &lt;/tbody&gt;
- * &lt;/table&gt;
- * &lt;sup&gt;REF&lt;/sup&gt;: The will cause {{#crossLink &quot;Skylink/PEER_CONNECTION_STATE:attr&quot;}}PEER_CONNECTION_STATE{{/crossLink}}
- *   state go to &lt;code&gt;HAVE_REMOTE_OFFER&lt;/code&gt;.
- * @param {String} ANSWER &lt;small&gt;Value &lt;code&gt;&quot;answer&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when self received &lt;code&gt;ANSWER&lt;/code&gt; from Peer.&lt;br&gt;
- * At this state, self would set the remote &lt;code&gt;ANSWER&lt;/code&gt; session description and
- *   the connection handshaking progress has been completed.&lt;br&gt;
- * &lt;table class=&quot;table table-condensed&quot;&gt;
- *   &lt;thead&gt;&lt;tr&gt;&lt;th class=&quot;col-md-1&quot;&gt;&lt;/th&gt;&lt;th class=&quot;col-md-5&quot;&gt;Self&lt;/th&gt;&lt;th&gt;Peer&lt;/th&gt;&lt;/thead&gt;
- *   &lt;tbody&gt;
- *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;13.&lt;/td&gt;
- *        &lt;td class=&quot;col-md-5&quot;&gt;Receives &lt;code&gt;ANSWER&lt;/code&gt;&lt;/td&gt;&lt;td&gt;-&lt;/td&gt;&lt;/tr&gt;
- *     &lt;tr&gt;&lt;td class=&quot;col-md-1&quot;&gt;14.&lt;/td&gt;
- *        &lt;td class=&quot;col-md-5&quot;&gt;Sets remote &lt;code&gt;ANSWER&lt;/code&gt;&lt;/td&gt;&lt;td&gt;-&lt;/td&gt;&lt;/tr&gt;
- *   &lt;/tbody&gt;
- * &lt;/table&gt;
- * @param {String} ERROR &lt;small&gt;Value &lt;code&gt;&quot;error&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when connection handshake has occurred and exception,
- *   in this which the connection handshake could have been aborted abruptly
- *   and no Peer connection is established.
+ *   The value of the connection state when Peer is aware that User has entered the Room.
+ *   &lt;small&gt;At this stage, &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;
+ *   is triggered and Peer connection may commence.&lt;/small&gt;
+ * @param {String} OFFER   &lt;small&gt;Value &lt;code&gt;&quot;offer&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the connection state when Peer connection has set the local / remote &lt;code&gt;&quot;offer&quot;&lt;/code&gt;
+ *   session description to start streaming connection.
+ * @param {String} ANSWER  &lt;small&gt;Value &lt;code&gt;&quot;answer&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the connection state when Peer connection has set the local / remote &lt;code&gt;&quot;answer&quot;&lt;/code&gt;
+ *   session description to establish streaming connection.
+ * @param {String} ERROR   &lt;small&gt;Value &lt;code&gt;&quot;error&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the connection state when Peer connection has failed to establish streaming connection.
+ *   &lt;small&gt;This happens when there are errors that occurs in creating local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; /
+ *   &lt;code&gt;&quot;answer&quot;&lt;/code&gt;, or when setting remote / local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; / &lt;code&gt;&quot;answer&quot;&lt;/code&gt;.&lt;/small&gt;
+ * @type JSON
  * @readOnly
- * @component Peer
  * @for Skylink
  * @since 0.1.0
  */
@@ -191,72 +124,46 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
 };
 
 /**
- * Stores the list of Peer connection health timeout objects that
- *   waits for any existing Peer &quot;healthy&quot; state in successful
- *   {{#crossLink &quot;Skylink/_peerConnectionHealth:attr&quot;}}_peerConnectionHealth{{/crossLink}}.
- *   If timeout has reached it&#x27;s limit and does not have any &quot;healthy&quot; connection state
- *   with Peer connection, it will restart the connection again with
- *   {{#crossLink &quot;Skylink/_restartPeerConnection:method&quot;}}_restartPeerConnection(){{/crossLink}}.
+ * Stores the list of Peer connection health timers.
+ * This timers sets a timeout which checks and waits if Peer connection is successfully established,
+ *   or else it will attempt to re-negotiate with the Peer connection again.
  * @attribute _peerConnectionHealthTimers
- * @param {Object} (#peerId) The timeout object set using &lt;code&gt;setTimeout()&lt;/code&gt; that
- *   does the wait for any &quot;healthy&quot; state connection associated with the Peer connection.
- *   This will be removed when the Peer connection has ended or when the Peer
- *   connection has been met with a &quot;healthy&quot; state.
+ * @param {Object} &lt;#peerId&gt; The Peer connection health timer.
  * @type JSON
  * @private
- * @required
- * @component Peer
  * @for Skylink
  * @since 0.5.5
  */
 Skylink.prototype._peerConnectionHealthTimers = {};
 
 /**
- * Stores the list of Peer connections that has connection
- *   established successfully. When the Peer connection has a
- *   successful ICE connection state of &lt;code&gt;&quot;completed&quot;&lt;/code&gt;,
- *   it stores the Peer connection as &quot;healthy&quot;.
+ * Stores the list of Peer connection &quot;healthy&quot; flags, which indicates if Peer connection is
+ *   successfully established, and when the health timers expires, it will clear the timer
+ *   and not attempt to re-negotiate with the Peer connection again.
  * @attribute _peerConnectionHealth
- * @param {Boolean} (#peerId) The flag that indicates if the associated Peer
- *   connection is in a &quot;healthy&quot; state. If the value is &lt;code&gt;true&lt;/code&gt;, it means
- *   that the Peer connectin is in a &quot;healthy&quot; state.
+ * @param {Boolean} &lt;#peerId&gt; The flag that indicates if Peer connection has been successfully established.
  * @type JSON
  * @private
- * @required
- * @component Peer
  * @since 0.5.5
  */
 Skylink.prototype._peerConnectionHealth = {};
 
 /**
- * Stores the peer connection priority weight.
+ * Stores the User connection priority weight.
+ * If Peer has a higher connection weight, it will do the offer from its Peer connection first.
  * @attribute _peerPriorityWeight
  * @type Number
  * @private
- * @required
  * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype._peerPriorityWeight = 0;
 
 /**
- * Starts to initiate the WebRTC layer of handshake connection by
- *   creating the &lt;code&gt;OFFER&lt;/code&gt; session description and then
- *   sending it to the associated Peer.
- * The offerer status may be shifted to the other peer depending on
- *   when version of browser that is initiating the connection
- *   to what version of browser to.
+ * Function that creates the Peer connection offer session description.
  * @method _doOffer
- * @param {String} targetMid The Peer ID to send the &lt;code&gt;OFFER&lt;/code&gt; to.
- * @param {JSON} peerBrowser The Peer platform agent information.
- * @param {String} peerBrowser.name The Peer platform browser or agent name.
- * @param {Number} peerBrowser.version The Peer platform browser or agent version.
- * @param {Number} peerBrowser.os The Peer platform name.
- * @param {Function} renegoCallback The callback function that triggers after
- *   the offer has been created or responsed.
  * @private
  * @for Skylink
- * @component Peer
  * @since 0.5.2
  */
 Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
@@ -351,14 +258,11 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
 };
 
 /**
- * Responses to the &lt;code&gt;OFFER&lt;/code&gt; session description received and
- *    creates an &lt;code&gt;ANSWER&lt;/code&gt; session description to sent
- *   to the associated Peer to complete the WebRTC handshake layer.
+ * Function that creates the Peer connection answer session description.
+ * This comes after receiving and setting the offer session description.
  * @method _doAnswer
- * @param {String} targetMid The Peer ID to send the &lt;code&gt;ANSWER&lt;/code&gt; to.
  * @private
  * @for Skylink
- * @component Peer
  * @since 0.1.0
  */
 Skylink.prototype._doAnswer = function(targetMid) {
@@ -394,21 +298,15 @@ Skylink.prototype._doAnswer = function(targetMid) {
 };
 
 /**
- * Starts the waiting timeout for a &quot;healthy&quot; connection
- *   with associated Peer connection.
- * It waits for any existing Peer &quot;healthy&quot; state in successful
- *   {{#crossLink &quot;Skylink/_peerConnectionHealth:attr&quot;}}_peerConnectionHealth{{/crossLink}}.
- * If timeout has reached it&#x27;s limit and does not have any &quot;healthy&quot; connection state
- *   with Peer connection, it will restart the connection again with
- *   {{#crossLink &quot;Skylink/_restartPeerConnection:method&quot;}}_restartPeerConnection(){{/crossLink}}.
- * This sets the timeout object associated with the Peer into
- *   {{#crossLink &quot;Skylink/_peerConnectionHealthTimers&quot;}}_peerConnectionHealthTimers(){{/crossLink}}.
+ * Function that starts the Peer connection health timer.
+ * To count as a &quot;healthy&quot; successful established Peer connection, the
+ *   ICE connection state has to be &quot;connected&quot; or &quot;completed&quot;,
+ *   messaging Datachannel type state has to be &quot;opened&quot; (if Datachannel is enabled)
+ *   and Signaling state has to be &quot;stable&quot;.
+ * Should consider dropping of counting messaging Datachannel type being opened as
+ *   it should not involve the actual Peer connection for media (audio/video) streaming. 
  * @method _startPeerConnectionHealthCheck
- * @param {String} peerId The Peer ID to start a waiting timeout for a &quot;healthy&quot; connection.
- * @param {Boolean} [toOffer=false] The flag that indicates if Peer connection
- *   is an offerer or an answerer for an accurate timeout waiting time.
  * @private
- * @component Peer
  * @for Skylink
  * @since 0.5.5
  */
@@ -486,13 +384,11 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
 };
 
 /**
- * Stops the waiting timeout for a &quot;healthy&quot; connection associated
- *   with the Peer.
+ * Function that stops the Peer connection health timer.
+ * This happens when Peer connection has been successfully established or when
+ *   Peer leaves the Room.
  * @method _stopPeerConnectionHealthCheck
- * @param {String} peerId The Peer ID to stop a waiting
- *   timeout for a &quot;healthy&quot; connection.
  * @private
- * @component Peer
  * @for Skylink
  * @since 0.5.5
  */
@@ -513,19 +409,11 @@ Skylink.prototype._stopPeerConnectionHealthCheck = function (peerId) {
 };
 
 /**
- * Sets the WebRTC handshake layer session description into the
- *   Peer &lt;code&gt;RTCPeerConnection&lt;/code&gt; object &lt;i&gt;&lt;code&gt;
- *   RTCPeerConnection.setLocalDescription()&lt;/code&gt;&lt;/i&gt; associated
- *   with the Peer connection.
+ * Function that sets the local session description and sends to Peer.
+ * If trickle ICE is disabled, the local session description will be sent after
+ *   ICE gathering has been completed.
  * @method _setLocalAndSendMessage
- * @param {String} targetMid The Peer ID to send the session description to
- *   after setting into the associated &lt;code&gt;RTCPeerConnection&lt;/code&gt; object.
- * @param {JSON} sessionDescription The &lt;code&gt;OFFER&lt;/code&gt; or an &lt;code&gt;ANSWER&lt;/code&gt;
- *   session description to set to the associated Peer after setting into
- *   the &lt;code&gt;RTCPeerConnection&lt;/code&gt; object.
- * @trigger handshakeProgress
  * @private
- * @component Peer
  * @for Skylink
  * @since 0.5.2
  */
