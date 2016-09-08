@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.13</title>
+    <title>SkylinkJS 0.6.14</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.13</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.14</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -90,60 +90,26 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * Stores the list of buffered ICE candidates received
- *   before &lt;code&gt;RTCPeerConnection.setRemoteDescription&lt;/code&gt; is
- *   called. Adding ICE candidates before receiving the remote
- *   session description causes an ICE connection failures in a
- *   number of instances.
- * @attribute _peerCandidatesQueue
- * @param {Array} (#peerId) The Peer ID associated with the
- *   list of buffered ICE candidates.
- * @param {Object} (#peerId).(#index) The buffered RTCIceCandidate
- *   object associated with the Peer.
- * @type JSON
- * @private
- * @required
- * @since 0.5.1
- * @component ICE
- * @for Skylink
- */
-Skylink.prototype._peerCandidatesQueue = {};
-
-/**
- * Stores the list of candidates sent &lt;code&gt;local&lt;/code&gt; and added &lt;code&gt;remote&lt;/code&gt; information.
- * @attribute _addedCandidates
- * @param {JSON} (#peerId) The list of candidates sent and added associated with the Peer ID.
- * @param {Array} (#peerId).relay The number of relay candidates added and sent.
- * @param {Array} (#peerId).srflx The number of server reflexive candidates added and sent.
- * @param {Array} (#peerId).host The number of host candidates added and sent.
- * @type JSON
- * @private
- * @required
- * @since 0.6.4
- * @component ICE
- * @for Skylink
- */
-Skylink.prototype._addedCandidates = {};
-
-/**
- * The list of Peer connection ICE candidate generation states that Skylink would trigger.
- * - These states references the [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceGatheringState).
+ * &lt;blockquote class=&quot;info&quot;&gt;
+ *   Learn more about how ICE works in this
+ *   &lt;a href=&quot;https://temasys.com.sg/ice-what-is-this-sorcery/&quot;&gt;article here&lt;/a&gt;.
+ * &lt;/blockquote&gt;
+ * The list of Peer connection ICE gathering states.
  * @attribute CANDIDATE_GENERATION_STATE
- * @type JSON
- * @param {String} NEW &lt;small&gt;Value &lt;code&gt;&quot;new&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when the object was just created, and no networking has occurred yet.&lt;br&gt;
- * This state occurs when Peer connection has just been initialised.
  * @param {String} GATHERING &lt;small&gt;Value &lt;code&gt;&quot;gathering&quot;&lt;/code&gt;&lt;/small&gt;
- *   The state when the ICE engine is in the process of gathering candidates for connection.&lt;br&gt;
- * This state occurs after &lt;code&gt;NEW&lt;/code&gt; state.
+ *   The value of the state when Peer connection is gathering ICE candidates.
+ *   &lt;small&gt;These ICE candidates are sent to Peer for its connection to check for a suitable matching
+ *   pair of ICE candidates to establish an ICE connection for stream audio, video and data.
+ *   See &lt;a href=&quot;#event_iceConnectionState&quot;&gt;&lt;code&gt;iceConnectionState&lt;/code&gt; event&lt;/a&gt; for ICE connection status.&lt;/small&gt;
+ *   &lt;small&gt;This state cannot happen until Peer connection remote &lt;code&gt;&quot;offer&quot;&lt;/code&gt; / &lt;code&gt;&quot;answer&quot;&lt;/code&gt;
+ *   session description is set. See &lt;a href=&quot;#event_peerConnectionState&quot;&gt;
+ *   &lt;code&gt;peerConnectionState&lt;/code&gt; event&lt;/a&gt; for session description exchanging status.&lt;/small&gt;
  * @param {String} COMPLETED &lt;small&gt;Value &lt;code&gt;&quot;completed&quot;&lt;/code&gt;&lt;/small&gt;
- *   The ICE engine has completed gathering. Events such as adding a
- *   new interface or a new TURN server will cause the state to go back to gathering.&lt;br&gt;
- * This state occurs after &lt;code&gt;GATHERING&lt;/code&gt; state and means ICE gathering has been done.
+ *   The value of the state when Peer connection gathering of ICE candidates has completed.
+ * @type JSON
  * @readOnly
- * @since 0.4.1
- * @component ICE
  * @for Skylink
+ * @since 0.4.1
  */
 Skylink.prototype.CANDIDATE_GENERATION_STATE = {
   NEW: &#x27;new&#x27;,
@@ -152,18 +118,37 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
 };
 
 /**
- * Handles the ICE candidate object received from associated Peer connection
- *   to send the ICE candidate object or wait for all gathering to complete
- *   before sending the candidate to prevent trickle ICE.
- * @method _onIceCandidate
- * @param {String} targetMid The Peer ID associated with the ICE
- *   candidate object received.
- * @param {RTCIceCandidate} candidate The local generated candidate object.
- * @trigger candidateGenerationState
+ * Stores the list of buffered ICE candidates that is received before
+ *   remote session description is received and set.
+ * @attribute _peerCandidatesQueue
+ * @param {Array} &lt;#peerId&gt; The list of the Peer connection buffered ICE candidates received.
+ * @param {Object} &lt;#peerId&gt;.&lt;#index&gt; The Peer connection buffered ICE candidate received.
+ * @type JSON
  * @private
- * @since 0.1.0
- * @component ICE
  * @for Skylink
+ * @since 0.5.1
+ */
+Skylink.prototype._peerCandidatesQueue = {};
+
+/**
+ * Stores the list of Peer connection ICE candidates.
+ * @attribute _gatheredCandidates
+ * @param {JSON} &lt;#peerId&gt; The list of the Peer connection ICE candidates.
+ * @param {JSON} &lt;#peerId&gt;.sending The list of the Peer connection ICE candidates sent.
+ * @param {JSON} &lt;#peerId&gt;.receiving The list of the Peer connection ICE candidates received.
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.14
+ */
+Skylink.prototype._gatheredCandidates = {};
+
+/**
+ * Function that handles the Peer connection gathered ICE candidate to be sent.
+ * @method _onIceCandidate
+ * @private
+ * @for Skylink
+ * @since 0.1.0
  */
 Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
   var self = this;
@@ -173,12 +158,6 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
     var candidateType = messageCan[7];
     log.debug([targetMid, &#x27;RTCIceCandidate&#x27;, null, &#x27;Created and sending &#x27; +
       candidateType + &#x27; candidate:&#x27;], candidate);
-
-    if (!self._enableIceTrickle) {
-      log.warn([targetMid, &#x27;RTCICECandidate&#x27;, null, &#x27;Ignoring sending of &quot;&#x27; + candidateType +
-        &#x27;&quot; candidate as trickle ICE is disabled&#x27;], candidate);
-      return;
-    }
 
     if (self._forceTURN &amp;&amp; candidateType !== &#x27;relay&#x27;) {
       if (!self._hasMCU) {
@@ -191,6 +170,25 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
         &#x27;&quot; candidate although TURN connections is forced as MCU is present&#x27;], candidate);
     }
 
+    if (!self._gatheredCandidates[targetMid]) {
+      self._gatheredCandidates[targetMid] = {
+        sending: { host: [], srflx: [], relay: [] },
+        receiving: { host: [], srflx: [], relay: [] }
+      };
+    }
+
+    self._gatheredCandidates[targetMid].sending[candidateType].push({
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex,
+      candidate: candidate.candidate
+    });
+
+    if (!self._enableIceTrickle) {
+      log.warn([targetMid, &#x27;RTCICECandidate&#x27;, null, &#x27;Ignoring sending of &quot;&#x27; + candidateType +
+        &#x27;&quot; candidate as trickle ICE is disabled&#x27;], candidate);
+      return;
+    }
+
     self._sendChannelMessage({
       type: self._SIG_MESSAGE_TYPE.CANDIDATE,
       label: candidate.sdpMLineIndex,
@@ -200,23 +198,6 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       target: targetMid,
       rid: self._room.id
     });
-
-    if (!self._addedCandidates[targetMid]) {
-      self._addedCandidates[targetMid] = {
-        relay: [],
-        host: [],
-        srflx: []
-      };
-    }
-
-    // shouldnt happen but just incase
-    if (!self._addedCandidates[targetMid][candidateType]) {
-      self._addedCandidates[targetMid][candidateType] = [];
-    }
-
-    self._addedCandidates[targetMid][candidateType].push(&#x27;local:&#x27; + messageCan[4] +
-      (messageCan[5] !== &#x27;0&#x27; ? &#x27;:&#x27; + messageCan[5] : &#x27;&#x27;) +
-      (messageCan[2] ? &#x27;?transport=&#x27; + messageCan[2].toLowerCase() : &#x27;&#x27;));
 
   } else {
     log.debug([targetMid, &#x27;RTCIceCandidate&#x27;, null, &#x27;End of gathering&#x27;]);
@@ -264,18 +245,12 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
 };
 
 /**
- * Buffers an ICE candidate object associated with a Peer connection
- *   to prevent disruption to ICE connection when ICE candidate
- *   is received before &lt;code&gt;RTCPeerConnection.setRemoteDescription&lt;/code&gt;
- *   is called.
+ * Function that buffers the Peer connection ICE candidate when received
+ *   before remote session description is received and set.
  * @method _addIceCandidateToQueue
- * @param {String} targetMid The Peer ID associated with the ICE
- *   candidate object.
- * @param {Object} candidate The constructed ICE candidate object.
  * @private
- * @since 0.5.2
- * @component ICE
  * @for Skylink
+ * @since 0.5.2
  */
 Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
   log.debug([targetMid, null, null, &#x27;Queued candidate to add after &#x27; +
@@ -286,43 +261,38 @@ Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
 };
 
 /**
- * Handles the event when adding an ICE candidate has been added
- *   successfully. This is mainly to prevent JShint errors.
+ * Function that handles when the Peer connection received ICE candidate
+ *   has been added or processed successfully.
+ * Separated in a function to prevent jshint errors.
  * @method _onAddIceCandidateSuccess
  * @private
- * @since 0.5.9
- * @component ICE
  * @for Skylink
+ * @since 0.5.9
  */
 Skylink.prototype._onAddIceCandidateSuccess = function () {
   log.debug([null, &#x27;RTCICECandidate&#x27;, null, &#x27;Successfully added ICE candidate&#x27;]);
 };
 
 /**
- * Handles the event when adding an ICE candidate has failed.
- * This is mainly to prevent JShint errors.
+ * Function that handles when the Peer connection received ICE candidate
+ *   has failed adding or processing.
+  * Separated in a function to prevent jshint errors.
  * @method _onAddIceCandidateFailure
- * @param {Object} error The error received in the failure callback
- *   in &lt;code&gt;RTCPeerConnection.addIceCandidate(candidate, successCb, failureCb)&lt;/code&gt;.
  * @private
- * @since 0.5.9
- * @component ICE
  * @for Skylink
+ * @since 0.5.9
  */
 Skylink.prototype._onAddIceCandidateFailure = function (error) {
   log.error([null, &#x27;RTCICECandidate&#x27;, null, &#x27;Error&#x27;], error);
 };
 
 /**
- * Adds the list of ICE candidates bufferred before &lt;code&gt;RTCPeerConnection.setRemoteDescription
- *   &lt;/code&gt; is called associated with the Peer connection.
+ * Function that adds all the Peer connection buffered ICE candidates received.
+ * This should be called only after the remote session description is received and set.
  * @method _addIceCandidateFromQueue
- * @param {String} targetMid The Peer ID to add the associated bufferred
- *   ICE candidates.
  * @private
- * @since 0.5.2
- * @component ICE
  * @for Skylink
+ * @since 0.5.2
  */
 Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
   this._peerCandidatesQueue[targetMid] =

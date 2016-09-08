@@ -40,7 +40,6 @@ SkylinkDemo.on('peerJoined', function (peerId, peerInfo, isSelf) {
 	document.body.appendChild(peer);
 	peer.appendChild(peerStatus);
 	peer.appendChild(peerVideo);
-	peerVideo.play();
 	if (isSelf && window.webrtcDetectedBrowser !== 'IE') {
 		peerVideo.muted = 'muted';
 	}
