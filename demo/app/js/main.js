@@ -566,7 +566,7 @@ Demo.Skylink.on('recordingState', function(state, recordingId, url, error) {
     case Demo.Skylink.RECORDING_STATE.LINK:
       $('#recording_' + recordingId + '_state_icon').attr('class', 'glyphicon glyphicon-ok');
       $('#recording_' + recordingId + '_state').html('COMPLETED');
-      $('#recording_' + recordingId + '_btn').attr('href', url).show();
+      $('#recording_' + recordingId + '_btn').attr('href', url.mixin).show();
       $('#recording_' + recordingId + '_error').html('');
       break;
     case Demo.Skylink.RECORDING_STATE.ERROR:
