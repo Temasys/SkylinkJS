@@ -2,9 +2,23 @@
  Save your api settings like appKey, defaultRoom and room and save it
  in a file called [config.js]
 *********************************************************************/
+function getParameterByName(name, url) {
+  if (!url) url = window.location.href;
+  name = name.replace(/[\[\]]/g, "\\$&");
+  var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)", "i"),
+      results = regex.exec(url);
+  if (!results) return null;
+  if (!results[2]) return '';
+  return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+if (!getParameterByName('room')) {
+  window.location.search = '?room=' + (new Date()).getTime();
+}
+
 var config = {
   appKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
-  defaultRoom: 'MY_DEFAULT_ROOM',
+  defaultRoom: getParameterByName('room'),
   enableDataChannel: true, // Disable this and sendBlobData(), sendP2PMessage() and sendURLData() will NOT work!
   enableIceTrickle: true,
   audioFallback: true,
