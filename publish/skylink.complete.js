@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Wed Sep 07 2016 17:47:49 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Sat Sep 10 2016 13:54:12 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10461,7 +10461,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.14 - Wed Sep 07 2016 17:47:49 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Sat Sep 10 2016 13:54:12 GMT+0800 (SGT) */
 
 (function() {
 
@@ -14864,7 +14864,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
         sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-        explicit: !!explicit
+        explicit: !!explicit,
+        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       });
 
       self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), false);
@@ -15243,7 +15244,8 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
         sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-        explicit: true
+        explicit: true,
+        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       });
     }
   }
@@ -15669,7 +15671,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
  *   messaging Datachannel type state has to be "opened" (if Datachannel is enabled)
  *   and Signaling state has to be "stable".
  * Should consider dropping of counting messaging Datachannel type being opened as
- *   it should not involve the actual Peer connection for media (audio/video) streaming. 
+ *   it should not involve the actual Peer connection for media (audio/video) streaming.
  * @method _startPeerConnectionHealthCheck
  * @private
  * @for Skylink
@@ -15901,13 +15903,27 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtcp-fb:100 goog-remb\r\n/g, '');
   }
 
+  var removeVP9AptRtxPayload = false;
+  var agent = (self._peerInformations[targetMid] || {}).agent || {};
+
+  if (agent.pluginVersion) {
+    // 0.8.870 supports
+    var parts = agent.pluginVersion.split('.');
+    removeVP9AptRtxPayload = parseInt(parts[0], 10) >= 0 && parseInt(parts[1], 10) >= 8 &&
+      parseInt(parts[2], 10) >= 870;
+  }
+
   // Remove rtx or apt= lines that prevent connections for browsers without VP8 or VP9 support
   // See: https://bugs.chromium.org/p/webrtc/issues/detail?id=3962
-  if (['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1) {
+  if (['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1 && removeVP9AptRtxPayload) {
     log.warn([targetMid, null, null, 'Removing apt= and rtx payload lines causing connectivity issues']);
 
-    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\n/g, '');
-    sessionDescription.sdp = sessionDescription.sdp.replace(/a=fmtp:\d+ apt=\d+\r\n/g, '');
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=101\r\n/g, '');
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=107\r\n/g, '');
+
+    /*var updatedSdpLines = sdpLines.split('\r\n');
+    updatedSdpLines = self._setSDPVideoCodec(updatedSdpLines, self._VIDEO_CODEC.VP8);
+    sessionDescription.sdp = updatedSdpLines.join('\r\n');*/
   }
 
   // NOTE ALEX: opus should not be used for mobile
@@ -18506,6 +18522,8 @@ Skylink.prototype._EVENTS = {
    *   <small>Data may be accessing browser or non-Web SDK version.</small>
    * @param {String} [peerInfo.agent.os] The Peer platform name.
    *  <small>Data may be accessing OS platform version from Web SDK.</small>
+   * @param {String} [peerInfo.agent.pluginVersion] The Peer Temasys Plugin version.
+   *  <small>Defined only when Peer is using the Temasys Plugin (IE / Safari).</small>
    * @param {String} peerInfo.room The Room Peer is from.
    * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
@@ -20039,7 +20057,8 @@ Skylink.prototype._approachEventHandler = function(message){
     receiveOnly: self._receiveOnly,
     sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
     target: message.target,
-    weight: self._peerPriorityWeight
+    weight: self._peerPriorityWeight,
+    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
   });
 };
 
@@ -20305,7 +20324,8 @@ Skylink.prototype._inRoomHandler = function(message) {
     userInfo: self.getPeerInfo(),
     receiveOnly: self._receiveOnly,
     sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-    weight: self._peerPriorityWeight
+    weight: self._peerPriorityWeight,
+    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
   });
 };
 
@@ -20337,7 +20357,8 @@ Skylink.prototype._enterHandler = function(message) {
     self._peerInformations[targetMid].agent = {
       name: message.agent,
       version: message.version,
-      os: message.os || ''
+      os: message.os || '',
+      pluginVersion: message.temasysPluginVersion
     };
 
     if (targetMid !== 'MCU') {
@@ -20367,7 +20388,8 @@ Skylink.prototype._enterHandler = function(message) {
     userInfo: self.getPeerInfo(),
     target: targetMid,
     weight: self._peerPriorityWeight,
-    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
   });
 
   if (isNewPeer) {
@@ -20429,7 +20451,8 @@ Skylink.prototype._restartHandler = function(message){
   self._peerInformations[targetMid].agent = {
     name: message.agent,
     version: message.version,
-    os: message.os || ''
+    os: message.os || '',
+    pluginVersion: message.temasysPluginVersion
   };
 
   var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
@@ -20473,7 +20496,8 @@ Skylink.prototype._restartHandler = function(message){
       // SkylinkJS parameters (copy the parameters from received message parameters)
       isConnectionRestart: !!message.isConnectionRestart,
       lastRestart: message.lastRestart,
-      explicit: !!message.explicit
+      explicit: !!message.explicit,
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
     });
   }
 
@@ -20514,7 +20538,8 @@ Skylink.prototype._welcomeHandler = function(message) {
     this._peerInformations[targetMid].agent = {
       name: message.agent,
       version: message.version,
-      os: message.os || ''
+      os: message.os || '',
+      pluginVersion: message.temasysPluginVersion
     };
     // disable mcu for incoming peer sent by MCU
     /*if (message.agent === 'MCU') {
@@ -20571,7 +20596,8 @@ Skylink.prototype._welcomeHandler = function(message) {
       userInfo: this.getPeerInfo(),
       target: targetMid,
       weight: this._peerPriorityWeight,
-      sessionType: !!this._mediaScreen ? 'screensharing' : 'stream'
+      sessionType: !!this._mediaScreen ? 'screensharing' : 'stream',
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
     });
   }
 };
@@ -23191,19 +23217,21 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._setSDPVideoCodec = function(sdpLines) {
-  log.log('Setting video codec', this._selectedVideoCodec);
+Skylink.prototype._setSDPVideoCodec = function(sdpLines, codec) {
+  var useCodec = codec || this._selectedVideoCodec;
   var codecFound = false;
   var payload = 0;
 
   var i, j;
   var line;
 
+  log.log('Setting video codec', useCodec);
+
   for (i = 0; i < sdpLines.length; i += 1) {
     line = sdpLines[i];
 
     if (line.indexOf('a=rtpmap:') === 0) {
-      if (line.indexOf(this._selectedVideoCodec) > 0) {
+      if (line.indexOf(useCodec) > 0) {
         codecFound = true;
         payload = line.split(':')[1].split(' ')[0];
         break;

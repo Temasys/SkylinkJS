@@ -213,7 +213,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
  *   messaging Datachannel type state has to be "opened" (if Datachannel is enabled)
  *   and Signaling state has to be "stable".
  * Should consider dropping of counting messaging Datachannel type being opened as
- *   it should not involve the actual Peer connection for media (audio/video) streaming. 
+ *   it should not involve the actual Peer connection for media (audio/video) streaming.
  * @method _startPeerConnectionHealthCheck
  * @private
  * @for Skylink
@@ -445,13 +445,23 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtcp-fb:100 goog-remb\r\n/g, '');
   }
 
+  var removeVP9AptRtxPayload = false;
+  var agent = (self._peerInformations[targetMid] || {}).agent || {};
+
+  if (agent.pluginVersion) {
+    // 0.8.870 supports
+    var parts = agent.pluginVersion.split('.');
+    removeVP9AptRtxPayload = parseInt(parts[0], 10) >= 0 && parseInt(parts[1], 10) >= 8 &&
+      parseInt(parts[2], 10) >= 870;
+  }
+
   // Remove rtx or apt= lines that prevent connections for browsers without VP8 or VP9 support
   // See: https://bugs.chromium.org/p/webrtc/issues/detail?id=3962
-  if (['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1) {
+  if (['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1 && removeVP9AptRtxPayload) {
     log.warn([targetMid, null, null, 'Removing apt= and rtx payload lines causing connectivity issues']);
 
-    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\n/g, '');
-    sessionDescription.sdp = sessionDescription.sdp.replace(/a=fmtp:\d+ apt=\d+\r\n/g, '');
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=101\r\n/g, '');
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=107\r\n/g, '');
   }
 
   // NOTE ALEX: opus should not be used for mobile

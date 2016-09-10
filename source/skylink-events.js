@@ -248,6 +248,8 @@ Skylink.prototype._EVENTS = {
    *   <small>Data may be accessing browser or non-Web SDK version.</small>
    * @param {String} [peerInfo.agent.os] The Peer platform name.
    *  <small>Data may be accessing OS platform version from Web SDK.</small>
+   * @param {String} [peerInfo.agent.pluginVersion] The Peer Temasys Plugin version.
+   *  <small>Defined only when Peer is using the Temasys Plugin (IE / Safari).</small>
    * @param {String} peerInfo.room The Room Peer is from.
    * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink

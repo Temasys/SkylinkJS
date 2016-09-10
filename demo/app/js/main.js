@@ -274,7 +274,8 @@ Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo){
         '">See Stats</button><div class="row connstats">' +
         '<div class="agent row"><b class="col-md-12">Agent</b><p class="col-md-6">Name: <span class="upload">' +
           peerInfo.agent.name + (peerInfo.agent.os ? ' (' + peerInfo.agent.os + ')' : '') + '</span></p>' +
-          '<p class="col-md-6">Version: <span class="download">' + peerInfo.agent.version + '</span></p></div>' +
+          '<p class="col-md-6">Version: <span class="download">' + peerInfo.agent.version +
+          (peerInfo.agent.pluginVersion ? ' (Plugin Ver: ' + peerInfo.agent.pluginVersion + ')' : '') + '</span></p></div>' +
         '<div class="audio row"><b class="col-md-12">Audio</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
           '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
         '<div class="video row"><b class="col-md-12">Video</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
