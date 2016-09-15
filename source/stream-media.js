@@ -768,7 +768,6 @@ Skylink.prototype.sendStream = function(options, callback) {
  * @since 0.5.6
  */
 Skylink.prototype.stopStream = function () {
-  // if previous line break, recheck again to trigger event
   this._stopStreams({
     userMedia: true
   });
@@ -1330,6 +1329,7 @@ Skylink.prototype._stopStreams = function (options) {
 
   var stopUserMedia = false;
   var stopScreenshare = false;
+  var hasStoppedMedia = false;
 
   if (typeof options === 'object') {
     stopUserMedia = options.userMedia === true;
@@ -1342,6 +1342,7 @@ Skylink.prototype._stopStreams = function (options) {
     }
 
     self._streams.userMedia = null;
+    hasStoppedMedia = true;
   }
 
   if (stopScreenshare && self._streams.screenshare) {
@@ -1354,9 +1355,10 @@ Skylink.prototype._stopStreams = function (options) {
     }
 
     self._streams.screenshare = null;
+    hasStoppedMedia = true;
   }
 
-  if (self._inRoom) {
+  if (self._inRoom && hasStoppedMedia) {
     self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
   }
 
