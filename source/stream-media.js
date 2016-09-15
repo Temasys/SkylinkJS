@@ -1124,35 +1124,17 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
  * @since 0.6.0
  */
 Skylink.prototype.stopScreen = function () {
-  if (this._mediaScreen && this._mediaScreen !== null) {
-    this._stopLocalMediaStreams({
+  if (this._streams.screenshare) {
+    this._stopStreams({
       screenshare: true
     });
 
-    /*// for changes where the audio is not muted in here but the original mediastream has no audio
-    if (!this._mediaStreamsStatus.audioMuted && !this._streamSettings.audio) {
-      this._mediaStreamsStatus.audioMuted = true;
-    }
-
-    // for changes where the video is not muted in here but the original mediastream has no video
-    if (!this._mediaStreamsStatus.videoMuted && !this._streamSettings.video) {
-      this._mediaStreamsStatus.videoMuted = true;
-    }*/
-
     if (this._inRoom) {
-      if (this._hasMCU) {
-        this._restartMCUConnection();
-      } else {
-        if (!!this._mediaStream && this._mediaStream !== null) {
-          this._trigger('incomingStream', this._user.sid, this._mediaStream, true,
-            this.getPeerInfo(), false);
-        }
-        for (var peer in this._peerConnections) {
-          if (this._peerConnections.hasOwnProperty(peer)) {
-            this._restartPeerConnection(peer, true, false, null, true);
-          }
-        }
+      if (this._streams.userMedia && this._streams.userMedia.stream) {
+        this._trigger('incomingStream', this._user.sid, this._streams.userMedia.stream, true, this.getPeerInfo());
+        this._trigger('peerUpdated', this._user.sid, this.getPeerInfo(), true);
       }
+      this.refreshConnection();
     }
   }
 };
