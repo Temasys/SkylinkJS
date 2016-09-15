@@ -1,4 +1,26 @@
 /**
+ * Stores the preferred sending Peer connection streaming audio codec.
+ * @attribute _selectedAudioCodec
+ * @type String
+ * @default "auto"
+ * @private
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype._selectedAudioCodec = 'auto';
+
+/**
+ * Stores the preferred sending Peer connection streaming video codec.
+ * @attribute _selectedVideoCodec
+ * @type String
+ * @default "auto"
+ * @private
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype._selectedVideoCodec = 'auto';
+
+/**
  * Function that modifies the SessionDescription string to enable OPUS stereo.
  * @method _addSDPStereo
  * @private

@@ -194,147 +194,6 @@ Skylink.prototype.MEDIA_ACCESS_FALLBACK_STATE = {
 };
 
 /**
- * Stores the preferred sending Peer connection streaming audio codec.
- * @attribute _selectedAudioCodec
- * @type String
- * @default "auto"
- * @private
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype._selectedAudioCodec = 'auto';
-
-/**
- * Stores the preferred sending Peer connection streaming video codec.
- * @attribute _selectedVideoCodec
- * @type String
- * @default "auto"
- * @private
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype._selectedVideoCodec = 'auto';
-
-/**
- * Stores the User's <code>getUserMedia()</code> Stream.
- * @attribute _mediaStream
- * @type MediaStream
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._mediaStream = null;
-
-/**
- * Stores the User's <code>shareScreen()</code> Stream.
- * @attribute _mediaScreen
- * @type MediaStream
- * @private
- * @for Skylink
- * @since 0.6.0
- */
-Skylink.prototype._mediaScreen = null;
-
-/**
- * Stores the User's <code>shareScreen()</code> Stream clone for storing the video track.
- * Currently Chrome doesn't give us the audio track in the stream we receive, so we have to
- *   make another getUserMedia() call to retrieve the audio track only.
- * @attribute _mediaScreenClone
- * @type MediaStream
- * @private
- * @for Skylink
- * @since 0.6.0
- */
-Skylink.prototype._mediaScreenClone = null;
-
-/**
- * Stores the default Stream settings for <code>getUserMedia()</code> method.
- * @attribute _defaultStreamSettings
- * @param {JSON} audio The default Stream audio settings.
- * @param {JSON} video The default Stream video settings.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.7
- */
-Skylink.prototype._defaultStreamSettings = {
-  audio: {
-    stereo: false
-  },
-  video: {
-    resolution: {
-      width: 640,
-      height: 480
-    },
-    frameRate: 50
-  },
-  bandwidth: {
-    //audio: 50,
-    //video: 256,
-    //data: 1638400
-  }
-};
-
-/**
- * Stores the <code>getUserMedia()</code> Stream settings.
- * @attribute _streamSettings
- * @param {JSON} audio The Stream audio settings.
- * @param {JSON} video The Stream video settings.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._streamSettings = {};
-
-/**
- * Stores the <code>shareScreen()</code> Stream settings.
- * @attribute _screenSharingStreamSettings
- * @param {JSON} audio The Stream audio settings.
- * @param {JSON} video The Stream video settings.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._screenSharingStreamSettings = {
-  video: true
-};
-
-/**
- * Stores the flag that indicates if screensharing is supported in the browser.
- * @attribute _screenSharingAvailable
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._screenSharingAvailable = false;
-
-/**
- * Stores the native <code>navigator.getUserMedia()</code> API constraints for
- *   <code>getUserMedia()</code> retrieval of Stream.
- * @attribute _getUserMediaSettings
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._getUserMediaSettings = {};
-
-/**
- * Stores the User's Stream (both <code>getUserMedia()</code> and <code>shareScreen()</code>) muted status.
- * @attribute _mediaStreamsStatus
- * @param {Boolean} audioMuted The flag that indicates if audio is muted or not available.
- * @param {Boolean} videoMuted The flag that indicates if video is muted or not available.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._mediaStreamsStatus = {};
-
-/**
  * Stores the flag that indicates if <code>getUserMedia()</code> should fallback to retrieve
  *   audio only Stream after retrieval of audio and video Stream had failed.
  * @attribute _audioFallback
@@ -345,6 +204,68 @@ Skylink.prototype._mediaStreamsStatus = {};
  * @since 0.5.4
  */
 Skylink.prototype._audioFallback = false;
+
+/**
+ * Stores the Streams.
+ * @attribute _streams
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._streams = {
+  userMedia: null,
+  screenshare: null
+};
+
+/**
+ * Stores the default camera Stream settings.
+ * @attribute _streamsDefaultSettings
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._streamsDefaultSettings = {
+  userMedia: {
+    audio: {
+      stereo: false
+    },
+    video: {
+      resolution: {
+        width: 640,
+        height: 480
+      },
+      frameRate: 50
+    }
+  },
+  screenshare: {
+    video: true
+  }
+};
+
+/**
+ * Stores all the Stream required muted settings.
+ * @attribute _streamsMutedSettings
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._streamsMutedSettings = {
+  audioMuted: false,
+  videoMuted: false
+};
+
+/**
+ * Stores all the Stream stopped callbacks.
+ * @attribute _streamsStoppedCbs
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._streamsStoppedCbs = {};
 
 /**
  * Function that retrieves camera Stream.
@@ -848,7 +769,7 @@ Skylink.prototype.sendStream = function(options, callback) {
  */
 Skylink.prototype.stopStream = function () {
   // if previous line break, recheck again to trigger event
-  this._stopLocalMediaStreams({
+  this._stopStreams({
     userMedia: true
   });
 };
@@ -890,81 +811,69 @@ Skylink.prototype.stopStream = function () {
  */
 Skylink.prototype.muteStream = function(options) {
   var self = this;
-  var hasAudioError = false;
-  var hasVideoError = false;
 
   if (typeof options !== 'object') {
     log.error('Provided settings is not an object');
     return;
   }
 
-  if ((!self._mediaStream || self._mediaStream === null) &&
-    (!self._mediaScreen || self._mediaScreen === null)) {
+  if (!(self._streams.userMedia && self._streams.userMedia.stream) &&
+    !(self._streams.screenshare && self._streams.screenshare.stream)) {
     log.warn('No streams are available to mute / unmute!');
     return;
   }
 
-  // set the muted status
-  if (typeof options.audioMuted === 'boolean') {
-    if (self._streamSettings.audio === false) {
-      log.error('No audio available to mute / unmute');
-      hasAudioError = true;
-    } else {
-      if (options.audioMuted) {
-        self._mediaStreamsStatus.audioMuted = true;
-      } else {
-        self._mediaStreamsStatus.audioMuted = false;
-      }
-    }
-  }
-  if (typeof options.videoMuted === 'boolean') {
-    if (self._streamSettings.video === false) {
-      log.error('No video available to mute / unmute');
-      hasVideoError = true;
-    } else {
-      if (options.videoMuted) {
-        self._mediaStreamsStatus.videoMuted = true;
-      } else {
-        self._mediaStreamsStatus.videoMuted = false;
-      }
-    }
+  var audioMuted = typeof options.audioMuted === 'boolean' ? options.audioMuted : true;
+  var videoMuted = typeof options.videoMuted === 'boolean' ? options.videoMuted : true;
+  var hasToggledAudio = false;
+  var hasToggledVideo = false;
+
+  if (self._streamsMutedSettings.audioMuted !== audioMuted) {
+    self._streamsMutedSettings.audioMuted = audioMuted;
+    hasToggledAudio = true;
   }
 
-  var hasTracksOption = self._muteLocalMediaStreams();
+  if (self._streamsMutedSettings.videoMuted !== videoMuted) {
+    self._streamsMutedSettings.videoMuted = videoMuted;
+    hasToggledVideo = true;
+  }
 
-  if (self._inRoom) {
-    // update to mute status of video tracks
-    if (hasTracksOption.hasVideoTracks) {
-      // send message
+  if (hasToggledVideo || hasToggledAudio) {
+    var streamTracksAvailability = self._muteStreams();
+
+    if (hasToggledVideo) {
       self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.MUTE_VIDEO,
         mid: self._user.sid,
         rid: self._room.id,
-        muted: self._mediaStreamsStatus.videoMuted
+        muted: self._streamsMutedSettings.videoMuted
       });
     }
-    // update to mute status of audio tracks
-    if (hasTracksOption.hasAudioTracks) {
-      // send message
-      // set timeout to do a wait interval of 1s
+
+    if (hasToggledAudio) {
       setTimeout(function () {
         self._sendChannelMessage({
           type: self._SIG_MESSAGE_TYPE.MUTE_AUDIO,
           mid: self._user.sid,
           rid: self._room.id,
-          muted: self._mediaStreamsStatus.audioMuted
+          muted: self._streamsMutedSettings.audioMuted
         });
-      }, 1050);
+      }, hasToggledVideo ? 1050 : 0);
     }
 
-    if (!hasAudioError || !hasVideoError) {
-      self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
-    }
-  }
+    if ((streamTracksAvailability.hasVideo && hasToggledVideo) ||
+      (streamTracksAvailability.hasAudio && hasToggledAudio)) {
 
-  if (!hasAudioError || !hasVideoError) {
-    self._trigger('streamMuted', self._user.sid || null, self.getPeerInfo(), true,
-      !!self._mediaScreen && self._mediaScreen !== null);
+      self._trigger('localMediaMuted', {
+        audioMuted: streamTracksAvailability.hasAudio ? self._streamsMutedSettings.audioMuted : true,
+        videoMuted: streamTracksAvailability.hasVideo ? self._streamsMutedSettings.videoMuted : true
+      });
+
+      if (self._inRoom) {
+        self._trigger('streamMuted', self._user.sid, self.getPeerInfo(), true,
+          self._streams.screenshare && self._streams.screenshare.stream);
+      }
+    }
   }
 };
 
@@ -988,7 +897,8 @@ Skylink.prototype.muteStream = function(options) {
  */
 Skylink.prototype.enableAudio = function() {
   this.muteStream({
-    audioMuted: false
+    audioMuted: false,
+    videoMuted: self._streamsMutedSettings.videoMuted
   });
 };
 
@@ -1012,7 +922,8 @@ Skylink.prototype.enableAudio = function() {
  */
 Skylink.prototype.disableAudio = function() {
   this.muteStream({
-    audioMuted: true
+    audioMuted: true,
+    videoMuted: self._streamsMutedSettings.videoMuted
   });
 };
 
@@ -1036,7 +947,8 @@ Skylink.prototype.disableAudio = function() {
  */
 Skylink.prototype.enableVideo = function() {
   this.muteStream({
-    videoMuted: false
+    videoMuted: false,
+    audioMuted: self._streamsMutedSettings.audioMuted
   });
 };
 
@@ -1061,7 +973,8 @@ Skylink.prototype.enableVideo = function() {
  */
 Skylink.prototype.disableVideo = function() {
   this.muteStream({
-    videoMuted: true
+    videoMuted: true,
+    audioMuted: self._streamsMutedSettings.audioMuted
   });
 };
 
@@ -1335,45 +1248,156 @@ Skylink.prototype.stopScreen = function () {
 };
 
 /**
+ * Function that handles the muting of Stream audio and video tracks.
+ * @method _muteStreams
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._muteStreams = function () {
+  var self = this;
+  var hasVideo = false;
+  var hasAudio = false;
+
+  var muteFn = function (stream) {
+    var audioTracks = stream.getAudioTracks();
+    var videoTracks = stream.getVideoTracks();
+
+    for (var a = 0; a < audioTracks.length; a++) {
+      audioTracks[a].enabled = !!self._streamsMutedSettings.audioMuted;
+      hasAudio = true;
+    }
+
+    for (var v = 0; v < videoTracks.length; v++) {
+      videoTracks[v].enabled = !!self._streamsMutedSettings.videoMuted;
+      hasVideo = true;
+    }
+  };
+
+  if (self._streams.userMedia && self._streams.userMedia.stream) {
+    muteFn(self._streams.userMedia.stream);
+  }
+
+  if (self._streams.screenshare && self._streams.screenshare.stream) {
+    muteFn(self._streams.screenshare.stream);
+  }
+
+  if (self._streams.screenshare && self._streams.screenshare.streamClone) {
+    muteFn(self._streams.screenshare.streamClone);
+  }
+
+  log.debug('Updated Streams muted status ->', self._streamsMutedSettings);
+
+  return {
+    hasVideo: hasVideo,
+    hasAudio: hasAudio
+  };
+};
+
+/**
+ * Function that handles stopping the Stream streaming.
+ * @method _stopStreams
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._stopStreams = function (options) {
+  var self = this;
+  var stopFn = function (stream) {
+    var streamId = stream.id || stream.label;
+    log.debug([null, 'MediaStream', streamId, 'Stopping Stream ->'], stream);
+
+    try {
+      var audioTracks = stream.getAudioTracks();
+      var videoTracks = stream.getVideoTracks();
+
+      for (var a = 0; a < audioTracks.length; a++) {
+        audioTracks[a].stop();
+      }
+
+      for (var v = 0; v < videoTracks.length; v++) {
+        videoTracks[v].stop();
+      }
+
+    } catch (error) {
+      stream.stop();
+    }
+
+    if (self._streamsStoppedCbs[streamId]) {
+      self._streamsStoppedCbs[streamId]();
+    }
+  };
+
+  var stopUserMedia = false;
+  var stopScreenshare = false;
+
+  if (typeof options === 'object') {
+    stopUserMedia = options.userMedia === true;
+    stopScreenshare = options.screenshare === true;
+  }
+
+  if (stopUserMedia && self._streams.userMedia) {
+    if (self._streams.userMedia.stream) {
+      stopFn(self._streams.userMedia.stream);
+    }
+
+    self._streams.userMedia = null;
+  }
+
+  if (stopScreenshare && self._streams.screenshare) {
+    if (self._streams.screenshare.stream) {
+      stopFn(self._streams.userMedia.stream);
+    }
+
+    if (self._streams.screenshare.streamClone) {
+      stopFn(self._streams.screenshare.streamClone);
+    }
+
+    self._streams.screenshare = null;
+  }
+
+  if (self._inRoom) {
+    self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+  }
+
+  log.log('Stopping Streams with settings ->', options);
+};
+
+/**
  * Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.
- * @method _onUserMediaSuccess
+ * @method _onStreamAccessSuccess
  * @private
  * @for Skylink
  * @since 0.3.0
  */
-Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
+Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSharing, isAudioFallback) {
   var self = this;
-  log.log([null, 'MediaStream', stream.id,
-    'User has granted access to local media'], stream);
+  var streamId = stream.id || stream.label;
+
+  log.log([null, 'MediaStream', streamId, 'Has access to stream ->'], stream);
 
   // Stop previous stream
-  if (!isScreenSharing && self._mediaStream) {
-    self._stopLocalMediaStreams({
+  if (!isScreensharing && self._streams.userMedia) {
+    self._stopStreams({
       userMedia: true,
       screenshare: false
     });
 
-  } else {
-    self._stopLocalMediaStreams({
+  } else if (isScreenSharing && self._streams.screenshare) {
+    self._stopStreams({
       userMedia: false,
       screenshare: true
     });
   }
 
-  var hasTriggeredEnded = false;
-  var streamEnded = function () {
-    if (hasTriggeredEnded) {
-      return;
-    }
-
-    log.log([null, 'MediaStream', stream.id, 'Local mediastream has ended']);
-
-    hasTriggeredEnded = true;
+  self._streamsStoppedCbs[streamId] = function () {
+    log.log([null, 'MediaStream', streamId, 'Stream has ended']);
 
     self._trigger('mediaAccessStopped', !!isScreenSharing);
 
     if (self._inRoom) {
-      log.debug([null, 'MediaStream', stream.id, 'Sending mediastream ended status']);
+      log.debug([null, 'MediaStream', streamId, 'Sending Stream ended status to Peers']);
+
       self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.STREAM,
         mid: self._user.sid,
@@ -1387,11 +1411,15 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
     }
   };
 
-  // chrome uses the new specs
-  if (window.webrtcDetectedBrowser === 'chrome' || window.webrtcDetectedBrowser === 'opera') {
-    stream.oninactive = streamEnded;
+  // Handle event for Chrome / Opera
+  if (['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1) {
+    stream.oninactive = function () {
+      if (self._streamsStoppedCbs[streamId]) {
+        self._streamsStoppedCbs[streamId]();
+      }
+    };
 
-  // Workaround for local stream.onended because firefox has not yet implemented it
+  // Handle event for Firefox (use an interval)
   } else if (window.webrtcDetectedBrowser === 'firefox') {
     stream.endedInterval = setInterval(function () {
       if (typeof stream.recordedTime === 'undefined') {
@@ -1399,8 +1427,10 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
       }
       if (stream.recordedTime === stream.currentTime) {
         clearInterval(stream.endedInterval);
-        // trigger that it has ended
-        streamEnded();
+
+        if (self._streamsStoppedCbs[streamId]) {
+          self._streamsStoppedCbs[streamId]();
+        }
 
       } else {
         stream.recordedTime = stream.currentTime;
@@ -1408,68 +1438,88 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
     }, 1000);
 
   } else {
-    stream.onended = streamEnded;
+    stream.onended = function () {
+      if (self._streamsStoppedCbs[streamId]) {
+        self._streamsStoppedCbs[streamId]();
+      }
+    };
   }
 
-  // check if readyStateChange is done
-  if (!isScreenSharing) {
-    self._mediaStream = stream;
-  } else {
-    self._mediaScreen = stream;
+  if ((settings.settings.audio && stream.getAudioTracks().length === 0) ||
+    (settings.settings.video && stream.getVideoTracks().length === 0)) {
+
+    var tracksNotSameError = 'Expected audio tracks length with ' +
+      (settings.settings.audio ? '1' : '0') + ' and video tracks length with ' +
+      (settings.settings.video ? '1' : '0') + ' but received audio tracks length ' +
+      'with ' + stream.getAudioTracks().length + ' and video ' +
+      'tracks length with ' + stream.getVideoTracks().length;
+
+    log.warn([null, 'MediaStream', streamId, tracksNotSameError]);
+
+    if (settings.settings.audio && stream.getAudioTracks().length === 0) {
+      settings.settings.audio = false;
+    }
+
+    if (settings.settings.video && stream.getVideoTracks().length === 0) {
+      settings.settings.video = false;
+    }
+
+    self._trigger('mediaAccessFallback', {
+      error: new Error(tracksNotSameError),
+      diff: {
+        video: { expected: 1, received: stream.getVideoTracks().length },
+        audio: { expected: requireAudio ? 1 : 0, received: stream.getAudioTracks().length }
+      }
+    }, self.MEDIA_ACCESS_FALLBACK_STATE.FALLBACKED, !!isScreensharing, !!isAudioFallback);
   }
 
-  self._muteLocalMediaStreams();
-
+  self._streams[ isScreenSharing ? 'screenshare' : 'userMedia' ] = {
+    stream: stream,
+    settings: settings.settings,
+    constraints: settings.constraints
+  };
+  self._muteStreams();
   self._trigger('mediaAccessSuccess', stream, !!isScreenSharing);
 };
 
 /**
  * Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.
- * @method _onUserMediaError
+ * @method _onStreamAccessError
  * @private
  * @for Skylink
- * @since 0.5.4
+ * @since 0.6.15
  */
-Skylink.prototype._onUserMediaError = function(error, isScreenSharing, audioFallback) {
+Skylink.prototype._onStreamAccessError = function(error, settings, isScreenSharing) {
   var self = this;
-  var hasAudioVideoRequest = !!self._streamSettings.video && !!self._streamSettings.audio;
 
-  if (self._audioFallback && hasAudioVideoRequest && audioFallback) {
-    // redefined the settings for video as false
-    self._streamSettings.video = false;
-    self._getUserMediaSettings.video = false;
-
-    log.debug([null, 'MediaStream', null, 'Falling back to audio stream call']);
+  if (!isScreensharing && settings.settings.audio && settings.settings.video && self._audioFallback) {
+    log.debug('Fallbacking to retrieve audio only Stream');
 
     self._trigger('mediaAccessFallback', {
       error: error,
       diff: null
-    }, 0, false, true);
+    }, self.MEDIA_ACCESS_FALLBACK_STATE.FALLBACKING, false, true);
 
-    window.getUserMedia({
+    navigator.getUserMedia({
       audio: true
-    }, function(stream) {
-      self._onUserMediaSuccess(stream);
-      self._trigger('mediaAccessFallback', {
-        error: null,
-        diff: {
-          video: { expected: 1, received: stream.getVideoTracks().length },
-          audio: { expected: 1, received: stream.getAudioTracks().length }
-        }
-      }, 1, false, true);
-    }, function(error) {
-      log.error([null, 'MediaStream', null,
-        'Failed retrieving audio in audio fallback:'], error);
-      self._trigger('mediaAccessError', error, !!isScreenSharing, true);
+    }, function (stream) {
+      self._onStreamAccessSuccess(stream, settings, false, true);
+
+    }, function (error) {
+      log.error('Failed fallbacking to retrieve audio only Stream ->', error);
+
+      self._trigger('mediaAccessError', error, false, true);
       self._trigger('mediaAccessFallback', {
         error: error,
         diff: null
-      }, -1, false, true);
+      }, self.MEDIA_ACCESS_FALLBACK_STATE.ERROR, false, true);
     });
-  } else {
-    log.error([null, 'MediaStream', null, 'Failed retrieving stream:'], error);
-   self._trigger('mediaAccessError', error, !!isScreenSharing, false);
+    return;
   }
+
+  log.error('Failed retrieving ' + (isScreensharing ? 'screensharing' : 'camera') + ' Stream ->', error);
+
+  self._trigger('mediaAccessError', error, !!isScreenSharing, false);
 };
 
 /**
@@ -1816,202 +1866,6 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
       // Fix errors thrown like NS_ERROR_UNEXPECTED
       log.error([peerId, null, null, 'Failed adding local stream'], error);
     }
-  }
-};
-
-/**
- * Function that handles the muting of Stream audio and video tracks.
- * @method _muteLocalMediaStreams
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._muteLocalMediaStreams = function () {
-  var hasAudioTracks = false;
-  var hasVideoTracks = false;
-
-  var audioTracks;
-  var videoTracks;
-  var a, v;
-
-  // Loop and enable tracks accordingly (mediaStream)
-  if (this._mediaStream && this._mediaStream !== null) {
-    audioTracks = this._mediaStream.getAudioTracks();
-    videoTracks = this._mediaStream.getVideoTracks();
-
-    hasAudioTracks = audioTracks.length > 0 || hasAudioTracks;
-    hasVideoTracks = videoTracks.length > 0 || hasVideoTracks;
-
-    // loop audio tracks
-    for (a = 0; a < audioTracks.length; a++) {
-      if (this._mediaStreamsStatus.audioMuted) {
-        audioTracks[a].enabled = false;
-      } else {
-        audioTracks[a].enabled = true;
-      }
-    }
-    // loop video tracks
-    for (v = 0; v < videoTracks.length; v++) {
-      if (this._mediaStreamsStatus.videoMuted) {
-        videoTracks[v].enabled = false;
-      } else {
-        videoTracks[v].enabled = true;
-      }
-    }
-  }
-
-  // Loop and enable tracks accordingly (mediaScreen)
-  if (this._mediaScreen && this._mediaScreen !== null) {
-    audioTracks = this._mediaScreen.getAudioTracks();
-    videoTracks = this._mediaScreen.getVideoTracks();
-
-    hasAudioTracks = hasAudioTracks || audioTracks.length > 0;
-    hasVideoTracks = hasVideoTracks || videoTracks.length > 0;
-
-    // loop audio tracks
-    for (a = 0; a < audioTracks.length; a++) {
-      if (this._mediaStreamsStatus.audioMuted) {
-        audioTracks[a].enabled = false;
-      } else {
-        audioTracks[a].enabled = true;
-      }
-    }
-    // loop video tracks
-    for (v = 0; v < videoTracks.length; v++) {
-      if (this._mediaStreamsStatus.videoMuted) {
-        videoTracks[v].enabled = false;
-      } else {
-        videoTracks[v].enabled = true;
-      }
-    }
-  }
-
-  // Loop and enable tracks accordingly (mediaScreenClone)
-  if (this._mediaScreenClone && this._mediaScreenClone !== null) {
-    videoTracks = this._mediaScreen.getVideoTracks();
-
-    hasVideoTracks = hasVideoTracks || videoTracks.length > 0;
-
-    // loop video tracks
-    for (v = 0; v < videoTracks.length; v++) {
-      if (this._mediaStreamsStatus.videoMuted) {
-        videoTracks[v].enabled = false;
-      } else {
-        videoTracks[v].enabled = true;
-      }
-    }
-  }
-
-  // update accordingly if failed
-  if (!hasAudioTracks) {
-    //this._mediaStreamsStatus.audioMuted = true;
-    this._streamSettings.audio = false;
-  }
-  if (!hasVideoTracks) {
-    //this._mediaStreamsStatus.videoMuted = true;
-    this._streamSettings.video = false;
-  }
-
-  log.log('Update to muted status ->', this._mediaStreamsStatus);
-
-  return {
-    hasAudioTracks: hasAudioTracks,
-    hasVideoTracks: hasVideoTracks
-  };
-};
-
-/**
- * Function that handles stopping the Stream streaming.
- * @method _stopLocalMediaStreams
- * @private
- * @for Skylink
- * @since 0.6.3
- */
-Skylink.prototype._stopLocalMediaStreams = function (options) {
-  var self = this;
-  var stopUserMedia = false;
-  var stopScreenshare = false;
-  var triggerStopped = false;
-
-  if (typeof options === 'object') {
-    stopUserMedia = options.userMedia === true;
-    stopScreenshare = options.screenshare === true;
-  }
-
-  var stopTracksFn = function (stream) {
-    var audioTracks = stream.getAudioTracks();
-    var videoTracks = stream.getVideoTracks();
-
-    for (var i = 0; i < audioTracks.length; i++) {
-      audioTracks[i].stop();
-    }
-
-    for (var j = 0; j < videoTracks.length; j++) {
-      videoTracks[j].stop();
-    }
-  };
-
-  var stopFn = function (stream, name) {
-    //if (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 44) {
-    // chrome/opera/firefox uses mediastreamtrack.stop()
-    if (['chrome', 'opera', 'firefox'].indexOf(window.webrtcDetectedBrowser) > -1) {
-      stopTracksFn(stream);
-    } else {
-      try {
-        stream.stop();
-      } catch (error) {
-        log.warn('Failed stopping MediaStreamTracks for ' + name + '.' +
-          ' Stopping MediaStream instead', error);
-        stopTracksFn(stream);
-      }
-    }
-  };
-
-  if (stopScreenshare) {
-    log.log([null, 'MediaStream', self._selectedRoom, 'Stopping screensharing MediaStream']);
-
-    if (this._mediaScreen && this._mediaScreen !== null) {
-      stopFn(this._mediaScreen, '_mediaScreen');
-      this._mediaScreen = null;
-      triggerStopped = true;
-    }
-
-    if (this._mediaScreenClone && this._mediaScreenClone !== null) {
-      stopFn(this._mediaScreenClone, '_mediaScreenClone');
-      this._mediaScreenClone = null;
-    }
-
-    if (triggerStopped) {
-      this._screenSharingStreamSettings.audio = false;
-      this._screenSharingStreamSettings.video = false;
-      //this._trigger('mediaAccessStopped', true);
-    }
-
-  } else {
-    log.log([null, 'MediaStream', self._selectedRoom, 'Screensharing MediaStream will not be stopped']);
-  }
-
-  if (stopUserMedia) {
-    log.log([null, 'MediaStream', self._selectedRoom, 'Stopping user\'s MediaStream']);
-
-    if (this._mediaStream && this._mediaStream !== null) {
-      stopFn(this._mediaStream, '_mediaStream');
-      this._mediaStream = null;
-      triggerStopped = true;
-    }
-
-    if (triggerStopped) {
-      this._streamSettings.audio = false;
-      this._streamSettings.video = false;
-      //this._trigger('mediaAccessStopped', false);
-    }
-  } else {
-    log.log([null, 'MediaStream', self._selectedRoom, 'User\'s MediaStream will not be stopped']);
-  }
-
-  // prevent triggering when user is not in the room
-  if (this._inRoom) {
-    this._trigger('peerUpdated', this._user.sid, this.getPeerInfo(), true);
   }
 };
 
