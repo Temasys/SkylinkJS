@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 01:09:08 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 01:11:02 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6375,7 +6375,10 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
             callback(null, success);
           }
         });
+        return;
       }
+
+      callback(null, null);
 
     }, function() { // open channel first if it's not opened
 

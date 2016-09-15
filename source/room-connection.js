@@ -697,7 +697,10 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
             callback(null, success);
           }
         });
+        return;
       }
+
+      callback(null, null);
 
     }, function() { // open channel first if it's not opened
 
