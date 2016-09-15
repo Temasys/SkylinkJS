@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 01:54:07 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 02:21:38 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9740,6 +9740,7 @@ Skylink.prototype._streamEventHandler = function(message) {
   	if (message.status === 'ended') {
   		this._trigger('streamEnded', targetMid, this.getPeerInfo(targetMid),
         false, message.sessionType === 'screensharing');
+      this._trigger('peerUpdated', targetMid, this.getPeerInfo(targetMid), false);
 
       if (this._peerConnections[targetMid]) {
         this._peerConnections[targetMid].hasStream = false;
@@ -9749,7 +9750,39 @@ Skylink.prototype._streamEventHandler = function(message) {
       } else {
         log.log([targetMid, null, message.type, 'Peer connection not found']);
       }
-  	}
+  	} else if (message.status === 'check') {
+      if (!message.streamId) {
+        return;
+      }
+
+      // Prevent restarts unless its stable
+      if (this._peerConnections[targetMid] && this._peerConnections[targetMid].signalingState ===
+        this.PEER_CONNECTION_STATE.STABLE) {
+        var streams = this._peerConnections[targetMid].getRemoteStreams();
+        if (streams.length > 0 && message.streamId !== (streams[0].id || streams[0].label)) {
+          this._sendChannelMessage({
+            type: this._SIG_MESSAGE_TYPE.RESTART,
+            mid: this._user.sid,
+            rid: this._room.id,
+            agent: window.webrtcDetectedBrowser,
+            version: window.webrtcDetectedVersion,
+            os: window.navigator.platform,
+            userInfo: this.getPeerInfo(),
+            target: targetMid,
+            weight: this._peerPriorityWeight,
+            enableIceTrickle: this._enableIceTrickle,
+            enableDataChannel: this._enableDataChannel,
+            receiveOnly: this._peerConnections[targetMid] && this._peerConnections[targetMid].receiveOnly,
+            sessionType: !!this._streams.screenshare ? 'screensharing' : 'stream',
+            // SkylinkJS parameters (copy the parameters from received message parameters)
+            isConnectionRestart: !!message.isConnectionRestart,
+            lastRestart: message.lastRestart,
+            explicit: !!message.explicit,
+            temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+          });
+        }
+      }
+    }
 
   } else {
     log.log([targetMid, null, message.type, 'Peer does not have any user information']);
@@ -12003,16 +12036,18 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
  * @since 0.5.2
  */
 Skylink.prototype._addLocalMediaStreams = function(peerId) {
+  var self = this;
+
   // NOTE ALEX: here we could do something smarter
   // a mediastream is mainly a container, most of the info
   // are attached to the tracks. We should iterates over track and print
   try {
     log.log([peerId, null, null, 'Adding local stream']);
 
-    var pc = this._peerConnections[peerId];
+    var pc = self._peerConnections[peerId];
 
     if (pc) {
-      if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
+      if (pc.signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
         // Updates the streams accordingly
         var updateStreamFn = function (updatedStream) {
           var hasStream = false;
@@ -12033,15 +12068,15 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
           }
         };
 
-        if (this._streams.screenshare && this._streams.screenshare.stream) {
-          log.debug([peerId, 'MediaStream', null, 'Sending screen'], this._streams.screenshare.stream);
+        if (self._streams.screenshare && self._streams.screenshare.stream) {
+          log.debug([peerId, 'MediaStream', null, 'Sending screen'], self._streams.screenshare.stream);
 
-          updateStreamFn(this._streams.screenshare.stream);
+          updateStreamFn(self._streams.screenshare.stream);
 
-        } else if (this._streams.userMedia && this._streams.userMedia.stream) {
-          log.debug([peerId, 'MediaStream', null, 'Sending stream'], this._streams.userMedia.stream);
+        } else if (self._streams.userMedia && self._streams.userMedia.stream) {
+          log.debug([peerId, 'MediaStream', null, 'Sending stream'], self._streams.userMedia.stream);
 
-          updateStreamFn(this._streams.userMedia.stream);
+          updateStreamFn(self._streams.userMedia.stream);
 
         } else {
           log.warn([peerId, 'MediaStream', null, 'No media to send. Will be only receiving']);
@@ -12054,7 +12089,7 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
           'Not adding any stream as signalingState is closed']);
       }
     } else {
-      log.warn([peerId, 'MediaStream', this._mediaStream,
+      log.warn([peerId, 'MediaStream', self._mediaStream,
         'Not adding stream as peerconnection object does not exists']);
     }
   } catch (error) {
@@ -12065,6 +12100,26 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
       log.error([peerId, null, null, 'Failed adding local stream'], error);
     }
   }
+
+  setTimeout(function () {
+    var streamId = null;
+
+    if (self._streams.screenshare && self._streams.screenshare.stream) {
+      streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
+    } else if (self._streams.userMedia && self._streams.userMedia.stream) {
+      streamId = self._streams.userMedia.stream.id || self._streams.userMedia.stream.label;
+    }
+
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.STREAM,
+      mid: self._user.sid,
+      rid: self._room.id,
+      cid: self._key,
+      sessionType: self._streams.screenshare && self._streams.screenshare.stream ? 'screensharing' : 'stream',
+      streamId: streamId,
+      status: 'check'
+    });
+  }, 5000);
 };
 Skylink.prototype._selectedAudioCodec = 'auto';
 

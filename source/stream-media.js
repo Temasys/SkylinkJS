@@ -1576,16 +1576,18 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
  * @since 0.5.2
  */
 Skylink.prototype._addLocalMediaStreams = function(peerId) {
+  var self = this;
+
   // NOTE ALEX: here we could do something smarter
   // a mediastream is mainly a container, most of the info
   // are attached to the tracks. We should iterates over track and print
   try {
     log.log([peerId, null, null, 'Adding local stream']);
 
-    var pc = this._peerConnections[peerId];
+    var pc = self._peerConnections[peerId];
 
     if (pc) {
-      if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
+      if (pc.signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
         // Updates the streams accordingly
         var updateStreamFn = function (updatedStream) {
           var hasStream = false;
@@ -1606,15 +1608,15 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
           }
         };
 
-        if (this._streams.screenshare && this._streams.screenshare.stream) {
-          log.debug([peerId, 'MediaStream', null, 'Sending screen'], this._streams.screenshare.stream);
+        if (self._streams.screenshare && self._streams.screenshare.stream) {
+          log.debug([peerId, 'MediaStream', null, 'Sending screen'], self._streams.screenshare.stream);
 
-          updateStreamFn(this._streams.screenshare.stream);
+          updateStreamFn(self._streams.screenshare.stream);
 
-        } else if (this._streams.userMedia && this._streams.userMedia.stream) {
-          log.debug([peerId, 'MediaStream', null, 'Sending stream'], this._streams.userMedia.stream);
+        } else if (self._streams.userMedia && self._streams.userMedia.stream) {
+          log.debug([peerId, 'MediaStream', null, 'Sending stream'], self._streams.userMedia.stream);
 
-          updateStreamFn(this._streams.userMedia.stream);
+          updateStreamFn(self._streams.userMedia.stream);
 
         } else {
           log.warn([peerId, 'MediaStream', null, 'No media to send. Will be only receiving']);
@@ -1627,7 +1629,7 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
           'Not adding any stream as signalingState is closed']);
       }
     } else {
-      log.warn([peerId, 'MediaStream', this._mediaStream,
+      log.warn([peerId, 'MediaStream', self._mediaStream,
         'Not adding stream as peerconnection object does not exists']);
     }
   } catch (error) {
@@ -1638,4 +1640,24 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
       log.error([peerId, null, null, 'Failed adding local stream'], error);
     }
   }
+
+  setTimeout(function () {
+    var streamId = null;
+
+    if (self._streams.screenshare && self._streams.screenshare.stream) {
+      streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
+    } else if (self._streams.userMedia && self._streams.userMedia.stream) {
+      streamId = self._streams.userMedia.stream.id || self._streams.userMedia.stream.label;
+    }
+
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.STREAM,
+      mid: self._user.sid,
+      rid: self._room.id,
+      cid: self._key,
+      sessionType: self._streams.screenshare && self._streams.screenshare.stream ? 'screensharing' : 'stream',
+      streamId: streamId,
+      status: 'check'
+    });
+  }, 5000);
 };
