@@ -1669,5 +1669,5 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
       streamId: streamId,
       status: 'check'
     });
-  }, 5000);
+  }, 3500);
 };

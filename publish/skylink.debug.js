@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 03:31:47 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 03:43:05 GMT+0800 (SGT) */
 
 (function() {
 
@@ -12146,7 +12146,7 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
       streamId: streamId,
       status: 'check'
     });
-  }, 5000);
+  }, 3500);
 };
 Skylink.prototype._selectedAudioCodec = 'auto';
 
