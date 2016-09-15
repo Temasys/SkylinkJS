@@ -558,7 +558,7 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
   self._inRoom = false;
   self._closeChannel();
 
-  self._stopLocalMediaStreams({
+  self._stopStreams({
     userMedia: stopUserMedia,
     screenshare: stopScreenshare
   });

@@ -227,12 +227,12 @@ Skylink.prototype._EVENTS = {
    *   <small>When defined as <code>false</code>, it means there is no video being sent from Peer.</small>
    * @param {JSON} peerInfo.settings.video.resolution The Peer Stream video resolution.
    *   [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} [peerInfo.settings.video.resolution.width] The Peer Stream video resolution width.
-   * @param {Number} [peerInfo.settings.video.resolution.height] The Peer Stream video resolution height.
-   * @param {Number} [peerInfo.settings.video.frameRate] The Peer Stream video
+   * @param {Number} peerInfo.settings.video.resolution.width The Peer Stream video resolution width.
+   * @param {Number} peerInfo.settings.video.resolution.height The Peer Stream video resolution height.
+   * @param {Number} peerInfo.settings.video.frameRate The Peer Stream video
    *   <a href="https://en.wikipedia.org/wiki/Frame_rate">frameRate</a> per second (fps).
    * @param {Boolean} [peerInfo.settings.video.screenshare] The flag if Peer Stream is a screensharing Stream.
-   * @param {JSON} [peerInfo.settings.bandwidth] The maximum streaming bandwidth sent from Peer.
+   * @param {JSON} peerInfo.settings.bandwidth The maximum streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.audio] The maximum audio streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.video] The maximum video streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.data] The maximum data streaming bandwidth sent from Peer.

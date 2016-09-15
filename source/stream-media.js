@@ -432,35 +432,34 @@ Skylink.prototype._streamsStoppedCbs = {};
 Skylink.prototype.getUserMedia = function(options,callback) {
   var self = this;
 
-  var errorMsg; // j-shint rocks
-
   if (typeof options === 'function'){
     callback = options;
     options = {
       audio: true,
       video: true
     };
-  }
-  else if (typeof options !== 'object' || options === null) {
+
+  } else if (typeof options !== 'object' || options === null) {
     if (typeof options === 'undefined') {
       options = {
         audio: true,
         video: true
       };
+
     } else {
-      errorMsg = 'Please provide a valid options';
-      log.error(errorMsg, options);
+      var invalidOptionsError = 'Please provide a valid options';
+      log.error(invalidOptionsError, options);
       if (typeof callback === 'function') {
-        callback(new Error(errorMsg), null);
+        callback(new Error(invalidOptionsError), null);
       }
       return;
     }
-  }
-  else if (!options.audio && !options.video) {
-    errorMsg = 'Please select audio or video';
-    log.error(errorMsg, options);
+
+  } else if (!options.audio && !options.video) {
+    var noConstraintOptionsSelectedError = 'Please select audio or video';
+    log.error(noConstraintOptionsSelectedError, options);
     if (typeof callback === 'function') {
-      callback(new Error(errorMsg), null);
+      callback(new Error(noConstraintOptionsSelectedError), null);
     }
     return;
   }
@@ -475,86 +474,15 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     return;
   }*/
 
-  // parse stream settings
-  self._parseMediaStreamSettings(options);
+  // Parse stream settings
+  var settings = self._parseStreamSettings(options);
 
-  // if audio and video is false, do not call getUserMedia
-  if (!(options.audio === false && options.video === false)) {
-    // clear previous mediastreams
-    self.stopStream();
+  navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
+    self._onStreamAccessSuccess(stream, false, false);
 
-    setTimeout(function () {
-      try {
-        if (typeof callback === 'function'){
-          var mediaAccessErrorFn = function (error) {
-            callback(error, null);
-            self.off('mediaAccessSuccess', mediaAccessSuccessFn);
-          };
-
-          var mediaAccessSuccessFn = function (stream) {
-            callback(null, stream);
-            self.off('mediaAccessError', mediaAccessErrorFn);
-          };
-
-          self.once('mediaAccessError', mediaAccessErrorFn);
-          self.once('mediaAccessSuccess', mediaAccessSuccessFn);
-        }
-
-        window.getUserMedia(self._getUserMediaSettings, function (stream) {
-          var isSuccess = false;
-          var requireAudio = !!options.audio;
-          var requireVideo = !!options.video;
-          var hasAudio = !requireAudio;
-          var hasVideo = !requireVideo;
-
-          // for now we require one MediaStream with both audio and video
-          // due to firefox non-supported audio or video
-          if (stream && stream !== null) {
-            var notSameTracksError = new Error(
-              'Expected audio tracks length with ' +
-              (requireAudio ? '1' : '0') + ' and video tracks length with ' +
-              (requireVideo ? '1' : '0') + ' but received audio tracks length ' +
-              'with ' + stream.getAudioTracks().length + ' and video ' +
-              'tracks length with ' + stream.getVideoTracks().length);
-
-            // do the check
-            if (requireAudio) {
-              hasAudio = stream.getAudioTracks().length > 0;
-            }
-            if (requireVideo) {
-              hasVideo =  stream.getVideoTracks().length > 0;
-
-              /*if (self._audioFallback && !hasVideo) {
-                hasVideo = true; // to trick isSuccess to be true
-                self._trigger('mediaAccessFallback', notSameTracksError);
-              }*/
-            }
-            if (hasAudio && hasVideo) {
-              isSuccess = true;
-            }
-
-            if (!isSuccess) {
-              self._trigger('mediaAccessFallback', {
-                error: notSameTracksError,
-                diff: {
-                  video: { expected: requireAudio ? 1 : 0, received: stream.getVideoTracks().length },
-                  audio: { expected: requireVideo ? 1 : 0, received: stream.getAudioTracks().length }
-                }
-              }, 1, false, false);
-            }
-
-            self._onUserMediaSuccess(stream);
-          }
-        }, function (error) {
-          self._onUserMediaError(error, false, true);
-        });
-      } catch (error) {
-        self._onUserMediaError(error, false, true);
-      }
-    }, window.webrtcDetectedBrowser === 'firefox' ? 500 : 1);
-  } else {
-    log.warn([null, 'MediaStream', null, 'Not retrieving stream']);
-  }
+  }, function (error) {
+    self._onStreamAccessError(error, false, false);
+  });
 };
 
 /**
@@ -1366,6 +1294,83 @@ Skylink.prototype._stopStreams = function (options) {
 };
 
 /**
+ * Function that parses the <code>getUserMedia()</code> settings provided.
+ * @method _parseStreamSettings
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._parseStreamSettings = function(options) {
+  var settings = {
+    settings: { audio: false, video: false },
+    getUserMediaSettings: { audio: false, video: false }
+  };
+
+  if (options.audio) {
+    settings.settings.audio = {
+      stereo: false,
+      optional: []
+    };
+    settings.getUserMediaSettings.audio = {};
+
+    if (typeof options.audio.stereo === 'boolean') {
+      settings.settings.audio.stereo = options.audio.stereo;
+    }
+
+    // New constraints { sourceId: { exact: xxx }}
+    if (Array.isArray(options.audio.optional)) {
+      settings.settings.audio = options.audio.optional;
+      settings.getUserMediaSettings.audio.optional = options.audio.optional;
+    }
+
+    // For Edge to work since they do not support the advanced constraints yet
+    if (window.webrtcDetectedBrowser === 'edge') {
+      settings.getUserMediaSettings.audio = true;
+    }
+  }
+
+  if (options.video) {
+    settings.settings.video = {
+      resolution: self.VIDEO_RESOLUTION.VGA,
+      frameRate: 50,
+      optional: []
+    };
+    settings.getUserMediaSettings.video = {};
+
+    if (typeof options.video.frameRate === 'number') {
+      settings.settings.video.frameRate = options.video.frameRate;
+    }
+
+    // New constraints { sourceId: { exact: xxx }}
+    if (Array.isArray(options.video.optional)) {
+      settings.settings.video = options.video.optional;
+      settings.getUserMediaSettings.video.optional = options.video.optional;
+    }
+
+    settings.getUserMediaSettings.video.mandatory = {
+      //minWidth: videoOptions.resolution.width,
+      //minHeight: videoOptions.resolution.height,
+      maxWidth: settings.settings.video.resolution.width,
+      maxHeight: settings.settings.video.resolution.height,
+      //minFrameRate: videoOptions.frameRate,
+      maxFrameRate: settings.settings.video.frameRate
+    };
+
+    // Remove maxFrameRate for AdapterJS to work with Safari
+    if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1) {
+      delete settings.getUserMediaSettings.video.mandatory.maxFrameRate;
+    }
+
+    // For Edge to work since they do not support the advanced constraints yet
+    if (window.webrtcDetectedBrowser === 'edge') {
+      settings.getUserMediaSettings.video = true;
+    }
+  }
+
+  return settings;
+};
+
+/**
  * Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.
  * @method _onStreamAccessSuccess
  * @private
@@ -1760,42 +1765,6 @@ Skylink.prototype._parseDefaultMediaStreamSettings = function(options) {
   this._defaultStreamSettings.video.resolution.height = options.maxHeight;
 
   log.debug('Parsed default media stream settings', this._defaultStreamSettings);
-};
-
-/**
- * Function that parses the <code>getUserMedia()</code> settings provided.
- * @method _parseMediaStreamSettings
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._parseMediaStreamSettings = function(options) {
-  var hasMediaChanged = false;
-
-  options = options || {};
-
-  log.debug('Parsing stream settings. Stream options:', options);
-
-  // Set audio settings
-  var audioSettings = this._parseAudioStreamSettings(options.audio);
-  // check for change
-  this._streamSettings.audio = audioSettings.settings;
-  this._getUserMediaSettings.audio = audioSettings.userMedia;
-
-  // Set video settings
-  var videoSettings = this._parseVideoStreamSettings(options.video);
-  // check for change
-  this._streamSettings.video = videoSettings.settings;
-  this._getUserMediaSettings.video = videoSettings.userMedia;
-
-  // Set user media status options
-  var mutedSettings = this._parseMutedSettings(options);
-
-  this._mediaStreamsStatus = mutedSettings;
-
-  log.debug('Parsed user media stream settings', this._streamSettings);
-
-  log.debug('User media status:', this._mediaStreamsStatus);
 };
 
 /**
