@@ -1311,7 +1311,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
 
   if (options.video) {
     settings.settings.video = {
-      resolution: self.VIDEO_RESOLUTION.VGA,
+      resolution: this.VIDEO_RESOLUTION.VGA,
       frameRate: 50,
       optional: []
     };

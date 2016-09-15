@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 00:31:20 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 00:32:54 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11730,7 +11730,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
 
   if (options.video) {
     settings.settings.video = {
-      resolution: self.VIDEO_RESOLUTION.VGA,
+      resolution: this.VIDEO_RESOLUTION.VGA,
       frameRate: 50,
       optional: []
     };
