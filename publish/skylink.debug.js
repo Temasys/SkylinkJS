@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 00:43:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 00:55:52 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4400,7 +4400,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         receiveOnly: self._peerConnections[peerId] && self._peerConnections[peerId].receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
-        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+        sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
         explicit: !!explicit,
         temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       });
@@ -4780,7 +4780,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         receiveOnly: receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
-        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+        sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
         explicit: true,
         temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       });
@@ -4955,55 +4955,41 @@ Skylink.prototype.getUserData = function(peerId) {
  * @since 0.4.0
  */
 Skylink.prototype.getPeerInfo = function(peerId) {
-  var isNotSelf = this._user && this._user.sid ? peerId !== this._user.sid : false;
-
-  if (typeof peerId === 'string' && isNotSelf) {
-    // peer info
-    var peerInfo = this._peerInformations[peerId];
-
-    if (typeof peerInfo === 'object') {
-      return peerInfo;
-    }
-
-    return null;
-  } else {
-
-    var mediaSettings = {};
-    var mediaStatus = clone(this._mediaStreamsStatus) || {};
-
-    // add screensharing information
-    if (!!this._mediaScreen && this._mediaScreen !== null) {
-      mediaSettings = clone(this._screenSharingStreamSettings);
-      mediaSettings.bandwidth = clone(this._streamSettings.bandwidth);
-
-      if (mediaSettings.video) {
-        mediaSettings.video = {
-          screenshare: true
-        };
-      }
-    } else {
-      mediaSettings = clone(this._streamSettings);
-    }
-
-    if (!mediaSettings.audio) {
-      mediaStatus.audioMuted = true;
-    }
-
-    if (!mediaSettings.video) {
-      mediaStatus.videoMuted = true;
-    }
-
-    return {
-      userData: clone(this._userData) || '',
-      settings: mediaSettings || {},
-      mediaStatus: mediaStatus,
-      agent: {
-        name: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion
-      },
-      room: clone(this._selectedRoom)
-    };
+  if (typeof peerId === 'string' && typeof this._peerInformations[peerId] === 'object') {
+    return this._peerInformations[peerId];
   }
+
+  var peerInfo = {
+    userData: clone(this._userData) || '',
+    settings: {
+      audio: false,
+      video: false
+    },
+    mediaStatus: clone(this._streamsMutedSettings),
+    agent: {
+      name: window.webrtcDetectedBrowser,
+      version: window.webrtcDetectedVersion,
+      os: window.navigator.platform,
+      pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+    },
+    room: clone(this._selectedRoom)
+  };
+
+  if (this._streams.screenshare) {
+    peerInfo.settings = clone(this._streams.screenshare.settings);
+  } else if (this._streams.userMedia) {
+    peerInfo.settings = clone(this._streams.userMedia.settings);
+  }
+
+  if (!peerInfo.settings.audio) {
+    peerInfo.mediaStatus.audioMuted = true;
+  }
+
+  if (!peerInfo.settings.video) {
+    peerInfo.mediaStatus.videoMuted = true;
+  }
+
+  return peerInfo;
 };
 
 Skylink.prototype.HANDSHAKE_PROGRESS = {
@@ -9610,7 +9596,7 @@ Skylink.prototype._approachEventHandler = function(message){
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     receiveOnly: self._receiveOnly,
-    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+    sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
     target: message.target,
     weight: self._peerPriorityWeight,
     temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
@@ -9859,10 +9845,10 @@ Skylink.prototype._inRoomHandler = function(message) {
     self._peerPriorityWeight -= 100000000000;
   }
 
-  if (self._mediaScreen && self._mediaScreen !== null) {
-    self._trigger('incomingStream', self._user.sid, self._mediaScreen, true, self.getPeerInfo());
-  } else if (self._mediaStream && self._mediaStream !== null) {
-    self._trigger('incomingStream', self._user.sid, self._mediaStream, true, self.getPeerInfo());
+  if (self._streams.screenshare && self._streams.screenshare.stream) {
+    self._trigger('incomingStream', self._user.sid, self._streams.screenshare.stream, true, self.getPeerInfo());
+  } else if (self._streams.userMedia && self._streams.userMedia.stream) {
+    self._trigger('incomingStream', self._user.sid, self._streams.userMedia.stream, true, self.getPeerInfo());
   }
   // NOTE ALEX: should we wait for local streams?
   // or just go with what we have (if no stream, then one way?)
@@ -9878,7 +9864,7 @@ Skylink.prototype._inRoomHandler = function(message) {
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     receiveOnly: self._receiveOnly,
-    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+    sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
     weight: self._peerPriorityWeight,
     temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
   });
@@ -9943,7 +9929,7 @@ Skylink.prototype._enterHandler = function(message) {
     userInfo: self.getPeerInfo(),
     target: targetMid,
     weight: self._peerPriorityWeight,
-    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+    sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
     temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
   });
 
@@ -10047,7 +10033,7 @@ Skylink.prototype._restartHandler = function(message){
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
       receiveOnly: self._peerConnections[targetMid] && self._peerConnections[targetMid].receiveOnly,
-      sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+      sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
       // SkylinkJS parameters (copy the parameters from received message parameters)
       isConnectionRestart: !!message.isConnectionRestart,
       lastRestart: message.lastRestart,
@@ -10151,7 +10137,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       userInfo: this.getPeerInfo(),
       target: targetMid,
       weight: this._peerPriorityWeight,
-      sessionType: !!this._mediaScreen ? 'screensharing' : 'stream',
+      sessionType: !!this._streams.screenshare ? 'screensharing' : 'stream',
       temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
     });
   }

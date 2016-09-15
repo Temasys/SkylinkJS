@@ -842,7 +842,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         receiveOnly: self._peerConnections[peerId] && self._peerConnections[peerId].receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
-        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+        sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
         explicit: !!explicit,
         temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       });
@@ -1222,7 +1222,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         receiveOnly: receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
-        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+        sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
         explicit: true,
         temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       });

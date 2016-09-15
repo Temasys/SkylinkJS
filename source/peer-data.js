@@ -139,53 +139,39 @@ Skylink.prototype.getUserData = function(peerId) {
  * @since 0.4.0
  */
 Skylink.prototype.getPeerInfo = function(peerId) {
-  var isNotSelf = this._user && this._user.sid ? peerId !== this._user.sid : false;
-
-  if (typeof peerId === 'string' && isNotSelf) {
-    // peer info
-    var peerInfo = this._peerInformations[peerId];
-
-    if (typeof peerInfo === 'object') {
-      return peerInfo;
-    }
-
-    return null;
-  } else {
-
-    var mediaSettings = {};
-    var mediaStatus = clone(this._mediaStreamsStatus) || {};
-
-    // add screensharing information
-    if (!!this._mediaScreen && this._mediaScreen !== null) {
-      mediaSettings = clone(this._screenSharingStreamSettings);
-      mediaSettings.bandwidth = clone(this._streamSettings.bandwidth);
-
-      if (mediaSettings.video) {
-        mediaSettings.video = {
-          screenshare: true
-        };
-      }
-    } else {
-      mediaSettings = clone(this._streamSettings);
-    }
-
-    if (!mediaSettings.audio) {
-      mediaStatus.audioMuted = true;
-    }
-
-    if (!mediaSettings.video) {
-      mediaStatus.videoMuted = true;
-    }
-
-    return {
-      userData: clone(this._userData) || '',
-      settings: mediaSettings || {},
-      mediaStatus: mediaStatus,
-      agent: {
-        name: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion
-      },
-      room: clone(this._selectedRoom)
-    };
+  if (typeof peerId === 'string' && typeof this._peerInformations[peerId] === 'object') {
+    return this._peerInformations[peerId];
   }
+
+  var peerInfo = {
+    userData: clone(this._userData) || '',
+    settings: {
+      audio: false,
+      video: false
+    },
+    mediaStatus: clone(this._streamsMutedSettings),
+    agent: {
+      name: window.webrtcDetectedBrowser,
+      version: window.webrtcDetectedVersion,
+      os: window.navigator.platform,
+      pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+    },
+    room: clone(this._selectedRoom)
+  };
+
+  if (this._streams.screenshare) {
+    peerInfo.settings = clone(this._streams.screenshare.settings);
+  } else if (this._streams.userMedia) {
+    peerInfo.settings = clone(this._streams.userMedia.settings);
+  }
+
+  if (!peerInfo.settings.audio) {
+    peerInfo.mediaStatus.audioMuted = true;
+  }
+
+  if (!peerInfo.settings.video) {
+    peerInfo.mediaStatus.videoMuted = true;
+  }
+
+  return peerInfo;
 };
