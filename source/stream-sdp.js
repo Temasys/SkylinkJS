@@ -84,7 +84,7 @@ Skylink.prototype._addSDPStereo = function(sdpLines) {
  * @since 0.5.10
  */
 Skylink.prototype._setSDPVideoResolution = function(sdpLines){
-  var video = this._streamSettings.video;
+  var video = this._streams.userMedia && this._streams.userMedia.settings.video;
   var frameRate = video.frameRate || 50;
   var resolution = {
     width: 320,
