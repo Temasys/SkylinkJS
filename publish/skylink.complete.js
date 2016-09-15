@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Thu Sep 15 2016 14:07:26 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Thu Sep 15 2016 15:22:58 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10461,7 +10461,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.14 - Thu Sep 15 2016 14:07:26 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Thu Sep 15 2016 15:22:58 GMT+0800 (SGT) */
 
 (function() {
 
@@ -22197,13 +22197,31 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
   log.log([null, 'MediaStream', stream.id,
     'User has granted access to local media'], stream);
 
-  var streamEnded = function () {
-    log.log([null, 'MediaStream', stream.id, 'Local mediastream has ended'], {
-      inRoom: self._inRoom,
-      currentTime: stream.currentTime,
-      ended: typeof stream.active === 'boolean' ?
-        stream.active : stream.ended
+  // Stop previous stream
+  if (!isScreenSharing && self._mediaStream) {
+    self._stopLocalMediaStreams({
+      userMedia: true,
+      screenshare: false
     });
+
+  } else {
+    self._stopLocalMediaStreams({
+      userMedia: false,
+      screenshare: true
+    });
+  }
+
+  var hasTriggeredEnded = false;
+  var streamEnded = function () {
+    if (hasTriggeredEnded) {
+      return;
+    }
+
+    log.log([null, 'MediaStream', stream.id, 'Local mediastream has ended']);
+
+    hasTriggeredEnded = true;
+
+    self._trigger('mediaAccessStopped', !!isScreenSharing);
 
     if (self._inRoom) {
       log.debug([null, 'MediaStream', stream.id, 'Sending mediastream ended status']);
@@ -22215,20 +22233,21 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
         sessionType: !!isScreenSharing ? 'screensharing' : 'stream',
         status: 'ended'
       });
+
+      self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true, !!isScreenSharing);
     }
-    self._trigger('streamEnded', self._user.sid || null, self.getPeerInfo(), true, !!isScreenSharing);
   };
 
   // chrome uses the new specs
   if (window.webrtcDetectedBrowser === 'chrome' || window.webrtcDetectedBrowser === 'opera') {
     stream.oninactive = streamEnded;
+
   // Workaround for local stream.onended because firefox has not yet implemented it
   } else if (window.webrtcDetectedBrowser === 'firefox') {
     stream.endedInterval = setInterval(function () {
       if (typeof stream.recordedTime === 'undefined') {
         stream.recordedTime = 0;
       }
-
       if (stream.recordedTime === stream.currentTime) {
         clearInterval(stream.endedInterval);
         // trigger that it has ended
@@ -22237,8 +22256,8 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
       } else {
         stream.recordedTime = stream.currentTime;
       }
-
     }, 1000);
+
   } else {
     stream.onended = streamEnded;
   }
@@ -22248,46 +22267,11 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
     self._mediaStream = stream;
   } else {
     self._mediaScreen = stream;
-
-    /*// for the case where local user media (audio) is not available for screensharing audio is, do not mute it
-    if (!self._streamSettings.audio) {
-      self._mediaStreamsStatus.audioMuted = !self._screenSharingStreamSettings.audio;
-    }
-
-    // for the case where local user media (video) is not available for screensharing video is, do not mute it
-    // logically, this should always pass because screensharing will always require video
-    if (!self._streamSettings.video) {
-      self._mediaStreamsStatus.videoMuted = !self._screenSharingStreamSettings.video;
-    }*/
   }
 
   self._muteLocalMediaStreams();
 
-  self._wait(function () {
-    self._trigger('mediaAccessSuccess', stream, !!isScreenSharing);
-  }, function () {
-    if (!isScreenSharing) {
-      return self._mediaStream && self._mediaStream !== null;
-    } else {
-      return self._mediaScreen && self._mediaScreen !== null;
-    }
-  });
-
-  /*self._condition('readyStateChange', function () {
-    // check if users is in the room already
-    self._condition('peerJoined', function () {
-      self._trigger('incomingStream', self._user.sid, stream, true,
-        self.getPeerInfo(), !!isScreenSharing);
-    }, function () {
-      return self._inRoom;
-    }, function (peerId, peerInfo, isSelf) {
-      return isSelf;
-    });
-  }, function () {
-    return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
-  }, function (state) {
-    return state === self.READY_STATE_CHANGE.COMPLETED;
-  });*/
+  self._trigger('mediaAccessSuccess', stream, !!isScreenSharing);
 };
 
 /**
@@ -22851,7 +22835,7 @@ Skylink.prototype._stopLocalMediaStreams = function (options) {
     if (triggerStopped) {
       this._screenSharingStreamSettings.audio = false;
       this._screenSharingStreamSettings.video = false;
-      this._trigger('mediaAccessStopped', true);
+      //this._trigger('mediaAccessStopped', true);
     }
 
   } else {
@@ -22870,7 +22854,7 @@ Skylink.prototype._stopLocalMediaStreams = function (options) {
     if (triggerStopped) {
       this._streamSettings.audio = false;
       this._streamSettings.video = false;
-      this._trigger('mediaAccessStopped', false);
+      //this._trigger('mediaAccessStopped', false);
     }
   } else {
     log.log([null, 'MediaStream', self._selectedRoom, 'User\'s MediaStream will not be stopped']);
