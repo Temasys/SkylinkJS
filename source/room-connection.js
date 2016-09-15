@@ -692,7 +692,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 
         }, function (error, success) {
           if (error) {
-            callback(error);
+            callback(error, null);
           } else {
             callback(null, success);
           }

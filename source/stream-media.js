@@ -490,6 +490,32 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     return;
   }*/
 
+  var mediaAccessSuccessFn = function (stream) {
+    if (typeof callback === 'function') {
+      callback(null, stream);
+    }
+  };
+
+  var mediaAccessErrorFn = function (error) {
+    if (typeof callback === 'function') {
+      callback(error, null);
+    }
+  };
+
+  self.once('mediaAccessSuccess', function (stream) {
+    self.off('mediaAccessError', mediaAccessErrorFn);
+    mediaAccessSuccessFn(stream);
+  }, function (stream, isScreensharing) {
+    return !isScreensharing;
+  });
+
+  self.once('mediaAccessError', function (error) {
+    self.off('mediaAccessSuccess', mediaAccessSuccessFn);
+    mediaAccessErrorFn(error);
+  }, function (error, isScreensharing) {
+    return !isScreensharing;
+  });
+
   // Parse stream settings
   var settings = self._parseStreamSettings(options);
 
