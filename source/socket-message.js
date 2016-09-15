@@ -926,6 +926,13 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }*/
 
+  // Add-on by Web SDK fixes
+  if (message.userInfo && typeof message.userInfo === 'object') {
+    self._peerInformations[targetMid].settings = message.userInfo.settings;
+    self._peerInformations[targetMid].mediaStatus = message.userInfo.mediaStatus;
+    self._peerInformations[targetMid].userData = message.userInfo.userData;
+  }
+
   log.log([targetMid, null, message.type, 'Received offer from peer. ' +
     'Session description:'], message.sdp);
   var offer = new window.RTCSessionDescription({
@@ -1100,6 +1107,13 @@ Skylink.prototype._answerHandler = function(message) {
     log.error([targetMid, null, message.type, 'Peer connection object ' +
       'not found. Unable to setRemoteDescription for answer']);
     return;
+  }
+
+  // Add-on by Web SDK fixes
+  if (message.userInfo && typeof message.userInfo === 'object') {
+    self._peerInformations[targetMid].settings = message.userInfo.settings;
+    self._peerInformations[targetMid].mediaStatus = message.userInfo.mediaStatus;
+    self._peerInformations[targetMid].userData = message.userInfo.userData;
   }
 
   var answer = new window.RTCSessionDescription({
