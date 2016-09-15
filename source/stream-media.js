@@ -624,8 +624,10 @@ Skylink.prototype.sendStream = function(options, callback) {
 
   var restartFn = function (stream) {
     if (self._inRoom) {
-      self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo());
-      self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+      if (!self._streams.screenshare) {
+        self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo());
+        self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+      }
 
       if (Object.keys(self._peerConnections).length > 0) {
         self._refreshPeerConnection(Object.keys(self._peerConnections), false, function (err, success) {

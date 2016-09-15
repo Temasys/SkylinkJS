@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 03:43:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 03:45:05 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11101,8 +11101,10 @@ Skylink.prototype.sendStream = function(options, callback) {
 
   var restartFn = function (stream) {
     if (self._inRoom) {
-      self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo());
-      self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+      if (!self._streams.screenshare) {
+        self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo());
+        self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+      }
 
       if (Object.keys(self._peerConnections).length > 0) {
         self._refreshPeerConnection(Object.keys(self._peerConnections), false, function (err, success) {
