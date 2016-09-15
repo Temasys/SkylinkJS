@@ -258,6 +258,16 @@ Skylink.prototype._streamsMutedSettings = {
 };
 
 /**
+ * Stores all the Stream sending maximum bandwidth settings.
+ * @attribute _streamsBandwidthSettings
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._streamsBandwidthSettings = {};
+
+/**
  * Stores all the Stream stopped callbacks.
  * @attribute _streamsStoppedCbs
  * @type JSON
@@ -1540,87 +1550,6 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
 };
 
 /**
- * Function that parses the <code>joinRoom()</code> bandwidth settings provided.
- * This parses and sets any missing values to default.
- * @method _parseBandwidthSettings
- * @private
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._parseBandwidthSettings = function (bwOptions) {
-  this._streamSettings.bandwidth = {};
-
-  bwOptions = (typeof bwOptions === 'object') ?
-    bwOptions : {};
-
-  // Configure the audio bandwidth. Recommended = 50
-  if (typeof bwOptions.audio === 'number') {
-    this._streamSettings.bandwidth.audio = bwOptions.audio;
-  }
-
-  // Configure the video bandwidth. Recommended = 256
-  if (typeof bwOptions.video === 'number') {
-    this._streamSettings.bandwidth.video = bwOptions.video;
-  }
-
-  // Configure the data bandwidth. Recommended = 1638400
-  if (typeof bwOptions.data === 'number') {
-    this._streamSettings.bandwidth.data = bwOptions.data;
-  }
-};
-
-/**
- * Function that parses the <code>getUserMedia()</code> audio/video mute settings provided.
- * This parses and sets any missing values to default.
- * @method _parseMutedSettings
- * @private
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._parseMutedSettings = function (options) {
-  // the stream options
-  options = (typeof options === 'object') ?
-    options : { audio: false, video: false };
-
-  var updateAudioMuted = (typeof options.audio === 'object') ?
-    !!options.audio.mute : false;//!options.audio;
-  var updateVideoMuted = (typeof options.video === 'object') ?
-    !!options.video.mute : false;//!options.video;
-
-  return {
-    audioMuted: updateAudioMuted,
-    videoMuted: updateVideoMuted
-  };
-};
-
-/**
- * Function that parses the <code>getUserMedia()</code> default settings received from the API result.
- * @method _parseDefaultMediaStreamSettings
- * @private
- * @for Skylink
- * @since 0.5.7
- */
-Skylink.prototype._parseDefaultMediaStreamSettings = function(options) {
-  var hasMediaChanged = false;
-
-  // prevent undefined error
-  options = options || {};
-
-  log.debug('Parsing stream settings. Default stream options:', options);
-
-  options.maxWidth = (typeof options.maxWidth === 'number') ? options.maxWidth :
-    640;
-  options.maxHeight = (typeof options.maxHeight === 'number') ? options.maxHeight :
-    480;
-
-  // parse video resolution. that's for now
-  this._defaultStreamSettings.video.resolution.width = options.maxWidth;
-  this._defaultStreamSettings.video.resolution.height = options.maxHeight;
-
-  log.debug('Parsed default media stream settings', this._defaultStreamSettings);
-};
-
-/**
  * Function that sets User's Stream to send to Peer connection.
  * Priority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.
  * @method _addLocalMediaStreams
@@ -1690,80 +1619,5 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
       // Fix errors thrown like NS_ERROR_UNEXPECTED
       log.error([peerId, null, null, 'Failed adding local stream'], error);
     }
-  }
-};
-
-/**
- * Function that waits for Stream to be retrieved before firing callback.
- * @method _waitForLocalMediaStream
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
-  var self = this;
-  options = options || {};
-
-  // get the stream
-  if (options.manualGetUserMedia === true) {
-    self._trigger('mediaAccessRequired');
-  }
-  // If options video or audio false, do the opposite to throw a true.
-  var requireAudio = !!options.audio;
-  var requireVideo = !!options.video;
-
-  log.log('Requested audio:', requireAudio);
-  log.log('Requested video:', requireVideo);
-
-  // check if it requires audio or video
-  if (!requireAudio && !requireVideo && !options.manualGetUserMedia) {
-    // set to default
-    if (options.audio === false && options.video === false) {
-      self._parseMediaStreamSettings(options);
-    }
-
-    callback(null);
-    return;
-  }
-
-  // get the user media
-  if (!options.manualGetUserMedia && (options.audio || options.video)) {
-    self.getUserMedia({
-      audio: options.audio,
-      video: options.video
-
-    }, function (error, success) {
-      if (error) {
-        callback(error);
-      } else {
-        callback(null, success);
-      }
-    });
-  }
-
-  // clear previous mediastreams
-  self.stopStream();
-
-  if (options.manualGetUserMedia === true) {
-    var current50Block = 0;
-    var mediaAccessRequiredFailure = false;
-    // wait for available audio or video stream
-    self._wait(function () {
-      if (mediaAccessRequiredFailure === true) {
-        self._onUserMediaError(new Error('Waiting for stream timeout'), false, false);
-      } else {
-        callback(null, self._mediaStream);
-      }
-    }, function () {
-      current50Block += 1;
-      if (current50Block === 600) {
-        mediaAccessRequiredFailure = true;
-        return true;
-      }
-
-      if (self._mediaStream && self._mediaStream !== null) {
-        return true;
-      }
-    }, 50);
   }
 };

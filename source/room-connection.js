@@ -641,12 +641,64 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
     self._condition('channelOpen', function() {
       mediaOptions = mediaOptions || {};
 
-      // parse user data settings
-      self._parseUserData(mediaOptions.userData || self._userData);
-      self._parseBandwidthSettings(mediaOptions.bandwidth);
+      self._userData = mediaOptions.userData || self._userData || '';
+      self._streamsBandwidthSettings = {};
 
-      // wait for local mediastream
-      self._waitForLocalMediaStream(callback, mediaOptions);
+      if (mediaOptions.bandwidth) {
+        if (typeof mediaOptions.bandwidth.audio === 'number') {
+          self._streamsBandwidthSettings.audio = mediaOptions.bandwidth.audio;
+        }
+
+        if (typeof mediaOptions.bandwidth.video === 'number') {
+          self._streamsBandwidthSettings.video = mediaOptions.bandwidth.video;
+        }
+
+        if (typeof mediaOptions.bandwidth.data === 'number') {
+          self._streamsBandwidthSettings.data = mediaOptions.bandwidth.data;
+        }
+      }
+
+      // get the stream
+      if (mediaOptions.manualGetUserMedia === true) {
+        self._trigger('mediaAccessRequired');
+
+        var current50Block = 0;
+        var mediaAccessRequiredFailure = false;
+        // wait for available audio or video stream
+        self._wait(function () {
+          if (mediaAccessRequiredFailure === true) {
+            self._onUserMediaError(new Error('Waiting for stream timeout'), false, false);
+          } else {
+            callback(null, self._streams.userMedia.stream);
+          }
+        }, function () {
+          current50Block += 1;
+          if (current50Block === 600) {
+            mediaAccessRequiredFailure = true;
+            return true;
+          }
+
+          if (self._streams.userMedia && self._streams.userMedia.stream) {
+            return true;
+          }
+        }, 50);
+        return;
+      }
+
+      if (mediaOptions.audio || mediaOptions.video) {
+        self.getUserMedia({
+          audio: mediaOptions.audio,
+          video: mediaOptions.video
+
+        }, function (error, success) {
+          if (error) {
+            callback(error);
+          } else {
+            callback(null, success);
+          }
+        });
+      }
+
     }, function() { // open channel first if it's not opened
 
       if (!self._channelOpen) {

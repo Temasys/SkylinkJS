@@ -73,8 +73,8 @@ Skylink.prototype._userData = '';
  */
 Skylink.prototype.setUserData = function(userData) {
   var self = this;
-  // NOTE ALEX: be smarter and copy fields and only if different
-  self._parseUserData(userData);
+
+  this._userData = userData || '';
 
   if (self._inRoom) {
     log.log('Updated userData -> ', userData);
@@ -188,17 +188,4 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       room: clone(this._selectedRoom)
     };
   }
-};
-
-/**
- * Function that parses the User custom data provided.
- * @method _parseUserData
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._parseUserData = function(userData) {
-  log.debug('Parsing user data:', userData);
-
-  this._userData = userData || '';
 };

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Thu Sep 15 2016 19:48:32 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Thu Sep 15 2016 20:28:28 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10461,7 +10461,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.14 - Thu Sep 15 2016 19:48:32 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Thu Sep 15 2016 20:28:28 GMT+0800 (SGT) */
 
 (function() {
 
@@ -15352,8 +15352,8 @@ Skylink.prototype._userData = '';
  */
 Skylink.prototype.setUserData = function(userData) {
   var self = this;
-  // NOTE ALEX: be smarter and copy fields and only if different
-  self._parseUserData(userData);
+
+  this._userData = userData || '';
 
   if (self._inRoom) {
     log.log('Updated userData -> ', userData);
@@ -15467,19 +15467,6 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       room: clone(this._selectedRoom)
     };
   }
-};
-
-/**
- * Function that parses the User custom data provided.
- * @method _parseUserData
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._parseUserData = function(userData) {
-  log.debug('Parsing user data:', userData);
-
-  this._userData = userData || '';
 };
 
 Skylink.prototype.HANDSHAKE_PROGRESS = {
@@ -15837,18 +15824,16 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   // remove h264 invalid pref
   sdpLines = self._removeSDPFirefoxH264Pref(sdpLines);
   // Check if stereo was enabled
-  if (self._streamSettings.hasOwnProperty('audio')) {
-    if (self._streamSettings.audio.stereo) {
-      self._addSDPStereo(sdpLines);
-    }
+  if (self._streams.userMedia && self._streams.settings.audio && self._stream.settings.audio.stereo) {
+    self._addSDPStereo(sdpLines);
+
+    log.info([targetMid, null, null, 'Appending OPUS stereo flag']);
   }
 
-  log.info([targetMid, null, null, 'Requested stereo:'], (self._streamSettings.audio ?
-    (self._streamSettings.audio.stereo ? self._streamSettings.audio.stereo : false) :
-    false));
+
 
   // set sdp bitrate
-  if (self._streamSettings.hasOwnProperty('bandwidth')) {
+  if (self._streamsBandwidthSettings) {
     var peerSettings = (self._peerInformations[targetMid] || {}).settings || {};
 
     sdpLines = self._setSDPBitrate(sdpLines, peerSettings);
@@ -16816,12 +16801,64 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
     self._condition('channelOpen', function() {
       mediaOptions = mediaOptions || {};
 
-      // parse user data settings
-      self._parseUserData(mediaOptions.userData || self._userData);
-      self._parseBandwidthSettings(mediaOptions.bandwidth);
+      self._userData = mediaOptions.userData || self._userData || '';
+      self._streamsBandwidthSettings = {};
 
-      // wait for local mediastream
-      self._waitForLocalMediaStream(callback, mediaOptions);
+      if (mediaOptions.bandwidth) {
+        if (typeof mediaOptions.bandwidth.audio === 'number') {
+          self._streamsBandwidthSettings.audio = mediaOptions.bandwidth.audio;
+        }
+
+        if (typeof mediaOptions.bandwidth.video === 'number') {
+          self._streamsBandwidthSettings.video = mediaOptions.bandwidth.video;
+        }
+
+        if (typeof mediaOptions.bandwidth.data === 'number') {
+          self._streamsBandwidthSettings.data = mediaOptions.bandwidth.data;
+        }
+      }
+
+      // get the stream
+      if (mediaOptions.manualGetUserMedia === true) {
+        self._trigger('mediaAccessRequired');
+
+        var current50Block = 0;
+        var mediaAccessRequiredFailure = false;
+        // wait for available audio or video stream
+        self._wait(function () {
+          if (mediaAccessRequiredFailure === true) {
+            self._onUserMediaError(new Error('Waiting for stream timeout'), false, false);
+          } else {
+            callback(null, self._streams.userMedia.stream);
+          }
+        }, function () {
+          current50Block += 1;
+          if (current50Block === 600) {
+            mediaAccessRequiredFailure = true;
+            return true;
+          }
+
+          if (self._streams.userMedia && self._streams.userMedia.stream) {
+            return true;
+          }
+        }, 50);
+        return;
+      }
+
+      if (mediaOptions.audio || mediaOptions.video) {
+        self.getUserMedia({
+          audio: mediaOptions.audio,
+          video: mediaOptions.video
+
+        }, function (error, success) {
+          if (error) {
+            callback(error);
+          } else {
+            callback(null, success);
+          }
+        });
+      }
+
     }, function() { // open channel first if it's not opened
 
       if (!self._channelOpen) {
@@ -21109,6 +21146,16 @@ Skylink.prototype._streamsMutedSettings = {
 };
 
 /**
+ * Stores all the Stream sending maximum bandwidth settings.
+ * @attribute _streamsBandwidthSettings
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._streamsBandwidthSettings = {};
+
+/**
  * Stores all the Stream stopped callbacks.
  * @attribute _streamsStoppedCbs
  * @type JSON
@@ -21128,11 +21175,17 @@ Skylink.prototype._streamsStoppedCbs = {};
  * @param {Boolean|JSON} [options.audio=false] The audio configuration options.
  * @param {Boolean} [options.audio.stereo=false] The flag if stereo band should be configured
  *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
- * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
+ * @param {Boolean} [options.audio.mute=false] <blockquote class="info">
+ *   Note that this mutes any existing <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>
+ *   audio tracks as well. <blockquote> The flag if audio tracks should be muted upon receiving them.
+ *   <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.audioMuted</code>.</small>
  * @param {Array} [options.audio.optional] The <code>navigator.getUserMedia()</code> API
  *   <code>audio: { optional [..] }</code> property.
  * @param {Boolean|JSON} [options.video=false] The video configuration options.
- * @param {Boolean} [options.video.mute=false] The flag if video tracks should be muted upon receiving them.
+ * @param {Boolean} [options.video.mute=false] <blockquote class="info">
+ *   Note that this mutes any existing <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>
+ *   video tracks as well. <blockquote> The flag if video tracks should be muted upon receiving them.
+ *   <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.videoMuted</code>.</small>
  * @param {JSON} [options.video.resolution] <blockquote class="info">
  *   Note that currently <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> only configures
  *   the maximum resolution of the camera Stream due to browser interopability and support. </blockquote>
@@ -21329,6 +21382,14 @@ Skylink.prototype.getUserMedia = function(options,callback) {
   var settings = self._parseStreamSettings(options);
 
   navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
+    if (settings.mutedSettings.shouldAudioMuted) {
+      self._streamsMutedSettings.audioMuted = true;
+    }
+
+    if (settings.mutedSettings.shouldVideoMuted) {
+      self._streamsMutedSettings.videoMuted = true;
+    }
+
     self._onStreamAccessSuccess(stream, settings, false, false);
 
   }, function (error) {
@@ -21961,35 +22022,17 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
  * @since 0.6.0
  */
 Skylink.prototype.stopScreen = function () {
-  if (this._mediaScreen && this._mediaScreen !== null) {
-    this._stopLocalMediaStreams({
+  if (this._streams.screenshare) {
+    this._stopStreams({
       screenshare: true
     });
 
-    /*// for changes where the audio is not muted in here but the original mediastream has no audio
-    if (!this._mediaStreamsStatus.audioMuted && !this._streamSettings.audio) {
-      this._mediaStreamsStatus.audioMuted = true;
-    }
-
-    // for changes where the video is not muted in here but the original mediastream has no video
-    if (!this._mediaStreamsStatus.videoMuted && !this._streamSettings.video) {
-      this._mediaStreamsStatus.videoMuted = true;
-    }*/
-
     if (this._inRoom) {
-      if (this._hasMCU) {
-        this._restartMCUConnection();
-      } else {
-        if (!!this._mediaStream && this._mediaStream !== null) {
-          this._trigger('incomingStream', this._user.sid, this._mediaStream, true,
-            this.getPeerInfo(), false);
-        }
-        for (var peer in this._peerConnections) {
-          if (this._peerConnections.hasOwnProperty(peer)) {
-            this._restartPeerConnection(peer, true, false, null, true);
-          }
-        }
+      if (this._streams.userMedia && this._streams.userMedia.stream) {
+        this._trigger('incomingStream', this._user.sid, this._streams.userMedia.stream, true, this.getPeerInfo());
+        this._trigger('peerUpdated', this._user.sid, this.getPeerInfo(), true);
       }
+      this.refreshConnection();
     }
   }
 };
@@ -22123,6 +22166,7 @@ Skylink.prototype._stopStreams = function (options) {
 Skylink.prototype._parseStreamSettings = function(options) {
   var settings = {
     settings: { audio: false, video: false },
+    mutedSettings: { shouldAudioMuted: false, shouldVideoMuted: false },
     getUserMediaSettings: { audio: false, video: false }
   };
 
@@ -22135,6 +22179,10 @@ Skylink.prototype._parseStreamSettings = function(options) {
 
     if (typeof options.audio.stereo === 'boolean') {
       settings.settings.audio.stereo = options.audio.stereo;
+    }
+
+    if (typeof options.audio.mute === 'boolean') {
+      settings.mutedSettings.shouldAudioMuted = options.audio.mute;
     }
 
     // New constraints { sourceId: { exact: xxx }}
@@ -22159,6 +22207,10 @@ Skylink.prototype._parseStreamSettings = function(options) {
 
     if (typeof options.video.frameRate === 'number') {
       settings.settings.video.frameRate = options.video.frameRate;
+    }
+
+    if (typeof options.video.mute === 'boolean') {
+      settings.mutedSettings.shouldVideoMuted = options.video.mute;
     }
 
     // New constraints { sourceId: { exact: xxx }}
@@ -22386,87 +22438,6 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
 };
 
 /**
- * Function that parses the <code>joinRoom()</code> bandwidth settings provided.
- * This parses and sets any missing values to default.
- * @method _parseBandwidthSettings
- * @private
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._parseBandwidthSettings = function (bwOptions) {
-  this._streamSettings.bandwidth = {};
-
-  bwOptions = (typeof bwOptions === 'object') ?
-    bwOptions : {};
-
-  // Configure the audio bandwidth. Recommended = 50
-  if (typeof bwOptions.audio === 'number') {
-    this._streamSettings.bandwidth.audio = bwOptions.audio;
-  }
-
-  // Configure the video bandwidth. Recommended = 256
-  if (typeof bwOptions.video === 'number') {
-    this._streamSettings.bandwidth.video = bwOptions.video;
-  }
-
-  // Configure the data bandwidth. Recommended = 1638400
-  if (typeof bwOptions.data === 'number') {
-    this._streamSettings.bandwidth.data = bwOptions.data;
-  }
-};
-
-/**
- * Function that parses the <code>getUserMedia()</code> audio/video mute settings provided.
- * This parses and sets any missing values to default.
- * @method _parseMutedSettings
- * @private
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._parseMutedSettings = function (options) {
-  // the stream options
-  options = (typeof options === 'object') ?
-    options : { audio: false, video: false };
-
-  var updateAudioMuted = (typeof options.audio === 'object') ?
-    !!options.audio.mute : false;//!options.audio;
-  var updateVideoMuted = (typeof options.video === 'object') ?
-    !!options.video.mute : false;//!options.video;
-
-  return {
-    audioMuted: updateAudioMuted,
-    videoMuted: updateVideoMuted
-  };
-};
-
-/**
- * Function that parses the <code>getUserMedia()</code> default settings received from the API result.
- * @method _parseDefaultMediaStreamSettings
- * @private
- * @for Skylink
- * @since 0.5.7
- */
-Skylink.prototype._parseDefaultMediaStreamSettings = function(options) {
-  var hasMediaChanged = false;
-
-  // prevent undefined error
-  options = options || {};
-
-  log.debug('Parsing stream settings. Default stream options:', options);
-
-  options.maxWidth = (typeof options.maxWidth === 'number') ? options.maxWidth :
-    640;
-  options.maxHeight = (typeof options.maxHeight === 'number') ? options.maxHeight :
-    480;
-
-  // parse video resolution. that's for now
-  this._defaultStreamSettings.video.resolution.width = options.maxWidth;
-  this._defaultStreamSettings.video.resolution.height = options.maxHeight;
-
-  log.debug('Parsed default media stream settings', this._defaultStreamSettings);
-};
-
-/**
  * Function that sets User's Stream to send to Peer connection.
  * Priority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.
  * @method _addLocalMediaStreams
@@ -22536,81 +22507,6 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
       // Fix errors thrown like NS_ERROR_UNEXPECTED
       log.error([peerId, null, null, 'Failed adding local stream'], error);
     }
-  }
-};
-
-/**
- * Function that waits for Stream to be retrieved before firing callback.
- * @method _waitForLocalMediaStream
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
-  var self = this;
-  options = options || {};
-
-  // get the stream
-  if (options.manualGetUserMedia === true) {
-    self._trigger('mediaAccessRequired');
-  }
-  // If options video or audio false, do the opposite to throw a true.
-  var requireAudio = !!options.audio;
-  var requireVideo = !!options.video;
-
-  log.log('Requested audio:', requireAudio);
-  log.log('Requested video:', requireVideo);
-
-  // check if it requires audio or video
-  if (!requireAudio && !requireVideo && !options.manualGetUserMedia) {
-    // set to default
-    if (options.audio === false && options.video === false) {
-      self._parseMediaStreamSettings(options);
-    }
-
-    callback(null);
-    return;
-  }
-
-  // get the user media
-  if (!options.manualGetUserMedia && (options.audio || options.video)) {
-    self.getUserMedia({
-      audio: options.audio,
-      video: options.video
-
-    }, function (error, success) {
-      if (error) {
-        callback(error);
-      } else {
-        callback(null, success);
-      }
-    });
-  }
-
-  // clear previous mediastreams
-  self.stopStream();
-
-  if (options.manualGetUserMedia === true) {
-    var current50Block = 0;
-    var mediaAccessRequiredFailure = false;
-    // wait for available audio or video stream
-    self._wait(function () {
-      if (mediaAccessRequiredFailure === true) {
-        self._onUserMediaError(new Error('Waiting for stream timeout'), false, false);
-      } else {
-        callback(null, self._mediaStream);
-      }
-    }, function () {
-      current50Block += 1;
-      if (current50Block === 600) {
-        mediaAccessRequiredFailure = true;
-        return true;
-      }
-
-      if (self._mediaStream && self._mediaStream !== null) {
-        return true;
-      }
-    }, 50);
   }
 };
 Skylink.prototype._selectedAudioCodec = 'auto';
@@ -22776,7 +22672,7 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
  */
 Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
   // Find if user has audioStream
-  var bandwidth = this._streamSettings.bandwidth;
+  var bandwidth = this._streamsBandwidthSettings;
 
   // Prevent setting of bandwidth audio if not configured
   if (typeof bandwidth.audio === 'number' && bandwidth.audio > 0) {

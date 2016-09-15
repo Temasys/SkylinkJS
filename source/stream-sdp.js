@@ -170,7 +170,7 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
  */
 Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
   // Find if user has audioStream
-  var bandwidth = this._streamSettings.bandwidth;
+  var bandwidth = this._streamsBandwidthSettings;
 
   // Prevent setting of bandwidth audio if not configured
   if (typeof bandwidth.audio === 'number' && bandwidth.audio > 0) {
