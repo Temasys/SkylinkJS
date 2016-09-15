@@ -277,11 +277,17 @@ Skylink.prototype._streamsStoppedCbs = {};
  * @param {Boolean|JSON} [options.audio=false] The audio configuration options.
  * @param {Boolean} [options.audio.stereo=false] The flag if stereo band should be configured
  *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
- * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
+ * @param {Boolean} [options.audio.mute=false] <blockquote class="info">
+ *   Note that this mutes any existing <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>
+ *   audio tracks as well. <blockquote> The flag if audio tracks should be muted upon receiving them.
+ *   <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.audioMuted</code>.</small>
  * @param {Array} [options.audio.optional] The <code>navigator.getUserMedia()</code> API
  *   <code>audio: { optional [..] }</code> property.
  * @param {Boolean|JSON} [options.video=false] The video configuration options.
- * @param {Boolean} [options.video.mute=false] The flag if video tracks should be muted upon receiving them.
+ * @param {Boolean} [options.video.mute=false] <blockquote class="info">
+ *   Note that this mutes any existing <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>
+ *   video tracks as well. <blockquote> The flag if video tracks should be muted upon receiving them.
+ *   <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.videoMuted</code>.</small>
  * @param {JSON} [options.video.resolution] <blockquote class="info">
  *   Note that currently <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> only configures
  *   the maximum resolution of the camera Stream due to browser interopability and support. </blockquote>
@@ -478,6 +484,14 @@ Skylink.prototype.getUserMedia = function(options,callback) {
   var settings = self._parseStreamSettings(options);
 
   navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
+    if (settings.mutedSettings.shouldAudioMuted) {
+      self._streamsMutedSettings.audioMuted = true;
+    }
+
+    if (settings.mutedSettings.shouldVideoMuted) {
+      self._streamsMutedSettings.videoMuted = true;
+    }
+
     self._onStreamAccessSuccess(stream, settings, false, false);
 
   }, function (error) {
@@ -1272,6 +1286,7 @@ Skylink.prototype._stopStreams = function (options) {
 Skylink.prototype._parseStreamSettings = function(options) {
   var settings = {
     settings: { audio: false, video: false },
+    mutedSettings: { shouldAudioMuted: false, shouldVideoMuted: false },
     getUserMediaSettings: { audio: false, video: false }
   };
 
@@ -1284,6 +1299,10 @@ Skylink.prototype._parseStreamSettings = function(options) {
 
     if (typeof options.audio.stereo === 'boolean') {
       settings.settings.audio.stereo = options.audio.stereo;
+    }
+
+    if (typeof options.audio.mute === 'boolean') {
+      settings.mutedSettings.shouldAudioMuted = options.audio.mute;
     }
 
     // New constraints { sourceId: { exact: xxx }}
@@ -1308,6 +1327,10 @@ Skylink.prototype._parseStreamSettings = function(options) {
 
     if (typeof options.video.frameRate === 'number') {
       settings.settings.video.frameRate = options.video.frameRate;
+    }
+
+    if (typeof options.video.mute === 'boolean') {
+      settings.mutedSettings.shouldVideoMuted = options.video.mute;
     }
 
     // New constraints { sourceId: { exact: xxx }}
