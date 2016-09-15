@@ -443,8 +443,10 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
   log.log([targetMid, null, message.type, 'Peer\'s audio muted:'], message.muted);
   if (this._peerInformations[targetMid]) {
     this._peerInformations[targetMid].mediaStatus.audioMuted = message.muted;
-    this._trigger('peerUpdated', targetMid,
-      this.getPeerInfo(targetMid), false);
+    this._trigger('streamMuted', targetMid, this.getPeerInfo(targetMid), false,
+      this._peerInformations[targetMid].settings.video &&
+      this._peerInformations[targetMid].settings.video.screenshare);
+    this._trigger('peerUpdated', targetMid, this.getPeerInfo(targetMid), false);
   } else {
     log.log([targetMid, message.type, 'Peer does not have any user information']);
   }
@@ -464,6 +466,9 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
   log.log([targetMid, null, message.type, 'Peer\'s video muted:'], message.muted);
   if (this._peerInformations[targetMid]) {
     this._peerInformations[targetMid].mediaStatus.videoMuted = message.muted;
+    this._trigger('streamMuted', targetMid, this.getPeerInfo(targetMid), false,
+      this._peerInformations[targetMid].settings.video &&
+      this._peerInformations[targetMid].settings.video.screenshare);
     this._trigger('peerUpdated', targetMid,
       this.getPeerInfo(targetMid), false);
   } else {
@@ -489,6 +494,7 @@ Skylink.prototype._streamEventHandler = function(message) {
   	if (message.status === 'ended') {
   		this._trigger('streamEnded', targetMid, this.getPeerInfo(targetMid),
         false, message.sessionType === 'screensharing');
+      this._trigger('peerUpdated', targetMid, this.getPeerInfo(targetMid), false);
 
       if (this._peerConnections[targetMid]) {
         this._peerConnections[targetMid].hasStream = false;

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 01:50:29 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 01:54:07 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9689,8 +9689,10 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
   log.log([targetMid, null, message.type, 'Peer\'s audio muted:'], message.muted);
   if (this._peerInformations[targetMid]) {
     this._peerInformations[targetMid].mediaStatus.audioMuted = message.muted;
-    this._trigger('peerUpdated', targetMid,
-      this.getPeerInfo(targetMid), false);
+    this._trigger('streamMuted', targetMid, this.getPeerInfo(targetMid), false,
+      this._peerInformations[targetMid].settings.video &&
+      this._peerInformations[targetMid].settings.video.screenshare);
+    this._trigger('peerUpdated', targetMid, this.getPeerInfo(targetMid), false);
   } else {
     log.log([targetMid, message.type, 'Peer does not have any user information']);
   }
@@ -9710,6 +9712,9 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
   log.log([targetMid, null, message.type, 'Peer\'s video muted:'], message.muted);
   if (this._peerInformations[targetMid]) {
     this._peerInformations[targetMid].mediaStatus.videoMuted = message.muted;
+    this._trigger('streamMuted', targetMid, this.getPeerInfo(targetMid), false,
+      this._peerInformations[targetMid].settings.video &&
+      this._peerInformations[targetMid].settings.video.screenshare);
     this._trigger('peerUpdated', targetMid,
       this.getPeerInfo(targetMid), false);
   } else {
