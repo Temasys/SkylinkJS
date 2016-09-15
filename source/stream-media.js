@@ -1412,10 +1412,15 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
         rid: self._room.id,
         cid: self._key,
         sessionType: !!isScreenSharing ? 'screensharing' : 'stream',
+        streamId: streamId,
         status: 'ended'
       });
 
       self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true, !!isScreenSharing);
+
+      if (self._streams[ !!isScreenSharing ? 'screenshare' : 'userMedia' ]) {
+        self._streams[ !!isScreenSharing ? 'screenshare' : 'userMedia' ] = null;
+      }
     }
   };
 
