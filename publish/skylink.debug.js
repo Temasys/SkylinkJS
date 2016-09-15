@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 00:30:35 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 00:31:20 GMT+0800 (SGT) */
 
 (function() {
 
@@ -7268,7 +7268,7 @@ Skylink.prototype._parseInfo = function(info) {
       mediaConstraints: JSON.parse(info.media_constraints)
     }
   };
-  this._parseDefaultMediaStreamSettings(this._room.connection.mediaConstraints);
+  //this._parseDefaultMediaStreamSettings(this._room.connection.mediaConstraints);
 
   // set the socket ports
   this._socketPorts = {
