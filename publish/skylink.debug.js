@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 01:34:06 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 01:40:26 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11691,7 +11691,7 @@ Skylink.prototype._stopStreams = function (options) {
 
   if (stopScreenshare && self._streams.screenshare) {
     if (self._streams.screenshare.stream) {
-      stopFn(self._streams.userMedia.stream);
+      stopFn(self._streams.screenshare.stream);
     }
 
     if (self._streams.screenshare.streamClone) {
@@ -11911,7 +11911,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
   self._streams[ isScreenSharing ? 'screenshare' : 'userMedia' ] = {
     stream: stream,
     settings: settings.settings,
-    constraints: settings.constraints
+    constraints: settings.getUserMediaSettings
   };
   self._muteStreams();
   self._trigger('mediaAccessSuccess', stream, !!isScreenSharing);
