@@ -1604,15 +1604,15 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
           }
         };
 
-        if (this._mediaScreen && this._mediaScreen !== null) {
-          log.debug([peerId, 'MediaStream', null, 'Sending screen'], this._mediaScreen);
+        if (this._streams.screenshare && this._streams.screenshare.stream) {
+          log.debug([peerId, 'MediaStream', null, 'Sending screen'], this._streams.screenshare.stream);
 
-          updateStreamFn(this._mediaScreen);
+          updateStreamFn(this._streams.screenshare.stream);
 
-        } else if (this._mediaStream && this._mediaStream !== null) {
-          log.debug([peerId, 'MediaStream', null, 'Sending stream'], this._mediaStream);
+        } else if (this._streams.userMedia && this._streams.userMedia.stream) {
+          log.debug([peerId, 'MediaStream', null, 'Sending stream'], this._streams.userMedia.stream);
 
-          updateStreamFn(this._mediaStream);
+          updateStreamFn(this._streams.userMedia.stream);
 
         } else {
           log.warn([peerId, 'MediaStream', null, 'No media to send. Will be only receiving']);
