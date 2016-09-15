@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 03:17:16 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 03:31:47 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3670,6 +3670,8 @@ Skylink.prototype._peerConnections = {};
  *   it <a href="http://support.temasys.com.sg/support/discussions/topics/12000002853">in this article here</a>.<br>
  *   For restarts with Peers connecting from Android or iOS SDKs, restarts might not work as written in
  *   <a href="http://support.temasys.com.sg/support/discussions/topics/12000005188">in this article here</a>.<br>
+ *   Note that this functionality should be used when Peer connection stream freezes during a connection,
+ *   and is throttled when invoked many times in less than 3 seconds interval.
  * </blockquote>
  * Function that refreshes Peer connections to update with the current streaming.
  * @method refreshConnection
@@ -3783,6 +3785,24 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
     return;
   }
 
+  self._throttle(function () {
+    self._refreshPeerConnection(listOfPeers, true, callback);
+  },5000)();
+
+};
+
+/**
+ * Function that refresh connections.
+ * @method _refreshPeerConnection
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle, callback) {
+  var self = this;
+  var listOfPeerRestarts = [];
+  var error = '';
+  var listOfPeerRestartErrors = {};
+
   // To fix jshint dont put functions within a loop
   var refreshSinglePeerCallback = function (peerId) {
     return function (error, success) {
@@ -3822,14 +3842,16 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
       return;
     }
 
-    /*var now = Date.now() || function() { return +new Date(); };
+    if (shouldThrottle) {
+      var now = Date.now() || function() { return +new Date(); };
 
-    if (now - self.lastRestart < 3000) {
-      error = 'Last restart was so tight. Aborting.';
-      log.error([peerId, null, null, error]);
-      listOfPeerRestartErrors[peerId] = new Error(error);
-      return;
-    }*/
+      if (now - self.lastRestart < 3000) {
+        error = 'Last restart was so tight. Aborting.';
+        log.error([peerId, null, null, error]);
+        listOfPeerRestartErrors[peerId] = new Error(error);
+        return;
+      }
+    }
 
     log.log([peerId, 'PeerConnection', null, 'Restarting peer connection']);
 
@@ -3837,38 +3859,33 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
     self._restartPeerConnection(peerId, true, false, peerCallback, true);
   };
 
-  //var toRefresh = function() {
-    if(!self._hasMCU) {
-      var i;
+  if(!self._hasMCU) {
+    var i;
 
-      for (i = 0; i < listOfPeers.length; i++) {
-        var peerId = listOfPeers[i];
+    for (i = 0; i < listOfPeers.length; i++) {
+      var peerId = listOfPeers[i];
 
-        if (Object.keys(self._peerConnections).indexOf(peerId) > -1) {
-          refreshSinglePeer(peerId, refreshSinglePeerCallback(peerId));
-        } else {
-          error = 'Peer connection with peer does not exists. Unable to restart';
-          log.error([peerId, 'PeerConnection', null, error]);
-          listOfPeerRestartErrors[peerId] = new Error(error);
-        }
+      if (Object.keys(self._peerConnections).indexOf(peerId) > -1) {
+        refreshSinglePeer(peerId, refreshSinglePeerCallback(peerId));
+      } else {
+        error = 'Peer connection with peer does not exists. Unable to restart';
+        log.error([peerId, 'PeerConnection', null, error]);
+        listOfPeerRestartErrors[peerId] = new Error(error);
+      }
 
-        // there's an error to trigger for
-        if (i === listOfPeers.length - 1 && Object.keys(listOfPeerRestartErrors).length > 0) {
-          if (typeof callback === 'function') {
-            callback({
-              refreshErrors: listOfPeerRestartErrors,
-              listOfPeers: listOfPeers
-            }, null);
-          }
+      // there's an error to trigger for
+      if (i === listOfPeers.length - 1 && Object.keys(listOfPeerRestartErrors).length > 0) {
+        if (typeof callback === 'function') {
+          callback({
+            refreshErrors: listOfPeerRestartErrors,
+            listOfPeers: listOfPeers
+          }, null);
         }
       }
-    } else {
-      self._restartMCUConnection(callback);
     }
-  //};
-
-  //self._throttle(toRefresh,5000)();
-
+  } else {
+    self._restartMCUConnection(callback);
+  }
 };
 
 /**
@@ -11088,7 +11105,7 @@ Skylink.prototype.sendStream = function(options, callback) {
       self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 
       if (Object.keys(self._peerConnections).length > 0) {
-        self.refreshConnection(function (err, success) {
+        self._refreshPeerConnection(Object.keys(self._peerConnections), false, function (err, success) {
           if (err) {
             log.error('Failed refreshing connections for sendStream() ->', err);
             if (typeof callback === 'function') {
@@ -11500,7 +11517,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
         self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 
         if (Object.keys(self._peerConnections).length > 0) {
-          self.refreshConnection(function (err, success) {
+          self._refreshPeerConnection(Object.keys(self._peerConnections), false, function (err, success) {
             if (err) {
               log.error('Failed refreshing connections for shareScreen() ->', err);
               if (typeof callback === 'function') {
@@ -11621,7 +11638,7 @@ Skylink.prototype.stopScreen = function () {
         this._trigger('incomingStream', this._user.sid, this._streams.userMedia.stream, true, this.getPeerInfo());
         this._trigger('peerUpdated', this._user.sid, this.getPeerInfo(), true);
       }
-      this.refreshConnection();
+      this._refreshPeerConnection(Object.keys(this._peerConnections), false);
     }
   }
 };
