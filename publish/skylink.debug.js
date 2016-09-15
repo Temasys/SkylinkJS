@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Thu Sep 15 2016 18:28:07 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Thu Sep 15 2016 19:48:32 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6270,7 +6270,7 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
   self._inRoom = false;
   self._closeChannel();
 
-  self._stopLocalMediaStreams({
+  self._stopStreams({
     userMedia: stopUserMedia,
     screenshare: stopScreenshare
   });
@@ -10866,10 +10866,10 @@ Skylink.prototype.getUserMedia = function(options,callback) {
   var settings = self._parseStreamSettings(options);
 
   navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
-    self._onStreamAccessSuccess(stream, false, false);
+    self._onStreamAccessSuccess(stream, settings, false, false);
 
   }, function (error) {
-    self._onStreamAccessError(error, false, false);
+    self._onStreamAccessError(error, settings, false, false);
   });
 };
 
@@ -11339,13 +11339,6 @@ Skylink.prototype.disableVideo = function() {
  */
 Skylink.prototype.shareScreen = function (enableAudio, callback) {
   var self = this;
-  var hasAudio = false;
-
-  var settings = {
-    video: {
-      mediaSource: 'window'
-    }
-  };
 
   if (typeof enableAudio === 'function') {
     callback = enableAudio;
@@ -11354,67 +11347,6 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 
   if (typeof enableAudio !== 'boolean') {
     enableAudio = true;
-  }
-
-  var triggerSuccessFn = function (sStream) {
-    if (hasAudio) {
-      if (typeof self._streamSettings.audio === 'object') {
-        self._screenSharingStreamSettings.audio = {
-          stereo: !!self._streamSettings.audio.stereo
-        };
-      } else {
-        self._screenSharingStreamSettings.audio = true;
-      }
-    } else {
-      log.warn('This screensharing session will not support audio streaming');
-      self._screenSharingStreamSettings.audio = false;
-    }
-
-    var requireAudio = enableAudio === true;
-    var requireVideo = true;
-    var checkAudio = !requireAudio;
-    var checkVideo = !requireVideo;
-    var notSameTracksError = new Error(
-      'Expected audio tracks length with ' +
-      (requireAudio ? '1' : '0') + ' and video tracks length with ' +
-      (requireVideo ? '1' : '0') + ' but received audio tracks length ' +
-      'with ' + sStream.getAudioTracks().length + ' and video ' +
-      'tracks length with ' + sStream.getVideoTracks().length);
-
-    // do the check
-    if (requireAudio) {
-      checkAudio = sStream.getAudioTracks().length > 0;
-    }
-    if (requireVideo) {
-      checkVideo =  sStream.getVideoTracks().length > 0;
-    }
-
-    if (checkVideo) {
-      self._screenSharingStreamSettings.video = true;
-
-      // no audio but has video for screensharing
-      if (!checkAudio) {
-        self._trigger('mediaAccessFallback', {
-          error: notSameTracksError,
-          diff: {
-            video: { expected: 1, received: sStream.getVideoTracks().length },
-            audio: { expected: requireAudio ? 1 : 0, received: sStream.getAudioTracks().length }
-          }
-        }, 1, true, false);
-        self._screenSharingStreamSettings.audio = false;
-      }
-
-      self._onUserMediaSuccess(sStream, true);
-
-    } else {
-      self._onUserMediaError(notSameTracksError, true);
-    }
-
-    self._timestamp.screen = true;
-  };
-
-  if (window.webrtcDetectedBrowser === 'firefox') {
-    settings.audio = !!enableAudio;
   }
 
   var throttleFn = function (fn, wait) {
@@ -11434,74 +11366,111 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     self._timestamp.func = now;
   };
 
-  var toShareScreen = function(){
-    try {
-      window.getUserMedia(settings, function (stream) {
-        self.once('mediaAccessSuccess', function (stream) {
-          if (self._inRoom) {
-            if (self._hasMCU) {
-              self._restartMCUConnection();
-            } else {
-              self._trigger('incomingStream', self._user.sid, stream,
-                true, self.getPeerInfo(), false);
-              for (var peer in self._peerConnections) {
-                if (self._peerConnections.hasOwnProperty(peer)) {
-                  self._restartPeerConnection(peer, true, false, null, true);
-                }
+  throttleFn(function () {
+    var settings = {
+      settings: {
+        audio: enableAudio,
+        video: {
+          screenshare: true
+        }
+      },
+      getUserMediaSettings: {
+        video: {
+          mediaSource: 'window'
+        }
+      }
+    };
+
+    var mediaAccessSuccessFn = function (stream) {
+      if (self._inRoom) {
+        self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo());
+        self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+
+        if (Object.keys(self._peerConnections).length > 0) {
+          self.refreshConnection(function (err, success) {
+            if (err) {
+              log.error('Failed refreshing connections for shareScreen() ->', err);
+              if (typeof callback === 'function') {
+                callback(new Error('Failed refreshing connections.'), null);
               }
+              return;
             }
-          } else if (typeof callback === 'function') {
-            callback(null, stream);
-          }
-        }, function (stream, isScreenSharing) {
-          return isScreenSharing;
-        });
-
-        if (window.webrtcDetectedBrowser !== 'firefox' && enableAudio) {
-          window.getUserMedia({
-            audio: true
-          }, function (audioStream) {
-            try {
-              audioStream.addTrack(stream.getVideoTracks()[0]);
-              self._mediaScreenClone = stream;
-              hasAudio = true;
-              triggerSuccessFn(audioStream, true);
-
-            } catch (error) {
-              log.error('Failed retrieving audio stream for screensharing stream', error);
-              triggerSuccessFn(stream, true);
+            if (typeof callback === 'function') {
+              callback(null, stream);
             }
-
-          }, function (error) {
-            log.error('Failed retrieving audio stream for screensharing stream', error);
-            triggerSuccessFn(stream, true);
           });
-        } else {
-          hasAudio = window.webrtcDetectedBrowser === 'firefox' ? enableAudio : false;
-          triggerSuccessFn(stream, true);
+        } else if (typeof callback === 'function') {
+          callback(null, stream);
         }
+      } else if (typeof callback === 'function') {
+        callback(null, stream);
+      }
+    };
 
-      }, function (error) {
-        self._onUserMediaError(error, true, false);
-
-        self._timestamp.screen = true;
-
-        if (typeof callback === 'function') {
-          callback(error, null);
-        }
-      });
-
-    } catch (error) {
-      self._onUserMediaError(error, true, false);
-
+    var mediaAccessErrorFn = function (error) {
       if (typeof callback === 'function') {
         callback(error, null);
       }
-    }
-  };
+    };
 
-  //self._throttle(toShareScreen,10000)();
-  throttleFn(toShareScreen, 10000);
+    self.once('mediaAccessSuccess', function (stream) {
+      self.off('mediaAccessError', mediaAccessErrorFn);
+      mediaAccessSuccessFn(stream);
+    }, function (stream, isScreensharing) {
+      return isScreensharing;
+    });
+
+    self.once('mediaAccessError', function (error) {
+      self.off('mediaAccessSuccess', mediaAccessSuccessFn);
+      mediaAccessErrorFn(error);
+    }, function (error, isScreensharing) {
+      return isScreensharing;
+    });
+
+    try {
+      if (enableAudio && window.webrtcDetectedBrowser === 'firefox') {
+        settings.getUserMediaSettings.audio = true;
+      }
+
+      navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
+        if (window.webrtcDetectedBrowser === 'firefox' || !enableAudio) {
+          self._onStreamAccessSuccess(stream, settings, true, false);
+          return;
+        }
+
+        navigator.getUserMedia({
+          audio: true
+
+        }, function (audioStream) {
+          try {
+            audioStream.addTrack(stream.getVideoTracks()[0]);
+
+            self.once('mediaAccessSuccess', function () {
+              self._streams.screenshare.streamClone = stream;
+            }, function (stream, isScreensharing) {
+              return isScreensharing;
+            });
+
+            self._onStreamAccessSuccess(audioStream, settings, true, false);
+
+          } catch (error) {
+            log.error('Failed retrieving audio stream for screensharing stream', error);
+            self._onStreamAccessSuccess(stream, settings, true, false);
+          }
+        }, function (error) {
+          log.error('Failed retrieving audio stream for screensharing stream', error);
+          self._onStreamAccessSuccess(stream, settings, true, false);
+        });
+
+      }, function (error) {
+        self._onStreamAccessError(error, settings, true, false);
+      });
+
+    } catch (error) {
+      self._onStreamAccessError(error, settings, true, false);
+    }
+
+  }, 10000);
 };
 
 /**
@@ -11951,127 +11920,6 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
 
   self._trigger('incomingStream', targetMid, stream,
     false, self.getPeerInfo(targetMid), !!isScreenSharing);
-};
-
-/**
- * Function that parses the <code>getUserMedia()</code> audio settings provided.
- * This parses correctly for the native <code>navigator.getUserMedia()</code> API audio constraints and
- *   sets any missing values to default.
- * @method _parseAudioStreamSettings
- * @private
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._parseAudioStreamSettings = function (audioOptions) {
-  audioOptions = (typeof audioOptions === 'object') ?
-    audioOptions : !!audioOptions;
-
-  var hasOptional = false;
-
-  // Cleaning of unwanted keys
-  if (audioOptions !== false) {
-    audioOptions = (typeof audioOptions === 'boolean') ? {} : audioOptions;
-    var tempAudioOptions = {};
-    tempAudioOptions.stereo = !!audioOptions.stereo;
-    tempAudioOptions.optional = [];
-
-    if (Array.isArray(audioOptions.optional)) {
-      tempAudioOptions.optional = audioOptions.optional;
-      hasOptional = true;
-    }
-
-    audioOptions = tempAudioOptions;
-  }
-
-  var userMedia = (typeof audioOptions === 'object') ?
-    true : audioOptions;
-
-  if (hasOptional) {
-    userMedia = {
-      optional: audioOptions.optional
-    };
-  }
-
-  return {
-    settings: audioOptions,
-    userMedia: userMedia
-  };
-};
-
-/**
- * Function that parses the <code>getUserMedia()</code> video settings provided.
- * This parses correctly for the native <code>navigator.getUserMedia()</code> API video constraints and
- *   sets any missing values to default.
- * @method _parseVideoStreamSettings
- * @private
- * @for Skylink
- * @since 0.5.8
- */
-Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
-  videoOptions = (typeof videoOptions === 'object') ?
-    videoOptions : !!videoOptions;
-
-  var userMedia = false;
-
-  // Cleaning of unwanted keys
-  if (videoOptions !== false) {
-    videoOptions = (typeof videoOptions === 'boolean') ?
-      { resolution: {} } : videoOptions;
-    var tempVideoOptions = {};
-    // set the resolution parsing
-    videoOptions.resolution = videoOptions.resolution || {};
-    tempVideoOptions.resolution = tempVideoOptions.resolution || {};
-    // set resolution
-    tempVideoOptions.resolution.width = videoOptions.resolution.width ||
-      this._defaultStreamSettings.video.resolution.width;
-    tempVideoOptions.resolution.height = videoOptions.resolution.height ||
-      this._defaultStreamSettings.video.resolution.height;
-    // set the framerate
-    tempVideoOptions.frameRate = videoOptions.frameRate ||
-      this._defaultStreamSettings.video.frameRate;
-    // set the screenshare option
-    tempVideoOptions.screenshare = false;
-
-    tempVideoOptions.optional = [];
-
-    if (Array.isArray(videoOptions.optional)) {
-      tempVideoOptions.optional = videoOptions.optional;
-    }
-
-    videoOptions = tempVideoOptions;
-
-    userMedia = {
-      mandatory: {
-        //minWidth: videoOptions.resolution.width,
-        //minHeight: videoOptions.resolution.height,
-        maxWidth: videoOptions.resolution.width,
-        maxHeight: videoOptions.resolution.height,
-        //minFrameRate: videoOptions.frameRate,
-        maxFrameRate: videoOptions.frameRate
-      },
-      optional: tempVideoOptions.optional
-    };
-
-    //Remove maxFrameRate for AdapterJS to work with Safari
-    if (window.webrtcDetectedType === 'plugin') {
-      delete userMedia.mandatory.maxFrameRate;
-    }
-
-    // Check if screensharing is available and enabled
-    /*if (this._screenSharingAvailable && videoOptions.screenshare) {
-      userMedia.optional.push({ sourceId: AdapterJS.WebRTCPlugin.plugin.screensharingKey });
-    }*/
-
-    //For Edge
-    if (window.webrtcDetectedBrowser === 'edge') {
-      userMedia = true;
-    }
-  }
-
-  return {
-    settings: videoOptions,
-    userMedia: userMedia
-  };
 };
 
 /**
