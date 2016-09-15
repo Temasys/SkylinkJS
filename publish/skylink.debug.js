@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 01:44:37 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 01:50:29 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11986,6 +11986,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
   }
 
   self._trigger('incomingStream', targetMid, stream, false, self.getPeerInfo(targetMid));
+  self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
 };
 
 /**

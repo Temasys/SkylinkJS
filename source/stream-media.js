@@ -1564,6 +1564,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
   }
 
   self._trigger('incomingStream', targetMid, stream, false, self.getPeerInfo(targetMid));
+  self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
 };
 
 /**
