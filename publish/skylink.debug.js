@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 00:59:01 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 01:02:09 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4590,8 +4590,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     var stream = event.stream || event;
 
     if (targetMid === 'MCU') {
-      log.debug([targetMid, 'MediaStream', stream.id,
-        'Ignoring received remote stream from MCU ->'], stream);
+      log.debug([targetMid, 'MediaStream', stream.id, 'Ignoring received remote stream from MCU ->'], stream);
       return;
     }
 
@@ -11945,29 +11944,26 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
   var self = this;
 
   if (!self._peerInformations[targetMid]) {
-    log.error([targetMid, 'MediaStream', stream.id,
-        'Received remote stream when peer is not connected. ' +
-        'Ignoring stream ->'], stream);
+    log.warn([targetMid, 'MediaStream', stream.id,
+      'Received remote stream when peer is not connected. ' +
+      'Ignoring stream ->'], stream);
     return;
   }
 
-  if (!self._peerInformations[targetMid].settings.audio &&
+  /*if (!self._peerInformations[targetMid].settings.audio &&
     !self._peerInformations[targetMid].settings.video && !isScreenSharing) {
     log.log([targetMid, 'MediaStream', stream.id,
       'Receive remote stream but ignoring stream as it is empty ->'
       ], stream);
     return;
-  }
-  log.log([targetMid, 'MediaStream', stream.id,
-    'Received remote stream ->'], stream);
+  }*/
+  log.log([targetMid, 'MediaStream', stream.id, 'Received remote stream ->'], stream);
 
   if (isScreenSharing) {
-    log.log([targetMid, 'MediaStream', stream.id,
-      'Peer is having a screensharing session with user']);
+    log.log([targetMid, 'MediaStream', stream.id, 'Peer is having a screensharing session with user']);
   }
 
-  self._trigger('incomingStream', targetMid, stream,
-    false, self.getPeerInfo(targetMid), !!isScreenSharing);
+  self._trigger('incomingStream', targetMid, stream, false, self.getPeerInfo(targetMid));
 };
 
 /**
