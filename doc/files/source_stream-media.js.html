@@ -715,11 +715,13 @@ Skylink.prototype.sendStream = function(options, callback) {
 
   var restartFn = function (stream) {
     if (self._inRoom) {
-      self._trigger(&#x27;incomingStream&#x27;, self._user.sid, stream, true, self.getPeerInfo());
-      self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
+      if (!self._streams.screenshare) {
+        self._trigger(&#x27;incomingStream&#x27;, self._user.sid, stream, true, self.getPeerInfo());
+        self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
+      }
 
       if (Object.keys(self._peerConnections).length &gt; 0) {
-        self.refreshConnection(function (err, success) {
+        self._refreshPeerConnection(Object.keys(self._peerConnections), false, function (err, success) {
           if (err) {
             log.error(&#x27;Failed refreshing connections for sendStream() -&gt;&#x27;, err);
             if (typeof callback === &#x27;function&#x27;) {
@@ -930,6 +932,7 @@ Skylink.prototype.muteStream = function(options) {
       if (self._inRoom) {
         self._trigger(&#x27;streamMuted&#x27;, self._user.sid, self.getPeerInfo(), true,
           self._streams.screenshare &amp;&amp; self._streams.screenshare.stream);
+        self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
       }
     }
   }
@@ -956,7 +959,7 @@ Skylink.prototype.muteStream = function(options) {
 Skylink.prototype.enableAudio = function() {
   this.muteStream({
     audioMuted: false,
-    videoMuted: self._streamsMutedSettings.videoMuted
+    videoMuted: this._streamsMutedSettings.videoMuted
   });
 };
 
@@ -981,7 +984,7 @@ Skylink.prototype.enableAudio = function() {
 Skylink.prototype.disableAudio = function() {
   this.muteStream({
     audioMuted: true,
-    videoMuted: self._streamsMutedSettings.videoMuted
+    videoMuted: this._streamsMutedSettings.videoMuted
   });
 };
 
@@ -1006,7 +1009,7 @@ Skylink.prototype.disableAudio = function() {
 Skylink.prototype.enableVideo = function() {
   this.muteStream({
     videoMuted: false,
-    audioMuted: self._streamsMutedSettings.audioMuted
+    audioMuted: this._streamsMutedSettings.audioMuted
   });
 };
 
@@ -1032,7 +1035,7 @@ Skylink.prototype.enableVideo = function() {
 Skylink.prototype.disableVideo = function() {
   this.muteStream({
     videoMuted: true,
-    audioMuted: self._streamsMutedSettings.audioMuted
+    audioMuted: this._streamsMutedSettings.audioMuted
   });
 };
 
@@ -1130,7 +1133,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
         self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
 
         if (Object.keys(self._peerConnections).length &gt; 0) {
-          self.refreshConnection(function (err, success) {
+          self._refreshPeerConnection(Object.keys(self._peerConnections), false, function (err, success) {
             if (err) {
               log.error(&#x27;Failed refreshing connections for shareScreen() -&gt;&#x27;, err);
               if (typeof callback === &#x27;function&#x27;) {
@@ -1251,7 +1254,7 @@ Skylink.prototype.stopScreen = function () {
         this._trigger(&#x27;incomingStream&#x27;, this._user.sid, this._streams.userMedia.stream, true, this.getPeerInfo());
         this._trigger(&#x27;peerUpdated&#x27;, this._user.sid, this.getPeerInfo(), true);
       }
-      this.refreshConnection();
+      this._refreshPeerConnection(Object.keys(this._peerConnections), false);
     }
   }
 };
@@ -1356,12 +1359,12 @@ Skylink.prototype._stopStreams = function (options) {
   }
 
   if (stopScreenshare &amp;&amp; self._streams.screenshare) {
-    if (self._streams.screenshare.stream) {
-      stopFn(self._streams.userMedia.stream);
-    }
-
     if (self._streams.screenshare.streamClone) {
       stopFn(self._streams.screenshare.streamClone);
+    }
+
+    if (self._streams.screenshare.stream) {
+      stopFn(self._streams.screenshare.stream);
     }
 
     self._streams.screenshare = null;
@@ -1502,10 +1505,20 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
         rid: self._room.id,
         cid: self._key,
         sessionType: !!isScreenSharing ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
+        streamId: streamId,
         status: &#x27;ended&#x27;
       });
 
       self._trigger(&#x27;streamEnded&#x27;, self._user.sid, self.getPeerInfo(), true, !!isScreenSharing);
+
+      if (isScreenSharing &amp;&amp; self._streams.screenshare &amp;&amp; self._streams.screenshare.stream &amp;&amp;
+        (self._streams.screenshare.stream.id || self._streams.screenshare.stream.label) === streamId) {
+        self._streams.screenshare = null;
+
+      } else if (!isScreenSharing &amp;&amp; self._streams.userMedia &amp;&amp; self._streams.userMedia.stream &amp;&amp;
+        (self._streams.userMedia.stream.id || self._streams.userMedia.stream.label) === streamId) {
+        self._streams.userMedia = null;
+      }
     }
   };
 
@@ -1554,6 +1567,9 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
 
     log.warn([null, &#x27;MediaStream&#x27;, streamId, tracksNotSameError]);
 
+    var requireAudio = !!settings.settings.audio;
+    var requireVideo = !!settings.settings.video;
+
     if (settings.settings.audio &amp;&amp; stream.getAudioTracks().length === 0) {
       settings.settings.audio = false;
     }
@@ -1565,16 +1581,16 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
     self._trigger(&#x27;mediaAccessFallback&#x27;, {
       error: new Error(tracksNotSameError),
       diff: {
-        video: { expected: 1, received: stream.getVideoTracks().length },
+        video: { expected: requireVideo ? 1 : 0, received: stream.getVideoTracks().length },
         audio: { expected: requireAudio ? 1 : 0, received: stream.getAudioTracks().length }
       }
-    }, self.MEDIA_ACCESS_FALLBACK_STATE.FALLBACKED, !!isScreensharing, !!isAudioFallback);
+    }, self.MEDIA_ACCESS_FALLBACK_STATE.FALLBACKED, !!isScreenSharing, !!isAudioFallback);
   }
 
   self._streams[ isScreenSharing ? &#x27;screenshare&#x27; : &#x27;userMedia&#x27; ] = {
     stream: stream,
     settings: settings.settings,
-    constraints: settings.constraints
+    constraints: settings.getUserMediaSettings
   };
   self._muteStreams();
   self._trigger(&#x27;mediaAccessSuccess&#x27;, stream, !!isScreenSharing);
@@ -1651,6 +1667,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
   }
 
   self._trigger(&#x27;incomingStream&#x27;, targetMid, stream, false, self.getPeerInfo(targetMid));
+  self._trigger(&#x27;peerUpdated&#x27;, targetMid, self.getPeerInfo(targetMid), false);
 };
 
 /**
@@ -1662,16 +1679,18 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
  * @since 0.5.2
  */
 Skylink.prototype._addLocalMediaStreams = function(peerId) {
+  var self = this;
+
   // NOTE ALEX: here we could do something smarter
   // a mediastream is mainly a container, most of the info
   // are attached to the tracks. We should iterates over track and print
   try {
     log.log([peerId, null, null, &#x27;Adding local stream&#x27;]);
 
-    var pc = this._peerConnections[peerId];
+    var pc = self._peerConnections[peerId];
 
     if (pc) {
-      if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
+      if (pc.signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
         // Updates the streams accordingly
         var updateStreamFn = function (updatedStream) {
           var hasStream = false;
@@ -1692,15 +1711,15 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
           }
         };
 
-        if (this._streams.screenshare &amp;&amp; this._streams.screenshare.stream) {
-          log.debug([peerId, &#x27;MediaStream&#x27;, null, &#x27;Sending screen&#x27;], this._streams.screenshare.stream);
+        if (self._streams.screenshare &amp;&amp; self._streams.screenshare.stream) {
+          log.debug([peerId, &#x27;MediaStream&#x27;, null, &#x27;Sending screen&#x27;], self._streams.screenshare.stream);
 
-          updateStreamFn(this._streams.screenshare.stream);
+          updateStreamFn(self._streams.screenshare.stream);
 
-        } else if (this._streams.userMedia &amp;&amp; this._streams.userMedia.stream) {
-          log.debug([peerId, &#x27;MediaStream&#x27;, null, &#x27;Sending stream&#x27;], this._streams.userMedia.stream);
+        } else if (self._streams.userMedia &amp;&amp; self._streams.userMedia.stream) {
+          log.debug([peerId, &#x27;MediaStream&#x27;, null, &#x27;Sending stream&#x27;], self._streams.userMedia.stream);
 
-          updateStreamFn(this._streams.userMedia.stream);
+          updateStreamFn(self._streams.userMedia.stream);
 
         } else {
           log.warn([peerId, &#x27;MediaStream&#x27;, null, &#x27;No media to send. Will be only receiving&#x27;]);
@@ -1713,7 +1732,7 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
           &#x27;Not adding any stream as signalingState is closed&#x27;]);
       }
     } else {
-      log.warn([peerId, &#x27;MediaStream&#x27;, this._mediaStream,
+      log.warn([peerId, &#x27;MediaStream&#x27;, self._mediaStream,
         &#x27;Not adding stream as peerconnection object does not exists&#x27;]);
     }
   } catch (error) {
@@ -1724,6 +1743,26 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
       log.error([peerId, null, null, &#x27;Failed adding local stream&#x27;], error);
     }
   }
+
+  setTimeout(function () {
+    var streamId = null;
+
+    if (self._streams.screenshare &amp;&amp; self._streams.screenshare.stream) {
+      streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
+    } else if (self._streams.userMedia &amp;&amp; self._streams.userMedia.stream) {
+      streamId = self._streams.userMedia.stream.id || self._streams.userMedia.stream.label;
+    }
+
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.STREAM,
+      mid: self._user.sid,
+      rid: self._room.id,
+      cid: self._key,
+      sessionType: self._streams.screenshare &amp;&amp; self._streams.screenshare.stream ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
+      streamId: streamId,
+      status: &#x27;check&#x27;
+    });
+  }, 3500);
 };
     </pre>
 </div>

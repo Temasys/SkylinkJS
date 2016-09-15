@@ -312,8 +312,10 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.settings The Peer sending Stream settings.
    * @param {Boolean|JSON} peerInfo.settings.audio The Peer Stream audio settings.
    *   &lt;small&gt;When defined as &lt;code&gt;false&lt;/code&gt;, it means there is no audio being sent from Peer.&lt;/small&gt;
-   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag if stereo band is configured
+   * @param {Boolean} peerInfo.settings.audio.stereo The flag if stereo band is configured
    *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for receiving audio data.
+   * @param {Array} peerInfo.settings.audio.optional The Peer Stream &lt;code&gt;navigator.getUserMedia()&lt;/code&gt; API
+   *   &lt;code&gt;audio: { optional [..] }&lt;/code&gt; property.
    * @param {Boolean|JSON} peerInfo.settings.video The Peer Stream video settings.
    *   &lt;small&gt;When defined as &lt;code&gt;false&lt;/code&gt;, it means there is no video being sent from Peer.&lt;/small&gt;
    * @param {JSON} peerInfo.settings.video.resolution The Peer Stream video resolution.
@@ -323,6 +325,8 @@ Skylink.prototype._EVENTS = {
    * @param {Number} peerInfo.settings.video.frameRate The Peer Stream video
    *   &lt;a href=&quot;https://en.wikipedia.org/wiki/Frame_rate&quot;&gt;frameRate&lt;/a&gt; per second (fps).
    * @param {Boolean} [peerInfo.settings.video.screenshare] The flag if Peer Stream is a screensharing Stream.
+   * @param {Array} peerInfo.settings.video.optional The Peer Stream &lt;code&gt;navigator.getUserMedia()&lt;/code&gt; API
+   *   &lt;code&gt;video: { optional [..] }&lt;/code&gt; property.
    * @param {JSON} peerInfo.settings.bandwidth The maximum streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.audio] The maximum audio streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.video] The maximum video streaming bandwidth sent from Peer.

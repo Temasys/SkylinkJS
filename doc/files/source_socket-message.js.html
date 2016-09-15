@@ -534,8 +534,10 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
   log.log([targetMid, null, message.type, &#x27;Peer\&#x27;s audio muted:&#x27;], message.muted);
   if (this._peerInformations[targetMid]) {
     this._peerInformations[targetMid].mediaStatus.audioMuted = message.muted;
-    this._trigger(&#x27;peerUpdated&#x27;, targetMid,
-      this.getPeerInfo(targetMid), false);
+    this._trigger(&#x27;streamMuted&#x27;, targetMid, this.getPeerInfo(targetMid), false,
+      this._peerInformations[targetMid].settings.video &amp;&amp;
+      this._peerInformations[targetMid].settings.video.screenshare);
+    this._trigger(&#x27;peerUpdated&#x27;, targetMid, this.getPeerInfo(targetMid), false);
   } else {
     log.log([targetMid, message.type, &#x27;Peer does not have any user information&#x27;]);
   }
@@ -555,6 +557,9 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
   log.log([targetMid, null, message.type, &#x27;Peer\&#x27;s video muted:&#x27;], message.muted);
   if (this._peerInformations[targetMid]) {
     this._peerInformations[targetMid].mediaStatus.videoMuted = message.muted;
+    this._trigger(&#x27;streamMuted&#x27;, targetMid, this.getPeerInfo(targetMid), false,
+      this._peerInformations[targetMid].settings.video &amp;&amp;
+      this._peerInformations[targetMid].settings.video.screenshare);
     this._trigger(&#x27;peerUpdated&#x27;, targetMid,
       this.getPeerInfo(targetMid), false);
   } else {
@@ -580,6 +585,7 @@ Skylink.prototype._streamEventHandler = function(message) {
   	if (message.status === &#x27;ended&#x27;) {
   		this._trigger(&#x27;streamEnded&#x27;, targetMid, this.getPeerInfo(targetMid),
         false, message.sessionType === &#x27;screensharing&#x27;);
+      this._trigger(&#x27;peerUpdated&#x27;, targetMid, this.getPeerInfo(targetMid), false);
 
       if (this._peerConnections[targetMid]) {
         this._peerConnections[targetMid].hasStream = false;
@@ -589,7 +595,39 @@ Skylink.prototype._streamEventHandler = function(message) {
       } else {
         log.log([targetMid, null, message.type, &#x27;Peer connection not found&#x27;]);
       }
-  	}
+  	} else if (message.status === &#x27;check&#x27;) {
+      if (!message.streamId) {
+        return;
+      }
+
+      // Prevent restarts unless its stable
+      if (this._peerConnections[targetMid] &amp;&amp; this._peerConnections[targetMid].signalingState ===
+        this.PEER_CONNECTION_STATE.STABLE) {
+        var streams = this._peerConnections[targetMid].getRemoteStreams();
+        if (streams.length &gt; 0 &amp;&amp; message.streamId !== (streams[0].id || streams[0].label)) {
+          this._sendChannelMessage({
+            type: this._SIG_MESSAGE_TYPE.RESTART,
+            mid: this._user.sid,
+            rid: this._room.id,
+            agent: window.webrtcDetectedBrowser,
+            version: window.webrtcDetectedVersion,
+            os: window.navigator.platform,
+            userInfo: this.getPeerInfo(),
+            target: targetMid,
+            weight: this._peerPriorityWeight,
+            enableIceTrickle: this._enableIceTrickle,
+            enableDataChannel: this._enableDataChannel,
+            receiveOnly: this._peerConnections[targetMid] &amp;&amp; this._peerConnections[targetMid].receiveOnly,
+            sessionType: !!this._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
+            // SkylinkJS parameters (copy the parameters from received message parameters)
+            isConnectionRestart: !!message.isConnectionRestart,
+            lastRestart: message.lastRestart,
+            explicit: !!message.explicit,
+            temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+          });
+        }
+      }
+    }
 
   } else {
     log.log([targetMid, null, message.type, &#x27;Peer does not have any user information&#x27;]);

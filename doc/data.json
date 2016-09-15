@@ -1654,7 +1654,16 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 317,
+            "line": 235,
+            "description": "Function that refresh connections.",
+            "itemtype": "method",
+            "name": "_refreshPeerConnection",
+            "since": "0.6.15",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-connection.js",
+            "line": 332,
             "description": "Function that retrieves Peer connection bandwidth and ICE connection stats.",
             "itemtype": "method",
             "name": "getConnectionStatus",
@@ -1737,7 +1746,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 724,
+            "line": 739,
             "description": "Function that starts the Peer connection session.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_addPeer",
@@ -1748,7 +1757,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 776,
+            "line": 791,
             "description": "Function that re-negotiates a Peer connection.\nWe currently do not implement the ICE restart functionality.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -1759,7 +1768,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 907,
+            "line": 922,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -1770,7 +1779,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 963,
+            "line": 978,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -1781,13 +1790,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1101,
+            "line": 1116,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1164,
+            "line": 1179,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -4082,8 +4091,12 @@
                                 {
                                     "name": "audio.stereo",
                                     "description": "The flag if stereo band is configured\n  when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for receiving audio data.",
-                                    "type": "Boolean",
-                                    "optional": true
+                                    "type": "Boolean"
+                                },
+                                {
+                                    "name": "audio.optional",
+                                    "description": "The Peer Stream <code>navigator.getUserMedia()</code> API\n  <code>audio: { optional [..] }</code> property.",
+                                    "type": "Array"
                                 },
                                 {
                                     "name": "video",
@@ -4115,6 +4128,11 @@
                                     "description": "The flag if Peer Stream is a screensharing Stream.",
                                     "type": "Boolean",
                                     "optional": true
+                                },
+                                {
+                                    "name": "video.optional",
+                                    "description": "The Peer Stream <code>navigator.getUserMedia()</code> API\n  <code>video: { optional [..] }</code> property.",
+                                    "type": "Array"
                                 },
                                 {
                                     "name": "bandwidth",
@@ -4205,7 +4223,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 260,
+            "line": 264,
             "description": "Event triggered when a Peer connection has been refreshed.",
             "itemtype": "event",
             "name": "peerRestart",
@@ -4231,7 +4249,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 273,
+            "line": 277,
             "description": "Event triggered when a Peer session information has been updated.",
             "itemtype": "event",
             "name": "peerUpdated",
@@ -4257,7 +4275,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 286,
+            "line": 290,
             "description": "Event triggered when a Peer leaves the room.",
             "itemtype": "event",
             "name": "peerLeft",
@@ -4283,7 +4301,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 299,
+            "line": 303,
             "description": "Event triggered when Room session has ended abruptly due to network disconnections.",
             "itemtype": "event",
             "name": "sessionDisconnect",
@@ -4304,7 +4322,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 311,
+            "line": 315,
             "description": "Event triggered when receiving Peer Stream.",
             "itemtype": "event",
             "name": "incomingStream",
@@ -4335,7 +4353,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 326,
+            "line": 330,
             "description": "Event triggered when receiving message from Peer.",
             "itemtype": "event",
             "name": "incomingMessage",
@@ -4390,7 +4408,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 350,
+            "line": 354,
             "description": "Event triggered when receiving completed data transfer from Peer.",
             "itemtype": "event",
             "name": "incomingData",
@@ -4426,7 +4444,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 366,
+            "line": 370,
             "description": "Event triggered when receiving upload data transfer from Peer.",
             "itemtype": "event",
             "name": "incomingDataRequest",
@@ -4457,7 +4475,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 380,
+            "line": 384,
             "description": "Event triggered when Room locked status has changed.",
             "itemtype": "event",
             "name": "roomLock",
@@ -4483,7 +4501,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 393,
+            "line": 397,
             "description": "Event triggered when a Datachannel connection state has changed.",
             "itemtype": "event",
             "name": "dataChannelState",
@@ -4520,7 +4538,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 409,
+            "line": 413,
             "description": "Event triggered when a data transfer state has changed.",
             "itemtype": "event",
             "name": "dataTransferState",
@@ -4602,7 +4620,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 439,
+            "line": 443,
             "description": "Event triggered when Signaling server reaction state has changed.",
             "itemtype": "event",
             "name": "systemAction",
@@ -4628,7 +4646,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 452,
+            "line": 456,
             "description": "Event triggered when a server Peer joins the room.",
             "itemtype": "event",
             "name": "serverPeerJoined",
@@ -4649,7 +4667,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 463,
+            "line": 467,
             "description": "Event triggered when a server Peer leaves the room.",
             "itemtype": "event",
             "name": "serverPeerLeft",
@@ -4670,7 +4688,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 474,
+            "line": 478,
             "description": "Event triggered when a server Peer connection has been refreshed.",
             "itemtype": "event",
             "name": "serverPeerRestart",
@@ -4691,7 +4709,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 485,
+            "line": 489,
             "description": "Event triggered when Peer Stream streaming has stopped.",
             "itemtype": "event",
             "name": "streamEnded",
@@ -4722,7 +4740,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 499,
+            "line": 503,
             "description": "Event triggered when Peer Stream audio or video tracks has been muted.",
             "itemtype": "event",
             "name": "streamMuted",
@@ -4753,7 +4771,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 513,
+            "line": 517,
             "description": "Event triggered when <a href=\"#method_getPeers\"><code>getPeers()</code> method</a> retrieval state changes.",
             "itemtype": "event",
             "name": "getPeersStateChange",
@@ -4786,7 +4804,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 526,
+            "line": 530,
             "description": "Event triggered when <a href=\"#method_introducePeer\"><code>introducePeer()</code> method</a>\nintroduction request state changes.",
             "itemtype": "event",
             "name": "introduceStateChange",
@@ -4823,7 +4841,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 542,
+            "line": 546,
             "description": "Event triggered when <a href=\"#method_getConnectionStatus\"><code>getConnectionStatus()</code> method</a>\nretrieval state changes.",
             "itemtype": "event",
             "name": "getConnectionStatusStateChange",
@@ -5140,7 +5158,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 630,
+            "line": 634,
             "description": "Stores the list of <code>once()</code> event handlers.\nThese events are only triggered once.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -5166,7 +5184,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 643,
+            "line": 647,
             "description": "Stores the timestamps data used for throttling.",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -5178,7 +5196,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 656,
+            "line": 660,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -5202,7 +5220,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 680,
+            "line": 684,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -5239,7 +5257,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 738,
+            "line": 742,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -5264,7 +5282,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 787,
+            "line": 791,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -5275,7 +5293,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 841,
+            "line": 845,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -5286,7 +5304,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 867,
+            "line": 871,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -5297,7 +5315,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 905,
+            "line": 909,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",
@@ -5768,7 +5786,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 453,
+            "line": 455,
             "description": "Function that handles the \"muteVideoEvent\" socket message received.\nSee confluence docs for the \"muteVideoEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -5779,7 +5797,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 474,
+            "line": 479,
             "description": "Function that handles the \"stream\" socket message received.\nSee confluence docs for the \"stream\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_streamEventHandler",
@@ -5790,7 +5808,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 508,
+            "line": 546,
             "description": "Function that handles the \"bye\" socket message received.\nSee confluence docs for the \"bye\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -5801,7 +5819,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 529,
+            "line": 567,
             "description": "Function that handles the \"private\" socket message received.\nSee confluence docs for the \"private\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -5812,7 +5830,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 551,
+            "line": 589,
             "description": "Function that handles the \"public\" socket message received.\nSee confluence docs for the \"public\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -5823,7 +5841,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 573,
+            "line": 611,
             "description": "Function that handles the \"inRoom\" socket message received.\nSee confluence docs for the \"inRoom\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -5834,7 +5852,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 630,
+            "line": 668,
             "description": "Function that handles the \"enter\" socket message received.\nSee confluence docs for the \"enter\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -5845,7 +5863,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 698,
+            "line": 736,
             "description": "Function that handles the \"restart\" socket message received.\nSee confluence docs for the \"restart\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -5856,7 +5874,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 808,
+            "line": 846,
             "description": "Function that handles the \"welcome\" socket message received.\nSee confluence docs for the \"welcome\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -5867,7 +5885,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 903,
+            "line": 941,
             "description": "Function that handles the \"offer\" socket message received.\nSee confluence docs for the \"offer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -5878,7 +5896,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 996,
+            "line": 1034,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -5889,7 +5907,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1088,
+            "line": 1126,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -6324,7 +6342,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 719,
+            "line": 721,
             "description": "Function that stops <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopStream",
@@ -6337,7 +6355,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 744,
+            "line": 746,
             "description": "Function that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio or video tracks.",
             "itemtype": "method",
             "name": "muteStream",
@@ -6373,7 +6391,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 847,
+            "line": 850,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -6388,7 +6406,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 872,
+            "line": 875,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -6403,7 +6421,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 897,
+            "line": 900,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -6418,13 +6436,13 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 922,
+            "line": 925,
             "description": "/**\n* <blockquote class=\"info\"><b>Deprecation Warning!</b>\n*   This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n* </blockquote>\n* Function that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n* <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.\n* @method disableVideo\n* @deprecated true\n* @example\n*   function muteVideo () {\n*     skylinkDemo.disableVideo();\n*   }\n* @trigger <ol class=\"desc-seq\">\n*   <li>Invokes <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> with\n*   <code>options.videoMuted</code> value as <code>true</code>.</li></ol>\n* @for Skylink\n* @since 0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/stream-media.js",
-            "line": 948,
+            "line": 951,
             "description": "Function that retrieves screensharing Stream.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -6464,7 +6482,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1128,
+            "line": 1131,
             "description": "Function that stops <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -6477,7 +6495,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1168,
+            "line": 1171,
             "description": "Function that handles the muting of Stream audio and video tracks.",
             "itemtype": "method",
             "name": "_muteStreams",
@@ -6488,7 +6506,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1215,
+            "line": 1218,
             "description": "Function that handles stopping the Stream streaming.",
             "itemtype": "method",
             "name": "_stopStreams",
@@ -6499,7 +6517,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1287,
+            "line": 1290,
             "description": "Function that parses the <code>getUserMedia()</code> settings provided.",
             "itemtype": "method",
             "name": "_parseStreamSettings",
@@ -6510,7 +6528,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1373,
+            "line": 1376,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -6521,7 +6539,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1492,
+            "line": 1508,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -6532,7 +6550,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1532,
+            "line": 1548,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -6543,7 +6561,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1565,
+            "line": 1582,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -6695,7 +6713,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:317"
+            "line": " source/peer-connection.js:332"
         },
         {
             "message": "unknown tag: trigger",
@@ -6803,31 +6821,31 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:719"
+            "line": " source/stream-media.js:721"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:744"
+            "line": " source/stream-media.js:746"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:847"
+            "line": " source/stream-media.js:850"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:872"
+            "line": " source/stream-media.js:875"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:897"
+            "line": " source/stream-media.js:900"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:948"
+            "line": " source/stream-media.js:951"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1128"
+            "line": " source/stream-media.js:1131"
         },
         {
             "message": "Missing item type\nPolyfill for Object.keys() from Mozilla\nFrom https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys",
@@ -6847,11 +6865,11 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:1101"
+            "line": " source/peer-connection.js:1116"
         },
         {
             "message": "Missing item type\n/**\n* <blockquote class=\"info\"><b>Deprecation Warning!</b>\n*   This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n* </blockquote>\n* Function that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n* <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.\n* @method disableVideo\n* @deprecated true\n* @example\n*   function muteVideo () {\n*     skylinkDemo.disableVideo();\n*   }\n* @trigger <ol class=\"desc-seq\">\n*   <li>Invokes <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> with\n*   <code>options.videoMuted</code> value as <code>true</code>.</li></ol>\n* @for Skylink\n* @since 0.5.5",
-            "line": " source/stream-media.js:922"
+            "line": " source/stream-media.js:925"
         }
     ]
 }
