@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 00:55:52 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 00:57:05 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11587,12 +11587,12 @@ Skylink.prototype._muteStreams = function () {
     var videoTracks = stream.getVideoTracks();
 
     for (var a = 0; a < audioTracks.length; a++) {
-      audioTracks[a].enabled = !!self._streamsMutedSettings.audioMuted;
+      audioTracks[a].enabled = !self._streamsMutedSettings.audioMuted;
       hasAudio = true;
     }
 
     for (var v = 0; v < videoTracks.length; v++) {
-      videoTracks[v].enabled = !!self._streamsMutedSettings.videoMuted;
+      videoTracks[v].enabled = !self._streamsMutedSettings.videoMuted;
       hasVideo = true;
     }
   };

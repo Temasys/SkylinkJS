@@ -1182,12 +1182,12 @@ Skylink.prototype._muteStreams = function () {
     var videoTracks = stream.getVideoTracks();
 
     for (var a = 0; a < audioTracks.length; a++) {
-      audioTracks[a].enabled = !!self._streamsMutedSettings.audioMuted;
+      audioTracks[a].enabled = !self._streamsMutedSettings.audioMuted;
       hasAudio = true;
     }
 
     for (var v = 0; v < videoTracks.length; v++) {
-      videoTracks[v].enabled = !!self._streamsMutedSettings.videoMuted;
+      videoTracks[v].enabled = !self._streamsMutedSettings.videoMuted;
       hasVideo = true;
     }
   };
