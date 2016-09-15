@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 01:40:26 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 01:44:37 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10461,7 +10461,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 01:40:26 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 01:44:37 GMT+0800 (SGT) */
 
 (function() {
 
@@ -14133,8 +14133,6 @@ Skylink.prototype._peerConnections = {};
  *   it <a href="http://support.temasys.com.sg/support/discussions/topics/12000002853">in this article here</a>.<br>
  *   For restarts with Peers connecting from Android or iOS SDKs, restarts might not work as written in
  *   <a href="http://support.temasys.com.sg/support/discussions/topics/12000005188">in this article here</a>.<br>
- *   Note that this functionality should be used when Peer connection stream freezes during a connection,
- *   and is throttled when invoked many times in less than 3 seconds interval.
  * </blockquote>
  * Function that refreshes Peer connections to update with the current streaming.
  * @method refreshConnection
@@ -14287,14 +14285,14 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
       return;
     }
 
-    var now = Date.now() || function() { return +new Date(); };
+    /*var now = Date.now() || function() { return +new Date(); };
 
     if (now - self.lastRestart < 3000) {
       error = 'Last restart was so tight. Aborting.';
       log.error([peerId, null, null, error]);
       listOfPeerRestartErrors[peerId] = new Error(error);
       return;
-    }
+    }*/
 
     log.log([peerId, 'PeerConnection', null, 'Restarting peer connection']);
 
@@ -14302,7 +14300,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
     self._restartPeerConnection(peerId, true, false, peerCallback, true);
   };
 
-  var toRefresh = function() {
+  //var toRefresh = function() {
     if(!self._hasMCU) {
       var i;
 
@@ -14330,9 +14328,9 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
     } else {
       self._restartMCUConnection(callback);
     }
-  };
+  //};
 
-  self._throttle(toRefresh,5000)();
+  //self._throttle(toRefresh,5000)();
 
 };
 
