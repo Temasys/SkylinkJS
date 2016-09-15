@@ -253,6 +253,7 @@ Skylink.prototype._inRoom = false;
  *   &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt;
  *   must be retrieved as a requirement before Room session may begin.
  *   &lt;small&gt;This ignores the &lt;code&gt;options.audio&lt;/code&gt; and &lt;code&gt;options.video&lt;/code&gt; configuration.&lt;/small&gt;
+ *   &lt;small&gt;After 30 seconds without any Stream retrieved, this results in the &#x60;callback(error, ..)&#x60; result.&lt;/small&gt;
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_peerJoined&quot;&gt;
@@ -649,7 +650,7 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
   self._inRoom = false;
   self._closeChannel();
 
-  self._stopLocalMediaStreams({
+  self._stopStreams({
     userMedia: stopUserMedia,
     screenshare: stopScreenshare
   });
@@ -732,12 +733,67 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
     self._condition(&#x27;channelOpen&#x27;, function() {
       mediaOptions = mediaOptions || {};
 
-      // parse user data settings
-      self._parseUserData(mediaOptions.userData || self._userData);
-      self._parseBandwidthSettings(mediaOptions.bandwidth);
+      self._userData = mediaOptions.userData || self._userData || &#x27;&#x27;;
+      self._streamsBandwidthSettings = {};
 
-      // wait for local mediastream
-      self._waitForLocalMediaStream(callback, mediaOptions);
+      if (mediaOptions.bandwidth) {
+        if (typeof mediaOptions.bandwidth.audio === &#x27;number&#x27;) {
+          self._streamsBandwidthSettings.audio = mediaOptions.bandwidth.audio;
+        }
+
+        if (typeof mediaOptions.bandwidth.video === &#x27;number&#x27;) {
+          self._streamsBandwidthSettings.video = mediaOptions.bandwidth.video;
+        }
+
+        if (typeof mediaOptions.bandwidth.data === &#x27;number&#x27;) {
+          self._streamsBandwidthSettings.data = mediaOptions.bandwidth.data;
+        }
+      }
+
+      // get the stream
+      if (mediaOptions.manualGetUserMedia === true) {
+        self._trigger(&#x27;mediaAccessRequired&#x27;);
+
+        var current50Block = 0;
+        var mediaAccessRequiredFailure = false;
+        // wait for available audio or video stream
+        self._wait(function () {
+          if (mediaAccessRequiredFailure === true) {
+            self._onUserMediaError(new Error(&#x27;Waiting for stream timeout&#x27;), false, false);
+          } else {
+            callback(null, self._streams.userMedia.stream);
+          }
+        }, function () {
+          current50Block += 1;
+          if (current50Block === 600) {
+            mediaAccessRequiredFailure = true;
+            return true;
+          }
+
+          if (self._streams.userMedia &amp;&amp; self._streams.userMedia.stream) {
+            return true;
+          }
+        }, 50);
+        return;
+      }
+
+      if (mediaOptions.audio || mediaOptions.video) {
+        self.getUserMedia({
+          audio: mediaOptions.audio,
+          video: mediaOptions.video
+
+        }, function (error, success) {
+          if (error) {
+            callback(error, null);
+          } else {
+            callback(null, success);
+          }
+        });
+        return;
+      }
+
+      callback(null, null);
+
     }, function() { // open channel first if it&#x27;s not opened
 
       if (!self._channelOpen) {

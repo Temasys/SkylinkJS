@@ -933,8 +933,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         receiveOnly: self._peerConnections[peerId] &amp;&amp; self._peerConnections[peerId].receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
-        sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
-        explicit: !!explicit
+        sessionType: !!self._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
+        explicit: !!explicit,
+        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       });
 
       self._trigger(&#x27;peerRestart&#x27;, peerId, self.getPeerInfo(peerId), false);
@@ -1122,8 +1123,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     var stream = event.stream || event;
 
     if (targetMid === &#x27;MCU&#x27;) {
-      log.debug([targetMid, &#x27;MediaStream&#x27;, stream.id,
-        &#x27;Ignoring received remote stream from MCU -&gt;&#x27;], stream);
+      log.debug([targetMid, &#x27;MediaStream&#x27;, stream.id, &#x27;Ignoring received remote stream from MCU -&gt;&#x27;], stream);
       return;
     }
 
@@ -1312,8 +1312,9 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         receiveOnly: receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
-        sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
-        explicit: true
+        sessionType: !!self._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
+        explicit: true,
+        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       });
     }
   }

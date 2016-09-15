@@ -318,12 +318,12 @@ Skylink.prototype._EVENTS = {
    *   &lt;small&gt;When defined as &lt;code&gt;false&lt;/code&gt;, it means there is no video being sent from Peer.&lt;/small&gt;
    * @param {JSON} peerInfo.settings.video.resolution The Peer Stream video resolution.
    *   [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} [peerInfo.settings.video.resolution.width] The Peer Stream video resolution width.
-   * @param {Number} [peerInfo.settings.video.resolution.height] The Peer Stream video resolution height.
-   * @param {Number} [peerInfo.settings.video.frameRate] The Peer Stream video
+   * @param {Number} peerInfo.settings.video.resolution.width The Peer Stream video resolution width.
+   * @param {Number} peerInfo.settings.video.resolution.height The Peer Stream video resolution height.
+   * @param {Number} peerInfo.settings.video.frameRate The Peer Stream video
    *   &lt;a href=&quot;https://en.wikipedia.org/wiki/Frame_rate&quot;&gt;frameRate&lt;/a&gt; per second (fps).
    * @param {Boolean} [peerInfo.settings.video.screenshare] The flag if Peer Stream is a screensharing Stream.
-   * @param {JSON} [peerInfo.settings.bandwidth] The maximum streaming bandwidth sent from Peer.
+   * @param {JSON} peerInfo.settings.bandwidth The maximum streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.audio] The maximum audio streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.video] The maximum video streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.data] The maximum data streaming bandwidth sent from Peer.
@@ -339,6 +339,8 @@ Skylink.prototype._EVENTS = {
    *   &lt;small&gt;Data may be accessing browser or non-Web SDK version.&lt;/small&gt;
    * @param {String} [peerInfo.agent.os] The Peer platform name.
    *  &lt;small&gt;Data may be accessing OS platform version from Web SDK.&lt;/small&gt;
+   * @param {String} [peerInfo.agent.pluginVersion] The Peer Temasys Plugin version.
+   *  &lt;small&gt;Defined only when Peer is using the Temasys Plugin (IE / Safari).&lt;/small&gt;
    * @param {String} peerInfo.room The Room Peer is from.
    * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink

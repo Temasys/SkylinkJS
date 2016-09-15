@@ -444,9 +444,10 @@ Skylink.prototype._approachEventHandler = function(message){
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     receiveOnly: self._receiveOnly,
-    sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
+    sessionType: !!self._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
     target: message.target,
-    weight: self._peerPriorityWeight
+    weight: self._peerPriorityWeight,
+    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
   });
 };
 
@@ -692,10 +693,10 @@ Skylink.prototype._inRoomHandler = function(message) {
     self._peerPriorityWeight -= 100000000000;
   }
 
-  if (self._mediaScreen &amp;&amp; self._mediaScreen !== null) {
-    self._trigger(&#x27;incomingStream&#x27;, self._user.sid, self._mediaScreen, true, self.getPeerInfo());
-  } else if (self._mediaStream &amp;&amp; self._mediaStream !== null) {
-    self._trigger(&#x27;incomingStream&#x27;, self._user.sid, self._mediaStream, true, self.getPeerInfo());
+  if (self._streams.screenshare &amp;&amp; self._streams.screenshare.stream) {
+    self._trigger(&#x27;incomingStream&#x27;, self._user.sid, self._streams.screenshare.stream, true, self.getPeerInfo());
+  } else if (self._streams.userMedia &amp;&amp; self._streams.userMedia.stream) {
+    self._trigger(&#x27;incomingStream&#x27;, self._user.sid, self._streams.userMedia.stream, true, self.getPeerInfo());
   }
   // NOTE ALEX: should we wait for local streams?
   // or just go with what we have (if no stream, then one way?)
@@ -711,8 +712,9 @@ Skylink.prototype._inRoomHandler = function(message) {
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     receiveOnly: self._receiveOnly,
-    sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
-    weight: self._peerPriorityWeight
+    sessionType: !!self._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
+    weight: self._peerPriorityWeight,
+    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
   });
 };
 
@@ -744,7 +746,8 @@ Skylink.prototype._enterHandler = function(message) {
     self._peerInformations[targetMid].agent = {
       name: message.agent,
       version: message.version,
-      os: message.os || &#x27;&#x27;
+      os: message.os || &#x27;&#x27;,
+      pluginVersion: message.temasysPluginVersion
     };
 
     if (targetMid !== &#x27;MCU&#x27;) {
@@ -774,7 +777,8 @@ Skylink.prototype._enterHandler = function(message) {
     userInfo: self.getPeerInfo(),
     target: targetMid,
     weight: self._peerPriorityWeight,
-    sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;
+    sessionType: !!self._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
+    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
   });
 
   if (isNewPeer) {
@@ -836,7 +840,8 @@ Skylink.prototype._restartHandler = function(message){
   self._peerInformations[targetMid].agent = {
     name: message.agent,
     version: message.version,
-    os: message.os || &#x27;&#x27;
+    os: message.os || &#x27;&#x27;,
+    pluginVersion: message.temasysPluginVersion
   };
 
   var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
@@ -876,11 +881,12 @@ Skylink.prototype._restartHandler = function(message){
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
       receiveOnly: self._peerConnections[targetMid] &amp;&amp; self._peerConnections[targetMid].receiveOnly,
-      sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
+      sessionType: !!self._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
       // SkylinkJS parameters (copy the parameters from received message parameters)
       isConnectionRestart: !!message.isConnectionRestart,
       lastRestart: message.lastRestart,
-      explicit: !!message.explicit
+      explicit: !!message.explicit,
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
     });
   }
 
@@ -921,7 +927,8 @@ Skylink.prototype._welcomeHandler = function(message) {
     this._peerInformations[targetMid].agent = {
       name: message.agent,
       version: message.version,
-      os: message.os || &#x27;&#x27;
+      os: message.os || &#x27;&#x27;,
+      pluginVersion: message.temasysPluginVersion
     };
     // disable mcu for incoming peer sent by MCU
     /*if (message.agent === &#x27;MCU&#x27;) {
@@ -978,7 +985,8 @@ Skylink.prototype._welcomeHandler = function(message) {
       userInfo: this.getPeerInfo(),
       target: targetMid,
       weight: this._peerPriorityWeight,
-      sessionType: !!this._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;
+      sessionType: !!this._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
     });
   }
 };
@@ -1008,6 +1016,13 @@ Skylink.prototype._offerHandler = function(message) {
       pc.localDescription);
     return;
   }*/
+
+  // Add-on by Web SDK fixes
+  if (message.userInfo &amp;&amp; typeof message.userInfo === &#x27;object&#x27;) {
+    self._peerInformations[targetMid].settings = message.userInfo.settings;
+    self._peerInformations[targetMid].mediaStatus = message.userInfo.mediaStatus;
+    self._peerInformations[targetMid].userData = message.userInfo.userData;
+  }
 
   log.log([targetMid, null, message.type, &#x27;Received offer from peer. &#x27; +
     &#x27;Session description:&#x27;], message.sdp);
@@ -1183,6 +1198,13 @@ Skylink.prototype._answerHandler = function(message) {
     log.error([targetMid, null, message.type, &#x27;Peer connection object &#x27; +
       &#x27;not found. Unable to setRemoteDescription for answer&#x27;]);
     return;
+  }
+
+  // Add-on by Web SDK fixes
+  if (message.userInfo &amp;&amp; typeof message.userInfo === &#x27;object&#x27;) {
+    self._peerInformations[targetMid].settings = message.userInfo.settings;
+    self._peerInformations[targetMid].mediaStatus = message.userInfo.mediaStatus;
+    self._peerInformations[targetMid].userData = message.userInfo.userData;
   }
 
   var answer = new window.RTCSessionDescription({

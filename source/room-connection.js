@@ -162,6 +162,7 @@ Skylink.prototype._inRoom = false;
  *   <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>
  *   must be retrieved as a requirement before Room session may begin.
  *   <small>This ignores the <code>options.audio</code> and <code>options.video</code> configuration.</small>
+ *   <small>After 30 seconds without any Stream retrieved, this results in the `callback(error, ..)` result.</small>
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_peerJoined">
