@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 00:32:54 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 00:38:11 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11016,44 +11016,31 @@ Skylink.prototype.sendStream = function(options, callback) {
   var self = this;
 
   var restartFn = function (stream) {
-    // User is in the Room
     if (self._inRoom) {
-      // Trigger because User does not have screensharing stream
-      if (!self._mediaScreen) {
-        self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+      self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo());
+      self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 
-        if (!self._hasMCU) {
-          self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo());
-        }
-      }
-
-      // There are peers, refresh connections
-      if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
+      if (Object.keys(self._peerConnections).length > 0) {
         self.refreshConnection(function (err, success) {
           if (err) {
             log.error('Failed refreshing connections for sendStream() ->', err);
             if (typeof callback === 'function') {
-              callback(new Error('Failed refreshing connections'), null);
+              callback(new Error('Failed refreshing connections.'), null);
             }
             return;
           }
-
           if (typeof callback === 'function') {
             callback(null, stream);
           }
         });
-
-      // There is no peers, do not need to refresh
       } else if (typeof callback === 'function') {
         callback(null, stream);
       }
-
-    // User is not in the Room
     } else {
-      var notInRoomLaterError = 'Unable to send stream as user is not in the Room.';
-      log.error(notInRoomLaterError, stream);
+      var notInRoomAgainError = 'Unable to send stream as user is not in the Room.';
+      log.error(notInRoomAgainError, stream);
       if (typeof callback === 'function') {
-        callback(new Error(notInRoomLaterError), stream);
+        callback(new Error(notInRoomAgainError), null);
       }
     }
   };
@@ -11096,15 +11083,18 @@ Skylink.prototype.sendStream = function(options, callback) {
       return;
     }
 
-    self.once('mediaAccessSuccess', function (stream) {
-      self._streamSettings.audio = true;
-      self._streamSettings.video = true;
-      restartFn(stream);
-    }, function (stream, isScreensharing) {
-      return !isScreensharing;
-    });
+    self._onStreamAccessSuccess(options, {
+      settings: {
+        audio: true,
+        video: true
+      },
+      getUserMediaSettings: {
+        audio: true,
+        video: true
+      }
+    }, false, false);
 
-    self._onUserMediaSuccess(options, false);
+    restartFn(options);
 
   } else {
     self.getUserMedia(options, function (err, stream) {
@@ -11787,7 +11777,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
   log.log([null, 'MediaStream', streamId, 'Has access to stream ->'], stream);
 
   // Stop previous stream
-  if (!isScreensharing && self._streams.userMedia) {
+  if (!isScreenSharing && self._streams.userMedia) {
     self._stopStreams({
       userMedia: true,
       screenshare: false
