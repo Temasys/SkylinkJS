@@ -1266,12 +1266,12 @@ Skylink.prototype._stopStreams = function (options) {
   }
 
   if (stopScreenshare && self._streams.screenshare) {
-    if (self._streams.screenshare.stream) {
-      stopFn(self._streams.screenshare.stream);
-    }
-
     if (self._streams.screenshare.streamClone) {
       stopFn(self._streams.screenshare.streamClone);
+    }
+
+    if (self._streams.screenshare.stream) {
+      stopFn(self._streams.screenshare.stream);
     }
 
     self._streams.screenshare = null;

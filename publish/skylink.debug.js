@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 02:53:10 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 03:11:29 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11726,12 +11726,12 @@ Skylink.prototype._stopStreams = function (options) {
   }
 
   if (stopScreenshare && self._streams.screenshare) {
-    if (self._streams.screenshare.stream) {
-      stopFn(self._streams.screenshare.stream);
-    }
-
     if (self._streams.screenshare.streamClone) {
       stopFn(self._streams.screenshare.streamClone);
+    }
+
+    if (self._streams.screenshare.stream) {
+      stopFn(self._streams.screenshare.stream);
     }
 
     self._streams.screenshare = null;
