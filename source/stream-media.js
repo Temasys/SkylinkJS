@@ -1418,8 +1418,13 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
 
       self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true, !!isScreenSharing);
 
-      if (self._streams[ !!isScreenSharing ? 'screenshare' : 'userMedia' ]) {
-        self._streams[ !!isScreenSharing ? 'screenshare' : 'userMedia' ] = null;
+      if (isScreenSharing && self._streams.screenshare && self._streams.screenshare.stream &&
+        (self._streams.screenshare.stream.id || self._streams.screenshare.stream.label) === streamId) {
+        self._streams.screenshare = null;
+
+      } else if (!isScreenSharing && self._streams.userMedia && self._streams.userMedia.stream &&
+        (self._streams.userMedia.stream.id || self._streams.userMedia.stream.label) === streamId) {
+        self._streams.userMedia = null;
       }
     }
   };

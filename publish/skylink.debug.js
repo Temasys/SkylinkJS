@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 03:11:29 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 03:17:16 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11878,8 +11878,13 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
 
       self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true, !!isScreenSharing);
 
-      if (self._streams[ !!isScreenSharing ? 'screenshare' : 'userMedia' ]) {
-        self._streams[ !!isScreenSharing ? 'screenshare' : 'userMedia' ] = null;
+      if (isScreenSharing && self._streams.screenshare && self._streams.screenshare.stream &&
+        (self._streams.screenshare.stream.id || self._streams.screenshare.stream.label) === streamId) {
+        self._streams.screenshare = null;
+
+      } else if (!isScreenSharing && self._streams.userMedia && self._streams.userMedia.stream &&
+        (self._streams.userMedia.stream.id || self._streams.userMedia.stream.label) === streamId) {
+        self._streams.userMedia = null;
       }
     }
   };
