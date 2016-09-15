@@ -285,7 +285,7 @@ Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo){
     }
 
   } else {
-    peerVideo = $('video' + peerId + ' .video-obj')[0];
+    peerVideo = $('#video' + peerId + ' .video-obj')[0];
   }
 
   attachMediaStream(peerVideo, stream);

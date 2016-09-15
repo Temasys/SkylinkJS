@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 01:14:50 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 01:34:06 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10461,7 +10461,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 01:14:50 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Fri Sep 16 2016 01:34:06 GMT+0800 (SGT) */
 
 (function() {
 
@@ -21726,6 +21726,7 @@ Skylink.prototype.muteStream = function(options) {
       if (self._inRoom) {
         self._trigger('streamMuted', self._user.sid, self.getPeerInfo(), true,
           self._streams.screenshare && self._streams.screenshare.stream);
+        self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
       }
     }
   }
@@ -21752,7 +21753,7 @@ Skylink.prototype.muteStream = function(options) {
 Skylink.prototype.enableAudio = function() {
   this.muteStream({
     audioMuted: false,
-    videoMuted: self._streamsMutedSettings.videoMuted
+    videoMuted: this._streamsMutedSettings.videoMuted
   });
 };
 
@@ -21777,7 +21778,7 @@ Skylink.prototype.enableAudio = function() {
 Skylink.prototype.disableAudio = function() {
   this.muteStream({
     audioMuted: true,
-    videoMuted: self._streamsMutedSettings.videoMuted
+    videoMuted: this._streamsMutedSettings.videoMuted
   });
 };
 
@@ -21802,7 +21803,7 @@ Skylink.prototype.disableAudio = function() {
 Skylink.prototype.enableVideo = function() {
   this.muteStream({
     videoMuted: false,
-    audioMuted: self._streamsMutedSettings.audioMuted
+    audioMuted: this._streamsMutedSettings.audioMuted
   });
 };
 
@@ -21828,7 +21829,7 @@ Skylink.prototype.enableVideo = function() {
 Skylink.prototype.disableVideo = function() {
   this.muteStream({
     videoMuted: true,
-    audioMuted: self._streamsMutedSettings.audioMuted
+    audioMuted: this._streamsMutedSettings.audioMuted
   });
 };
 
@@ -22350,6 +22351,9 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
 
     log.warn([null, 'MediaStream', streamId, tracksNotSameError]);
 
+    var requireAudio = !!settings.settings.audio;
+    var requireVideo = !!settings.settings.video;
+
     if (settings.settings.audio && stream.getAudioTracks().length === 0) {
       settings.settings.audio = false;
     }
@@ -22361,10 +22365,10 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
     self._trigger('mediaAccessFallback', {
       error: new Error(tracksNotSameError),
       diff: {
-        video: { expected: 1, received: stream.getVideoTracks().length },
+        video: { expected: requireVideo ? 1 : 0, received: stream.getVideoTracks().length },
         audio: { expected: requireAudio ? 1 : 0, received: stream.getAudioTracks().length }
       }
-    }, self.MEDIA_ACCESS_FALLBACK_STATE.FALLBACKED, !!isScreensharing, !!isAudioFallback);
+    }, self.MEDIA_ACCESS_FALLBACK_STATE.FALLBACKED, !!isScreenSharing, !!isAudioFallback);
   }
 
   self._streams[ isScreenSharing ? 'screenshare' : 'userMedia' ] = {

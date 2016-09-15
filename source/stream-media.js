@@ -839,6 +839,7 @@ Skylink.prototype.muteStream = function(options) {
       if (self._inRoom) {
         self._trigger('streamMuted', self._user.sid, self.getPeerInfo(), true,
           self._streams.screenshare && self._streams.screenshare.stream);
+        self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
       }
     }
   }
@@ -865,7 +866,7 @@ Skylink.prototype.muteStream = function(options) {
 Skylink.prototype.enableAudio = function() {
   this.muteStream({
     audioMuted: false,
-    videoMuted: self._streamsMutedSettings.videoMuted
+    videoMuted: this._streamsMutedSettings.videoMuted
   });
 };
 
@@ -890,7 +891,7 @@ Skylink.prototype.enableAudio = function() {
 Skylink.prototype.disableAudio = function() {
   this.muteStream({
     audioMuted: true,
-    videoMuted: self._streamsMutedSettings.videoMuted
+    videoMuted: this._streamsMutedSettings.videoMuted
   });
 };
 
@@ -915,7 +916,7 @@ Skylink.prototype.disableAudio = function() {
 Skylink.prototype.enableVideo = function() {
   this.muteStream({
     videoMuted: false,
-    audioMuted: self._streamsMutedSettings.audioMuted
+    audioMuted: this._streamsMutedSettings.audioMuted
   });
 };
 
@@ -941,7 +942,7 @@ Skylink.prototype.enableVideo = function() {
 Skylink.prototype.disableVideo = function() {
   this.muteStream({
     videoMuted: true,
-    audioMuted: self._streamsMutedSettings.audioMuted
+    audioMuted: this._streamsMutedSettings.audioMuted
   });
 };
 
@@ -1463,6 +1464,9 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
 
     log.warn([null, 'MediaStream', streamId, tracksNotSameError]);
 
+    var requireAudio = !!settings.settings.audio;
+    var requireVideo = !!settings.settings.video;
+
     if (settings.settings.audio && stream.getAudioTracks().length === 0) {
       settings.settings.audio = false;
     }
@@ -1474,10 +1478,10 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
     self._trigger('mediaAccessFallback', {
       error: new Error(tracksNotSameError),
       diff: {
-        video: { expected: 1, received: stream.getVideoTracks().length },
+        video: { expected: requireVideo ? 1 : 0, received: stream.getVideoTracks().length },
         audio: { expected: requireAudio ? 1 : 0, received: stream.getAudioTracks().length }
       }
-    }, self.MEDIA_ACCESS_FALLBACK_STATE.FALLBACKED, !!isScreensharing, !!isAudioFallback);
+    }, self.MEDIA_ACCESS_FALLBACK_STATE.FALLBACKED, !!isScreenSharing, !!isAudioFallback);
   }
 
   self._streams[ isScreenSharing ? 'screenshare' : 'userMedia' ] = {
