@@ -375,36 +375,53 @@ Skylink.prototype._streamsStoppedCbs = {};
  * - When not provided, the value is set to &lt;code&gt;{ audio: true, video: true }&lt;/code&gt;.
  *   &lt;small&gt;To fallback to retrieve audio track only when retrieving of audio and video tracks failed,
  *   enable the &lt;code&gt;audioFallback&lt;/code&gt; flag in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
+ * @param {Boolean} [options.useExactConstraints=false] &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that by enabling this flag, exact values will be requested  when retrieving camera Stream,
+ *   but it does not prevent constraints related errors. By default when not enabled,
+ *   expected mandatory maximum values (or optional values for source ID) will requested to prevent constraints related
+ *   errors, with an exception for &lt;code&gt;options.video.frameRate&lt;/code&gt; option in Safari and IE (plugin-enabled) browsers,
+ *   where the expected maximum value will not be requested due to the lack of support.&lt;/blockquote&gt;
+ *   The flag if &lt;code&gt;getUserMedia()&lt;/code&gt; should request for camera Stream to match exact requested values of
+ *   &lt;code&gt;options.audio.deviceId&lt;/code&gt; and &lt;code&gt;options.video.deviceId&lt;/code&gt;, &lt;code&gt;options.video.resolution&lt;/code&gt;
+ *   and &lt;code&gt;options.video.frameRate&lt;/code&gt; when provided.
  * @param {Boolean|JSON} [options.audio=false] The audio configuration options.
  * @param {Boolean} [options.audio.stereo=false] The flag if stereo band should be configured
  *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
- * @param {Boolean} [options.audio.mute=false] &lt;blockquote class=&quot;info&quot;&gt;
- *   Note that this mutes any existing &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt;
- *   audio tracks as well. &lt;blockquote&gt; The flag if audio tracks should be muted upon receiving them.
- *   &lt;small&gt;Providing the value as &lt;code&gt;false&lt;/code&gt; does nothing to &lt;code&gt;peerInfo.mediaStatus.audioMuted&lt;/code&gt;.&lt;/small&gt;
- * @param {Array} [options.audio.optional] The &lt;code&gt;navigator.getUserMedia()&lt;/code&gt; API
- *   &lt;code&gt;audio: { optional [..] }&lt;/code&gt; property.
+ * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
+ *   &lt;small&gt;Providing the value as &lt;code&gt;false&lt;/code&gt; does nothing to &lt;code&gt;peerInfo.mediaStatus.audioMuted&lt;/code&gt;,
+ *   but when provided as &lt;code&gt;true&lt;/code&gt;, this mutes any existing &lt;a href=&quot;#method_shareScreen&quot;&gt;
+ *   &lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt; audio tracks as well.&lt;/small&gt;
+ * @param {Array} [options.audio.optional] &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that this may result in constraints related error when &lt;code&gt;options.useExactConstraints&lt;/code&gt; value is
+ *   &lt;code&gt;true&lt;/code&gt;. If you are looking to set the requested source ID of the audio track,
+ *   use &lt;code&gt;options.audio.deviceId&lt;/code&gt; instead.&lt;/blockquote&gt;
+ *   The &lt;code&gt;navigator.getUserMedia()&lt;/code&gt; API &lt;code&gt;audio: { optional [..] }&lt;/code&gt; property.
+ * @param {String} [options.audio.deviceId] The audio track source ID of the device to use.
+ *   &lt;small&gt;The list of available audio source ID can be retrieved by the &lt;a href=&quot;https://developer.
+ * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices&quot;&gt;&lt;code&gt;navigator.mediaDevices.enumerateDevices&lt;/code&gt;
+ *   API&lt;/a&gt;.&lt;/small&gt;
  * @param {Boolean|JSON} [options.video=false] The video configuration options.
- * @param {Boolean} [options.video.mute=false] &lt;blockquote class=&quot;info&quot;&gt;
- *   Note that this mutes any existing &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt;
- *   video tracks as well. &lt;blockquote&gt; The flag if video tracks should be muted upon receiving them.
- *   &lt;small&gt;Providing the value as &lt;code&gt;false&lt;/code&gt; does nothing to &lt;code&gt;peerInfo.mediaStatus.videoMuted&lt;/code&gt;.&lt;/small&gt;
- * @param {JSON} [options.video.resolution] &lt;blockquote class=&quot;info&quot;&gt;
- *   Note that currently &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt; only configures
- *   the maximum resolution of the camera Stream due to browser interopability and support. &lt;/blockquote&gt;
- *   The video resolution.
+ * @param {Boolean} [options.video.mute=false] The flag if video tracks should be muted upon receiving them.
+ *   &lt;small&gt;Providing the value as &lt;code&gt;false&lt;/code&gt; does nothing to &lt;code&gt;peerInfo.mediaStatus.videoMuted&lt;/code&gt;,
+ *   but when provided as &lt;code&gt;true&lt;/code&gt;, this mutes any existing &lt;a href=&quot;#method_shareScreen&quot;&gt;
+ *   &lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt; video tracks as well.&lt;/small&gt;
+ * @param {JSON} [options.video.resolution] The video resolution.
  *   &lt;small&gt;By default, &lt;a href=&quot;#attr_VIDEO_RESOLUTION&quot;&gt;&lt;code&gt;VGA&lt;/code&gt;&lt;/a&gt; resolution option
  *   is selected when not provided.&lt;/small&gt;
  *   [Rel: Skylink.VIDEO_RESOLUTION]
  * @param {Number} [options.video.resolution.width] The video resolution width.
  * @param {Number} [options.video.resolution.height] The video resolution height.
- * @param {Number} [options.video.frameRate=50] &lt;blockquote class=&quot;info&quot;&gt;
- *   Note that currently &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt; only configures
- *   the maximum frameRate of the camera Stream due to browser interopability and support. For Safari and IE browsers
- *   (plugin-enabled), the maximum frameRate is not configured due to the lack of support.&lt;/blockquote&gt;
- *   The video &lt;a href=&quot;https://en.wikipedia.org/wiki/Frame_rate&quot;&gt;frameRate&lt;/a&gt; per second (fps).
- * @param {Array} [options.video.optional] The &lt;code&gt;navigator.getUserMedia()&lt;/code&gt; API
- *   &lt;code&gt;video: { optional [..] }&lt;/code&gt; property.
+ * @param {Number} [options.video.frameRate] The video &lt;a href=&quot;https://en.wikipedia.org/wiki/Frame_rate&quot;&gt;
+ *   frameRate&lt;/a&gt; per second (fps).
+ * @param {Array} [options.video.optional] &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that this may result in constraints related error when &lt;code&gt;options.useExactConstraints&lt;/code&gt; value is
+ *   &lt;code&gt;true&lt;/code&gt;. If you are looking to set the requested source ID of the video track,
+ *   use &lt;code&gt;options.video.deviceId&lt;/code&gt; instead.&lt;/blockquote&gt;
+ *   The &lt;code&gt;navigator.getUserMedia()&lt;/code&gt; API &lt;code&gt;video: { optional [..] }&lt;/code&gt; property.
+ * @param {String} [options.video.deviceId] The video track source ID of the device to use.
+ *   &lt;small&gt;The list of available video source ID can be retrieved by the &lt;a href=&quot;https://developer.
+ * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices&quot;&gt;&lt;code&gt;navigator.mediaDevices.enumerateDevices&lt;/code&gt;
+ *   API&lt;/a&gt;.&lt;/small&gt;
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;
@@ -1422,8 +1439,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
 
   if (options.audio) {
     settings.settings.audio = {
-      stereo: false,
-      optional: []
+      stereo: false
     };
     settings.getUserMediaSettings.audio = {};
 
@@ -1435,10 +1451,26 @@ Skylink.prototype._parseStreamSettings = function(options) {
       settings.mutedSettings.shouldAudioMuted = options.audio.mute;
     }
 
-    // New constraints { sourceId: { exact: xxx }}
     if (Array.isArray(options.audio.optional)) {
-      settings.settings.audio = options.audio.optional;
+      settings.settings.audio.optional = options.audio.optional;
       settings.getUserMediaSettings.audio.optional = options.audio.optional;
+    }
+
+    if (options.audio.deviceId &amp;&amp; typeof options.audio.deviceId === &#x27;string&#x27;) {
+      settings.settings.audio.deviceId = options.audio.deviceId;
+
+      if (options.useExactConstraints) {
+        settings.settings.audio.deviceId = { exact: options.audio.deviceId };
+
+      } else {
+        if (!Array.isArray(settings.getUserMediaSettings.audio.optional)) {
+          settings.getUserMediaSettings.audio.optional = [];
+        }
+
+        settings.getUserMediaSettings.audio.optional.push({
+          sourceId: options.audio.deviceId
+        });
+      }
     }
 
     // For Edge to work since they do not support the advanced constraints yet
@@ -1449,38 +1481,68 @@ Skylink.prototype._parseStreamSettings = function(options) {
 
   if (options.video) {
     settings.settings.video = {
-      resolution: this.VIDEO_RESOLUTION.VGA,
-      frameRate: 50,
-      optional: []
+      resolution: {
+        width: options.video.resolution &amp;&amp; typeof options.video.resolution.width === &#x27;number&#x27; ?
+          options.video.resolution.width : this.VIDEO_RESOLUTION.VGA.width,
+        height: options.video.resolution &amp;&amp; typeof options.video.resolution.height === &#x27;number&#x27; ?
+          options.video.resolution.height : this.VIDEO_RESOLUTION.VGA.height
+      }
     };
     settings.getUserMediaSettings.video = {};
-
-    if (typeof options.video.frameRate === &#x27;number&#x27;) {
-      settings.settings.video.frameRate = options.video.frameRate;
-    }
 
     if (typeof options.video.mute === &#x27;boolean&#x27;) {
       settings.mutedSettings.shouldVideoMuted = options.video.mute;
     }
 
-    // New constraints { sourceId: { exact: xxx }}
     if (Array.isArray(options.video.optional)) {
-      settings.settings.video = options.video.optional;
+      settings.settings.video.optional = options.video.optional;
       settings.getUserMediaSettings.video.optional = options.video.optional;
     }
 
-    settings.getUserMediaSettings.video.mandatory = {
-      //minWidth: videoOptions.resolution.width,
-      //minHeight: videoOptions.resolution.height,
-      maxWidth: settings.settings.video.resolution.width,
-      maxHeight: settings.settings.video.resolution.height,
-      //minFrameRate: videoOptions.frameRate,
-      maxFrameRate: settings.settings.video.frameRate
-    };
+    if (options.video.deviceId &amp;&amp; typeof options.video.deviceId === &#x27;string&#x27;) {
+      settings.settings.video.deviceId = options.video.deviceId;
 
-    // Remove maxFrameRate for AdapterJS to work with Safari
-    if ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1) {
-      delete settings.getUserMediaSettings.video.mandatory.maxFrameRate;
+      if (options.useExactConstraints) {
+        settings.settings.video.deviceId = { exact: options.video.deviceId };
+
+      } else {
+        if (!Array.isArray(settings.getUserMediaSettings.video.optional)) {
+          settings.getUserMediaSettings.video.optional = [];
+        }
+
+        settings.getUserMediaSettings.video.optional.push({
+          sourceId: options.video.deviceId
+        });
+      }
+    }
+
+    if (useExactConstraints) {
+      settings.getUserMediaSettings.video.width = { exact: settings.settings.video.resolution.width };
+      settings.getUserMediaSettings.video.height = { exact: settings.settings.video.resolution.height };
+
+      if (typeof options.video.frameRate === &#x27;number&#x27;) {
+        settings.settings.video.frameRate = options.video.frameRate;
+        settings.getUserMediaSettings.video.frameRate = { exact: options.video.frameRate };
+      }
+
+    } else {
+      settings.getUserMediaSettings.video.mandatory = {
+        maxWidth: settings.settings.video.resolution.width,
+        maxHeight: settings.settings.video.resolution.height
+      };
+
+      if (typeof options.video.frameRate === &#x27;number&#x27; &amp;&amp; [&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) === -1) {
+        settings.settings.video.frameRate = options.video.frameRate;
+        settings.getUserMediaSettings.video.mandatory.maxFrameRate = options.video.frameRate;
+      }
+    }
+
+    if (typeof options.video.frameRate === &#x27;number&#x27;) {
+      settings.settings.video.frameRate = options.video.frameRate;
+
+      if (options.useExactConstraints) {
+        settings.settings.video
+      }
     }
 
     // For Edge to work since they do not support the advanced constraints yet
