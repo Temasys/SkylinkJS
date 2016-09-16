@@ -2418,7 +2418,7 @@
                         },
                         {
                             "name": "bandwidth",
-                            "description": "<blockquote class=\"info\">Note that this currently does not work\n  with Firefox browsers.</blockquote> The configuration to set the maximum streaming bandwidth sent to Peers.",
+                            "description": "<blockquote class=\"info\">Note that this is currently not supported\n  with Firefox browsers versions 48 and below as noted in an existing\n  <a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21\">bugzilla ticket here</a>.</blockquote>\n  The configuration to set the maximum streaming bandwidth sent to Peers.",
                             "type": "JSON",
                             "optional": true,
                             "props": [
@@ -2512,7 +2512,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 458,
+            "line": 460,
             "description": "Function that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -2577,7 +2577,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 584,
+            "line": 586,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -2587,7 +2587,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 615,
+            "line": 617,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -2597,7 +2597,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 646,
+            "line": 648,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -6546,7 +6546,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1466,
+            "line": 1463,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -6557,7 +6557,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1598,
+            "line": 1595,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -6568,7 +6568,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1638,
+            "line": 1635,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -6579,7 +6579,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1672,
+            "line": 1669,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -6649,7 +6649,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 247,
+            "line": 250,
             "description": "Function that modifies the SessionDescription string to set the preferred sending video codec.",
             "itemtype": "method",
             "name": "_setSDPVideoCodec",
@@ -6660,7 +6660,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 300,
+            "line": 303,
             "description": "Function that modifies the SessionDescription string to set the preferred sending audio codec.",
             "itemtype": "method",
             "name": "_setSDPAudioCodec",
@@ -6671,7 +6671,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 352,
+            "line": 355,
             "description": "Function that modifies the SessionDescription string to remove the experimental H264 Firefox flag\n  that is breaking connections.\nTo evaluate removal of this change once we roll out H264 codec interop.",
             "itemtype": "method",
             "name": "_removeSDPFirefoxH264Pref",
@@ -6682,7 +6682,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 371,
+            "line": 374,
             "description": "Function that modifies the SessionDescription string to set with the correct MediaStream ID and\n  MediaStreamTrack IDs that is not provided from Firefox connection to Chromium connection.",
             "itemtype": "method",
             "name": "_addSDPSsrcFirefoxAnswer",
@@ -6751,15 +6751,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:458"
+            "line": " source/room-connection.js:460"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:584"
+            "line": " source/room-connection.js:586"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:615"
+            "line": " source/room-connection.js:617"
         },
         {
             "message": "unknown tag: trigger",

@@ -148,8 +148,10 @@ Skylink.prototype._inRoom = false;
  *   <code>options.audio</code> is not defined, it will be defined as <code>false</code>.</small>
  *   <small>Object signature matches the <code>options.video</code> parameter in the
  *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</small>
- * @param {JSON} [options.bandwidth] <blockquote class="info">Note that this currently does not work
- *   with Firefox browsers.</blockquote> The configuration to set the maximum streaming bandwidth sent to Peers.
+ * @param {JSON} [options.bandwidth] <blockquote class="info">Note that this is currently not supported
+ *   with Firefox browsers versions 48 and below as noted in an existing
+ *   <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21">bugzilla ticket here</a>.</blockquote>
+ *   The configuration to set the maximum streaming bandwidth sent to Peers.
  * @param {Number} [options.bandwidth.audio] The maximum audio streaming bandwidth sent to Peers.
  * @param {Number} [options.bandwidth.video] The maximum video streaming bandwidth sent to Peers.
  * @param {Number} [options.bandwidth.data] The maximum data streaming bandwidth sent to Peers.

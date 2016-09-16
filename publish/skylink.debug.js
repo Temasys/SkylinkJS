@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Sat Sep 17 2016 01:48:09 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Sat Sep 17 2016 02:10:56 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5371,8 +5371,8 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   }
 
   // Set SDP max bitrate
-  if (self._streamsBandwidthSettings.bandwidth) {
-    sdpLines = self._setSDPBitrate(sdpLines, self._streamsBandwidthSettings.bandwidth);
+  if (self._streamsBandwidthSettings) {
+    sdpLines = self._setSDPBitrate(sdpLines, self._streamsBandwidthSettings);
   }
 
   // set sdp resolution
@@ -5841,8 +5841,10 @@ Skylink.prototype._inRoom = false;
  *   <code>options.audio</code> is not defined, it will be defined as <code>false</code>.</small>
  *   <small>Object signature matches the <code>options.video</code> parameter in the
  *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</small>
- * @param {JSON} [options.bandwidth] <blockquote class="info">Note that this currently does not work
- *   with Firefox browsers.</blockquote> The configuration to set the maximum streaming bandwidth sent to Peers.
+ * @param {JSON} [options.bandwidth] <blockquote class="info">Note that this is currently not supported
+ *   with Firefox browsers versions 48 and below as noted in an existing
+ *   <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21">bugzilla ticket here</a>.</blockquote>
+ *   The configuration to set the maximum streaming bandwidth sent to Peers.
  * @param {Number} [options.bandwidth.audio] The maximum audio streaming bandwidth sent to Peers.
  * @param {Number} [options.bandwidth.video] The maximum video streaming bandwidth sent to Peers.
  * @param {Number} [options.bandwidth.data] The maximum data streaming bandwidth sent to Peers.
@@ -12441,7 +12443,8 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
       // set the audio bandwidth
       if (sdpLines[i].indexOf('m=audio') === 0) {
       //if (sdpLines[i].indexOf('a=audio') === 0 || sdpLines[i].indexOf('m=audio') === 0) {
-        sdpLines.splice(i + 1, 0, 'b=AS:' + bandwidth.audio);
+        sdpLines.splice(i + 1, 0, window.webrtcDetectedBrowser === 'firefox' ?
+          'b=TIAS:' + (bandwidth.audio * 1000) : 'b=AS:' + bandwidth.audio);
 
         log.info([null, 'SDP', null, 'Setting maximum sending audio bandwidth bitrate @(index:' + i + ') -> '], bandwidth.audio);
         hasSetAudio = true;
@@ -12464,7 +12467,8 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
       // set the video bandwidth
       if (sdpLines[j].indexOf('m=video') === 0) {
       //if (sdpLines[j].indexOf('a=video') === 0 || sdpLines[j].indexOf('m=video') === 0) {
-        sdpLines.splice(j + 1, 0, 'b=AS:' + bandwidth.video);
+        sdpLines.splice(j + 1, 0, window.webrtcDetectedBrowser === 'firefox' ?
+          'b=TIAS:' + (bandwidth.video * 1000) : 'b=AS:' + bandwidth.video);
 
         log.info([null, 'SDP', null, 'Setting maximum sending video bandwidth bitrate @(index:' + j + ') -> '], bandwidth.video);
         hasSetVideo = true;
@@ -12487,7 +12491,8 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
       // set the data bandwidth
       if (sdpLines[k].indexOf('m=application') === 0) {
       //if (sdpLines[k].indexOf('a=application') === 0 || sdpLines[k].indexOf('m=application') === 0) {
-        sdpLines.splice(k + 1, 0, 'b=AS:' + bandwidth.data);
+        sdpLines.splice(k + 1, 0, window.webrtcDetectedBrowser === 'firefox' ?
+          'b=TIAS:' + (bandwidth.data * 1000) : 'b=AS:' + bandwidth.data);
 
         log.info([null, 'SDP', null, 'Setting maximum sending data bandwidth bitrate @(index:' + k + ') -> '], bandwidth.data);
         hasSetData = true;

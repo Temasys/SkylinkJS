@@ -388,8 +388,8 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   }
 
   // Set SDP max bitrate
-  if (self._streamsBandwidthSettings.bandwidth) {
-    sdpLines = self._setSDPBitrate(sdpLines, self._streamsBandwidthSettings.bandwidth);
+  if (self._streamsBandwidthSettings) {
+    sdpLines = self._setSDPBitrate(sdpLines, self._streamsBandwidthSettings);
   }
 
   // set sdp resolution

@@ -271,7 +271,8 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
       // set the audio bandwidth
       if (sdpLines[i].indexOf(&#x27;m=audio&#x27;) === 0) {
       //if (sdpLines[i].indexOf(&#x27;a=audio&#x27;) === 0 || sdpLines[i].indexOf(&#x27;m=audio&#x27;) === 0) {
-        sdpLines.splice(i + 1, 0, &#x27;b=AS:&#x27; + bandwidth.audio);
+        sdpLines.splice(i + 1, 0, window.webrtcDetectedBrowser === &#x27;firefox&#x27; ?
+          &#x27;b=TIAS:&#x27; + (bandwidth.audio * 1000) : &#x27;b=AS:&#x27; + bandwidth.audio);
 
         log.info([null, &#x27;SDP&#x27;, null, &#x27;Setting maximum sending audio bandwidth bitrate @(index:&#x27; + i + &#x27;) -&gt; &#x27;], bandwidth.audio);
         hasSetAudio = true;
@@ -294,7 +295,8 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
       // set the video bandwidth
       if (sdpLines[j].indexOf(&#x27;m=video&#x27;) === 0) {
       //if (sdpLines[j].indexOf(&#x27;a=video&#x27;) === 0 || sdpLines[j].indexOf(&#x27;m=video&#x27;) === 0) {
-        sdpLines.splice(j + 1, 0, &#x27;b=AS:&#x27; + bandwidth.video);
+        sdpLines.splice(j + 1, 0, window.webrtcDetectedBrowser === &#x27;firefox&#x27; ?
+          &#x27;b=TIAS:&#x27; + (bandwidth.video * 1000) : &#x27;b=AS:&#x27; + bandwidth.video);
 
         log.info([null, &#x27;SDP&#x27;, null, &#x27;Setting maximum sending video bandwidth bitrate @(index:&#x27; + j + &#x27;) -&gt; &#x27;], bandwidth.video);
         hasSetVideo = true;
@@ -317,7 +319,8 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
       // set the data bandwidth
       if (sdpLines[k].indexOf(&#x27;m=application&#x27;) === 0) {
       //if (sdpLines[k].indexOf(&#x27;a=application&#x27;) === 0 || sdpLines[k].indexOf(&#x27;m=application&#x27;) === 0) {
-        sdpLines.splice(k + 1, 0, &#x27;b=AS:&#x27; + bandwidth.data);
+        sdpLines.splice(k + 1, 0, window.webrtcDetectedBrowser === &#x27;firefox&#x27; ?
+          &#x27;b=TIAS:&#x27; + (bandwidth.data * 1000) : &#x27;b=AS:&#x27; + bandwidth.data);
 
         log.info([null, &#x27;SDP&#x27;, null, &#x27;Setting maximum sending data bandwidth bitrate @(index:&#x27; + k + &#x27;) -&gt; &#x27;], bandwidth.data);
         hasSetData = true;

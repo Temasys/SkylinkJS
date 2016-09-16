@@ -238,26 +238,26 @@ Skylink.prototype.AUDIO_CODEC = {
  * @since 0.5.6
  */
 Skylink.prototype.VIDEO_RESOLUTION = {
-  QQVGA: { width: 160, height: 120, aspectRatio: &#x27;4:3&#x27; },
-  HQVGA: { width: 240, height: 160, aspectRatio: &#x27;3:2&#x27; },
-  QVGA: { width: 320, height: 240, aspectRatio: &#x27;4:3&#x27; },
-  WQVGA: { width: 384, height: 240, aspectRatio: &#x27;16:10&#x27; },
-  HVGA: { width: 480, height: 320, aspectRatio: &#x27;3:2&#x27; },
-  VGA: { width: 640, height: 480, aspectRatio: &#x27;4:3&#x27; },
-  WVGA: { width: 768, height: 480, aspectRatio: &#x27;16:10&#x27; },
-  FWVGA: { width: 854, height: 480, aspectRatio: &#x27;16:9&#x27; },
-  SVGA: { width: 800, height: 600, aspectRatio: &#x27;4:3&#x27; },
-  DVGA: { width: 960, height: 640, aspectRatio: &#x27;3:2&#x27; },
-  WSVGA: { width: 1024, height: 576, aspectRatio: &#x27;16:9&#x27; },
-  HD: { width: 1280, height: 720, aspectRatio: &#x27;16:9&#x27; },
-  HDPLUS: { width: 1600, height: 900, aspectRatio: &#x27;16:9&#x27; },
-  FHD: { width: 1920, height: 1080, aspectRatio: &#x27;16:9&#x27; },
-  QHD: { width: 2560, height: 1440, aspectRatio: &#x27;16:9&#x27; },
-  WQXGAPLUS: { width: 3200, height: 1800, aspectRatio: &#x27;16:9&#x27; },
-  UHD: { width: 3840, height: 2160, aspectRatio: &#x27;16:9&#x27; },
-  UHDPLUS: { width: 5120, height: 2880, aspectRatio: &#x27;16:9&#x27; },
-  FUHD: { width: 7680, height: 4320, aspectRatio: &#x27;16:9&#x27; },
-  QUHD: { width: 15360, height: 8640, aspectRatio: &#x27;16:9&#x27; }
+  QQVGA: { width: 160, height: 120 /*, aspectRatio: &#x27;4:3&#x27;*/ },
+  HQVGA: { width: 240, height: 160 /*, aspectRatio: &#x27;3:2&#x27;*/ },
+  QVGA: { width: 320, height: 240 /*, aspectRatio: &#x27;4:3&#x27;*/ },
+  WQVGA: { width: 384, height: 240 /*, aspectRatio: &#x27;16:10&#x27;*/ },
+  HVGA: { width: 480, height: 320 /*, aspectRatio: &#x27;3:2&#x27;*/ },
+  VGA: { width: 640, height: 480 /*, aspectRatio: &#x27;4:3&#x27;*/ },
+  WVGA: { width: 768, height: 480 /*, aspectRatio: &#x27;16:10&#x27;*/ },
+  FWVGA: { width: 854, height: 480 /*, aspectRatio: &#x27;16:9&#x27;*/ },
+  SVGA: { width: 800, height: 600 /*, aspectRatio: &#x27;4:3&#x27;*/ },
+  DVGA: { width: 960, height: 640 /*, aspectRatio: &#x27;3:2&#x27;*/ },
+  WSVGA: { width: 1024, height: 576 /*, aspectRatio: &#x27;16:9&#x27;*/ },
+  HD: { width: 1280, height: 720 /*, aspectRatio: &#x27;16:9&#x27;*/ },
+  HDPLUS: { width: 1600, height: 900 /*, aspectRatio: &#x27;16:9&#x27;*/ },
+  FHD: { width: 1920, height: 1080 /*, aspectRatio: &#x27;16:9&#x27;*/ },
+  QHD: { width: 2560, height: 1440 /*, aspectRatio: &#x27;16:9&#x27;*/ },
+  WQXGAPLUS: { width: 3200, height: 1800 /*, aspectRatio: &#x27;16:9&#x27;*/ },
+  UHD: { width: 3840, height: 2160 /*, aspectRatio: &#x27;16:9&#x27;*/ },
+  UHDPLUS: { width: 5120, height: 2880 /*, aspectRatio: &#x27;16:9&#x27;*/ },
+  FUHD: { width: 7680, height: 4320 /*, aspectRatio: &#x27;16:9&#x27;*/ },
+  QUHD: { width: 15360, height: 8640 /*, aspectRatio: &#x27;16:9&#x27;*/ }
 };
 
 /**
@@ -1452,15 +1452,15 @@ Skylink.prototype._parseStreamSettings = function(options) {
     }
 
     if (Array.isArray(options.audio.optional)) {
-      settings.settings.audio.optional = options.audio.optional;
-      settings.getUserMediaSettings.audio.optional = options.audio.optional;
+      settings.settings.audio.optional = clone(options.audio.optional);
+      settings.getUserMediaSettings.audio.optional = clone(options.audio.optional);
     }
 
     if (options.audio.deviceId &amp;&amp; typeof options.audio.deviceId === &#x27;string&#x27;) {
       settings.settings.audio.deviceId = options.audio.deviceId;
 
       if (options.useExactConstraints) {
-        settings.settings.audio.deviceId = { exact: options.audio.deviceId };
+        settings.getUserMediaSettings.audio.deviceId = { exact: options.audio.deviceId };
 
       } else {
         if (!Array.isArray(settings.getUserMediaSettings.audio.optional)) {
@@ -1481,12 +1481,8 @@ Skylink.prototype._parseStreamSettings = function(options) {
 
   if (options.video) {
     settings.settings.video = {
-      resolution: {
-        width: options.video.resolution &amp;&amp; typeof options.video.resolution.width === &#x27;number&#x27; ?
-          options.video.resolution.width : this.VIDEO_RESOLUTION.VGA.width,
-        height: options.video.resolution &amp;&amp; typeof options.video.resolution.height === &#x27;number&#x27; ?
-          options.video.resolution.height : this.VIDEO_RESOLUTION.VGA.height
-      }
+      resolution: this.VIDEO_RESOLUTION.VGA,
+      screenshare: false
     };
     settings.getUserMediaSettings.video = {};
 
@@ -1495,15 +1491,15 @@ Skylink.prototype._parseStreamSettings = function(options) {
     }
 
     if (Array.isArray(options.video.optional)) {
-      settings.settings.video.optional = options.video.optional;
-      settings.getUserMediaSettings.video.optional = options.video.optional;
+      settings.settings.video.optional = clone(options.video.optional);
+      settings.getUserMediaSettings.video.optional = clone(options.video.optional);
     }
 
     if (options.video.deviceId &amp;&amp; typeof options.video.deviceId === &#x27;string&#x27;) {
       settings.settings.video.deviceId = options.video.deviceId;
 
       if (options.useExactConstraints) {
-        settings.settings.video.deviceId = { exact: options.video.deviceId };
+        settings.getUserMediaSettings.video.deviceId = { exact: options.video.deviceId };
 
       } else {
         if (!Array.isArray(settings.getUserMediaSettings.video.optional)) {
@@ -1516,7 +1512,16 @@ Skylink.prototype._parseStreamSettings = function(options) {
       }
     }
 
-    if (useExactConstraints) {
+    if (options.video.resolution &amp;&amp; typeof options.video.resolution === &#x27;object&#x27;) {
+      if (typeof options.video.resolution.width === &#x27;number&#x27;) {
+        settings.settings.video.resolution.width = options.video.resolution.width;
+      }
+      if (typeof options.video.resolution.height === &#x27;number&#x27;) {
+        settings.settings.video.resolution.height = options.video.resolution.height;
+      }
+    }
+
+    if (options.useExactConstraints) {
       settings.getUserMediaSettings.video.width = { exact: settings.settings.video.resolution.width };
       settings.getUserMediaSettings.video.height = { exact: settings.settings.video.resolution.height };
 
@@ -1534,14 +1539,6 @@ Skylink.prototype._parseStreamSettings = function(options) {
       if (typeof options.video.frameRate === &#x27;number&#x27; &amp;&amp; [&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) === -1) {
         settings.settings.video.frameRate = options.video.frameRate;
         settings.getUserMediaSettings.video.mandatory.maxFrameRate = options.video.frameRate;
-      }
-    }
-
-    if (typeof options.video.frameRate === &#x27;number&#x27;) {
-      settings.settings.video.frameRate = options.video.frameRate;
-
-      if (options.useExactConstraints) {
-        settings.settings.video
       }
     }
 
