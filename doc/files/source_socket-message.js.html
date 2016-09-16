@@ -189,6 +189,15 @@ Skylink.prototype._hasMCU = false;
 Skylink.prototype._receiveOnly = false;
 
 /**
+ * &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that broadcasted events from &lt;a href=&quot;#method_muteStream&quot;&gt;&lt;code&gt;muteStream()&lt;/code&gt; method&lt;/a&gt;,
+ *   &lt;a href=&quot;#method_stopStream&quot;&gt;&lt;code&gt;stopStream()&lt;/code&gt; method&lt;/a&gt;,
+ *   &lt;a href=&quot;#method_stopScreen&quot;&gt;&lt;code&gt;stopScreen()&lt;/code&gt; method&lt;/a&gt;,
+ *   &lt;a href=&quot;#method_sendMessage&quot;&gt;&lt;code&gt;sendMessage()&lt;/code&gt; method&lt;/a&gt;,
+ *   &lt;a href=&quot;#method_unlockRoom&quot;&gt;&lt;code&gt;unlockRoom()&lt;/code&gt; method&lt;/a&gt; and
+ *   &lt;a href=&quot;#method_lockRoom&quot;&gt;&lt;code&gt;lockRoom()&lt;/code&gt; method&lt;/a&gt; may be queued when
+ *   sent within less than an interval.
+ * &lt;/blockquote&gt;
  * Function that sends a message to Peers via the Signaling socket connection.
  * @method sendMessage
  * @param {String|JSON} message The message.

@@ -2578,7 +2578,7 @@
         {
             "file": "source/room-connection.js",
             "line": 584,
-            "description": "Function that locks the current Room when in session to prevent other Peers from joining the Room.",
+            "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
             "trigger": "<ol class=\"desc-seq\">\n  <li><a href=\"#event_roomLock\"><code>roomLock</code> event</a> triggers parameter payload\n  <code>isLocked</code> value as <code>true</code>.</li></ol>",
@@ -2587,8 +2587,8 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 606,
-            "description": "Function that unlocks the current Room when in session to allow other Peers to join the Room.",
+            "line": 615,
+            "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
             "trigger": "<ol class=\"desc-seq\">\n  <li><a href=\"#event_roomLock\"><code>roomLock</code> event</a> triggers parameter payload\n  <code>isLocked</code> value as <code>false</code>.</li></ol>",
@@ -2597,7 +2597,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 628,
+            "line": 646,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -5662,7 +5662,7 @@
         {
             "file": "source/socket-message.js",
             "line": 100,
-            "description": "Function that sends a message to Peers via the Signaling socket connection.",
+            "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that sends a message to Peers via the Signaling socket connection.",
             "itemtype": "method",
             "name": "sendMessage",
             "params": [
@@ -5687,7 +5687,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 195,
+            "line": 204,
             "description": "Function that process and parses the socket message string received from the Signaling.",
             "itemtype": "method",
             "name": "_processSigMessage",
@@ -5698,7 +5698,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 214,
+            "line": 223,
             "description": "Function that handles and processes the socket message received.",
             "itemtype": "method",
             "name": "_processingSingleMessage",
@@ -5709,7 +5709,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 300,
+            "line": 309,
             "description": "Function that handles the \"peerList\" socket message received.\nSee confluence docs for the \"peerList\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_peerListEventHandler",
@@ -5720,7 +5720,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 316,
+            "line": 325,
             "description": "Function that handles the \"introduceError\" socket message received.\nSee confluence docs for the \"introduceError\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_introduceErrorEventHandler",
@@ -5731,7 +5731,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 332,
+            "line": 341,
             "description": "Function that handles the \"approach\" socket message received.\nSee confluence docs for the \"approach\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_approachEventHandler",
@@ -5742,7 +5742,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 363,
+            "line": 372,
             "description": "Function that handles the \"redirect\" socket message received.\nSee confluence docs for the \"redirect\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_redirectHandler",
@@ -5753,7 +5753,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 395,
+            "line": 404,
             "description": "Function that handles the \"updateUserEvent\" socket message received.\nSee confluence docs for the \"updateUserEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
@@ -5764,7 +5764,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 416,
+            "line": 425,
             "description": "Function that handles the \"roomLockEvent\" socket message received.\nSee confluence docs for the \"roomLockEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
@@ -5775,7 +5775,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 432,
+            "line": 441,
             "description": "Function that handles the \"muteAudioEvent\" socket message received.\nSee confluence docs for the \"muteAudioEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -5786,7 +5786,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 455,
+            "line": 464,
             "description": "Function that handles the \"muteVideoEvent\" socket message received.\nSee confluence docs for the \"muteVideoEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -5797,7 +5797,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 479,
+            "line": 488,
             "description": "Function that handles the \"stream\" socket message received.\nSee confluence docs for the \"stream\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_streamEventHandler",
@@ -5808,7 +5808,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 546,
+            "line": 555,
             "description": "Function that handles the \"bye\" socket message received.\nSee confluence docs for the \"bye\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -5819,7 +5819,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 567,
+            "line": 576,
             "description": "Function that handles the \"private\" socket message received.\nSee confluence docs for the \"private\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -5830,7 +5830,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 589,
+            "line": 598,
             "description": "Function that handles the \"public\" socket message received.\nSee confluence docs for the \"public\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -5841,7 +5841,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 611,
+            "line": 620,
             "description": "Function that handles the \"inRoom\" socket message received.\nSee confluence docs for the \"inRoom\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -5852,7 +5852,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 668,
+            "line": 677,
             "description": "Function that handles the \"enter\" socket message received.\nSee confluence docs for the \"enter\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -5863,7 +5863,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 736,
+            "line": 745,
             "description": "Function that handles the \"restart\" socket message received.\nSee confluence docs for the \"restart\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -5874,7 +5874,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 846,
+            "line": 855,
             "description": "Function that handles the \"welcome\" socket message received.\nSee confluence docs for the \"welcome\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -5885,7 +5885,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 941,
+            "line": 950,
             "description": "Function that handles the \"offer\" socket message received.\nSee confluence docs for the \"offer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -5896,7 +5896,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1034,
+            "line": 1043,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -5907,7 +5907,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1126,
+            "line": 1135,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -6343,7 +6343,7 @@
         {
             "file": "source/stream-media.js",
             "line": 722,
-            "description": "Function that stops <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>.",
+            "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopStream",
             "example": [
@@ -6355,8 +6355,8 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 747,
-            "description": "Function that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio or video tracks.",
+            "line": 756,
+            "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio or video tracks.",
             "itemtype": "method",
             "name": "muteStream",
             "params": [
@@ -6391,7 +6391,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 851,
+            "line": 869,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -6406,7 +6406,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 876,
+            "line": 894,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -6421,7 +6421,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 901,
+            "line": 919,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -6436,13 +6436,13 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 926,
+            "line": 944,
             "description": "/**\n* <blockquote class=\"info\"><b>Deprecation Warning!</b>\n*   This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n* </blockquote>\n* Function that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n* <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.\n* @method disableVideo\n* @deprecated true\n* @example\n*   function muteVideo () {\n*     skylinkDemo.disableVideo();\n*   }\n* @trigger <ol class=\"desc-seq\">\n*   <li>Invokes <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> with\n*   <code>options.videoMuted</code> value as <code>true</code>.</li></ol>\n* @for Skylink\n* @since 0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/stream-media.js",
-            "line": 952,
+            "line": 970,
             "description": "Function that retrieves screensharing Stream.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -6482,8 +6482,8 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1132,
-            "description": "Function that stops <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>.",
+            "line": 1150,
+            "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopScreen",
             "example": [
@@ -6495,7 +6495,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1172,
+            "line": 1199,
             "description": "Function that handles the muting of Stream audio and video tracks.",
             "itemtype": "method",
             "name": "_muteStreams",
@@ -6506,7 +6506,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1219,
+            "line": 1246,
             "description": "Function that handles stopping the Stream streaming.",
             "itemtype": "method",
             "name": "_stopStreams",
@@ -6517,7 +6517,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1291,
+            "line": 1318,
             "description": "Function that parses the <code>getUserMedia()</code> settings provided.",
             "itemtype": "method",
             "name": "_parseStreamSettings",
@@ -6528,7 +6528,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1377,
+            "line": 1404,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -6539,7 +6539,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1509,
+            "line": 1536,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -6550,7 +6550,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1549,
+            "line": 1576,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -6561,7 +6561,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1583,
+            "line": 1610,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -6741,7 +6741,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:606"
+            "line": " source/room-connection.js:615"
         },
         {
             "message": "unknown tag: trigger",
@@ -6825,27 +6825,27 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:747"
+            "line": " source/stream-media.js:756"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:851"
+            "line": " source/stream-media.js:869"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:876"
+            "line": " source/stream-media.js:894"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:901"
+            "line": " source/stream-media.js:919"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:952"
+            "line": " source/stream-media.js:970"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1132"
+            "line": " source/stream-media.js:1150"
         },
         {
             "message": "Missing item type\nPolyfill for Object.keys() from Mozilla\nFrom https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys",
@@ -6869,7 +6869,7 @@
         },
         {
             "message": "Missing item type\n/**\n* <blockquote class=\"info\"><b>Deprecation Warning!</b>\n*   This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n* </blockquote>\n* Function that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n* <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.\n* @method disableVideo\n* @deprecated true\n* @example\n*   function muteVideo () {\n*     skylinkDemo.disableVideo();\n*   }\n* @trigger <ol class=\"desc-seq\">\n*   <li>Invokes <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> with\n*   <code>options.videoMuted</code> value as <code>true</code>.</li></ol>\n* @for Skylink\n* @since 0.5.5",
-            "line": " source/stream-media.js:926"
+            "line": " source/stream-media.js:944"
         }
     ]
 }

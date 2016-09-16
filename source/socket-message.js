@@ -98,6 +98,15 @@ Skylink.prototype._hasMCU = false;
 Skylink.prototype._receiveOnly = false;
 
 /**
+ * <blockquote class="info">
+ *   Note that broadcasted events from <a href="#method_muteStream"><code>muteStream()</code> method</a>,
+ *   <a href="#method_stopStream"><code>stopStream()</code> method</a>,
+ *   <a href="#method_stopScreen"><code>stopScreen()</code> method</a>,
+ *   <a href="#method_sendMessage"><code>sendMessage()</code> method</a>,
+ *   <a href="#method_unlockRoom"><code>unlockRoom()</code> method</a> and
+ *   <a href="#method_lockRoom"><code>lockRoom()</code> method</a> may be queued when
+ *   sent within less than an interval.
+ * </blockquote>
  * Function that sends a message to Peers via the Signaling socket connection.
  * @method sendMessage
  * @param {String|JSON} message The message.
