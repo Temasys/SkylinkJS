@@ -1346,7 +1346,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
 
     // New constraints { sourceId: { exact: xxx }}
     if (Array.isArray(options.audio.optional)) {
-      settings.settings.audio = options.audio.optional;
+      settings.settings.audio.optional = options.audio.optional;
       settings.getUserMediaSettings.audio.optional = options.audio.optional;
     }
 
@@ -1374,7 +1374,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
 
     // New constraints { sourceId: { exact: xxx }}
     if (Array.isArray(options.video.optional)) {
-      settings.settings.video = options.video.optional;
+      settings.settings.video.optional = options.video.optional;
       settings.getUserMediaSettings.video.optional = options.video.optional;
     }
 
