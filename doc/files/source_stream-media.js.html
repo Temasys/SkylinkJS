@@ -647,9 +647,9 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *   &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
- *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_peerRestart&quot;&gt;
- *   &lt;code&gt;peerRestart&lt;/code&gt; event&lt;/a&gt; triggering &lt;code&gt;isSelfInitiateRestart&lt;/code&gt; parameter payload
- *   value as &lt;code&gt;true&lt;/code&gt; for all Peers currently in the Room targeted for request success.&lt;/small&gt;
+ *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;
+ *   &lt;code&gt;mediaAccessSuccess&lt;/code&gt; event&lt;/a&gt; triggering &lt;code&gt;isScreensharing&lt;/code&gt; parameter
+ *   payload value as &lt;code&gt;false&lt;/code&gt; for request success.&lt;/small&gt;
  * @param {Error|String} callback.error The error result in request.
  *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are no errors in request&lt;/small&gt;
  *   &lt;small&gt;Object signature is the &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt; error or
@@ -702,7 +702,8 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
  *   &lt;li&gt;Invokes &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt;.&lt;/li&gt;
  *   &lt;li&gt;Invokes &lt;a href=&quot;#method_refreshConnection&quot;&gt;&lt;code&gt;refreshConnection()&lt;/code&gt; method&lt;/a&gt;.&lt;/li&gt;
- *   &lt;li&gt;If User is in the Room, &lt;a href=&quot;#event_incomingStream&quot;&gt;&lt;code&gt;incomingStream&lt;/code&gt; event&lt;/a&gt; triggers with
+ *   &lt;li&gt;If User is in the Room and there is no &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt;
+ *   available, &lt;a href=&quot;#event_incomingStream&quot;&gt;&lt;code&gt;incomingStream&lt;/code&gt; event&lt;/a&gt; triggers with
  *   parameter payload &lt;code&gt;isSelf&lt;/code&gt; as &lt;code&gt;true&lt;/code&gt;, and &lt;a href=&quot;#event_peerUpdate&quot;&gt;
  *   &lt;code&gt;peerUpdated&lt;/code&gt; event&lt;/a&gt; triggers with parameter payload &lt;code&gt;isSelf&lt;/code&gt;
  *   as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;

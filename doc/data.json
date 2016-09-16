@@ -6316,7 +6316,7 @@
                 },
                 {
                     "name": "callback",
-                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_peerRestart\">\n  <code>peerRestart</code> event</a> triggering <code>isSelfInitiateRestart</code> parameter payload\n  value as <code>true</code> for all Peers currently in the Room targeted for request success.</small>",
+                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_mediaAccessSuccess\">\n  <code>mediaAccessSuccess</code> event</a> triggering <code>isScreensharing</code> parameter\n  payload value as <code>false</code> for request success.</small>",
                     "type": "Function",
                     "optional": true,
                     "props": [
@@ -6336,13 +6336,13 @@
             "example": [
                 "\n  // Example 1: Send MediaStream object\n  function retrieveStreamBySourceForFirefox (sourceId) {\n    navigator.mediaDevices.getUserMedia({\n      audio: true,\n      video: {\n        sourceId: { exact: sourceId }\n      }\n    }).then(function (stream) {\n      skylinkDemo.sendStream(stream, function (error, success) {\n        if (err) return;\n        if (stream === success) {\n          console.info(\"Same MediaStream has been sent\");\n        }\n        console.log(\"Stream is now being sent to Peers\");\n        attachMediaStream(document.getElementById(\"my-video\"), success);\n      });\n    });\n  }\n\n  // Example 2: Send video later\n  var inRoom = false;\n\n  function sendVideo () {\n    if (!inRoom) return;\n    skylinkDemo.sendStream({\n      audio: true,\n      video: true\n    }, function (error, success) {\n      if (error) return;\n      console.log(\"getUserMedia() Stream with video is now being sent to Peers\");\n      attachMediaStream(document.getElementById(\"my-video\"), success);\n    });\n  }\n\n  skylinkDemo.joinRoom({\n    audio: true\n  }, function (jRError, jRSuccess) {\n    if (jRError) return;\n    inRoom = true;\n  });"
             ],
-            "trigger": "<ol class=\"desc-seq\">\n  <li>Invokes <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> method</a>.</li>\n  <li>Invokes <a href=\"#method_refreshConnection\"><code>refreshConnection()</code> method</a>.</li>\n  <li>If User is in the Room, <a href=\"#event_incomingStream\"><code>incomingStream</code> event</a> triggers with\n  parameter payload <code>isSelf</code> as <code>true</code>, and <a href=\"#event_peerUpdate\">\n  <code>peerUpdated</code> event</a> triggers with parameter payload <code>isSelf</code>\n  as <code>true</code>.</li></ol></li></ol>",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>Invokes <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> method</a>.</li>\n  <li>Invokes <a href=\"#method_refreshConnection\"><code>refreshConnection()</code> method</a>.</li>\n  <li>If User is in the Room and there is no <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>\n  available, <a href=\"#event_incomingStream\"><code>incomingStream</code> event</a> triggers with\n  parameter payload <code>isSelf</code> as <code>true</code>, and <a href=\"#event_peerUpdate\">\n  <code>peerUpdated</code> event</a> triggers with parameter payload <code>isSelf</code>\n  as <code>true</code>.</li></ol></li></ol>",
             "since": "0.5.6",
             "class": "Skylink"
         },
         {
             "file": "source/stream-media.js",
-            "line": 721,
+            "line": 722,
             "description": "Function that stops <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopStream",
@@ -6355,7 +6355,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 746,
+            "line": 747,
             "description": "Function that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio or video tracks.",
             "itemtype": "method",
             "name": "muteStream",
@@ -6391,7 +6391,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 850,
+            "line": 851,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -6406,7 +6406,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 875,
+            "line": 876,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -6421,7 +6421,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 900,
+            "line": 901,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -6436,13 +6436,13 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 925,
+            "line": 926,
             "description": "/**\n* <blockquote class=\"info\"><b>Deprecation Warning!</b>\n*   This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n* </blockquote>\n* Function that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n* <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.\n* @method disableVideo\n* @deprecated true\n* @example\n*   function muteVideo () {\n*     skylinkDemo.disableVideo();\n*   }\n* @trigger <ol class=\"desc-seq\">\n*   <li>Invokes <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> with\n*   <code>options.videoMuted</code> value as <code>true</code>.</li></ol>\n* @for Skylink\n* @since 0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/stream-media.js",
-            "line": 951,
+            "line": 952,
             "description": "Function that retrieves screensharing Stream.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -6482,7 +6482,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1131,
+            "line": 1132,
             "description": "Function that stops <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -6495,7 +6495,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1171,
+            "line": 1172,
             "description": "Function that handles the muting of Stream audio and video tracks.",
             "itemtype": "method",
             "name": "_muteStreams",
@@ -6506,7 +6506,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1218,
+            "line": 1219,
             "description": "Function that handles stopping the Stream streaming.",
             "itemtype": "method",
             "name": "_stopStreams",
@@ -6517,7 +6517,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1290,
+            "line": 1291,
             "description": "Function that parses the <code>getUserMedia()</code> settings provided.",
             "itemtype": "method",
             "name": "_parseStreamSettings",
@@ -6528,7 +6528,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1376,
+            "line": 1377,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -6539,7 +6539,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1508,
+            "line": 1509,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -6550,7 +6550,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1548,
+            "line": 1549,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -6561,7 +6561,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1582,
+            "line": 1583,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -6821,31 +6821,31 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:721"
+            "line": " source/stream-media.js:722"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:746"
+            "line": " source/stream-media.js:747"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:850"
+            "line": " source/stream-media.js:851"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:875"
+            "line": " source/stream-media.js:876"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:900"
+            "line": " source/stream-media.js:901"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:951"
+            "line": " source/stream-media.js:952"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1131"
+            "line": " source/stream-media.js:1132"
         },
         {
             "message": "Missing item type\nPolyfill for Object.keys() from Mozilla\nFrom https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys",
@@ -6869,7 +6869,7 @@
         },
         {
             "message": "Missing item type\n/**\n* <blockquote class=\"info\"><b>Deprecation Warning!</b>\n*   This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n* </blockquote>\n* Function that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n* <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.\n* @method disableVideo\n* @deprecated true\n* @example\n*   function muteVideo () {\n*     skylinkDemo.disableVideo();\n*   }\n* @trigger <ol class=\"desc-seq\">\n*   <li>Invokes <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> with\n*   <code>options.videoMuted</code> value as <code>true</code>.</li></ol>\n* @for Skylink\n* @since 0.5.5",
-            "line": " source/stream-media.js:925"
+            "line": " source/stream-media.js:926"
         }
     ]
 }

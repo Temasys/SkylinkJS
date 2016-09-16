@@ -556,9 +556,9 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</small>
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
- *   <small>Function request completion is determined by the <a href="#event_peerRestart">
- *   <code>peerRestart</code> event</a> triggering <code>isSelfInitiateRestart</code> parameter payload
- *   value as <code>true</code> for all Peers currently in the Room targeted for request success.</small>
+ *   <small>Function request completion is determined by the <a href="#event_mediaAccessSuccess">
+ *   <code>mediaAccessSuccess</code> event</a> triggering <code>isScreensharing</code> parameter
+ *   payload value as <code>false</code> for request success.</small>
  * @param {Error|String} callback.error The error result in request.
  *   <small>Defined as <code>null</code> when there are no errors in request</small>
  *   <small>Object signature is the <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> error or
@@ -611,7 +611,8 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  * @trigger <ol class="desc-seq">
  *   <li>Invokes <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</li>
  *   <li>Invokes <a href="#method_refreshConnection"><code>refreshConnection()</code> method</a>.</li>
- *   <li>If User is in the Room, <a href="#event_incomingStream"><code>incomingStream</code> event</a> triggers with
+ *   <li>If User is in the Room and there is no <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>
+ *   available, <a href="#event_incomingStream"><code>incomingStream</code> event</a> triggers with
  *   parameter payload <code>isSelf</code> as <code>true</code>, and <a href="#event_peerUpdate">
  *   <code>peerUpdated</code> event</a> triggers with parameter payload <code>isSelf</code>
  *   as <code>true</code>.</li></ol></li></ol>
