@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Sat Sep 17 2016 15:41:56 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Sat Sep 17 2016 17:30:03 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9107,8 +9107,6 @@ Skylink.prototype._createSocket = function (type) {
     self._signalingServerPort = ports[ ports.indexOf(self._signalingServerPort) + 1 ];
   }
 
-  //self._signalingServer = 'signaling-router.temasys.com.sg';
-
   var url = self._signalingServerProtocol + '//' + self._signalingServer + ':' + self._signalingServerPort;
     //'http://ec2-52-8-93-170.us-west-1.compute.amazonaws.com:6001';
 
@@ -12437,7 +12435,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
       if (sdpLines[i].indexOf('m=audio') === 0) {
       //if (sdpLines[i].indexOf('a=audio') === 0 || sdpLines[i].indexOf('m=audio') === 0) {
         sdpLines.splice(i + 1, 0, window.webrtcDetectedBrowser === 'firefox' ?
-          'b=TIAS:' + (bandwidth.audio * 1000) : 'b=AS:' + bandwidth.audio);
+          'b=TIAS:' + (bandwidth.audio * 1024) : 'b=AS:' + bandwidth.audio);
 
         log.info([null, 'SDP', null, 'Setting maximum sending audio bandwidth bitrate @(index:' + i + ') -> '], bandwidth.audio);
         hasSetAudio = true;
@@ -12461,7 +12459,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
       if (sdpLines[j].indexOf('m=video') === 0) {
       //if (sdpLines[j].indexOf('a=video') === 0 || sdpLines[j].indexOf('m=video') === 0) {
         sdpLines.splice(j + 1, 0, window.webrtcDetectedBrowser === 'firefox' ?
-          'b=TIAS:' + (bandwidth.video * 1000) : 'b=AS:' + bandwidth.video);
+          'b=TIAS:' + (bandwidth.video * 1024) : 'b=AS:' + bandwidth.video);
 
         log.info([null, 'SDP', null, 'Setting maximum sending video bandwidth bitrate @(index:' + j + ') -> '], bandwidth.video);
         hasSetVideo = true;
@@ -12485,7 +12483,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
       if (sdpLines[k].indexOf('m=application') === 0) {
       //if (sdpLines[k].indexOf('a=application') === 0 || sdpLines[k].indexOf('m=application') === 0) {
         sdpLines.splice(k + 1, 0, window.webrtcDetectedBrowser === 'firefox' ?
-          'b=TIAS:' + (bandwidth.data * 1000) : 'b=AS:' + bandwidth.data);
+          'b=TIAS:' + (bandwidth.data * 1024) : 'b=AS:' + bandwidth.data);
 
         log.info([null, 'SDP', null, 'Setting maximum sending data bandwidth bitrate @(index:' + k + ') -> '], bandwidth.data);
         hasSetData = true;
