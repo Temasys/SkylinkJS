@@ -507,31 +507,24 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     return;
   }*/
 
-  var mediaAccessSuccessFn = function (stream) {
-    if (typeof callback === 'function') {
+  if (typeof callback === 'function') {
+    var mediaAccessSuccessFn = function (stream) {
+      self.off('mediaAccessError', mediaAccessErrorFn);
       callback(null, stream);
-    }
-  };
-
-  var mediaAccessErrorFn = function (error) {
-    if (typeof callback === 'function') {
+    };
+    var mediaAccessErrorFn = function (error) {
+      self.off('mediaAccessSuccess', mediaAccessSuccessFn);
       callback(error, null);
-    }
-  };
+    };
 
-  self.once('mediaAccessSuccess', function (stream) {
-    self.off('mediaAccessError', mediaAccessErrorFn);
-    mediaAccessSuccessFn(stream);
-  }, function (stream, isScreensharing) {
-    return !isScreensharing;
-  });
+    self.once('mediaAccessSuccess', mediaAccessSuccessFn, function (stream, isScreensharing) {
+      return !isScreensharing;
+    });
 
-  self.once('mediaAccessError', function (error) {
-    self.off('mediaAccessSuccess', mediaAccessSuccessFn);
-    mediaAccessErrorFn(error);
-  }, function (error, isScreensharing) {
-    return !isScreensharing;
-  });
+    self.once('mediaAccessError', mediaAccessErrorFn, function (error, isScreensharing) {
+      return !isScreensharing;
+    });
+  }
 
   // Parse stream settings
   var settings = self._parseStreamSettings(options);
@@ -1073,6 +1066,8 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     };
 
     var mediaAccessSuccessFn = function (stream) {
+      self.off('mediaAccessError', mediaAccessErrorFn);
+
       if (self._inRoom) {
         self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo());
         self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
@@ -1099,22 +1094,18 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     };
 
     var mediaAccessErrorFn = function (error) {
+      self.off('mediaAccessSuccess', mediaAccessSuccessFn);
+
       if (typeof callback === 'function') {
         callback(error, null);
       }
     };
 
-    self.once('mediaAccessSuccess', function (stream) {
-      self.off('mediaAccessError', mediaAccessErrorFn);
-      mediaAccessSuccessFn(stream);
-    }, function (stream, isScreensharing) {
+    self.once('mediaAccessSuccess', mediaAccessSuccessFn, function (stream, isScreensharing) {
       return isScreensharing;
     });
 
-    self.once('mediaAccessError', function (error) {
-      self.off('mediaAccessSuccess', mediaAccessSuccessFn);
-      mediaAccessErrorFn(error);
-    }, function (error, isScreensharing) {
+    self.once('mediaAccessError', mediaAccessErrorFn, function (error, isScreensharing) {
       return isScreensharing;
     });
 
@@ -1602,7 +1593,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
 Skylink.prototype._onStreamAccessError = function(error, settings, isScreenSharing) {
   var self = this;
 
-  if (!isScreensharing && settings.settings.audio && settings.settings.video && self._audioFallback) {
+  if (!isScreenSharing && settings.settings.audio && settings.settings.video && self._audioFallback) {
     log.debug('Fallbacking to retrieve audio only Stream');
 
     self._trigger('mediaAccessFallback', {
@@ -1627,7 +1618,7 @@ Skylink.prototype._onStreamAccessError = function(error, settings, isScreenShari
     return;
   }
 
-  log.error('Failed retrieving ' + (isScreensharing ? 'screensharing' : 'camera') + ' Stream ->', error);
+  log.error('Failed retrieving ' + (isScreenSharing ? 'screensharing' : 'camera') + ' Stream ->', error);
 
   self._trigger('mediaAccessError', error, !!isScreenSharing, false);
 };

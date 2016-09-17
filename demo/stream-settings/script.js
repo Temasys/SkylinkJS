@@ -91,7 +91,7 @@ SkylinkDemo.on('peerLeft', function (peerId, stream, isSelf) {
 		document.getElementById(peerId));
 });
 
-SkylinkDemo.init(config);
+SkylinkDemo.init(config.appKey);
 
 function joinRoom () {
 	var settings = {
