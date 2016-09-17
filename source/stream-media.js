@@ -1381,7 +1381,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
 
   if (options.video) {
     settings.settings.video = {
-      resolution: this.VIDEO_RESOLUTION.VGA,
+      resolution: clone(this.VIDEO_RESOLUTION.VGA),
       screenshare: false
     };
     settings.getUserMediaSettings.video = {};

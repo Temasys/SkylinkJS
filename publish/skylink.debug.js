@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Sat Sep 17 2016 17:30:03 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Sat Sep 17 2016 17:34:25 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11891,7 +11891,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
 
   if (options.video) {
     settings.settings.video = {
-      resolution: this.VIDEO_RESOLUTION.VGA,
+      resolution: clone(this.VIDEO_RESOLUTION.VGA),
       screenshare: false
     };
     settings.getUserMediaSettings.video = {};
