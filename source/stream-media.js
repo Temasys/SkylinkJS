@@ -305,7 +305,9 @@ Skylink.prototype._streamsStoppedCbs = {};
  *   <code>true</code>. If you are looking to set the requested source ID of the audio track,
  *   use <code>options.audio.deviceId</code> instead.</blockquote>
  *   The <code>navigator.getUserMedia()</code> API <code>audio: { optional [..] }</code> property.
- * @param {String} [options.audio.deviceId] The audio track source ID of the device to use.
+ * @param {String} [options.audio.deviceId] <blockquote class="info">
+ *   Note this is currently not supported in Firefox browsers.
+ *   </blockquote> The audio track source ID of the device to use.
  *   <small>The list of available audio source ID can be retrieved by the <a href="https://developer.
  * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices"><code>navigator.mediaDevices.enumerateDevices</code>
  *   API</a>.</small>
@@ -327,7 +329,9 @@ Skylink.prototype._streamsStoppedCbs = {};
  *   <code>true</code>. If you are looking to set the requested source ID of the video track,
  *   use <code>options.video.deviceId</code> instead.</blockquote>
  *   The <code>navigator.getUserMedia()</code> API <code>video: { optional [..] }</code> property.
- * @param {String} [options.video.deviceId] The video track source ID of the device to use.
+ * @param {String} [options.video.deviceId] <blockquote class="info">
+ *   Note this is currently not supported in Firefox browsers.
+ *   </blockquote> The video track source ID of the device to use.
  *   <small>The list of available video source ID can be retrieved by the <a href="https://developer.
  * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices"><code>navigator.mediaDevices.enumerateDevices</code>
  *   API</a>.</small>
@@ -399,6 +403,10 @@ Skylink.prototype._streamsStoppedCbs = {};
  *   var sources = { audio: [], video: [] };
  *
  *   function selectStream (audioSourceId, videoSourceId) {
+ *     if (window.webrtcDetectedBrowser === 'firefox') {
+ *       console.warn("Currently this feature is not supported by Firefox browsers!");
+ *       return;
+ *     }
  *     skylinkDemo.getUserMedia({
  *       audio: {
  *         optional: [{ sourceId: audioSourceId }]
@@ -1339,7 +1347,8 @@ Skylink.prototype._parseStreamSettings = function(options) {
 
   if (options.audio) {
     settings.settings.audio = {
-      stereo: false
+      stereo: false,
+      exact: !!options.useExactConstraints
     };
     settings.getUserMediaSettings.audio = {};
 
@@ -1356,7 +1365,8 @@ Skylink.prototype._parseStreamSettings = function(options) {
       settings.getUserMediaSettings.audio.optional = clone(options.audio.optional);
     }
 
-    if (options.audio.deviceId && typeof options.audio.deviceId === 'string') {
+    if (options.audio.deviceId && typeof options.audio.deviceId === 'string' &&
+      window.webrtcDetectedBrowser !== 'firefox') {
       settings.settings.audio.deviceId = options.audio.deviceId;
 
       if (options.useExactConstraints) {
@@ -1382,7 +1392,8 @@ Skylink.prototype._parseStreamSettings = function(options) {
   if (options.video) {
     settings.settings.video = {
       resolution: clone(this.VIDEO_RESOLUTION.VGA),
-      screenshare: false
+      screenshare: false,
+      exact: !!options.useExactConstraints
     };
     settings.getUserMediaSettings.video = {};
 
@@ -1395,7 +1406,8 @@ Skylink.prototype._parseStreamSettings = function(options) {
       settings.getUserMediaSettings.video.optional = clone(options.video.optional);
     }
 
-    if (options.video.deviceId && typeof options.video.deviceId === 'string') {
+    if (options.video.deviceId && typeof options.video.deviceId === 'string' &&
+      window.webrtcDetectedBrowser !== 'firefox') {
       settings.settings.video.deviceId = options.video.deviceId;
 
       if (options.useExactConstraints) {

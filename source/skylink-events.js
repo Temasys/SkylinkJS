@@ -223,19 +223,27 @@ Skylink.prototype._EVENTS = {
    *   <small>When defined as <code>false</code>, it means there is no audio being sent from Peer.</small>
    * @param {Boolean} peerInfo.settings.audio.stereo The flag if stereo band is configured
    *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for receiving audio data.
-   * @param {Array} peerInfo.settings.audio.optional The Peer Stream <code>navigator.getUserMedia()</code> API
+   * @param {Array} [peerInfo.settings.audio.optional] The Peer Stream <code>navigator.getUserMedia()</code> API
    *   <code>audio: { optional [..] }</code> property.
+   * @param {String} [peerInfo.settings.audio.deviceId] The Peer Stream audio track source ID of the device used.
+   * @param {Boolean} peerInfo.settings.audio.exact The flag if Peer Stream audio track is sending exact
+   *   requested values of <code>peerInfo.settings.audio.deviceId</code> when provided.
    * @param {Boolean|JSON} peerInfo.settings.video The Peer Stream video settings.
    *   <small>When defined as <code>false</code>, it means there is no video being sent from Peer.</small>
    * @param {JSON} peerInfo.settings.video.resolution The Peer Stream video resolution.
    *   [Rel: Skylink.VIDEO_RESOLUTION]
    * @param {Number} peerInfo.settings.video.resolution.width The Peer Stream video resolution width.
    * @param {Number} peerInfo.settings.video.resolution.height The Peer Stream video resolution height.
-   * @param {Number} peerInfo.settings.video.frameRate The Peer Stream video
+   * @param {Number} [peerInfo.settings.video.frameRate] The Peer Stream video
    *   <a href="https://en.wikipedia.org/wiki/Frame_rate">frameRate</a> per second (fps).
-   * @param {Boolean} [peerInfo.settings.video.screenshare] The flag if Peer Stream is a screensharing Stream.
-   * @param {Array} peerInfo.settings.video.optional The Peer Stream <code>navigator.getUserMedia()</code> API
+   * @param {Boolean} peerInfo.settings.video.screenshare The flag if Peer Stream is a screensharing Stream.
+   * @param {Array} [peerInfo.settings.video.optional] The Peer Stream <code>navigator.getUserMedia()</code> API
    *   <code>video: { optional [..] }</code> property.
+   * @param {String} [peerInfo.settings.video.deviceId] The Peer Stream video track source ID of the device used.
+   * @param {Boolean} peerInfo.settings.video.exact The flag if Peer Stream video track is sending exact
+   *   requested values of <code>peerInfo.settings.video.resolution</code>,
+   *   <code>peerInfo.settings.video.frameRate</code> and <code>peerInfo.settings.video.deviceId</code>
+   *   when provided.
    * @param {JSON} peerInfo.settings.bandwidth The maximum streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.audio] The maximum audio streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.video] The maximum video streaming bandwidth sent from Peer.

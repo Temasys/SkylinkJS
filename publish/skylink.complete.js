@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Sat Sep 17 2016 17:34:25 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Sun Sep 18 2016 13:43:00 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10461,7 +10461,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.14 - Sat Sep 17 2016 17:34:25 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Sun Sep 18 2016 13:43:00 GMT+0800 (SGT) */
 
 (function() {
 
@@ -18541,19 +18541,27 @@ Skylink.prototype._EVENTS = {
    *   <small>When defined as <code>false</code>, it means there is no audio being sent from Peer.</small>
    * @param {Boolean} peerInfo.settings.audio.stereo The flag if stereo band is configured
    *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for receiving audio data.
-   * @param {Array} peerInfo.settings.audio.optional The Peer Stream <code>navigator.getUserMedia()</code> API
+   * @param {Array} [peerInfo.settings.audio.optional] The Peer Stream <code>navigator.getUserMedia()</code> API
    *   <code>audio: { optional [..] }</code> property.
+   * @param {String} [peerInfo.settings.audio.deviceId] The Peer Stream audio track source ID of the device used.
+   * @param {Boolean} peerInfo.settings.audio.exact The flag if Peer Stream audio track is sending exact
+   *   requested values of <code>peerInfo.settings.audio.deviceId</code> when provided.
    * @param {Boolean|JSON} peerInfo.settings.video The Peer Stream video settings.
    *   <small>When defined as <code>false</code>, it means there is no video being sent from Peer.</small>
    * @param {JSON} peerInfo.settings.video.resolution The Peer Stream video resolution.
    *   [Rel: Skylink.VIDEO_RESOLUTION]
    * @param {Number} peerInfo.settings.video.resolution.width The Peer Stream video resolution width.
    * @param {Number} peerInfo.settings.video.resolution.height The Peer Stream video resolution height.
-   * @param {Number} peerInfo.settings.video.frameRate The Peer Stream video
+   * @param {Number} [peerInfo.settings.video.frameRate] The Peer Stream video
    *   <a href="https://en.wikipedia.org/wiki/Frame_rate">frameRate</a> per second (fps).
-   * @param {Boolean} [peerInfo.settings.video.screenshare] The flag if Peer Stream is a screensharing Stream.
-   * @param {Array} peerInfo.settings.video.optional The Peer Stream <code>navigator.getUserMedia()</code> API
+   * @param {Boolean} peerInfo.settings.video.screenshare The flag if Peer Stream is a screensharing Stream.
+   * @param {Array} [peerInfo.settings.video.optional] The Peer Stream <code>navigator.getUserMedia()</code> API
    *   <code>video: { optional [..] }</code> property.
+   * @param {String} [peerInfo.settings.video.deviceId] The Peer Stream video track source ID of the device used.
+   * @param {Boolean} peerInfo.settings.video.exact The flag if Peer Stream video track is sending exact
+   *   requested values of <code>peerInfo.settings.video.resolution</code>,
+   *   <code>peerInfo.settings.video.frameRate</code> and <code>peerInfo.settings.video.deviceId</code>
+   *   when provided.
    * @param {JSON} peerInfo.settings.bandwidth The maximum streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.audio] The maximum audio streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.video] The maximum video streaming bandwidth sent from Peer.
@@ -21278,7 +21286,9 @@ Skylink.prototype._streamsStoppedCbs = {};
  *   <code>true</code>. If you are looking to set the requested source ID of the audio track,
  *   use <code>options.audio.deviceId</code> instead.</blockquote>
  *   The <code>navigator.getUserMedia()</code> API <code>audio: { optional [..] }</code> property.
- * @param {String} [options.audio.deviceId] The audio track source ID of the device to use.
+ * @param {String} [options.audio.deviceId] <blockquote class="info">
+ *   Note this is currently not supported in Firefox browsers.
+ *   </blockquote> The audio track source ID of the device to use.
  *   <small>The list of available audio source ID can be retrieved by the <a href="https://developer.
  * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices"><code>navigator.mediaDevices.enumerateDevices</code>
  *   API</a>.</small>
@@ -21300,7 +21310,9 @@ Skylink.prototype._streamsStoppedCbs = {};
  *   <code>true</code>. If you are looking to set the requested source ID of the video track,
  *   use <code>options.video.deviceId</code> instead.</blockquote>
  *   The <code>navigator.getUserMedia()</code> API <code>video: { optional [..] }</code> property.
- * @param {String} [options.video.deviceId] The video track source ID of the device to use.
+ * @param {String} [options.video.deviceId] <blockquote class="info">
+ *   Note this is currently not supported in Firefox browsers.
+ *   </blockquote> The video track source ID of the device to use.
  *   <small>The list of available video source ID can be retrieved by the <a href="https://developer.
  * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices"><code>navigator.mediaDevices.enumerateDevices</code>
  *   API</a>.</small>
@@ -21372,6 +21384,10 @@ Skylink.prototype._streamsStoppedCbs = {};
  *   var sources = { audio: [], video: [] };
  *
  *   function selectStream (audioSourceId, videoSourceId) {
+ *     if (window.webrtcDetectedBrowser === 'firefox') {
+ *       console.warn("Currently this feature is not supported by Firefox browsers!");
+ *       return;
+ *     }
  *     skylinkDemo.getUserMedia({
  *       audio: {
  *         optional: [{ sourceId: audioSourceId }]
@@ -22312,7 +22328,8 @@ Skylink.prototype._parseStreamSettings = function(options) {
 
   if (options.audio) {
     settings.settings.audio = {
-      stereo: false
+      stereo: false,
+      exact: !!options.useExactConstraints
     };
     settings.getUserMediaSettings.audio = {};
 
@@ -22329,7 +22346,8 @@ Skylink.prototype._parseStreamSettings = function(options) {
       settings.getUserMediaSettings.audio.optional = clone(options.audio.optional);
     }
 
-    if (options.audio.deviceId && typeof options.audio.deviceId === 'string') {
+    if (options.audio.deviceId && typeof options.audio.deviceId === 'string' &&
+      window.webrtcDetectedBrowser !== 'firefox') {
       settings.settings.audio.deviceId = options.audio.deviceId;
 
       if (options.useExactConstraints) {
@@ -22355,7 +22373,8 @@ Skylink.prototype._parseStreamSettings = function(options) {
   if (options.video) {
     settings.settings.video = {
       resolution: clone(this.VIDEO_RESOLUTION.VGA),
-      screenshare: false
+      screenshare: false,
+      exact: !!options.useExactConstraints
     };
     settings.getUserMediaSettings.video = {};
 
@@ -22368,7 +22387,8 @@ Skylink.prototype._parseStreamSettings = function(options) {
       settings.getUserMediaSettings.video.optional = clone(options.video.optional);
     }
 
-    if (options.video.deviceId && typeof options.video.deviceId === 'string') {
+    if (options.video.deviceId && typeof options.video.deviceId === 'string' &&
+      window.webrtcDetectedBrowser !== 'firefox') {
       settings.settings.video.deviceId = options.video.deviceId;
 
       if (options.useExactConstraints) {
