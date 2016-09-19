@@ -207,9 +207,9 @@ Skylink.prototype._peerList = null;
  *   &lt;a href=&quot;#event_getPeersStateChange&quot;&gt;&lt;code&gt;getPeersStateChange&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
  *   &lt;li&gt;&lt;a href=&quot;#event_getPeersStateChange&quot;&gt;&lt;code&gt;getPeersStateChange&lt;/code&gt; event&lt;/a&gt; triggers parameter
- *   payload &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;ENQUIRED&lt;/code&gt;.&lt;/li&gt;&lt;li&gt;&lt;ol&gt;
- *   &lt;li&gt;When retrieval of the list of Peer IDs from Rooms within the same App space is successful,
- *   &lt;a href=&quot;#event_getPeersStateChange&quot;&gt;&lt;code&gt;getPeersStateChange&lt;/code&gt; event&lt;/a&gt; triggers parameter
+ *   payload &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;ENQUIRED&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;When retrieval of the list of Peer IDs from Rooms within the same App space is successful &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_getPeersStateChange&quot;&gt;&lt;code&gt;getPeersStateChange&lt;/code&gt; event&lt;/a&gt; triggers parameter
  *   payload &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;RECEIVED&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @example
  *   // Example 1: Retrieving the un-privileged Peers
@@ -282,12 +282,12 @@ Skylink.prototype.getPeers = function(showAll, callback){
  * @method introducePeer
  * @param {String} sendingPeerId The Peer ID to be connected with &lt;code&gt;receivingPeerId&lt;/code&gt;.
  * @param {String} receivingPeerId The Peer ID to be connected with &lt;code&gt;sendingPeerId&lt;/code&gt;.
- * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;&lt;li&gt;&lt;ol&gt;
- *   &lt;li&gt;When introduction request for the selected pair of Peers has been made to the Signaling server,
- *   &lt;a href=&quot;#event_introduceStateChange&quot;&gt;&lt;code&gt;introduceStateChange&lt;/code&gt; event&lt;/a&gt; triggers parameter
- *   payload &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;INTRODUCING&lt;/code&gt;.&lt;/li&gt;
- *   &lt;li&gt;When introduction request made for the selected pair of Peers to the Signaling server has failed,
- *   &lt;a href=&quot;#event_introduceStateChange&quot;&gt;&lt;code&gt;introduceStateChange&lt;/code&gt; event&lt;/a&gt; triggers parameter
+ * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
+ *   &lt;li&gt;When introduction request for the selected pair of Peers has been made to the Signaling server &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_introduceStateChange&quot;&gt;&lt;code&gt;introduceStateChange&lt;/code&gt; event&lt;/a&gt; triggers parameter
+ *   payload &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;INTRODUCING&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;When introduction request made for the selected pair of Peers to the Signaling server has failed &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_introduceStateChange&quot;&gt;&lt;code&gt;introduceStateChange&lt;/code&gt; event&lt;/a&gt; triggers parameter
  *   payload &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;ERROR&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @example
  *   // Example 1: Introduce a pair of Peers

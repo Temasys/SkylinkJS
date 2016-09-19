@@ -137,11 +137,13 @@ Skylink.prototype._peerConnections = {};
  * @param {Array} callback.success.listOfPeers The list of Peer IDs targeted.
  * @trigger <ol class="desc-seq">
  *   <li>For Peer connections without MCU enabled <ol>
- *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter
- *   payload <code>isSelfInitiateRestart</code> as <code>true</code> for all targeted Peer connections.</li></ol></li>
+ *   <li>When there are connected Peers <ol>
+ *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter payload
+ *   <code>isSelfInitiateRestart</code> as <code>true</code> for all targeted Peer connections.</li></ol></li></ol></li>
  *   <li>For Peer connections with MCU enabled <ol>
- *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter
- *   payload <code>isSelfInitiateRestart</code> as <code>true</code> for all targeted Peer connections.</li>
+ *   <li>When there are connected Peers <ol>
+ *   <a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter
+ *   payload <code>isSelfInitiateRestart</code> as <code>true</code> for all targeted Peer connections.</li></ol></li>
  *   <li><a href="#event_serverPeerRestart"><code>serverPeerRestart</code> event</a> triggers.</li>
  *   <li>Invokes <a href="#method_joinRoom"><code>joinRoom()</code> method</a>.<small><code>refreshConnection</code>
  *   will retain the User session information except the Peer ID will be a different assigned ID due to restarting

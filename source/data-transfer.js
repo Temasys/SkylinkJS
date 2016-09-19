@@ -78,7 +78,7 @@ Skylink.prototype.DATA_TRANSFER_SESSION_TYPE = {
  * @param {String} CANCEL             <small>Value <code>"cancel"</code></small>
  *   The value of the state when data transfer has been terminated from / to Peer.
  * @param {String} ERROR              <small>Value <code>"error"</code></small>
- *   The value of the state when data transfer has errors and has been terminated.
+ *   The value of the state when data transfer has errors and has been terminated from / to Peer.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -279,33 +279,43 @@ Skylink.prototype._dataTransfersTimeout = {};
  *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
  *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
  * @trigger <ol class="desc-seq">
- *   <li>When Peer supports simultaneous data transfers, <ol>
+ *   <li>Opens a new Datachannel which type is <a href="#attr_DATA_CHANNEL_TYPE"><code>DATA</code></a>.
+ *   <small>SKIP this step for Peers that do not support simultaneous data transfers.</small></li>
+ *   <li>When Datachannel has opened <ol>
  *   <li><a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>CONNECTING</code> and <code>channelType</code> as <code>DATA</code>.</li>
- *   <li><a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>OPEN</code> and <code>channelType</code> as <code>DATA</code>.</li></ol>
- *   <small>For Peers that do not support simultaneous data transfers, the
- *   <a href="#event_dataChannelState"><code>dataChannelState</code> event</a> must trigger parameter payload
- *   <code>state</code> as <code>OPEN</code> and <code>channelType</code> as <code>MESSAGING</code>.</small></li>
+ *   <code>state</code> as <code>OPEN</code> and <code>channelType</code> as <code>DATA</code>.
+ *   <small>This step is required for Peers that do not support simultaneous data transfers as well
+ *   except that the <code>channelType</code> is <code>MESSAGING</code> and may happen before
+ *   <code>sendBlobData()</code> or <code>sendURLData()</code>.</small></li>
  *   <li><a href="#event_incomingDataRequest"><code>incomingDataRequest</code> event</a> triggers parameter payload
  *   <code>isSelf</code> value as <code>true</code>.</li>
- *   <li>When Peers accepts the uploading data transfer request from User <ol>
+ *   <li>If Peer accepts the uploading data transfer request from User
+ *   <small>This happens when Peer invokes <a href="#method_acceptDataTransfer"><code>acceptDataTransfer</code> method</a>
+ *   with parameter <code>accept</code> value as <code>true</code>.</small> <ol>
  *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
  *   <code>state</code> as <code>UPLOAD_STARTED</code>.
- *   <small>For Peers, the parameter payload <code>state</code> is <code>DOWNLOAD_STARTED</code>.</small></li>
- *   <li>When data transfer is still uploading, <a href="#event_dataTransferState"><code>dataTransferState</code>
- *   event</a> triggers parameter payload <code>state</code> as <code>UPLOADING</code>.
- *   <small>For Peers, the parameter payload <code>state</code> is <code>DOWNLOADING</code>.</small></li>
- *   <li>When response has timed out from Peer (based on the <code>timeout</code> parameter configured in the method),
- *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>ERROR</code> and data transfer has been terminated.</li>
- *   <li><a href="#event_dataTransferState"><code>dataTransferState</code>
- *   event</a> triggers parameter payload <code>state</code> as <code>UPLOAD_COMPLETED</code>.
- *   <small>For Peers, the parameter payload <code>state</code> is <code>DOWNLOAD_COMPLETED</code>.
- *   </small></li></ol></li>
- *   <li>When Peers rejects the uploading data transfer request from User <ol>
+ *   <small>For Peer, the <code>state</code> is <code>DOWNLOAD_STARTED</code>.</small></li>
+ *   <li>When the data transfer is still in-progress <ol>
  *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>REJECTED</code></li></ol></li></ol>
+ *   <code>state</code> as <code>UPLOADING</code>.
+ *   <small>For Peer, the <code>state</code> is <code>DOWNLOADING</code>.</small></li></ol></li>
+ *   <li>When the data transfer has errors <ol>
+ *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
+ *   <code>state</code> as <code>ERROR</code> and data transfer is terminated.</li></ol></li>
+ *   <li>When Peer or User invokes <a href="#method_cancelDataTransfer"><code>cancelDataTransfer()</code> method</a> <ol>
+ *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
+ *   <code>state</code> as <code>CANCEL</code> and data transfer is terminated.</li></ol></li>
+ *   <li>When data transfer has been completed <ol>
+ *   <li><a href="#event_dataTransferState"><code>dataTransferState</code>
+ *   event</a> triggers parameter payload <code>state</code> as <code>UPLOAD_COMPLETED</code> when data transfer has
+ *   been completed. <small>For Peers, the parameter payload <code>state</code> is <code>DOWNLOAD_COMPLETED</code>.
+ *   </small></li>
+ *   <li><a href="#event_incomingData"><code>incomingData</code> event</a> triggers parameter payload
+ *   <code>isSelf</code> value as <code>true</code>.</li></ol></li></ol></li>
+ *   <li>Else <small>This happens when Peer invokes <a href="#method_acceptDataTransfer">
+ *   <code>acceptDataTransfer</code> method</a> with parameter <code>accept</code> value as<code>false</code>.</small>
+ *   <ol><li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers
+ *   parameter payload <code>state</code> as <code>REJECTED</code>.</li></ol></li></ol>
  * @example
  * &lt;body&gt;
  *  &lt;input type="radio" name="timeout" onchange="setTransferTimeout(0)"&gt; 1s timeout (Default)
@@ -549,8 +559,9 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
  *      }
  *   });
  * @deprecated true
- * @trigger <small>Event sequence follows <a href="#method_acceptDataTransfer">
- * <code>acceptDataTransfer()</code> method</a>.</small>
+ * @trigger <small>See event sequence of <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>
+ *   at step 2-c when <code>accept</code> value is <code>true</code>
+ *   and 2-d when <code>accept</code> value is <code>false</code>.</small>
  * @for Skylink
  * @since 0.5.0
  */
@@ -575,13 +586,9 @@ Skylink.prototype.respondBlobRequest =
  *        skylinkDemo.acceptDataTransfer(peerId, transferId, false);
  *      }
  *   });
- * @trigger <ol class="desc-seq">
- *   <li>When User accepts the uploading data transfer request from Peer,
- *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>DOWNLOAD_STARTED</code>.
- *   <li>When User rejects the uploading data transfer request from Peer,
- *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>REJECTED</code></li></ol>
+ * @trigger <small>See event sequence of <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>
+ *   at step 2-c when <code>accept</code> value is <code>true</code>
+ *   and 2-d when <code>accept</code> value is <code>false</code>.</small>
  * @for Skylink
  * @since 0.6.1
  */
@@ -686,8 +693,8 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
  *   function cancelTransfer (peerId, transferId) {
  *     skylinkDemo.cancelBlobTransfer(peerId, transferId);
  *   }
- * @trigger <small>Event sequence follows <a href="#method_cancelDataTransfer">
- * <code>cancelDataTransfer()</code> method</a>.</small>
+ * @trigger <small>See event sequence of <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>
+ *   at step 2-c-iv.</small>
  * @for Skylink
  * @deprecated true
  * @for Skylink
@@ -718,10 +725,8 @@ Skylink.prototype.cancelBlobTransfer =
  *   function cancelTransfer (peerId, transferId) {
  *     skylinkDemo.cancelDataTransfer(peerId, transferId);
  *   }
- * @trigger <ol class="desc-seq">
- *  <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers
- *  parameter payload <code>state</code> as <code>CANCEL</code>.</li>
- *  </ol>
+ * @trigger <small>See event sequence of <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>
+ *   at step 2-c-iv.</small>
  * @for Skylink
  * @since 0.6.1
  */
@@ -811,23 +816,19 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
  * - When provided as an Array, it will send the message to only Peers which IDs are in the list.
  * - When not provided, it will broadcast the message to all connected Peers in the Room.
  * @trigger <ol class="desc-seq">
+ *  <li>When Datachannel is opened <small>This happens when <a href="#event_dataChannelState">
+ *  <code>dataChannelState</code> event</a> triggers parameter payload <code>state</code> as <code>OPEN</code> and
+ *  <code>channelType</code> as <code>MESSAGING</code> for Peer.</small> <ol>
  *  <li><a href="#event_incomingMessage"><code>incomingMessage</code> event</a> triggers
- *  parameter payload <code>isSelf</code> value as <code>true</code>
- *  <small>Note that the <a href="#event_dataChannelState"><code>dataChannelState</code> event</a>
- *  must trigger parameter payload <code>state</code> as <code>OPEN</code> and
- *  <code>channelType</code> as <code>MESSAGING</code> for targeted Peers or the message
- *  will not be sent.</small></li></ol>
+ *  parameter payload <code>isSelf</code> value as <code>true</code></li></ol></li></ol>
  * @example
- *   // Example 1: Sending m
+ *   // Example 1: Broadcasting to all Peers
  *   skylinkDemo.on("dataChannelState", function (state, peerId, error, channelName, channelType) {
  *      if (state === skylinkDemo.DATA_CHANNEL_STATE.OPEN &&
  *        channelType === skylinkDemo.DATA_CHANNEL_TYPE.MESSAGING) {
- *        skylinkDemo.sendP2PMessage("test", peerId);
+ *        skylinkDemo.sendP2PMessage("Hi all!");
  *      }
  *   });
- *
- *   // Example 1: Broadcasting to all Peers
- *   skylinkDemo.sendP2PMessage("Hi all!");
  *
  *   // Example 2: Sending to specific Peers
  *   var peersInExclusiveParty = [];
@@ -847,7 +848,13 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
  *   });
  *
  *   function updateExclusivePartyStatus (message) {
- *     skylinkDemo.sendP2PMessage(message, peersInExclusiveParty);
+ *     var readyToSend = [];
+ *     for (var p in peersInExclusiveParty) {
+ *       if (peersInExclusiveParty.hasOwnProperty(p)) {
+ *         readyToSend.push(p);
+ *       }
+ *     }
+ *     skylinkDemo.sendP2PMessage(message, readyToSend);
  *   }
  * @for Skylink
  * @since 0.5.5

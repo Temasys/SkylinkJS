@@ -228,11 +228,13 @@ Skylink.prototype._peerConnections = {};
  * @param {Array} callback.success.listOfPeers The list of Peer IDs targeted.
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
  *   &lt;li&gt;For Peer connections without MCU enabled &lt;ol&gt;
- *   &lt;li&gt;&lt;a href=&quot;#event_peerRestart&quot;&gt;&lt;code&gt;peerRestart&lt;/code&gt; event&lt;/a&gt; triggers parameter
- *   payload &lt;code&gt;isSelfInitiateRestart&lt;/code&gt; as &lt;code&gt;true&lt;/code&gt; for all targeted Peer connections.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;When there are connected Peers &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_peerRestart&quot;&gt;&lt;code&gt;peerRestart&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
+ *   &lt;code&gt;isSelfInitiateRestart&lt;/code&gt; as &lt;code&gt;true&lt;/code&gt; for all targeted Peer connections.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
  *   &lt;li&gt;For Peer connections with MCU enabled &lt;ol&gt;
- *   &lt;li&gt;&lt;a href=&quot;#event_peerRestart&quot;&gt;&lt;code&gt;peerRestart&lt;/code&gt; event&lt;/a&gt; triggers parameter
- *   payload &lt;code&gt;isSelfInitiateRestart&lt;/code&gt; as &lt;code&gt;true&lt;/code&gt; for all targeted Peer connections.&lt;/li&gt;
+ *   &lt;li&gt;When there are connected Peers &lt;ol&gt;
+ *   &lt;a href=&quot;#event_peerRestart&quot;&gt;&lt;code&gt;peerRestart&lt;/code&gt; event&lt;/a&gt; triggers parameter
+ *   payload &lt;code&gt;isSelfInitiateRestart&lt;/code&gt; as &lt;code&gt;true&lt;/code&gt; for all targeted Peer connections.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
  *   &lt;li&gt;&lt;a href=&quot;#event_serverPeerRestart&quot;&gt;&lt;code&gt;serverPeerRestart&lt;/code&gt; event&lt;/a&gt; triggers.&lt;/li&gt;
  *   &lt;li&gt;Invokes &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt;.&lt;small&gt;&lt;code&gt;refreshConnection&lt;/code&gt;
  *   will retain the User session information except the Peer ID will be a different assigned ID due to restarting

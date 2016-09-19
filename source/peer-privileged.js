@@ -116,9 +116,9 @@ Skylink.prototype._peerList = null;
  *   <a href="#event_getPeersStateChange"><code>getPeersStateChange</code> event</a>.</small>
  * @trigger <ol class="desc-seq">
  *   <li><a href="#event_getPeersStateChange"><code>getPeersStateChange</code> event</a> triggers parameter
- *   payload <code>state</code> value as <code>ENQUIRED</code>.</li><li><ol>
- *   <li>When retrieval of the list of Peer IDs from Rooms within the same App space is successful,
- *   <a href="#event_getPeersStateChange"><code>getPeersStateChange</code> event</a> triggers parameter
+ *   payload <code>state</code> value as <code>ENQUIRED</code>.</li>
+ *   <li>When retrieval of the list of Peer IDs from Rooms within the same App space is successful <ol>
+ *   <li><a href="#event_getPeersStateChange"><code>getPeersStateChange</code> event</a> triggers parameter
  *   payload <code>state</code> value as <code>RECEIVED</code>.</li></ol></li></ol>
  * @example
  *   // Example 1: Retrieving the un-privileged Peers
@@ -191,12 +191,12 @@ Skylink.prototype.getPeers = function(showAll, callback){
  * @method introducePeer
  * @param {String} sendingPeerId The Peer ID to be connected with <code>receivingPeerId</code>.
  * @param {String} receivingPeerId The Peer ID to be connected with <code>sendingPeerId</code>.
- * @trigger <ol class="desc-seq"><li><ol>
- *   <li>When introduction request for the selected pair of Peers has been made to the Signaling server,
- *   <a href="#event_introduceStateChange"><code>introduceStateChange</code> event</a> triggers parameter
- *   payload <code>state</code> value as <code>INTRODUCING</code>.</li>
- *   <li>When introduction request made for the selected pair of Peers to the Signaling server has failed,
- *   <a href="#event_introduceStateChange"><code>introduceStateChange</code> event</a> triggers parameter
+ * @trigger <ol class="desc-seq">
+ *   <li>When introduction request for the selected pair of Peers has been made to the Signaling server <ol>
+ *   <li><a href="#event_introduceStateChange"><code>introduceStateChange</code> event</a> triggers parameter
+ *   payload <code>state</code> value as <code>INTRODUCING</code>.</li></ol></li>
+ *   <li>When introduction request made for the selected pair of Peers to the Signaling server has failed <ol>
+ *   <li><a href="#event_introduceStateChange"><code>introduceStateChange</code> event</a> triggers parameter
  *   payload <code>state</code> value as <code>ERROR</code>.</li></ol></li></ol>
  * @example
  *   // Example 1: Introduce a pair of Peers
