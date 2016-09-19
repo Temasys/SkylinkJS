@@ -233,22 +233,23 @@ Skylink.prototype._inRoom = false;
  * @trigger <ol class="desc-seq">
  *   <li>Invokes <a href="#method_init"><code>init()</code> method</a> to retrieve Room session token.</li>
  *   <li>Starts a socket connection with the Signaling server.<ol>
- *   <li>When socket connection to Signaling server is successfully established,
- *   <a href="#event_channelOpen"><code>channelOpen</code> event</a> triggers.</li>
- *   <li>When socket connection to Signaling server is fails to establish,
- *   <a href="#event_socketError"><code>socketError</code> event</a> triggers.<small>
- *   Triggers <a href="#event_channelRetry"><code>channelRetry</code> event</a> if there are
- *   still existing fallback ports and transport to attempt to establish a successful
- *   socket connection with the Signaling server.</small></li></ol></li>
+ *   <li>When socket connection to Signaling server is successfully established <ol>
+ *   <li><a href="#event_channelOpen"><code>channelOpen</code> event</a> triggers.</li>
  *   <li><a href="#event_channelMessage"><code>channelMessage</code> event</a> triggers.</li>
+ *   <li>When Peer has succesfully joined the Room <ol>
  *   <li><a href="#event_peerJoined"><code>peerJoined</code> event</a> triggers parameter payload
- *   <code>isSelf</code> value as <code>true</code>. <small>If MCU is enabled for the App Key,
- *   the <a href="#event_serverPeerJoined"><code>serverPeerJoined</code> event</a> will be triggered
- *   when MCU is present in the Room, and then Peer connections can commence.</small><small>If
+ *   <code>isSelf</code> value as <code>true</code>.</li>
+ *   <li>If MCU is enabled for the App Key <ol>
+ *   <li><a href="#event_serverPeerJoined"><code>serverPeerJoined</code> event</a> triggers.
+ *   <small>MCU has to be present in the Room in order for Peer connections to commence.</small></li></ol></li>
+ *   <li>If there is <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> or
+ *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> available <ol>
+ *   <li><a href="#event_incomingStream"><code>incomingStream</code> event</a> triggers.
+ *   <small>If
  *   <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> is available despite having
  *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> available, the
  *   <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> is sent instead of the
- *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> to Peers.</small></li></ol>
+ *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> to Peers.</small></li></ol></li></ol>
  * @for Skylink
  * @since 0.5.5
  */

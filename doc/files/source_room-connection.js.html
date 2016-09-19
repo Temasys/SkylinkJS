@@ -324,22 +324,23 @@ Skylink.prototype._inRoom = false;
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
  *   &lt;li&gt;Invokes &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; to retrieve Room session token.&lt;/li&gt;
  *   &lt;li&gt;Starts a socket connection with the Signaling server.&lt;ol&gt;
- *   &lt;li&gt;When socket connection to Signaling server is successfully established,
- *   &lt;a href=&quot;#event_channelOpen&quot;&gt;&lt;code&gt;channelOpen&lt;/code&gt; event&lt;/a&gt; triggers.&lt;/li&gt;
- *   &lt;li&gt;When socket connection to Signaling server is fails to establish,
- *   &lt;a href=&quot;#event_socketError&quot;&gt;&lt;code&gt;socketError&lt;/code&gt; event&lt;/a&gt; triggers.&lt;small&gt;
- *   Triggers &lt;a href=&quot;#event_channelRetry&quot;&gt;&lt;code&gt;channelRetry&lt;/code&gt; event&lt;/a&gt; if there are
- *   still existing fallback ports and transport to attempt to establish a successful
- *   socket connection with the Signaling server.&lt;/small&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;When socket connection to Signaling server is successfully established &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_channelOpen&quot;&gt;&lt;code&gt;channelOpen&lt;/code&gt; event&lt;/a&gt; triggers.&lt;/li&gt;
  *   &lt;li&gt;&lt;a href=&quot;#event_channelMessage&quot;&gt;&lt;code&gt;channelMessage&lt;/code&gt; event&lt;/a&gt; triggers.&lt;/li&gt;
+ *   &lt;li&gt;When Peer has succesfully joined the Room &lt;ol&gt;
  *   &lt;li&gt;&lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
- *   &lt;code&gt;isSelf&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;. &lt;small&gt;If MCU is enabled for the App Key,
- *   the &lt;a href=&quot;#event_serverPeerJoined&quot;&gt;&lt;code&gt;serverPeerJoined&lt;/code&gt; event&lt;/a&gt; will be triggered
- *   when MCU is present in the Room, and then Peer connections can commence.&lt;/small&gt;&lt;small&gt;If
+ *   &lt;code&gt;isSelf&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;If MCU is enabled for the App Key &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_serverPeerJoined&quot;&gt;&lt;code&gt;serverPeerJoined&lt;/code&gt; event&lt;/a&gt; triggers.
+ *   &lt;small&gt;MCU has to be present in the Room in order for Peer connections to commence.&lt;/small&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;If there is &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt; or
+ *   &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; Stream&lt;/a&gt; available &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_incomingStream&quot;&gt;&lt;code&gt;incomingStream&lt;/code&gt; event&lt;/a&gt; triggers.
+ *   &lt;small&gt;If
  *   &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt; is available despite having
  *   &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; Stream&lt;/a&gt; available, the
  *   &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt; is sent instead of the
- *   &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; Stream&lt;/a&gt; to Peers.&lt;/small&gt;&lt;/li&gt;&lt;/ol&gt;
+ *   &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; Stream&lt;/a&gt; to Peers.&lt;/small&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.5.5
  */
