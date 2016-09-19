@@ -317,7 +317,7 @@ Skylink.prototype._EVENTS = {
    * @param {Array} [peerInfo.settings.audio.optional] The Peer Stream &lt;code&gt;navigator.getUserMedia()&lt;/code&gt; API
    *   &lt;code&gt;audio: { optional [..] }&lt;/code&gt; property.
    * @param {String} [peerInfo.settings.audio.deviceId] The Peer Stream audio track source ID of the device used.
-   * @param {Boolean} peerInfo.settings.audio.exact The flag if Peer Stream audio track is sending exact
+   * @param {Boolean} peerInfo.settings.audio.exactConstraints The flag if Peer Stream audio track is sending exact
    *   requested values of &lt;code&gt;peerInfo.settings.audio.deviceId&lt;/code&gt; when provided.
    * @param {Boolean|JSON} peerInfo.settings.video The Peer Stream video settings.
    *   &lt;small&gt;When defined as &lt;code&gt;false&lt;/code&gt;, it means there is no video being sent from Peer.&lt;/small&gt;
@@ -331,7 +331,7 @@ Skylink.prototype._EVENTS = {
    * @param {Array} [peerInfo.settings.video.optional] The Peer Stream &lt;code&gt;navigator.getUserMedia()&lt;/code&gt; API
    *   &lt;code&gt;video: { optional [..] }&lt;/code&gt; property.
    * @param {String} [peerInfo.settings.video.deviceId] The Peer Stream video track source ID of the device used.
-   * @param {Boolean} peerInfo.settings.video.exact The flag if Peer Stream video track is sending exact
+   * @param {Boolean} peerInfo.settings.video.exactConstraints The flag if Peer Stream video track is sending exact
    *   requested values of &lt;code&gt;peerInfo.settings.video.resolution&lt;/code&gt;,
    *   &lt;code&gt;peerInfo.settings.video.frameRate&lt;/code&gt; and &lt;code&gt;peerInfo.settings.video.deviceId&lt;/code&gt;
    *   when provided.

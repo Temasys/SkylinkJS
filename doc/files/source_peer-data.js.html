@@ -135,7 +135,9 @@ Skylink.prototype._userData = &#x27;&#x27;;
  * @method setUserData
  * @param {JSON|String} userData The updated custom data.
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
- *   &lt;li&gt;If User is in Room, &lt;a href=&quot;#event_peerUpdated&quot;&gt;&lt;code&gt;peerUpdated&lt;/code&gt; event&lt;/a&gt; triggers.&lt;/li&gt;&lt;/ol&gt;
+ *   &lt;li&gt;If User is in Room &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_peerUpdated&quot;&gt;&lt;code&gt;peerUpdated&lt;/code&gt; event&lt;/a&gt; triggers with parameter payload
+ *   &lt;code&gt;isSelf&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @example
  *   // Example 1: Set/Update User custom data before joinRoom()
  *   var userData = &quot;beforejoin&quot;;

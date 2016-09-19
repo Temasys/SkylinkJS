@@ -527,13 +527,21 @@ Skylink.prototype._streamsStoppedCbs = {};
  *      console.error(&quot;Failed&quot;, error);
  *   });
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
- *   &lt;li&gt;When retrieval of camera Stream is successful, &lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;
- *   &lt;code&gt;mediaAccessSuccess&lt;/code&gt; event&lt;/a&gt; triggers parameter payload &lt;code&gt;isScreensharing&lt;/code&gt;
- *   value as &lt;code&gt;false&lt;/code&gt;.&lt;ol&gt;
- *   &lt;li&gt;When there are missing required audio or video tracks, &lt;a href=&quot;#event_mediaAccessFallback&quot;&gt;
- *   &lt;code&gt;mediaAccessFallback&lt;/code&gt; event&lt;/a&gt; triggers parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;FALLBACKED&lt;/code&gt;
- *   , &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt;, &lt;code&gt;isAudioFallback&lt;/code&gt; as
+ *   &lt;li&gt;When retrieval of camera Stream is successful &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;&lt;code&gt;mediaAccessSuccess&lt;/code&gt; event&lt;/a&gt; triggers
+ *   parameter payload &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;When there are missing required audio or video tracks &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessFallback&quot;&gt;&lt;code&gt;mediaAccessFallback&lt;/code&gt; event&lt;/a&gt; triggers
+ *   parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;FALLBACKED&lt;/code&gt;, &lt;code&gt;isScreensharing&lt;/code&gt;
+ *   value as &lt;code&gt;false&lt;/code&gt;, &lt;code&gt;isAudioFallback&lt;/code&gt; as
  *   &lt;code&gt;false&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt; is defined.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;If there is a previous &lt;code&gt;getUserMedia()&lt;/code&gt; Stream available &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessStopped&quot;&gt;&lt;code&gt;mediaAccessStopped&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
+ *   &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;If User is in Room &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_streamEnded&quot;&gt;&lt;code&gt;streamEnded&lt;/code&gt; event&lt;/a&gt; triggers
+ *   parameter payload &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt; and &lt;code&gt;isSelf&lt;/code&gt; value
+ *   as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
  *   &lt;li&gt;When retrieval of camera Stream has failed&lt;ol&gt;
  *   &lt;li&gt;If &lt;code&gt;audioFallback&lt;/code&gt; is enabled in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;
  *   configuration, and &lt;code&gt;options.video&lt;/code&gt; and &lt;code&gt;options.audio&lt;/code&gt; is requested &lt;ol&gt;
@@ -555,9 +563,9 @@ Skylink.prototype._streamsStoppedCbs = {};
  *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessError&quot;&gt;&lt;code&gt;mediaAccessError&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
  *   &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt; and &lt;code&gt;isAudioFallbackError&lt;/code&gt;
  *   as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
- *   &lt;li&gt;Else, &lt;a href=&quot;#event_mediaAccessError&quot;&gt;&lt;code&gt;mediaAccessError&lt;/code&gt; event&lt;/a&gt;
+ *   &lt;li&gt;Else &lt;ol&gt;&lt;li&gt;&lt;a href=&quot;#event_mediaAccessError&quot;&gt;&lt;code&gt;mediaAccessError&lt;/code&gt; event&lt;/a&gt;
  *   triggers parameter payload &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt; and
- *   &lt;code&gt;isAudioFallbackError&lt;/code&gt; as &lt;code&gt;false&lt;/code&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
+ *   &lt;code&gt;isAudioFallbackError&lt;/code&gt; as &lt;code&gt;false&lt;/code&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.5.6
  */
@@ -666,8 +674,11 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;
- *   &lt;code&gt;mediaAccessSuccess&lt;/code&gt; event&lt;/a&gt; triggering &lt;code&gt;isScreensharing&lt;/code&gt; parameter
- *   payload value as &lt;code&gt;false&lt;/code&gt; for request success.&lt;/small&gt;
+ *   &lt;code&gt;mediaAccessSuccess&lt;/code&gt; event&lt;/a&gt; triggering &lt;code&gt;isScreensharing&lt;/code&gt; parameter payload value
+ *   as &lt;code&gt;false&lt;/code&gt; for request success when User is in Room without Peers,
+ *   or by the &lt;a href=&quot;#event_peerRestart&quot;&gt;&lt;code&gt;peerRestart&lt;/code&gt; event&lt;/a&gt; triggering
+ *   &lt;code&gt;isSelfInitiateRestart&lt;/code&gt; parameter payload value as &lt;code&gt;true&lt;/code&gt; for all connected Peers
+ *   for request success when User is in Room with Peers.&lt;/small&gt;
  * @param {Error|String} callback.error The error result in request.
  *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are no errors in request&lt;/small&gt;
  *   &lt;small&gt;Object signature is the &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt; error or
@@ -719,12 +730,14 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *   });
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
  *   &lt;li&gt;Invokes &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt;.&lt;/li&gt;
- *   &lt;li&gt;Invokes &lt;a href=&quot;#method_refreshConnection&quot;&gt;&lt;code&gt;refreshConnection()&lt;/code&gt; method&lt;/a&gt;.&lt;/li&gt;
  *   &lt;li&gt;If User is in the Room and there is no &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt;
- *   available, &lt;a href=&quot;#event_incomingStream&quot;&gt;&lt;code&gt;incomingStream&lt;/code&gt; event&lt;/a&gt; triggers with
- *   parameter payload &lt;code&gt;isSelf&lt;/code&gt; as &lt;code&gt;true&lt;/code&gt;, and &lt;a href=&quot;#event_peerUpdate&quot;&gt;
- *   &lt;code&gt;peerUpdated&lt;/code&gt; event&lt;/a&gt; triggers with parameter payload &lt;code&gt;isSelf&lt;/code&gt;
- *   as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
+ *   available&lt;ol&gt;
+ *   &lt;li&gt;When there are connected Peers &lt;ol&gt;
+ *   &lt;li&gt;Invokes &lt;a href=&quot;#method_refreshConnection&quot;&gt;&lt;code&gt;refreshConnection()&lt;/code&gt; method&lt;/a&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_incomingStream&quot;&gt;&lt;code&gt;incomingStream&lt;/code&gt; event&lt;/a&gt; triggers with
+ *   parameter payload &lt;code&gt;isSelf&lt;/code&gt; as &lt;code&gt;true&lt;/code&gt;&lt;/li&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_peerUpdate&quot;&gt;&lt;code&gt;peerUpdated&lt;/code&gt; event&lt;/a&gt; triggers with
+ *   parameter payload &lt;code&gt;isSelf&lt;/code&gt; as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.5.6
  */
@@ -849,10 +862,12 @@ Skylink.prototype.sendStream = function(options, callback) {
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
  *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessStopped&quot;&gt;&lt;code&gt;mediaAccessStopped&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
  *   &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt;.&lt;/li&gt;
- *   &lt;li&gt;If User is in the Room, &lt;a href=&quot;#event_streamEnded&quot;&gt;&lt;code&gt;streamEnded&lt;/code&gt; event&lt;/a&gt; triggers
+ *   &lt;li&gt;If User is in the Room &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_streamEnded&quot;&gt;&lt;code&gt;streamEnded&lt;/code&gt; event&lt;/a&gt; triggers
  *   parameter payload &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt; and &lt;code&gt;isSelf&lt;/code&gt; value
- *   as &lt;code&gt;true&lt;/code&gt;, and &lt;a href=&quot;#event_peerUpdated&quot;&gt;&lt;code&gt;peerUpdated&lt;/code&gt; event&lt;/a&gt; triggers
- *   parameter payload &lt;code&gt;isSelf&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;
+ *   as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_peerUpdated&quot;&gt;&lt;code&gt;peerUpdated&lt;/code&gt; event&lt;/a&gt; triggers
+ *   parameter payload &lt;code&gt;isSelf&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.5.6
  */
@@ -899,10 +914,13 @@ Skylink.prototype.stopStream = function () {
  *     videoMuted: true
  *   });
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
- *   &lt;li&gt;If User is in the Room, &lt;a href=&quot;#event_streamMuted&quot;&gt;&lt;code&gt;streamMuted&lt;/code&gt; event&lt;/a&gt; triggers
- *   parameter payload &lt;code&gt;isSelf&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;, and &lt;a href=&quot;#event_peerUpdated&quot;&gt;
- *   &lt;code&gt;peerUpdated&lt;/code&gt; event&lt;/a&gt; triggers parameter payload &lt;code&gt;isSelf&lt;/code&gt;
- *   value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;
+ *   &lt;li&gt;When requested Stream tracks are available and its muted values have changed &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_localMediaMuted&quot;&gt;&lt;code&gt;localMediaMuted&lt;/code&gt; event&lt;/a&gt; triggers.&lt;/li&gt;
+ *   &lt;li&gt;If User is in the Room &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_streamMuted&quot;&gt;&lt;code&gt;streamMuted&lt;/code&gt; event&lt;/a&gt; triggers
+ *   parameter payload &lt;code&gt;isSelf&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_peerUpdated&quot;&gt;&lt;code&gt;peerUpdated&lt;/code&gt; event&lt;/a&gt; triggers parameter payload &lt;code&gt;isSelf&lt;/code&gt;
+ *   value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.5.7
  */
@@ -989,7 +1007,9 @@ Skylink.prototype.muteStream = function(options) {
  *   }
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
  *   &lt;li&gt;Invokes &lt;a href=&quot;#method_muteStream&quot;&gt;&lt;code&gt;muteStream()&lt;/code&gt; method&lt;/a&gt; with
- *   &lt;code&gt;options.audioMuted&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;
+ *   &lt;code&gt;options.audioMuted&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt; and
+ *   &lt;code&gt;options.videoMuted&lt;/code&gt; value with current &lt;code&gt;peerInfo.mediaStatus.videoMuted&lt;/code&gt; value.
+ *   &lt;small&gt;See &lt;a href=&quot;#method_getPeerInfo&quot;&gt;&lt;code&gt;getPeerInfo()&lt;/code&gt; method&lt;/a&gt; for more information.&lt;/small&gt;&lt;/li&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.5.5
  */
@@ -1014,7 +1034,9 @@ Skylink.prototype.enableAudio = function() {
  *   }
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
  *   &lt;li&gt;Invokes &lt;a href=&quot;#method_muteStream&quot;&gt;&lt;code&gt;muteStream()&lt;/code&gt; method&lt;/a&gt; with
- *   &lt;code&gt;options.audioMuted&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;
+ *   &lt;code&gt;options.audioMuted&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt; and
+ *   &lt;code&gt;options.videoMuted&lt;/code&gt; value with current &lt;code&gt;peerInfo.mediaStatus.videoMuted&lt;/code&gt; value.
+ *   &lt;small&gt;See &lt;a href=&quot;#method_getPeerInfo&quot;&gt;&lt;code&gt;getPeerInfo()&lt;/code&gt; method&lt;/a&gt; for more information.&lt;/small&gt;&lt;/li&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.5.5
  */
@@ -1039,7 +1061,9 @@ Skylink.prototype.disableAudio = function() {
  *   }
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
  *   &lt;li&gt;Invokes &lt;a href=&quot;#method_muteStream&quot;&gt;&lt;code&gt;muteStream()&lt;/code&gt; method&lt;/a&gt; with
- *   &lt;code&gt;options.videoMuted&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;
+ *   &lt;code&gt;options.videoMuted&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt; and
+ *   &lt;code&gt;options.audioMuted&lt;/code&gt; value with current &lt;code&gt;peerInfo.mediaStatus.audioMuted&lt;/code&gt; value.
+ *   &lt;small&gt;See &lt;a href=&quot;#method_getPeerInfo&quot;&gt;&lt;code&gt;getPeerInfo()&lt;/code&gt; method&lt;/a&gt; for more information.&lt;/small&gt;&lt;/li&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.5.5
  */
@@ -1051,7 +1075,6 @@ Skylink.prototype.enableVideo = function() {
 };
 
 /**
- /**
  * &lt;blockquote class=&quot;info&quot;&gt;&lt;b&gt;Deprecation Warning!&lt;/b&gt;
  *   This method has been deprecated. Use &lt;a href=&quot;#method_muteStream&quot;&gt;&lt;code&gt;muteStream()&lt;/code&gt; method&lt;/a&gt; instead.
  * &lt;/blockquote&gt;
@@ -1065,7 +1088,9 @@ Skylink.prototype.enableVideo = function() {
  *   }
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
  *   &lt;li&gt;Invokes &lt;a href=&quot;#method_muteStream&quot;&gt;&lt;code&gt;muteStream()&lt;/code&gt; method&lt;/a&gt; with
- *   &lt;code&gt;options.videoMuted&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;
+ *   &lt;code&gt;options.videoMuted&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt; and
+ *   &lt;code&gt;options.audioMuted&lt;/code&gt; value with current &lt;code&gt;peerInfo.mediaStatus.audioMuted&lt;/code&gt; value.
+ *   &lt;small&gt;See &lt;a href=&quot;#method_getPeerInfo&quot;&gt;&lt;code&gt;getPeerInfo()&lt;/code&gt; method&lt;/a&gt; for more information.&lt;/small&gt;&lt;/li&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.5.5
  */
@@ -1084,8 +1109,11 @@ Skylink.prototype.disableVideo = function() {
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;
- *   &lt;code&gt;mediaAccessSuccess&lt;/code&gt; event&lt;/a&gt; triggering &lt;code&gt;isScreensharing&lt;/code&gt; parameter
- *   payload value as &lt;code&gt;true&lt;/code&gt; for request success.&lt;/small&gt;
+ *   &lt;code&gt;mediaAccessSuccess&lt;/code&gt; event&lt;/a&gt; triggering &lt;code&gt;isScreensharing&lt;/code&gt; parameter payload value
+ *   as &lt;code&gt;true&lt;/code&gt; for request success when User is not in the Room or is in Room without Peers,
+ *   or by the &lt;a href=&quot;#event_peerRestart&quot;&gt;&lt;code&gt;peerRestart&lt;/code&gt; event&lt;/a&gt; triggering
+ *   &lt;code&gt;isSelfInitiateRestart&lt;/code&gt; parameter payload value as &lt;code&gt;true&lt;/code&gt; for all connected Peers
+ *   for request success when User is in Room with Peers.&lt;/small&gt;
  * @param {Error|String} callback.error The error result in request.
  *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are no errors in request&lt;/small&gt;
  *   &lt;small&gt;Object signature is the &lt;code&gt;shareScreen()&lt;/code&gt; error when retrieving screensharing Stream.&lt;/small&gt;
@@ -1105,18 +1133,32 @@ Skylink.prototype.disableVideo = function() {
  *     attachMediaStream(document.getElementById(&quot;my-screen&quot;), success);
  *   });
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
- *   &lt;li&gt;When retrieval of screensharing Stream is successful, &lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;
- *   &lt;code&gt;mediaAccessSuccess&lt;/code&gt; event&lt;/a&gt; triggers parameter payload &lt;code&gt;isScreensharing&lt;/code&gt;
- *   value as &lt;code&gt;true&lt;/code&gt;.&lt;ol&gt;
- *   &lt;li&gt;When there are missing required audio tracks, &lt;a href=&quot;#event_mediaAccessFallback&quot;&gt;
+ *   &lt;li&gt;When retrieval of screensharing Stream is successful &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;&lt;code&gt;mediaAccessSuccess&lt;/code&gt; event&lt;/a&gt;
+ *   triggers parameter payload &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;When there are missing required audio tracks &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessFallback&quot;&gt;
  *   &lt;code&gt;mediaAccessFallback&lt;/code&gt; event&lt;/a&gt; triggers parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;FALLBACKED&lt;/code&gt;
  *   , &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;, &lt;code&gt;isAudioFallback&lt;/code&gt; as
- *   &lt;code&gt;false&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt; is defined.&lt;/li&gt;
- *   &lt;li&gt;If User is in Room, &lt;a href=&quot;#event_incomingStream&quot;&gt;&lt;code&gt;incomingStream&lt;/code&gt; event&lt;/a&gt; triggers.&lt;/li&gt;
+ *   &lt;code&gt;false&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt; is defined.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;If there is a previous &lt;code&gt;shareScreen()&lt;/code&gt; Stream available &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessStopped&quot;&gt;&lt;code&gt;mediaAccessStopped&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
+ *   &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;If User is in Room &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_streamEnded&quot;&gt;&lt;code&gt;streamEnded&lt;/code&gt; event&lt;/a&gt; triggers
+ *   parameter payload &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt; and &lt;code&gt;isSelf&lt;/code&gt; value
+ *   as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;If User is in Room &lt;ol&gt;
+ *   &lt;li&gt;When there are connected Peers &lt;ol&gt;
  *   &lt;li&gt;Invokes &lt;a href=&quot;#method_refreshConnection&quot;&gt;&lt;code&gt;refreshConnection()&lt;/code&gt; method&lt;/a&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
- *   &lt;li&gt;When retrieval of screensharing Stream has failed, &lt;a href=&quot;#event_mediaAccessError&quot;&gt;
- *   &lt;code&gt;mediaAccessError&lt;/code&gt; event&lt;/a&gt; triggers parameter payload &lt;code&gt;isScreensharing&lt;/code&gt;
- *   value as &lt;code&gt;true&lt;/code&gt; and &lt;code&gt;isAudioFallbackError&lt;/code&gt; as &lt;code&gt;false&lt;/code&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_incomingStream&quot;&gt;&lt;code&gt;incomingStream&lt;/code&gt; event&lt;/a&gt; triggers with
+ *   parameter payload &lt;code&gt;isSelf&lt;/code&gt; as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_peerUpdate&quot;&gt;&lt;code&gt;peerUpdated&lt;/code&gt; event&lt;/a&gt; triggers with
+ *   parameter payload &lt;code&gt;isSelf&lt;/code&gt; as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;When retrieval of screensharing Stream has failed &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessError&quot;&gt;&lt;code&gt;mediaAccessError&lt;/code&gt; event&lt;/a&gt; triggers
+ *   parameter payload &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt; and
+ *   &lt;code&gt;isAudioFallbackError&lt;/code&gt; as &lt;code&gt;false&lt;/code&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.6.0
  */
@@ -1275,15 +1317,17 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
  *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessStopped&quot;&gt;&lt;code&gt;mediaAccessStopped&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
  *   &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;
- *   &lt;li&gt;If User is in the Room, &lt;a href=&quot;#event_streamEnded&quot;&gt;&lt;code&gt;streamEnded&lt;/code&gt; event&lt;/a&gt; triggers
- *   parameter payload &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt; and &lt;code&gt;isSelf&lt;/code&gt; value
- *   as &lt;code&gt;true&lt;/code&gt;, and &lt;a href=&quot;#event_peerUpdated&quot;&gt;&lt;code&gt;peerUpdated&lt;/code&gt; event&lt;/a&gt; triggers
+ *   &lt;li&gt;If User is in the Room &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_streamEnded&quot;&gt;&lt;code&gt;streamEnded&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
+ *   &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt; and &lt;code&gt;isSelf&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_peerUpdated&quot;&gt;&lt;code&gt;peerUpdated&lt;/code&gt; event&lt;/a&gt; triggers
  *   parameter payload &lt;code&gt;isSelf&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;
- *   &lt;li&gt;If User has &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; Stream&lt;/a&gt; and is in the Room,
- *   the Stream will be sent to Peers and &lt;a href=&quot;#event_incomingStream&quot;&gt;&lt;code&gt;incomingStream&lt;/code&gt; event&lt;/a&gt;
+ *   &lt;li&gt;If User has &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; Stream&lt;/a&gt;&lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_incomingStream&quot;&gt;&lt;code&gt;incomingStream&lt;/code&gt; event&lt;/a&gt;
  *   triggers with parameter payload &lt;code&gt;isSelf&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt; using the
  *   &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; Stream&lt;/a&gt;.&lt;/li&gt;
- *   &lt;li&gt;Invokes &lt;a href=&quot;#method_refreshConnection&quot;&gt;&lt;code&gt;refreshConnection()&lt;/code&gt; method&lt;/a&gt;.&lt;/li&gt;&lt;/ol&gt;
+ *   &lt;li&gt;Invokes &lt;a href=&quot;#method_refreshConnection&quot;&gt;&lt;code&gt;refreshConnection()&lt;/code&gt; method&lt;/a&gt; to
+ *   send the &lt;code&gt;getUserMedia()&lt;/code&gt; Stream to Peers.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.6.0
  */
@@ -1439,7 +1483,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
   if (options.audio) {
     settings.settings.audio = {
       stereo: false,
-      exact: !!options.useExactConstraints
+      exactConstraints: !!options.useExactConstraints
     };
     settings.getUserMediaSettings.audio = {};
 
@@ -1484,7 +1528,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
     settings.settings.video = {
       resolution: clone(this.VIDEO_RESOLUTION.VGA),
       screenshare: false,
-      exact: !!options.useExactConstraints
+      exactConstraints: !!options.useExactConstraints
     };
     settings.getUserMediaSettings.video = {};
 

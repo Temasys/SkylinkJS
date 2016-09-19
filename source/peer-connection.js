@@ -135,17 +135,17 @@ Skylink.prototype._peerConnections = {};
  * @param {JSON} callback.success The success result in request.
  *   <small>Defined as <code>null</code> when there are errors in request</small>
  * @param {Array} callback.success.listOfPeers The list of Peer IDs targeted.
- * @trigger <b class="desc-seq-header">&#8594; For Peer connections without MCU enabled:</b>
- *   <ol class="desc-seq"><li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter
- *   payload <code>isSelfInitiateRestart</code> as <code>true</code> for all targeted Peer connections.</li></ol>
- *   <b class="desc-seq-header">&#8594; For Peer connections with MCU enabled:</b> <ol class="desc-seq">
- *   <li><ol><li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter
+ * @trigger <ol class="desc-seq">
+ *   <li>For Peer connections without MCU enabled <ol>
+ *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter
+ *   payload <code>isSelfInitiateRestart</code> as <code>true</code> for all targeted Peer connections.</li></ol></li>
+ *   <li>For Peer connections with MCU enabled <ol>
+ *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter
  *   payload <code>isSelfInitiateRestart</code> as <code>true</code> for all targeted Peer connections.</li>
- *   <li><a href="#event_serverPeerRestart"><code>serverPeerRestart</code> event</a> triggers parameter
- *   payload <code>serverPeerType</code> as <code>MCU</code>.</li></ol></li>
+ *   <li><a href="#event_serverPeerRestart"><code>serverPeerRestart</code> event</a> triggers.</li>
  *   <li>Invokes <a href="#method_joinRoom"><code>joinRoom()</code> method</a>.<small><code>refreshConnection</code>
  *   will retain the User session information except the Peer ID will be a different assigned ID due to restarting
- *   the Room session.</small></li></ol>
+ *   the Room session.</small></li></ol></li></ol>
  * @example
  *   // Example 1: Refreshing a Peer connection
  *   function refreshFrozenVideoStream (peerId) {
@@ -235,6 +235,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
 /**
  * Function that refresh connections.
  * @method _refreshPeerConnection
+ * @private
  * @for Skylink
  * @since 0.6.15
  */
@@ -366,12 +367,12 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle,
  * @trigger <ol class="desc-seq">
  *   <li><a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>
  *   triggers parameter payload <code>state</code> value as <code>RETRIEVING</code>.</li>
- *   <li><ol><li>When retrieval of Peer connection stats is successful, <a href="#event_getConnectionStatusStateChange">
- *   <code>getConnectionStatusStateChange</code> event</a> triggers parameter payload
- *   <code>state</code> value as <code>RETRIEVE_SUCCESS</code>.</li>
- *   <li>When retrieval of Peer connection stats had failed, <a href="#event_getConnectionStatusStateChange">
- *   <code>getConnectionStatusStateChange</code> event</a> triggers parameter payload
- *   <code>state</code> value as <code>RETRIEVE_ERROR</code>.</li></ol></li></ol>
+ *   <li>When retrieval of Peer connection stats is successful <ol>
+ *   <li><a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>
+ *   triggers parameter payload <code>state</code> value as <code>RETRIEVE_SUCCESS</code>.</li></ol></li>
+ *   <li>When retrieval of Peer connection stats had failed <ol>
+ *   <li><a href="#event_getConnectionStatusStateChange"> <code>getConnectionStatusStateChange</code> event</a>
+ *   triggers parameter payload <code>state</code> value as <code>RETRIEVE_ERROR</code>.</li></ol></li></ol></li></ol>
  * @example
  *   // Example 1: Retrieve a Peer connection stats
  *   function startBWStatsInterval (peerId) {
