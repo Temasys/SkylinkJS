@@ -1908,7 +1908,7 @@
                     "type": "JSON|String"
                 }
             ],
-            "trigger": "<ol class=\"desc-seq\">\n  <li>If User is in Room <ol>\n  <li><a href=\"#event_peerUpdated\"><code>peerUpdated</code> event</a> triggers with parameter payload\n  <code>isSelf</code> value as <code>true</code>.</li></ol></li></ol>",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>Updates User custom data. <ol>\n  <li>If User is in Room: <ol>\n  <li><a href=\"#event_peerUpdated\"><code>peerUpdated</code> event</a> triggers with parameter payload\n  <code>isSelf</code> value as <code>true</code>.</li></ol></li></ol></li></ol>",
             "example": [
                 "\n  // Example 1: Set/Update User custom data before joinRoom()\n  var userData = \"beforejoin\";\n\n  skylinkDemo.setUserData(userData);\n\n  skylinkDemo.joinRoom(function (error, success) {\n     if (error) return;\n     if (success.peerInfo.userData === userData) {\n       console.log(\"User data is sent\");\n     }\n  });\n\n  // Example 2: Update User custom data after joinRoom()\n  var userData = \"afterjoin\";\n\n  skylinkDemo.joinRoom(function (error, success) {\n    if (error) return;\n    skylinkDemo.setUserData(userData);\n    if (skylinkDemo.getPeerInfo().userData === userData) {\n      console.log(\"User data is updated and sent\");\n    }\n  });"
             ],
@@ -1917,7 +1917,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 95,
+            "line": 96,
             "description": "Function that returns the User / Peer current custom data.",
             "itemtype": "method",
             "name": "getUserData",
@@ -1941,7 +1941,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 125,
+            "line": 126,
             "description": "Function that returns the User / Peer current session information.",
             "itemtype": "method",
             "name": "getPeerInfo",
