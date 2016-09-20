@@ -150,9 +150,12 @@ Skylink.prototype._peerConnections = {};
  *   will retain the User session information except the Peer ID will be a different assigned ID due to restarting the
  *   Room session.</small> <ol><li>If request has errors <ol><li><b>ABORT</b> and return error.
  *   </li></ol></li></ol></li></ol></li>
- *   <li>Else: <ol> If there are connected Peers in the Room: <ol>
+ *   <li>Else: <ol><li>If there are connected Peers in the Room: <ol>
+ *   <li>Refresh connections for all targeted Peers. <ol>
+ *   <li>If Peer connection exists: <ol>
  *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter payload
- *   <code>isSelfInitiateRestart</code> value as <code>true</code> for all targeted Peer connections.</li>
+ *   <code>isSelfInitiateRestart</code> value as <code>true</code> for all targeted Peer connections.</li></ol></li>
+ *   <li>Else: <ol><li><b>ABORT</b> and return error.</li></ol></li>
  *   </ol></li></ol></li></ol>
  * @example
  *   // Example 1: Refreshing a Peer connection
@@ -373,14 +376,23 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle,
  *   <small>Object signature matches the <code>stats</code> parameter payload received in the
  *   <a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>.</small>
  * @trigger <ol class="desc-seq">
- *   <li><a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>
- *   triggers parameter payload <code>state</code> value as <code>RETRIEVING</code>.</li>
- *   <li>When retrieval of Peer connection stats is successful <ol>
- *   <li><a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>
- *   triggers parameter payload <code>state</code> value as <code>RETRIEVE_SUCCESS</code>.</li></ol></li>
- *   <li>When retrieval of Peer connection stats had failed <ol>
+ *   <li>Retrieves Peer connection stats for all targeted Peers. <ol>
+ *   <li>If Peer connection has closed or does not exists: <small>This can be checked with
+ *   <a href="#event_peerConnectionState"><code>peerConnectionState</code> event</a>
+ *   triggering parameter payload <code>state</code> as <code>CLOSED</code> for Peer.</small> <ol>
  *   <li><a href="#event_getConnectionStatusStateChange"> <code>getConnectionStatusStateChange</code> event</a>
- *   triggers parameter payload <code>state</code> value as <code>RETRIEVE_ERROR</code>.</li></ol></li></ol></li></ol>
+ *   triggers parameter payload <code>state</code> as <code>RETRIEVE_ERROR</code>.</li>
+ *   <li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li><a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>RETRIEVING</code>.</li>
+ *   <li>Received response from retrieval. <ol>
+ *   <li>If retrieval was successful: <ol>
+ *   <li><a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>RETRIEVE_SUCCESS</code>.</li></ol></li>
+ *   <li>Else: <ol>
+ *   <li><a href="#event_getConnectionStatusStateChange"> <code>getConnectionStatusStateChange</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>RETRIEVE_ERROR</code>.</li>
+ *   </ol></li></ol></li></ol></li></ol>
  * @example
  *   // Example 1: Retrieve a Peer connection stats
  *   function startBWStatsInterval (peerId) {

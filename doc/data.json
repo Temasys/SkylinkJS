@@ -1645,7 +1645,7 @@
                     ]
                 }
             ],
-            "trigger": "<ol class=\"desc-seq\">\n  <li>Checks if MCU is enabled for App Key provided in <a href=\"#method_init\"><code>init()</code> method</a><ol>\n  <li>If MCU is enabled: <ol><li>If there are connected Peers in the Room: <ol>\n  <li><a href=\"#event_peerRestart\"><code>peerRestart</code> event</a> triggers parameter payload\n  <code>isSelfInitiateRestart</code> value as <code>true</code> for all connected Peer connections.</li>\n  <li><a href=\"#event_serverPeerRestart\"><code>serverPeerRestart</code> event</a> triggers for\n  connected MCU server Peer connection.</li></ol></li>\n  <li>Invokes <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a> <small><code>refreshConnection()</code>\n  will retain the User session information except the Peer ID will be a different assigned ID due to restarting the\n  Room session.</small> <ol><li>If request has errors <ol><li><b>ABORT</b> and return error.\n  </li></ol></li></ol></li></ol></li>\n  <li>Else: <ol> If there are connected Peers in the Room: <ol>\n  <li><a href=\"#event_peerRestart\"><code>peerRestart</code> event</a> triggers parameter payload\n  <code>isSelfInitiateRestart</code> value as <code>true</code> for all targeted Peer connections.</li>\n  </ol></li></ol></li></ol>",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>Checks if MCU is enabled for App Key provided in <a href=\"#method_init\"><code>init()</code> method</a><ol>\n  <li>If MCU is enabled: <ol><li>If there are connected Peers in the Room: <ol>\n  <li><a href=\"#event_peerRestart\"><code>peerRestart</code> event</a> triggers parameter payload\n  <code>isSelfInitiateRestart</code> value as <code>true</code> for all connected Peer connections.</li>\n  <li><a href=\"#event_serverPeerRestart\"><code>serverPeerRestart</code> event</a> triggers for\n  connected MCU server Peer connection.</li></ol></li>\n  <li>Invokes <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a> <small><code>refreshConnection()</code>\n  will retain the User session information except the Peer ID will be a different assigned ID due to restarting the\n  Room session.</small> <ol><li>If request has errors <ol><li><b>ABORT</b> and return error.\n  </li></ol></li></ol></li></ol></li>\n  <li>Else: <ol><li>If there are connected Peers in the Room: <ol>\n  <li>Refresh connections for all targeted Peers. <ol>\n  <li>If Peer connection exists: <ol>\n  <li><a href=\"#event_peerRestart\"><code>peerRestart</code> event</a> triggers parameter payload\n  <code>isSelfInitiateRestart</code> value as <code>true</code> for all targeted Peer connections.</li></ol></li>\n  <li>Else: <ol><li><b>ABORT</b> and return error.</li></ol></li>\n  </ol></li></ol></li></ol>",
             "example": [
                 "\n  // Example 1: Refreshing a Peer connection\n  function refreshFrozenVideoStream (peerId) {\n    skylinkDemo.refreshConnection(peerId, function (error, success) {\n      if (error) return;\n      console.log(\"Refreshing connection for '\" + peerId + \"'\");\n    });\n  }\n\n  // Example 2: Refreshing a list of Peer connections\n  function refreshFrozenVideoStreamGroup (peerIdA, peerIdB) {\n    skylinkDemo.refreshConnection([peerIdA, peerIdB], function (error, success) {\n      if (error) {\n        if (error.transferErrors[peerIdA]) {\n          console.error(\"Failed refreshing connection for '\" + peerIdA + \"'\");\n        } else {\n          console.log(\"Refreshing connection for '\" + peerIdA + \"'\");\n        }\n        if (error.transferErrors[peerIdB]) {\n          console.error(\"Failed refreshing connection for '\" + peerIdB + \"'\");\n        } else {\n          console.log(\"Refreshing connection for '\" + peerIdB + \"'\");\n        }\n      } else {\n        console.log(\"Refreshing connection for '\" + peerIdA + \"' and '\" + peerIdB + \"'\");\n      }\n    });\n  }\n\n  // Example 3: Refreshing all Peer connections\n  function refreshFrozenVideoStreamAll () {\n    skylinkDemo.refreshConnection(function (error, success) {\n      if (error) {\n        for (var i = 0; i < error.listOfPeers.length; i++) {\n          if (error.refreshErrors[error.listOfPeers[i]]) {\n            console.error(\"Failed refreshing connection for '\" + error.listOfPeers[i] + \"'\");\n          } else {\n            console.info(\"Refreshing connection for '\" + error.listOfPeers[i] + \"'\");\n          }\n        }\n      } else {\n        console.log(\"Refreshing connection for all Peers\", success.listOfPeers);\n      }\n    });\n  }"
             ],
@@ -1654,7 +1654,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 243,
+            "line": 246,
             "description": "Function that refresh connections.",
             "itemtype": "method",
             "name": "_refreshPeerConnection",
@@ -1665,7 +1665,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 341,
+            "line": 344,
             "description": "Function that retrieves Peer connection bandwidth and ICE connection stats.",
             "itemtype": "method",
             "name": "getConnectionStatus",
@@ -1739,7 +1739,7 @@
                     ]
                 }
             ],
-            "trigger": "<ol class=\"desc-seq\">\n  <li><a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>\n  triggers parameter payload <code>state</code> value as <code>RETRIEVING</code>.</li>\n  <li>When retrieval of Peer connection stats is successful <ol>\n  <li><a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>\n  triggers parameter payload <code>state</code> value as <code>RETRIEVE_SUCCESS</code>.</li></ol></li>\n  <li>When retrieval of Peer connection stats had failed <ol>\n  <li><a href=\"#event_getConnectionStatusStateChange\"> <code>getConnectionStatusStateChange</code> event</a>\n  triggers parameter payload <code>state</code> value as <code>RETRIEVE_ERROR</code>.</li></ol></li></ol></li></ol>",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>Retrieves Peer connection stats for all targeted Peers. <ol>\n  <li>If Peer connection has closed or does not exists: <small>This can be checked with\n  <a href=\"#event_peerConnectionState\"><code>peerConnectionState</code> event</a>\n  triggering parameter payload <code>state</code> as <code>CLOSED</code> for Peer.</small> <ol>\n  <li><a href=\"#event_getConnectionStatusStateChange\"> <code>getConnectionStatusStateChange</code> event</a>\n  triggers parameter payload <code>state</code> as <code>RETRIEVE_ERROR</code>.</li>\n  <li><b>ABORT</b> and return error.</li></ol></li>\n  <li><a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>\n  triggers parameter payload <code>state</code> as <code>RETRIEVING</code>.</li>\n  <li>Received response from retrieval. <ol>\n  <li>If retrieval was successful: <ol>\n  <li><a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>\n  triggers parameter payload <code>state</code> as <code>RETRIEVE_SUCCESS</code>.</li></ol></li>\n  <li>Else: <ol>\n  <li><a href=\"#event_getConnectionStatusStateChange\"> <code>getConnectionStatusStateChange</code> event</a>\n  triggers parameter payload <code>state</code> as <code>RETRIEVE_ERROR</code>.</li>\n  </ol></li></ol></li></ol></li></ol>",
             "example": [
                 "\n  // Example 1: Retrieve a Peer connection stats\n  function startBWStatsInterval (peerId) {\n    setInterval(function () {\n      skylinkDemo.getConnectionStatus(peerId, function (error, success) {\n        if (error) return;\n        var sendVideoBytes  = success.connectionStats[peerId].video.sending.bytes;\n        var sendAudioBytes  = success.connectionStats[peerId].audio.sending.bytes;\n        var recvVideoBytes  = success.connectionStats[peerId].video.receiving.bytes;\n        var recvAudioBytes  = success.connectionStats[peerId].audio.receiving.bytes;\n        var localCandidate  = success.connectionStats[peerId].selectedCandidate.local;\n        var remoteCandidate = success.connectionStats[peerId].selectedCandidate.remote;\n        console.log(\"Sending audio (\" + sendAudioBytes + \"bps) video (\" + sendVideoBytes + \")\");\n        console.log(\"Receiving audio (\" + recvAudioBytes + \"bps) video (\" + recvVideoBytes + \")\");\n        console.log(\"Local candidate: \" + localCandidate.ipAddress + \":\" + localCandidate.portNumber +\n          \"?transport=\" + localCandidate.transport + \" (type: \" + localCandidate.candidateType + \")\");\n        console.log(\"Remote candidate: \" + remoteCandidate.ipAddress + \":\" + remoteCandidate.portNumber +\n          \"?transport=\" + remoteCandidate.transport + \" (type: \" + remoteCandidate.candidateType + \")\");\n      });\n    }, 1000);\n  }\n\n  // Example 2: Retrieve a list of Peer connection stats\n  function printConnStats (peerId, data) {\n    if (!data.connectionStats[peerId]) return;\n    var sendVideoBytes  = data.connectionStats[peerId].video.sending.bytes;\n    var sendAudioBytes  = data.connectionStats[peerId].audio.sending.bytes;\n    var recvVideoBytes  = data.connectionStats[peerId].video.receiving.bytes;\n    var recvAudioBytes  = data.connectionStats[peerId].audio.receiving.bytes;\n    var localCandidate  = data.connectionStats[peerId].selectedCandidate.local;\n    var remoteCandidate = data.connectionStats[peerId].selectedCandidate.remote;\n    console.log(peerId + \" - Sending audio (\" + sendAudioBytes + \"bps) video (\" + sendVideoBytes + \")\");\n    console.log(peerId + \" - Receiving audio (\" + recvAudioBytes + \"bps) video (\" + recvVideoBytes + \")\");\n    console.log(peerId + \" - Local candidate: \" + localCandidate.ipAddress + \":\" + localCandidate.portNumber +\n      \"?transport=\" + localCandidate.transport + \" (type: \" + localCandidate.candidateType + \")\");\n    console.log(peerId + \" - Remote candidate: \" + remoteCandidate.ipAddress + \":\" + remoteCandidate.portNumber +\n      \"?transport=\" + remoteCandidate.transport + \" (type: \" + remoteCandidate.candidateType + \")\");\n  }\n\n  function startBWStatsInterval (peerIdA, peerIdB) {\n    setInterval(function () {\n      skylinkDemo.getConnectionStatus([peerIdA, peerIdB], function (error, success) {\n        if (error) {\n          printConnStats(peerIdA, error.connectionStats);\n          printConnStats(peerIdB, error.connectionStats);\n        } else {\n          printConnStats(peerIdA, success.connectionStats);\n          printConnStats(peerIdB, success.connectionStats);\n        }\n      });\n    }, 1000);\n  }\n\n  // Example 3: Retrieve all Peer connection stats\n  function printConnStats (listOfPeers, data) {\n    listOfPeers.forEach(function (peerId) {\n      if (!data.connectionStats[peerId]) return;\n      var sendVideoBytes  = data.connectionStats[peerId].video.sending.bytes;\n      var sendAudioBytes  = data.connectionStats[peerId].audio.sending.bytes;\n      var recvVideoBytes  = data.connectionStats[peerId].video.receiving.bytes;\n      var recvAudioBytes  = data.connectionStats[peerId].audio.receiving.bytes;\n      var localCandidate  = data.connectionStats[peerId].selectedCandidate.local;\n      var remoteCandidate = data.connectionStats[peerId].selectedCandidate.remote;\n      console.log(peerId + \" - Sending audio (\" + sendAudioBytes + \"bps) video (\" + sendVideoBytes + \")\");\n      console.log(peerId + \" - Receiving audio (\" + recvAudioBytes + \"bps) video (\" + recvVideoBytes + \")\");\n      console.log(peerId + \" - Local candidate: \" + localCandidate.ipAddress + \":\" + localCandidate.portNumber +\n        \"?transport=\" + localCandidate.transport + \" (type: \" + localCandidate.candidateType + \")\");\n      console.log(peerId + \" - Remote candidate: \" + remoteCandidate.ipAddress + \":\" + remoteCandidate.portNumber +\n        \"?transport=\" + remoteCandidate.transport + \" (type: \" + remoteCandidate.candidateType + \")\");\n    });\n  }\n\n  function startBWStatsInterval (peerIdA, peerIdB) {\n    setInterval(function () {\n      skylinkDemo.getConnectionStatus(function (error, success) {\n        if (error) {\n          printConnStats(error.listOfPeers, error.connectionStats);\n        } else {\n          printConnStats(success.listOfPeers, success.connectionStats);\n        }\n      });\n    }, 1000);\n  }"
             ],
@@ -1748,7 +1748,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 748,
+            "line": 760,
             "description": "Function that starts the Peer connection session.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_addPeer",
@@ -1759,7 +1759,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 800,
+            "line": 812,
             "description": "Function that re-negotiates a Peer connection.\nWe currently do not implement the ICE restart functionality.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -1770,7 +1770,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 931,
+            "line": 943,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -1781,7 +1781,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 987,
+            "line": 999,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -1792,13 +1792,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1125,
+            "line": 1137,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1188,
+            "line": 1200,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -6766,7 +6766,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:341"
+            "line": " source/peer-connection.js:344"
         },
         {
             "message": "unknown tag: trigger",
@@ -6922,7 +6922,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:1125"
+            "line": " source/peer-connection.js:1137"
         }
     ]
 }

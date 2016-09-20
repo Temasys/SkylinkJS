@@ -241,9 +241,12 @@ Skylink.prototype._peerConnections = {};
  *   will retain the User session information except the Peer ID will be a different assigned ID due to restarting the
  *   Room session.&lt;/small&gt; &lt;ol&gt;&lt;li&gt;If request has errors &lt;ol&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.
  *   &lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
- *   &lt;li&gt;Else: &lt;ol&gt; If there are connected Peers in the Room: &lt;ol&gt;
+ *   &lt;li&gt;Else: &lt;ol&gt;&lt;li&gt;If there are connected Peers in the Room: &lt;ol&gt;
+ *   &lt;li&gt;Refresh connections for all targeted Peers. &lt;ol&gt;
+ *   &lt;li&gt;If Peer connection exists: &lt;ol&gt;
  *   &lt;li&gt;&lt;a href=&quot;#event_peerRestart&quot;&gt;&lt;code&gt;peerRestart&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
- *   &lt;code&gt;isSelfInitiateRestart&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt; for all targeted Peer connections.&lt;/li&gt;
+ *   &lt;code&gt;isSelfInitiateRestart&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt; for all targeted Peer connections.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;Else: &lt;ol&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
  *   &lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @example
  *   // Example 1: Refreshing a Peer connection
@@ -464,14 +467,23 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle,
  *   &lt;small&gt;Object signature matches the &lt;code&gt;stats&lt;/code&gt; parameter payload received in the
  *   &lt;a href=&quot;#event_getConnectionStatusStateChange&quot;&gt;&lt;code&gt;getConnectionStatusStateChange&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
- *   &lt;li&gt;&lt;a href=&quot;#event_getConnectionStatusStateChange&quot;&gt;&lt;code&gt;getConnectionStatusStateChange&lt;/code&gt; event&lt;/a&gt;
- *   triggers parameter payload &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;RETRIEVING&lt;/code&gt;.&lt;/li&gt;
- *   &lt;li&gt;When retrieval of Peer connection stats is successful &lt;ol&gt;
- *   &lt;li&gt;&lt;a href=&quot;#event_getConnectionStatusStateChange&quot;&gt;&lt;code&gt;getConnectionStatusStateChange&lt;/code&gt; event&lt;/a&gt;
- *   triggers parameter payload &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;RETRIEVE_SUCCESS&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
- *   &lt;li&gt;When retrieval of Peer connection stats had failed &lt;ol&gt;
+ *   &lt;li&gt;Retrieves Peer connection stats for all targeted Peers. &lt;ol&gt;
+ *   &lt;li&gt;If Peer connection has closed or does not exists: &lt;small&gt;This can be checked with
+ *   &lt;a href=&quot;#event_peerConnectionState&quot;&gt;&lt;code&gt;peerConnectionState&lt;/code&gt; event&lt;/a&gt;
+ *   triggering parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;CLOSED&lt;/code&gt; for Peer.&lt;/small&gt; &lt;ol&gt;
  *   &lt;li&gt;&lt;a href=&quot;#event_getConnectionStatusStateChange&quot;&gt; &lt;code&gt;getConnectionStatusStateChange&lt;/code&gt; event&lt;/a&gt;
- *   triggers parameter payload &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;RETRIEVE_ERROR&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
+ *   triggers parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;RETRIEVE_ERROR&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_getConnectionStatusStateChange&quot;&gt;&lt;code&gt;getConnectionStatusStateChange&lt;/code&gt; event&lt;/a&gt;
+ *   triggers parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;RETRIEVING&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;Received response from retrieval. &lt;ol&gt;
+ *   &lt;li&gt;If retrieval was successful: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_getConnectionStatusStateChange&quot;&gt;&lt;code&gt;getConnectionStatusStateChange&lt;/code&gt; event&lt;/a&gt;
+ *   triggers parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;RETRIEVE_SUCCESS&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;Else: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_getConnectionStatusStateChange&quot;&gt; &lt;code&gt;getConnectionStatusStateChange&lt;/code&gt; event&lt;/a&gt;
+ *   triggers parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;RETRIEVE_ERROR&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @example
  *   // Example 1: Retrieve a Peer connection stats
  *   function startBWStatsInterval (peerId) {

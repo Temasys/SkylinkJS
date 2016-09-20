@@ -2964,7 +2964,7 @@ Priority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l748"><code>source&#x2F;peer-connection.js:748</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l760"><code>source&#x2F;peer-connection.js:760</code></a>
       </small>
     
 
@@ -4559,7 +4559,7 @@ If provided string length is lesser than or equals to the chunk size, it should 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l987"><code>source&#x2F;peer-connection.js:987</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l999"><code>source&#x2F;peer-connection.js:999</code></a>
       </small>
     
 
@@ -7497,7 +7497,7 @@ See confluence docs for the &quot;redirect&quot; expected properties to be recei
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l243"><code>source&#x2F;peer-connection.js:243</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l246"><code>source&#x2F;peer-connection.js:246</code></a>
       </small>
     
 
@@ -7580,7 +7580,7 @@ See confluence docs for the &quot;redirect&quot; expected properties to be recei
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l931"><code>source&#x2F;peer-connection.js:931</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l943"><code>source&#x2F;peer-connection.js:943</code></a>
       </small>
     
 
@@ -7916,7 +7916,7 @@ See confluence docs for the &quot;restart&quot; expected properties to be receiv
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l1188"><code>source&#x2F;peer-connection.js:1188</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l1200"><code>source&#x2F;peer-connection.js:1200</code></a>
       </small>
     
 
@@ -8002,7 +8002,7 @@ The Peer ID will not stay the same though.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l800"><code>source&#x2F;peer-connection.js:800</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l812"><code>source&#x2F;peer-connection.js:812</code></a>
       </small>
     
 
@@ -10995,7 +10995,7 @@ Function that unmutes both <a href="#method_getUserMedia"><code>getUserMedia()</
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l341"><code>source&#x2F;peer-connection.js:341</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l344"><code>source&#x2F;peer-connection.js:344</code></a>
       </small>
     
 
@@ -11106,14 +11106,23 @@ Function that unmutes both <a href="#method_getUserMedia"><code>getUserMedia()</
   <div class="code-item-section">
     <h4>Events Sequence:</h4>
     <span class="code-item-trigger"><ol class="desc-seq">
-  <li><a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>
-  triggers parameter payload <code>state</code> value as <code>RETRIEVING</code>.</li>
-  <li>When retrieval of Peer connection stats is successful <ol>
-  <li><a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>
-  triggers parameter payload <code>state</code> value as <code>RETRIEVE_SUCCESS</code>.</li></ol></li>
-  <li>When retrieval of Peer connection stats had failed <ol>
+  <li>Retrieves Peer connection stats for all targeted Peers. <ol>
+  <li>If Peer connection has closed or does not exists: <small>This can be checked with
+  <a href="#event_peerConnectionState"><code>peerConnectionState</code> event</a>
+  triggering parameter payload <code>state</code> as <code>CLOSED</code> for Peer.</small> <ol>
   <li><a href="#event_getConnectionStatusStateChange"> <code>getConnectionStatusStateChange</code> event</a>
-  triggers parameter payload <code>state</code> value as <code>RETRIEVE_ERROR</code>.</li></ol></li></ol></li></ol></span>
+  triggers parameter payload <code>state</code> as <code>RETRIEVE_ERROR</code>.</li>
+  <li><b>ABORT</b> and return error.</li></ol></li>
+  <li><a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>
+  triggers parameter payload <code>state</code> as <code>RETRIEVING</code>.</li>
+  <li>Received response from retrieval. <ol>
+  <li>If retrieval was successful: <ol>
+  <li><a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>
+  triggers parameter payload <code>state</code> as <code>RETRIEVE_SUCCESS</code>.</li></ol></li>
+  <li>Else: <ol>
+  <li><a href="#event_getConnectionStatusStateChange"> <code>getConnectionStatusStateChange</code> event</a>
+  triggers parameter payload <code>state</code> as <code>RETRIEVE_ERROR</code>.</li>
+  </ol></li></ol></li></ol></li></ol></span>
   </div>
   
 
@@ -15247,9 +15256,12 @@ Function that refreshes Peer connections to update with the current streaming.</
   will retain the User session information except the Peer ID will be a different assigned ID due to restarting the
   Room session.</small> <ol><li>If request has errors <ol><li><b>ABORT</b> and return error.
   </li></ol></li></ol></li></ol></li>
-  <li>Else: <ol> If there are connected Peers in the Room: <ol>
+  <li>Else: <ol><li>If there are connected Peers in the Room: <ol>
+  <li>Refresh connections for all targeted Peers. <ol>
+  <li>If Peer connection exists: <ol>
   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter payload
-  <code>isSelfInitiateRestart</code> value as <code>true</code> for all targeted Peer connections.</li>
+  <code>isSelfInitiateRestart</code> value as <code>true</code> for all targeted Peer connections.</li></ol></li>
+  <li>Else: <ol><li><b>ABORT</b> and return error.</li></ol></li>
   </ol></li></ol></li></ol></span>
   </div>
   
