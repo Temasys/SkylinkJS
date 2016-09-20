@@ -289,7 +289,7 @@ Skylink.prototype._dataTransfersTimeout = {};
  *   <li>If Datachannel has opened successfully: <ol>
  *   <li> <a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggers parameter payload
  *   <code>state</code> as <code>OPEN</code> and <code>channelType</code> as <code>DATA</code>.</li></ol></li></ol></li>
- *   <li>Else: <ol><li>If Peer Datachannel has not been opened <small>This can be checked with
+ *   <li>Else: <ol><li>If Peer connection Datachannel has not been opened <small>This can be checked with
  *   <a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggering parameter
  *   payload <code>state</code> as <code>OPEN</code> and <code>channelType</code> as
  *   <code>MESSAGING</code> for Peer.</small> <ol>
@@ -831,12 +831,12 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
  * - When provided as an Array, it will send the message to only Peers which IDs are in the list.
  * - When not provided, it will broadcast the message to all connected Peers in the Room.
  * @trigger <ol class="desc-seq">
- *  <li>If Peer Datachannel has not been opened <small>This can be checked with
+ *  <li>Sends P2P message to all targeted Peers. <ol>
+ *  <li>If Peer connection Datachannel has not been opened: <small>This can be checked with
  *  <a href="#event_dataChannelState"><code>dataChannelState</code> event</a>
  *  triggering parameter payload <code>state</code> as <code>OPEN</code> and
- *  <code>channelType</code> as <code>MESSAGING</code> for Peer </small> <ol>
+ *  <code>channelType</code> as <code>MESSAGING</code> for Peer.</small> <ol>
  *  <li><b>ABORT</b> step and return error.</li></ol></li>
- *  <li>Sends message to Signaling server <ol>
  *  <li><a href="#event_incomingMessage"><code>incomingMessage</code> event</a> triggers
  *  parameter payload <code>message.isDataChannel</code> value as <code>false</code> and
  *  <code>isSelf</code> value as <code>true</code>.</li></ol></li></ol>

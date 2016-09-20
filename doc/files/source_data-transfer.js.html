@@ -380,7 +380,7 @@ Skylink.prototype._dataTransfersTimeout = {};
  *   &lt;li&gt;If Datachannel has opened successfully: &lt;ol&gt;
  *   &lt;li&gt; &lt;a href=&quot;#event_dataChannelState&quot;&gt;&lt;code&gt;dataChannelState&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
  *   &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;OPEN&lt;/code&gt; and &lt;code&gt;channelType&lt;/code&gt; as &lt;code&gt;DATA&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
- *   &lt;li&gt;Else: &lt;ol&gt;&lt;li&gt;If Peer Datachannel has not been opened &lt;small&gt;This can be checked with
+ *   &lt;li&gt;Else: &lt;ol&gt;&lt;li&gt;If Peer connection Datachannel has not been opened &lt;small&gt;This can be checked with
  *   &lt;a href=&quot;#event_dataChannelState&quot;&gt;&lt;code&gt;dataChannelState&lt;/code&gt; event&lt;/a&gt; triggering parameter
  *   payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;OPEN&lt;/code&gt; and &lt;code&gt;channelType&lt;/code&gt; as
  *   &lt;code&gt;MESSAGING&lt;/code&gt; for Peer.&lt;/small&gt; &lt;ol&gt;
@@ -922,12 +922,12 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
  * - When provided as an Array, it will send the message to only Peers which IDs are in the list.
  * - When not provided, it will broadcast the message to all connected Peers in the Room.
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
- *  &lt;li&gt;If Peer Datachannel has not been opened &lt;small&gt;This can be checked with
+ *  &lt;li&gt;Sends P2P message to all targeted Peers. &lt;ol&gt;
+ *  &lt;li&gt;If Peer connection Datachannel has not been opened: &lt;small&gt;This can be checked with
  *  &lt;a href=&quot;#event_dataChannelState&quot;&gt;&lt;code&gt;dataChannelState&lt;/code&gt; event&lt;/a&gt;
  *  triggering parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;OPEN&lt;/code&gt; and
- *  &lt;code&gt;channelType&lt;/code&gt; as &lt;code&gt;MESSAGING&lt;/code&gt; for Peer &lt;/small&gt; &lt;ol&gt;
+ *  &lt;code&gt;channelType&lt;/code&gt; as &lt;code&gt;MESSAGING&lt;/code&gt; for Peer.&lt;/small&gt; &lt;ol&gt;
  *  &lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; step and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
- *  &lt;li&gt;Sends message to Signaling server &lt;ol&gt;
  *  &lt;li&gt;&lt;a href=&quot;#event_incomingMessage&quot;&gt;&lt;code&gt;incomingMessage&lt;/code&gt; event&lt;/a&gt; triggers
  *  parameter payload &lt;code&gt;message.isDataChannel&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt; and
  *  &lt;code&gt;isSelf&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
