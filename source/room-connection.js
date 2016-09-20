@@ -152,8 +152,13 @@ Skylink.prototype._inRoom = false;
  *   with Firefox browsers versions 48 and below as noted in an existing
  *   <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21">bugzilla ticket here</a>.</blockquote>
  *   The configuration to set the maximum streaming bandwidth sent to Peers.
- * @param {Number} [options.bandwidth.audio] The maximum audio streaming bandwidth sent to Peers.
+ * @param {Number} [options.bandwidth.audio] The maximum audio streaming bandwidth sent to Peers in kbps.
+ *   <small>Recommended values are <code>50</code> to <code>200</code>. <code>50</code> is sufficient enough for
+ *   an audio call. The higher you go if you want clearer audio and to be able to hear music streaming.</small>
  * @param {Number} [options.bandwidth.video] The maximum video streaming bandwidth sent to Peers.
+ *   <small>Recommended values are <code>256</code>-<code>500</code> for 180p quality,
+ *   <code>500</code>-<code>1024</code> for 360p quality, <code>1024</code>-<code>2048</code> for 720p quality
+ *   and <code>2048</code>-<code>4096</code> for 1080p quality.</small>
  * @param {Number} [options.bandwidth.data] The maximum data streaming bandwidth sent to Peers.
  *   <small>This affects the P2P messaging in <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>,
  *   and data transfers in <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a> and
