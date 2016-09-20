@@ -322,26 +322,69 @@ Skylink.prototype._inRoom = false;
  *     console.log(&quot;User connected with correct user data?&quot;, success.peerInfo.userData.username === data.username);
  *   });
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
- *   &lt;li&gt;When requested Room name provided is different from currently retrieved Room session token Room name &lt;ol&gt;
- *   &lt;li&gt;Invokes &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; to retrieve Room session token.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
- *   &lt;li&gt;Starts a socket connection with the Signaling server.&lt;ol&gt;
- *   &lt;li&gt;When socket connection to Signaling server is successfully established &lt;ol&gt;
- *   &lt;li&gt;&lt;a href=&quot;#event_channelOpen&quot;&gt;&lt;code&gt;channelOpen&lt;/code&gt; event&lt;/a&gt; triggers.&lt;/li&gt;
- *   &lt;li&gt;&lt;a href=&quot;#event_channelMessage&quot;&gt;&lt;code&gt;channelMessage&lt;/code&gt; event&lt;/a&gt; triggers.&lt;/li&gt;
- *   &lt;li&gt;When Peer has succesfully joined the Room &lt;ol&gt;
+ *   &lt;li&gt;If User is in a Room: &lt;ol&gt;
+ *   &lt;li&gt;Invoke &lt;a href=&quot;#method_leaveRoom&quot;&gt;&lt;code&gt;leaveRoom()&lt;/code&gt; method&lt;/a&gt;
+ *   to end current Room connection. &lt;small&gt;Invoked &lt;a href=&quot;#method_leaveRoom&quot;&gt;&lt;code&gt;leaveRoom()&lt;/code&gt;
+ *   method&lt;/a&gt; &lt;code&gt;stopMediaOptions&lt;/code&gt; parameter value will be &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;
+ *   &lt;small&gt;Regardless of request errors, &lt;code&gt;joinRoom()&lt;/code&gt; will still proceed.&lt;/small&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;Check if Room name provided matches the Room name of the currently retrieved Room session token. &lt;ol&gt;
+ *   &lt;li&gt;If Room name does not matches: &lt;ol&gt;
+ *   &lt;li&gt;Invoke &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; to retrieve new Room session token. &lt;ol&gt;
+ *   &lt;li&gt;If request has errors: &lt;ol&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;Open a new socket connection to Signaling server. &lt;ol&gt;&lt;li&gt;If Socket connection fails: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_socketError&quot;&gt;&lt;code&gt;socketError&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
+ *   &lt;code&gt;errorCode&lt;/code&gt; as &lt;code&gt;CONNECTION_FAILED&lt;/code&gt;. &lt;ol&gt;
+ *   &lt;li&gt;Checks if there are fallback ports and transports to use. &lt;ol&gt;
+ *   &lt;li&gt;If there are still fallback ports and transports: &lt;ol&gt;
+ *   &lt;li&gt;Attempts to retry socket connection to Signaling server. &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_channelRetry&quot;&gt;&lt;code&gt;channelRetry&lt;/code&gt; event&lt;/a&gt; triggers.&lt;/li&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_socketError&quot;&gt;&lt;code&gt;socketError&lt;/code&gt; event&lt;/a&gt; triggers parameter
+ *   payload &lt;code&gt;errorCode&lt;/code&gt; as &lt;code&gt;RECONNECTION_ATTEMPT&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;If attempt to retry socket connection to Signaling server has failed: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_socketError&quot;&gt;&lt;code&gt;socketError&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
+ *   &lt;code&gt;errorCode&lt;/code&gt; as &lt;code&gt;RECONNECTION_FAILED&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;Checks if there are still any more fallback ports and transports to use. &lt;ol&gt;
+ *   &lt;li&gt;If there are is no more fallback ports and transports to use: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_socketError&quot;&gt;&lt;code&gt;socketError&lt;/code&gt; event&lt;/a&gt; triggers
+ *   parameter payload &lt;code&gt;errorCode&lt;/code&gt; as &lt;code&gt;RECONNECTION_ABORTED&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;li&gt;Else: &lt;ol&gt;&lt;li&gt;&lt;b&gt;REPEAT&lt;/b&gt; attempt to retry socket connection
+ *   to Signaling server step.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;li&gt;Else: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_socketError&quot;&gt;&lt;code&gt;socketError&lt;/code&gt; event&lt;/a&gt; triggers
+ *   parameter payload &lt;code&gt;errorCode&lt;/code&gt; as &lt;code&gt;CONNECTION_ABORTED&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;If socket connection to Signaling server has opened: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_channelOpen&quot;&gt;&lt;code&gt;channelOpen&lt;/code&gt; event&lt;/a&gt; triggers.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;Checks if there is &lt;code&gt;options.manualGetUserMedia&lt;/code&gt; requested &lt;ol&gt;&lt;li&gt;If it is requested: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessRequired&quot;&gt;&lt;code&gt;mediaAccessRequired&lt;/code&gt; event&lt;/a&gt; triggers.&lt;/li&gt;
+ *   &lt;li&gt;If more than 30 seconds has passed and no &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; Stream&lt;/a&gt;
+ *   or &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt;
+ *   has been retrieved: &lt;ol&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;li&gt;Else: &lt;ol&gt;
+ *   &lt;li&gt;If there is &lt;code&gt;options.audio&lt;/code&gt; or &lt;code&gt;options.video&lt;/code&gt; requested: &lt;ol&gt;
+ *   &lt;li&gt;Invoke &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt;. &lt;ol&gt;
+ *   &lt;li&gt;If request has errors: &lt;ol&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;/ol&gt;&lt;/li&gt;&lt;li&gt;Starts the Room session &lt;ol&gt;&lt;li&gt;If Room session has started successfully: &lt;ol&gt;
  *   &lt;li&gt;&lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
  *   &lt;code&gt;isSelf&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;
- *   &lt;li&gt;If MCU is enabled for the App Key &lt;ol&gt;
- *   &lt;li&gt;&lt;a href=&quot;#event_serverPeerJoined&quot;&gt;&lt;code&gt;serverPeerJoined&lt;/code&gt; event&lt;/a&gt; triggers.
- *   &lt;small&gt;MCU has to be present in the Room in order for Peer connections to commence.&lt;/small&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
- *   &lt;li&gt;If there is &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt; or
- *   &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; Stream&lt;/a&gt; available &lt;ol&gt;
- *   &lt;li&gt;&lt;a href=&quot;#event_incomingStream&quot;&gt;&lt;code&gt;incomingStream&lt;/code&gt; event&lt;/a&gt; triggers.
- *   &lt;small&gt;If
- *   &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt; is available despite having
- *   &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; Stream&lt;/a&gt; available, the
- *   &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt; is sent instead of the
- *   &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; Stream&lt;/a&gt; to Peers.&lt;/small&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
+ *   &lt;li&gt;If MCU is enabled for the App Key provided in &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt;
+ *   method&lt;/a&gt; and connected: &lt;ol&gt;&lt;li&gt;&lt;a href=&quot;#event_serverPeerJoined&quot;&gt;&lt;code&gt;serverPeerJoined&lt;/code&gt;
+ *   event&lt;/a&gt; triggers &lt;code&gt;serverPeerType&lt;/code&gt; as &lt;code&gt;MCU&lt;/code&gt;. &lt;small&gt;MCU has
+ *   to be present in the Room in order for Peer connections to commence.&lt;/small&gt;&lt;/li&gt;
+ *   &lt;li&gt;Checks for any available Stream &lt;ol&gt;
+ *   &lt;li&gt;If &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt; is available: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_incomingStream&quot;&gt;&lt;code&gt;incomingStream&lt;/code&gt; event&lt;/a&gt;
+ *   triggers parameter payload &lt;code&gt;isSelf&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt; and &lt;code&gt;stream&lt;/code&gt;
+ *   as &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt;.
+ *   &lt;small&gt;User will be sending &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt;
+ *   to Peers.&lt;/small&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;Else if &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; Stream&lt;/a&gt; is available: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_incomingStream&quot;&gt;&lt;code&gt;incomingStream&lt;/code&gt; event&lt;/a&gt; triggers parameter
+ *   payload &lt;code&gt;isSelf&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt; and &lt;code&gt;stream&lt;/code&gt; as
+ *   &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; Stream&lt;/a&gt;.
+ *   &lt;small&gt;User will be sending &lt;code&gt;getUserMedia()&lt;/code&gt; Stream to Peers.&lt;/small&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;li&gt;Else: &lt;ol&gt;
+ *   &lt;li&gt;No Stream will be sent.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;li&gt;Else: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_systemAction&quot;&gt;&lt;code&gt;systemAction&lt;/code&gt; event&lt;/a&gt; triggers
+ *   parameter payload &lt;code&gt;action&lt;/code&gt; as &lt;code&gt;REJECT&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.5.5
  */
