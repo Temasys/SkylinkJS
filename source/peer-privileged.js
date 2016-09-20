@@ -115,9 +115,12 @@ Skylink.prototype._peerList = null;
  *   <small>Object signature matches the <code>peerList</code> parameter payload received in the
  *   <a href="#event_getPeersStateChange"><code>getPeersStateChange</code> event</a>.</small>
  * @trigger <ol class="desc-seq">
+ *   <li>If App Key provided in the <a href="#method_init"><code>init()</code> method</a> is not
+ *   a Privileged enabled Key: <ol><li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>Retrieves the list of Peer IDs from Rooms within the same App space. <ol>
  *   <li><a href="#event_getPeersStateChange"><code>getPeersStateChange</code> event</a> triggers parameter
  *   payload <code>state</code> value as <code>ENQUIRED</code>.</li>
- *   <li>When retrieval of the list of Peer IDs from Rooms within the same App space is successful <ol>
+ *   <li>If received list from Signaling server successfully: <ol>
  *   <li><a href="#event_getPeersStateChange"><code>getPeersStateChange</code> event</a> triggers parameter
  *   payload <code>state</code> value as <code>RECEIVED</code>.</li></ol></li></ol>
  * @example
@@ -192,12 +195,14 @@ Skylink.prototype.getPeers = function(showAll, callback){
  * @param {String} sendingPeerId The Peer ID to be connected with <code>receivingPeerId</code>.
  * @param {String} receivingPeerId The Peer ID to be connected with <code>sendingPeerId</code>.
  * @trigger <ol class="desc-seq">
- *   <li>When introduction request for the selected pair of Peers has been made to the Signaling server <ol>
+ *   <li>If App Key provided in the <a href="#method_init"><code>init()</code> method</a> is not
+ *   a Privileged enabled Key: <ol><li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>Starts sending introduction request for the selected pair of Peers to the Signaling server. <ol>
  *   <li><a href="#event_introduceStateChange"><code>introduceStateChange</code> event</a> triggers parameter
- *   payload <code>state</code> value as <code>INTRODUCING</code>.</li></ol></li>
- *   <li>When introduction request made for the selected pair of Peers to the Signaling server has failed <ol>
+ *   payload <code>state</code> value as <code>INTRODUCING</code>.</li>
+ *   <li>If received errors from Signaling server: <ol>
  *   <li><a href="#event_introduceStateChange"><code>introduceStateChange</code> event</a> triggers parameter
- *   payload <code>state</code> value as <code>ERROR</code>.</li></ol></li></ol>
+ *   payload <code>state</code> value as <code>ERROR</code>.</li></ol></li></ol></li></ol>
  * @example
  *   // Example 1: Introduce a pair of Peers
  *   skylinkDemo.on("introduceStateChange", function (state, privilegedPeerId, sendingPeerId, receivingPeerId) {

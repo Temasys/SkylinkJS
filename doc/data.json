@@ -2222,7 +2222,7 @@
                     ]
                 }
             ],
-            "trigger": "<ol class=\"desc-seq\">\n  <li><a href=\"#event_getPeersStateChange\"><code>getPeersStateChange</code> event</a> triggers parameter\n  payload <code>state</code> value as <code>ENQUIRED</code>.</li>\n  <li>When retrieval of the list of Peer IDs from Rooms within the same App space is successful <ol>\n  <li><a href=\"#event_getPeersStateChange\"><code>getPeersStateChange</code> event</a> triggers parameter\n  payload <code>state</code> value as <code>RECEIVED</code>.</li></ol></li></ol>",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>If App Key provided in the <a href=\"#method_init\"><code>init()</code> method</a> is not\n  a Privileged enabled Key: <ol><li><b>ABORT</b> and return error.</li></ol></li>\n  <li>Retrieves the list of Peer IDs from Rooms within the same App space. <ol>\n  <li><a href=\"#event_getPeersStateChange\"><code>getPeersStateChange</code> event</a> triggers parameter\n  payload <code>state</code> value as <code>ENQUIRED</code>.</li>\n  <li>If received list from Signaling server successfully: <ol>\n  <li><a href=\"#event_getPeersStateChange\"><code>getPeersStateChange</code> event</a> triggers parameter\n  payload <code>state</code> value as <code>RECEIVED</code>.</li></ol></li></ol>",
             "example": [
                 "\n  // Example 1: Retrieving the un-privileged Peers\n  skylinkDemo.joinRoom(function (jRError, jRSuccess) {\n    if (jRError) return;\n    skylinkDemo.getPeers(function (error, success) {\n       if (error) return;\n       console.log(\"The list of only un-privileged Peers in the same App space ->\", success);\n    });\n  });\n\n  // Example 2: Retrieving the all Peers (privileged or un-privileged)\n  skylinkDemo.joinRoom(function (jRError, jRSuccess) {\n    if (jRError) return;\n    skylinkDemo.getPeers(true, function (error, success) {\n       if (error) return;\n       console.log(\"The list of all Peers in the same App space ->\", success);\n    });\n  });"
             ],
@@ -2231,7 +2231,7 @@
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 180,
+            "line": 183,
             "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled and\n  <code>\"autoIntroduce\"</code> flag to be disabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>, as only Users connecting using\n  the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of\n  Peer IDs from Rooms within the same App space.\n  <a href=\"http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about privileged App Key feature here</a>.\n</blockquote>\nFunction that selects and introduces a pair of Peers to start connection with each other.",
             "itemtype": "method",
             "name": "introducePeer",
@@ -2247,7 +2247,7 @@
                     "type": "String"
                 }
             ],
-            "trigger": "<ol class=\"desc-seq\">\n  <li>When introduction request for the selected pair of Peers has been made to the Signaling server <ol>\n  <li><a href=\"#event_introduceStateChange\"><code>introduceStateChange</code> event</a> triggers parameter\n  payload <code>state</code> value as <code>INTRODUCING</code>.</li></ol></li>\n  <li>When introduction request made for the selected pair of Peers to the Signaling server has failed <ol>\n  <li><a href=\"#event_introduceStateChange\"><code>introduceStateChange</code> event</a> triggers parameter\n  payload <code>state</code> value as <code>ERROR</code>.</li></ol></li></ol>",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>If App Key provided in the <a href=\"#method_init\"><code>init()</code> method</a> is not\n  a Privileged enabled Key: <ol><li><b>ABORT</b> and return error.</li></ol></li>\n  <li>Starts sending introduction request for the selected pair of Peers to the Signaling server. <ol>\n  <li><a href=\"#event_introduceStateChange\"><code>introduceStateChange</code> event</a> triggers parameter\n  payload <code>state</code> value as <code>INTRODUCING</code>.</li>\n  <li>If received errors from Signaling server: <ol>\n  <li><a href=\"#event_introduceStateChange\"><code>introduceStateChange</code> event</a> triggers parameter\n  payload <code>state</code> value as <code>ERROR</code>.</li></ol></li></ol></li></ol>",
             "example": [
                 "\n  // Example 1: Introduce a pair of Peers\n  skylinkDemo.on(\"introduceStateChange\", function (state, privilegedPeerId, sendingPeerId, receivingPeerId) {\n\t   if (state === skylinkDemo.INTRODUCE_STATE.INTRODUCING) {\n      console.log(\"Peer '\" + sendingPeerId + \"' has been introduced to '\" + receivingPeerId + \"'\");\n    }\n  });\n\n  skylinkDemo.joinRoom(function (jRError, jRSuccess) {\n    if (jRError) return;\n    skylinkDemo.getPeers(function (gPError, gPSuccess) {\n       if (gPError) return;\n       skylinkDemo.introducePeer(gPSuccess.roomName[0], gPSuccess.roomName[1]);\n    });\n  });"
             ],
@@ -6778,7 +6778,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-privileged.js:180"
+            "line": " source/peer-privileged.js:183"
         },
         {
             "message": "unknown tag: trigger",
