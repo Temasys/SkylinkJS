@@ -5312,7 +5312,7 @@ See confluence docs for the &quot;enter&quot; expected properties to be received
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l994"><code>source&#x2F;room-init.js:994</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l1008"><code>source&#x2F;room-init.js:1008</code></a>
       </small>
     
 
@@ -5565,7 +5565,7 @@ See confluence docs for the &quot;introduceError&quot; expected properties to be
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l903"><code>source&#x2F;room-init.js:903</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l917"><code>source&#x2F;room-init.js:917</code></a>
       </small>
     
 
@@ -6740,7 +6740,7 @@ This starts creating the socket connection and called at first not when requirin
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l830"><code>source&#x2F;room-init.js:830</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l844"><code>source&#x2F;room-init.js:844</code></a>
       </small>
     
 
@@ -7748,7 +7748,7 @@ To evaluate removal of this change once we roll out H264 codec interop.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l756"><code>source&#x2F;room-init.js:756</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l770"><code>source&#x2F;room-init.js:770</code></a>
       </small>
     
 
@@ -12523,15 +12523,29 @@ mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices"><code>navigator.me
   <div class="code-item-section">
     <h4>Events Sequence:</h4>
     <span class="code-item-trigger"><ol class="desc-seq">
+  <li>If parameter <code>options</code> is not provided: <ol><li><b>ABORT</b> and return error.</li></ol></li>
+  <li>Checks if dependecies and browser APIs are available. <ol><li>If AdapterJS is not loaded: <ol>
+  <li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers
+  parameter payload <code>state</code> as <code>ERROR</code> and <code>error.errorCode</code> as
+  <code>ADAPTER_NO_LOADED</code>.</li><li><b>ABORT</b> and return error.</li></ol></li>
+  <li>If socket.io-client is not loaded: <ol><li><a href="#event_readyStateChange">
+  <code>readyStateChange</code> event</a> triggers parameter payload <code>state</code>
+  as <code>ERROR</code> and <code>error.errorCode</code> as <code>NO_SOCKET_IO</code>.</li>
+  <li><b>ABORT</b> and return error. </li></ol></li>
+  <li>If XMLHttpRequest API is not available: <ol><li><a href="#event_readyStateChange">
+  <code>readyStateChange</code> event</a> triggers parameter payload <code>state</code>
+  as <code>ERROR</code> and <code>error.errorCode</code> as <code>NO_XMLHTTPREQUEST_SUPPORT</code>.</li>
+  <li><b>ABORT</b> and return error.</li></ol></li><li>If WebRTC is not supported by device: <ol>
   <li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers parameter
-  payload <code>state</code> value as <code>LOADING</code>.</li><li><ol>
-  <li>When authentication is successful,
-  <a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers parameter
-  payload <code>state</code> value as <code>COMPLETED</code>.
-  <small>Room session token will be retrieved and will be required by <a href="#method_joinRoom">
-  <code>joinRoom()</code> method</a> to start Room connection.</small></li>
-  <li>When authentication fails, <a href="#event_readyStateChange"><code>readyStateChange</code>
-  event</a> triggers parameter payload <code>state</code> value as <code>ERROR</code>.</li></ol></ol></span>
+  payload <code>state</code> as <code>ERROR</code> and <code>error.errorCode</code> as
+  <code>NO_WEBRTC_SUPPORT</code>.</li><li><b>ABORT</b> and return error.</li></ol></li></ol></li>
+  <li>Retrieves Room session token from Auth server. <ol>
+  <li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers
+  parameter payload <code>state</code> as <code>LOADING</code>.</li>
+  <li>If retrieval was successful: <ol><li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a>
+  triggers parameter payload <code>state</code> as <code>COMPLETED</code>.</li></ol></li><li>Else: <ol>
+  <li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers parameter
+  payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol></span>
   </div>
   
 

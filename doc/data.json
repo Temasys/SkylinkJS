@@ -3257,13 +3257,13 @@
             "example": [
                 "\n  // Example 1: Using CORS authentication and connection to default Room\n  skylinkDemo(appKey, function (error, success) {\n    if (error) return;\n    skylinkDemo.joinRoom(); // Goes to default Room\n  });\n\n  // Example 2: Using CORS authentication and connection to a different Room\n  skylinkDemo(appKey, function (error, success) {\n    skylinkDemo.joinRoom(\"testxx\"); // Goes to \"testxx\" Room\n  });\n\n  // Example 3: Using credentials authentication and connection to only default Room\n  var defaultRoom   = \"test\",\n      startDateTime = (new Date()).toISOString(),\n      duration      = 1, // Allows only User session to stay for 1 hour\n      appKeySecret  = \"xxxxxxx\",\n      hash          = CryptoJS.HmacSHA1(defaultRoom + \"_\" + duration + \"_\" + startDateTime, appKeySecret);\n      credentials   = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));\n\n  skylinkDemo({\n    defaultRoom: defaultRoom,\n    appKey: appKey,\n    credentials: {\n      duration: duration,\n      startDateTime: startDateTime,\n      credentials: credentials\n    }\n  }, function (error, success) {\n    if (error) return;\n    skylinkDemo.joinRoom(); // Goes to default Room (switching to different Room is not allowed for credentials authentication)\n  });"
             ],
-            "trigger": "<ol class=\"desc-seq\">\n  <li><a href=\"#event_readyStateChange\"><code>readyStateChange</code> event</a> triggers parameter\n  payload <code>state</code> value as <code>LOADING</code>.</li><li><ol>\n  <li>When authentication is successful,\n  <a href=\"#event_readyStateChange\"><code>readyStateChange</code> event</a> triggers parameter\n  payload <code>state</code> value as <code>COMPLETED</code>.\n  <small>Room session token will be retrieved and will be required by <a href=\"#method_joinRoom\">\n  <code>joinRoom()</code> method</a> to start Room connection.</small></li>\n  <li>When authentication fails, <a href=\"#event_readyStateChange\"><code>readyStateChange</code>\n  event</a> triggers parameter payload <code>state</code> value as <code>ERROR</code>.</li></ol></ol>",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>If parameter <code>options</code> is not provided: <ol><li><b>ABORT</b> and return error.</li></ol></li>\n  <li>Checks if dependecies and browser APIs are available. <ol><li>If AdapterJS is not loaded: <ol>\n  <li><a href=\"#event_readyStateChange\"><code>readyStateChange</code> event</a> triggers\n  parameter payload <code>state</code> as <code>ERROR</code> and <code>error.errorCode</code> as\n  <code>ADAPTER_NO_LOADED</code>.</li><li><b>ABORT</b> and return error.</li></ol></li>\n  <li>If socket.io-client is not loaded: <ol><li><a href=\"#event_readyStateChange\">\n  <code>readyStateChange</code> event</a> triggers parameter payload <code>state</code>\n  as <code>ERROR</code> and <code>error.errorCode</code> as <code>NO_SOCKET_IO</code>.</li>\n  <li><b>ABORT</b> and return error. </li></ol></li>\n  <li>If XMLHttpRequest API is not available: <ol><li><a href=\"#event_readyStateChange\">\n  <code>readyStateChange</code> event</a> triggers parameter payload <code>state</code>\n  as <code>ERROR</code> and <code>error.errorCode</code> as <code>NO_XMLHTTPREQUEST_SUPPORT</code>.</li>\n  <li><b>ABORT</b> and return error.</li></ol></li><li>If WebRTC is not supported by device: <ol>\n  <li><a href=\"#event_readyStateChange\"><code>readyStateChange</code> event</a> triggers parameter\n  payload <code>state</code> as <code>ERROR</code> and <code>error.errorCode</code> as\n  <code>NO_WEBRTC_SUPPORT</code>.</li><li><b>ABORT</b> and return error.</li></ol></li></ol></li>\n  <li>Retrieves Room session token from Auth server. <ol>\n  <li><a href=\"#event_readyStateChange\"><code>readyStateChange</code> event</a> triggers\n  parameter payload <code>state</code> as <code>LOADING</code>.</li>\n  <li>If retrieval was successful: <ol><li><a href=\"#event_readyStateChange\"><code>readyStateChange</code> event</a>\n  triggers parameter payload <code>state</code> as <code>COMPLETED</code>.</li></ol></li><li>Else: <ol>\n  <li><a href=\"#event_readyStateChange\"><code>readyStateChange</code> event</a> triggers parameter\n  payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol>",
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/room-init.js",
-            "line": 756,
+            "line": 770,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -3274,7 +3274,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 830,
+            "line": 844,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -3285,7 +3285,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 903,
+            "line": 917,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -3296,7 +3296,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 994,
+            "line": 1008,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
