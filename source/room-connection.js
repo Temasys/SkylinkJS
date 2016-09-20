@@ -231,7 +231,8 @@ Skylink.prototype._inRoom = false;
  *     console.log("User connected with correct user data?", success.peerInfo.userData.username === data.username);
  *   });
  * @trigger <ol class="desc-seq">
- *   <li>Invokes <a href="#method_init"><code>init()</code> method</a> to retrieve Room session token.</li>
+ *   <li>When requested Room name provided is different from currently retrieved Room session token Room name <ol>
+ *   <li>Invokes <a href="#method_init"><code>init()</code> method</a> to retrieve Room session token.</li></ol></li>
  *   <li>Starts a socket connection with the Signaling server.<ol>
  *   <li>When socket connection to Signaling server is successfully established <ol>
  *   <li><a href="#event_channelOpen"><code>channelOpen</code> event</a> triggers.</li>
