@@ -131,8 +131,9 @@ Skylink.prototype._receiveOnly = false;
  *     skylinkDemo.sendMessage(message, peersInExclusiveParty);
  *   }
  * @trigger <ol class="desc-seq">
+ *   <li>Sends socket connection message to all targeted Peers via Signaling server. <ol>
  *   <li><a href="#event_incomingMessage"><code>incomingMessage</code> event</a> triggers parameter payload
- *   <code>message.isDataChannel</code> value as <code>false</code>.</li></ol>
+ *   <code>message.isDataChannel</code> value as <code>false</code>.</li></ol></li></ol>
  * @for Skylink
  * @since 0.4.0
  */

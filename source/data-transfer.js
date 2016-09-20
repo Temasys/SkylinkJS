@@ -838,7 +838,7 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
  *  <code>channelType</code> as <code>MESSAGING</code> for Peer.</small> <ol>
  *  <li><b>ABORT</b> step and return error.</li></ol></li>
  *  <li><a href="#event_incomingMessage"><code>incomingMessage</code> event</a> triggers
- *  parameter payload <code>message.isDataChannel</code> value as <code>false</code> and
+ *  parameter payload <code>message.isDataChannel</code> value as <code>true</code> and
  *  <code>isSelf</code> value as <code>true</code>.</li></ol></li></ol>
  * @example
  *   // Example 1: Broadcasting to all Peers

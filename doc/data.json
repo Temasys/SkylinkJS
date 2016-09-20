@@ -1002,7 +1002,7 @@
                     "optional": true
                 }
             ],
-            "trigger": "<ol class=\"desc-seq\">\n <li>Sends P2P message to all targeted Peers. <ol>\n <li>If Peer connection Datachannel has not been opened: <small>This can be checked with\n <a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a>\n triggering parameter payload <code>state</code> as <code>OPEN</code> and\n <code>channelType</code> as <code>MESSAGING</code> for Peer.</small> <ol>\n <li><b>ABORT</b> step and return error.</li></ol></li>\n <li><a href=\"#event_incomingMessage\"><code>incomingMessage</code> event</a> triggers\n parameter payload <code>message.isDataChannel</code> value as <code>false</code> and\n <code>isSelf</code> value as <code>true</code>.</li></ol></li></ol>",
+            "trigger": "<ol class=\"desc-seq\">\n <li>Sends P2P message to all targeted Peers. <ol>\n <li>If Peer connection Datachannel has not been opened: <small>This can be checked with\n <a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a>\n triggering parameter payload <code>state</code> as <code>OPEN</code> and\n <code>channelType</code> as <code>MESSAGING</code> for Peer.</small> <ol>\n <li><b>ABORT</b> step and return error.</li></ol></li>\n <li><a href=\"#event_incomingMessage\"><code>incomingMessage</code> event</a> triggers\n parameter payload <code>message.isDataChannel</code> value as <code>true</code> and\n <code>isSelf</code> value as <code>true</code>.</li></ol></li></ol>",
             "example": [
                 "\n  // Example 1: Broadcasting to all Peers\n  skylinkDemo.on(\"dataChannelState\", function (state, peerId, error, channelName, channelType) {\n     if (state === skylinkDemo.DATA_CHANNEL_STATE.OPEN &&\n       channelType === skylinkDemo.DATA_CHANNEL_TYPE.MESSAGING) {\n       skylinkDemo.sendP2PMessage(\"Hi all!\");\n     }\n  });\n\n  // Example 2: Sending to specific Peers\n  var peersInExclusiveParty = [];\n\n  skylinkDemo.on(\"peerJoined\", function (peerId, peerInfo, isSelf) {\n    if (isSelf) return;\n    if (peerInfo.userData.exclusive) {\n      peersInExclusiveParty[peerId] = false;\n    }\n  });\n\n  skylinkDemo.on(\"dataChannelState\", function (state, peerId, error, channelName, channelType) {\n     if (state === skylinkDemo.DATA_CHANNEL_STATE.OPEN &&\n       channelType === skylinkDemo.DATA_CHANNEL_TYPE.MESSAGING) {\n       peersInExclusiveParty[peerId] = true;\n     }\n  });\n\n  function updateExclusivePartyStatus (message) {\n    var readyToSend = [];\n    for (var p in peersInExclusiveParty) {\n      if (peersInExclusiveParty.hasOwnProperty(p)) {\n        readyToSend.push(p);\n      }\n    }\n    skylinkDemo.sendP2PMessage(message, readyToSend);\n  }"
             ],
@@ -5707,13 +5707,13 @@
             "example": [
                 "\n  // Example 1: Broadcasting to all Peers\n  skylinkDemo.sendMessage(\"Hi all!\");\n\n  // Example 2: Sending to specific Peers\n  var peersInExclusiveParty = [];\n\n  skylinkDemo.on(\"peerJoined\", function (peerId, peerInfo, isSelf) {\n    if (isSelf) return;\n    if (peerInfo.userData.exclusive) {\n      peersInExclusiveParty.push(peerId);\n    }\n  });\n\n  function updateExclusivePartyStatus (message) {\n    skylinkDemo.sendMessage(message, peersInExclusiveParty);\n  }"
             ],
-            "trigger": "<ol class=\"desc-seq\">\n  <li><a href=\"#event_incomingMessage\"><code>incomingMessage</code> event</a> triggers parameter payload\n  <code>message.isDataChannel</code> value as <code>false</code>.</li></ol>",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>Sends socket connection message to all targeted Peers via Signaling server. <ol>\n  <li><a href=\"#event_incomingMessage\"><code>incomingMessage</code> event</a> triggers parameter payload\n  <code>message.isDataChannel</code> value as <code>false</code>.</li></ol></li></ol>",
             "since": "0.4.0",
             "class": "Skylink"
         },
         {
             "file": "source/socket-message.js",
-            "line": 204,
+            "line": 205,
             "description": "Function that process and parses the socket message string received from the Signaling.",
             "itemtype": "method",
             "name": "_processSigMessage",
@@ -5724,7 +5724,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 223,
+            "line": 224,
             "description": "Function that handles and processes the socket message received.",
             "itemtype": "method",
             "name": "_processingSingleMessage",
@@ -5735,7 +5735,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 309,
+            "line": 310,
             "description": "Function that handles the \"peerList\" socket message received.\nSee confluence docs for the \"peerList\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_peerListEventHandler",
@@ -5746,7 +5746,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 325,
+            "line": 326,
             "description": "Function that handles the \"introduceError\" socket message received.\nSee confluence docs for the \"introduceError\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_introduceErrorEventHandler",
@@ -5757,7 +5757,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 341,
+            "line": 342,
             "description": "Function that handles the \"approach\" socket message received.\nSee confluence docs for the \"approach\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_approachEventHandler",
@@ -5768,7 +5768,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 372,
+            "line": 373,
             "description": "Function that handles the \"redirect\" socket message received.\nSee confluence docs for the \"redirect\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_redirectHandler",
@@ -5779,7 +5779,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 404,
+            "line": 405,
             "description": "Function that handles the \"updateUserEvent\" socket message received.\nSee confluence docs for the \"updateUserEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
@@ -5790,7 +5790,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 425,
+            "line": 426,
             "description": "Function that handles the \"roomLockEvent\" socket message received.\nSee confluence docs for the \"roomLockEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
@@ -5801,7 +5801,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 441,
+            "line": 442,
             "description": "Function that handles the \"muteAudioEvent\" socket message received.\nSee confluence docs for the \"muteAudioEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -5812,7 +5812,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 464,
+            "line": 465,
             "description": "Function that handles the \"muteVideoEvent\" socket message received.\nSee confluence docs for the \"muteVideoEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -5823,7 +5823,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 488,
+            "line": 489,
             "description": "Function that handles the \"stream\" socket message received.\nSee confluence docs for the \"stream\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_streamEventHandler",
@@ -5834,7 +5834,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 555,
+            "line": 556,
             "description": "Function that handles the \"bye\" socket message received.\nSee confluence docs for the \"bye\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -5845,7 +5845,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 576,
+            "line": 577,
             "description": "Function that handles the \"private\" socket message received.\nSee confluence docs for the \"private\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -5856,7 +5856,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 598,
+            "line": 599,
             "description": "Function that handles the \"public\" socket message received.\nSee confluence docs for the \"public\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -5867,7 +5867,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 620,
+            "line": 621,
             "description": "Function that handles the \"inRoom\" socket message received.\nSee confluence docs for the \"inRoom\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -5878,7 +5878,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 677,
+            "line": 678,
             "description": "Function that handles the \"enter\" socket message received.\nSee confluence docs for the \"enter\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -5889,7 +5889,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 745,
+            "line": 746,
             "description": "Function that handles the \"restart\" socket message received.\nSee confluence docs for the \"restart\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -5900,7 +5900,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 855,
+            "line": 856,
             "description": "Function that handles the \"welcome\" socket message received.\nSee confluence docs for the \"welcome\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -5911,7 +5911,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 950,
+            "line": 951,
             "description": "Function that handles the \"offer\" socket message received.\nSee confluence docs for the \"offer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -5922,7 +5922,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1043,
+            "line": 1044,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -5933,7 +5933,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1135,
+            "line": 1136,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
