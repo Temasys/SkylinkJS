@@ -529,16 +529,18 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  * @param {String} callback.success.peerId The User's Room session Peer ID.
  * @param {String} callback.success.previousRoom The Room name.
  * @trigger <ol class="desc-seq">
- *   <li>When <code>stopMediaOptions.userMedia</code> is <code>true</code>, the
- *   <a href="#method_stopStream"><code>stopStream()</code> method</a> is invoked.</li>
- *   <li>When <code>stopMediaOptions.screenshare</code> is <code>true</code>, the
- *   <a href="#method_stopScreen"><code>stopScreen()</code> method</a> is invoked.</li>
- *   <li>Stops the socket connection with the Signaling server. <ol>
- *   <li>When socket connection to Signaling server is closed,
- *   <a href="#event_channelClose"><code>channelClose</code> event</a> triggers.</li></ol></li>
- *   <li><a href="#event_peerLeft"><code>peerLeft</code> event</a> triggers for Peers in the Room and User.
- *   <small>If MCU is enabled for the App Key, the <a href="#event_serverPeerLeft">
- *   <code>serverPeerLeft</code> event</a> will be triggered when Room session has ended.</small></li></ol>
+ *   <li>Checks if User is in Room. <ol><li>If User is not in a Room: <ol><li><b>ABORT</b> and return error.</li>
+ *   </ol></li><li>Else: <ol><li>If parameter <code>stopMediaOptions.userMedia</code> value is <code>true</code>: <ol>
+ *   <li>Invoke <a href="#method_stopStream"><code>stopStream()</code> method</a>. 
+ *   <small>Regardless of request errors, <code>leaveRoom()</code> will still proceed.</small></li></ol></li>
+ *   <li>If parameter <code>stopMediaOptions.screenshare</code> value is <code>true</code>: <ol>
+ *   <li>Invoke <a href="#method_stopScreen"><code>stopScreen()</code> method</a>.
+ *   <small>Regardless of request errors, <code>leaveRoom()</code> will still proceed.</small></li></ol></li>
+ *   <li><a href="#event_peerLeft"><code>peerLeft</code> event</a> triggers for User and all connected Peers in Room.</li>
+ *   <li>If MCU is enabled for the App Key provided in <a href="#method_init"><code>init()</code> method</a>
+ *   and connected: <ol><li><a href="#event_serverPeerLeft"><code>serverPeerLeft</code> event</a>
+ *   triggers parameter payload <code>serverPeerType</code> as <code>MCU</code>.</li></ol></li>
+ *   <li><a href="#event_channelClose"><code>channelClose</code> event</a> triggers.</li></ol></li></ol></li></ol>
  * @for Skylink
  * @since 0.5.5
  */
@@ -641,8 +643,9 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
  * Function that locks the current Room when in session to prevent other Peers from joining the Room.
  * @method lockRoom
  * @trigger <ol class="desc-seq">
+ *   <li>Requests to Signaling server to lock Room <ol>
  *   <li><a href="#event_roomLock"><code>roomLock</code> event</a> triggers parameter payload
- *   <code>isLocked</code> value as <code>true</code>.</li></ol>
+ *   <code>isLocked</code> value as <code>true</code>.</li></ol></li></ol>
  * @for Skylink
  * @since 0.5.0
  */
@@ -672,8 +675,9 @@ Skylink.prototype.lockRoom = function() {
  * Function that unlocks the current Room when in session to allow other Peers to join the Room.
  * @method unlockRoom
  * @trigger <ol class="desc-seq">
+ *   <li>Requests to Signaling server to unlock Room <ol>
  *   <li><a href="#event_roomLock"><code>roomLock</code> event</a> triggers parameter payload
- *   <code>isLocked</code> value as <code>false</code>.</li></ol>
+ *   <code>isLocked</code> value as <code>false</code>.</li></ol></li></ol>
  * @for Skylink
  * @since 0.5.0
  */
