@@ -134,6 +134,10 @@ Skylink.prototype._inRoom = false;
  * @param {JSON|String} [options.userData] The User custom data.
  *   <small>This can be set after Room session has started using the
  *   <a href="#method_setUserData"><code>setUserData()</code> method</a>.</small>
+ * @param {Boolean} [options.useExactConstraints] The <a href="#method_getUserMedia"><code>getUserMedia()</code>
+ *   method</a> <code>options.useExactConstraints</code> parameter settings.
+ *   <small>See the <code>options.useExactConstraints</code> parameter in the
+ *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> for more information.</small>
  * @param {Boolean|JSON} [options.audio] The <a href="#method_getUserMedia"><code>getUserMedia()</code>
  *   method</a> <code>options.audio</code> parameter settings.
  *   <small>When value is defined as <code>true</code> or an object, <a href="#method_getUserMedia">
@@ -762,6 +766,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 
       if (mediaOptions.audio || mediaOptions.video) {
         self.getUserMedia({
+          useExactConstraints: !!mediaOptions.useExactConstraints,
           audio: mediaOptions.audio,
           video: mediaOptions.video
 

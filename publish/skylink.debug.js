@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Sun Sep 18 2016 13:43:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Wed Sep 21 2016 01:39:03 GMT+0800 (SGT) */
 
 (function() {
 
@@ -244,12 +244,17 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
  *   <small>However for Peers that do not support simultaneous data transfers, this Datachannel
  *   type will be used to do data transfers (1 at a time).</small>
  *   <small>Each Peer connections will only have one of this Datachannel type and the
- *   connection will only close when the Peer connection is closed.</small>
+ *   connection will only close when the Peer connection is closed (happens when <a href="#event_peerConnectionState">
+ *   <code>peerConnectionState</code> event</a> triggers parameter payload <code>state</code> as
+ *   <code>CLOSED</code> for Peer).</small>
  * @param {String} DATA <small>Value <code>"data"</code></small>
  *   The value of the Datachannel type that is used only for a data transfer in
  *   <a href="#method_sendURLData"><code>sendURLData()</code> method</a> and
  *   <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>.
- *   <small>The connection will close after the data transfer has been completed or terminated.</small>
+ *   <small>The connection will close after the data transfer has been completed or terminated (happens when
+ *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
+ *   <code>state</code> as <code>DOWNLOAD_COMPLETED</code>, <code>UPLOAD_COMPLETED</code>,
+ *   <code>REJECTED</code>, <code>CANCEL</code> or <code>ERROR</code> for Peer).</small>
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -786,7 +791,7 @@ Skylink.prototype.DATA_TRANSFER_SESSION_TYPE = {
  * @param {String} CANCEL             <small>Value <code>"cancel"</code></small>
  *   The value of the state when data transfer has been terminated from / to Peer.
  * @param {String} ERROR              <small>Value <code>"error"</code></small>
- *   The value of the state when data transfer has errors and has been terminated.
+ *   The value of the state when data transfer has errors and has been terminated from / to Peer.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -987,33 +992,60 @@ Skylink.prototype._dataTransfersTimeout = {};
  *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
  *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
  * @trigger <ol class="desc-seq">
- *   <li>When Peer supports simultaneous data transfers, <ol>
- *   <li><a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>CONNECTING</code> and <code>channelType</code> as <code>DATA</code>.</li>
- *   <li><a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>OPEN</code> and <code>channelType</code> as <code>DATA</code>.</li></ol>
- *   <small>For Peers that do not support simultaneous data transfers, the
- *   <a href="#event_dataChannelState"><code>dataChannelState</code> event</a> must trigger parameter payload
- *   <code>state</code> as <code>OPEN</code> and <code>channelType</code> as <code>MESSAGING</code>.</small></li>
- *   <li><a href="#event_incomingDataRequest"><code>incomingDataRequest</code> event</a> triggers parameter payload
- *   <code>isSelf</code> value as <code>true</code>.</li>
- *   <li>When Peers accepts the uploading data transfer request from User <ol>
- *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>UPLOAD_STARTED</code>.
- *   <small>For Peers, the parameter payload <code>state</code> is <code>DOWNLOAD_STARTED</code>.</small></li>
- *   <li>When data transfer is still uploading, <a href="#event_dataTransferState"><code>dataTransferState</code>
- *   event</a> triggers parameter payload <code>state</code> as <code>UPLOADING</code>.
- *   <small>For Peers, the parameter payload <code>state</code> is <code>DOWNLOADING</code>.</small></li>
- *   <li>When response has timed out from Peer (based on the <code>timeout</code> parameter configured in the method),
- *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>ERROR</code> and data transfer has been terminated.</li>
- *   <li><a href="#event_dataTransferState"><code>dataTransferState</code>
- *   event</a> triggers parameter payload <code>state</code> as <code>UPLOAD_COMPLETED</code>.
- *   <small>For Peers, the parameter payload <code>state</code> is <code>DOWNLOAD_COMPLETED</code>.
- *   </small></li></ol></li>
- *   <li>When Peers rejects the uploading data transfer request from User <ol>
- *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>REJECTED</code></li></ol></li></ol>
+ *   <li>Checks if should open a new Datachannel <ol>
+ *   <li>If Peer connection has closed: <small>This can be checked with <a href="#event_peerConnectionState">
+ *   <code>peerConnectionState</code> event</a> triggering parameter payload <code>state</code> as <code>CLOSED</code>
+ *   for Peer.</small> <ol><li><b>ABORT</b> step and return error.</li></ol></li>
+ *   <li>If Peer supports simultaneous data transfer, open new Datachannel: <ol>
+ *   <li><a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggers parameter
+ *   payload <code>state</code> as <code>CONNECTING</code> and <code>channelType</code> as <code>DATA</code>.</li>
+ *   <li>If Datachannel has opened successfully: <ol>
+ *   <li> <a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggers parameter payload
+ *   <code>state</code> as <code>OPEN</code> and <code>channelType</code> as <code>DATA</code>.</li></ol></li></ol></li>
+ *   <li>Else: <ol><li>If Peer connection Datachannel has not been opened <small>This can be checked with
+ *   <a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggering parameter
+ *   payload <code>state</code> as <code>OPEN</code> and <code>channelType</code> as
+ *   <code>MESSAGING</code> for Peer.</small> <ol>
+ *   <li><b>ABORT</b> step and return error.</li></ol></li></ol></li></ol></li>
+ *   <li>Starts the data transfer to Peer <ol>
+ *   <li><em>For Peer only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>UPLOAD_REQUEST</code>.</li>
+ *   <li><a href="#event_incomingDataRequest"><code>incomingDataRequest</code> event</a> triggers.</li>
+ *   <li>Peer invokes <a href="#method_acceptDataTransfer"><code>acceptDataTransfer()</code> method</a>. <ol>
+ *   <li>If parameter <code>accept</code> value is <code>true</code>: <ol>
+ *   <li>User starts upload data transfer to Peer <ol>
+ *   <li><em>For User only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>UPLOAD_STARTED</code>.</li>
+ *   <li><em>For Peer only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>DOWNLOAD_STARTED</code>.</li></ol></li>
+ *   <li>If Peer / User invokes <a href="#method_cancelDataTransfer"><code>cancelDataTransfer()</code> method</a>: <ol>
+ *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter
+ *   <code>state</code> as <code>CANCEL</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li>
+ *   <li>If data transfer has errors: <ol>
+ *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter
+ *   <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li>
+ *   <li>If Datachannel has closed abruptly during data transfer:
+ *   <small>This can be checked with <a href="#event_dataChannelState"><code>dataChannelState</code> event</a>
+ *   triggering parameter payload <code>state</code> as <code>CLOSED</code> and <code>channelType</code>
+ *   as <code>DATA</code> for Peer that supports simultaneous data transfer or <code>MESSAGING</code>
+ *   for Peer that do not support it.</small> <ol>
+ *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter
+ *   <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li>
+ *   <li>If data transfer is still progressing: <ol>
+ *   <li><em>For User only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>UPLOADING</code>.</li>
+ *   <li><em>For Peer only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>DOWNLOADING</code>.</li></ol></li>
+ *   <li>If data transfer has completed <ol>
+ *   <li><em>For User only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>UPLOAD_COMPLETED</code>.</li>
+ *   <li><em>For Peer only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>DOWNLOAD_COMPLETED</code>.</li>
+ *   <li><a href="#event_incomingData"><code>incomingData</code> event</a> triggers.</li></ol></li></ol></li>
+ *   <li>If parameter <code>accept</code> value is <code>false</code>: <ol>
+ *   <li><em>For User only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>REJECTED</code>.</li>
+ *   <li><b>ABORT</b> step and return error.</li></ol></li></ol>
  * @example
  * &lt;body&gt;
  *  &lt;input type="radio" name="timeout" onchange="setTransferTimeout(0)"&gt; 1s timeout (Default)
@@ -1257,8 +1289,8 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
  *      }
  *   });
  * @deprecated true
- * @trigger <small>Event sequence follows <a href="#method_acceptDataTransfer">
- * <code>acceptDataTransfer()</code> method</a>.</small>
+ * @trigger <small>Event sequence follows <a href="#method_sendBlobData">
+ * <code>sendBlobData()</code> method</a> after <code>acceptDataTransfer()</code> method is invoked.</small>
  * @for Skylink
  * @since 0.5.0
  */
@@ -1283,13 +1315,8 @@ Skylink.prototype.respondBlobRequest =
  *        skylinkDemo.acceptDataTransfer(peerId, transferId, false);
  *      }
  *   });
- * @trigger <ol class="desc-seq">
- *   <li>When User accepts the uploading data transfer request from Peer,
- *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>DOWNLOAD_STARTED</code>.
- *   <li>When User rejects the uploading data transfer request from Peer,
- *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>REJECTED</code></li></ol>
+ * @trigger <small>Event sequence follows <a href="#method_sendBlobData">
+ * <code>sendBlobData()</code> method</a> after <code>acceptDataTransfer()</code> method is invoked.</small>
  * @for Skylink
  * @since 0.6.1
  */
@@ -1394,8 +1421,8 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
  *   function cancelTransfer (peerId, transferId) {
  *     skylinkDemo.cancelBlobTransfer(peerId, transferId);
  *   }
- * @trigger <small>Event sequence follows <a href="#method_cancelDataTransfer">
- * <code>cancelDataTransfer()</code> method</a>.</small>
+ * @trigger <small>Event sequence follows <a href="#method_sendBlobData">
+ * <code>sendBlobData()</code> method</a> after <code>cancelDataTransfer()</code> method is invoked.</small>
  * @for Skylink
  * @deprecated true
  * @for Skylink
@@ -1426,10 +1453,8 @@ Skylink.prototype.cancelBlobTransfer =
  *   function cancelTransfer (peerId, transferId) {
  *     skylinkDemo.cancelDataTransfer(peerId, transferId);
  *   }
- * @trigger <ol class="desc-seq">
- *  <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers
- *  parameter payload <code>state</code> as <code>CANCEL</code>.</li>
- *  </ol>
+ * @trigger <small>Event sequence follows <a href="#method_sendBlobData">
+ * <code>sendBlobData()</code> method</a> after <code>cancelDataTransfer()</code> method is invoked.</small>
  * @for Skylink
  * @since 0.6.1
  */
@@ -1519,23 +1544,23 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
  * - When provided as an Array, it will send the message to only Peers which IDs are in the list.
  * - When not provided, it will broadcast the message to all connected Peers in the Room.
  * @trigger <ol class="desc-seq">
+ *  <li>Sends P2P message to all targeted Peers. <ol>
+ *  <li>If Peer connection Datachannel has not been opened: <small>This can be checked with
+ *  <a href="#event_dataChannelState"><code>dataChannelState</code> event</a>
+ *  triggering parameter payload <code>state</code> as <code>OPEN</code> and
+ *  <code>channelType</code> as <code>MESSAGING</code> for Peer.</small> <ol>
+ *  <li><b>ABORT</b> step and return error.</li></ol></li>
  *  <li><a href="#event_incomingMessage"><code>incomingMessage</code> event</a> triggers
- *  parameter payload <code>isSelf</code> value as <code>true</code>
- *  <small>Note that the <a href="#event_dataChannelState"><code>dataChannelState</code> event</a>
- *  must trigger parameter payload <code>state</code> as <code>OPEN</code> and
- *  <code>channelType</code> as <code>MESSAGING</code> for targeted Peers or the message
- *  will not be sent.</small></li></ol>
+ *  parameter payload <code>message.isDataChannel</code> value as <code>true</code> and
+ *  <code>isSelf</code> value as <code>true</code>.</li></ol></li></ol>
  * @example
- *   // Example 1: Sending m
+ *   // Example 1: Broadcasting to all Peers
  *   skylinkDemo.on("dataChannelState", function (state, peerId, error, channelName, channelType) {
  *      if (state === skylinkDemo.DATA_CHANNEL_STATE.OPEN &&
  *        channelType === skylinkDemo.DATA_CHANNEL_TYPE.MESSAGING) {
- *        skylinkDemo.sendP2PMessage("test", peerId);
+ *        skylinkDemo.sendP2PMessage("Hi all!");
  *      }
  *   });
- *
- *   // Example 1: Broadcasting to all Peers
- *   skylinkDemo.sendP2PMessage("Hi all!");
  *
  *   // Example 2: Sending to specific Peers
  *   var peersInExclusiveParty = [];
@@ -1555,7 +1580,13 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
  *   });
  *
  *   function updateExclusivePartyStatus (message) {
- *     skylinkDemo.sendP2PMessage(message, peersInExclusiveParty);
+ *     var readyToSend = [];
+ *     for (var p in peersInExclusiveParty) {
+ *       if (peersInExclusiveParty.hasOwnProperty(p)) {
+ *         readyToSend.push(p);
+ *       }
+ *     }
+ *     skylinkDemo.sendP2PMessage(message, readyToSend);
  *   }
  * @for Skylink
  * @since 0.5.5
@@ -3675,7 +3706,11 @@ Skylink.prototype._peerConnections = {};
  * </blockquote>
  * Function that refreshes Peer connections to update with the current streaming.
  * @method refreshConnection
- * @param {String|Array} [targetPeerId] The target Peer ID to refresh connection with.
+ * @param {String|Array} [targetPeerId] <blockquote class="info">
+ *   Note that this is ignored if MCU is enabled for the App Key provided in
+ *   <a href="#method_init"><code>init()</code> method</a>. <code>refreshConnection()</code> will "refresh"
+ *   all Peer connections. See the <u>Event Sequence</u> for more information.</blockquote>
+ *   The target Peer ID to refresh connection with.
  * - When provided as an Array, it will refresh all connections with all the Peer IDs provided.
  * - When not provided, it will refresh all the currently connected Peers in the Room.
  * @param {Function} [callback] The callback function fired when request has completed.
@@ -3694,17 +3729,24 @@ Skylink.prototype._peerConnections = {};
  * @param {JSON} callback.success The success result in request.
  *   <small>Defined as <code>null</code> when there are errors in request</small>
  * @param {Array} callback.success.listOfPeers The list of Peer IDs targeted.
- * @trigger <b class="desc-seq-header">&#8594; For Peer connections without MCU enabled:</b>
- *   <ol class="desc-seq"><li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter
- *   payload <code>isSelfInitiateRestart</code> as <code>true</code> for all targeted Peer connections.</li></ol>
- *   <b class="desc-seq-header">&#8594; For Peer connections with MCU enabled:</b> <ol class="desc-seq">
- *   <li><ol><li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter
- *   payload <code>isSelfInitiateRestart</code> as <code>true</code> for all targeted Peer connections.</li>
- *   <li><a href="#event_serverPeerRestart"><code>serverPeerRestart</code> event</a> triggers parameter
- *   payload <code>serverPeerType</code> as <code>MCU</code>.</li></ol></li>
- *   <li>Invokes <a href="#method_joinRoom"><code>joinRoom()</code> method</a>.<small><code>refreshConnection</code>
- *   will retain the User session information except the Peer ID will be a different assigned ID due to restarting
- *   the Room session.</small></li></ol>
+ * @trigger <ol class="desc-seq">
+ *   <li>Checks if MCU is enabled for App Key provided in <a href="#method_init"><code>init()</code> method</a><ol>
+ *   <li>If MCU is enabled: <ol><li>If there are connected Peers in the Room: <ol>
+ *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter payload
+ *   <code>isSelfInitiateRestart</code> value as <code>true</code> for all connected Peer connections.</li>
+ *   <li><a href="#event_serverPeerRestart"><code>serverPeerRestart</code> event</a> triggers for
+ *   connected MCU server Peer connection.</li></ol></li>
+ *   <li>Invokes <a href="#method_joinRoom"><code>joinRoom()</code> method</a> <small><code>refreshConnection()</code>
+ *   will retain the User session information except the Peer ID will be a different assigned ID due to restarting the
+ *   Room session.</small> <ol><li>If request has errors <ol><li><b>ABORT</b> and return error.
+ *   </li></ol></li></ol></li></ol></li>
+ *   <li>Else: <ol><li>If there are connected Peers in the Room: <ol>
+ *   <li>Refresh connections for all targeted Peers. <ol>
+ *   <li>If Peer connection exists: <ol>
+ *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter payload
+ *   <code>isSelfInitiateRestart</code> value as <code>true</code> for all targeted Peer connections.</li></ol></li>
+ *   <li>Else: <ol><li><b>ABORT</b> and return error.</li></ol></li>
+ *   </ol></li></ol></li></ol>
  * @example
  *   // Example 1: Refreshing a Peer connection
  *   function refreshFrozenVideoStream (peerId) {
@@ -3794,6 +3836,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
 /**
  * Function that refresh connections.
  * @method _refreshPeerConnection
+ * @private
  * @for Skylink
  * @since 0.6.15
  */
@@ -3923,14 +3966,23 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle,
  *   <small>Object signature matches the <code>stats</code> parameter payload received in the
  *   <a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>.</small>
  * @trigger <ol class="desc-seq">
+ *   <li>Retrieves Peer connection stats for all targeted Peers. <ol>
+ *   <li>If Peer connection has closed or does not exists: <small>This can be checked with
+ *   <a href="#event_peerConnectionState"><code>peerConnectionState</code> event</a>
+ *   triggering parameter payload <code>state</code> as <code>CLOSED</code> for Peer.</small> <ol>
+ *   <li><a href="#event_getConnectionStatusStateChange"> <code>getConnectionStatusStateChange</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>RETRIEVE_ERROR</code>.</li>
+ *   <li><b>ABORT</b> and return error.</li></ol></li>
  *   <li><a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>
- *   triggers parameter payload <code>state</code> value as <code>RETRIEVING</code>.</li>
- *   <li><ol><li>When retrieval of Peer connection stats is successful, <a href="#event_getConnectionStatusStateChange">
- *   <code>getConnectionStatusStateChange</code> event</a> triggers parameter payload
- *   <code>state</code> value as <code>RETRIEVE_SUCCESS</code>.</li>
- *   <li>When retrieval of Peer connection stats had failed, <a href="#event_getConnectionStatusStateChange">
- *   <code>getConnectionStatusStateChange</code> event</a> triggers parameter payload
- *   <code>state</code> value as <code>RETRIEVE_ERROR</code>.</li></ol></li></ol>
+ *   triggers parameter payload <code>state</code> as <code>RETRIEVING</code>.</li>
+ *   <li>Received response from retrieval. <ol>
+ *   <li>If retrieval was successful: <ol>
+ *   <li><a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>RETRIEVE_SUCCESS</code>.</li></ol></li>
+ *   <li>Else: <ol>
+ *   <li><a href="#event_getConnectionStatusStateChange"> <code>getConnectionStatusStateChange</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>RETRIEVE_ERROR</code>.</li>
+ *   </ol></li></ol></li></ol></li></ol>
  * @example
  *   // Example 1: Retrieve a Peer connection stats
  *   function startBWStatsInterval (peerId) {
@@ -4875,7 +4927,10 @@ Skylink.prototype._userData = '';
  * @method setUserData
  * @param {JSON|String} userData The updated custom data.
  * @trigger <ol class="desc-seq">
- *   <li>If User is in Room, <a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers.</li></ol>
+ *   <li>Updates User custom data. <ol>
+ *   <li>If User is in Room: <ol>
+ *   <li><a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers with parameter payload
+ *   <code>isSelf</code> value as <code>true</code>.</li></ol></li></ol></li></ol>
  * @example
  *   // Example 1: Set/Update User custom data before joinRoom()
  *   var userData = "beforejoin";
@@ -5585,10 +5640,13 @@ Skylink.prototype._peerList = null;
  *   <small>Object signature matches the <code>peerList</code> parameter payload received in the
  *   <a href="#event_getPeersStateChange"><code>getPeersStateChange</code> event</a>.</small>
  * @trigger <ol class="desc-seq">
+ *   <li>If App Key provided in the <a href="#method_init"><code>init()</code> method</a> is not
+ *   a Privileged enabled Key: <ol><li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>Retrieves the list of Peer IDs from Rooms within the same App space. <ol>
  *   <li><a href="#event_getPeersStateChange"><code>getPeersStateChange</code> event</a> triggers parameter
- *   payload <code>state</code> value as <code>ENQUIRED</code>.</li><li><ol>
- *   <li>When retrieval of the list of Peer IDs from Rooms within the same App space is successful,
- *   <a href="#event_getPeersStateChange"><code>getPeersStateChange</code> event</a> triggers parameter
+ *   payload <code>state</code> value as <code>ENQUIRED</code>.</li>
+ *   <li>If received list from Signaling server successfully: <ol>
+ *   <li><a href="#event_getPeersStateChange"><code>getPeersStateChange</code> event</a> triggers parameter
  *   payload <code>state</code> value as <code>RECEIVED</code>.</li></ol></li></ol>
  * @example
  *   // Example 1: Retrieving the un-privileged Peers
@@ -5661,13 +5719,15 @@ Skylink.prototype.getPeers = function(showAll, callback){
  * @method introducePeer
  * @param {String} sendingPeerId The Peer ID to be connected with <code>receivingPeerId</code>.
  * @param {String} receivingPeerId The Peer ID to be connected with <code>sendingPeerId</code>.
- * @trigger <ol class="desc-seq"><li><ol>
- *   <li>When introduction request for the selected pair of Peers has been made to the Signaling server,
- *   <a href="#event_introduceStateChange"><code>introduceStateChange</code> event</a> triggers parameter
+ * @trigger <ol class="desc-seq">
+ *   <li>If App Key provided in the <a href="#method_init"><code>init()</code> method</a> is not
+ *   a Privileged enabled Key: <ol><li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>Starts sending introduction request for the selected pair of Peers to the Signaling server. <ol>
+ *   <li><a href="#event_introduceStateChange"><code>introduceStateChange</code> event</a> triggers parameter
  *   payload <code>state</code> value as <code>INTRODUCING</code>.</li>
- *   <li>When introduction request made for the selected pair of Peers to the Signaling server has failed,
- *   <a href="#event_introduceStateChange"><code>introduceStateChange</code> event</a> triggers parameter
- *   payload <code>state</code> value as <code>ERROR</code>.</li></ol></li></ol>
+ *   <li>If received errors from Signaling server: <ol>
+ *   <li><a href="#event_introduceStateChange"><code>introduceStateChange</code> event</a> triggers parameter
+ *   payload <code>state</code> value as <code>ERROR</code>.</li></ol></li></ol></li></ol>
  * @example
  *   // Example 1: Introduce a pair of Peers
  *   skylinkDemo.on("introduceStateChange", function (state, privilegedPeerId, sendingPeerId, receivingPeerId) {
@@ -5827,6 +5887,10 @@ Skylink.prototype._inRoom = false;
  * @param {JSON|String} [options.userData] The User custom data.
  *   <small>This can be set after Room session has started using the
  *   <a href="#method_setUserData"><code>setUserData()</code> method</a>.</small>
+ * @param {Boolean} [options.useExactConstraints] The <a href="#method_getUserMedia"><code>getUserMedia()</code>
+ *   method</a> <code>options.useExactConstraints</code> parameter settings.
+ *   <small>See the <code>options.useExactConstraints</code> parameter in the
+ *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> for more information.</small>
  * @param {Boolean|JSON} [options.audio] The <a href="#method_getUserMedia"><code>getUserMedia()</code>
  *   method</a> <code>options.audio</code> parameter settings.
  *   <small>When value is defined as <code>true</code> or an object, <a href="#method_getUserMedia">
@@ -5845,8 +5909,13 @@ Skylink.prototype._inRoom = false;
  *   with Firefox browsers versions 48 and below as noted in an existing
  *   <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21">bugzilla ticket here</a>.</blockquote>
  *   The configuration to set the maximum streaming bandwidth sent to Peers.
- * @param {Number} [options.bandwidth.audio] The maximum audio streaming bandwidth sent to Peers.
+ * @param {Number} [options.bandwidth.audio] The maximum audio streaming bandwidth sent to Peers in kbps.
+ *   <small>Recommended values are <code>50</code> to <code>200</code>. <code>50</code> is sufficient enough for
+ *   an audio call. The higher you go if you want clearer audio and to be able to hear music streaming.</small>
  * @param {Number} [options.bandwidth.video] The maximum video streaming bandwidth sent to Peers.
+ *   <small>Recommended values are <code>256</code>-<code>500</code> for 180p quality,
+ *   <code>500</code>-<code>1024</code> for 360p quality, <code>1024</code>-<code>2048</code> for 720p quality
+ *   and <code>2048</code>-<code>4096</code> for 1080p quality.</small>
  * @param {Number} [options.bandwidth.data] The maximum data streaming bandwidth sent to Peers.
  *   <small>This affects the P2P messaging in <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>,
  *   and data transfers in <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a> and
@@ -5924,24 +5993,69 @@ Skylink.prototype._inRoom = false;
  *     console.log("User connected with correct user data?", success.peerInfo.userData.username === data.username);
  *   });
  * @trigger <ol class="desc-seq">
- *   <li>Invokes <a href="#method_init"><code>init()</code> method</a> to retrieve Room session token.</li>
- *   <li>Starts a socket connection with the Signaling server.<ol>
- *   <li>When socket connection to Signaling server is successfully established,
- *   <a href="#event_channelOpen"><code>channelOpen</code> event</a> triggers.</li>
- *   <li>When socket connection to Signaling server is fails to establish,
- *   <a href="#event_socketError"><code>socketError</code> event</a> triggers.<small>
- *   Triggers <a href="#event_channelRetry"><code>channelRetry</code> event</a> if there are
- *   still existing fallback ports and transport to attempt to establish a successful
- *   socket connection with the Signaling server.</small></li></ol></li>
- *   <li><a href="#event_channelMessage"><code>channelMessage</code> event</a> triggers.</li>
+ *   <li>If User is in a Room: <ol>
+ *   <li>Invoke <a href="#method_leaveRoom"><code>leaveRoom()</code> method</a>
+ *   to end current Room connection. <small>Invoked <a href="#method_leaveRoom"><code>leaveRoom()</code>
+ *   method</a> <code>stopMediaOptions</code> parameter value will be <code>false</code>.</small>
+ *   <small>Regardless of request errors, <code>joinRoom()</code> will still proceed.</small></li></ol></li>
+ *   <li>Check if Room name provided matches the Room name of the currently retrieved Room session token. <ol>
+ *   <li>If Room name does not matches: <ol>
+ *   <li>Invoke <a href="#method_init"><code>init()</code> method</a> to retrieve new Room session token. <ol>
+ *   <li>If request has errors: <ol><li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol></li></ol></li>
+ *   <li>Open a new socket connection to Signaling server. <ol><li>If Socket connection fails: <ol>
+ *   <li><a href="#event_socketError"><code>socketError</code> event</a> triggers parameter payload
+ *   <code>errorCode</code> as <code>CONNECTION_FAILED</code>. <ol>
+ *   <li>Checks if there are fallback ports and transports to use. <ol>
+ *   <li>If there are still fallback ports and transports: <ol>
+ *   <li>Attempts to retry socket connection to Signaling server. <ol>
+ *   <li><a href="#event_channelRetry"><code>channelRetry</code> event</a> triggers.</li>
+ *   <li><a href="#event_socketError"><code>socketError</code> event</a> triggers parameter
+ *   payload <code>errorCode</code> as <code>RECONNECTION_ATTEMPT</code>.</li>
+ *   <li>If attempt to retry socket connection to Signaling server has failed: <ol>
+ *   <li><a href="#event_socketError"><code>socketError</code> event</a> triggers parameter payload
+ *   <code>errorCode</code> as <code>RECONNECTION_FAILED</code>.</li>
+ *   <li>Checks if there are still any more fallback ports and transports to use. <ol>
+ *   <li>If there are is no more fallback ports and transports to use: <ol>
+ *   <li><a href="#event_socketError"><code>socketError</code> event</a> triggers
+ *   parameter payload <code>errorCode</code> as <code>RECONNECTION_ABORTED</code>.</li>
+ *   <li><b>ABORT</b> and return error.</li></ol></li><li>Else: <ol><li><b>REPEAT</b> attempt to retry socket connection
+ *   to Signaling server step.</li></ol></li></ol></li></ol></li></ol></li></ol></li><li>Else: <ol>
+ *   <li><a href="#event_socketError"><code>socketError</code> event</a> triggers
+ *   parameter payload <code>errorCode</code> as <code>CONNECTION_ABORTED</code>.</li>
+ *   <li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol></li></ol></li>
+ *   <li>If socket connection to Signaling server has opened: <ol>
+ *   <li><a href="#event_channelOpen"><code>channelOpen</code> event</a> triggers.</li></ol></li></ol></li>
+ *   <li>Checks if there is <code>options.manualGetUserMedia</code> requested <ol><li>If it is requested: <ol>
+ *   <li><a href="#event_mediaAccessRequired"><code>mediaAccessRequired</code> event</a> triggers.</li>
+ *   <li>If more than 30 seconds has passed and no <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a>
+ *   or <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>
+ *   has been retrieved: <ol><li><b>ABORT</b> and return error.</li></ol></li></ol></li><li>Else: <ol>
+ *   <li>If there is <code>options.audio</code> or <code>options.video</code> requested: <ol>
+ *   <li>Invoke <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>. <ol>
+ *   <li>If request has errors: <ol><li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol></li></ol></li>
+ *   </ol></li><li>Starts the Room session <ol><li>If Room session has started successfully: <ol>
  *   <li><a href="#event_peerJoined"><code>peerJoined</code> event</a> triggers parameter payload
- *   <code>isSelf</code> value as <code>true</code>. <small>If MCU is enabled for the App Key,
- *   the <a href="#event_serverPeerJoined"><code>serverPeerJoined</code> event</a> will be triggered
- *   when MCU is present in the Room, and then Peer connections can commence.</small><small>If
- *   <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> is available despite having
- *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> available, the
- *   <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> is sent instead of the
- *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> to Peers.</small></li></ol>
+ *   <code>isSelf</code> value as <code>true</code>.</li>
+ *   <li>If MCU is enabled for the App Key provided in <a href="#method_init"><code>init()</code>
+ *   method</a> and connected: <ol><li><a href="#event_serverPeerJoined"><code>serverPeerJoined</code>
+ *   event</a> triggers <code>serverPeerType</code> as <code>MCU</code>. <small>MCU has
+ *   to be present in the Room in order for Peer connections to commence.</small></li>
+ *   <li>Checks for any available Stream <ol>
+ *   <li>If <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> is available: <ol>
+ *   <li><a href="#event_incomingStream"><code>incomingStream</code> event</a>
+ *   triggers parameter payload <code>isSelf</code> value as <code>true</code> and <code>stream</code>
+ *   as <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>.
+ *   <small>User will be sending <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>
+ *   to Peers.</small></li></ol></li>
+ *   <li>Else if <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> is available: <ol>
+ *   <li><a href="#event_incomingStream"><code>incomingStream</code> event</a> triggers parameter
+ *   payload <code>isSelf</code> value as <code>true</code> and <code>stream</code> as
+ *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a>.
+ *   <small>User will be sending <code>getUserMedia()</code> Stream to Peers.</small></li></ol></li><li>Else: <ol>
+ *   <li>No Stream will be sent.</li></ol></li></ol></li></ol></li></ol></li><li>Else: <ol>
+ *   <li><a href="#event_systemAction"><code>systemAction</code> event</a> triggers
+ *   parameter payload <code>action</code> as <code>REJECT</code>.</li>
+ *   <li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol>
  * @for Skylink
  * @since 0.5.5
  */
@@ -6177,16 +6291,18 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  * @param {String} callback.success.peerId The User's Room session Peer ID.
  * @param {String} callback.success.previousRoom The Room name.
  * @trigger <ol class="desc-seq">
- *   <li>When <code>stopMediaOptions.userMedia</code> is <code>true</code>, the
- *   <a href="#method_stopStream"><code>stopStream()</code> method</a> is invoked.</li>
- *   <li>When <code>stopMediaOptions.screenshare</code> is <code>true</code>, the
- *   <a href="#method_stopScreen"><code>stopScreen()</code> method</a> is invoked.</li>
- *   <li>Stops the socket connection with the Signaling server. <ol>
- *   <li>When socket connection to Signaling server is closed,
- *   <a href="#event_channelClose"><code>channelClose</code> event</a> triggers.</li></ol></li>
- *   <li><a href="#event_peerLeft"><code>peerLeft</code> event</a> triggers for Peers in the Room and User.
- *   <small>If MCU is enabled for the App Key, the <a href="#event_serverPeerLeft">
- *   <code>serverPeerLeft</code> event</a> will be triggered when Room session has ended.</small></li></ol>
+ *   <li>Checks if User is in Room. <ol><li>If User is not in a Room: <ol><li><b>ABORT</b> and return error.</li>
+ *   </ol></li><li>Else: <ol><li>If parameter <code>stopMediaOptions.userMedia</code> value is <code>true</code>: <ol>
+ *   <li>Invoke <a href="#method_stopStream"><code>stopStream()</code> method</a>. 
+ *   <small>Regardless of request errors, <code>leaveRoom()</code> will still proceed.</small></li></ol></li>
+ *   <li>If parameter <code>stopMediaOptions.screenshare</code> value is <code>true</code>: <ol>
+ *   <li>Invoke <a href="#method_stopScreen"><code>stopScreen()</code> method</a>.
+ *   <small>Regardless of request errors, <code>leaveRoom()</code> will still proceed.</small></li></ol></li>
+ *   <li><a href="#event_peerLeft"><code>peerLeft</code> event</a> triggers for User and all connected Peers in Room.</li>
+ *   <li>If MCU is enabled for the App Key provided in <a href="#method_init"><code>init()</code> method</a>
+ *   and connected: <ol><li><a href="#event_serverPeerLeft"><code>serverPeerLeft</code> event</a>
+ *   triggers parameter payload <code>serverPeerType</code> as <code>MCU</code>.</li></ol></li>
+ *   <li><a href="#event_channelClose"><code>channelClose</code> event</a> triggers.</li></ol></li></ol></li></ol>
  * @for Skylink
  * @since 0.5.5
  */
@@ -6289,8 +6405,9 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
  * Function that locks the current Room when in session to prevent other Peers from joining the Room.
  * @method lockRoom
  * @trigger <ol class="desc-seq">
+ *   <li>Requests to Signaling server to lock Room <ol>
  *   <li><a href="#event_roomLock"><code>roomLock</code> event</a> triggers parameter payload
- *   <code>isLocked</code> value as <code>true</code>.</li></ol>
+ *   <code>isLocked</code> value as <code>true</code>.</li></ol></li></ol>
  * @for Skylink
  * @since 0.5.0
  */
@@ -6320,8 +6437,9 @@ Skylink.prototype.lockRoom = function() {
  * Function that unlocks the current Room when in session to allow other Peers to join the Room.
  * @method unlockRoom
  * @trigger <ol class="desc-seq">
+ *   <li>Requests to Signaling server to unlock Room <ol>
  *   <li><a href="#event_roomLock"><code>roomLock</code> event</a> triggers parameter payload
- *   <code>isLocked</code> value as <code>false</code>.</li></ol>
+ *   <code>isLocked</code> value as <code>false</code>.</li></ol></li></ol>
  * @for Skylink
  * @since 0.5.0
  */
@@ -6401,6 +6519,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 
       if (mediaOptions.audio || mediaOptions.video) {
         self.getUserMedia({
+          useExactConstraints: !!mediaOptions.useExactConstraints,
           audio: mediaOptions.audio,
           video: mediaOptions.video
 
@@ -6905,15 +7024,29 @@ Skylink.prototype._room = null;
  *     skylinkDemo.joinRoom(); // Goes to default Room (switching to different Room is not allowed for credentials authentication)
  *   });
  * @trigger <ol class="desc-seq">
+ *   <li>If parameter <code>options</code> is not provided: <ol><li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>Checks if dependecies and browser APIs are available. <ol><li>If AdapterJS is not loaded: <ol>
+ *   <li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers
+ *   parameter payload <code>state</code> as <code>ERROR</code> and <code>error.errorCode</code> as
+ *   <code>ADAPTER_NO_LOADED</code>.</li><li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>If socket.io-client is not loaded: <ol><li><a href="#event_readyStateChange">
+ *   <code>readyStateChange</code> event</a> triggers parameter payload <code>state</code>
+ *   as <code>ERROR</code> and <code>error.errorCode</code> as <code>NO_SOCKET_IO</code>.</li>
+ *   <li><b>ABORT</b> and return error. </li></ol></li>
+ *   <li>If XMLHttpRequest API is not available: <ol><li><a href="#event_readyStateChange">
+ *   <code>readyStateChange</code> event</a> triggers parameter payload <code>state</code>
+ *   as <code>ERROR</code> and <code>error.errorCode</code> as <code>NO_XMLHTTPREQUEST_SUPPORT</code>.</li>
+ *   <li><b>ABORT</b> and return error.</li></ol></li><li>If WebRTC is not supported by device: <ol>
  *   <li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers parameter
- *   payload <code>state</code> value as <code>LOADING</code>.</li><li><ol>
- *   <li>When authentication is successful,
- *   <a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers parameter
- *   payload <code>state</code> value as <code>COMPLETED</code>.
- *   <small>Room session token will be retrieved and will be required by <a href="#method_joinRoom">
- *   <code>joinRoom()</code> method</a> to start Room connection.</small></li>
- *   <li>When authentication fails, <a href="#event_readyStateChange"><code>readyStateChange</code>
- *   event</a> triggers parameter payload <code>state</code> value as <code>ERROR</code>.</li></ol></ol>
+ *   payload <code>state</code> as <code>ERROR</code> and <code>error.errorCode</code> as
+ *   <code>NO_WEBRTC_SUPPORT</code>.</li><li><b>ABORT</b> and return error.</li></ol></li></ol></li>
+ *   <li>Retrieves Room session token from Auth server. <ol>
+ *   <li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers
+ *   parameter payload <code>state</code> as <code>LOADING</code>.</li>
+ *   <li>If retrieval was successful: <ol><li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>COMPLETED</code>.</li></ol></li><li>Else: <ol>
+ *   <li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers parameter
+ *   payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol>
  * @for Skylink
  * @since 0.5.5
  */
@@ -8081,7 +8214,7 @@ Skylink.prototype._EVENTS = {
    * @param {Array} [peerInfo.settings.audio.optional] The Peer Stream <code>navigator.getUserMedia()</code> API
    *   <code>audio: { optional [..] }</code> property.
    * @param {String} [peerInfo.settings.audio.deviceId] The Peer Stream audio track source ID of the device used.
-   * @param {Boolean} peerInfo.settings.audio.exact The flag if Peer Stream audio track is sending exact
+   * @param {Boolean} peerInfo.settings.audio.exactConstraints The flag if Peer Stream audio track is sending exact
    *   requested values of <code>peerInfo.settings.audio.deviceId</code> when provided.
    * @param {Boolean|JSON} peerInfo.settings.video The Peer Stream video settings.
    *   <small>When defined as <code>false</code>, it means there is no video being sent from Peer.</small>
@@ -8095,7 +8228,7 @@ Skylink.prototype._EVENTS = {
    * @param {Array} [peerInfo.settings.video.optional] The Peer Stream <code>navigator.getUserMedia()</code> API
    *   <code>video: { optional [..] }</code> property.
    * @param {String} [peerInfo.settings.video.deviceId] The Peer Stream video track source ID of the device used.
-   * @param {Boolean} peerInfo.settings.video.exact The flag if Peer Stream video track is sending exact
+   * @param {Boolean} peerInfo.settings.video.exactConstraints The flag if Peer Stream video track is sending exact
    *   requested values of <code>peerInfo.settings.video.resolution</code>,
    *   <code>peerInfo.settings.video.frameRate</code> and <code>peerInfo.settings.video.deviceId</code>
    *   when provided.
@@ -9426,8 +9559,9 @@ Skylink.prototype._receiveOnly = false;
  *     skylinkDemo.sendMessage(message, peersInExclusiveParty);
  *   }
  * @trigger <ol class="desc-seq">
+ *   <li>Sends socket connection message to all targeted Peers via Signaling server. <ol>
  *   <li><a href="#event_incomingMessage"><code>incomingMessage</code> event</a> triggers parameter payload
- *   <code>message.isDataChannel</code> value as <code>false</code>.</li></ol>
+ *   <code>message.isDataChannel</code> value as <code>false</code>.</li></ol></li></ol>
  * @for Skylink
  * @since 0.4.0
  */
@@ -10586,79 +10720,80 @@ Skylink.prototype.AUDIO_CODEC = {
  * @param {JSON} QQVGA <small>Value <code>{ width: 160, height: 120 }</code></small>
  *   The value of the option to configure QQVGA resolution.
  *   <small>Aspect ratio: <code>4:3</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} HQVGA <small>Value <code>{ width: 240, height: 160 }</code></small>
  *   The value of the option to configure HQVGA resolution.
  *   <small>Aspect ratio: <code>3:2</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} QVGA <small>Value <code>{ width: 320, height: 240 }</code></small>
  *   The value of the option to configure QVGA resolution.
  *   <small>Aspect ratio: <code>4:3</code></small>
  * @param {JSON} WQVGA <small>Value <code>{ width: 384, height: 240 }</code></small>
  *   The value of the option to configure WQVGA resolution.
  *   <small>Aspect ratio: <code>16:10</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} HVGA <small>Value <code>{ width: 480, height: 320 }</code></small>
  *   The value of the option to configure HVGA resolution.
  *   <small>Aspect ratio: <code>3:2</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} VGA <small>Value <code>{ width: 640, height: 480 }</code></small>
  *   The value of the option to configure VGA resolution.
  *   <small>Aspect ratio: <code>4:3</code></small>
  * @param {JSON} WVGA <small>Value <code>{ width: 768, height: 480 }</code></small>
  *   The value of the option to configure WVGA resolution.
  *   <small>Aspect ratio: <code>16:10</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} FWVGA <small>Value <code>{ width: 854, height: 480 }</code></small>
  *   The value of the option to configure FWVGA resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} SVGA <small>Value <code>{ width: 800, height: 600 }</code></small>
  *   The value of the option to configure SVGA resolution.
  *   <small>Aspect ratio: <code>4:3</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} DVGA <small>Value <code>{ width: 960, height: 640 }</code></small>
  *   The value of the option to configure DVGA resolution.
  *   <small>Aspect ratio: <code>3:2</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} WSVGA <small>Value <code>{ width: 1024, height: 576 }</code></small>
  *   The value of the option to configure WSVGA resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
  * @param {JSON} HD <small>Value <code>{ width: 1280, height: 720 }</code></small>
  *   The value of the option to configure HD resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
+ *   <small>Note that configurating this resolution may not be supported depending on device supports.</small>
  * @param {JSON} HDPLUS <small>Value <code>{ width: 1600, height: 900 }</code></small>
  *   The value of the option to configure HDPLUS resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} FHD <small>Value <code>{ width: 1920, height: 1080 }</code></small>
  *   The value of the option to configure FHD resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on device supports.</small>
  * @param {JSON} QHD <small>Value <code>{ width: 2560, height: 1440 }</code></small>
  *   The value of the option to configure QHD resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} WQXGAPLUS <small>Value <code>{ width: 3200, height: 1800 }</code></small>
  *   The value of the option to configure WQXGAPLUS resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} UHD <small>Value <code>{ width: 3840, height: 2160 }</code></small>
  *   The value of the option to configure UHD resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} UHDPLUS <small>Value <code>{ width: 5120, height: 2880 }</code></small>
  *   The value of the option to configure UHDPLUS resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} FUHD <small>Value <code>{ width: 7680, height: 4320 }</code></small>
  *   The value of the option to configure FUHD resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} QUHD <small>Value <code>{ width: 15360, height: 8640 }</code></small>
  *   The value of the option to configure QUHD resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -10688,7 +10823,8 @@ Skylink.prototype.VIDEO_RESOLUTION = {
 };
 
 /**
- * The list of <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> Stream fallback states.
+ * The list of <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> or
+ * <a href="#method_shareScreen"><code>shareScreen()</code> method</a> Stream fallback states.
  * @attribute MEDIA_ACCESS_FALLBACK_STATE
  * @param {JSON} FALLBACKING <small>Value <code>0</code></small>
  *   The value of the state when <code>getUserMedia()</code> will retrieve audio track only
@@ -10696,9 +10832,9 @@ Skylink.prototype.VIDEO_RESOLUTION = {
  *   <small>This can be configured by <a href="#method_init"><code>init()</code> method</a>
  *   <code>audioFallback</code> option.</small>
  * @param {JSON} FALLBACKED  <small>Value <code>1</code></small>
- *   The value of the state when <code>getUserMedia()</code> retrieves camera Stream successfully but with
- *   missing originally required audio or video tracks.
- * @param {JSON} ERROR       <small>-1</code></small>
+ *   The value of the state when <code>getUserMedia()</code> or <code>shareScreen()</code>
+ *   retrieves camera / screensharing Stream successfully but with missing originally required audio or video tracks.
+ * @param {JSON} ERROR       <small>Value <code>-1</code></small>
  *   The value of the state when <code>getUserMedia()</code> failed to retrieve audio track only
  *   after retrieving audio and video tracks failed.
  * @readOnly
@@ -10954,13 +11090,21 @@ Skylink.prototype._streamsStoppedCbs = {};
  *      console.error("Failed", error);
  *   });
  * @trigger <ol class="desc-seq">
- *   <li>When retrieval of camera Stream is successful, <a href="#event_mediaAccessSuccess">
- *   <code>mediaAccessSuccess</code> event</a> triggers parameter payload <code>isScreensharing</code>
- *   value as <code>false</code>.<ol>
- *   <li>When there are missing required audio or video tracks, <a href="#event_mediaAccessFallback">
- *   <code>mediaAccessFallback</code> event</a> triggers parameter payload <code>state</code> as <code>FALLBACKED</code>
- *   , <code>isScreensharing</code> value as <code>false</code>, <code>isAudioFallback</code> as
+ *   <li>When retrieval of camera Stream is successful <ol>
+ *   <li><a href="#event_mediaAccessSuccess"><code>mediaAccessSuccess</code> event</a> triggers
+ *   parameter payload <code>isScreensharing</code> value as <code>false</code>.</li>
+ *   <li>When there are missing required audio or video tracks <ol>
+ *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> triggers
+ *   parameter payload <code>state</code> as <code>FALLBACKED</code>, <code>isScreensharing</code>
+ *   value as <code>false</code>, <code>isAudioFallback</code> as
  *   <code>false</code> and <code>error</code> is defined.</li></ol></li>
+ *   <li>If there is a previous <code>getUserMedia()</code> Stream available <ol>
+ *   <li><a href="#event_mediaAccessStopped"><code>mediaAccessStopped</code> event</a> triggers parameter payload
+ *   <code>isScreensharing</code> value as <code>false</code>.</li>
+ *   <li>If User is in Room <ol>
+ *   <li><a href="#event_streamEnded"><code>streamEnded</code> event</a> triggers
+ *   parameter payload <code>isScreensharing</code> value as <code>false</code> and <code>isSelf</code> value
+ *   as <code>true</code>.</li></ol></li></ol></li></ol></li>
  *   <li>When retrieval of camera Stream has failed<ol>
  *   <li>If <code>audioFallback</code> is enabled in the <a href="#method_init"><code>init()</code> method</a>
  *   configuration, and <code>options.video</code> and <code>options.audio</code> is requested <ol>
@@ -10982,9 +11126,9 @@ Skylink.prototype._streamsStoppedCbs = {};
  *   <li><a href="#event_mediaAccessError"><code>mediaAccessError</code> event</a> triggers parameter payload
  *   <code>isScreensharing</code> value as <code>false</code> and <code>isAudioFallbackError</code>
  *   as <code>true</code>.</li></ol></li></ol></li></ol></li>
- *   <li>Else, <a href="#event_mediaAccessError"><code>mediaAccessError</code> event</a>
+ *   <li>Else <ol><li><a href="#event_mediaAccessError"><code>mediaAccessError</code> event</a>
  *   triggers parameter payload <code>isScreensharing</code> value as <code>false</code> and
- *   <code>isAudioFallbackError</code> as <code>false</code></li></ol></li></ol>
+ *   <code>isAudioFallbackError</code> as <code>false</code></li></ol></li></ol></li></ol>
  * @for Skylink
  * @since 0.5.6
  */
@@ -11093,8 +11237,11 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_mediaAccessSuccess">
- *   <code>mediaAccessSuccess</code> event</a> triggering <code>isScreensharing</code> parameter
- *   payload value as <code>false</code> for request success.</small>
+ *   <code>mediaAccessSuccess</code> event</a> triggering <code>isScreensharing</code> parameter payload value
+ *   as <code>false</code> for request success when User is in Room without Peers,
+ *   or by the <a href="#event_peerRestart"><code>peerRestart</code> event</a> triggering
+ *   <code>isSelfInitiateRestart</code> parameter payload value as <code>true</code> for all connected Peers
+ *   for request success when User is in Room with Peers.</small>
  * @param {Error|String} callback.error The error result in request.
  *   <small>Defined as <code>null</code> when there are no errors in request</small>
  *   <small>Object signature is the <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> error or
@@ -11146,12 +11293,14 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *   });
  * @trigger <ol class="desc-seq">
  *   <li>Invokes <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</li>
- *   <li>Invokes <a href="#method_refreshConnection"><code>refreshConnection()</code> method</a>.</li>
  *   <li>If User is in the Room and there is no <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>
- *   available, <a href="#event_incomingStream"><code>incomingStream</code> event</a> triggers with
- *   parameter payload <code>isSelf</code> as <code>true</code>, and <a href="#event_peerUpdate">
- *   <code>peerUpdated</code> event</a> triggers with parameter payload <code>isSelf</code>
- *   as <code>true</code>.</li></ol></li></ol>
+ *   available<ol>
+ *   <li>When there are connected Peers <ol>
+ *   <li>Invokes <a href="#method_refreshConnection"><code>refreshConnection()</code> method</a>.</li></ol></li>
+ *   <li><a href="#event_incomingStream"><code>incomingStream</code> event</a> triggers with
+ *   parameter payload <code>isSelf</code> as <code>true</code></li>
+ *   <li><a href="#event_peerUpdate"><code>peerUpdated</code> event</a> triggers with
+ *   parameter payload <code>isSelf</code> as <code>true</code>.</li></ol></li></ol>
  * @for Skylink
  * @since 0.5.6
  */
@@ -11276,10 +11425,12 @@ Skylink.prototype.sendStream = function(options, callback) {
  * @trigger <ol class="desc-seq">
  *   <li><a href="#event_mediaAccessStopped"><code>mediaAccessStopped</code> event</a> triggers parameter payload
  *   <code>isScreensharing</code> value as <code>false</code>.</li>
- *   <li>If User is in the Room, <a href="#event_streamEnded"><code>streamEnded</code> event</a> triggers
+ *   <li>If User is in the Room <ol>
+ *   <li><a href="#event_streamEnded"><code>streamEnded</code> event</a> triggers
  *   parameter payload <code>isScreensharing</code> value as <code>false</code> and <code>isSelf</code> value
- *   as <code>true</code>, and <a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers
- *   parameter payload <code>isSelf</code> value as <code>true</code>.</li></ol>
+ *   as <code>true</code>.</li>
+ *   <li><a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers
+ *   parameter payload <code>isSelf</code> value as <code>true</code>.</li></ol></li></ol>
  * @for Skylink
  * @since 0.5.6
  */
@@ -11326,10 +11477,13 @@ Skylink.prototype.stopStream = function () {
  *     videoMuted: true
  *   });
  * @trigger <ol class="desc-seq">
- *   <li>If User is in the Room, <a href="#event_streamMuted"><code>streamMuted</code> event</a> triggers
- *   parameter payload <code>isSelf</code> value as <code>true</code>, and <a href="#event_peerUpdated">
- *   <code>peerUpdated</code> event</a> triggers parameter payload <code>isSelf</code>
- *   value as <code>true</code>.</li></ol>
+ *   <li>When requested Stream tracks are available and its muted values have changed <ol>
+ *   <li><a href="#event_localMediaMuted"><code>localMediaMuted</code> event</a> triggers.</li>
+ *   <li>If User is in the Room <ol>
+ *   <li><a href="#event_streamMuted"><code>streamMuted</code> event</a> triggers
+ *   parameter payload <code>isSelf</code> value as <code>true</code>.</li>
+ *   <li><a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers parameter payload <code>isSelf</code>
+ *   value as <code>true</code>.</li></ol></li></ol></li></ol>
  * @for Skylink
  * @since 0.5.7
  */
@@ -11416,7 +11570,9 @@ Skylink.prototype.muteStream = function(options) {
  *   }
  * @trigger <ol class="desc-seq">
  *   <li>Invokes <a href="#method_muteStream"><code>muteStream()</code> method</a> with
- *   <code>options.audioMuted</code> value as <code>false</code>.</li></ol>
+ *   <code>options.audioMuted</code> value as <code>false</code> and
+ *   <code>options.videoMuted</code> value with current <code>peerInfo.mediaStatus.videoMuted</code> value.
+ *   <small>See <a href="#method_getPeerInfo"><code>getPeerInfo()</code> method</a> for more information.</small></li></ol>
  * @for Skylink
  * @since 0.5.5
  */
@@ -11441,7 +11597,9 @@ Skylink.prototype.enableAudio = function() {
  *   }
  * @trigger <ol class="desc-seq">
  *   <li>Invokes <a href="#method_muteStream"><code>muteStream()</code> method</a> with
- *   <code>options.audioMuted</code> value as <code>true</code>.</li></ol>
+ *   <code>options.audioMuted</code> value as <code>true</code> and
+ *   <code>options.videoMuted</code> value with current <code>peerInfo.mediaStatus.videoMuted</code> value.
+ *   <small>See <a href="#method_getPeerInfo"><code>getPeerInfo()</code> method</a> for more information.</small></li></ol>
  * @for Skylink
  * @since 0.5.5
  */
@@ -11466,7 +11624,9 @@ Skylink.prototype.disableAudio = function() {
  *   }
  * @trigger <ol class="desc-seq">
  *   <li>Invokes <a href="#method_muteStream"><code>muteStream()</code> method</a> with
- *   <code>options.videoMuted</code> value as <code>false</code>.</li></ol>
+ *   <code>options.videoMuted</code> value as <code>false</code> and
+ *   <code>options.audioMuted</code> value with current <code>peerInfo.mediaStatus.audioMuted</code> value.
+ *   <small>See <a href="#method_getPeerInfo"><code>getPeerInfo()</code> method</a> for more information.</small></li></ol>
  * @for Skylink
  * @since 0.5.5
  */
@@ -11478,7 +11638,6 @@ Skylink.prototype.enableVideo = function() {
 };
 
 /**
- /**
  * <blockquote class="info"><b>Deprecation Warning!</b>
  *   This method has been deprecated. Use <a href="#method_muteStream"><code>muteStream()</code> method</a> instead.
  * </blockquote>
@@ -11492,7 +11651,9 @@ Skylink.prototype.enableVideo = function() {
  *   }
  * @trigger <ol class="desc-seq">
  *   <li>Invokes <a href="#method_muteStream"><code>muteStream()</code> method</a> with
- *   <code>options.videoMuted</code> value as <code>true</code>.</li></ol>
+ *   <code>options.videoMuted</code> value as <code>true</code> and
+ *   <code>options.audioMuted</code> value with current <code>peerInfo.mediaStatus.audioMuted</code> value.
+ *   <small>See <a href="#method_getPeerInfo"><code>getPeerInfo()</code> method</a> for more information.</small></li></ol>
  * @for Skylink
  * @since 0.5.5
  */
@@ -11511,8 +11672,11 @@ Skylink.prototype.disableVideo = function() {
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_mediaAccessSuccess">
- *   <code>mediaAccessSuccess</code> event</a> triggering <code>isScreensharing</code> parameter
- *   payload value as <code>true</code> for request success.</small>
+ *   <code>mediaAccessSuccess</code> event</a> triggering <code>isScreensharing</code> parameter payload value
+ *   as <code>true</code> for request success when User is not in the Room or is in Room without Peers,
+ *   or by the <a href="#event_peerRestart"><code>peerRestart</code> event</a> triggering
+ *   <code>isSelfInitiateRestart</code> parameter payload value as <code>true</code> for all connected Peers
+ *   for request success when User is in Room with Peers.</small>
  * @param {Error|String} callback.error The error result in request.
  *   <small>Defined as <code>null</code> when there are no errors in request</small>
  *   <small>Object signature is the <code>shareScreen()</code> error when retrieving screensharing Stream.</small>
@@ -11532,18 +11696,32 @@ Skylink.prototype.disableVideo = function() {
  *     attachMediaStream(document.getElementById("my-screen"), success);
  *   });
  * @trigger <ol class="desc-seq">
- *   <li>When retrieval of screensharing Stream is successful, <a href="#event_mediaAccessSuccess">
- *   <code>mediaAccessSuccess</code> event</a> triggers parameter payload <code>isScreensharing</code>
- *   value as <code>true</code>.<ol>
- *   <li>When there are missing required audio tracks, <a href="#event_mediaAccessFallback">
+ *   <li>When retrieval of screensharing Stream is successful <ol>
+ *   <li><a href="#event_mediaAccessSuccess"><code>mediaAccessSuccess</code> event</a>
+ *   triggers parameter payload <code>isScreensharing</code> value as <code>true</code>.</li>
+ *   <li>When there are missing required audio tracks <ol>
+ *   <li><a href="#event_mediaAccessFallback">
  *   <code>mediaAccessFallback</code> event</a> triggers parameter payload <code>state</code> as <code>FALLBACKED</code>
  *   , <code>isScreensharing</code> value as <code>true</code>, <code>isAudioFallback</code> as
- *   <code>false</code> and <code>error</code> is defined.</li>
- *   <li>If User is in Room, <a href="#event_incomingStream"><code>incomingStream</code> event</a> triggers.</li>
+ *   <code>false</code> and <code>error</code> is defined.</li></ol></li>
+ *   <li>If there is a previous <code>shareScreen()</code> Stream available <ol>
+ *   <li><a href="#event_mediaAccessStopped"><code>mediaAccessStopped</code> event</a> triggers parameter payload
+ *   <code>isScreensharing</code> value as <code>true</code>.</li>
+ *   <li>If User is in Room <ol>
+ *   <li><a href="#event_streamEnded"><code>streamEnded</code> event</a> triggers
+ *   parameter payload <code>isScreensharing</code> value as <code>true</code> and <code>isSelf</code> value
+ *   as <code>true</code>.</li></ol></li></ol></li>
+ *   <li>If User is in Room <ol>
+ *   <li>When there are connected Peers <ol>
  *   <li>Invokes <a href="#method_refreshConnection"><code>refreshConnection()</code> method</a>.</li></ol></li>
- *   <li>When retrieval of screensharing Stream has failed, <a href="#event_mediaAccessError">
- *   <code>mediaAccessError</code> event</a> triggers parameter payload <code>isScreensharing</code>
- *   value as <code>true</code> and <code>isAudioFallbackError</code> as <code>false</code></li></ol></li></ol>
+ *   <li><a href="#event_incomingStream"><code>incomingStream</code> event</a> triggers with
+ *   parameter payload <code>isSelf</code> as <code>true</code>.</li>
+ *   <li><a href="#event_peerUpdate"><code>peerUpdated</code> event</a> triggers with
+ *   parameter payload <code>isSelf</code> as <code>true</code>.</li></ol></li>
+ *   <li>When retrieval of screensharing Stream has failed <ol>
+ *   <li><a href="#event_mediaAccessError"><code>mediaAccessError</code> event</a> triggers
+ *   parameter payload <code>isScreensharing</code> value as <code>true</code> and
+ *   <code>isAudioFallbackError</code> as <code>false</code></li></ol></li></ol>
  * @for Skylink
  * @since 0.6.0
  */
@@ -11702,15 +11880,17 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
  * @trigger <ol class="desc-seq">
  *   <li><a href="#event_mediaAccessStopped"><code>mediaAccessStopped</code> event</a> triggers parameter payload
  *   <code>isScreensharing</code> value as <code>true</code>.</li>
- *   <li>If User is in the Room, <a href="#event_streamEnded"><code>streamEnded</code> event</a> triggers
- *   parameter payload <code>isScreensharing</code> value as <code>true</code> and <code>isSelf</code> value
- *   as <code>true</code>, and <a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers
+ *   <li>If User is in the Room <ol>
+ *   <li><a href="#event_streamEnded"><code>streamEnded</code> event</a> triggers parameter payload
+ *   <code>isScreensharing</code> value as <code>true</code> and <code>isSelf</code> value as <code>true</code>.</li>
+ *   <li><a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers
  *   parameter payload <code>isSelf</code> value as <code>true</code>.</li>
- *   <li>If User has <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> and is in the Room,
- *   the Stream will be sent to Peers and <a href="#event_incomingStream"><code>incomingStream</code> event</a>
+ *   <li>If User has <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a><ol>
+ *   <li><a href="#event_incomingStream"><code>incomingStream</code> event</a>
  *   triggers with parameter payload <code>isSelf</code> value as <code>true</code> using the
  *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a>.</li>
- *   <li>Invokes <a href="#method_refreshConnection"><code>refreshConnection()</code> method</a>.</li></ol>
+ *   <li>Invokes <a href="#method_refreshConnection"><code>refreshConnection()</code> method</a> to
+ *   send the <code>getUserMedia()</code> Stream to Peers.</li></ol></li></ol></li></ol>
  * @for Skylink
  * @since 0.6.0
  */
@@ -11866,7 +12046,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
   if (options.audio) {
     settings.settings.audio = {
       stereo: false,
-      exact: !!options.useExactConstraints
+      exactConstraints: !!options.useExactConstraints
     };
     settings.getUserMediaSettings.audio = {};
 
@@ -11911,7 +12091,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
     settings.settings.video = {
       resolution: clone(this.VIDEO_RESOLUTION.VGA),
       screenshare: false,
-      exact: !!options.useExactConstraints
+      exactConstraints: !!options.useExactConstraints
     };
     settings.getUserMediaSettings.video = {};
 

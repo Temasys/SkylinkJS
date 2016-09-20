@@ -2407,6 +2407,12 @@
                             "optional": true
                         },
                         {
+                            "name": "useExactConstraints",
+                            "description": "The <a href=\"#method_getUserMedia\"><code>getUserMedia()</code>\n  method</a> <code>options.useExactConstraints</code> parameter settings.\n  <small>See the <code>options.useExactConstraints</code> parameter in the\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> method</a> for more information.</small>",
+                            "type": "Boolean",
+                            "optional": true
+                        },
+                        {
                             "name": "audio",
                             "description": "The <a href=\"#method_getUserMedia\"><code>getUserMedia()</code>\n  method</a> <code>options.audio</code> parameter settings.\n  <small>When value is defined as <code>true</code> or an object, <a href=\"#method_getUserMedia\">\n  <code>getUserMedia()</code> method</a> to be invoked to retrieve new Stream. If\n  <code>options.video</code> is not defined, it will be defined as <code>false</code>.</small>\n  <small>Object signature matches the <code>options.audio</code> parameter in the\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> method</a>.</small>",
                             "type": "Boolean|JSON",
@@ -2514,7 +2520,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 510,
+            "line": 514,
             "description": "Function that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -2579,7 +2585,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 638,
+            "line": 642,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -2589,7 +2595,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 670,
+            "line": 674,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -2599,7 +2605,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 702,
+            "line": 706,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -6786,15 +6792,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:510"
+            "line": " source/room-connection.js:514"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:638"
+            "line": " source/room-connection.js:642"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:670"
+            "line": " source/room-connection.js:674"
         },
         {
             "message": "unknown tag: trigger",
