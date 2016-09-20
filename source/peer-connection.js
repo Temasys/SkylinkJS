@@ -116,7 +116,11 @@ Skylink.prototype._peerConnections = {};
  * </blockquote>
  * Function that refreshes Peer connections to update with the current streaming.
  * @method refreshConnection
- * @param {String|Array} [targetPeerId] The target Peer ID to refresh connection with.
+ * @param {String|Array} [targetPeerId] <blockquote class="info">
+ *   Note that this is ignored if MCU is enabled for the App Key provided in
+ *   <a href="#method_init"><code>init()</code> method</a>. <code>refreshConnection()</code> will "refresh"
+ *   all Peer connections. See the <u>Event Sequence</u> for more information.</blockquote>
+ *   The target Peer ID to refresh connection with.
  * - When provided as an Array, it will refresh all connections with all the Peer IDs provided.
  * - When not provided, it will refresh all the currently connected Peers in the Room.
  * @param {Function} [callback] The callback function fired when request has completed.
@@ -136,18 +140,20 @@ Skylink.prototype._peerConnections = {};
  *   <small>Defined as <code>null</code> when there are errors in request</small>
  * @param {Array} callback.success.listOfPeers The list of Peer IDs targeted.
  * @trigger <ol class="desc-seq">
- *   <li>For Peer connections without MCU enabled <ol>
- *   <li>When there are connected Peers <ol>
+ *   <li>Checks if MCU is enabled for App Key provided in <a href="#method_init"><code>init()</code> method</a><ol>
+ *   <li>If MCU is enabled: <ol><li>If there are connected Peers in the Room: <ol>
  *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter payload
- *   <code>isSelfInitiateRestart</code> as <code>true</code> for all targeted Peer connections.</li></ol></li></ol></li>
- *   <li>For Peer connections with MCU enabled <ol>
- *   <li>When there are connected Peers <ol>
- *   <a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter
- *   payload <code>isSelfInitiateRestart</code> as <code>true</code> for all targeted Peer connections.</li></ol></li>
- *   <li><a href="#event_serverPeerRestart"><code>serverPeerRestart</code> event</a> triggers.</li>
- *   <li>Invokes <a href="#method_joinRoom"><code>joinRoom()</code> method</a>.<small><code>refreshConnection</code>
- *   will retain the User session information except the Peer ID will be a different assigned ID due to restarting
- *   the Room session.</small></li></ol></li></ol>
+ *   <code>isSelfInitiateRestart</code> value as <code>true</code> for all connected Peer connections.</li>
+ *   <li><a href="#event_serverPeerRestart"><code>serverPeerRestart</code> event</a> triggers for
+ *   connected MCU server Peer connection.</li></ol></li>
+ *   <li>Invokes <a href="#method_joinRoom"><code>joinRoom()</code> method</a> <small><code>refreshConnection()</code>
+ *   will retain the User session information except the Peer ID will be a different assigned ID due to restarting the
+ *   Room session.</small> <ol><li>If request has errors <ol><li><b>ABORT</b> and return error.
+ *   </li></ol></li></ol></li></ol></li>
+ *   <li>Else: <ol> If there are connected Peers in the Room: <ol>
+ *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter payload
+ *   <code>isSelfInitiateRestart</code> value as <code>true</code> for all targeted Peer connections.</li>
+ *   </ol></li></ol></li></ol>
  * @example
  *   // Example 1: Refreshing a Peer connection
  *   function refreshFrozenVideoStream (peerId) {
