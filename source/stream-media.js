@@ -921,7 +921,8 @@ Skylink.prototype.muteStream = function(options) {
         type: self._SIG_MESSAGE_TYPE.MUTE_VIDEO,
         mid: self._user.sid,
         rid: self._room.id,
-        muted: self._streamsMutedSettings.videoMuted
+        muted: self._streamsMutedSettings.videoMuted,
+        stamp: (new Date()).getTime()
       });
     }
 
@@ -931,7 +932,8 @@ Skylink.prototype.muteStream = function(options) {
           type: self._SIG_MESSAGE_TYPE.MUTE_AUDIO,
           mid: self._user.sid,
           rid: self._room.id,
-          muted: self._streamsMutedSettings.audioMuted
+          muted: self._streamsMutedSettings.audioMuted,
+          stamp: (new Date()).getTime()
         });
       }, hasToggledVideo ? 1050 : 0);
     }
@@ -1617,7 +1619,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
   self._streamsStoppedCbs[streamId] = function () {
     log.log([null, 'MediaStream', streamId, 'Stream has ended']);
 
-    self._trigger('mediaAccessStopped', !!isScreenSharing, !!isAudioFallback);
+    self._trigger('mediaAccessStopped', !!isScreenSharing, !!isAudioFallback, streamId);
 
     if (self._inRoom) {
       log.debug([null, 'MediaStream', streamId, 'Sending Stream ended status to Peers']);
@@ -1632,7 +1634,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
         status: 'ended'
       });
 
-      self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true, !!isScreenSharing);
+      self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true, !!isScreenSharing, streamId);
 
       if (isScreenSharing && self._streams.screenshare && self._streams.screenshare.stream &&
         (self._streams.screenshare.stream.id || self._streams.screenshare.stream.label) === streamId) {
@@ -1707,7 +1709,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
         video: { expected: requireVideo ? 1 : 0, received: stream.getVideoTracks().length },
         audio: { expected: requireAudio ? 1 : 0, received: stream.getAudioTracks().length }
       }
-    }, self.MEDIA_ACCESS_FALLBACK_STATE.FALLBACKED, !!isScreenSharing, !!isAudioFallback);
+    }, self.MEDIA_ACCESS_FALLBACK_STATE.FALLBACKED, !!isScreenSharing, !!isAudioFallback, streamId);
   }
 
   self._streams[ isScreenSharing ? 'screenshare' : 'userMedia' ] = {
@@ -1716,7 +1718,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
     constraints: settings.getUserMediaSettings
   };
   self._muteStreams();
-  self._trigger('mediaAccessSuccess', stream, !!isScreenSharing, !!isAudioFallback);
+  self._trigger('mediaAccessSuccess', stream, !!isScreenSharing, !!isAudioFallback, streamId);
 };
 
 /**

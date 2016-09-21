@@ -98,6 +98,16 @@ Skylink.prototype._hasMCU = false;
 Skylink.prototype._receiveOnly = false;
 
 /**
+ * Stores the list of Peer messages timestamp.
+ * @attribute _peerMessagesStamps
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._peerMessagesStamps = {};
+
+/**
  * <blockquote class="info">
  *   Note that broadcasted events from <a href="#method_muteStream"><code>muteStream()</code> method</a>,
  *   <a href="#method_stopStream"><code>stopStream()</code> method</a>,
@@ -415,6 +425,13 @@ Skylink.prototype._updateUserEventHandler = function(message) {
   var targetMid = message.mid;
   log.log([targetMid, null, message.type, 'Peer updated userData:'], message.userData);
   if (this._peerInformations[targetMid]) {
+    if (this._peerMessagesStamps[targetMid] && typeof message.stamp === 'number') {
+      if (message.stamp < this._peerMessagesStamps[targetMid].userData) {
+        log.warn([targetMid, null, message.type, 'Dropping outdated status ->'], message);
+        return;
+      }
+      this._peerMessagesStamps[targetMid].userData = message.stamp;
+    }
     this._peerInformations[targetMid].userData = message.userData || {};
     this._trigger('peerUpdated', targetMid,
       this.getPeerInfo(targetMid), false);
@@ -452,6 +469,13 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
   var targetMid = message.mid;
   log.log([targetMid, null, message.type, 'Peer\'s audio muted:'], message.muted);
   if (this._peerInformations[targetMid]) {
+    if (this._peerMessagesStamps[targetMid] && typeof message.stamp === 'number') {
+      if (message.stamp < this._peerMessagesStamps[targetMid].audioMuted) {
+        log.warn([targetMid, null, message.type, 'Dropping outdated status ->'], message);
+        return;
+      }
+      this._peerMessagesStamps[targetMid].audioMuted = message.stamp;
+    }
     this._peerInformations[targetMid].mediaStatus.audioMuted = message.muted;
     this._trigger('streamMuted', targetMid, this.getPeerInfo(targetMid), false,
       this._peerInformations[targetMid].settings.video &&
@@ -475,6 +499,13 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
   var targetMid = message.mid;
   log.log([targetMid, null, message.type, 'Peer\'s video muted:'], message.muted);
   if (this._peerInformations[targetMid]) {
+    if (this._peerMessagesStamps[targetMid] && typeof message.stamp === 'number') {
+      if (message.stamp < this._peerMessagesStamps[targetMid].videoMuted) {
+        log.warn([targetMid, null, message.type, 'Dropping outdated status ->'], message);
+        return;
+      }
+      this._peerMessagesStamps[targetMid].videoMuted = message.stamp;
+    }
     this._peerInformations[targetMid].mediaStatus.videoMuted = message.muted;
     this._trigger('streamMuted', targetMid, this.getPeerInfo(targetMid), false,
       this._peerInformations[targetMid].settings.video &&
@@ -503,7 +534,7 @@ Skylink.prototype._streamEventHandler = function(message) {
 
   	if (message.status === 'ended') {
   		this._trigger('streamEnded', targetMid, this.getPeerInfo(targetMid),
-        false, message.sessionType === 'screensharing');
+        false, message.sessionType === 'screensharing', message.streamId);
       this._trigger('peerUpdated', targetMid, this.getPeerInfo(targetMid), false);
 
       if (this._peerConnections[targetMid]) {
@@ -700,6 +731,11 @@ Skylink.prototype._enterHandler = function(message) {
     }, false, false, message.receiveOnly, message.sessionType === 'screensharing');
 
     self._peerInformations[targetMid] = message.userInfo || {};
+    self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
+      userData: 0,
+      audioMuted: 0,
+      videoMuted: 0
+    };
     self._peerInformations[targetMid].agent = {
       name: message.agent,
       version: message.version,
@@ -794,6 +830,11 @@ Skylink.prototype._restartHandler = function(message){
 
   // re-add information
   self._peerInformations[targetMid] = message.userInfo || {};
+  self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
+    userData: 0,
+    audioMuted: 0,
+    videoMuted: 0
+  };
   self._peerInformations[targetMid].agent = {
     name: message.agent,
     version: message.version,
@@ -881,6 +922,11 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   if (!this._peerInformations[targetMid]) {
     this._peerInformations[targetMid] = message.userInfo || {};
+    this._peerMessagesStamps[targetMid] = this._peerMessagesStamps[targetMid] || {
+      userData: 0,
+      audioMuted: 0,
+      videoMuted: 0
+    };
     this._peerInformations[targetMid].agent = {
       name: message.agent,
       version: message.version,

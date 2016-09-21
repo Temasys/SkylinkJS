@@ -174,6 +174,8 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} isAudioFallback The flag if event occurred during
    *   retrieval of audio tracks only when <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>
    *   had failed to retrieve both audio and video tracks.
+   * @param {String} streamId The Stream ID.
+   *   <small>Defined only when <code>state</code> payload is <code>FALLBACKED</code>.</small>
    * @for Skylink
    * @since 0.6.3
    */
@@ -190,6 +192,7 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} isAudioFallback The flag if event occurred during
    *   retrieval of audio tracks only when <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>
    *   had failed to retrieve both audio and video tracks.
+   * @param {String} streamId The Stream ID.
    * @for Skylink
    * @since 0.1.0
    */
@@ -213,6 +216,7 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} isAudioFallback The flag if event occurred during
    *   retrieval of audio tracks only when <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>
    *   had failed to retrieve both audio and video tracks.
+   * @param {String} streamId The Stream ID.
    * @for Skylink
    * @since 0.5.6
    */
@@ -509,6 +513,7 @@ Skylink.prototype._EVENTS = {
    *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small>
    * @param {Boolean} isSelf The flag if Peer is User.
    * @param {Boolean} isScreensharing The flag if Peer Stream is a screensharing Stream.
+   * @param {String} streamId The Stream ID.
    * @for Skylink
    * @since 0.5.10
    */

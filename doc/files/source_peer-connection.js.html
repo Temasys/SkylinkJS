@@ -1076,6 +1076,11 @@ Skylink.prototype._removePeer = function(peerId) {
   if (typeof this._peerInformations[peerId] !== &#x27;undefined&#x27;) {
     delete this._peerInformations[peerId];
   }
+  // remove peer messages stamps session
+  if (typeof this._peerMessagesStamps[peerId] !== &#x27;undefined&#x27;) {
+    delete this._peerMessagesStamps[peerId];
+  }
+  
   if (typeof this._peerConnectionHealth[peerId] !== &#x27;undefined&#x27;) {
     delete this._peerConnectionHealth[peerId];
   }
