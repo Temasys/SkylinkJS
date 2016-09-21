@@ -187,6 +187,9 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} isScreensharing The flag if event occurred during
    *   <a href="#method_shareScreen"><code>shareScreen()</code> method</a> and not
    *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.
+   * @param {Boolean} isAudioFallback The flag if event occurred during
+   *   retrieval of audio tracks only when <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>
+   *   had failed to retrieve both audio and video tracks.
    * @for Skylink
    * @since 0.1.0
    */
@@ -207,6 +210,9 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} isScreensharing The flag if event occurred during
    *   <a href="#method_shareScreen"><code>shareScreen()</code> method</a> and not
    *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.
+   * @param {Boolean} isAudioFallback The flag if event occurred during
+   *   retrieval of audio tracks only when <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>
+   *   had failed to retrieve both audio and video tracks.
    * @for Skylink
    * @since 0.5.6
    */

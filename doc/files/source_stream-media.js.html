@@ -529,45 +529,38 @@ Skylink.prototype._streamsStoppedCbs = {};
  *      console.error(&quot;Failed&quot;, error);
  *   });
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
- *   &lt;li&gt;When retrieval of camera Stream is successful &lt;ol&gt;
- *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;&lt;code&gt;mediaAccessSuccess&lt;/code&gt; event&lt;/a&gt; triggers
- *   parameter payload &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt;.&lt;/li&gt;
- *   &lt;li&gt;When there are missing required audio or video tracks &lt;ol&gt;
- *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessFallback&quot;&gt;&lt;code&gt;mediaAccessFallback&lt;/code&gt; event&lt;/a&gt; triggers
- *   parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;FALLBACKED&lt;/code&gt;, &lt;code&gt;isScreensharing&lt;/code&gt;
- *   value as &lt;code&gt;false&lt;/code&gt;, &lt;code&gt;isAudioFallback&lt;/code&gt; as
- *   &lt;code&gt;false&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt; is defined.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
- *   &lt;li&gt;If there is a previous &lt;code&gt;getUserMedia()&lt;/code&gt; Stream available &lt;ol&gt;
- *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessStopped&quot;&gt;&lt;code&gt;mediaAccessStopped&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
- *   &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt;.&lt;/li&gt;
- *   &lt;li&gt;If User is in Room &lt;ol&gt;
- *   &lt;li&gt;&lt;a href=&quot;#event_streamEnded&quot;&gt;&lt;code&gt;streamEnded&lt;/code&gt; event&lt;/a&gt; triggers
- *   parameter payload &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt; and &lt;code&gt;isSelf&lt;/code&gt; value
- *   as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
- *   &lt;li&gt;When retrieval of camera Stream has failed&lt;ol&gt;
- *   &lt;li&gt;If &lt;code&gt;audioFallback&lt;/code&gt; is enabled in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;
- *   configuration, and &lt;code&gt;options.video&lt;/code&gt; and &lt;code&gt;options.audio&lt;/code&gt; is requested &lt;ol&gt;
- *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessFallback&quot;&gt;&lt;code&gt;mediaAccessFallback&lt;/code&gt; event&lt;/a&gt; is triggers parameter payload
- *   &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;FALLBACKING&lt;/code&gt;, &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt;,
- *   &lt;code&gt;isAudioFallback&lt;/code&gt; as &lt;code&gt;true&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt; is defined.&lt;/li&gt;
- *   &lt;li&gt;Invokes &lt;code&gt;getUserMedia()&lt;/code&gt; with &lt;code&gt;options.audio&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt; and
- *   &lt;code&gt;options.video&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt;.&lt;ol&gt;
- *   &lt;li&gt;When retrieval of camera Stream (fallbacked audio only) is successful&lt;ol&gt;
+ *   &lt;li&gt;If &lt;code&gt;options.audio&lt;/code&gt; value is &lt;code&gt;false&lt;/code&gt; and &lt;code&gt;options.video&lt;/code&gt;
+ *   value is &lt;code&gt;false&lt;/code&gt;: &lt;ol&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;Retrieve camera Stream. &lt;ol&gt;&lt;li&gt;If retrieval was succesful: &lt;ol&gt;
+ *   &lt;li&gt;If there are missing audio or video tracks requested: &lt;ol&gt;
  *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessFallback&quot;&gt;&lt;code&gt;mediaAccessFallback&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
  *   &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;FALLBACKED&lt;/code&gt;, &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt; and
- *   &lt;code&gt;isAudioFallback&lt;/code&gt; as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;
- *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;&lt;code&gt;mediaAccessSuccess&lt;/code&gt; event&lt;/a&gt; triggers parameter
- *   payload &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
- *   &lt;li&gt;When retrieval of camera Stream (fallbacked audio only) has failed &lt;ol&gt;
- *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessFallback&quot;&gt;&lt;code&gt;mediaAccessFallback&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
- *   &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;ERROR&lt;/code&gt;, &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt; and
- *   &lt;code&gt;isAudioFallback&lt;/code&gt; as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;code&gt;isAudioFallback&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;&lt;code&gt;mediaAccessSuccess&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
+ *   &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt; and &lt;code&gt;isAudioFallback&lt;/code&gt;
+ *   value as &lt;code&gt;false&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;li&gt;Else: &lt;ol&gt;
+ *   &lt;li&gt;If &lt;code&gt;options.audioFallback&lt;/code&gt; is enabled in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;,
+ *   &lt;code&gt;options.audio&lt;/code&gt; value is &lt;code&gt;true&lt;/code&gt; and &lt;code&gt;options.video&lt;/code&gt; value is &lt;code&gt;true&lt;/code&gt;: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessFallback&quot;&gt;&lt;code&gt;mediaAccessFallback&lt;/code&gt; event&lt;/a&gt; event triggers
+ *   parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;FALLBACKING&lt;/code&gt;, &lt;code&gt;isScreensharing&lt;/code&gt;
+ *   value as &lt;code&gt;false&lt;/code&gt; and &lt;code&gt;isAudioFallback&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;Retrieve camera Stream with audio tracks only. &lt;ol&gt;&lt;li&gt;If retrieval was successful: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessFallback&quot;&gt;&lt;code&gt;mediaAccessFallback&lt;/code&gt; event&lt;/a&gt; event triggers
+ *   parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;FALLBACKED&lt;/code&gt;, &lt;code&gt;isScreensharing&lt;/code&gt;
+ *   value as &lt;code&gt;false&lt;/code&gt; and &lt;code&gt;isAudioFallback&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;&lt;code&gt;mediaAccessSuccess&lt;/code&gt; event&lt;/a&gt; triggers
+ *   parameter payload &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt; and
+ *   &lt;code&gt;isAudioFallback&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;li&gt;Else: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessError&quot;&gt;&lt;code&gt;mediaAccessError&lt;/code&gt; event&lt;/a&gt; triggers
+ *   parameter payload &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt; and
+ *   &lt;code&gt;isAudioFallback&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessFallback&quot;&gt;&lt;code&gt;mediaAccessFallback&lt;/code&gt; event&lt;/a&gt; event triggers
+ *   parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;ERROR&lt;/code&gt;, &lt;code&gt;isScreensharing&lt;/code&gt; value as
+ *   &lt;code&gt;false&lt;/code&gt; and &lt;code&gt;isAudioFallback&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;li&gt;Else: &lt;ol&gt;
  *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessError&quot;&gt;&lt;code&gt;mediaAccessError&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
- *   &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt; and &lt;code&gt;isAudioFallbackError&lt;/code&gt;
- *   as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
- *   &lt;li&gt;Else &lt;ol&gt;&lt;li&gt;&lt;a href=&quot;#event_mediaAccessError&quot;&gt;&lt;code&gt;mediaAccessError&lt;/code&gt; event&lt;/a&gt;
- *   triggers parameter payload &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt; and
- *   &lt;code&gt;isAudioFallbackError&lt;/code&gt; as &lt;code&gt;false&lt;/code&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
+ *   &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt; and &lt;code&gt;isAudioFallback&lt;/code&gt; value as
+ *   &lt;code&gt;false&lt;/code&gt;.&lt;/li&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.5.6
  */
@@ -1630,7 +1623,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
   self._streamsStoppedCbs[streamId] = function () {
     log.log([null, &#x27;MediaStream&#x27;, streamId, &#x27;Stream has ended&#x27;]);
 
-    self._trigger(&#x27;mediaAccessStopped&#x27;, !!isScreenSharing);
+    self._trigger(&#x27;mediaAccessStopped&#x27;, !!isScreenSharing, !!isAudioFallback);
 
     if (self._inRoom) {
       log.debug([null, &#x27;MediaStream&#x27;, streamId, &#x27;Sending Stream ended status to Peers&#x27;]);
@@ -1729,7 +1722,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
     constraints: settings.getUserMediaSettings
   };
   self._muteStreams();
-  self._trigger(&#x27;mediaAccessSuccess&#x27;, stream, !!isScreenSharing);
+  self._trigger(&#x27;mediaAccessSuccess&#x27;, stream, !!isScreenSharing, !!isAudioFallback);
 };
 
 /**
