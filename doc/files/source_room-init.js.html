@@ -584,15 +584,29 @@ Skylink.prototype._room = null;
  *     skylinkDemo.joinRoom(); // Goes to default Room (switching to different Room is not allowed for credentials authentication)
  *   });
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
+ *   &lt;li&gt;If parameter &lt;code&gt;options&lt;/code&gt; is not provided: &lt;ol&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;Checks if dependecies and browser APIs are available. &lt;ol&gt;&lt;li&gt;If AdapterJS is not loaded: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_readyStateChange&quot;&gt;&lt;code&gt;readyStateChange&lt;/code&gt; event&lt;/a&gt; triggers
+ *   parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;ERROR&lt;/code&gt; and &lt;code&gt;error.errorCode&lt;/code&gt; as
+ *   &lt;code&gt;ADAPTER_NO_LOADED&lt;/code&gt;.&lt;/li&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;If socket.io-client is not loaded: &lt;ol&gt;&lt;li&gt;&lt;a href=&quot;#event_readyStateChange&quot;&gt;
+ *   &lt;code&gt;readyStateChange&lt;/code&gt; event&lt;/a&gt; triggers parameter payload &lt;code&gt;state&lt;/code&gt;
+ *   as &lt;code&gt;ERROR&lt;/code&gt; and &lt;code&gt;error.errorCode&lt;/code&gt; as &lt;code&gt;NO_SOCKET_IO&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error. &lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;If XMLHttpRequest API is not available: &lt;ol&gt;&lt;li&gt;&lt;a href=&quot;#event_readyStateChange&quot;&gt;
+ *   &lt;code&gt;readyStateChange&lt;/code&gt; event&lt;/a&gt; triggers parameter payload &lt;code&gt;state&lt;/code&gt;
+ *   as &lt;code&gt;ERROR&lt;/code&gt; and &lt;code&gt;error.errorCode&lt;/code&gt; as &lt;code&gt;NO_XMLHTTPREQUEST_SUPPORT&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;li&gt;If WebRTC is not supported by device: &lt;ol&gt;
  *   &lt;li&gt;&lt;a href=&quot;#event_readyStateChange&quot;&gt;&lt;code&gt;readyStateChange&lt;/code&gt; event&lt;/a&gt; triggers parameter
- *   payload &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;LOADING&lt;/code&gt;.&lt;/li&gt;&lt;li&gt;&lt;ol&gt;
- *   &lt;li&gt;When authentication is successful,
- *   &lt;a href=&quot;#event_readyStateChange&quot;&gt;&lt;code&gt;readyStateChange&lt;/code&gt; event&lt;/a&gt; triggers parameter
- *   payload &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;COMPLETED&lt;/code&gt;.
- *   &lt;small&gt;Room session token will be retrieved and will be required by &lt;a href=&quot;#method_joinRoom&quot;&gt;
- *   &lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt; to start Room connection.&lt;/small&gt;&lt;/li&gt;
- *   &lt;li&gt;When authentication fails, &lt;a href=&quot;#event_readyStateChange&quot;&gt;&lt;code&gt;readyStateChange&lt;/code&gt;
- *   event&lt;/a&gt; triggers parameter payload &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;ERROR&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/ol&gt;
+ *   payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;ERROR&lt;/code&gt; and &lt;code&gt;error.errorCode&lt;/code&gt; as
+ *   &lt;code&gt;NO_WEBRTC_SUPPORT&lt;/code&gt;.&lt;/li&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;Retrieves Room session token from Auth server. &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_readyStateChange&quot;&gt;&lt;code&gt;readyStateChange&lt;/code&gt; event&lt;/a&gt; triggers
+ *   parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;LOADING&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;If retrieval was successful: &lt;ol&gt;&lt;li&gt;&lt;a href=&quot;#event_readyStateChange&quot;&gt;&lt;code&gt;readyStateChange&lt;/code&gt; event&lt;/a&gt;
+ *   triggers parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;COMPLETED&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;li&gt;Else: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_readyStateChange&quot;&gt;&lt;code&gt;readyStateChange&lt;/code&gt; event&lt;/a&gt; triggers parameter
+ *   payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;ERROR&lt;/code&gt;.&lt;/li&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.5.5
  */
@@ -973,7 +987,7 @@ Skylink.prototype._parseInfo = function(info) {
       mediaConstraints: JSON.parse(info.media_constraints)
     }
   };
-  this._parseDefaultMediaStreamSettings(this._room.connection.mediaConstraints);
+  //this._parseDefaultMediaStreamSettings(this._room.connection.mediaConstraints);
 
   // set the socket ports
   this._socketPorts = {

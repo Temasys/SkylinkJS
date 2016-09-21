@@ -90,6 +90,28 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
+ * Stores the preferred sending Peer connection streaming audio codec.
+ * @attribute _selectedAudioCodec
+ * @type String
+ * @default &quot;auto&quot;
+ * @private
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype._selectedAudioCodec = &#x27;auto&#x27;;
+
+/**
+ * Stores the preferred sending Peer connection streaming video codec.
+ * @attribute _selectedVideoCodec
+ * @type String
+ * @default &quot;auto&quot;
+ * @private
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype._selectedVideoCodec = &#x27;auto&#x27;;
+
+/**
  * Function that modifies the SessionDescription string to enable OPUS stereo.
  * @method _addSDPStereo
  * @private
@@ -153,7 +175,7 @@ Skylink.prototype._addSDPStereo = function(sdpLines) {
  * @since 0.5.10
  */
 Skylink.prototype._setSDPVideoResolution = function(sdpLines){
-  var video = this._streamSettings.video;
+  var video = this._streams.userMedia &amp;&amp; this._streams.userMedia.settings.video;
   var frameRate = video.frameRate || 50;
   var resolution = {
     width: 320,
@@ -239,7 +261,7 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
  */
 Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
   // Find if user has audioStream
-  var bandwidth = this._streamSettings.bandwidth;
+  var bandwidth = this._streamsBandwidthSettings;
 
   // Prevent setting of bandwidth audio if not configured
   if (typeof bandwidth.audio === &#x27;number&#x27; &amp;&amp; bandwidth.audio &gt; 0) {
@@ -249,7 +271,8 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
       // set the audio bandwidth
       if (sdpLines[i].indexOf(&#x27;m=audio&#x27;) === 0) {
       //if (sdpLines[i].indexOf(&#x27;a=audio&#x27;) === 0 || sdpLines[i].indexOf(&#x27;m=audio&#x27;) === 0) {
-        sdpLines.splice(i + 1, 0, &#x27;b=AS:&#x27; + bandwidth.audio);
+        sdpLines.splice(i + 1, 0, window.webrtcDetectedBrowser === &#x27;firefox&#x27; ?
+          &#x27;b=TIAS:&#x27; + (bandwidth.audio * 1024) : &#x27;b=AS:&#x27; + bandwidth.audio);
 
         log.info([null, &#x27;SDP&#x27;, null, &#x27;Setting maximum sending audio bandwidth bitrate @(index:&#x27; + i + &#x27;) -&gt; &#x27;], bandwidth.audio);
         hasSetAudio = true;
@@ -272,7 +295,8 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
       // set the video bandwidth
       if (sdpLines[j].indexOf(&#x27;m=video&#x27;) === 0) {
       //if (sdpLines[j].indexOf(&#x27;a=video&#x27;) === 0 || sdpLines[j].indexOf(&#x27;m=video&#x27;) === 0) {
-        sdpLines.splice(j + 1, 0, &#x27;b=AS:&#x27; + bandwidth.video);
+        sdpLines.splice(j + 1, 0, window.webrtcDetectedBrowser === &#x27;firefox&#x27; ?
+          &#x27;b=TIAS:&#x27; + (bandwidth.video * 1024) : &#x27;b=AS:&#x27; + bandwidth.video);
 
         log.info([null, &#x27;SDP&#x27;, null, &#x27;Setting maximum sending video bandwidth bitrate @(index:&#x27; + j + &#x27;) -&gt; &#x27;], bandwidth.video);
         hasSetVideo = true;
@@ -295,7 +319,8 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
       // set the data bandwidth
       if (sdpLines[k].indexOf(&#x27;m=application&#x27;) === 0) {
       //if (sdpLines[k].indexOf(&#x27;a=application&#x27;) === 0 || sdpLines[k].indexOf(&#x27;m=application&#x27;) === 0) {
-        sdpLines.splice(k + 1, 0, &#x27;b=AS:&#x27; + bandwidth.data);
+        sdpLines.splice(k + 1, 0, window.webrtcDetectedBrowser === &#x27;firefox&#x27; ?
+          &#x27;b=TIAS:&#x27; + (bandwidth.data * 1024) : &#x27;b=AS:&#x27; + bandwidth.data);
 
         log.info([null, &#x27;SDP&#x27;, null, &#x27;Setting maximum sending data bandwidth bitrate @(index:&#x27; + k + &#x27;) -&gt; &#x27;], bandwidth.data);
         hasSetData = true;

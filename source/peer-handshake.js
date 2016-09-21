@@ -378,32 +378,24 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
   // remove h264 invalid pref
   sdpLines = self._removeSDPFirefoxH264Pref(sdpLines);
+
   // Check if stereo was enabled
-  if (self._streamSettings.hasOwnProperty('audio')) {
-    if (self._streamSettings.audio.stereo) {
+  if (self._streams.userMedia && self._streams.userMedia.settings.audio) {
+    if (self._streams.userMedia.settings.stereo) {
+      log.info([targetMid, null, null, 'Enabling OPUS stereo flag']);
       self._addSDPStereo(sdpLines);
     }
   }
 
-  log.info([targetMid, null, null, 'Requested stereo:'], (self._streamSettings.audio ?
-    (self._streamSettings.audio.stereo ? self._streamSettings.audio.stereo : false) :
-    false));
-
-  // set sdp bitrate
-  if (self._streamSettings.hasOwnProperty('bandwidth')) {
-    var peerSettings = (self._peerInformations[targetMid] || {}).settings || {};
-
-    sdpLines = self._setSDPBitrate(sdpLines, peerSettings);
+  // Set SDP max bitrate
+  if (self._streamsBandwidthSettings) {
+    sdpLines = self._setSDPBitrate(sdpLines, self._streamsBandwidthSettings);
   }
 
   // set sdp resolution
   /*if (self._streamSettings.hasOwnProperty('video')) {
     sdpLines = self._setSDPVideoResolution(sdpLines, self._streamSettings.video);
   }*/
-
-  self._streamSettings.bandwidth = self._streamSettings.bandwidth || {};
-
-  self._streamSettings.video = self._streamSettings.video || false;
 
   /*log.info([targetMid, null, null, 'Custom bandwidth settings:'], {
     audio: (self._streamSettings.bandwidth.audio || 'Not set') + ' kB/s',
@@ -501,7 +493,8 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       sdp: sessionDescription.sdp,
       mid: self._user.sid,
       target: targetMid,
-      rid: self._room.id
+      rid: self._room.id,
+      userInfo: self.getPeerInfo()
     });
 
   }, function(error) {

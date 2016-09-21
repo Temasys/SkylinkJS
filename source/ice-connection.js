@@ -8,7 +8,7 @@
  * @param {String} CHECKING       <small>Value <code>"checking"</code></small>
  *   The value of the state when Peer connection is checking for a suitable matching pair of
  *   ICE candidates to establish ICE connection.
- *   <small>ICE candidates are exchanged from <a href="#event_candidateGenerationState">
+ *   <small>Exchanging of ICE candidates happens during <a href="#event_candidateGenerationState">
  *   <code>candidateGenerationState</code> event</a>.</small>
  * @param {String} CONNECTED      <small>Value <code>"connected"</code></small>
  *   The value of the state when Peer connection has found a suitable matching pair of

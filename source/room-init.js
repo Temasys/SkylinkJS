@@ -493,15 +493,29 @@ Skylink.prototype._room = null;
  *     skylinkDemo.joinRoom(); // Goes to default Room (switching to different Room is not allowed for credentials authentication)
  *   });
  * @trigger <ol class="desc-seq">
+ *   <li>If parameter <code>options</code> is not provided: <ol><li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>Checks if dependecies and browser APIs are available. <ol><li>If AdapterJS is not loaded: <ol>
+ *   <li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers
+ *   parameter payload <code>state</code> as <code>ERROR</code> and <code>error.errorCode</code> as
+ *   <code>ADAPTER_NO_LOADED</code>.</li><li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>If socket.io-client is not loaded: <ol><li><a href="#event_readyStateChange">
+ *   <code>readyStateChange</code> event</a> triggers parameter payload <code>state</code>
+ *   as <code>ERROR</code> and <code>error.errorCode</code> as <code>NO_SOCKET_IO</code>.</li>
+ *   <li><b>ABORT</b> and return error. </li></ol></li>
+ *   <li>If XMLHttpRequest API is not available: <ol><li><a href="#event_readyStateChange">
+ *   <code>readyStateChange</code> event</a> triggers parameter payload <code>state</code>
+ *   as <code>ERROR</code> and <code>error.errorCode</code> as <code>NO_XMLHTTPREQUEST_SUPPORT</code>.</li>
+ *   <li><b>ABORT</b> and return error.</li></ol></li><li>If WebRTC is not supported by device: <ol>
  *   <li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers parameter
- *   payload <code>state</code> value as <code>LOADING</code>.</li><li><ol>
- *   <li>When authentication is successful,
- *   <a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers parameter
- *   payload <code>state</code> value as <code>COMPLETED</code>.
- *   <small>Room session token will be retrieved and will be required by <a href="#method_joinRoom">
- *   <code>joinRoom()</code> method</a> to start Room connection.</small></li>
- *   <li>When authentication fails, <a href="#event_readyStateChange"><code>readyStateChange</code>
- *   event</a> triggers parameter payload <code>state</code> value as <code>ERROR</code>.</li></ol></ol>
+ *   payload <code>state</code> as <code>ERROR</code> and <code>error.errorCode</code> as
+ *   <code>NO_WEBRTC_SUPPORT</code>.</li><li><b>ABORT</b> and return error.</li></ol></li></ol></li>
+ *   <li>Retrieves Room session token from Auth server. <ol>
+ *   <li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers
+ *   parameter payload <code>state</code> as <code>LOADING</code>.</li>
+ *   <li>If retrieval was successful: <ol><li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>COMPLETED</code>.</li></ol></li><li>Else: <ol>
+ *   <li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers parameter
+ *   payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol>
  * @for Skylink
  * @since 0.5.5
  */
@@ -882,7 +896,7 @@ Skylink.prototype._parseInfo = function(info) {
       mediaConstraints: JSON.parse(info.media_constraints)
     }
   };
-  this._parseDefaultMediaStreamSettings(this._room.connection.mediaConstraints);
+  //this._parseDefaultMediaStreamSettings(this._room.connection.mediaConstraints);
 
   // set the socket ports
   this._socketPorts = {

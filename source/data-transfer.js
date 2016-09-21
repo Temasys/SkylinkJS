@@ -78,7 +78,7 @@ Skylink.prototype.DATA_TRANSFER_SESSION_TYPE = {
  * @param {String} CANCEL             <small>Value <code>"cancel"</code></small>
  *   The value of the state when data transfer has been terminated from / to Peer.
  * @param {String} ERROR              <small>Value <code>"error"</code></small>
- *   The value of the state when data transfer has errors and has been terminated.
+ *   The value of the state when data transfer has errors and has been terminated from / to Peer.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -279,33 +279,60 @@ Skylink.prototype._dataTransfersTimeout = {};
  *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
  *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
  * @trigger <ol class="desc-seq">
- *   <li>When Peer supports simultaneous data transfers, <ol>
- *   <li><a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>CONNECTING</code> and <code>channelType</code> as <code>DATA</code>.</li>
- *   <li><a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>OPEN</code> and <code>channelType</code> as <code>DATA</code>.</li></ol>
- *   <small>For Peers that do not support simultaneous data transfers, the
- *   <a href="#event_dataChannelState"><code>dataChannelState</code> event</a> must trigger parameter payload
- *   <code>state</code> as <code>OPEN</code> and <code>channelType</code> as <code>MESSAGING</code>.</small></li>
- *   <li><a href="#event_incomingDataRequest"><code>incomingDataRequest</code> event</a> triggers parameter payload
- *   <code>isSelf</code> value as <code>true</code>.</li>
- *   <li>When Peers accepts the uploading data transfer request from User <ol>
- *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>UPLOAD_STARTED</code>.
- *   <small>For Peers, the parameter payload <code>state</code> is <code>DOWNLOAD_STARTED</code>.</small></li>
- *   <li>When data transfer is still uploading, <a href="#event_dataTransferState"><code>dataTransferState</code>
- *   event</a> triggers parameter payload <code>state</code> as <code>UPLOADING</code>.
- *   <small>For Peers, the parameter payload <code>state</code> is <code>DOWNLOADING</code>.</small></li>
- *   <li>When response has timed out from Peer (based on the <code>timeout</code> parameter configured in the method),
- *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>ERROR</code> and data transfer has been terminated.</li>
- *   <li><a href="#event_dataTransferState"><code>dataTransferState</code>
- *   event</a> triggers parameter payload <code>state</code> as <code>UPLOAD_COMPLETED</code>.
- *   <small>For Peers, the parameter payload <code>state</code> is <code>DOWNLOAD_COMPLETED</code>.
- *   </small></li></ol></li>
- *   <li>When Peers rejects the uploading data transfer request from User <ol>
- *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>REJECTED</code></li></ol></li></ol>
+ *   <li>Checks if should open a new Datachannel <ol>
+ *   <li>If Peer connection has closed: <small>This can be checked with <a href="#event_peerConnectionState">
+ *   <code>peerConnectionState</code> event</a> triggering parameter payload <code>state</code> as <code>CLOSED</code>
+ *   for Peer.</small> <ol><li><b>ABORT</b> step and return error.</li></ol></li>
+ *   <li>If Peer supports simultaneous data transfer, open new Datachannel: <ol>
+ *   <li><a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggers parameter
+ *   payload <code>state</code> as <code>CONNECTING</code> and <code>channelType</code> as <code>DATA</code>.</li>
+ *   <li>If Datachannel has opened successfully: <ol>
+ *   <li> <a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggers parameter payload
+ *   <code>state</code> as <code>OPEN</code> and <code>channelType</code> as <code>DATA</code>.</li></ol></li></ol></li>
+ *   <li>Else: <ol><li>If Peer connection Datachannel has not been opened <small>This can be checked with
+ *   <a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggering parameter
+ *   payload <code>state</code> as <code>OPEN</code> and <code>channelType</code> as
+ *   <code>MESSAGING</code> for Peer.</small> <ol>
+ *   <li><b>ABORT</b> step and return error.</li></ol></li></ol></li></ol></li>
+ *   <li>Starts the data transfer to Peer <ol>
+ *   <li><em>For Peer only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>UPLOAD_REQUEST</code>.</li>
+ *   <li><a href="#event_incomingDataRequest"><code>incomingDataRequest</code> event</a> triggers.</li>
+ *   <li>Peer invokes <a href="#method_acceptDataTransfer"><code>acceptDataTransfer()</code> method</a>. <ol>
+ *   <li>If parameter <code>accept</code> value is <code>true</code>: <ol>
+ *   <li>User starts upload data transfer to Peer <ol>
+ *   <li><em>For User only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>UPLOAD_STARTED</code>.</li>
+ *   <li><em>For Peer only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>DOWNLOAD_STARTED</code>.</li></ol></li>
+ *   <li>If Peer / User invokes <a href="#method_cancelDataTransfer"><code>cancelDataTransfer()</code> method</a>: <ol>
+ *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter
+ *   <code>state</code> as <code>CANCEL</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li>
+ *   <li>If data transfer has errors: <ol>
+ *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter
+ *   <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li>
+ *   <li>If Datachannel has closed abruptly during data transfer:
+ *   <small>This can be checked with <a href="#event_dataChannelState"><code>dataChannelState</code> event</a>
+ *   triggering parameter payload <code>state</code> as <code>CLOSED</code> and <code>channelType</code>
+ *   as <code>DATA</code> for Peer that supports simultaneous data transfer or <code>MESSAGING</code>
+ *   for Peer that do not support it.</small> <ol>
+ *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter
+ *   <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li>
+ *   <li>If data transfer is still progressing: <ol>
+ *   <li><em>For User only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>UPLOADING</code>.</li>
+ *   <li><em>For Peer only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>DOWNLOADING</code>.</li></ol></li>
+ *   <li>If data transfer has completed <ol>
+ *   <li><em>For User only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>UPLOAD_COMPLETED</code>.</li>
+ *   <li><em>For Peer only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>DOWNLOAD_COMPLETED</code>.</li>
+ *   <li><a href="#event_incomingData"><code>incomingData</code> event</a> triggers.</li></ol></li></ol></li>
+ *   <li>If parameter <code>accept</code> value is <code>false</code>: <ol>
+ *   <li><em>For User only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>REJECTED</code>.</li>
+ *   <li><b>ABORT</b> step and return error.</li></ol></li></ol>
  * @example
  * &lt;body&gt;
  *  &lt;input type="radio" name="timeout" onchange="setTransferTimeout(0)"&gt; 1s timeout (Default)
@@ -549,8 +576,8 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
  *      }
  *   });
  * @deprecated true
- * @trigger <small>Event sequence follows <a href="#method_acceptDataTransfer">
- * <code>acceptDataTransfer()</code> method</a>.</small>
+ * @trigger <small>Event sequence follows <a href="#method_sendBlobData">
+ * <code>sendBlobData()</code> method</a> after <code>acceptDataTransfer()</code> method is invoked.</small>
  * @for Skylink
  * @since 0.5.0
  */
@@ -575,13 +602,8 @@ Skylink.prototype.respondBlobRequest =
  *        skylinkDemo.acceptDataTransfer(peerId, transferId, false);
  *      }
  *   });
- * @trigger <ol class="desc-seq">
- *   <li>When User accepts the uploading data transfer request from Peer,
- *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>DOWNLOAD_STARTED</code>.
- *   <li>When User rejects the uploading data transfer request from Peer,
- *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>REJECTED</code></li></ol>
+ * @trigger <small>Event sequence follows <a href="#method_sendBlobData">
+ * <code>sendBlobData()</code> method</a> after <code>acceptDataTransfer()</code> method is invoked.</small>
  * @for Skylink
  * @since 0.6.1
  */
@@ -686,8 +708,8 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
  *   function cancelTransfer (peerId, transferId) {
  *     skylinkDemo.cancelBlobTransfer(peerId, transferId);
  *   }
- * @trigger <small>Event sequence follows <a href="#method_cancelDataTransfer">
- * <code>cancelDataTransfer()</code> method</a>.</small>
+ * @trigger <small>Event sequence follows <a href="#method_sendBlobData">
+ * <code>sendBlobData()</code> method</a> after <code>cancelDataTransfer()</code> method is invoked.</small>
  * @for Skylink
  * @deprecated true
  * @for Skylink
@@ -718,10 +740,8 @@ Skylink.prototype.cancelBlobTransfer =
  *   function cancelTransfer (peerId, transferId) {
  *     skylinkDemo.cancelDataTransfer(peerId, transferId);
  *   }
- * @trigger <ol class="desc-seq">
- *  <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers
- *  parameter payload <code>state</code> as <code>CANCEL</code>.</li>
- *  </ol>
+ * @trigger <small>Event sequence follows <a href="#method_sendBlobData">
+ * <code>sendBlobData()</code> method</a> after <code>cancelDataTransfer()</code> method is invoked.</small>
  * @for Skylink
  * @since 0.6.1
  */
@@ -811,23 +831,23 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
  * - When provided as an Array, it will send the message to only Peers which IDs are in the list.
  * - When not provided, it will broadcast the message to all connected Peers in the Room.
  * @trigger <ol class="desc-seq">
+ *  <li>Sends P2P message to all targeted Peers. <ol>
+ *  <li>If Peer connection Datachannel has not been opened: <small>This can be checked with
+ *  <a href="#event_dataChannelState"><code>dataChannelState</code> event</a>
+ *  triggering parameter payload <code>state</code> as <code>OPEN</code> and
+ *  <code>channelType</code> as <code>MESSAGING</code> for Peer.</small> <ol>
+ *  <li><b>ABORT</b> step and return error.</li></ol></li>
  *  <li><a href="#event_incomingMessage"><code>incomingMessage</code> event</a> triggers
- *  parameter payload <code>isSelf</code> value as <code>true</code>
- *  <small>Note that the <a href="#event_dataChannelState"><code>dataChannelState</code> event</a>
- *  must trigger parameter payload <code>state</code> as <code>OPEN</code> and
- *  <code>channelType</code> as <code>MESSAGING</code> for targeted Peers or the message
- *  will not be sent.</small></li></ol>
+ *  parameter payload <code>message.isDataChannel</code> value as <code>true</code> and
+ *  <code>isSelf</code> value as <code>true</code>.</li></ol></li></ol>
  * @example
- *   // Example 1: Sending m
+ *   // Example 1: Broadcasting to all Peers
  *   skylinkDemo.on("dataChannelState", function (state, peerId, error, channelName, channelType) {
  *      if (state === skylinkDemo.DATA_CHANNEL_STATE.OPEN &&
  *        channelType === skylinkDemo.DATA_CHANNEL_TYPE.MESSAGING) {
- *        skylinkDemo.sendP2PMessage("test", peerId);
+ *        skylinkDemo.sendP2PMessage("Hi all!");
  *      }
  *   });
- *
- *   // Example 1: Broadcasting to all Peers
- *   skylinkDemo.sendP2PMessage("Hi all!");
  *
  *   // Example 2: Sending to specific Peers
  *   var peersInExclusiveParty = [];
@@ -847,7 +867,13 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
  *   });
  *
  *   function updateExclusivePartyStatus (message) {
- *     skylinkDemo.sendP2PMessage(message, peersInExclusiveParty);
+ *     var readyToSend = [];
+ *     for (var p in peersInExclusiveParty) {
+ *       if (peersInExclusiveParty.hasOwnProperty(p)) {
+ *         readyToSend.push(p);
+ *       }
+ *     }
+ *     skylinkDemo.sendP2PMessage(message, readyToSend);
  *   }
  * @for Skylink
  * @since 0.5.5

@@ -243,6 +243,14 @@ h3 code {
   list-style-type: lower-alpha;
   padding-left: 10px;
 }
+.desc-seq em {
+  font-size: 12px;
+  color: #888;
+  font-style: normal;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-right: 5px;
+}
 .desc-seq ul {
   list-style-type: disc;
   color: #828282;
@@ -257,6 +265,18 @@ h3 code {
   list-style-type: upper-alpha;
 }
 .desc-seq ol ol ol ol {
+  list-style-type: upper-roman;
+}
+.desc-seq ol ol ol ol ol {
+  list-style-type: lower-alpha;
+}
+.desc-seq ol ol ol ol ol {
+  list-style-type: lower-roman;
+}
+.desc-seq ol ol ol ol ol ol {
+  list-style-type: upper-alpha;
+}
+.desc-seq ol ol ol ol ol ol ol {
   list-style-type: upper-roman;
 }
 .desc-seq ul li,
