@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Wed Sep 21 2016 01:39:03 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Wed Sep 21 2016 19:00:55 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8175,6 +8175,9 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} isScreensharing The flag if event occurred during
    *   <a href="#method_shareScreen"><code>shareScreen()</code> method</a> and not
    *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.
+   * @param {Boolean} isAudioFallback The flag if event occurred during
+   *   retrieval of audio tracks only when <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>
+   *   had failed to retrieve both audio and video tracks.
    * @for Skylink
    * @since 0.1.0
    */
@@ -8195,6 +8198,9 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} isScreensharing The flag if event occurred during
    *   <a href="#method_shareScreen"><code>shareScreen()</code> method</a> and not
    *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.
+   * @param {Boolean} isAudioFallback The flag if event occurred during
+   *   retrieval of audio tracks only when <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>
+   *   had failed to retrieve both audio and video tracks.
    * @for Skylink
    * @since 0.5.6
    */
@@ -10952,7 +10958,8 @@ Skylink.prototype._streamsStoppedCbs = {};
  *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
  * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
  *   <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.audioMuted</code>,
- *   but when provided as <code>true</code>, this mutes any existing <a href="#method_shareScreen">
+ *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.audioMuted</code> value to
+ *   <code>true</code> and mutes any existing <a href="#method_shareScreen">
  *   <code>shareScreen()</code> Stream</a> audio tracks as well.</small>
  * @param {Array} [options.audio.optional] <blockquote class="info">
  *   Note that this may result in constraints related error when <code>options.useExactConstraints</code> value is
@@ -10968,7 +10975,8 @@ Skylink.prototype._streamsStoppedCbs = {};
  * @param {Boolean|JSON} [options.video=false] The video configuration options.
  * @param {Boolean} [options.video.mute=false] The flag if video tracks should be muted upon receiving them.
  *   <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.videoMuted</code>,
- *   but when provided as <code>true</code>, this mutes any existing <a href="#method_shareScreen">
+ *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.videoMuted</code> value to
+ *   <code>true</code> and mutes any existing <a href="#method_shareScreen">
  *   <code>shareScreen()</code> Stream</a> video tracks as well.</small>
  * @param {JSON} [options.video.resolution] The video resolution.
  *   <small>By default, <a href="#attr_VIDEO_RESOLUTION"><code>VGA</code></a> resolution option
@@ -11090,45 +11098,42 @@ Skylink.prototype._streamsStoppedCbs = {};
  *      console.error("Failed", error);
  *   });
  * @trigger <ol class="desc-seq">
- *   <li>When retrieval of camera Stream is successful <ol>
- *   <li><a href="#event_mediaAccessSuccess"><code>mediaAccessSuccess</code> event</a> triggers
- *   parameter payload <code>isScreensharing</code> value as <code>false</code>.</li>
- *   <li>When there are missing required audio or video tracks <ol>
- *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> triggers
- *   parameter payload <code>state</code> as <code>FALLBACKED</code>, <code>isScreensharing</code>
- *   value as <code>false</code>, <code>isAudioFallback</code> as
- *   <code>false</code> and <code>error</code> is defined.</li></ol></li>
- *   <li>If there is a previous <code>getUserMedia()</code> Stream available <ol>
- *   <li><a href="#event_mediaAccessStopped"><code>mediaAccessStopped</code> event</a> triggers parameter payload
- *   <code>isScreensharing</code> value as <code>false</code>.</li>
- *   <li>If User is in Room <ol>
- *   <li><a href="#event_streamEnded"><code>streamEnded</code> event</a> triggers
- *   parameter payload <code>isScreensharing</code> value as <code>false</code> and <code>isSelf</code> value
- *   as <code>true</code>.</li></ol></li></ol></li></ol></li>
- *   <li>When retrieval of camera Stream has failed<ol>
- *   <li>If <code>audioFallback</code> is enabled in the <a href="#method_init"><code>init()</code> method</a>
- *   configuration, and <code>options.video</code> and <code>options.audio</code> is requested <ol>
- *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> is triggers parameter payload
- *   <code>state</code> value as <code>FALLBACKING</code>, <code>isScreensharing</code> value as <code>false</code>,
- *   <code>isAudioFallback</code> as <code>true</code> and <code>error</code> is defined.</li>
- *   <li>Invokes <code>getUserMedia()</code> with <code>options.audio</code> value as <code>true</code> and
- *   <code>options.video</code> value as <code>false</code>.<ol>
- *   <li>When retrieval of camera Stream (fallbacked audio only) is successful<ol>
+ *   <li>If <code>options.audio</code> value is <code>false</code> and <code>options.video</code>
+ *   value is <code>false</code>: <ol><li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>Retrieve camera Stream. <ol><li>If retrieval was succesful: <ol>
+ *   <li>If there are missing audio or video tracks requested: <ol>
  *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> triggers parameter payload
  *   <code>state</code> as <code>FALLBACKED</code>, <code>isScreensharing</code> value as <code>false</code> and
- *   <code>isAudioFallback</code> as <code>true</code>.</li>
- *   <li><a href="#event_mediaAccessSuccess"><code>mediaAccessSuccess</code> event</a> triggers parameter
- *   payload <code>isScreensharing</code> value as <code>false</code></li></ol></li>
- *   <li>When retrieval of camera Stream (fallbacked audio only) has failed <ol>
- *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>ERROR</code>, <code>isScreensharing</code> value as <code>false</code> and
- *   <code>isAudioFallback</code> as <code>true</code>.</li>
+ *   <code>isAudioFallback</code> value as <code>false</code>.</li></ol></li>
+ *   <li>Mutes / Unmutes audio and video tracks based on current muted settings in <code>peerInfo.mediaStatus</code>.
+ *   <small>This can be retrieved with <a href="#method_getPeerInfo"><code>getPeerInfo()</code> method</a>.</small></li>
+ *   <li><a href="#event_mediaAccessSuccess"><code>mediaAccessSuccess</code> event</a> triggers parameter payload
+ *   <code>isScreensharing</code> value as <code>false</code> and <code>isAudioFallback</code>
+ *   value as <code>false</code>.</li></ol></li><li>Else: <ol>
+ *   <li>If <code>options.audioFallback</code> is enabled in the <a href="#method_init"><code>init()</code> method</a>,
+ *   <code>options.audio</code> value is <code>true</code> and <code>options.video</code> value is <code>true</code>: <ol>
+ *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> event triggers
+ *   parameter payload <code>state</code> as <code>FALLBACKING</code>, <code>isScreensharing</code>
+ *   value as <code>false</code> and <code>isAudioFallback</code> value as <code>true</code>.</li>
+ *   <li>Retrieve camera Stream with audio tracks only. <ol><li>If retrieval was successful: <ol>
+ *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> event triggers
+ *   parameter payload <code>state</code> as <code>FALLBACKED</code>, <code>isScreensharing</code>
+ *   value as <code>false</code> and <code>isAudioFallback</code> value as <code>true</code>.</li>
+ *   <li>Mutes / Unmutes audio and video tracks based on current muted settings in <code>peerInfo.mediaStatus</code>.
+ *   <small>This can be retrieved with <a href="#method_getPeerInfo"><code>getPeerInfo()</code> method</a>.</small></li>
+ *   <li><a href="#event_mediaAccessSuccess"><code>mediaAccessSuccess</code> event</a> triggers
+ *   parameter payload <code>isScreensharing</code> value as <code>false</code> and
+ *   <code>isAudioFallback</code> value as <code>true</code>.</li></ol></li><li>Else: <ol>
+ *   <li><a href="#event_mediaAccessError"><code>mediaAccessError</code> event</a> triggers
+ *   parameter payload <code>isScreensharing</code> value as <code>false</code> and
+ *   <code>isAudioFallback</code> value as <code>true</code>.</li>
+ *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> event triggers
+ *   parameter payload <code>state</code> as <code>ERROR</code>, <code>isScreensharing</code> value as
+ *   <code>false</code> and <code>isAudioFallback</code> value as <code>true</code>.</li>
+ *   <li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol></li><li>Else: <ol>
  *   <li><a href="#event_mediaAccessError"><code>mediaAccessError</code> event</a> triggers parameter payload
- *   <code>isScreensharing</code> value as <code>false</code> and <code>isAudioFallbackError</code>
- *   as <code>true</code>.</li></ol></li></ol></li></ol></li>
- *   <li>Else <ol><li><a href="#event_mediaAccessError"><code>mediaAccessError</code> event</a>
- *   triggers parameter payload <code>isScreensharing</code> value as <code>false</code> and
- *   <code>isAudioFallbackError</code> as <code>false</code></li></ol></li></ol></li></ol>
+ *   <code>isScreensharing</code> value as <code>false</code> and <code>isAudioFallback</code> value as
+ *   <code>false</code>.</li><li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol></li></ol></li></ol>
  * @for Skylink
  * @since 0.5.6
  */
@@ -11315,7 +11320,7 @@ Skylink.prototype.sendStream = function(options, callback) {
         self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
       }
 
-      if (Object.keys(self._peerConnections).length > 0) {
+      if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
         self._refreshPeerConnection(Object.keys(self._peerConnections), false, function (err, success) {
           if (err) {
             log.error('Failed refreshing connections for sendStream() ->', err);
@@ -11776,7 +11781,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
         self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo());
         self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 
-        if (Object.keys(self._peerConnections).length > 0) {
+        if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
           self._refreshPeerConnection(Object.keys(self._peerConnections), false, function (err, success) {
             if (err) {
               log.error('Failed refreshing connections for shareScreen() ->', err);
@@ -12191,7 +12196,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
   self._streamsStoppedCbs[streamId] = function () {
     log.log([null, 'MediaStream', streamId, 'Stream has ended']);
 
-    self._trigger('mediaAccessStopped', !!isScreenSharing);
+    self._trigger('mediaAccessStopped', !!isScreenSharing, !!isAudioFallback);
 
     if (self._inRoom) {
       log.debug([null, 'MediaStream', streamId, 'Sending Stream ended status to Peers']);
@@ -12290,7 +12295,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
     constraints: settings.getUserMediaSettings
   };
   self._muteStreams();
-  self._trigger('mediaAccessSuccess', stream, !!isScreenSharing);
+  self._trigger('mediaAccessSuccess', stream, !!isScreenSharing, !!isAudioFallback);
 };
 
 /**
