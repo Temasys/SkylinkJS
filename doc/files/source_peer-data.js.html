@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.14</title>
+    <title>SkylinkJS 0.6.15</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.14</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.15</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -135,7 +135,10 @@ Skylink.prototype._userData = &#x27;&#x27;;
  * @method setUserData
  * @param {JSON|String} userData The updated custom data.
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
- *   &lt;li&gt;If User is in Room, &lt;a href=&quot;#event_peerUpdated&quot;&gt;&lt;code&gt;peerUpdated&lt;/code&gt; event&lt;/a&gt; triggers.&lt;/li&gt;&lt;/ol&gt;
+ *   &lt;li&gt;Updates User custom data. &lt;ol&gt;
+ *   &lt;li&gt;If User is in Room: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_peerUpdated&quot;&gt;&lt;code&gt;peerUpdated&lt;/code&gt; event&lt;/a&gt; triggers with parameter payload
+ *   &lt;code&gt;isSelf&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @example
  *   // Example 1: Set/Update User custom data before joinRoom()
  *   var userData = &quot;beforejoin&quot;;
@@ -164,8 +167,8 @@ Skylink.prototype._userData = &#x27;&#x27;;
  */
 Skylink.prototype.setUserData = function(userData) {
   var self = this;
-  // NOTE ALEX: be smarter and copy fields and only if different
-  self._parseUserData(userData);
+
+  this._userData = userData || &#x27;&#x27;;
 
   if (self._inRoom) {
     log.log(&#x27;Updated userData -&gt; &#x27;, userData);
@@ -173,7 +176,8 @@ Skylink.prototype.setUserData = function(userData) {
       type: self._SIG_MESSAGE_TYPE.UPDATE_USER,
       mid: self._user.sid,
       rid: self._room.id,
-      userData: self._userData
+      userData: self._userData,
+      stamp: (new Date()).getTime()
     });
     self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
   } else {
@@ -230,70 +234,70 @@ Skylink.prototype.getUserData = function(peerId) {
  * @since 0.4.0
  */
 Skylink.prototype.getPeerInfo = function(peerId) {
-  var isNotSelf = this._user &amp;&amp; this._user.sid ? peerId !== this._user.sid : false;
+  var peerInfo = null;
 
-  if (typeof peerId === &#x27;string&#x27; &amp;&amp; isNotSelf) {
-    // peer info
-    var peerInfo = this._peerInformations[peerId];
-
-    if (typeof peerInfo === &#x27;object&#x27;) {
-      return peerInfo;
+  if (typeof peerId === &#x27;string&#x27; &amp;&amp; typeof this._peerInformations[peerId] === &#x27;object&#x27;) {
+    peerInfo = clone(this._peerInformations[peerId]);
+    peerInfo.room = clone(this._selectedRoom);
+    
+    if (peerInfo.settings.video &amp;&amp; peerInfo.settings.video.frameRate === -1) {
+      delete peerInfo.settings.video.frameRate;
     }
 
-    return null;
   } else {
-
-    var mediaSettings = {};
-    var mediaStatus = clone(this._mediaStreamsStatus) || {};
-
-    // add screensharing information
-    if (!!this._mediaScreen &amp;&amp; this._mediaScreen !== null) {
-      mediaSettings = clone(this._screenSharingStreamSettings);
-      mediaSettings.bandwidth = clone(this._streamSettings.bandwidth);
-
-      if (mediaSettings.video) {
-        mediaSettings.video = {
-          screenshare: true
-        };
-      }
-    } else {
-      mediaSettings = clone(this._streamSettings);
-    }
-
-    if (!mediaSettings.audio) {
-      mediaStatus.audioMuted = true;
-    }
-
-    if (!mediaSettings.video) {
-      mediaStatus.videoMuted = true;
-    }
-
-    return {
+    peerInfo = {
       userData: clone(this._userData) || &#x27;&#x27;,
-      settings: mediaSettings || {},
-      mediaStatus: mediaStatus,
+      settings: {
+        audio: false,
+        video: false
+      },
+      mediaStatus: clone(this._streamsMutedSettings),
       agent: {
         name: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion
+        version: window.webrtcDetectedVersion,
+        os: window.navigator.platform,
+        pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       },
       room: clone(this._selectedRoom)
     };
+
+    if (this._streams.screenshare) {
+      peerInfo.settings = clone(this._streams.screenshare.settings);
+    } else if (this._streams.userMedia) {
+      peerInfo.settings = clone(this._streams.userMedia.settings);
+    }
   }
+
+  if (!peerInfo.settings.audio) {
+    peerInfo.mediaStatus.audioMuted = true;
+  }
+
+  if (!peerInfo.settings.video) {
+    peerInfo.mediaStatus.videoMuted = true;
+  }
+
+  return peerInfo;
 };
 
 /**
- * Function that parses the User custom data provided.
- * @method _parseUserData
+ * Function that returns the User session information to be sent to Peers.
+ * @method _getUserInfo
  * @private
  * @for Skylink
- * @since 0.5.6
+ * @since 0.4.0
  */
-Skylink.prototype._parseUserData = function(userData) {
-  log.debug(&#x27;Parsing user data:&#x27;, userData);
+Skylink.prototype._getUserInfo = function(peerId) {
+  var userInfo = clone(this.getPeerInfo());
 
-  this._userData = userData || &#x27;&#x27;;
+  if (userInfo.settings.video &amp;&amp; !userInfo.settings.video.frameRate) {
+    userInfo.settings.video.frameRate = -1;
+  }
+
+  delete userInfo.agent;
+  delete userInfo.room;
+
+  return userInfo;
 };
-
     </pre>
 </div>
 

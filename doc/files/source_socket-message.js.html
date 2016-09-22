@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.14</title>
+    <title>SkylinkJS 0.6.15</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.14</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.15</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -189,6 +189,25 @@ Skylink.prototype._hasMCU = false;
 Skylink.prototype._receiveOnly = false;
 
 /**
+ * Stores the list of Peer messages timestamp.
+ * @attribute _peerMessagesStamps
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._peerMessagesStamps = {};
+
+/**
+ * &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that broadcasted events from &lt;a href=&quot;#method_muteStream&quot;&gt;&lt;code&gt;muteStream()&lt;/code&gt; method&lt;/a&gt;,
+ *   &lt;a href=&quot;#method_stopStream&quot;&gt;&lt;code&gt;stopStream()&lt;/code&gt; method&lt;/a&gt;,
+ *   &lt;a href=&quot;#method_stopScreen&quot;&gt;&lt;code&gt;stopScreen()&lt;/code&gt; method&lt;/a&gt;,
+ *   &lt;a href=&quot;#method_sendMessage&quot;&gt;&lt;code&gt;sendMessage()&lt;/code&gt; method&lt;/a&gt;,
+ *   &lt;a href=&quot;#method_unlockRoom&quot;&gt;&lt;code&gt;unlockRoom()&lt;/code&gt; method&lt;/a&gt; and
+ *   &lt;a href=&quot;#method_lockRoom&quot;&gt;&lt;code&gt;lockRoom()&lt;/code&gt; method&lt;/a&gt; may be queued when
+ *   sent within less than an interval.
+ * &lt;/blockquote&gt;
  * Function that sends a message to Peers via the Signaling socket connection.
  * @method sendMessage
  * @param {String|JSON} message The message.
@@ -213,8 +232,9 @@ Skylink.prototype._receiveOnly = false;
  *     skylinkDemo.sendMessage(message, peersInExclusiveParty);
  *   }
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
+ *   &lt;li&gt;Sends socket connection message to all targeted Peers via Signaling server. &lt;ol&gt;
  *   &lt;li&gt;&lt;a href=&quot;#event_incomingMessage&quot;&gt;&lt;code&gt;incomingMessage&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
- *   &lt;code&gt;message.isDataChannel&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;
+ *   &lt;code&gt;message.isDataChannel&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.4.0
  */
@@ -442,11 +462,12 @@ Skylink.prototype._approachEventHandler = function(message){
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
-    userInfo: self.getPeerInfo(),
+    userInfo: self._getUserInfo(),
     receiveOnly: self._receiveOnly,
-    sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
+    sessionType: !!self._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
     target: message.target,
-    weight: self._peerPriorityWeight
+    weight: self._peerPriorityWeight,
+    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
   });
 };
 
@@ -495,6 +516,13 @@ Skylink.prototype._updateUserEventHandler = function(message) {
   var targetMid = message.mid;
   log.log([targetMid, null, message.type, &#x27;Peer updated userData:&#x27;], message.userData);
   if (this._peerInformations[targetMid]) {
+    if (this._peerMessagesStamps[targetMid] &amp;&amp; typeof message.stamp === &#x27;number&#x27;) {
+      if (message.stamp &lt; this._peerMessagesStamps[targetMid].userData) {
+        log.warn([targetMid, null, message.type, &#x27;Dropping outdated status -&gt;&#x27;], message);
+        return;
+      }
+      this._peerMessagesStamps[targetMid].userData = message.stamp;
+    }
     this._peerInformations[targetMid].userData = message.userData || {};
     this._trigger(&#x27;peerUpdated&#x27;, targetMid,
       this.getPeerInfo(targetMid), false);
@@ -532,9 +560,18 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
   var targetMid = message.mid;
   log.log([targetMid, null, message.type, &#x27;Peer\&#x27;s audio muted:&#x27;], message.muted);
   if (this._peerInformations[targetMid]) {
+    if (this._peerMessagesStamps[targetMid] &amp;&amp; typeof message.stamp === &#x27;number&#x27;) {
+      if (message.stamp &lt; this._peerMessagesStamps[targetMid].audioMuted) {
+        log.warn([targetMid, null, message.type, &#x27;Dropping outdated status -&gt;&#x27;], message);
+        return;
+      }
+      this._peerMessagesStamps[targetMid].audioMuted = message.stamp;
+    }
     this._peerInformations[targetMid].mediaStatus.audioMuted = message.muted;
-    this._trigger(&#x27;peerUpdated&#x27;, targetMid,
-      this.getPeerInfo(targetMid), false);
+    this._trigger(&#x27;streamMuted&#x27;, targetMid, this.getPeerInfo(targetMid), false,
+      this._peerInformations[targetMid].settings.video &amp;&amp;
+      this._peerInformations[targetMid].settings.video.screenshare);
+    this._trigger(&#x27;peerUpdated&#x27;, targetMid, this.getPeerInfo(targetMid), false);
   } else {
     log.log([targetMid, message.type, &#x27;Peer does not have any user information&#x27;]);
   }
@@ -553,7 +590,17 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
   var targetMid = message.mid;
   log.log([targetMid, null, message.type, &#x27;Peer\&#x27;s video muted:&#x27;], message.muted);
   if (this._peerInformations[targetMid]) {
+    if (this._peerMessagesStamps[targetMid] &amp;&amp; typeof message.stamp === &#x27;number&#x27;) {
+      if (message.stamp &lt; this._peerMessagesStamps[targetMid].videoMuted) {
+        log.warn([targetMid, null, message.type, &#x27;Dropping outdated status -&gt;&#x27;], message);
+        return;
+      }
+      this._peerMessagesStamps[targetMid].videoMuted = message.stamp;
+    }
     this._peerInformations[targetMid].mediaStatus.videoMuted = message.muted;
+    this._trigger(&#x27;streamMuted&#x27;, targetMid, this.getPeerInfo(targetMid), false,
+      this._peerInformations[targetMid].settings.video &amp;&amp;
+      this._peerInformations[targetMid].settings.video.screenshare);
     this._trigger(&#x27;peerUpdated&#x27;, targetMid,
       this.getPeerInfo(targetMid), false);
   } else {
@@ -578,7 +625,8 @@ Skylink.prototype._streamEventHandler = function(message) {
 
   	if (message.status === &#x27;ended&#x27;) {
   		this._trigger(&#x27;streamEnded&#x27;, targetMid, this.getPeerInfo(targetMid),
-        false, message.sessionType === &#x27;screensharing&#x27;);
+        false, message.sessionType === &#x27;screensharing&#x27;, message.streamId);
+      this._trigger(&#x27;peerUpdated&#x27;, targetMid, this.getPeerInfo(targetMid), false);
 
       if (this._peerConnections[targetMid]) {
         this._peerConnections[targetMid].hasStream = false;
@@ -588,7 +636,39 @@ Skylink.prototype._streamEventHandler = function(message) {
       } else {
         log.log([targetMid, null, message.type, &#x27;Peer connection not found&#x27;]);
       }
-  	}
+  	} else if (message.status === &#x27;check&#x27;) {
+      if (!message.streamId) {
+        return;
+      }
+
+      // Prevent restarts unless its stable
+      if (this._peerConnections[targetMid] &amp;&amp; this._peerConnections[targetMid].signalingState ===
+        this.PEER_CONNECTION_STATE.STABLE) {
+        var streams = this._peerConnections[targetMid].getRemoteStreams();
+        if (streams.length &gt; 0 &amp;&amp; message.streamId !== (streams[0].id || streams[0].label)) {
+          this._sendChannelMessage({
+            type: this._SIG_MESSAGE_TYPE.RESTART,
+            mid: this._user.sid,
+            rid: this._room.id,
+            agent: window.webrtcDetectedBrowser,
+            version: window.webrtcDetectedVersion,
+            os: window.navigator.platform,
+            userInfo: this._getUserInfo(),
+            target: targetMid,
+            weight: this._peerPriorityWeight,
+            enableIceTrickle: this._enableIceTrickle,
+            enableDataChannel: this._enableDataChannel,
+            receiveOnly: this._peerConnections[targetMid] &amp;&amp; this._peerConnections[targetMid].receiveOnly,
+            sessionType: !!this._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
+            // SkylinkJS parameters (copy the parameters from received message parameters)
+            isConnectionRestart: !!message.isConnectionRestart,
+            lastRestart: message.lastRestart,
+            explicit: !!message.explicit,
+            temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+          });
+        }
+      }
+    }
 
   } else {
     log.log([targetMid, null, message.type, &#x27;Peer does not have any user information&#x27;]);
@@ -692,10 +772,10 @@ Skylink.prototype._inRoomHandler = function(message) {
     self._peerPriorityWeight -= 100000000000;
   }
 
-  if (self._mediaScreen &amp;&amp; self._mediaScreen !== null) {
-    self._trigger(&#x27;incomingStream&#x27;, self._user.sid, self._mediaScreen, true, self.getPeerInfo());
-  } else if (self._mediaStream &amp;&amp; self._mediaStream !== null) {
-    self._trigger(&#x27;incomingStream&#x27;, self._user.sid, self._mediaStream, true, self.getPeerInfo());
+  if (self._streams.screenshare &amp;&amp; self._streams.screenshare.stream) {
+    self._trigger(&#x27;incomingStream&#x27;, self._user.sid, self._streams.screenshare.stream, true, self.getPeerInfo());
+  } else if (self._streams.userMedia &amp;&amp; self._streams.userMedia.stream) {
+    self._trigger(&#x27;incomingStream&#x27;, self._user.sid, self._streams.userMedia.stream, true, self.getPeerInfo());
   }
   // NOTE ALEX: should we wait for local streams?
   // or just go with what we have (if no stream, then one way?)
@@ -709,10 +789,11 @@ Skylink.prototype._inRoomHandler = function(message) {
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
-    userInfo: self.getPeerInfo(),
+    userInfo: self._getUserInfo(),
     receiveOnly: self._receiveOnly,
-    sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
-    weight: self._peerPriorityWeight
+    sessionType: !!self._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
+    weight: self._peerPriorityWeight,
+    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
   });
 };
 
@@ -741,10 +822,16 @@ Skylink.prototype._enterHandler = function(message) {
     }, false, false, message.receiveOnly, message.sessionType === &#x27;screensharing&#x27;);
 
     self._peerInformations[targetMid] = message.userInfo || {};
+    self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
+      userData: 0,
+      audioMuted: 0,
+      videoMuted: 0
+    };
     self._peerInformations[targetMid].agent = {
       name: message.agent,
       version: message.version,
-      os: message.os || &#x27;&#x27;
+      os: message.os || &#x27;&#x27;,
+      pluginVersion: message.temasysPluginVersion
     };
 
     if (targetMid !== &#x27;MCU&#x27;) {
@@ -771,10 +858,11 @@ Skylink.prototype._enterHandler = function(message) {
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
-    userInfo: self.getPeerInfo(),
+    userInfo: self._getUserInfo(),
     target: targetMid,
     weight: self._peerPriorityWeight,
-    sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;
+    sessionType: !!self._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
+    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
   });
 
   if (isNewPeer) {
@@ -833,10 +921,16 @@ Skylink.prototype._restartHandler = function(message){
 
   // re-add information
   self._peerInformations[targetMid] = message.userInfo || {};
+  self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
+    userData: 0,
+    audioMuted: 0,
+    videoMuted: 0
+  };
   self._peerInformations[targetMid].agent = {
     name: message.agent,
     version: message.version,
-    os: message.os || &#x27;&#x27;
+    os: message.os || &#x27;&#x27;,
+    pluginVersion: message.temasysPluginVersion
   };
 
   var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
@@ -870,17 +964,18 @@ Skylink.prototype._restartHandler = function(message){
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion,
       os: window.navigator.platform,
-      userInfo: self.getPeerInfo(),
+      userInfo: self._getUserInfo(),
       target: targetMid,
       weight: self._peerPriorityWeight,
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
       receiveOnly: self._peerConnections[targetMid] &amp;&amp; self._peerConnections[targetMid].receiveOnly,
-      sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
+      sessionType: !!self._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
       // SkylinkJS parameters (copy the parameters from received message parameters)
       isConnectionRestart: !!message.isConnectionRestart,
       lastRestart: message.lastRestart,
-      explicit: !!message.explicit
+      explicit: !!message.explicit,
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
     });
   }
 
@@ -918,10 +1013,16 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   if (!this._peerInformations[targetMid]) {
     this._peerInformations[targetMid] = message.userInfo || {};
+    this._peerMessagesStamps[targetMid] = this._peerMessagesStamps[targetMid] || {
+      userData: 0,
+      audioMuted: 0,
+      videoMuted: 0
+    };
     this._peerInformations[targetMid].agent = {
       name: message.agent,
       version: message.version,
-      os: message.os || &#x27;&#x27;
+      os: message.os || &#x27;&#x27;,
+      pluginVersion: message.temasysPluginVersion
     };
     // disable mcu for incoming peer sent by MCU
     /*if (message.agent === &#x27;MCU&#x27;) {
@@ -975,10 +1076,11 @@ Skylink.prototype._welcomeHandler = function(message) {
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion,
       os: window.navigator.platform,
-      userInfo: this.getPeerInfo(),
+      userInfo: this._getUserInfo(),
       target: targetMid,
       weight: this._peerPriorityWeight,
-      sessionType: !!this._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;
+      sessionType: !!this._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
     });
   }
 };
@@ -1008,6 +1110,13 @@ Skylink.prototype._offerHandler = function(message) {
       pc.localDescription);
     return;
   }*/
+
+  // Add-on by Web SDK fixes
+  if (message.userInfo &amp;&amp; typeof message.userInfo === &#x27;object&#x27;) {
+    self._peerInformations[targetMid].settings = message.userInfo.settings;
+    self._peerInformations[targetMid].mediaStatus = message.userInfo.mediaStatus;
+    self._peerInformations[targetMid].userData = message.userInfo.userData;
+  }
 
   log.log([targetMid, null, message.type, &#x27;Received offer from peer. &#x27; +
     &#x27;Session description:&#x27;], message.sdp);
@@ -1183,6 +1292,13 @@ Skylink.prototype._answerHandler = function(message) {
     log.error([targetMid, null, message.type, &#x27;Peer connection object &#x27; +
       &#x27;not found. Unable to setRemoteDescription for answer&#x27;]);
     return;
+  }
+
+  // Add-on by Web SDK fixes
+  if (message.userInfo &amp;&amp; typeof message.userInfo === &#x27;object&#x27;) {
+    self._peerInformations[targetMid].settings = message.userInfo.settings;
+    self._peerInformations[targetMid].mediaStatus = message.userInfo.mediaStatus;
+    self._peerInformations[targetMid].userData = message.userInfo.userData;
   }
 
   var answer = new window.RTCSessionDescription({
