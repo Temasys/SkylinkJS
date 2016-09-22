@@ -2656,7 +2656,7 @@
             "params": [
                 {
                     "name": "API_INVALID",
-                    "description": "<small>Value <code>4001</code></small>\n  The value of the failure code when provided App Key in <code>init()</code> does not exists.\n  <small>To resolve this, check that the provided App Key exists in\n  <a href=\"https://console.temasys.io\">the Developer Console</a>.</small>",
+                    "description": "<small>Value <code>4001</code></small>\n  The value of the failure code when provided App Key in <code>init()</code> does not exists.\n  <small>To resolve this, check that the provided App Key exists in\n  <a href=\"https://console.temasys.io\">the Temasys Console</a>.</small>",
                     "type": "Number"
                 },
                 {
@@ -2666,7 +2666,7 @@
                 },
                 {
                     "name": "API_CORS_DOMAIN_NOT_MATCH",
-                    "description": "<small>Value <code>4003</code></small>\n  The value of the failure code when <code>\"corsurl\"</code> property in the App Key does not match accessing CORS.\n  <small>To resolve this, configure the App Key CORS in\n  <a href=\"https://console.temasys.io\">the Developer Console</a>.</small>",
+                    "description": "<small>Value <code>4003</code></small>\n  The value of the failure code when <code>\"corsurl\"</code> property in the App Key does not match accessing CORS.\n  <small>To resolve this, configure the App Key CORS in\n  <a href=\"https://console.temasys.io\">the Temasys Console</a>.</small>",
                     "type": "Number"
                 },
                 {
@@ -6583,7 +6583,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1283,
+            "line": 1282,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -6596,7 +6596,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1341,
+            "line": 1340,
             "description": "Function that handles the muting of Stream audio and video tracks.",
             "itemtype": "method",
             "name": "_muteStreams",
@@ -6607,7 +6607,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1388,
+            "line": 1387,
             "description": "Function that handles stopping the Stream streaming.",
             "itemtype": "method",
             "name": "_stopStreams",
@@ -6618,7 +6618,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1460,
+            "line": 1459,
             "description": "Function that parses the <code>getUserMedia()</code> settings provided.",
             "itemtype": "method",
             "name": "_parseStreamSettings",
@@ -6629,7 +6629,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1592,
+            "line": 1591,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -6640,7 +6640,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1724,
+            "line": 1723,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -6651,7 +6651,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1764,
+            "line": 1763,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -6662,7 +6662,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1798,
+            "line": 1797,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -6950,7 +6950,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1283"
+            "line": " source/stream-media.js:1282"
         },
         {
             "message": "Missing item type\nPolyfill for Object.keys() from Mozilla\nFrom https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys",

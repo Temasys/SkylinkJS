@@ -32,7 +32,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} API_INVALID                 <small>Value <code>4001</code></small>
  *   The value of the failure code when provided App Key in <code>init()</code> does not exists.
  *   <small>To resolve this, check that the provided App Key exists in
- *   <a href="https://console.temasys.io">the Developer Console</a>.</small>
+ *   <a href="https://console.temasys.io">the Temasys Console</a>.</small>
  * @param {Number} API_DOMAIN_NOT_MATCH        <small>Value <code>4002</code></small>
  *   The value of the failure code when <code>"domainName"</code> property in the App Key does not
  *   match the accessing server IP address.
@@ -40,7 +40,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} API_CORS_DOMAIN_NOT_MATCH   <small>Value <code>4003</code></small>
  *   The value of the failure code when <code>"corsurl"</code> property in the App Key does not match accessing CORS.
  *   <small>To resolve this, configure the App Key CORS in
- *   <a href="https://console.temasys.io">the Developer Console</a>.</small>
+ *   <a href="https://console.temasys.io">the Temasys Console</a>.</small>
  * @param {Number} API_CREDENTIALS_INVALID     <small>Value <code>4004</code></small>
  *   The value of the failure code when there is no [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
  *   present in the HTTP headers during the request to the Auth server present nor
