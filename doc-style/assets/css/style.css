@@ -242,22 +242,9 @@ h3 code {
 .desc-seq ol {
   list-style-type: lower-alpha;
   padding-left: 10px;
+  padding-left: 5px;
+  list-style-position: inside;
 }
-.desc-seq em {
-  font-size: 12px;
-  color: #888;
-  font-style: normal;
-  font-weight: 600;
-  text-transform: uppercase;
-  margin-right: 5px;
-}
-.desc-seq ul {
-  list-style-type: disc;
-  color: #828282;
-  font-size: 13px;
-  padding-left: 25px;
-}
-
 .desc-seq ol ol {
   list-style-type: lower-roman;
 }
@@ -279,6 +266,61 @@ h3 code {
 .desc-seq ol ol ol ol ol ol ol {
   list-style-type: upper-roman;
 }
+.desc-seq em {
+  font-size: 12px;
+  color: #888;
+  font-style: normal;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-right: 5px;
+}
+.desc-seq ul {
+  list-style-type: disc;
+  color: #828282;
+  font-size: 13px;
+  padding-left: 25px;
+}
+
+.desc-seq ol li {
+  padding-left: 7px;
+  border-left: solid 2px rgba(51,122,183,.5);
+}
+
+.desc-seq ol ol li {
+  border-left: solid 2px rgba(92,184,92,.5);
+}
+
+.desc-seq ol ol ol li {
+  border-left: solid 2px rgba(91,192,222,.5);
+}
+.desc-seq ol ol ol ol li {
+  border-left: solid 2px rgba(240,173,78,.5);
+}
+.desc-seq ol ol ol ol ol li {
+  border-left: solid 2px rgba(217,83,79,.5);
+}
+.desc-seq ol ol ol ol ol li {
+  border-left: solid 2px #dadada;
+}
+.desc-seq ol ol ol ol ol ol li {
+  border-left: solid 2px rgba(51,122,183,.5);
+}
+.desc-seq ol ol ol ol ol ol ol li {
+  border-left: solid 2px rgba(92,184,92,.5);
+}
+.desc-seq ol ol ol ol ol ol ol li {
+  border-left: solid 2px rgba(91,192,222,.5);
+}
+.desc-seq ol ol ol ol ol ol ol ol li {
+  border-left: solid 2px rgba(240,173,78,.5);
+}
+.desc-seq ol ol ol ol ol ol ol ol ol li {
+  border-left: solid 2px rgba(217,83,79,.5);
+}
+.desc-seq ol ol ol ol ol ol ol ol ol ol li {
+  border-left: solid 2px #dadada;
+}
+
 .desc-seq ul li,
 .desc-seq ol li {
   margin: 5px 0;
