@@ -108,13 +108,25 @@ var clone = function (obj) {
     return obj;
   }
 
-  var copy = obj.constructor();
-  for (var attr in obj) {
-    if (obj.hasOwnProperty(attr)) {
-      copy[attr] = obj[attr];
+  var copy = function (data) {
+    var copy = data.constructor();
+    for (var attr in data) {
+      if (data.hasOwnProperty(attr)) {
+        copy[attr] = data[attr];
+      }
+    }
+    return copy;
+  };
+
+  if (typeof obj === 'object' && !Array.isArray(obj)) {
+    try {
+      return JSON.parse( JSON.stringify(obj) );
+    } catch (err) {
+      return copy(obj);
     }
   }
-  return copy;
+  
+  return copy(obj);
 };
 
 /**

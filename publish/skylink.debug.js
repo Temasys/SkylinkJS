@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Thu Sep 22 2016 01:46:06 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.14 - Thu Sep 22 2016 15:50:34 GMT+0800 (SGT) */
 
 (function() {
 
@@ -110,13 +110,25 @@ var clone = function (obj) {
     return obj;
   }
 
-  var copy = obj.constructor();
-  for (var attr in obj) {
-    if (obj.hasOwnProperty(attr)) {
-      copy[attr] = obj[attr];
+  var copy = function (data) {
+    var copy = data.constructor();
+    for (var attr in data) {
+      if (data.hasOwnProperty(attr)) {
+        copy[attr] = data[attr];
+      }
+    }
+    return copy;
+  };
+
+  if (typeof obj === 'object' && !Array.isArray(obj)) {
+    try {
+      return JSON.parse( JSON.stringify(obj) );
+    } catch (err) {
+      return copy(obj);
     }
   }
-  return copy;
+  
+  return copy(obj);
 };
 
 /**
@@ -3193,7 +3205,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
         sdp: sessionDescription.sdp,
         mid: self._user.sid,
         //agent: window.webrtcDetectedBrowser,
-        userInfo: self.getPeerInfo(),
+        userInfo: self._getUserInfo(),
         target: targetMid,
         rid: self._room.id
       });
@@ -4459,7 +4471,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         agent: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion,
         os: window.navigator.platform,
-        userInfo: self.getPeerInfo(),
+        userInfo: self._getUserInfo(),
         target: peerId,
         isConnectionRestart: !!isConnectionRestart,
         lastRestart: lastRestart,
@@ -4741,7 +4753,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
           rid: self._room.id,
           agent: window.webrtcDetectedBrowser,
           version: window.webrtcDetectedVersion,
-          userInfo: self.getPeerInfo(),
+          userInfo: self._getUserInfo(),
           target: targetMid,
           restartNego: true,
           hsPriority: -1
@@ -4844,7 +4856,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         agent: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion,
         os: window.navigator.platform,
-        userInfo: self.getPeerInfo(),
+        userInfo: self._getUserInfo(),
         target: peerId, //'MCU',
         isConnectionRestart: false,
         lastRestart: lastRestart,
@@ -5031,30 +5043,38 @@ Skylink.prototype.getUserData = function(peerId) {
  * @since 0.4.0
  */
 Skylink.prototype.getPeerInfo = function(peerId) {
+  var peerInfo = null;
+
   if (typeof peerId === 'string' && typeof this._peerInformations[peerId] === 'object') {
-    return this._peerInformations[peerId];
-  }
+    peerInfo = clone(this._peerInformations[peerId]);
+    peerInfo.room = clone(this._selectedRoom);
+    
+    if (peerInfo.settings.video && peerInfo.settings.video.frameRate === -1) {
+      delete peerInfo.settings.video.frameRate;
+    }
 
-  var peerInfo = {
-    userData: clone(this._userData) || '',
-    settings: {
-      audio: false,
-      video: false
-    },
-    mediaStatus: clone(this._streamsMutedSettings),
-    agent: {
-      name: window.webrtcDetectedBrowser,
-      version: window.webrtcDetectedVersion,
-      os: window.navigator.platform,
-      pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
-    },
-    room: clone(this._selectedRoom)
-  };
+  } else {
+    peerInfo = {
+      userData: clone(this._userData) || '',
+      settings: {
+        audio: false,
+        video: false
+      },
+      mediaStatus: clone(this._streamsMutedSettings),
+      agent: {
+        name: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion,
+        os: window.navigator.platform,
+        pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+      },
+      room: clone(this._selectedRoom)
+    };
 
-  if (this._streams.screenshare) {
-    peerInfo.settings = clone(this._streams.screenshare.settings);
-  } else if (this._streams.userMedia) {
-    peerInfo.settings = clone(this._streams.userMedia.settings);
+    if (this._streams.screenshare) {
+      peerInfo.settings = clone(this._streams.screenshare.settings);
+    } else if (this._streams.userMedia) {
+      peerInfo.settings = clone(this._streams.userMedia.settings);
+    }
   }
 
   if (!peerInfo.settings.audio) {
@@ -5068,6 +5088,25 @@ Skylink.prototype.getPeerInfo = function(peerId) {
   return peerInfo;
 };
 
+/**
+ * Function that returns the User session information to be sent to Peers.
+ * @method _getUserInfo
+ * @private
+ * @for Skylink
+ * @since 0.4.0
+ */
+Skylink.prototype._getUserInfo = function(peerId) {
+  var userInfo = clone(this.getPeerInfo());
+
+  if (userInfo.settings.video && !userInfo.settings.video.frameRate) {
+    userInfo.settings.video.frameRate = -1;
+  }
+
+  delete userInfo.agent;
+  delete userInfo.room;
+
+  return userInfo;
+};
 Skylink.prototype.HANDSHAKE_PROGRESS = {
   ENTER: 'enter',
   WELCOME: 'welcome',
@@ -5538,7 +5577,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       mid: self._user.sid,
       target: targetMid,
       rid: self._room.id,
-      userInfo: self.getPeerInfo()
+      userInfo: self._getUserInfo()
     });
 
   }, function(error) {
@@ -6569,7 +6608,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} API_INVALID                 <small>Value <code>4001</code></small>
  *   The value of the failure code when provided App Key in <code>init()</code> does not exists.
  *   <small>To resolve this, check that the provided App Key exists in
- *   <a href="https://console.temasys.io">the Developer Console</a>.</small>
+ *   <a href="https://console.temasys.io">the Temasys Console</a>.</small>
  * @param {Number} API_DOMAIN_NOT_MATCH        <small>Value <code>4002</code></small>
  *   The value of the failure code when <code>"domainName"</code> property in the App Key does not
  *   match the accessing server IP address.
@@ -6577,7 +6616,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} API_CORS_DOMAIN_NOT_MATCH   <small>Value <code>4003</code></small>
  *   The value of the failure code when <code>"corsurl"</code> property in the App Key does not match accessing CORS.
  *   <small>To resolve this, configure the App Key CORS in
- *   <a href="https://console.temasys.io">the Developer Console</a>.</small>
+ *   <a href="https://console.temasys.io">the Temasys Console</a>.</small>
  * @param {Number} API_CREDENTIALS_INVALID     <small>Value <code>4004</code></small>
  *   The value of the failure code when there is no [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
  *   present in the HTTP headers during the request to the Auth server present nor
@@ -9816,7 +9855,7 @@ Skylink.prototype._approachEventHandler = function(message){
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
-    userInfo: self.getPeerInfo(),
+    userInfo: self._getUserInfo(),
     receiveOnly: self._receiveOnly,
     sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
     target: message.target,
@@ -10007,7 +10046,7 @@ Skylink.prototype._streamEventHandler = function(message) {
             agent: window.webrtcDetectedBrowser,
             version: window.webrtcDetectedVersion,
             os: window.navigator.platform,
-            userInfo: this.getPeerInfo(),
+            userInfo: this._getUserInfo(),
             target: targetMid,
             weight: this._peerPriorityWeight,
             enableIceTrickle: this._enableIceTrickle,
@@ -10143,7 +10182,7 @@ Skylink.prototype._inRoomHandler = function(message) {
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
-    userInfo: self.getPeerInfo(),
+    userInfo: self._getUserInfo(),
     receiveOnly: self._receiveOnly,
     sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
     weight: self._peerPriorityWeight,
@@ -10212,7 +10251,7 @@ Skylink.prototype._enterHandler = function(message) {
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
-    userInfo: self.getPeerInfo(),
+    userInfo: self._getUserInfo(),
     target: targetMid,
     weight: self._peerPriorityWeight,
     sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
@@ -10318,7 +10357,7 @@ Skylink.prototype._restartHandler = function(message){
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion,
       os: window.navigator.platform,
-      userInfo: self.getPeerInfo(),
+      userInfo: self._getUserInfo(),
       target: targetMid,
       weight: self._peerPriorityWeight,
       enableIceTrickle: self._enableIceTrickle,
@@ -10430,7 +10469,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion,
       os: window.navigator.platform,
-      userInfo: this.getPeerInfo(),
+      userInfo: this._getUserInfo(),
       target: targetMid,
       weight: this._peerPriorityWeight,
       sessionType: !!this._streams.screenshare ? 'screensharing' : 'stream',
@@ -11782,7 +11821,6 @@ Skylink.prototype.disableVideo = function() {
  * Function that retrieves screensharing Stream.
  * @method shareScreen
  * @param {JSON} [enableAudio=false] The flag if audio tracks should be retrieved.
-
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_mediaAccessSuccess">

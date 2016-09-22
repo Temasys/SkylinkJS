@@ -126,7 +126,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
         sdp: sessionDescription.sdp,
         mid: self._user.sid,
         //agent: window.webrtcDetectedBrowser,
-        userInfo: self.getPeerInfo(),
+        userInfo: self._getUserInfo(),
         target: targetMid,
         rid: self._room.id
       });

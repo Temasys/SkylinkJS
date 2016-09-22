@@ -143,30 +143,38 @@ Skylink.prototype.getUserData = function(peerId) {
  * @since 0.4.0
  */
 Skylink.prototype.getPeerInfo = function(peerId) {
+  var peerInfo = null;
+
   if (typeof peerId === 'string' && typeof this._peerInformations[peerId] === 'object') {
-    return this._peerInformations[peerId];
-  }
+    peerInfo = clone(this._peerInformations[peerId]);
+    peerInfo.room = clone(this._selectedRoom);
+    
+    if (peerInfo.settings.video && peerInfo.settings.video.frameRate === -1) {
+      delete peerInfo.settings.video.frameRate;
+    }
 
-  var peerInfo = {
-    userData: clone(this._userData) || '',
-    settings: {
-      audio: false,
-      video: false
-    },
-    mediaStatus: clone(this._streamsMutedSettings),
-    agent: {
-      name: window.webrtcDetectedBrowser,
-      version: window.webrtcDetectedVersion,
-      os: window.navigator.platform,
-      pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
-    },
-    room: clone(this._selectedRoom)
-  };
+  } else {
+    peerInfo = {
+      userData: clone(this._userData) || '',
+      settings: {
+        audio: false,
+        video: false
+      },
+      mediaStatus: clone(this._streamsMutedSettings),
+      agent: {
+        name: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion,
+        os: window.navigator.platform,
+        pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+      },
+      room: clone(this._selectedRoom)
+    };
 
-  if (this._streams.screenshare) {
-    peerInfo.settings = clone(this._streams.screenshare.settings);
-  } else if (this._streams.userMedia) {
-    peerInfo.settings = clone(this._streams.userMedia.settings);
+    if (this._streams.screenshare) {
+      peerInfo.settings = clone(this._streams.screenshare.settings);
+    } else if (this._streams.userMedia) {
+      peerInfo.settings = clone(this._streams.userMedia.settings);
+    }
   }
 
   if (!peerInfo.settings.audio) {
@@ -178,4 +186,24 @@ Skylink.prototype.getPeerInfo = function(peerId) {
   }
 
   return peerInfo;
+};
+
+/**
+ * Function that returns the User session information to be sent to Peers.
+ * @method _getUserInfo
+ * @private
+ * @for Skylink
+ * @since 0.4.0
+ */
+Skylink.prototype._getUserInfo = function(peerId) {
+  var userInfo = clone(this.getPeerInfo());
+
+  if (userInfo.settings.video && !userInfo.settings.video.frameRate) {
+    userInfo.settings.video.frameRate = -1;
+  }
+
+  delete userInfo.agent;
+  delete userInfo.room;
+
+  return userInfo;
 };
