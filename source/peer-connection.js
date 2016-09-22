@@ -116,7 +116,11 @@ Skylink.prototype._peerConnections = {};
  * </blockquote>
  * Function that refreshes Peer connections to update with the current streaming.
  * @method refreshConnection
- * @param {String|Array} [targetPeerId] The target Peer ID to refresh connection with.
+ * @param {String|Array} [targetPeerId] <blockquote class="info">
+ *   Note that this is ignored if MCU is enabled for the App Key provided in
+ *   <a href="#method_init"><code>init()</code> method</a>. <code>refreshConnection()</code> will "refresh"
+ *   all Peer connections. See the <u>Event Sequence</u> for more information.</blockquote>
+ *   The target Peer ID to refresh connection with.
  * - When provided as an Array, it will refresh all connections with all the Peer IDs provided.
  * - When not provided, it will refresh all the currently connected Peers in the Room.
  * @param {Function} [callback] The callback function fired when request has completed.
@@ -135,17 +139,24 @@ Skylink.prototype._peerConnections = {};
  * @param {JSON} callback.success The success result in request.
  *   <small>Defined as <code>null</code> when there are errors in request</small>
  * @param {Array} callback.success.listOfPeers The list of Peer IDs targeted.
- * @trigger <b class="desc-seq-header">&#8594; For Peer connections without MCU enabled:</b>
- *   <ol class="desc-seq"><li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter
- *   payload <code>isSelfInitiateRestart</code> as <code>true</code> for all targeted Peer connections.</li></ol>
- *   <b class="desc-seq-header">&#8594; For Peer connections with MCU enabled:</b> <ol class="desc-seq">
- *   <li><ol><li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter
- *   payload <code>isSelfInitiateRestart</code> as <code>true</code> for all targeted Peer connections.</li>
- *   <li><a href="#event_serverPeerRestart"><code>serverPeerRestart</code> event</a> triggers parameter
- *   payload <code>serverPeerType</code> as <code>MCU</code>.</li></ol></li>
- *   <li>Invokes <a href="#method_joinRoom"><code>joinRoom()</code> method</a>.<small><code>refreshConnection</code>
- *   will retain the User session information except the Peer ID will be a different assigned ID due to restarting
- *   the Room session.</small></li></ol>
+ * @trigger <ol class="desc-seq">
+ *   <li>Checks if MCU is enabled for App Key provided in <a href="#method_init"><code>init()</code> method</a><ol>
+ *   <li>If MCU is enabled: <ol><li>If there are connected Peers in the Room: <ol>
+ *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter payload
+ *   <code>isSelfInitiateRestart</code> value as <code>true</code> for all connected Peer connections.</li>
+ *   <li><a href="#event_serverPeerRestart"><code>serverPeerRestart</code> event</a> triggers for
+ *   connected MCU server Peer connection.</li></ol></li>
+ *   <li>Invokes <a href="#method_joinRoom"><code>joinRoom()</code> method</a> <small><code>refreshConnection()</code>
+ *   will retain the User session information except the Peer ID will be a different assigned ID due to restarting the
+ *   Room session.</small> <ol><li>If request has errors <ol><li><b>ABORT</b> and return error.
+ *   </li></ol></li></ol></li></ol></li>
+ *   <li>Else: <ol><li>If there are connected Peers in the Room: <ol>
+ *   <li>Refresh connections for all targeted Peers. <ol>
+ *   <li>If Peer connection exists: <ol>
+ *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter payload
+ *   <code>isSelfInitiateRestart</code> value as <code>true</code> for all targeted Peer connections.</li></ol></li>
+ *   <li>Else: <ol><li><b>ABORT</b> and return error.</li></ol></li>
+ *   </ol></li></ol></li></ol>
  * @example
  *   // Example 1: Refreshing a Peer connection
  *   function refreshFrozenVideoStream (peerId) {
@@ -226,6 +237,25 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
     return;
   }
 
+  self._throttle(function () {
+    self._refreshPeerConnection(listOfPeers, true, callback);
+  },5000)();
+
+};
+
+/**
+ * Function that refresh connections.
+ * @method _refreshPeerConnection
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle, callback) {
+  var self = this;
+  var listOfPeerRestarts = [];
+  var error = '';
+  var listOfPeerRestartErrors = {};
+
   // To fix jshint dont put functions within a loop
   var refreshSinglePeerCallback = function (peerId) {
     return function (error, success) {
@@ -265,13 +295,15 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
       return;
     }
 
-    var now = Date.now() || function() { return +new Date(); };
+    if (shouldThrottle) {
+      var now = Date.now() || function() { return +new Date(); };
 
-    if (now - self.lastRestart < 3000) {
-      error = 'Last restart was so tight. Aborting.';
-      log.error([peerId, null, null, error]);
-      listOfPeerRestartErrors[peerId] = new Error(error);
-      return;
+      if (now - self.lastRestart < 3000) {
+        error = 'Last restart was so tight. Aborting.';
+        log.error([peerId, null, null, error]);
+        listOfPeerRestartErrors[peerId] = new Error(error);
+        return;
+      }
     }
 
     log.log([peerId, 'PeerConnection', null, 'Restarting peer connection']);
@@ -280,38 +312,33 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
     self._restartPeerConnection(peerId, true, false, peerCallback, true);
   };
 
-  var toRefresh = function() {
-    if(!self._hasMCU) {
-      var i;
+  if(!self._hasMCU) {
+    var i;
 
-      for (i = 0; i < listOfPeers.length; i++) {
-        var peerId = listOfPeers[i];
+    for (i = 0; i < listOfPeers.length; i++) {
+      var peerId = listOfPeers[i];
 
-        if (Object.keys(self._peerConnections).indexOf(peerId) > -1) {
-          refreshSinglePeer(peerId, refreshSinglePeerCallback(peerId));
-        } else {
-          error = 'Peer connection with peer does not exists. Unable to restart';
-          log.error([peerId, 'PeerConnection', null, error]);
-          listOfPeerRestartErrors[peerId] = new Error(error);
-        }
+      if (Object.keys(self._peerConnections).indexOf(peerId) > -1) {
+        refreshSinglePeer(peerId, refreshSinglePeerCallback(peerId));
+      } else {
+        error = 'Peer connection with peer does not exists. Unable to restart';
+        log.error([peerId, 'PeerConnection', null, error]);
+        listOfPeerRestartErrors[peerId] = new Error(error);
+      }
 
-        // there's an error to trigger for
-        if (i === listOfPeers.length - 1 && Object.keys(listOfPeerRestartErrors).length > 0) {
-          if (typeof callback === 'function') {
-            callback({
-              refreshErrors: listOfPeerRestartErrors,
-              listOfPeers: listOfPeers
-            }, null);
-          }
+      // there's an error to trigger for
+      if (i === listOfPeers.length - 1 && Object.keys(listOfPeerRestartErrors).length > 0) {
+        if (typeof callback === 'function') {
+          callback({
+            refreshErrors: listOfPeerRestartErrors,
+            listOfPeers: listOfPeers
+          }, null);
         }
       }
-    } else {
-      self._restartMCUConnection(callback);
     }
-  };
-
-  self._throttle(toRefresh,5000)();
-
+  } else {
+    self._restartMCUConnection(callback);
+  }
 };
 
 /**
@@ -349,14 +376,23 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
  *   <small>Object signature matches the <code>stats</code> parameter payload received in the
  *   <a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>.</small>
  * @trigger <ol class="desc-seq">
+ *   <li>Retrieves Peer connection stats for all targeted Peers. <ol>
+ *   <li>If Peer connection has closed or does not exists: <small>This can be checked with
+ *   <a href="#event_peerConnectionState"><code>peerConnectionState</code> event</a>
+ *   triggering parameter payload <code>state</code> as <code>CLOSED</code> for Peer.</small> <ol>
+ *   <li><a href="#event_getConnectionStatusStateChange"> <code>getConnectionStatusStateChange</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>RETRIEVE_ERROR</code>.</li>
+ *   <li><b>ABORT</b> and return error.</li></ol></li>
  *   <li><a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>
- *   triggers parameter payload <code>state</code> value as <code>RETRIEVING</code>.</li>
- *   <li><ol><li>When retrieval of Peer connection stats is successful, <a href="#event_getConnectionStatusStateChange">
- *   <code>getConnectionStatusStateChange</code> event</a> triggers parameter payload
- *   <code>state</code> value as <code>RETRIEVE_SUCCESS</code>.</li>
- *   <li>When retrieval of Peer connection stats had failed, <a href="#event_getConnectionStatusStateChange">
- *   <code>getConnectionStatusStateChange</code> event</a> triggers parameter payload
- *   <code>state</code> value as <code>RETRIEVE_ERROR</code>.</li></ol></li></ol>
+ *   triggers parameter payload <code>state</code> as <code>RETRIEVING</code>.</li>
+ *   <li>Received response from retrieval. <ol>
+ *   <li>If retrieval was successful: <ol>
+ *   <li><a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>RETRIEVE_SUCCESS</code>.</li></ol></li>
+ *   <li>Else: <ol>
+ *   <li><a href="#event_getConnectionStatusStateChange"> <code>getConnectionStatusStateChange</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>RETRIEVE_ERROR</code>.</li>
+ *   </ol></li></ol></li></ol></li></ol>
  * @example
  *   // Example 1: Retrieve a Peer connection stats
  *   function startBWStatsInterval (peerId) {
@@ -833,7 +869,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         agent: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion,
         os: window.navigator.platform,
-        userInfo: self.getPeerInfo(),
+        userInfo: self._getUserInfo(),
         target: peerId,
         isConnectionRestart: !!isConnectionRestart,
         lastRestart: lastRestart,
@@ -842,8 +878,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         receiveOnly: self._peerConnections[peerId] && self._peerConnections[peerId].receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
-        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-        explicit: !!explicit
+        sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
+        explicit: !!explicit,
+        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       });
 
       self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), false);
@@ -948,6 +985,11 @@ Skylink.prototype._removePeer = function(peerId) {
   if (typeof this._peerInformations[peerId] !== 'undefined') {
     delete this._peerInformations[peerId];
   }
+  // remove peer messages stamps session
+  if (typeof this._peerMessagesStamps[peerId] !== 'undefined') {
+    delete this._peerMessagesStamps[peerId];
+  }
+  
   if (typeof this._peerConnectionHealth[peerId] !== 'undefined') {
     delete this._peerConnectionHealth[peerId];
   }
@@ -1031,8 +1073,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     var stream = event.stream || event;
 
     if (targetMid === 'MCU') {
-      log.debug([targetMid, 'MediaStream', stream.id,
-        'Ignoring received remote stream from MCU ->'], stream);
+      log.debug([targetMid, 'MediaStream', stream.id, 'Ignoring received remote stream from MCU ->'], stream);
       return;
     }
 
@@ -1110,7 +1151,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
           rid: self._room.id,
           agent: window.webrtcDetectedBrowser,
           version: window.webrtcDetectedVersion,
-          userInfo: self.getPeerInfo(),
+          userInfo: self._getUserInfo(),
           target: targetMid,
           restartNego: true,
           hsPriority: -1
@@ -1213,7 +1254,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         agent: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion,
         os: window.navigator.platform,
-        userInfo: self.getPeerInfo(),
+        userInfo: self._getUserInfo(),
         target: peerId, //'MCU',
         isConnectionRestart: false,
         lastRestart: lastRestart,
@@ -1221,8 +1262,9 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         receiveOnly: receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
-        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-        explicit: true
+        sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
+        explicit: true,
+        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       });
     }
   }

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.14</title>
+    <title>SkylinkJS 0.6.15</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.14</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.15</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -123,7 +123,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} API_INVALID                 &lt;small&gt;Value &lt;code&gt;4001&lt;/code&gt;&lt;/small&gt;
  *   The value of the failure code when provided App Key in &lt;code&gt;init()&lt;/code&gt; does not exists.
  *   &lt;small&gt;To resolve this, check that the provided App Key exists in
- *   &lt;a href=&quot;https://console.temasys.io&quot;&gt;the Developer Console&lt;/a&gt;.&lt;/small&gt;
+ *   &lt;a href=&quot;https://console.temasys.io&quot;&gt;the Temasys Console&lt;/a&gt;.&lt;/small&gt;
  * @param {Number} API_DOMAIN_NOT_MATCH        &lt;small&gt;Value &lt;code&gt;4002&lt;/code&gt;&lt;/small&gt;
  *   The value of the failure code when &lt;code&gt;&quot;domainName&quot;&lt;/code&gt; property in the App Key does not
  *   match the accessing server IP address.
@@ -131,7 +131,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} API_CORS_DOMAIN_NOT_MATCH   &lt;small&gt;Value &lt;code&gt;4003&lt;/code&gt;&lt;/small&gt;
  *   The value of the failure code when &lt;code&gt;&quot;corsurl&quot;&lt;/code&gt; property in the App Key does not match accessing CORS.
  *   &lt;small&gt;To resolve this, configure the App Key CORS in
- *   &lt;a href=&quot;https://console.temasys.io&quot;&gt;the Developer Console&lt;/a&gt;.&lt;/small&gt;
+ *   &lt;a href=&quot;https://console.temasys.io&quot;&gt;the Temasys Console&lt;/a&gt;.&lt;/small&gt;
  * @param {Number} API_CREDENTIALS_INVALID     &lt;small&gt;Value &lt;code&gt;4004&lt;/code&gt;&lt;/small&gt;
  *   The value of the failure code when there is no [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
  *   present in the HTTP headers during the request to the Auth server present nor
@@ -584,15 +584,29 @@ Skylink.prototype._room = null;
  *     skylinkDemo.joinRoom(); // Goes to default Room (switching to different Room is not allowed for credentials authentication)
  *   });
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
+ *   &lt;li&gt;If parameter &lt;code&gt;options&lt;/code&gt; is not provided: &lt;ol&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;Checks if dependecies and browser APIs are available. &lt;ol&gt;&lt;li&gt;If AdapterJS is not loaded: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_readyStateChange&quot;&gt;&lt;code&gt;readyStateChange&lt;/code&gt; event&lt;/a&gt; triggers
+ *   parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;ERROR&lt;/code&gt; and &lt;code&gt;error.errorCode&lt;/code&gt; as
+ *   &lt;code&gt;ADAPTER_NO_LOADED&lt;/code&gt;.&lt;/li&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;If socket.io-client is not loaded: &lt;ol&gt;&lt;li&gt;&lt;a href=&quot;#event_readyStateChange&quot;&gt;
+ *   &lt;code&gt;readyStateChange&lt;/code&gt; event&lt;/a&gt; triggers parameter payload &lt;code&gt;state&lt;/code&gt;
+ *   as &lt;code&gt;ERROR&lt;/code&gt; and &lt;code&gt;error.errorCode&lt;/code&gt; as &lt;code&gt;NO_SOCKET_IO&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error. &lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;If XMLHttpRequest API is not available: &lt;ol&gt;&lt;li&gt;&lt;a href=&quot;#event_readyStateChange&quot;&gt;
+ *   &lt;code&gt;readyStateChange&lt;/code&gt; event&lt;/a&gt; triggers parameter payload &lt;code&gt;state&lt;/code&gt;
+ *   as &lt;code&gt;ERROR&lt;/code&gt; and &lt;code&gt;error.errorCode&lt;/code&gt; as &lt;code&gt;NO_XMLHTTPREQUEST_SUPPORT&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;li&gt;If WebRTC is not supported by device: &lt;ol&gt;
  *   &lt;li&gt;&lt;a href=&quot;#event_readyStateChange&quot;&gt;&lt;code&gt;readyStateChange&lt;/code&gt; event&lt;/a&gt; triggers parameter
- *   payload &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;LOADING&lt;/code&gt;.&lt;/li&gt;&lt;li&gt;&lt;ol&gt;
- *   &lt;li&gt;When authentication is successful,
- *   &lt;a href=&quot;#event_readyStateChange&quot;&gt;&lt;code&gt;readyStateChange&lt;/code&gt; event&lt;/a&gt; triggers parameter
- *   payload &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;COMPLETED&lt;/code&gt;.
- *   &lt;small&gt;Room session token will be retrieved and will be required by &lt;a href=&quot;#method_joinRoom&quot;&gt;
- *   &lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt; to start Room connection.&lt;/small&gt;&lt;/li&gt;
- *   &lt;li&gt;When authentication fails, &lt;a href=&quot;#event_readyStateChange&quot;&gt;&lt;code&gt;readyStateChange&lt;/code&gt;
- *   event&lt;/a&gt; triggers parameter payload &lt;code&gt;state&lt;/code&gt; value as &lt;code&gt;ERROR&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/ol&gt;
+ *   payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;ERROR&lt;/code&gt; and &lt;code&gt;error.errorCode&lt;/code&gt; as
+ *   &lt;code&gt;NO_WEBRTC_SUPPORT&lt;/code&gt;.&lt;/li&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;Retrieves Room session token from Auth server. &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_readyStateChange&quot;&gt;&lt;code&gt;readyStateChange&lt;/code&gt; event&lt;/a&gt; triggers
+ *   parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;LOADING&lt;/code&gt;.&lt;/li&gt;
+ *   &lt;li&gt;If retrieval was successful: &lt;ol&gt;&lt;li&gt;&lt;a href=&quot;#event_readyStateChange&quot;&gt;&lt;code&gt;readyStateChange&lt;/code&gt; event&lt;/a&gt;
+ *   triggers parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;COMPLETED&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;li&gt;Else: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_readyStateChange&quot;&gt;&lt;code&gt;readyStateChange&lt;/code&gt; event&lt;/a&gt; triggers parameter
+ *   payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;ERROR&lt;/code&gt;.&lt;/li&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @for Skylink
  * @since 0.5.5
  */
@@ -973,7 +987,7 @@ Skylink.prototype._parseInfo = function(info) {
       mediaConstraints: JSON.parse(info.media_constraints)
     }
   };
-  this._parseDefaultMediaStreamSettings(this._room.connection.mediaConstraints);
+  //this._parseDefaultMediaStreamSettings(this._room.connection.mediaConstraints);
 
   // set the socket ports
   this._socketPorts = {

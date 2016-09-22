@@ -174,6 +174,8 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} isAudioFallback The flag if event occurred during
    *   retrieval of audio tracks only when <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>
    *   had failed to retrieve both audio and video tracks.
+   * @param {String} streamId The Stream ID.
+   *   <small>Defined only when <code>state</code> payload is <code>FALLBACKED</code>.</small>
    * @for Skylink
    * @since 0.6.3
    */
@@ -187,6 +189,10 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} isScreensharing The flag if event occurred during
    *   <a href="#method_shareScreen"><code>shareScreen()</code> method</a> and not
    *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.
+   * @param {Boolean} isAudioFallback The flag if event occurred during
+   *   retrieval of audio tracks only when <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>
+   *   had failed to retrieve both audio and video tracks.
+   * @param {String} streamId The Stream ID.
    * @for Skylink
    * @since 0.1.0
    */
@@ -207,6 +213,10 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} isScreensharing The flag if event occurred during
    *   <a href="#method_shareScreen"><code>shareScreen()</code> method</a> and not
    *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.
+   * @param {Boolean} isAudioFallback The flag if event occurred during
+   *   retrieval of audio tracks only when <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>
+   *   had failed to retrieve both audio and video tracks.
+   * @param {String} streamId The Stream ID.
    * @for Skylink
    * @since 0.5.6
    */
@@ -221,25 +231,37 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.settings The Peer sending Stream settings.
    * @param {Boolean|JSON} peerInfo.settings.audio The Peer Stream audio settings.
    *   <small>When defined as <code>false</code>, it means there is no audio being sent from Peer.</small>
-   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag if stereo band is configured
+   * @param {Boolean} peerInfo.settings.audio.stereo The flag if stereo band is configured
    *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for receiving audio data.
+   * @param {Array} [peerInfo.settings.audio.optional] The Peer Stream <code>navigator.getUserMedia()</code> API
+   *   <code>audio: { optional [..] }</code> property.
+   * @param {String} [peerInfo.settings.audio.deviceId] The Peer Stream audio track source ID of the device used.
+   * @param {Boolean} peerInfo.settings.audio.exactConstraints The flag if Peer Stream audio track is sending exact
+   *   requested values of <code>peerInfo.settings.audio.deviceId</code> when provided.
    * @param {Boolean|JSON} peerInfo.settings.video The Peer Stream video settings.
    *   <small>When defined as <code>false</code>, it means there is no video being sent from Peer.</small>
    * @param {JSON} peerInfo.settings.video.resolution The Peer Stream video resolution.
    *   [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} [peerInfo.settings.video.resolution.width] The Peer Stream video resolution width.
-   * @param {Number} [peerInfo.settings.video.resolution.height] The Peer Stream video resolution height.
+   * @param {Number} peerInfo.settings.video.resolution.width The Peer Stream video resolution width.
+   * @param {Number} peerInfo.settings.video.resolution.height The Peer Stream video resolution height.
    * @param {Number} [peerInfo.settings.video.frameRate] The Peer Stream video
    *   <a href="https://en.wikipedia.org/wiki/Frame_rate">frameRate</a> per second (fps).
-   * @param {Boolean} [peerInfo.settings.video.screenshare] The flag if Peer Stream is a screensharing Stream.
-   * @param {JSON} [peerInfo.settings.bandwidth] The maximum streaming bandwidth sent from Peer.
+   * @param {Boolean} peerInfo.settings.video.screenshare The flag if Peer Stream is a screensharing Stream.
+   * @param {Array} [peerInfo.settings.video.optional] The Peer Stream <code>navigator.getUserMedia()</code> API
+   *   <code>video: { optional [..] }</code> property.
+   * @param {String} [peerInfo.settings.video.deviceId] The Peer Stream video track source ID of the device used.
+   * @param {Boolean} peerInfo.settings.video.exactConstraints The flag if Peer Stream video track is sending exact
+   *   requested values of <code>peerInfo.settings.video.resolution</code>,
+   *   <code>peerInfo.settings.video.frameRate</code> and <code>peerInfo.settings.video.deviceId</code>
+   *   when provided.
+   * @param {JSON} peerInfo.settings.bandwidth The maximum streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.audio] The maximum audio streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.video] The maximum video streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.data] The maximum data streaming bandwidth sent from Peer.
    * @param {JSON} peerInfo.mediaStatus The Peer Stream muted settings.
    * @param {Boolean} peerInfo.mediaStatus.audioMuted The flag if Peer Stream audio tracks is muted or not.
    *   <small>If Peer <code>peerInfo.settings.audio</code> is false, this will be defined as <code>true</code>.</small>
-   * @param {Boolean} peerInfo.mediaStatus.videoMuted The flag if Peer Stream audio tracks is muted or not.
+   * @param {Boolean} peerInfo.mediaStatus.videoMuted The flag if Peer Stream video tracks is muted or not.
    *   <small>If Peer <code>peerInfo.settings.video</code> is false, this will be defined as <code>true</code>.</small>
    * @param {JSON} peerInfo.agent The Peer agent information.
    * @param {String} peerInfo.agent.name The Peer agent name.
@@ -248,6 +270,8 @@ Skylink.prototype._EVENTS = {
    *   <small>Data may be accessing browser or non-Web SDK version.</small>
    * @param {String} [peerInfo.agent.os] The Peer platform name.
    *  <small>Data may be accessing OS platform version from Web SDK.</small>
+   * @param {String} [peerInfo.agent.pluginVersion] The Peer Temasys Plugin version.
+   *  <small>Defined only when Peer is using the Temasys Plugin (IE / Safari).</small>
    * @param {String} peerInfo.room The Room Peer is from.
    * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
@@ -489,13 +513,14 @@ Skylink.prototype._EVENTS = {
    *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small>
    * @param {Boolean} isSelf The flag if Peer is User.
    * @param {Boolean} isScreensharing The flag if Peer Stream is a screensharing Stream.
+   * @param {String} streamId The Stream ID.
    * @for Skylink
    * @since 0.5.10
    */
   streamEnded: [],
 
   /**
-   * Event triggered when Peer Stream audio or video tracks has been muted.
+   * Event triggered when Peer Stream audio or video tracks has been muted / unmuted.
    * @event streamMuted
    * @param {String} peerId The Peer ID.
    * @param {JSON} peerInfo The Peer session information.
@@ -643,7 +668,24 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.14
    */
-  getConnectionStatusStateChange: []
+  getConnectionStatusStateChange: [],
+
+  /**
+   * Event triggered when <a href="#method_muteStream"><code>muteStream()</code> method</a> changes
+   * User Streams audio and video tracks muted status.
+   * @event localMediaMuted
+   * @param {JSON} mediaStatus The Streams muted settings.
+   *   <small>This indicates the muted settings for both
+   *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> and
+   *   <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>.</small>
+   * @param {Boolean} mediaStatus.audioMuted The flag if all Streams audio tracks is muted or not.
+   *   <small>If User's <code>peerInfo.settings.audio</code> is false, this will be defined as <code>true</code>.</small>
+   * @param {Boolean} mediaStatus.videoMuted The flag if all Streams video tracks is muted or not.
+   *   <small>If User's <code>peerInfo.settings.video</code> is false, this will be defined as <code>true</code>.</small>
+   * @for Skylink
+   * @since 0.6.15
+   */
+  localMediaMuted: []
 };
 
 /**

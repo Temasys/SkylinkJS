@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Thu Sep 08 2016 20:19:22 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Thu Sep 22 2016 23:58:12 GMT+0800 (SGT) */
 
 (function() {
 
@@ -110,13 +110,25 @@ var clone = function (obj) {
     return obj;
   }
 
-  var copy = obj.constructor();
-  for (var attr in obj) {
-    if (obj.hasOwnProperty(attr)) {
-      copy[attr] = obj[attr];
+  var copy = function (data) {
+    var copy = data.constructor();
+    for (var attr in data) {
+      if (data.hasOwnProperty(attr)) {
+        copy[attr] = data[attr];
+      }
+    }
+    return copy;
+  };
+
+  if (typeof obj === 'object' && !Array.isArray(obj)) {
+    try {
+      return JSON.parse( JSON.stringify(obj) );
+    } catch (err) {
+      return copy(obj);
     }
   }
-  return copy;
+  
+  return copy(obj);
 };
 
 /**
@@ -208,7 +220,7 @@ function Skylink() {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.VERSION = '0.6.14';
+Skylink.prototype.VERSION = '0.6.15';
 
 /**
  * Function that generates an <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">UUID</a> (Unique ID).
@@ -244,12 +256,17 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
  *   <small>However for Peers that do not support simultaneous data transfers, this Datachannel
  *   type will be used to do data transfers (1 at a time).</small>
  *   <small>Each Peer connections will only have one of this Datachannel type and the
- *   connection will only close when the Peer connection is closed.</small>
+ *   connection will only close when the Peer connection is closed (happens when <a href="#event_peerConnectionState">
+ *   <code>peerConnectionState</code> event</a> triggers parameter payload <code>state</code> as
+ *   <code>CLOSED</code> for Peer).</small>
  * @param {String} DATA <small>Value <code>"data"</code></small>
  *   The value of the Datachannel type that is used only for a data transfer in
  *   <a href="#method_sendURLData"><code>sendURLData()</code> method</a> and
  *   <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>.
- *   <small>The connection will close after the data transfer has been completed or terminated.</small>
+ *   <small>The connection will close after the data transfer has been completed or terminated (happens when
+ *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
+ *   <code>state</code> as <code>DOWNLOAD_COMPLETED</code>, <code>UPLOAD_COMPLETED</code>,
+ *   <code>REJECTED</code>, <code>CANCEL</code> or <code>ERROR</code> for Peer).</small>
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -786,7 +803,7 @@ Skylink.prototype.DATA_TRANSFER_SESSION_TYPE = {
  * @param {String} CANCEL             <small>Value <code>"cancel"</code></small>
  *   The value of the state when data transfer has been terminated from / to Peer.
  * @param {String} ERROR              <small>Value <code>"error"</code></small>
- *   The value of the state when data transfer has errors and has been terminated.
+ *   The value of the state when data transfer has errors and has been terminated from / to Peer.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -987,33 +1004,60 @@ Skylink.prototype._dataTransfersTimeout = {};
  *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
  *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
  * @trigger <ol class="desc-seq">
- *   <li>When Peer supports simultaneous data transfers, <ol>
- *   <li><a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>CONNECTING</code> and <code>channelType</code> as <code>DATA</code>.</li>
- *   <li><a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>OPEN</code> and <code>channelType</code> as <code>DATA</code>.</li></ol>
- *   <small>For Peers that do not support simultaneous data transfers, the
- *   <a href="#event_dataChannelState"><code>dataChannelState</code> event</a> must trigger parameter payload
- *   <code>state</code> as <code>OPEN</code> and <code>channelType</code> as <code>MESSAGING</code>.</small></li>
- *   <li><a href="#event_incomingDataRequest"><code>incomingDataRequest</code> event</a> triggers parameter payload
- *   <code>isSelf</code> value as <code>true</code>.</li>
- *   <li>When Peers accepts the uploading data transfer request from User <ol>
- *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>UPLOAD_STARTED</code>.
- *   <small>For Peers, the parameter payload <code>state</code> is <code>DOWNLOAD_STARTED</code>.</small></li>
- *   <li>When data transfer is still uploading, <a href="#event_dataTransferState"><code>dataTransferState</code>
- *   event</a> triggers parameter payload <code>state</code> as <code>UPLOADING</code>.
- *   <small>For Peers, the parameter payload <code>state</code> is <code>DOWNLOADING</code>.</small></li>
- *   <li>When response has timed out from Peer (based on the <code>timeout</code> parameter configured in the method),
- *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>ERROR</code> and data transfer has been terminated.</li>
- *   <li><a href="#event_dataTransferState"><code>dataTransferState</code>
- *   event</a> triggers parameter payload <code>state</code> as <code>UPLOAD_COMPLETED</code>.
- *   <small>For Peers, the parameter payload <code>state</code> is <code>DOWNLOAD_COMPLETED</code>.
- *   </small></li></ol></li>
- *   <li>When Peers rejects the uploading data transfer request from User <ol>
- *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>REJECTED</code></li></ol></li></ol>
+ *   <li>Checks if should open a new Datachannel <ol>
+ *   <li>If Peer connection has closed: <small>This can be checked with <a href="#event_peerConnectionState">
+ *   <code>peerConnectionState</code> event</a> triggering parameter payload <code>state</code> as <code>CLOSED</code>
+ *   for Peer.</small> <ol><li><b>ABORT</b> step and return error.</li></ol></li>
+ *   <li>If Peer supports simultaneous data transfer, open new Datachannel: <ol>
+ *   <li><a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggers parameter
+ *   payload <code>state</code> as <code>CONNECTING</code> and <code>channelType</code> as <code>DATA</code>.</li>
+ *   <li>If Datachannel has opened successfully: <ol>
+ *   <li> <a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggers parameter payload
+ *   <code>state</code> as <code>OPEN</code> and <code>channelType</code> as <code>DATA</code>.</li></ol></li></ol></li>
+ *   <li>Else: <ol><li>If Peer connection Datachannel has not been opened <small>This can be checked with
+ *   <a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggering parameter
+ *   payload <code>state</code> as <code>OPEN</code> and <code>channelType</code> as
+ *   <code>MESSAGING</code> for Peer.</small> <ol>
+ *   <li><b>ABORT</b> step and return error.</li></ol></li></ol></li></ol></li>
+ *   <li>Starts the data transfer to Peer <ol>
+ *   <li><em>For Peer only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>UPLOAD_REQUEST</code>.</li>
+ *   <li><a href="#event_incomingDataRequest"><code>incomingDataRequest</code> event</a> triggers.</li>
+ *   <li>Peer invokes <a href="#method_acceptDataTransfer"><code>acceptDataTransfer()</code> method</a>. <ol>
+ *   <li>If parameter <code>accept</code> value is <code>true</code>: <ol>
+ *   <li>User starts upload data transfer to Peer <ol>
+ *   <li><em>For User only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>UPLOAD_STARTED</code>.</li>
+ *   <li><em>For Peer only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>DOWNLOAD_STARTED</code>.</li></ol></li>
+ *   <li>If Peer / User invokes <a href="#method_cancelDataTransfer"><code>cancelDataTransfer()</code> method</a>: <ol>
+ *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter
+ *   <code>state</code> as <code>CANCEL</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li>
+ *   <li>If data transfer has errors: <ol>
+ *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter
+ *   <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li>
+ *   <li>If Datachannel has closed abruptly during data transfer:
+ *   <small>This can be checked with <a href="#event_dataChannelState"><code>dataChannelState</code> event</a>
+ *   triggering parameter payload <code>state</code> as <code>CLOSED</code> and <code>channelType</code>
+ *   as <code>DATA</code> for Peer that supports simultaneous data transfer or <code>MESSAGING</code>
+ *   for Peer that do not support it.</small> <ol>
+ *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter
+ *   <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li>
+ *   <li>If data transfer is still progressing: <ol>
+ *   <li><em>For User only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>UPLOADING</code>.</li>
+ *   <li><em>For Peer only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>DOWNLOADING</code>.</li></ol></li>
+ *   <li>If data transfer has completed <ol>
+ *   <li><em>For User only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>UPLOAD_COMPLETED</code>.</li>
+ *   <li><em>For Peer only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>DOWNLOAD_COMPLETED</code>.</li>
+ *   <li><a href="#event_incomingData"><code>incomingData</code> event</a> triggers.</li></ol></li></ol></li>
+ *   <li>If parameter <code>accept</code> value is <code>false</code>: <ol>
+ *   <li><em>For User only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>REJECTED</code>.</li>
+ *   <li><b>ABORT</b> step and return error.</li></ol></li></ol>
  * @example
  * &lt;body&gt;
  *  &lt;input type="radio" name="timeout" onchange="setTransferTimeout(0)"&gt; 1s timeout (Default)
@@ -1257,8 +1301,8 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
  *      }
  *   });
  * @deprecated true
- * @trigger <small>Event sequence follows <a href="#method_acceptDataTransfer">
- * <code>acceptDataTransfer()</code> method</a>.</small>
+ * @trigger <small>Event sequence follows <a href="#method_sendBlobData">
+ * <code>sendBlobData()</code> method</a> after <code>acceptDataTransfer()</code> method is invoked.</small>
  * @for Skylink
  * @since 0.5.0
  */
@@ -1283,13 +1327,8 @@ Skylink.prototype.respondBlobRequest =
  *        skylinkDemo.acceptDataTransfer(peerId, transferId, false);
  *      }
  *   });
- * @trigger <ol class="desc-seq">
- *   <li>When User accepts the uploading data transfer request from Peer,
- *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>DOWNLOAD_STARTED</code>.
- *   <li>When User rejects the uploading data transfer request from Peer,
- *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>REJECTED</code></li></ol>
+ * @trigger <small>Event sequence follows <a href="#method_sendBlobData">
+ * <code>sendBlobData()</code> method</a> after <code>acceptDataTransfer()</code> method is invoked.</small>
  * @for Skylink
  * @since 0.6.1
  */
@@ -1394,8 +1433,8 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
  *   function cancelTransfer (peerId, transferId) {
  *     skylinkDemo.cancelBlobTransfer(peerId, transferId);
  *   }
- * @trigger <small>Event sequence follows <a href="#method_cancelDataTransfer">
- * <code>cancelDataTransfer()</code> method</a>.</small>
+ * @trigger <small>Event sequence follows <a href="#method_sendBlobData">
+ * <code>sendBlobData()</code> method</a> after <code>cancelDataTransfer()</code> method is invoked.</small>
  * @for Skylink
  * @deprecated true
  * @for Skylink
@@ -1426,10 +1465,8 @@ Skylink.prototype.cancelBlobTransfer =
  *   function cancelTransfer (peerId, transferId) {
  *     skylinkDemo.cancelDataTransfer(peerId, transferId);
  *   }
- * @trigger <ol class="desc-seq">
- *  <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a> triggers
- *  parameter payload <code>state</code> as <code>CANCEL</code>.</li>
- *  </ol>
+ * @trigger <small>Event sequence follows <a href="#method_sendBlobData">
+ * <code>sendBlobData()</code> method</a> after <code>cancelDataTransfer()</code> method is invoked.</small>
  * @for Skylink
  * @since 0.6.1
  */
@@ -1519,23 +1556,23 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
  * - When provided as an Array, it will send the message to only Peers which IDs are in the list.
  * - When not provided, it will broadcast the message to all connected Peers in the Room.
  * @trigger <ol class="desc-seq">
+ *  <li>Sends P2P message to all targeted Peers. <ol>
+ *  <li>If Peer connection Datachannel has not been opened: <small>This can be checked with
+ *  <a href="#event_dataChannelState"><code>dataChannelState</code> event</a>
+ *  triggering parameter payload <code>state</code> as <code>OPEN</code> and
+ *  <code>channelType</code> as <code>MESSAGING</code> for Peer.</small> <ol>
+ *  <li><b>ABORT</b> step and return error.</li></ol></li>
  *  <li><a href="#event_incomingMessage"><code>incomingMessage</code> event</a> triggers
- *  parameter payload <code>isSelf</code> value as <code>true</code>
- *  <small>Note that the <a href="#event_dataChannelState"><code>dataChannelState</code> event</a>
- *  must trigger parameter payload <code>state</code> as <code>OPEN</code> and
- *  <code>channelType</code> as <code>MESSAGING</code> for targeted Peers or the message
- *  will not be sent.</small></li></ol>
+ *  parameter payload <code>message.isDataChannel</code> value as <code>true</code> and
+ *  <code>isSelf</code> value as <code>true</code>.</li></ol></li></ol>
  * @example
- *   // Example 1: Sending m
+ *   // Example 1: Broadcasting to all Peers
  *   skylinkDemo.on("dataChannelState", function (state, peerId, error, channelName, channelType) {
  *      if (state === skylinkDemo.DATA_CHANNEL_STATE.OPEN &&
  *        channelType === skylinkDemo.DATA_CHANNEL_TYPE.MESSAGING) {
- *        skylinkDemo.sendP2PMessage("test", peerId);
+ *        skylinkDemo.sendP2PMessage("Hi all!");
  *      }
  *   });
- *
- *   // Example 1: Broadcasting to all Peers
- *   skylinkDemo.sendP2PMessage("Hi all!");
  *
  *   // Example 2: Sending to specific Peers
  *   var peersInExclusiveParty = [];
@@ -1555,7 +1592,13 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
  *   });
  *
  *   function updateExclusivePartyStatus (message) {
- *     skylinkDemo.sendP2PMessage(message, peersInExclusiveParty);
+ *     var readyToSend = [];
+ *     for (var p in peersInExclusiveParty) {
+ *       if (peersInExclusiveParty.hasOwnProperty(p)) {
+ *         readyToSend.push(p);
+ *       }
+ *     }
+ *     skylinkDemo.sendP2PMessage(message, readyToSend);
  *   }
  * @for Skylink
  * @since 0.5.5
@@ -3161,7 +3204,8 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
         type: sessionDescription.type,
         sdp: sessionDescription.sdp,
         mid: self._user.sid,
-        agent: window.webrtcDetectedBrowser,
+        //agent: window.webrtcDetectedBrowser,
+        userInfo: self._getUserInfo(),
         target: targetMid,
         rid: self._room.id
       });
@@ -3674,7 +3718,11 @@ Skylink.prototype._peerConnections = {};
  * </blockquote>
  * Function that refreshes Peer connections to update with the current streaming.
  * @method refreshConnection
- * @param {String|Array} [targetPeerId] The target Peer ID to refresh connection with.
+ * @param {String|Array} [targetPeerId] <blockquote class="info">
+ *   Note that this is ignored if MCU is enabled for the App Key provided in
+ *   <a href="#method_init"><code>init()</code> method</a>. <code>refreshConnection()</code> will "refresh"
+ *   all Peer connections. See the <u>Event Sequence</u> for more information.</blockquote>
+ *   The target Peer ID to refresh connection with.
  * - When provided as an Array, it will refresh all connections with all the Peer IDs provided.
  * - When not provided, it will refresh all the currently connected Peers in the Room.
  * @param {Function} [callback] The callback function fired when request has completed.
@@ -3693,17 +3741,24 @@ Skylink.prototype._peerConnections = {};
  * @param {JSON} callback.success The success result in request.
  *   <small>Defined as <code>null</code> when there are errors in request</small>
  * @param {Array} callback.success.listOfPeers The list of Peer IDs targeted.
- * @trigger <b class="desc-seq-header">&#8594; For Peer connections without MCU enabled:</b>
- *   <ol class="desc-seq"><li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter
- *   payload <code>isSelfInitiateRestart</code> as <code>true</code> for all targeted Peer connections.</li></ol>
- *   <b class="desc-seq-header">&#8594; For Peer connections with MCU enabled:</b> <ol class="desc-seq">
- *   <li><ol><li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter
- *   payload <code>isSelfInitiateRestart</code> as <code>true</code> for all targeted Peer connections.</li>
- *   <li><a href="#event_serverPeerRestart"><code>serverPeerRestart</code> event</a> triggers parameter
- *   payload <code>serverPeerType</code> as <code>MCU</code>.</li></ol></li>
- *   <li>Invokes <a href="#method_joinRoom"><code>joinRoom()</code> method</a>.<small><code>refreshConnection</code>
- *   will retain the User session information except the Peer ID will be a different assigned ID due to restarting
- *   the Room session.</small></li></ol>
+ * @trigger <ol class="desc-seq">
+ *   <li>Checks if MCU is enabled for App Key provided in <a href="#method_init"><code>init()</code> method</a><ol>
+ *   <li>If MCU is enabled: <ol><li>If there are connected Peers in the Room: <ol>
+ *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter payload
+ *   <code>isSelfInitiateRestart</code> value as <code>true</code> for all connected Peer connections.</li>
+ *   <li><a href="#event_serverPeerRestart"><code>serverPeerRestart</code> event</a> triggers for
+ *   connected MCU server Peer connection.</li></ol></li>
+ *   <li>Invokes <a href="#method_joinRoom"><code>joinRoom()</code> method</a> <small><code>refreshConnection()</code>
+ *   will retain the User session information except the Peer ID will be a different assigned ID due to restarting the
+ *   Room session.</small> <ol><li>If request has errors <ol><li><b>ABORT</b> and return error.
+ *   </li></ol></li></ol></li></ol></li>
+ *   <li>Else: <ol><li>If there are connected Peers in the Room: <ol>
+ *   <li>Refresh connections for all targeted Peers. <ol>
+ *   <li>If Peer connection exists: <ol>
+ *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter payload
+ *   <code>isSelfInitiateRestart</code> value as <code>true</code> for all targeted Peer connections.</li></ol></li>
+ *   <li>Else: <ol><li><b>ABORT</b> and return error.</li></ol></li>
+ *   </ol></li></ol></li></ol>
  * @example
  *   // Example 1: Refreshing a Peer connection
  *   function refreshFrozenVideoStream (peerId) {
@@ -3784,6 +3839,25 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
     return;
   }
 
+  self._throttle(function () {
+    self._refreshPeerConnection(listOfPeers, true, callback);
+  },5000)();
+
+};
+
+/**
+ * Function that refresh connections.
+ * @method _refreshPeerConnection
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle, callback) {
+  var self = this;
+  var listOfPeerRestarts = [];
+  var error = '';
+  var listOfPeerRestartErrors = {};
+
   // To fix jshint dont put functions within a loop
   var refreshSinglePeerCallback = function (peerId) {
     return function (error, success) {
@@ -3823,13 +3897,15 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
       return;
     }
 
-    var now = Date.now() || function() { return +new Date(); };
+    if (shouldThrottle) {
+      var now = Date.now() || function() { return +new Date(); };
 
-    if (now - self.lastRestart < 3000) {
-      error = 'Last restart was so tight. Aborting.';
-      log.error([peerId, null, null, error]);
-      listOfPeerRestartErrors[peerId] = new Error(error);
-      return;
+      if (now - self.lastRestart < 3000) {
+        error = 'Last restart was so tight. Aborting.';
+        log.error([peerId, null, null, error]);
+        listOfPeerRestartErrors[peerId] = new Error(error);
+        return;
+      }
     }
 
     log.log([peerId, 'PeerConnection', null, 'Restarting peer connection']);
@@ -3838,38 +3914,33 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
     self._restartPeerConnection(peerId, true, false, peerCallback, true);
   };
 
-  var toRefresh = function() {
-    if(!self._hasMCU) {
-      var i;
+  if(!self._hasMCU) {
+    var i;
 
-      for (i = 0; i < listOfPeers.length; i++) {
-        var peerId = listOfPeers[i];
+    for (i = 0; i < listOfPeers.length; i++) {
+      var peerId = listOfPeers[i];
 
-        if (Object.keys(self._peerConnections).indexOf(peerId) > -1) {
-          refreshSinglePeer(peerId, refreshSinglePeerCallback(peerId));
-        } else {
-          error = 'Peer connection with peer does not exists. Unable to restart';
-          log.error([peerId, 'PeerConnection', null, error]);
-          listOfPeerRestartErrors[peerId] = new Error(error);
-        }
+      if (Object.keys(self._peerConnections).indexOf(peerId) > -1) {
+        refreshSinglePeer(peerId, refreshSinglePeerCallback(peerId));
+      } else {
+        error = 'Peer connection with peer does not exists. Unable to restart';
+        log.error([peerId, 'PeerConnection', null, error]);
+        listOfPeerRestartErrors[peerId] = new Error(error);
+      }
 
-        // there's an error to trigger for
-        if (i === listOfPeers.length - 1 && Object.keys(listOfPeerRestartErrors).length > 0) {
-          if (typeof callback === 'function') {
-            callback({
-              refreshErrors: listOfPeerRestartErrors,
-              listOfPeers: listOfPeers
-            }, null);
-          }
+      // there's an error to trigger for
+      if (i === listOfPeers.length - 1 && Object.keys(listOfPeerRestartErrors).length > 0) {
+        if (typeof callback === 'function') {
+          callback({
+            refreshErrors: listOfPeerRestartErrors,
+            listOfPeers: listOfPeers
+          }, null);
         }
       }
-    } else {
-      self._restartMCUConnection(callback);
     }
-  };
-
-  self._throttle(toRefresh,5000)();
-
+  } else {
+    self._restartMCUConnection(callback);
+  }
 };
 
 /**
@@ -3907,14 +3978,23 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
  *   <small>Object signature matches the <code>stats</code> parameter payload received in the
  *   <a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>.</small>
  * @trigger <ol class="desc-seq">
+ *   <li>Retrieves Peer connection stats for all targeted Peers. <ol>
+ *   <li>If Peer connection has closed or does not exists: <small>This can be checked with
+ *   <a href="#event_peerConnectionState"><code>peerConnectionState</code> event</a>
+ *   triggering parameter payload <code>state</code> as <code>CLOSED</code> for Peer.</small> <ol>
+ *   <li><a href="#event_getConnectionStatusStateChange"> <code>getConnectionStatusStateChange</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>RETRIEVE_ERROR</code>.</li>
+ *   <li><b>ABORT</b> and return error.</li></ol></li>
  *   <li><a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>
- *   triggers parameter payload <code>state</code> value as <code>RETRIEVING</code>.</li>
- *   <li><ol><li>When retrieval of Peer connection stats is successful, <a href="#event_getConnectionStatusStateChange">
- *   <code>getConnectionStatusStateChange</code> event</a> triggers parameter payload
- *   <code>state</code> value as <code>RETRIEVE_SUCCESS</code>.</li>
- *   <li>When retrieval of Peer connection stats had failed, <a href="#event_getConnectionStatusStateChange">
- *   <code>getConnectionStatusStateChange</code> event</a> triggers parameter payload
- *   <code>state</code> value as <code>RETRIEVE_ERROR</code>.</li></ol></li></ol>
+ *   triggers parameter payload <code>state</code> as <code>RETRIEVING</code>.</li>
+ *   <li>Received response from retrieval. <ol>
+ *   <li>If retrieval was successful: <ol>
+ *   <li><a href="#event_getConnectionStatusStateChange"><code>getConnectionStatusStateChange</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>RETRIEVE_SUCCESS</code>.</li></ol></li>
+ *   <li>Else: <ol>
+ *   <li><a href="#event_getConnectionStatusStateChange"> <code>getConnectionStatusStateChange</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>RETRIEVE_ERROR</code>.</li>
+ *   </ol></li></ol></li></ol></li></ol>
  * @example
  *   // Example 1: Retrieve a Peer connection stats
  *   function startBWStatsInterval (peerId) {
@@ -4391,7 +4471,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         agent: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion,
         os: window.navigator.platform,
-        userInfo: self.getPeerInfo(),
+        userInfo: self._getUserInfo(),
         target: peerId,
         isConnectionRestart: !!isConnectionRestart,
         lastRestart: lastRestart,
@@ -4400,8 +4480,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         receiveOnly: self._peerConnections[peerId] && self._peerConnections[peerId].receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
-        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-        explicit: !!explicit
+        sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
+        explicit: !!explicit,
+        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       });
 
       self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), false);
@@ -4506,6 +4587,11 @@ Skylink.prototype._removePeer = function(peerId) {
   if (typeof this._peerInformations[peerId] !== 'undefined') {
     delete this._peerInformations[peerId];
   }
+  // remove peer messages stamps session
+  if (typeof this._peerMessagesStamps[peerId] !== 'undefined') {
+    delete this._peerMessagesStamps[peerId];
+  }
+  
   if (typeof this._peerConnectionHealth[peerId] !== 'undefined') {
     delete this._peerConnectionHealth[peerId];
   }
@@ -4589,8 +4675,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     var stream = event.stream || event;
 
     if (targetMid === 'MCU') {
-      log.debug([targetMid, 'MediaStream', stream.id,
-        'Ignoring received remote stream from MCU ->'], stream);
+      log.debug([targetMid, 'MediaStream', stream.id, 'Ignoring received remote stream from MCU ->'], stream);
       return;
     }
 
@@ -4668,7 +4753,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
           rid: self._room.id,
           agent: window.webrtcDetectedBrowser,
           version: window.webrtcDetectedVersion,
-          userInfo: self.getPeerInfo(),
+          userInfo: self._getUserInfo(),
           target: targetMid,
           restartNego: true,
           hsPriority: -1
@@ -4771,7 +4856,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         agent: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion,
         os: window.navigator.platform,
-        userInfo: self.getPeerInfo(),
+        userInfo: self._getUserInfo(),
         target: peerId, //'MCU',
         isConnectionRestart: false,
         lastRestart: lastRestart,
@@ -4779,8 +4864,9 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         receiveOnly: receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
-        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-        explicit: true
+        sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
+        explicit: true,
+        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       });
     }
   }
@@ -4858,7 +4944,10 @@ Skylink.prototype._userData = '';
  * @method setUserData
  * @param {JSON|String} userData The updated custom data.
  * @trigger <ol class="desc-seq">
- *   <li>If User is in Room, <a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers.</li></ol>
+ *   <li>Updates User custom data. <ol>
+ *   <li>If User is in Room: <ol>
+ *   <li><a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers with parameter payload
+ *   <code>isSelf</code> value as <code>true</code>.</li></ol></li></ol></li></ol>
  * @example
  *   // Example 1: Set/Update User custom data before joinRoom()
  *   var userData = "beforejoin";
@@ -4887,8 +4976,8 @@ Skylink.prototype._userData = '';
  */
 Skylink.prototype.setUserData = function(userData) {
   var self = this;
-  // NOTE ALEX: be smarter and copy fields and only if different
-  self._parseUserData(userData);
+
+  this._userData = userData || '';
 
   if (self._inRoom) {
     log.log('Updated userData -> ', userData);
@@ -4896,7 +4985,8 @@ Skylink.prototype.setUserData = function(userData) {
       type: self._SIG_MESSAGE_TYPE.UPDATE_USER,
       mid: self._user.sid,
       rid: self._room.id,
-      userData: self._userData
+      userData: self._userData,
+      stamp: (new Date()).getTime()
     });
     self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
   } else {
@@ -4953,70 +5043,70 @@ Skylink.prototype.getUserData = function(peerId) {
  * @since 0.4.0
  */
 Skylink.prototype.getPeerInfo = function(peerId) {
-  var isNotSelf = this._user && this._user.sid ? peerId !== this._user.sid : false;
+  var peerInfo = null;
 
-  if (typeof peerId === 'string' && isNotSelf) {
-    // peer info
-    var peerInfo = this._peerInformations[peerId];
-
-    if (typeof peerInfo === 'object') {
-      return peerInfo;
+  if (typeof peerId === 'string' && typeof this._peerInformations[peerId] === 'object') {
+    peerInfo = clone(this._peerInformations[peerId]);
+    peerInfo.room = clone(this._selectedRoom);
+    
+    if (peerInfo.settings.video && peerInfo.settings.video.frameRate === -1) {
+      delete peerInfo.settings.video.frameRate;
     }
 
-    return null;
   } else {
-
-    var mediaSettings = {};
-    var mediaStatus = clone(this._mediaStreamsStatus) || {};
-
-    // add screensharing information
-    if (!!this._mediaScreen && this._mediaScreen !== null) {
-      mediaSettings = clone(this._screenSharingStreamSettings);
-      mediaSettings.bandwidth = clone(this._streamSettings.bandwidth);
-
-      if (mediaSettings.video) {
-        mediaSettings.video = {
-          screenshare: true
-        };
-      }
-    } else {
-      mediaSettings = clone(this._streamSettings);
-    }
-
-    if (!mediaSettings.audio) {
-      mediaStatus.audioMuted = true;
-    }
-
-    if (!mediaSettings.video) {
-      mediaStatus.videoMuted = true;
-    }
-
-    return {
+    peerInfo = {
       userData: clone(this._userData) || '',
-      settings: mediaSettings || {},
-      mediaStatus: mediaStatus,
+      settings: {
+        audio: false,
+        video: false
+      },
+      mediaStatus: clone(this._streamsMutedSettings),
       agent: {
         name: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion
+        version: window.webrtcDetectedVersion,
+        os: window.navigator.platform,
+        pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       },
       room: clone(this._selectedRoom)
     };
+
+    if (this._streams.screenshare) {
+      peerInfo.settings = clone(this._streams.screenshare.settings);
+    } else if (this._streams.userMedia) {
+      peerInfo.settings = clone(this._streams.userMedia.settings);
+    }
   }
+
+  if (!peerInfo.settings.audio) {
+    peerInfo.mediaStatus.audioMuted = true;
+  }
+
+  if (!peerInfo.settings.video) {
+    peerInfo.mediaStatus.videoMuted = true;
+  }
+
+  return peerInfo;
 };
 
 /**
- * Function that parses the User custom data provided.
- * @method _parseUserData
+ * Function that returns the User session information to be sent to Peers.
+ * @method _getUserInfo
  * @private
  * @for Skylink
- * @since 0.5.6
+ * @since 0.4.0
  */
-Skylink.prototype._parseUserData = function(userData) {
-  log.debug('Parsing user data:', userData);
+Skylink.prototype._getUserInfo = function(peerId) {
+  var userInfo = clone(this.getPeerInfo());
 
-  this._userData = userData || '';
+  if (userInfo.settings.video && !userInfo.settings.video.frameRate) {
+    userInfo.settings.video.frameRate = -1;
+  }
+
+  delete userInfo.agent;
+  delete userInfo.room;
+
+  return userInfo;
 };
-
 Skylink.prototype.HANDSHAKE_PROGRESS = {
   ENTER: 'enter',
   WELCOME: 'welcome',
@@ -5206,7 +5296,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
  *   messaging Datachannel type state has to be "opened" (if Datachannel is enabled)
  *   and Signaling state has to be "stable".
  * Should consider dropping of counting messaging Datachannel type being opened as
- *   it should not involve the actual Peer connection for media (audio/video) streaming. 
+ *   it should not involve the actual Peer connection for media (audio/video) streaming.
  * @method _startPeerConnectionHealthCheck
  * @private
  * @for Skylink
@@ -5371,32 +5461,24 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
   // remove h264 invalid pref
   sdpLines = self._removeSDPFirefoxH264Pref(sdpLines);
+
   // Check if stereo was enabled
-  if (self._streamSettings.hasOwnProperty('audio')) {
-    if (self._streamSettings.audio.stereo) {
+  if (self._streams.userMedia && self._streams.userMedia.settings.audio) {
+    if (self._streams.userMedia.settings.stereo) {
+      log.info([targetMid, null, null, 'Enabling OPUS stereo flag']);
       self._addSDPStereo(sdpLines);
     }
   }
 
-  log.info([targetMid, null, null, 'Requested stereo:'], (self._streamSettings.audio ?
-    (self._streamSettings.audio.stereo ? self._streamSettings.audio.stereo : false) :
-    false));
-
-  // set sdp bitrate
-  if (self._streamSettings.hasOwnProperty('bandwidth')) {
-    var peerSettings = (self._peerInformations[targetMid] || {}).settings || {};
-
-    sdpLines = self._setSDPBitrate(sdpLines, peerSettings);
+  // Set SDP max bitrate
+  if (self._streamsBandwidthSettings) {
+    sdpLines = self._setSDPBitrate(sdpLines, self._streamsBandwidthSettings);
   }
 
   // set sdp resolution
   /*if (self._streamSettings.hasOwnProperty('video')) {
     sdpLines = self._setSDPVideoResolution(sdpLines, self._streamSettings.video);
   }*/
-
-  self._streamSettings.bandwidth = self._streamSettings.bandwidth || {};
-
-  self._streamSettings.video = self._streamSettings.video || false;
 
   /*log.info([targetMid, null, null, 'Custom bandwidth settings:'], {
     audio: (self._streamSettings.bandwidth.audio || 'Not set') + ' kB/s',
@@ -5429,22 +5511,23 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
   sessionDescription.sdp = sdpLines.join('\r\n');
 
-  // Remove REMB packet for MCU connection consistent video quality
-  // NOTE: This is a temporary solution. This is bad to modify from the client since REMB packet
-  //   is required to control quality based on network conditions.
-  if (self._hasMCU && ['chrome', 'opera', 'safari', 'IE'].indexOf(window.webrtcDetectedBrowser) > -1) {
-    log.warn([targetMid, null, null, 'Removing REMB packet for streaming quality in MCU environment']);
+  var removeVP9AptRtxPayload = false;
+  var agent = (self._peerInformations[targetMid] || {}).agent || {};
 
-    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtcp-fb:100 goog-remb\r\n/g, '');
+  if (agent.pluginVersion) {
+    // 0.8.870 supports
+    var parts = agent.pluginVersion.split('.');
+    removeVP9AptRtxPayload = parseInt(parts[0], 10) >= 0 && parseInt(parts[1], 10) >= 8 &&
+      parseInt(parts[2], 10) >= 870;
   }
 
   // Remove rtx or apt= lines that prevent connections for browsers without VP8 or VP9 support
   // See: https://bugs.chromium.org/p/webrtc/issues/detail?id=3962
-  if (['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1) {
+  if (['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1 && removeVP9AptRtxPayload) {
     log.warn([targetMid, null, null, 'Removing apt= and rtx payload lines causing connectivity issues']);
 
-    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\n/g, '');
-    sessionDescription.sdp = sessionDescription.sdp.replace(/a=fmtp:\d+ apt=\d+\r\n/g, '');
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=101\r\n/g, '');
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=107\r\n/g, '');
   }
 
   // NOTE ALEX: opus should not be used for mobile
@@ -5493,7 +5576,8 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       sdp: sessionDescription.sdp,
       mid: self._user.sid,
       target: targetMid,
-      rid: self._room.id
+      rid: self._room.id,
+      userInfo: self._getUserInfo()
     });
 
   }, function(error) {
@@ -5601,10 +5685,13 @@ Skylink.prototype._peerList = null;
  *   <small>Object signature matches the <code>peerList</code> parameter payload received in the
  *   <a href="#event_getPeersStateChange"><code>getPeersStateChange</code> event</a>.</small>
  * @trigger <ol class="desc-seq">
+ *   <li>If App Key provided in the <a href="#method_init"><code>init()</code> method</a> is not
+ *   a Privileged enabled Key: <ol><li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>Retrieves the list of Peer IDs from Rooms within the same App space. <ol>
  *   <li><a href="#event_getPeersStateChange"><code>getPeersStateChange</code> event</a> triggers parameter
- *   payload <code>state</code> value as <code>ENQUIRED</code>.</li><li><ol>
- *   <li>When retrieval of the list of Peer IDs from Rooms within the same App space is successful,
- *   <a href="#event_getPeersStateChange"><code>getPeersStateChange</code> event</a> triggers parameter
+ *   payload <code>state</code> value as <code>ENQUIRED</code>.</li>
+ *   <li>If received list from Signaling server successfully: <ol>
+ *   <li><a href="#event_getPeersStateChange"><code>getPeersStateChange</code> event</a> triggers parameter
  *   payload <code>state</code> value as <code>RECEIVED</code>.</li></ol></li></ol>
  * @example
  *   // Example 1: Retrieving the un-privileged Peers
@@ -5677,13 +5764,15 @@ Skylink.prototype.getPeers = function(showAll, callback){
  * @method introducePeer
  * @param {String} sendingPeerId The Peer ID to be connected with <code>receivingPeerId</code>.
  * @param {String} receivingPeerId The Peer ID to be connected with <code>sendingPeerId</code>.
- * @trigger <ol class="desc-seq"><li><ol>
- *   <li>When introduction request for the selected pair of Peers has been made to the Signaling server,
- *   <a href="#event_introduceStateChange"><code>introduceStateChange</code> event</a> triggers parameter
+ * @trigger <ol class="desc-seq">
+ *   <li>If App Key provided in the <a href="#method_init"><code>init()</code> method</a> is not
+ *   a Privileged enabled Key: <ol><li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>Starts sending introduction request for the selected pair of Peers to the Signaling server. <ol>
+ *   <li><a href="#event_introduceStateChange"><code>introduceStateChange</code> event</a> triggers parameter
  *   payload <code>state</code> value as <code>INTRODUCING</code>.</li>
- *   <li>When introduction request made for the selected pair of Peers to the Signaling server has failed,
- *   <a href="#event_introduceStateChange"><code>introduceStateChange</code> event</a> triggers parameter
- *   payload <code>state</code> value as <code>ERROR</code>.</li></ol></li></ol>
+ *   <li>If received errors from Signaling server: <ol>
+ *   <li><a href="#event_introduceStateChange"><code>introduceStateChange</code> event</a> triggers parameter
+ *   payload <code>state</code> value as <code>ERROR</code>.</li></ol></li></ol></li></ol>
  * @example
  *   // Example 1: Introduce a pair of Peers
  *   skylinkDemo.on("introduceStateChange", function (state, privilegedPeerId, sendingPeerId, receivingPeerId) {
@@ -5843,6 +5932,10 @@ Skylink.prototype._inRoom = false;
  * @param {JSON|String} [options.userData] The User custom data.
  *   <small>This can be set after Room session has started using the
  *   <a href="#method_setUserData"><code>setUserData()</code> method</a>.</small>
+ * @param {Boolean} [options.useExactConstraints] The <a href="#method_getUserMedia"><code>getUserMedia()</code>
+ *   method</a> <code>options.useExactConstraints</code> parameter settings.
+ *   <small>See the <code>options.useExactConstraints</code> parameter in the
+ *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> for more information.</small>
  * @param {Boolean|JSON} [options.audio] The <a href="#method_getUserMedia"><code>getUserMedia()</code>
  *   method</a> <code>options.audio</code> parameter settings.
  *   <small>When value is defined as <code>true</code> or an object, <a href="#method_getUserMedia">
@@ -5857,10 +5950,17 @@ Skylink.prototype._inRoom = false;
  *   <code>options.audio</code> is not defined, it will be defined as <code>false</code>.</small>
  *   <small>Object signature matches the <code>options.video</code> parameter in the
  *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</small>
- * @param {JSON} [options.bandwidth] <blockquote class="info">Note that this currently does not work
- *   with Firefox browsers.</blockquote> The configuration to set the maximum streaming bandwidth sent to Peers.
- * @param {Number} [options.bandwidth.audio] The maximum audio streaming bandwidth sent to Peers.
+ * @param {JSON} [options.bandwidth] <blockquote class="info">Note that this is currently not supported
+ *   with Firefox browsers versions 48 and below as noted in an existing
+ *   <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21">bugzilla ticket here</a>.</blockquote>
+ *   The configuration to set the maximum streaming bandwidth sent to Peers.
+ * @param {Number} [options.bandwidth.audio] The maximum audio streaming bandwidth sent to Peers in kbps.
+ *   <small>Recommended values are <code>50</code> to <code>200</code>. <code>50</code> is sufficient enough for
+ *   an audio call. The higher you go if you want clearer audio and to be able to hear music streaming.</small>
  * @param {Number} [options.bandwidth.video] The maximum video streaming bandwidth sent to Peers.
+ *   <small>Recommended values are <code>256</code>-<code>500</code> for 180p quality,
+ *   <code>500</code>-<code>1024</code> for 360p quality, <code>1024</code>-<code>2048</code> for 720p quality
+ *   and <code>2048</code>-<code>4096</code> for 1080p quality.</small>
  * @param {Number} [options.bandwidth.data] The maximum data streaming bandwidth sent to Peers.
  *   <small>This affects the P2P messaging in <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>,
  *   and data transfers in <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a> and
@@ -5871,6 +5971,7 @@ Skylink.prototype._inRoom = false;
  *   <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>
  *   must be retrieved as a requirement before Room session may begin.
  *   <small>This ignores the <code>options.audio</code> and <code>options.video</code> configuration.</small>
+ *   <small>After 30 seconds without any Stream retrieved, this results in the `callback(error, ..)` result.</small>
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_peerJoined">
@@ -5937,24 +6038,69 @@ Skylink.prototype._inRoom = false;
  *     console.log("User connected with correct user data?", success.peerInfo.userData.username === data.username);
  *   });
  * @trigger <ol class="desc-seq">
- *   <li>Invokes <a href="#method_init"><code>init()</code> method</a> to retrieve Room session token.</li>
- *   <li>Starts a socket connection with the Signaling server.<ol>
- *   <li>When socket connection to Signaling server is successfully established,
- *   <a href="#event_channelOpen"><code>channelOpen</code> event</a> triggers.</li>
- *   <li>When socket connection to Signaling server is fails to establish,
- *   <a href="#event_socketError"><code>socketError</code> event</a> triggers.<small>
- *   Triggers <a href="#event_channelRetry"><code>channelRetry</code> event</a> if there are
- *   still existing fallback ports and transport to attempt to establish a successful
- *   socket connection with the Signaling server.</small></li></ol></li>
- *   <li><a href="#event_channelMessage"><code>channelMessage</code> event</a> triggers.</li>
+ *   <li>If User is in a Room: <ol>
+ *   <li>Invoke <a href="#method_leaveRoom"><code>leaveRoom()</code> method</a>
+ *   to end current Room connection. <small>Invoked <a href="#method_leaveRoom"><code>leaveRoom()</code>
+ *   method</a> <code>stopMediaOptions</code> parameter value will be <code>false</code>.</small>
+ *   <small>Regardless of request errors, <code>joinRoom()</code> will still proceed.</small></li></ol></li>
+ *   <li>Check if Room name provided matches the Room name of the currently retrieved Room session token. <ol>
+ *   <li>If Room name does not matches: <ol>
+ *   <li>Invoke <a href="#method_init"><code>init()</code> method</a> to retrieve new Room session token. <ol>
+ *   <li>If request has errors: <ol><li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol></li></ol></li>
+ *   <li>Open a new socket connection to Signaling server. <ol><li>If Socket connection fails: <ol>
+ *   <li><a href="#event_socketError"><code>socketError</code> event</a> triggers parameter payload
+ *   <code>errorCode</code> as <code>CONNECTION_FAILED</code>. <ol>
+ *   <li>Checks if there are fallback ports and transports to use. <ol>
+ *   <li>If there are still fallback ports and transports: <ol>
+ *   <li>Attempts to retry socket connection to Signaling server. <ol>
+ *   <li><a href="#event_channelRetry"><code>channelRetry</code> event</a> triggers.</li>
+ *   <li><a href="#event_socketError"><code>socketError</code> event</a> triggers parameter
+ *   payload <code>errorCode</code> as <code>RECONNECTION_ATTEMPT</code>.</li>
+ *   <li>If attempt to retry socket connection to Signaling server has failed: <ol>
+ *   <li><a href="#event_socketError"><code>socketError</code> event</a> triggers parameter payload
+ *   <code>errorCode</code> as <code>RECONNECTION_FAILED</code>.</li>
+ *   <li>Checks if there are still any more fallback ports and transports to use. <ol>
+ *   <li>If there are is no more fallback ports and transports to use: <ol>
+ *   <li><a href="#event_socketError"><code>socketError</code> event</a> triggers
+ *   parameter payload <code>errorCode</code> as <code>RECONNECTION_ABORTED</code>.</li>
+ *   <li><b>ABORT</b> and return error.</li></ol></li><li>Else: <ol><li><b>REPEAT</b> attempt to retry socket connection
+ *   to Signaling server step.</li></ol></li></ol></li></ol></li></ol></li></ol></li><li>Else: <ol>
+ *   <li><a href="#event_socketError"><code>socketError</code> event</a> triggers
+ *   parameter payload <code>errorCode</code> as <code>CONNECTION_ABORTED</code>.</li>
+ *   <li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol></li></ol></li>
+ *   <li>If socket connection to Signaling server has opened: <ol>
+ *   <li><a href="#event_channelOpen"><code>channelOpen</code> event</a> triggers.</li></ol></li></ol></li>
+ *   <li>Checks if there is <code>options.manualGetUserMedia</code> requested <ol><li>If it is requested: <ol>
+ *   <li><a href="#event_mediaAccessRequired"><code>mediaAccessRequired</code> event</a> triggers.</li>
+ *   <li>If more than 30 seconds has passed and no <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a>
+ *   or <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>
+ *   has been retrieved: <ol><li><b>ABORT</b> and return error.</li></ol></li></ol></li><li>Else: <ol>
+ *   <li>If there is <code>options.audio</code> or <code>options.video</code> requested: <ol>
+ *   <li>Invoke <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>. <ol>
+ *   <li>If request has errors: <ol><li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol></li></ol></li>
+ *   </ol></li><li>Starts the Room session <ol><li>If Room session has started successfully: <ol>
  *   <li><a href="#event_peerJoined"><code>peerJoined</code> event</a> triggers parameter payload
- *   <code>isSelf</code> value as <code>true</code>. <small>If MCU is enabled for the App Key,
- *   the <a href="#event_serverPeerJoined"><code>serverPeerJoined</code> event</a> will be triggered
- *   when MCU is present in the Room, and then Peer connections can commence.</small><small>If
- *   <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> is available despite having
- *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> available, the
- *   <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> is sent instead of the
- *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> to Peers.</small></li></ol>
+ *   <code>isSelf</code> value as <code>true</code>.</li>
+ *   <li>If MCU is enabled for the App Key provided in <a href="#method_init"><code>init()</code>
+ *   method</a> and connected: <ol><li><a href="#event_serverPeerJoined"><code>serverPeerJoined</code>
+ *   event</a> triggers <code>serverPeerType</code> as <code>MCU</code>. <small>MCU has
+ *   to be present in the Room in order for Peer connections to commence.</small></li>
+ *   <li>Checks for any available Stream <ol>
+ *   <li>If <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> is available: <ol>
+ *   <li><a href="#event_incomingStream"><code>incomingStream</code> event</a>
+ *   triggers parameter payload <code>isSelf</code> value as <code>true</code> and <code>stream</code>
+ *   as <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>.
+ *   <small>User will be sending <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>
+ *   to Peers.</small></li></ol></li>
+ *   <li>Else if <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> is available: <ol>
+ *   <li><a href="#event_incomingStream"><code>incomingStream</code> event</a> triggers parameter
+ *   payload <code>isSelf</code> value as <code>true</code> and <code>stream</code> as
+ *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a>.
+ *   <small>User will be sending <code>getUserMedia()</code> Stream to Peers.</small></li></ol></li><li>Else: <ol>
+ *   <li>No Stream will be sent.</li></ol></li></ol></li></ol></li></ol></li><li>Else: <ol>
+ *   <li><a href="#event_systemAction"><code>systemAction</code> event</a> triggers
+ *   parameter payload <code>action</code> as <code>REJECT</code>.</li>
+ *   <li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol>
  * @for Skylink
  * @since 0.5.5
  */
@@ -6190,16 +6336,18 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  * @param {String} callback.success.peerId The User's Room session Peer ID.
  * @param {String} callback.success.previousRoom The Room name.
  * @trigger <ol class="desc-seq">
- *   <li>When <code>stopMediaOptions.userMedia</code> is <code>true</code>, the
- *   <a href="#method_stopStream"><code>stopStream()</code> method</a> is invoked.</li>
- *   <li>When <code>stopMediaOptions.screenshare</code> is <code>true</code>, the
- *   <a href="#method_stopScreen"><code>stopScreen()</code> method</a> is invoked.</li>
- *   <li>Stops the socket connection with the Signaling server. <ol>
- *   <li>When socket connection to Signaling server is closed,
- *   <a href="#event_channelClose"><code>channelClose</code> event</a> triggers.</li></ol></li>
- *   <li><a href="#event_peerLeft"><code>peerLeft</code> event</a> triggers for Peers in the Room and User.
- *   <small>If MCU is enabled for the App Key, the <a href="#event_serverPeerLeft">
- *   <code>serverPeerLeft</code> event</a> will be triggered when Room session has ended.</small></li></ol>
+ *   <li>Checks if User is in Room. <ol><li>If User is not in a Room: <ol><li><b>ABORT</b> and return error.</li>
+ *   </ol></li><li>Else: <ol><li>If parameter <code>stopMediaOptions.userMedia</code> value is <code>true</code>: <ol>
+ *   <li>Invoke <a href="#method_stopStream"><code>stopStream()</code> method</a>. 
+ *   <small>Regardless of request errors, <code>leaveRoom()</code> will still proceed.</small></li></ol></li>
+ *   <li>If parameter <code>stopMediaOptions.screenshare</code> value is <code>true</code>: <ol>
+ *   <li>Invoke <a href="#method_stopScreen"><code>stopScreen()</code> method</a>.
+ *   <small>Regardless of request errors, <code>leaveRoom()</code> will still proceed.</small></li></ol></li>
+ *   <li><a href="#event_peerLeft"><code>peerLeft</code> event</a> triggers for User and all connected Peers in Room.</li>
+ *   <li>If MCU is enabled for the App Key provided in <a href="#method_init"><code>init()</code> method</a>
+ *   and connected: <ol><li><a href="#event_serverPeerLeft"><code>serverPeerLeft</code> event</a>
+ *   triggers parameter payload <code>serverPeerType</code> as <code>MCU</code>.</li></ol></li>
+ *   <li><a href="#event_channelClose"><code>channelClose</code> event</a> triggers.</li></ol></li></ol></li></ol>
  * @for Skylink
  * @since 0.5.5
  */
@@ -6267,7 +6415,7 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
   self._inRoom = false;
   self._closeChannel();
 
-  self._stopLocalMediaStreams({
+  self._stopStreams({
     userMedia: stopUserMedia,
     screenshare: stopScreenshare
   });
@@ -6290,11 +6438,21 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
 };
 
 /**
+ * <blockquote class="info">
+ *   Note that broadcasted events from <a href="#method_muteStream"><code>muteStream()</code> method</a>,
+ *   <a href="#method_stopStream"><code>stopStream()</code> method</a>,
+ *   <a href="#method_stopScreen"><code>stopScreen()</code> method</a>,
+ *   <a href="#method_sendMessage"><code>sendMessage()</code> method</a>,
+ *   <a href="#method_unlockRoom"><code>unlockRoom()</code> method</a> and
+ *   <a href="#method_lockRoom"><code>lockRoom()</code> method</a> may be queued when
+ *   sent within less than an interval.
+ * </blockquote>
  * Function that locks the current Room when in session to prevent other Peers from joining the Room.
  * @method lockRoom
  * @trigger <ol class="desc-seq">
+ *   <li>Requests to Signaling server to lock Room <ol>
  *   <li><a href="#event_roomLock"><code>roomLock</code> event</a> triggers parameter payload
- *   <code>isLocked</code> value as <code>true</code>.</li></ol>
+ *   <code>isLocked</code> value as <code>true</code>.</li></ol></li></ol>
  * @for Skylink
  * @since 0.5.0
  */
@@ -6312,11 +6470,21 @@ Skylink.prototype.lockRoom = function() {
 };
 
 /**
+ * <blockquote class="info">
+ *   Note that broadcasted events from <a href="#method_muteStream"><code>muteStream()</code> method</a>,
+ *   <a href="#method_stopStream"><code>stopStream()</code> method</a>,
+ *   <a href="#method_stopScreen"><code>stopScreen()</code> method</a>,
+ *   <a href="#method_sendMessage"><code>sendMessage()</code> method</a>,
+ *   <a href="#method_unlockRoom"><code>unlockRoom()</code> method</a> and
+ *   <a href="#method_lockRoom"><code>lockRoom()</code> method</a> may be queued when
+ *   sent within less than an interval.
+ * </blockquote>
  * Function that unlocks the current Room when in session to allow other Peers to join the Room.
  * @method unlockRoom
  * @trigger <ol class="desc-seq">
+ *   <li>Requests to Signaling server to unlock Room <ol>
  *   <li><a href="#event_roomLock"><code>roomLock</code> event</a> triggers parameter payload
- *   <code>isLocked</code> value as <code>false</code>.</li></ol>
+ *   <code>isLocked</code> value as <code>false</code>.</li></ol></li></ol>
  * @for Skylink
  * @since 0.5.0
  */
@@ -6350,12 +6518,68 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
     self._condition('channelOpen', function() {
       mediaOptions = mediaOptions || {};
 
-      // parse user data settings
-      self._parseUserData(mediaOptions.userData || self._userData);
-      self._parseBandwidthSettings(mediaOptions.bandwidth);
+      self._userData = mediaOptions.userData || self._userData || '';
+      self._streamsBandwidthSettings = {};
 
-      // wait for local mediastream
-      self._waitForLocalMediaStream(callback, mediaOptions);
+      if (mediaOptions.bandwidth) {
+        if (typeof mediaOptions.bandwidth.audio === 'number') {
+          self._streamsBandwidthSettings.audio = mediaOptions.bandwidth.audio;
+        }
+
+        if (typeof mediaOptions.bandwidth.video === 'number') {
+          self._streamsBandwidthSettings.video = mediaOptions.bandwidth.video;
+        }
+
+        if (typeof mediaOptions.bandwidth.data === 'number') {
+          self._streamsBandwidthSettings.data = mediaOptions.bandwidth.data;
+        }
+      }
+
+      // get the stream
+      if (mediaOptions.manualGetUserMedia === true) {
+        self._trigger('mediaAccessRequired');
+
+        var current50Block = 0;
+        var mediaAccessRequiredFailure = false;
+        // wait for available audio or video stream
+        self._wait(function () {
+          if (mediaAccessRequiredFailure === true) {
+            self._onUserMediaError(new Error('Waiting for stream timeout'), false, false);
+          } else {
+            callback(null, self._streams.userMedia.stream);
+          }
+        }, function () {
+          current50Block += 1;
+          if (current50Block === 600) {
+            mediaAccessRequiredFailure = true;
+            return true;
+          }
+
+          if (self._streams.userMedia && self._streams.userMedia.stream) {
+            return true;
+          }
+        }, 50);
+        return;
+      }
+
+      if (mediaOptions.audio || mediaOptions.video) {
+        self.getUserMedia({
+          useExactConstraints: !!mediaOptions.useExactConstraints,
+          audio: mediaOptions.audio,
+          video: mediaOptions.video
+
+        }, function (error, success) {
+          if (error) {
+            callback(error, null);
+          } else {
+            callback(null, success);
+          }
+        });
+        return;
+      }
+
+      callback(null, null);
+
     }, function() { // open channel first if it's not opened
 
       if (!self._channelOpen) {
@@ -6384,7 +6608,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} API_INVALID                 <small>Value <code>4001</code></small>
  *   The value of the failure code when provided App Key in <code>init()</code> does not exists.
  *   <small>To resolve this, check that the provided App Key exists in
- *   <a href="https://console.temasys.io">the Developer Console</a>.</small>
+ *   <a href="https://console.temasys.io">the Temasys Console</a>.</small>
  * @param {Number} API_DOMAIN_NOT_MATCH        <small>Value <code>4002</code></small>
  *   The value of the failure code when <code>"domainName"</code> property in the App Key does not
  *   match the accessing server IP address.
@@ -6392,7 +6616,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} API_CORS_DOMAIN_NOT_MATCH   <small>Value <code>4003</code></small>
  *   The value of the failure code when <code>"corsurl"</code> property in the App Key does not match accessing CORS.
  *   <small>To resolve this, configure the App Key CORS in
- *   <a href="https://console.temasys.io">the Developer Console</a>.</small>
+ *   <a href="https://console.temasys.io">the Temasys Console</a>.</small>
  * @param {Number} API_CREDENTIALS_INVALID     <small>Value <code>4004</code></small>
  *   The value of the failure code when there is no [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
  *   present in the HTTP headers during the request to the Auth server present nor
@@ -6845,15 +7069,29 @@ Skylink.prototype._room = null;
  *     skylinkDemo.joinRoom(); // Goes to default Room (switching to different Room is not allowed for credentials authentication)
  *   });
  * @trigger <ol class="desc-seq">
+ *   <li>If parameter <code>options</code> is not provided: <ol><li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>Checks if dependecies and browser APIs are available. <ol><li>If AdapterJS is not loaded: <ol>
+ *   <li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers
+ *   parameter payload <code>state</code> as <code>ERROR</code> and <code>error.errorCode</code> as
+ *   <code>ADAPTER_NO_LOADED</code>.</li><li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>If socket.io-client is not loaded: <ol><li><a href="#event_readyStateChange">
+ *   <code>readyStateChange</code> event</a> triggers parameter payload <code>state</code>
+ *   as <code>ERROR</code> and <code>error.errorCode</code> as <code>NO_SOCKET_IO</code>.</li>
+ *   <li><b>ABORT</b> and return error. </li></ol></li>
+ *   <li>If XMLHttpRequest API is not available: <ol><li><a href="#event_readyStateChange">
+ *   <code>readyStateChange</code> event</a> triggers parameter payload <code>state</code>
+ *   as <code>ERROR</code> and <code>error.errorCode</code> as <code>NO_XMLHTTPREQUEST_SUPPORT</code>.</li>
+ *   <li><b>ABORT</b> and return error.</li></ol></li><li>If WebRTC is not supported by device: <ol>
  *   <li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers parameter
- *   payload <code>state</code> value as <code>LOADING</code>.</li><li><ol>
- *   <li>When authentication is successful,
- *   <a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers parameter
- *   payload <code>state</code> value as <code>COMPLETED</code>.
- *   <small>Room session token will be retrieved and will be required by <a href="#method_joinRoom">
- *   <code>joinRoom()</code> method</a> to start Room connection.</small></li>
- *   <li>When authentication fails, <a href="#event_readyStateChange"><code>readyStateChange</code>
- *   event</a> triggers parameter payload <code>state</code> value as <code>ERROR</code>.</li></ol></ol>
+ *   payload <code>state</code> as <code>ERROR</code> and <code>error.errorCode</code> as
+ *   <code>NO_WEBRTC_SUPPORT</code>.</li><li><b>ABORT</b> and return error.</li></ol></li></ol></li>
+ *   <li>Retrieves Room session token from Auth server. <ol>
+ *   <li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers
+ *   parameter payload <code>state</code> as <code>LOADING</code>.</li>
+ *   <li>If retrieval was successful: <ol><li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>COMPLETED</code>.</li></ol></li><li>Else: <ol>
+ *   <li><a href="#event_readyStateChange"><code>readyStateChange</code> event</a> triggers parameter
+ *   payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol>
  * @for Skylink
  * @since 0.5.5
  */
@@ -7234,7 +7472,7 @@ Skylink.prototype._parseInfo = function(info) {
       mediaConstraints: JSON.parse(info.media_constraints)
     }
   };
-  this._parseDefaultMediaStreamSettings(this._room.connection.mediaConstraints);
+  //this._parseDefaultMediaStreamSettings(this._room.connection.mediaConstraints);
 
   // set the socket ports
   this._socketPorts = {
@@ -7969,6 +8207,8 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} isAudioFallback The flag if event occurred during
    *   retrieval of audio tracks only when <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>
    *   had failed to retrieve both audio and video tracks.
+   * @param {String} streamId The Stream ID.
+   *   <small>Defined only when <code>state</code> payload is <code>FALLBACKED</code>.</small>
    * @for Skylink
    * @since 0.6.3
    */
@@ -7982,6 +8222,10 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} isScreensharing The flag if event occurred during
    *   <a href="#method_shareScreen"><code>shareScreen()</code> method</a> and not
    *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.
+   * @param {Boolean} isAudioFallback The flag if event occurred during
+   *   retrieval of audio tracks only when <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>
+   *   had failed to retrieve both audio and video tracks.
+   * @param {String} streamId The Stream ID.
    * @for Skylink
    * @since 0.1.0
    */
@@ -8002,6 +8246,10 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} isScreensharing The flag if event occurred during
    *   <a href="#method_shareScreen"><code>shareScreen()</code> method</a> and not
    *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.
+   * @param {Boolean} isAudioFallback The flag if event occurred during
+   *   retrieval of audio tracks only when <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>
+   *   had failed to retrieve both audio and video tracks.
+   * @param {String} streamId The Stream ID.
    * @for Skylink
    * @since 0.5.6
    */
@@ -8016,25 +8264,37 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.settings The Peer sending Stream settings.
    * @param {Boolean|JSON} peerInfo.settings.audio The Peer Stream audio settings.
    *   <small>When defined as <code>false</code>, it means there is no audio being sent from Peer.</small>
-   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag if stereo band is configured
+   * @param {Boolean} peerInfo.settings.audio.stereo The flag if stereo band is configured
    *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for receiving audio data.
+   * @param {Array} [peerInfo.settings.audio.optional] The Peer Stream <code>navigator.getUserMedia()</code> API
+   *   <code>audio: { optional [..] }</code> property.
+   * @param {String} [peerInfo.settings.audio.deviceId] The Peer Stream audio track source ID of the device used.
+   * @param {Boolean} peerInfo.settings.audio.exactConstraints The flag if Peer Stream audio track is sending exact
+   *   requested values of <code>peerInfo.settings.audio.deviceId</code> when provided.
    * @param {Boolean|JSON} peerInfo.settings.video The Peer Stream video settings.
    *   <small>When defined as <code>false</code>, it means there is no video being sent from Peer.</small>
    * @param {JSON} peerInfo.settings.video.resolution The Peer Stream video resolution.
    *   [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} [peerInfo.settings.video.resolution.width] The Peer Stream video resolution width.
-   * @param {Number} [peerInfo.settings.video.resolution.height] The Peer Stream video resolution height.
+   * @param {Number} peerInfo.settings.video.resolution.width The Peer Stream video resolution width.
+   * @param {Number} peerInfo.settings.video.resolution.height The Peer Stream video resolution height.
    * @param {Number} [peerInfo.settings.video.frameRate] The Peer Stream video
    *   <a href="https://en.wikipedia.org/wiki/Frame_rate">frameRate</a> per second (fps).
-   * @param {Boolean} [peerInfo.settings.video.screenshare] The flag if Peer Stream is a screensharing Stream.
-   * @param {JSON} [peerInfo.settings.bandwidth] The maximum streaming bandwidth sent from Peer.
+   * @param {Boolean} peerInfo.settings.video.screenshare The flag if Peer Stream is a screensharing Stream.
+   * @param {Array} [peerInfo.settings.video.optional] The Peer Stream <code>navigator.getUserMedia()</code> API
+   *   <code>video: { optional [..] }</code> property.
+   * @param {String} [peerInfo.settings.video.deviceId] The Peer Stream video track source ID of the device used.
+   * @param {Boolean} peerInfo.settings.video.exactConstraints The flag if Peer Stream video track is sending exact
+   *   requested values of <code>peerInfo.settings.video.resolution</code>,
+   *   <code>peerInfo.settings.video.frameRate</code> and <code>peerInfo.settings.video.deviceId</code>
+   *   when provided.
+   * @param {JSON} peerInfo.settings.bandwidth The maximum streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.audio] The maximum audio streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.video] The maximum video streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.data] The maximum data streaming bandwidth sent from Peer.
    * @param {JSON} peerInfo.mediaStatus The Peer Stream muted settings.
    * @param {Boolean} peerInfo.mediaStatus.audioMuted The flag if Peer Stream audio tracks is muted or not.
    *   <small>If Peer <code>peerInfo.settings.audio</code> is false, this will be defined as <code>true</code>.</small>
-   * @param {Boolean} peerInfo.mediaStatus.videoMuted The flag if Peer Stream audio tracks is muted or not.
+   * @param {Boolean} peerInfo.mediaStatus.videoMuted The flag if Peer Stream video tracks is muted or not.
    *   <small>If Peer <code>peerInfo.settings.video</code> is false, this will be defined as <code>true</code>.</small>
    * @param {JSON} peerInfo.agent The Peer agent information.
    * @param {String} peerInfo.agent.name The Peer agent name.
@@ -8043,6 +8303,8 @@ Skylink.prototype._EVENTS = {
    *   <small>Data may be accessing browser or non-Web SDK version.</small>
    * @param {String} [peerInfo.agent.os] The Peer platform name.
    *  <small>Data may be accessing OS platform version from Web SDK.</small>
+   * @param {String} [peerInfo.agent.pluginVersion] The Peer Temasys Plugin version.
+   *  <small>Defined only when Peer is using the Temasys Plugin (IE / Safari).</small>
    * @param {String} peerInfo.room The Room Peer is from.
    * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
@@ -8284,13 +8546,14 @@ Skylink.prototype._EVENTS = {
    *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small>
    * @param {Boolean} isSelf The flag if Peer is User.
    * @param {Boolean} isScreensharing The flag if Peer Stream is a screensharing Stream.
+   * @param {String} streamId The Stream ID.
    * @for Skylink
    * @since 0.5.10
    */
   streamEnded: [],
 
   /**
-   * Event triggered when Peer Stream audio or video tracks has been muted.
+   * Event triggered when Peer Stream audio or video tracks has been muted / unmuted.
    * @event streamMuted
    * @param {String} peerId The Peer ID.
    * @param {JSON} peerInfo The Peer session information.
@@ -8438,7 +8701,24 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.14
    */
-  getConnectionStatusStateChange: []
+  getConnectionStatusStateChange: [],
+
+  /**
+   * Event triggered when <a href="#method_muteStream"><code>muteStream()</code> method</a> changes
+   * User Streams audio and video tracks muted status.
+   * @event localMediaMuted
+   * @param {JSON} mediaStatus The Streams muted settings.
+   *   <small>This indicates the muted settings for both
+   *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> and
+   *   <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>.</small>
+   * @param {Boolean} mediaStatus.audioMuted The flag if all Streams audio tracks is muted or not.
+   *   <small>If User's <code>peerInfo.settings.audio</code> is false, this will be defined as <code>true</code>.</small>
+   * @param {Boolean} mediaStatus.videoMuted The flag if all Streams video tracks is muted or not.
+   *   <small>If User's <code>peerInfo.settings.video</code> is false, this will be defined as <code>true</code>.</small>
+   * @for Skylink
+   * @since 0.6.15
+   */
+  localMediaMuted: []
 };
 
 /**
@@ -9343,6 +9623,25 @@ Skylink.prototype._hasMCU = false;
 Skylink.prototype._receiveOnly = false;
 
 /**
+ * Stores the list of Peer messages timestamp.
+ * @attribute _peerMessagesStamps
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._peerMessagesStamps = {};
+
+/**
+ * <blockquote class="info">
+ *   Note that broadcasted events from <a href="#method_muteStream"><code>muteStream()</code> method</a>,
+ *   <a href="#method_stopStream"><code>stopStream()</code> method</a>,
+ *   <a href="#method_stopScreen"><code>stopScreen()</code> method</a>,
+ *   <a href="#method_sendMessage"><code>sendMessage()</code> method</a>,
+ *   <a href="#method_unlockRoom"><code>unlockRoom()</code> method</a> and
+ *   <a href="#method_lockRoom"><code>lockRoom()</code> method</a> may be queued when
+ *   sent within less than an interval.
+ * </blockquote>
  * Function that sends a message to Peers via the Signaling socket connection.
  * @method sendMessage
  * @param {String|JSON} message The message.
@@ -9367,8 +9666,9 @@ Skylink.prototype._receiveOnly = false;
  *     skylinkDemo.sendMessage(message, peersInExclusiveParty);
  *   }
  * @trigger <ol class="desc-seq">
+ *   <li>Sends socket connection message to all targeted Peers via Signaling server. <ol>
  *   <li><a href="#event_incomingMessage"><code>incomingMessage</code> event</a> triggers parameter payload
- *   <code>message.isDataChannel</code> value as <code>false</code>.</li></ol>
+ *   <code>message.isDataChannel</code> value as <code>false</code>.</li></ol></li></ol>
  * @for Skylink
  * @since 0.4.0
  */
@@ -9797,11 +10097,12 @@ Skylink.prototype._approachEventHandler = function(message){
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
-    userInfo: self.getPeerInfo(),
+    userInfo: self._getUserInfo(),
     receiveOnly: self._receiveOnly,
-    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+    sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
     target: message.target,
-    weight: self._peerPriorityWeight
+    weight: self._peerPriorityWeight,
+    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
   });
 };
 
@@ -9850,6 +10151,13 @@ Skylink.prototype._updateUserEventHandler = function(message) {
   var targetMid = message.mid;
   log.log([targetMid, null, message.type, 'Peer updated userData:'], message.userData);
   if (this._peerInformations[targetMid]) {
+    if (this._peerMessagesStamps[targetMid] && typeof message.stamp === 'number') {
+      if (message.stamp < this._peerMessagesStamps[targetMid].userData) {
+        log.warn([targetMid, null, message.type, 'Dropping outdated status ->'], message);
+        return;
+      }
+      this._peerMessagesStamps[targetMid].userData = message.stamp;
+    }
     this._peerInformations[targetMid].userData = message.userData || {};
     this._trigger('peerUpdated', targetMid,
       this.getPeerInfo(targetMid), false);
@@ -9887,9 +10195,18 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
   var targetMid = message.mid;
   log.log([targetMid, null, message.type, 'Peer\'s audio muted:'], message.muted);
   if (this._peerInformations[targetMid]) {
+    if (this._peerMessagesStamps[targetMid] && typeof message.stamp === 'number') {
+      if (message.stamp < this._peerMessagesStamps[targetMid].audioMuted) {
+        log.warn([targetMid, null, message.type, 'Dropping outdated status ->'], message);
+        return;
+      }
+      this._peerMessagesStamps[targetMid].audioMuted = message.stamp;
+    }
     this._peerInformations[targetMid].mediaStatus.audioMuted = message.muted;
-    this._trigger('peerUpdated', targetMid,
-      this.getPeerInfo(targetMid), false);
+    this._trigger('streamMuted', targetMid, this.getPeerInfo(targetMid), false,
+      this._peerInformations[targetMid].settings.video &&
+      this._peerInformations[targetMid].settings.video.screenshare);
+    this._trigger('peerUpdated', targetMid, this.getPeerInfo(targetMid), false);
   } else {
     log.log([targetMid, message.type, 'Peer does not have any user information']);
   }
@@ -9908,7 +10225,17 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
   var targetMid = message.mid;
   log.log([targetMid, null, message.type, 'Peer\'s video muted:'], message.muted);
   if (this._peerInformations[targetMid]) {
+    if (this._peerMessagesStamps[targetMid] && typeof message.stamp === 'number') {
+      if (message.stamp < this._peerMessagesStamps[targetMid].videoMuted) {
+        log.warn([targetMid, null, message.type, 'Dropping outdated status ->'], message);
+        return;
+      }
+      this._peerMessagesStamps[targetMid].videoMuted = message.stamp;
+    }
     this._peerInformations[targetMid].mediaStatus.videoMuted = message.muted;
+    this._trigger('streamMuted', targetMid, this.getPeerInfo(targetMid), false,
+      this._peerInformations[targetMid].settings.video &&
+      this._peerInformations[targetMid].settings.video.screenshare);
     this._trigger('peerUpdated', targetMid,
       this.getPeerInfo(targetMid), false);
   } else {
@@ -9933,7 +10260,8 @@ Skylink.prototype._streamEventHandler = function(message) {
 
   	if (message.status === 'ended') {
   		this._trigger('streamEnded', targetMid, this.getPeerInfo(targetMid),
-        false, message.sessionType === 'screensharing');
+        false, message.sessionType === 'screensharing', message.streamId);
+      this._trigger('peerUpdated', targetMid, this.getPeerInfo(targetMid), false);
 
       if (this._peerConnections[targetMid]) {
         this._peerConnections[targetMid].hasStream = false;
@@ -9943,7 +10271,39 @@ Skylink.prototype._streamEventHandler = function(message) {
       } else {
         log.log([targetMid, null, message.type, 'Peer connection not found']);
       }
-  	}
+  	} else if (message.status === 'check') {
+      if (!message.streamId) {
+        return;
+      }
+
+      // Prevent restarts unless its stable
+      if (this._peerConnections[targetMid] && this._peerConnections[targetMid].signalingState ===
+        this.PEER_CONNECTION_STATE.STABLE) {
+        var streams = this._peerConnections[targetMid].getRemoteStreams();
+        if (streams.length > 0 && message.streamId !== (streams[0].id || streams[0].label)) {
+          this._sendChannelMessage({
+            type: this._SIG_MESSAGE_TYPE.RESTART,
+            mid: this._user.sid,
+            rid: this._room.id,
+            agent: window.webrtcDetectedBrowser,
+            version: window.webrtcDetectedVersion,
+            os: window.navigator.platform,
+            userInfo: this._getUserInfo(),
+            target: targetMid,
+            weight: this._peerPriorityWeight,
+            enableIceTrickle: this._enableIceTrickle,
+            enableDataChannel: this._enableDataChannel,
+            receiveOnly: this._peerConnections[targetMid] && this._peerConnections[targetMid].receiveOnly,
+            sessionType: !!this._streams.screenshare ? 'screensharing' : 'stream',
+            // SkylinkJS parameters (copy the parameters from received message parameters)
+            isConnectionRestart: !!message.isConnectionRestart,
+            lastRestart: message.lastRestart,
+            explicit: !!message.explicit,
+            temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+          });
+        }
+      }
+    }
 
   } else {
     log.log([targetMid, null, message.type, 'Peer does not have any user information']);
@@ -10133,10 +10493,10 @@ Skylink.prototype._inRoomHandler = function(message) {
     self._peerPriorityWeight -= 100000000000;
   }
 
-  if (self._mediaScreen && self._mediaScreen !== null) {
-    self._trigger('incomingStream', self._user.sid, self._mediaScreen, true, self.getPeerInfo());
-  } else if (self._mediaStream && self._mediaStream !== null) {
-    self._trigger('incomingStream', self._user.sid, self._mediaStream, true, self.getPeerInfo());
+  if (self._streams.screenshare && self._streams.screenshare.stream) {
+    self._trigger('incomingStream', self._user.sid, self._streams.screenshare.stream, true, self.getPeerInfo());
+  } else if (self._streams.userMedia && self._streams.userMedia.stream) {
+    self._trigger('incomingStream', self._user.sid, self._streams.userMedia.stream, true, self.getPeerInfo());
   }
   // NOTE ALEX: should we wait for local streams?
   // or just go with what we have (if no stream, then one way?)
@@ -10150,10 +10510,11 @@ Skylink.prototype._inRoomHandler = function(message) {
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
-    userInfo: self.getPeerInfo(),
+    userInfo: self._getUserInfo(),
     receiveOnly: self._receiveOnly,
-    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
-    weight: self._peerPriorityWeight
+    sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
+    weight: self._peerPriorityWeight,
+    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
   });
 };
 
@@ -10182,10 +10543,16 @@ Skylink.prototype._enterHandler = function(message) {
     }, false, false, message.receiveOnly, message.sessionType === 'screensharing');
 
     self._peerInformations[targetMid] = message.userInfo || {};
+    self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
+      userData: 0,
+      audioMuted: 0,
+      videoMuted: 0
+    };
     self._peerInformations[targetMid].agent = {
       name: message.agent,
       version: message.version,
-      os: message.os || ''
+      os: message.os || '',
+      pluginVersion: message.temasysPluginVersion
     };
 
     if (targetMid !== 'MCU') {
@@ -10212,10 +10579,11 @@ Skylink.prototype._enterHandler = function(message) {
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
-    userInfo: self.getPeerInfo(),
+    userInfo: self._getUserInfo(),
     target: targetMid,
     weight: self._peerPriorityWeight,
-    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+    sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
+    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
   });
 
   if (isNewPeer) {
@@ -10274,10 +10642,16 @@ Skylink.prototype._restartHandler = function(message){
 
   // re-add information
   self._peerInformations[targetMid] = message.userInfo || {};
+  self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
+    userData: 0,
+    audioMuted: 0,
+    videoMuted: 0
+  };
   self._peerInformations[targetMid].agent = {
     name: message.agent,
     version: message.version,
-    os: message.os || ''
+    os: message.os || '',
+    pluginVersion: message.temasysPluginVersion
   };
 
   var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
@@ -10311,17 +10685,18 @@ Skylink.prototype._restartHandler = function(message){
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion,
       os: window.navigator.platform,
-      userInfo: self.getPeerInfo(),
+      userInfo: self._getUserInfo(),
       target: targetMid,
       weight: self._peerPriorityWeight,
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
       receiveOnly: self._peerConnections[targetMid] && self._peerConnections[targetMid].receiveOnly,
-      sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+      sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
       // SkylinkJS parameters (copy the parameters from received message parameters)
       isConnectionRestart: !!message.isConnectionRestart,
       lastRestart: message.lastRestart,
-      explicit: !!message.explicit
+      explicit: !!message.explicit,
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
     });
   }
 
@@ -10359,10 +10734,16 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   if (!this._peerInformations[targetMid]) {
     this._peerInformations[targetMid] = message.userInfo || {};
+    this._peerMessagesStamps[targetMid] = this._peerMessagesStamps[targetMid] || {
+      userData: 0,
+      audioMuted: 0,
+      videoMuted: 0
+    };
     this._peerInformations[targetMid].agent = {
       name: message.agent,
       version: message.version,
-      os: message.os || ''
+      os: message.os || '',
+      pluginVersion: message.temasysPluginVersion
     };
     // disable mcu for incoming peer sent by MCU
     /*if (message.agent === 'MCU') {
@@ -10416,10 +10797,11 @@ Skylink.prototype._welcomeHandler = function(message) {
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion,
       os: window.navigator.platform,
-      userInfo: this.getPeerInfo(),
+      userInfo: this._getUserInfo(),
       target: targetMid,
       weight: this._peerPriorityWeight,
-      sessionType: !!this._mediaScreen ? 'screensharing' : 'stream'
+      sessionType: !!this._streams.screenshare ? 'screensharing' : 'stream',
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
     });
   }
 };
@@ -10449,6 +10831,13 @@ Skylink.prototype._offerHandler = function(message) {
       pc.localDescription);
     return;
   }*/
+
+  // Add-on by Web SDK fixes
+  if (message.userInfo && typeof message.userInfo === 'object') {
+    self._peerInformations[targetMid].settings = message.userInfo.settings;
+    self._peerInformations[targetMid].mediaStatus = message.userInfo.mediaStatus;
+    self._peerInformations[targetMid].userData = message.userInfo.userData;
+  }
 
   log.log([targetMid, null, message.type, 'Received offer from peer. ' +
     'Session description:'], message.sdp);
@@ -10626,6 +11015,13 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }
 
+  // Add-on by Web SDK fixes
+  if (message.userInfo && typeof message.userInfo === 'object') {
+    self._peerInformations[targetMid].settings = message.userInfo.settings;
+    self._peerInformations[targetMid].mediaStatus = message.userInfo.mediaStatus;
+    self._peerInformations[targetMid].userData = message.userInfo.userData;
+  }
+
   var answer = new window.RTCSessionDescription({
     type: message.type,
     sdp: message.sdp
@@ -10754,109 +11150,111 @@ Skylink.prototype.AUDIO_CODEC = {
  * @param {JSON} QQVGA <small>Value <code>{ width: 160, height: 120 }</code></small>
  *   The value of the option to configure QQVGA resolution.
  *   <small>Aspect ratio: <code>4:3</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} HQVGA <small>Value <code>{ width: 240, height: 160 }</code></small>
  *   The value of the option to configure HQVGA resolution.
  *   <small>Aspect ratio: <code>3:2</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} QVGA <small>Value <code>{ width: 320, height: 240 }</code></small>
  *   The value of the option to configure QVGA resolution.
  *   <small>Aspect ratio: <code>4:3</code></small>
  * @param {JSON} WQVGA <small>Value <code>{ width: 384, height: 240 }</code></small>
  *   The value of the option to configure WQVGA resolution.
  *   <small>Aspect ratio: <code>16:10</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} HVGA <small>Value <code>{ width: 480, height: 320 }</code></small>
  *   The value of the option to configure HVGA resolution.
  *   <small>Aspect ratio: <code>3:2</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} VGA <small>Value <code>{ width: 640, height: 480 }</code></small>
  *   The value of the option to configure VGA resolution.
  *   <small>Aspect ratio: <code>4:3</code></small>
  * @param {JSON} WVGA <small>Value <code>{ width: 768, height: 480 }</code></small>
  *   The value of the option to configure WVGA resolution.
  *   <small>Aspect ratio: <code>16:10</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} FWVGA <small>Value <code>{ width: 854, height: 480 }</code></small>
  *   The value of the option to configure FWVGA resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} SVGA <small>Value <code>{ width: 800, height: 600 }</code></small>
  *   The value of the option to configure SVGA resolution.
  *   <small>Aspect ratio: <code>4:3</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} DVGA <small>Value <code>{ width: 960, height: 640 }</code></small>
  *   The value of the option to configure DVGA resolution.
  *   <small>Aspect ratio: <code>3:2</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} WSVGA <small>Value <code>{ width: 1024, height: 576 }</code></small>
  *   The value of the option to configure WSVGA resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
  * @param {JSON} HD <small>Value <code>{ width: 1280, height: 720 }</code></small>
  *   The value of the option to configure HD resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
+ *   <small>Note that configurating this resolution may not be supported depending on device supports.</small>
  * @param {JSON} HDPLUS <small>Value <code>{ width: 1600, height: 900 }</code></small>
  *   The value of the option to configure HDPLUS resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} FHD <small>Value <code>{ width: 1920, height: 1080 }</code></small>
  *   The value of the option to configure FHD resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on device supports.</small>
  * @param {JSON} QHD <small>Value <code>{ width: 2560, height: 1440 }</code></small>
  *   The value of the option to configure QHD resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} WQXGAPLUS <small>Value <code>{ width: 3200, height: 1800 }</code></small>
  *   The value of the option to configure WQXGAPLUS resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} UHD <small>Value <code>{ width: 3840, height: 2160 }</code></small>
  *   The value of the option to configure UHD resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} UHDPLUS <small>Value <code>{ width: 5120, height: 2880 }</code></small>
  *   The value of the option to configure UHDPLUS resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} FUHD <small>Value <code>{ width: 7680, height: 4320 }</code></small>
  *   The value of the option to configure FUHD resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @param {JSON} QUHD <small>Value <code>{ width: 15360, height: 8640 }</code></small>
  *   The value of the option to configure QUHD resolution.
  *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported.</small>
+ *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
  * @type JSON
  * @readOnly
  * @for Skylink
  * @since 0.5.6
  */
 Skylink.prototype.VIDEO_RESOLUTION = {
-  QQVGA: { width: 160, height: 120, aspectRatio: '4:3' },
-  HQVGA: { width: 240, height: 160, aspectRatio: '3:2' },
-  QVGA: { width: 320, height: 240, aspectRatio: '4:3' },
-  WQVGA: { width: 384, height: 240, aspectRatio: '16:10' },
-  HVGA: { width: 480, height: 320, aspectRatio: '3:2' },
-  VGA: { width: 640, height: 480, aspectRatio: '4:3' },
-  WVGA: { width: 768, height: 480, aspectRatio: '16:10' },
-  FWVGA: { width: 854, height: 480, aspectRatio: '16:9' },
-  SVGA: { width: 800, height: 600, aspectRatio: '4:3' },
-  DVGA: { width: 960, height: 640, aspectRatio: '3:2' },
-  WSVGA: { width: 1024, height: 576, aspectRatio: '16:9' },
-  HD: { width: 1280, height: 720, aspectRatio: '16:9' },
-  HDPLUS: { width: 1600, height: 900, aspectRatio: '16:9' },
-  FHD: { width: 1920, height: 1080, aspectRatio: '16:9' },
-  QHD: { width: 2560, height: 1440, aspectRatio: '16:9' },
-  WQXGAPLUS: { width: 3200, height: 1800, aspectRatio: '16:9' },
-  UHD: { width: 3840, height: 2160, aspectRatio: '16:9' },
-  UHDPLUS: { width: 5120, height: 2880, aspectRatio: '16:9' },
-  FUHD: { width: 7680, height: 4320, aspectRatio: '16:9' },
-  QUHD: { width: 15360, height: 8640, aspectRatio: '16:9' }
+  QQVGA: { width: 160, height: 120 /*, aspectRatio: '4:3'*/ },
+  HQVGA: { width: 240, height: 160 /*, aspectRatio: '3:2'*/ },
+  QVGA: { width: 320, height: 240 /*, aspectRatio: '4:3'*/ },
+  WQVGA: { width: 384, height: 240 /*, aspectRatio: '16:10'*/ },
+  HVGA: { width: 480, height: 320 /*, aspectRatio: '3:2'*/ },
+  VGA: { width: 640, height: 480 /*, aspectRatio: '4:3'*/ },
+  WVGA: { width: 768, height: 480 /*, aspectRatio: '16:10'*/ },
+  FWVGA: { width: 854, height: 480 /*, aspectRatio: '16:9'*/ },
+  SVGA: { width: 800, height: 600 /*, aspectRatio: '4:3'*/ },
+  DVGA: { width: 960, height: 640 /*, aspectRatio: '3:2'*/ },
+  WSVGA: { width: 1024, height: 576 /*, aspectRatio: '16:9'*/ },
+  HD: { width: 1280, height: 720 /*, aspectRatio: '16:9'*/ },
+  HDPLUS: { width: 1600, height: 900 /*, aspectRatio: '16:9'*/ },
+  FHD: { width: 1920, height: 1080 /*, aspectRatio: '16:9'*/ },
+  QHD: { width: 2560, height: 1440 /*, aspectRatio: '16:9'*/ },
+  WQXGAPLUS: { width: 3200, height: 1800 /*, aspectRatio: '16:9'*/ },
+  UHD: { width: 3840, height: 2160 /*, aspectRatio: '16:9'*/ },
+  UHDPLUS: { width: 5120, height: 2880 /*, aspectRatio: '16:9'*/ },
+  FUHD: { width: 7680, height: 4320 /*, aspectRatio: '16:9'*/ },
+  QUHD: { width: 15360, height: 8640 /*, aspectRatio: '16:9'*/ }
 };
 
-/*
- * The list of <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> Stream fallback states.
+/**
+ * The list of <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> or
+ * <a href="#method_shareScreen"><code>shareScreen()</code> method</a> Stream fallback states.
  * @attribute MEDIA_ACCESS_FALLBACK_STATE
  * @param {JSON} FALLBACKING <small>Value <code>0</code></small>
  *   The value of the state when <code>getUserMedia()</code> will retrieve audio track only
@@ -10864,9 +11262,9 @@ Skylink.prototype.VIDEO_RESOLUTION = {
  *   <small>This can be configured by <a href="#method_init"><code>init()</code> method</a>
  *   <code>audioFallback</code> option.</small>
  * @param {JSON} FALLBACKED  <small>Value <code>1</code></small>
- *   The value of the state when <code>getUserMedia()</code> retrieves camera Stream successfully but with
- *   missing originally required audio or video tracks.
- * @param {JSON} ERROR       <small>-1</code></small>
+ *   The value of the state when <code>getUserMedia()</code> or <code>shareScreen()</code>
+ *   retrieves camera / screensharing Stream successfully but with missing originally required audio or video tracks.
+ * @param {JSON} ERROR       <small>Value <code>-1</code></small>
  *   The value of the state when <code>getUserMedia()</code> failed to retrieve audio track only
  *   after retrieving audio and video tracks failed.
  * @readOnly
@@ -10940,148 +11338,6 @@ Skylink.prototype._currentRecordingId = false;
 Skylink.prototype._recordingStartInterval = null;
 
 /**
- * Stores the preferred sending Peer connection streaming audio codec.
- * @attribute _selectedAudioCodec
- * @type String
- * @default "auto"
- * @private
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype._selectedAudioCodec = 'auto';
-
-/**
- * Stores the preferred sending Peer connection streaming video codec.
- * @attribute _selectedVideoCodec
- * @type String
- * @default "auto"
- * @private
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype._selectedVideoCodec = 'auto';
-
-/**
- * Stores the User's <code>getUserMedia()</code> Stream.
->>>>>>> 0.6.x-development
- * @attribute _mediaStream
- * @type MediaStream
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._mediaStream = null;
-
-/**
- * Stores the User's <code>shareScreen()</code> Stream.
- * @attribute _mediaScreen
- * @type MediaStream
- * @private
- * @for Skylink
- * @since 0.6.0
- */
-Skylink.prototype._mediaScreen = null;
-
-/**
- * Stores the User's <code>shareScreen()</code> Stream clone for storing the video track.
- * Currently Chrome doesn't give us the audio track in the stream we receive, so we have to
- *   make another getUserMedia() call to retrieve the audio track only.
- * @attribute _mediaScreenClone
- * @type MediaStream
- * @private
- * @for Skylink
- * @since 0.6.0
- */
-Skylink.prototype._mediaScreenClone = null;
-
-/**
- * Stores the default Stream settings for <code>getUserMedia()</code> method.
- * @attribute _defaultStreamSettings
- * @param {JSON} audio The default Stream audio settings.
- * @param {JSON} video The default Stream video settings.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.7
- */
-Skylink.prototype._defaultStreamSettings = {
-  audio: {
-    stereo: false
-  },
-  video: {
-    resolution: {
-      width: 640,
-      height: 480
-    },
-    frameRate: 50
-  },
-  bandwidth: {
-    //audio: 50,
-    //video: 256,
-    //data: 1638400
-  }
-};
-
-/**
- * Stores the <code>getUserMedia()</code> Stream settings.
- * @attribute _streamSettings
- * @param {JSON} audio The Stream audio settings.
- * @param {JSON} video The Stream video settings.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._streamSettings = {};
-
-/**
- * Stores the <code>shareScreen()</code> Stream settings.
- * @attribute _screenSharingStreamSettings
- * @param {JSON} audio The Stream audio settings.
- * @param {JSON} video The Stream video settings.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._screenSharingStreamSettings = {
-  video: true
-};
-
-/**
- * Stores the flag that indicates if screensharing is supported in the browser.
- * @attribute _screenSharingAvailable
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._screenSharingAvailable = false;
-
-/**
- * Stores the native <code>navigator.getUserMedia()</code> API constraints for
- *   <code>getUserMedia()</code> retrieval of Stream.
- * @attribute _getUserMediaSettings
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._getUserMediaSettings = {};
-
-/**
- * Stores the User's Stream (both <code>getUserMedia()</code> and <code>shareScreen()</code>) muted status.
- * @attribute _mediaStreamsStatus
- * @param {Boolean} audioMuted The flag that indicates if audio is muted or not available.
- * @param {Boolean} videoMuted The flag that indicates if video is muted or not available.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._mediaStreamsStatus = {};
-
-/**
  * Stores the flag that indicates if <code>getUserMedia()</code> should fallback to retrieve
  *   audio only Stream after retrieval of audio and video Stream had failed.
  * @attribute _audioFallback
@@ -11094,36 +11350,137 @@ Skylink.prototype._mediaStreamsStatus = {};
 Skylink.prototype._audioFallback = false;
 
 /**
+ * Stores the Streams.
+ * @attribute _streams
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._streams = {
+  userMedia: null,
+  screenshare: null
+};
+
+/**
+ * Stores the default camera Stream settings.
+ * @attribute _streamsDefaultSettings
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._streamsDefaultSettings = {
+  userMedia: {
+    audio: {
+      stereo: false
+    },
+    video: {
+      resolution: {
+        width: 640,
+        height: 480
+      },
+      frameRate: 50
+    }
+  },
+  screenshare: {
+    video: true
+  }
+};
+
+/**
+ * Stores all the Stream required muted settings.
+ * @attribute _streamsMutedSettings
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._streamsMutedSettings = {
+  audioMuted: false,
+  videoMuted: false
+};
+
+/**
+ * Stores all the Stream sending maximum bandwidth settings.
+ * @attribute _streamsBandwidthSettings
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._streamsBandwidthSettings = {};
+
+/**
+ * Stores all the Stream stopped callbacks.
+ * @attribute _streamsStoppedCbs
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._streamsStoppedCbs = {};
+
+/**
  * Function that retrieves camera Stream.
  * @method getUserMedia
  * @param {JSON} [options] The camera Stream configuration options.
  * - When not provided, the value is set to <code>{ audio: true, video: true }</code>.
  *   <small>To fallback to retrieve audio track only when retrieving of audio and video tracks failed,
  *   enable the <code>audioFallback</code> flag in the <a href="#method_init"><code>init()</code> method</a>.</small>
+ * @param {Boolean} [options.useExactConstraints=false] <blockquote class="info">
+ *   Note that by enabling this flag, exact values will be requested  when retrieving camera Stream,
+ *   but it does not prevent constraints related errors. By default when not enabled,
+ *   expected mandatory maximum values (or optional values for source ID) will requested to prevent constraints related
+ *   errors, with an exception for <code>options.video.frameRate</code> option in Safari and IE (plugin-enabled) browsers,
+ *   where the expected maximum value will not be requested due to the lack of support.</blockquote>
+ *   The flag if <code>getUserMedia()</code> should request for camera Stream to match exact requested values of
+ *   <code>options.audio.deviceId</code> and <code>options.video.deviceId</code>, <code>options.video.resolution</code>
+ *   and <code>options.video.frameRate</code> when provided.
  * @param {Boolean|JSON} [options.audio=false] The audio configuration options.
  * @param {Boolean} [options.audio.stereo=false] The flag if stereo band should be configured
  *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
  * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
- * @param {Array} [options.audio.optional] The <code>navigator.getUserMedia()</code> API
- *   <code>audio: { optional [..] }</code> property.
+ *   <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.audioMuted</code>,
+ *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.audioMuted</code> value to
+ *   <code>true</code> and mutes any existing <a href="#method_shareScreen">
+ *   <code>shareScreen()</code> Stream</a> audio tracks as well.</small>
+ * @param {Array} [options.audio.optional] <blockquote class="info">
+ *   Note that this may result in constraints related error when <code>options.useExactConstraints</code> value is
+ *   <code>true</code>. If you are looking to set the requested source ID of the audio track,
+ *   use <code>options.audio.deviceId</code> instead.</blockquote>
+ *   The <code>navigator.getUserMedia()</code> API <code>audio: { optional [..] }</code> property.
+ * @param {String} [options.audio.deviceId] <blockquote class="info">
+ *   Note this is currently not supported in Firefox browsers.
+ *   </blockquote> The audio track source ID of the device to use.
+ *   <small>The list of available audio source ID can be retrieved by the <a href="https://developer.
+ * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices"><code>navigator.mediaDevices.enumerateDevices</code>
+ *   API</a>.</small>
  * @param {Boolean|JSON} [options.video=false] The video configuration options.
  * @param {Boolean} [options.video.mute=false] The flag if video tracks should be muted upon receiving them.
- * @param {JSON} [options.video.resolution] <blockquote class="info">
- *   Note that currently <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> only configures
- *   the maximum resolution of the camera Stream due to browser interopability and support. </blockquote>
- *   The video resolution.
+ *   <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.videoMuted</code>,
+ *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.videoMuted</code> value to
+ *   <code>true</code> and mutes any existing <a href="#method_shareScreen">
+ *   <code>shareScreen()</code> Stream</a> video tracks as well.</small>
+ * @param {JSON} [options.video.resolution] The video resolution.
  *   <small>By default, <a href="#attr_VIDEO_RESOLUTION"><code>VGA</code></a> resolution option
  *   is selected when not provided.</small>
  *   [Rel: Skylink.VIDEO_RESOLUTION]
  * @param {Number} [options.video.resolution.width] The video resolution width.
  * @param {Number} [options.video.resolution.height] The video resolution height.
- * @param {Number} [options.video.frameRate=50] <blockquote class="info">
- *   Note that currently <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> only configures
- *   the maximum frameRate of the camera Stream due to browser interopability and support. For Safari and IE browsers
- *   (plugin-enabled), the maximum frameRate is not configured due to the lack of support.</blockquote>
- *   The video <a href="https://en.wikipedia.org/wiki/Frame_rate">frameRate</a> per second (fps).
- * @param {Array} [options.video.optional] The <code>navigator.getUserMedia()</code> API
- *   <code>video: { optional [..] }</code> property.
+ * @param {Number} [options.video.frameRate] The video <a href="https://en.wikipedia.org/wiki/Frame_rate">
+ *   frameRate</a> per second (fps).
+ * @param {Array} [options.video.optional] <blockquote class="info">
+ *   Note that this may result in constraints related error when <code>options.useExactConstraints</code> value is
+ *   <code>true</code>. If you are looking to set the requested source ID of the video track,
+ *   use <code>options.video.deviceId</code> instead.</blockquote>
+ *   The <code>navigator.getUserMedia()</code> API <code>video: { optional [..] }</code> property.
+ * @param {String} [options.video.deviceId] <blockquote class="info">
+ *   Note this is currently not supported in Firefox browsers.
+ *   </blockquote> The video track source ID of the device to use.
+ *   <small>The list of available video source ID can be retrieved by the <a href="https://developer.
+ * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices"><code>navigator.mediaDevices.enumerateDevices</code>
+ *   API</a>.</small>
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_mediaAccessSuccess">
@@ -11192,6 +11549,10 @@ Skylink.prototype._audioFallback = false;
  *   var sources = { audio: [], video: [] };
  *
  *   function selectStream (audioSourceId, videoSourceId) {
+ *     if (window.webrtcDetectedBrowser === 'firefox') {
+ *       console.warn("Currently this feature is not supported by Firefox browsers!");
+ *       return;
+ *     }
  *     skylinkDemo.getUserMedia({
  *       audio: {
  *         optional: [{ sourceId: audioSourceId }]
@@ -11221,44 +11582,51 @@ Skylink.prototype._audioFallback = false;
  *      console.error("Failed", error);
  *   });
  * @trigger <ol class="desc-seq">
- *   <li>When retrieval of camera Stream is successful, <a href="#event_mediaAccessSuccess">
- *   <code>mediaAccessSuccess</code> event</a> triggers parameter payload <code>isScreensharing</code>
- *   value as <code>false</code>.<ol>
- *   <li>When there are missing required audio or video tracks, <a href="#event_mediaAccessFallback">
- *   <code>mediaAccessFallback</code> event</a> triggers parameter payload <code>state</code> as <code>FALLBACKED</code>
- *   , <code>isScreensharing</code> value as <code>false</code>, <code>isAudioFallback</code> as
- *   <code>false</code> and <code>error</code> is defined.</li></ol></li>
- *   <li>When retrieval of camera Stream has failed<ol>
- *   <li>If <code>audioFallback</code> is enabled in the <a href="#method_init"><code>init()</code> method</a>
- *   configuration, and <code>options.video</code> and <code>options.audio</code> is requested <ol>
- *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> is triggers parameter payload
- *   <code>state</code> value as <code>FALLBACKING</code>, <code>isScreensharing</code> value as <code>false</code>,
- *   <code>isAudioFallback</code> as <code>true</code> and <code>error</code> is defined.</li>
- *   <li>Invokes <code>getUserMedia()</code> with <code>options.audio</code> value as <code>true</code> and
- *   <code>options.video</code> value as <code>false</code>.<ol>
- *   <li>When retrieval of camera Stream (fallbacked audio only) is successful<ol>
+ *   <li>If <code>options.audio</code> value is <code>false</code> and <code>options.video</code>
+ *   value is <code>false</code>: <ol><li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>Retrieve camera Stream. <ol><li>If retrieval was succesful: <ol>
+ *   <li>If there is any previous <code>getUserMedia()</code> Stream: <ol>
+ *   <li>Invokes <a href="#method_stopStream"><code>stopStream()</code> method</a>.</li></ol></li>
+ *   <li>If there are missing audio or video tracks requested: <ol>
  *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> triggers parameter payload
  *   <code>state</code> as <code>FALLBACKED</code>, <code>isScreensharing</code> value as <code>false</code> and
- *   <code>isAudioFallback</code> as <code>true</code>.</li>
- *   <li><a href="#event_mediaAccessSuccess"><code>mediaAccessSuccess</code> event</a> triggers parameter
- *   payload <code>isScreensharing</code> value as <code>false</code></li></ol></li>
- *   <li>When retrieval of camera Stream (fallbacked audio only) has failed <ol>
- *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>ERROR</code>, <code>isScreensharing</code> value as <code>false</code> and
- *   <code>isAudioFallback</code> as <code>true</code>.</li>
+ *   <code>isAudioFallback</code> value as <code>false</code>.</li></ol></li>
+ *   <li>Mutes / Unmutes audio and video tracks based on current muted settings in <code>peerInfo.mediaStatus</code>.
+ *   <small>This can be retrieved with <a href="#method_getPeerInfo"><code>getPeerInfo()</code> method</a>.</small></li>
+ *   <li><a href="#event_mediaAccessSuccess"><code>mediaAccessSuccess</code> event</a> triggers parameter payload
+ *   <code>isScreensharing</code> value as <code>false</code> and <code>isAudioFallback</code>
+ *   value as <code>false</code>.</li></ol></li><li>Else: <ol>
+ *   <li>If <code>options.audioFallback</code> is enabled in the <a href="#method_init"><code>init()</code> method</a>,
+ *   <code>options.audio</code> value is <code>true</code> and <code>options.video</code> value is <code>true</code>: <ol>
+ *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> event triggers
+ *   parameter payload <code>state</code> as <code>FALLBACKING</code>, <code>isScreensharing</code>
+ *   value as <code>false</code> and <code>isAudioFallback</code> value as <code>true</code>.</li>
+ *   <li>Retrieve camera Stream with audio tracks only. <ol><li>If retrieval was successful: <ol>
+ *   <li>If there is any previous <code>getUserMedia()</code> Stream: <ol>
+ *   <li>Invokes <a href="#method_stopStream"><code>stopStream()</code> method</a>.</li></ol></li>
+ *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> event triggers
+ *   parameter payload <code>state</code> as <code>FALLBACKED</code>, <code>isScreensharing</code>
+ *   value as <code>false</code> and <code>isAudioFallback</code> value as <code>true</code>.</li>
+ *   <li>Mutes / Unmutes audio and video tracks based on current muted settings in <code>peerInfo.mediaStatus</code>.
+ *   <small>This can be retrieved with <a href="#method_getPeerInfo"><code>getPeerInfo()</code> method</a>.</small></li>
+ *   <li><a href="#event_mediaAccessSuccess"><code>mediaAccessSuccess</code> event</a> triggers
+ *   parameter payload <code>isScreensharing</code> value as <code>false</code> and
+ *   <code>isAudioFallback</code> value as <code>true</code>.</li></ol></li><li>Else: <ol>
+ *   <li><a href="#event_mediaAccessError"><code>mediaAccessError</code> event</a> triggers
+ *   parameter payload <code>isScreensharing</code> value as <code>false</code> and
+ *   <code>isAudioFallbackError</code> value as <code>true</code>.</li>
+ *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> event triggers
+ *   parameter payload <code>state</code> as <code>ERROR</code>, <code>isScreensharing</code> value as
+ *   <code>false</code> and <code>isAudioFallback</code> value as <code>true</code>.</li>
+ *   <li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol></li><li>Else: <ol>
  *   <li><a href="#event_mediaAccessError"><code>mediaAccessError</code> event</a> triggers parameter payload
- *   <code>isScreensharing</code> value as <code>false</code> and <code>isAudioFallbackError</code>
- *   as <code>true</code>.</li></ol></li></ol></li></ol></li>
- *   <li>Else, <a href="#event_mediaAccessError"><code>mediaAccessError</code> event</a>
- *   triggers parameter payload <code>isScreensharing</code> value as <code>false</code> and
- *   <code>isAudioFallbackError</code> as <code>false</code></li></ol></li></ol>
+ *   <code>isScreensharing</code> value as <code>false</code> and <code>isAudioFallbackError</code> value as
+ *   <code>false</code>.</li><li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol></li></ol></li></ol>
  * @for Skylink
  * @since 0.5.6
  */
 Skylink.prototype.getUserMedia = function(options,callback) {
   var self = this;
-
-  var errorMsg; // j-shint rocks
 
   if (typeof options === 'function'){
     callback = options;
@@ -11266,27 +11634,28 @@ Skylink.prototype.getUserMedia = function(options,callback) {
       audio: true,
       video: true
     };
-  }
-  else if (typeof options !== 'object' || options === null) {
+
+  } else if (typeof options !== 'object' || options === null) {
     if (typeof options === 'undefined') {
       options = {
         audio: true,
         video: true
       };
+
     } else {
-      errorMsg = 'Please provide a valid options';
-      log.error(errorMsg, options);
+      var invalidOptionsError = 'Please provide a valid options';
+      log.error(invalidOptionsError, options);
       if (typeof callback === 'function') {
-        callback(new Error(errorMsg), null);
+        callback(new Error(invalidOptionsError), null);
       }
       return;
     }
-  }
-  else if (!options.audio && !options.video) {
-    errorMsg = 'Please select audio or video';
-    log.error(errorMsg, options);
+
+  } else if (!options.audio && !options.video) {
+    var noConstraintOptionsSelectedError = 'Please select audio or video';
+    log.error(noConstraintOptionsSelectedError, options);
     if (typeof callback === 'function') {
-      callback(new Error(errorMsg), null);
+      callback(new Error(noConstraintOptionsSelectedError), null);
     }
     return;
   }
@@ -11301,86 +11670,42 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     return;
   }*/
 
-  // parse stream settings
-  self._parseMediaStreamSettings(options);
+  if (typeof callback === 'function') {
+    var mediaAccessSuccessFn = function (stream) {
+      self.off('mediaAccessError', mediaAccessErrorFn);
+      callback(null, stream);
+    };
+    var mediaAccessErrorFn = function (error) {
+      self.off('mediaAccessSuccess', mediaAccessSuccessFn);
+      callback(error, null);
+    };
 
-  // if audio and video is false, do not call getUserMedia
-  if (!(options.audio === false && options.video === false)) {
-    // clear previous mediastreams
-    self.stopStream();
+    self.once('mediaAccessSuccess', mediaAccessSuccessFn, function (stream, isScreensharing) {
+      return !isScreensharing;
+    });
 
-    setTimeout(function () {
-      try {
-        if (typeof callback === 'function'){
-          var mediaAccessErrorFn = function (error) {
-            callback(error, null);
-            self.off('mediaAccessSuccess', mediaAccessSuccessFn);
-          };
-
-          var mediaAccessSuccessFn = function (stream) {
-            callback(null, stream);
-            self.off('mediaAccessError', mediaAccessErrorFn);
-          };
-
-          self.once('mediaAccessError', mediaAccessErrorFn);
-          self.once('mediaAccessSuccess', mediaAccessSuccessFn);
-        }
-
-        window.getUserMedia(self._getUserMediaSettings, function (stream) {
-          var isSuccess = false;
-          var requireAudio = !!options.audio;
-          var requireVideo = !!options.video;
-          var hasAudio = !requireAudio;
-          var hasVideo = !requireVideo;
-
-          // for now we require one MediaStream with both audio and video
-          // due to firefox non-supported audio or video
-          if (stream && stream !== null) {
-            var notSameTracksError = new Error(
-              'Expected audio tracks length with ' +
-              (requireAudio ? '1' : '0') + ' and video tracks length with ' +
-              (requireVideo ? '1' : '0') + ' but received audio tracks length ' +
-              'with ' + stream.getAudioTracks().length + ' and video ' +
-              'tracks length with ' + stream.getVideoTracks().length);
-
-            // do the check
-            if (requireAudio) {
-              hasAudio = stream.getAudioTracks().length > 0;
-            }
-            if (requireVideo) {
-              hasVideo =  stream.getVideoTracks().length > 0;
-
-              /*if (self._audioFallback && !hasVideo) {
-                hasVideo = true; // to trick isSuccess to be true
-                self._trigger('mediaAccessFallback', notSameTracksError);
-              }*/
-            }
-            if (hasAudio && hasVideo) {
-              isSuccess = true;
-            }
-
-            if (!isSuccess) {
-              self._trigger('mediaAccessFallback', {
-                error: notSameTracksError,
-                diff: {
-                  video: { expected: requireAudio ? 1 : 0, received: stream.getVideoTracks().length },
-                  audio: { expected: requireVideo ? 1 : 0, received: stream.getAudioTracks().length }
-                }
-              }, 1, false, false);
-            }
-
-            self._onUserMediaSuccess(stream);
-          }
-        }, function (error) {
-          self._onUserMediaError(error, false, true);
-        });
-      } catch (error) {
-        self._onUserMediaError(error, false, true);
-      }
-    }, window.webrtcDetectedBrowser === 'firefox' ? 500 : 1);
-  } else {
-    log.warn([null, 'MediaStream', null, 'Not retrieving stream']);
+    self.once('mediaAccessError', mediaAccessErrorFn, function (error, isScreensharing) {
+      return !isScreensharing;
+    });
   }
+
+  // Parse stream settings
+  var settings = self._parseStreamSettings(options);
+
+  navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
+    if (settings.mutedSettings.shouldAudioMuted) {
+      self._streamsMutedSettings.audioMuted = true;
+    }
+
+    if (settings.mutedSettings.shouldVideoMuted) {
+      self._streamsMutedSettings.videoMuted = true;
+    }
+
+    self._onStreamAccessSuccess(stream, settings, false, false);
+
+  }, function (error) {
+    self._onStreamAccessError(error, settings, false, false);
+  });
 };
 
 /**
@@ -11404,9 +11729,12 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</small>
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
- *   <small>Function request completion is determined by the <a href="#event_peerRestart">
- *   <code>peerRestart</code> event</a> triggering <code>isSelfInitiateRestart</code> parameter payload
- *   value as <code>true</code> for all Peers currently in the Room targeted for request success.</small>
+ *   <small>Function request completion is determined by the <a href="#event_mediaAccessSuccess">
+ *   <code>mediaAccessSuccess</code> event</a> triggering <code>isScreensharing</code> parameter payload value
+ *   as <code>false</code> for request success when User is in Room without Peers,
+ *   or by the <a href="#event_peerRestart"><code>peerRestart</code> event</a> triggering
+ *   <code>isSelfInitiateRestart</code> parameter payload value as <code>true</code> for all connected Peers
+ *   for request success when User is in Room with Peers.</small>
  * @param {Error|String} callback.error The error result in request.
  *   <small>Defined as <code>null</code> when there are no errors in request</small>
  *   <small>Object signature is the <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> error or
@@ -11457,148 +11785,151 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *     inRoom = true;
  *   });
  * @trigger <ol class="desc-seq">
- *   <li>Invokes <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</li>
- *   <li>Invokes <a href="#method_refreshConnection"><code>refreshConnection()</code> method</a>.</li>
- *   <li>If User is in the Room, <a href="#event_incomingStream"><code>incomingStream</code> event</a> triggers with
- *   parameter payload <code>isSelf</code> as <code>true</code>, and <a href="#event_peerUpdate">
- *   <code>peerUpdated</code> event</a> triggers with parameter payload <code>isSelf</code>
- *   as <code>true</code>.</li></ol></li></ol>
+ *   <li>If User is not in Room: <ol><li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>Checks <code>options</code> provided. <ol><li>If provided parameter <code>options</code> is not valid: <ol>
+ *   <li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>Else if provided parameter <code>options</code> is a Stream object: <ol>
+ *   <li>Checks if there is any audio or video tracks. <ol><li>If there is no tracks: <ol>
+ *   <li><b>ABORT</b> and return error.</li></ol></li><li>Else: <ol>
+ *   <li>Set <code>options.audio</code> value as <code>true</code> if Stream has audio tracks.</li>
+ *   <li>Set <code>options.video</code> value as <code>false</code> if Stream has video tracks.</li>
+ *   <li>Mutes / Unmutes audio and video tracks based on current muted settings in
+ *   <code>peerInfo.mediaStatus</code>. <small>This can be retrieved with
+ *   <a href="#method_getPeerInfo"><code>getPeerInfo()</code> method</a>.</small></li>
+ *   <li>If there is any previous <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a>:
+ *   <ol><li>Invokes <a href="#method_stopStream"><code>stopStream()</code> method</a> to stop previous Stream.</li></ol></li>
+ *   <li><a href="#event_mediaAccessSuccess"><code>mediaAccessSuccess</code> event</a> triggers
+ *   parameter payload <code>isScreensharing</code> value as <code>false</code> and <code>isAudioFallback</code>
+ *   value as <code>false</code>.</li></ol></li></ol></li></ol></li><li>Else: <ol>
+ *   <li>Invoke <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> with
+ *   <code>options</code> provided in <code>sendStream()</code>. <ol><li>If request has errors: <ol>
+ *   <li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol></li></ol></li>
+ *   <li>If there is currently no <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>: <ol>
+ *   <li><a href="#event_incomingStream"><code>incomingStream</code> event</a> triggers parameter payload
+ *   <code>isSelf</code> value as <code>true</code> and <code>stream</code> as
+ *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a>.</li>
+ *   <li><a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers parameter payload
+ *   <code>isSelf</code> value as <code>true</code>.</li>
+ *   <li>Checks if MCU is enabled for App Key provided in <a href="#method_init"><code>init()</code> method</a>. <ol>
+ *   <li>If MCU is enabled: <ol><li>Invoke <a href="#method_refreshConnection"><code>refreshConnection()</code>
+ *   method</a>. <ol><li>If request has errors: <ol><li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol></li>
+ *   <li>Else: <ol><li>If there are connected Peers in the Room: <ol>
+ *   <li>Invoke <a href="#method_refreshConnection"><code>refreshConnection()</code> method</a>. <ol>
+ *   <li>If request has errors: <ol><li><b>ABORT</b> and return error.
+ *   </li></ol></li></ol></li></ol></li></ol></li></ol></li></ol></li></ol>
  * @for Skylink
  * @since 0.5.6
  */
 
-Skylink.prototype.sendStream = function(stream, callback) {
+Skylink.prototype.sendStream = function(options, callback) {
   var self = this;
-  var restartCount = 0;
-  var peerCount = Object.keys(self._peerConnections).length;
 
-  if (typeof stream !== 'object' || stream === null) {
-    var error = 'Provided stream settings is invalid';
-    log.error(error, stream);
+  var restartFn = function (stream) {
+    if (self._inRoom) {
+      if (!self._streams.screenshare) {
+        self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo());
+        self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+      }
+
+      if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
+        self._refreshPeerConnection(Object.keys(self._peerConnections), false, function (err, success) {
+          if (err) {
+            log.error('Failed refreshing connections for sendStream() ->', err);
+            if (typeof callback === 'function') {
+              callback(new Error('Failed refreshing connections.'), null);
+            }
+            return;
+          }
+          if (typeof callback === 'function') {
+            callback(null, stream);
+          }
+        });
+      } else if (typeof callback === 'function') {
+        callback(null, stream);
+      }
+    } else {
+      var notInRoomAgainError = 'Unable to send stream as user is not in the Room.';
+      log.error(notInRoomAgainError, stream);
+      if (typeof callback === 'function') {
+        callback(new Error(notInRoomAgainError), null);
+      }
+    }
+  };
+
+  if (typeof options !== 'object' || options === null) {
+    var invalidOptionsError = 'Provided stream settings is invalid';
+    log.error(invalidOptionsError, options);
     if (typeof callback === 'function'){
-      callback(new Error(error),null);
+      callback(new Error(invalidOptionsError),null);
     }
     return;
   }
 
-  var hasNoPeers = Object.keys(self._peerConnections).length === 0;
+  if (!self._inRoom) {
+    var notInRoomError = 'Unable to send stream as user is not in the Room.';
+    log.error(notInRoomError, options);
+    if (typeof callback === 'function'){
+      callback(new Error(notInRoomError),null);
+    }
+    return;
+  }
 
-  // Stream object
-  // getAudioTracks or getVideoTracks first because adapterjs
-  // has not implemeneted MediaStream as an interface
-  // interopability with firefox and chrome
-  //MediaStream = MediaStream || webkitMediaStream;
-  // NOTE: eventually we should do instanceof
-  if (typeof stream.getAudioTracks === 'function' ||
-    typeof stream.getVideoTracks === 'function') {
-    // stop playback
-    self.stopStream();
-
-    self._streamSettings.audio = stream.getAudioTracks().length > 0;
-    self._streamSettings.video = stream.getVideoTracks().length > 0;
-
-    //self._mediaStreamsStatus.audioMuted = self._streamSettings.audio === false;
-    //self._mediaStreamsStatus.videoMuted = self._streamSettings.video === false;
-
-    if (self._inRoom) {
-      self.once('mediaAccessSuccess', function (stream) {
-        if (self._hasMCU) {
-          self._restartMCUConnection();
-        } else {
-          self._trigger('incomingStream', self._user.sid, self._mediaStream,
-            true, self.getPeerInfo(), false);
-          for (var peer in self._peerConnections) {
-            if (self._peerConnections.hasOwnProperty(peer)) {
-              self._restartPeerConnection(peer, true, false, null, true);
-            }
-          }
+  if (typeof options.getAudioTracks === 'function' || typeof options.getVideoTracks === 'function') {
+    var checkActiveTracksFn = function (tracks) {
+      for (var t = 0; t < tracks.length; t++) {
+        if (!(tracks[t].ended || (typeof tracks[t].readyState === 'string' ?
+          tracks[t].readyState !== 'live' : false))) {
+          return true;
         }
-
-        self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
-      });
-    }
-
-    // send the stream
-    if (self._mediaStream !== stream) {
-      self._onUserMediaSuccess(stream);
-    }
-
-    // The callback is provided and has peers, so require to wait for restart
-    if (typeof callback === 'function' && !hasNoPeers) {
-      self.once('peerRestart',function(peerId, peerInfo, isSelfInitiatedRestart){
-        log.log([null, 'MediaStream', stream.id,
-          'Stream was sent. Firing callback'], stream);
-        callback(null,stream);
-        restartCount = 0; //reset counter
-      },function(peerId, peerInfo, isSelfInitiatedRestart){
-        if (isSelfInitiatedRestart){
-          restartCount++;
-          if (restartCount === peerCount){
-            return true;
-          }
-        }
-        return false;
-      },false);
-    }
-
-    // The callback is provided but there is no peers, so automatically invoke the callback
-    if (typeof callback === 'function' && hasNoPeers) {
-      callback(null, self._mediaStream);
-    }
-
-  // Options object
-  } else {
-    // The callback is provided but there is peers, so require to wait for restart
-    if (typeof callback === 'function' && !hasNoPeers) {
-      self.once('peerRestart',function(peerId, peerInfo, isSelfInitiatedRestart){
-        log.log([null, 'MediaStream', stream.id,
-          'Stream was sent. Firing callback'], stream);
-        callback(null,stream);
-        restartCount = 0; //reset counter
-      },function(peerId, peerInfo, isSelfInitiatedRestart){
-        if (isSelfInitiatedRestart){
-          restartCount++;
-          if (restartCount === peerCount){
-            return true;
-          }
-        }
-        return false;
-      },false);
-    }
-
-    if (self._inRoom) {
-      self.once('mediaAccessSuccess', function (stream) {
-        if (self._hasMCU) {
-          self._restartMCUConnection();
-        } else {
-          self._trigger('incomingStream', self._user.sid, self._mediaStream,
-            true, self.getPeerInfo(), false);
-          for (var peer in self._peerConnections) {
-            if (self._peerConnections.hasOwnProperty(peer)) {
-              self._restartPeerConnection(peer, true, false, null, true);
-            }
-          }
-        }
-
-        self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
-      });
-    }
-
-    // get the mediastream and then wait for it to be retrieved before sending
-    self._waitForLocalMediaStream(function (error) {
-      if (!error) {
-        // The callback is provided but there is not peers, so automatically invoke the callback
-        if (typeof callback === 'function' && hasNoPeers) {
-          callback(null, self._mediaStream);
-        }
-      } else {
-        callback(error, null);
       }
-    }, stream);
+      return false;
+    };
+
+    if (!checkActiveTracksFn( options.getAudioTracks() ) && !checkActiveTracksFn( options.getVideoTracks() )) {
+      var invalidStreamError = 'Provided stream object does not have audio or video tracks.';
+      log.error(invalidStreamError, options);
+      if (typeof callback === 'function'){
+        callback(new Error(invalidStreamError),null);
+      }
+      return;
+    }
+
+    self._onStreamAccessSuccess(options, {
+      settings: {
+        audio: true,
+        video: true
+      },
+      getUserMediaSettings: {
+        audio: true,
+        video: true
+      }
+    }, false, false);
+
+    restartFn(options);
+
+  } else {
+    self.getUserMedia(options, function (err, stream) {
+      if (err) {
+        if (typeof callback === 'function') {
+          callback(err, null);
+        }
+        return;
+      }
+      restartFn(stream);
+    });
   }
 };
 
 /**
+ * <blockquote class="info">
+ *   Note that broadcasted events from <a href="#method_muteStream"><code>muteStream()</code> method</a>,
+ *   <a href="#method_stopStream"><code>stopStream()</code> method</a>,
+ *   <a href="#method_stopScreen"><code>stopScreen()</code> method</a>,
+ *   <a href="#method_sendMessage"><code>sendMessage()</code> method</a>,
+ *   <a href="#method_unlockRoom"><code>unlockRoom()</code> method</a> and
+ *   <a href="#method_lockRoom"><code>lockRoom()</code> method</a> may be queued when
+ *   sent within less than an interval.
+ * </blockquote>
  * Function that stops <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a>.
  * @method stopStream
  * @example
@@ -11608,23 +11939,36 @@ Skylink.prototype.sendStream = function(stream, callback) {
  *
  *   skylinkDemo.getUserMedia();
  * @trigger <ol class="desc-seq">
- *   <li><a href="#event_mediaAccessStopped"><code>mediaAccessStopped</code> event</a> triggers parameter payload
- *   <code>isScreensharing</code> value as <code>false</code>.</li>
- *   <li>If User is in the Room, <a href="#event_streamEnded"><code>streamEnded</code> event</a> triggers
- *   parameter payload <code>isScreensharing</code> value as <code>false</code> and <code>isSelf</code> value
- *   as <code>true</code>, and <a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers
- *   parameter payload <code>isSelf</code> value as <code>true</code>.</li></ol>
+ *   <li>Checks if there is <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a>. <ol>
+ *   <li>If there is <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a>: <ol>
+ *   <li>Stop <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> Stream. <ol>
+ *   <li><a href="#event_mediaAccessStopped"><code>mediaAccessStopped</code> event</a> triggers
+ *   parameter payload <code>isScreensharing</code> value as <code>false</code>.</li><li>If User is in Room: <ol>
+ *   <li><a href="#event_streamEnded"><code>streamEnded</code> event</a> triggers parameter
+ *   payload <code>isSelf</code> value as <code>true</code> and <code>isScreensharing</code> value as<code>false</code>
+ *   .</li><li><a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers parameter payload
+ *   <code>isSelf</code> value as <code>true</code>.</li></ol></li></ol></li></ol></li></ol></li></ol>
  * @for Skylink
  * @since 0.5.6
  */
 Skylink.prototype.stopStream = function () {
-  // if previous line break, recheck again to trigger event
-  this._stopLocalMediaStreams({
-    userMedia: true
-  });
+  if (this._streams.userMedia) {
+    this._stopStreams({
+      userMedia: true
+    });
+  }
 };
 
 /**
+ * <blockquote class="info">
+ *   Note that broadcasted events from <a href="#method_muteStream"><code>muteStream()</code> method</a>,
+ *   <a href="#method_stopStream"><code>stopStream()</code> method</a>,
+ *   <a href="#method_stopScreen"><code>stopScreen()</code> method</a>,
+ *   <a href="#method_sendMessage"><code>sendMessage()</code> method</a>,
+ *   <a href="#method_unlockRoom"><code>unlockRoom()</code> method</a> and
+ *   <a href="#method_lockRoom"><code>lockRoom()</code> method</a> may be queued when
+ *   sent within less than an interval.
+ * </blockquote>
  * Function that mutes both <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> and
  * <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> audio or video tracks.
  * @method muteStream
@@ -11652,90 +11996,104 @@ Skylink.prototype.stopStream = function () {
  *     videoMuted: true
  *   });
  * @trigger <ol class="desc-seq">
- *   <li>If User is in the Room, <a href="#event_streamMuted"><code>streamMuted</code> event</a> triggers
- *   parameter payload <code>isSelf</code> value as <code>true</code>, and <a href="#event_peerUpdated">
- *   <code>peerUpdated</code> event</a> triggers parameter payload <code>isSelf</code>
- *   value as <code>true</code>.</li></ol>
+ *   <li>If provided parameter <code>options</code> is invalid: <ol><li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>Checks if there is any available Streams: <ol><li>If there is no available Streams: <ol>
+ *   <li><b>ABORT</b> and return error.</li></ol></li><li>If User is in Room: <ol>
+ *   <li>Checks if there is audio tracks to mute / unmute: <ol><li>If there is audio tracks to mute / unmute: <ol>
+ *   <li>If <code>options.audioMuted</code> value is not the same as the current
+ *   <code>peerInfo.mediaStatus.audioMuted</code>: <small>This can be retrieved with
+ *   <a href="#method_getPeerInfo"><code>getPeerInfo()</code> method</a>.</small> <ol>
+ *   <li><em>For Peer only</em> <a href="#event_peerUpdated"><code>peerUpdated</code> event</a>
+ *   triggers with parameter payload <code>isSelf</code> value as <code>false</code>.</li>
+ *   <li><em>For Peer only</em> <a href="#event_streamMuted"><code>streamMuted</code> event</a>
+ *   triggers with parameter payload <code>isSelf</code> value as <code>false</code>.</li></ol></li></ol></li></ol></li>
+ *   <li>Checks if there is video tracks to mute / unmute: <ol><li>If there is video tracks to mute / unmute: <ol>
+ *   <li>If <code>options.videoMuted</code> value is not the same as the current
+ *   <code>peerInfo.mediaStatus.videoMuted</code>: <small>This can be retrieved with
+ *   <a href="#method_getPeerInfo"><code>getPeerInfo()</code> method</a>.</small> <ol>
+ *   <li><em>For Peer only</em> <a href="#event_peerUpdated"><code>peerUpdated</code> event</a>
+ *   triggers with parameter payload <code>isSelf</code> value as <code>false</code>.</li>
+ *   <li><em>For Peer only</em> <a href="#event_streamMuted"><code>streamMuted</code> event</a> triggers with
+ *   parameter payload <code>isSelf</code> value as <code>false</code>.</li></ol></li></ol></li></ol></li></ol></li>
+ *   <li>If <code>options.audioMuted</code> value is not the same as the current
+ *   <code>peerInfo.mediaStatus.audioMuted</code> or <code>options.videoMuted</code> value is not
+ *   the same as the current <code>peerInfo.mediaStatus.videoMuted</code>: <ol>
+ *   <li><a href="#event_localMediaMuted"><code>localMediaMuted</code> event</a> triggers.</li>
+ *   <li>If User is in Room: <ol><li><a href="#event_streamMuted"><code>streamMuted</code> event</a>
+ *   triggers with parameter payload <code>isSelf</code> value as <code>true</code>.</li>
+ *   <li><a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers with
+ *   parameter payload <code>isSelf</code> value as <code>true</code>.</li></ol></li></ol></li></ol></li></ol>
  * @for Skylink
  * @since 0.5.7
  */
 Skylink.prototype.muteStream = function(options) {
   var self = this;
-  var hasAudioError = false;
-  var hasVideoError = false;
 
   if (typeof options !== 'object') {
     log.error('Provided settings is not an object');
     return;
   }
 
-  if ((!self._mediaStream || self._mediaStream === null) &&
-    (!self._mediaScreen || self._mediaScreen === null)) {
+  if (!(self._streams.userMedia && self._streams.userMedia.stream) &&
+    !(self._streams.screenshare && self._streams.screenshare.stream)) {
     log.warn('No streams are available to mute / unmute!');
     return;
   }
 
-  // set the muted status
-  if (typeof options.audioMuted === 'boolean') {
-    if (self._streamSettings.audio === false) {
-      log.error('No audio available to mute / unmute');
-      hasAudioError = true;
-    } else {
-      if (options.audioMuted) {
-        self._mediaStreamsStatus.audioMuted = true;
-      } else {
-        self._mediaStreamsStatus.audioMuted = false;
-      }
-    }
-  }
-  if (typeof options.videoMuted === 'boolean') {
-    if (self._streamSettings.video === false) {
-      log.error('No video available to mute / unmute');
-      hasVideoError = true;
-    } else {
-      if (options.videoMuted) {
-        self._mediaStreamsStatus.videoMuted = true;
-      } else {
-        self._mediaStreamsStatus.videoMuted = false;
-      }
-    }
+  var audioMuted = typeof options.audioMuted === 'boolean' ? options.audioMuted : true;
+  var videoMuted = typeof options.videoMuted === 'boolean' ? options.videoMuted : true;
+  var hasToggledAudio = false;
+  var hasToggledVideo = false;
+
+  if (self._streamsMutedSettings.audioMuted !== audioMuted) {
+    self._streamsMutedSettings.audioMuted = audioMuted;
+    hasToggledAudio = true;
   }
 
-  var hasTracksOption = self._muteLocalMediaStreams();
+  if (self._streamsMutedSettings.videoMuted !== videoMuted) {
+    self._streamsMutedSettings.videoMuted = videoMuted;
+    hasToggledVideo = true;
+  }
 
-  if (self._inRoom) {
-    // update to mute status of video tracks
-    if (hasTracksOption.hasVideoTracks) {
-      // send message
+  if (hasToggledVideo || hasToggledAudio) {
+    var streamTracksAvailability = self._muteStreams();
+
+    if (hasToggledVideo && self._inRoom) {
       self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.MUTE_VIDEO,
         mid: self._user.sid,
         rid: self._room.id,
-        muted: self._mediaStreamsStatus.videoMuted
+        muted: self._streamsMutedSettings.videoMuted,
+        stamp: (new Date()).getTime()
       });
     }
-    // update to mute status of audio tracks
-    if (hasTracksOption.hasAudioTracks) {
-      // send message
-      // set timeout to do a wait interval of 1s
+
+    if (hasToggledAudio && self._inRoom) {
       setTimeout(function () {
         self._sendChannelMessage({
           type: self._SIG_MESSAGE_TYPE.MUTE_AUDIO,
           mid: self._user.sid,
           rid: self._room.id,
-          muted: self._mediaStreamsStatus.audioMuted
+          muted: self._streamsMutedSettings.audioMuted,
+          stamp: (new Date()).getTime()
         });
-      }, 1050);
+      }, hasToggledVideo ? 1050 : 0);
     }
 
-    if (!hasAudioError || !hasVideoError) {
-      self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
-    }
-  }
+    if ((streamTracksAvailability.hasVideo && hasToggledVideo) ||
+      (streamTracksAvailability.hasAudio && hasToggledAudio)) {
 
-  if (!hasAudioError || !hasVideoError) {
-    self._trigger('streamMuted', self._user.sid || null, self.getPeerInfo(), true,
-      !!self._mediaScreen && self._mediaScreen !== null);
+      self._trigger('localMediaMuted', {
+        audioMuted: streamTracksAvailability.hasAudio ? self._streamsMutedSettings.audioMuted : true,
+        videoMuted: streamTracksAvailability.hasVideo ? self._streamsMutedSettings.videoMuted : true
+      });
+
+      if (self._inRoom) {
+        self._trigger('streamMuted', self._user.sid, self.getPeerInfo(), true,
+          self._streams.screenshare && self._streams.screenshare.stream);
+        self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+      }
+    }
   }
 };
 
@@ -11753,13 +12111,16 @@ Skylink.prototype.muteStream = function(options) {
  *   }
  * @trigger <ol class="desc-seq">
  *   <li>Invokes <a href="#method_muteStream"><code>muteStream()</code> method</a> with
- *   <code>options.audioMuted</code> value as <code>false</code>.</li></ol>
+ *   <code>options.audioMuted</code> value as <code>false</code> and
+ *   <code>options.videoMuted</code> value with current <code>peerInfo.mediaStatus.videoMuted</code> value.
+ *   <small>See <a href="#method_getPeerInfo"><code>getPeerInfo()</code> method</a> for more information.</small></li></ol>
  * @for Skylink
  * @since 0.5.5
  */
 Skylink.prototype.enableAudio = function() {
   this.muteStream({
-    audioMuted: false
+    audioMuted: false,
+    videoMuted: this._streamsMutedSettings.videoMuted
   });
 };
 
@@ -11777,13 +12138,16 @@ Skylink.prototype.enableAudio = function() {
  *   }
  * @trigger <ol class="desc-seq">
  *   <li>Invokes <a href="#method_muteStream"><code>muteStream()</code> method</a> with
- *   <code>options.audioMuted</code> value as <code>true</code>.</li></ol>
+ *   <code>options.audioMuted</code> value as <code>true</code> and
+ *   <code>options.videoMuted</code> value with current <code>peerInfo.mediaStatus.videoMuted</code> value.
+ *   <small>See <a href="#method_getPeerInfo"><code>getPeerInfo()</code> method</a> for more information.</small></li></ol>
  * @for Skylink
  * @since 0.5.5
  */
 Skylink.prototype.disableAudio = function() {
   this.muteStream({
-    audioMuted: true
+    audioMuted: true,
+    videoMuted: this._streamsMutedSettings.videoMuted
   });
 };
 
@@ -11801,18 +12165,20 @@ Skylink.prototype.disableAudio = function() {
  *   }
  * @trigger <ol class="desc-seq">
  *   <li>Invokes <a href="#method_muteStream"><code>muteStream()</code> method</a> with
- *   <code>options.videoMuted</code> value as <code>false</code>.</li></ol>
+ *   <code>options.videoMuted</code> value as <code>false</code> and
+ *   <code>options.audioMuted</code> value with current <code>peerInfo.mediaStatus.audioMuted</code> value.
+ *   <small>See <a href="#method_getPeerInfo"><code>getPeerInfo()</code> method</a> for more information.</small></li></ol>
  * @for Skylink
  * @since 0.5.5
  */
 Skylink.prototype.enableVideo = function() {
   this.muteStream({
-    videoMuted: false
+    videoMuted: false,
+    audioMuted: this._streamsMutedSettings.audioMuted
   });
 };
 
 /**
- /**
  * <blockquote class="info"><b>Deprecation Warning!</b>
  *   This method has been deprecated. Use <a href="#method_muteStream"><code>muteStream()</code> method</a> instead.
  * </blockquote>
@@ -11826,13 +12192,16 @@ Skylink.prototype.enableVideo = function() {
  *   }
  * @trigger <ol class="desc-seq">
  *   <li>Invokes <a href="#method_muteStream"><code>muteStream()</code> method</a> with
- *   <code>options.videoMuted</code> value as <code>true</code>.</li></ol>
+ *   <code>options.videoMuted</code> value as <code>true</code> and
+ *   <code>options.audioMuted</code> value with current <code>peerInfo.mediaStatus.audioMuted</code> value.
+ *   <small>See <a href="#method_getPeerInfo"><code>getPeerInfo()</code> method</a> for more information.</small></li></ol>
  * @for Skylink
  * @since 0.5.5
  */
 Skylink.prototype.disableVideo = function() {
   this.muteStream({
-    videoMuted: true
+    videoMuted: true,
+    audioMuted: this._streamsMutedSettings.audioMuted
   });
 };
 
@@ -11840,12 +12209,14 @@ Skylink.prototype.disableVideo = function() {
  * Function that retrieves screensharing Stream.
  * @method shareScreen
  * @param {JSON} [enableAudio=false] The flag if audio tracks should be retrieved.
-
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_mediaAccessSuccess">
- *   <code>mediaAccessSuccess</code> event</a> triggering <code>isScreensharing</code> parameter
- *   payload value as <code>true</code> for request success.</small>
+ *   <code>mediaAccessSuccess</code> event</a> triggering <code>isScreensharing</code> parameter payload value
+ *   as <code>true</code> for request success when User is not in the Room or is in Room without Peers,
+ *   or by the <a href="#event_peerRestart"><code>peerRestart</code> event</a> triggering
+ *   <code>isSelfInitiateRestart</code> parameter payload value as <code>true</code> for all connected Peers
+ *   for request success when User is in Room with Peers.</small>
  * @param {Error|String} callback.error The error result in request.
  *   <small>Defined as <code>null</code> when there are no errors in request</small>
  *   <small>Object signature is the <code>shareScreen()</code> error when retrieving screensharing Stream.</small>
@@ -11865,30 +12236,59 @@ Skylink.prototype.disableVideo = function() {
  *     attachMediaStream(document.getElementById("my-screen"), success);
  *   });
  * @trigger <ol class="desc-seq">
- *   <li>When retrieval of screensharing Stream is successful, <a href="#event_mediaAccessSuccess">
+ *   <li>Retrieves screensharing Stream. <ol><li>If retrieval was successful: <ol><li>If browser is Firefox: <ol>
+ *   <li>If there are missing audio or video tracks requested: <ol>
+ *   <li>If there is any previous <code>shareScreen()</code> Stream: <ol>
+ *   <li>Invokes <a href="#method_stopScreen"><code>stopScreen()</code> method</a>.</li></ol></li>
+ *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>FALLBACKED</code>, <code>isScreensharing</code>
+ *   value as <code>true</code> and <code>isAudioFallback</code> value as <code>false</code>.</li></ol></li>
+ *   <li><a href="#event_mediaAccessSuccess"><code>mediaAccessSuccess</code> event</a> triggers
+ *   parameter payload <code>isScreensharing</code> value as <code>true</code> and <code>isAudioFallback</code>
+ *   value as <code>false</code>.</li></ol></li><li>Else: <ol>
+ *   <li>If audio is requested: <small>Chrome, Safari and IE currently doesn't support retrieval of
+ *   audio track together with screensharing video track.</small> <ol><li>Retrieves audio Stream: <ol>
+ *   <li>If retrieval was successful: <ol><li>Attempts to attach screensharing Stream video track to audio Stream. <ol>
+ *   <li>If attachment was successful: <ol><li><a href="#event_mediaAccessSuccess">
  *   <code>mediaAccessSuccess</code> event</a> triggers parameter payload <code>isScreensharing</code>
- *   value as <code>true</code>.<ol>
- *   <li>When there are missing required audio tracks, <a href="#event_mediaAccessFallback">
- *   <code>mediaAccessFallback</code> event</a> triggers parameter payload <code>state</code> as <code>FALLBACKED</code>
- *   , <code>isScreensharing</code> value as <code>true</code>, <code>isAudioFallback</code> as
- *   <code>false</code> and <code>error</code> is defined.</li>
- *   <li>If User is in Room, <a href="#event_incomingStream"><code>incomingStream</code> event</a> triggers.</li>
- *   <li>Invokes <a href="#method_refreshConnection"><code>refreshConnection()</code> method</a>.</li></ol></li>
- *   <li>When retrieval of screensharing Stream has failed, <a href="#event_mediaAccessError">
- *   <code>mediaAccessError</code> event</a> triggers parameter payload <code>isScreensharing</code>
- *   value as <code>true</code> and <code>isAudioFallbackError</code> as <code>false</code></li></ol></li></ol>
+ *   value as <code>true</code> and <code>isAudioFallback</code> value as <code>false</code>.</li></ol></li><li>Else: <ol>
+ *   <li>If there is any previous <code>shareScreen()</code> Stream: <ol>
+ *   <li>Invokes <a href="#method_stopScreen"><code>stopScreen()</code> method</a>.</li></ol></li> 
+ *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> triggers parameter payload
+ *   <code>state</code> as <code>FALLBACKED</code>, <code>isScreensharing</code> value as <code>true</code> and
+ *   <code>isAudioFallback</code> value as <code>false</code>.</li>
+ *   <li><a href="#event_mediaAccessSuccess"><code>mediaAccessSuccess</code> event</a> triggers
+ *   parameter payload <code>isScreensharing</code> value as <code>true</code> and <code>isAudioFallback</code>
+ *   value as <code>false</code>.</li></ol></li></ol></li></ol></li><li>Else: <ol>
+ *   <li>If there is any previous <code>shareScreen()</code> Stream: <ol>
+ *   <li>Invokes <a href="#method_stopScreen"><code>stopScreen()</code> method</a>.</li></ol></li>
+ *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>FALLBACKED</code>, <code>isScreensharing</code>
+ *   value as <code>true</code> and <code>isAudioFallback</code> value as <code>false</code>.</li>
+ *   <li><a href="#event_mediaAccessSuccess"><code>mediaAccessSuccess</code> event</a> triggers
+ *   parameter payload <code>isScreensharing</code> value as <code>true</code> and <code>isAudioFallback</code>
+ *   value as <code>false</code>.</li></ol></li></ol></li></ol></li><li>Else: <ol>
+ *   <li><a href="#event_mediaAccessSuccess"><code>mediaAccessSuccess</code> event</a>
+ *   triggers parameter payload <code>isScreensharing</code> value as <code>true</code>
+ *   and <code>isAudioFallback</code> value as <code>false</code>.</li></ol></li></ol></li></ol></li><li>Else: <ol>
+ *   <li><a href="#event_mediaAccessError"><code>mediaAccessError</code> event</a> triggers parameter payload
+ *   <code>isScreensharing</code> value as <code>true</code> and <code>isAudioFallback</code> value as
+ *   <code>false</code>.</li><li><b>ABORT</b> and return error.</li></ol></li></ol></li><li>If User is in Room: <ol>
+ *   <li><a href="#event_incomingStream"><code>incomingStream</code> event</a> triggers parameter payload
+ *   <code>isSelf</code> value as <code>true</code> and <code>stream</code> as <code>shareScreen()</code> Stream.</li>
+ *   <li><a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers parameter payload
+ *   <code>isSelf</code> value as <code>true</code>.</li>
+ *   <li>Checks if MCU is enabled for App Key provided in <a href="#method_init"><code>init()</code> method</a>. <ol>
+ *   <li>If MCU is enabled: <ol><li>Invoke <a href="#method_refreshConnection"><code>refreshConnection()</code> method</a>.
+ *   <ol><li>If request has errors: <ol><li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol></li><li>Else: <ol>
+ *   <li>If there are connected Peers in the Room: <ol><li>Invoke <a href="#method_refreshConnection">
+ *   <code>refreshConnection()</code> method</a>. <ol><li>If request has errors: <ol><li><b>ABORT</b> and return error.</li>
+ *   </ol></li></ol></li></ol></li></ol></li></ol></li></ol></li></ol>
  * @for Skylink
  * @since 0.6.0
  */
 Skylink.prototype.shareScreen = function (enableAudio, callback) {
   var self = this;
-  var hasAudio = false;
-
-  var settings = {
-    video: {
-      mediaSource: 'window'
-    }
-  };
 
   if (typeof enableAudio === 'function') {
     callback = enableAudio;
@@ -11897,67 +12297,6 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 
   if (typeof enableAudio !== 'boolean') {
     enableAudio = true;
-  }
-
-  var triggerSuccessFn = function (sStream) {
-    if (hasAudio) {
-      if (typeof self._streamSettings.audio === 'object') {
-        self._screenSharingStreamSettings.audio = {
-          stereo: !!self._streamSettings.audio.stereo
-        };
-      } else {
-        self._screenSharingStreamSettings.audio = true;
-      }
-    } else {
-      log.warn('This screensharing session will not support audio streaming');
-      self._screenSharingStreamSettings.audio = false;
-    }
-
-    var requireAudio = enableAudio === true;
-    var requireVideo = true;
-    var checkAudio = !requireAudio;
-    var checkVideo = !requireVideo;
-    var notSameTracksError = new Error(
-      'Expected audio tracks length with ' +
-      (requireAudio ? '1' : '0') + ' and video tracks length with ' +
-      (requireVideo ? '1' : '0') + ' but received audio tracks length ' +
-      'with ' + sStream.getAudioTracks().length + ' and video ' +
-      'tracks length with ' + sStream.getVideoTracks().length);
-
-    // do the check
-    if (requireAudio) {
-      checkAudio = sStream.getAudioTracks().length > 0;
-    }
-    if (requireVideo) {
-      checkVideo =  sStream.getVideoTracks().length > 0;
-    }
-
-    if (checkVideo) {
-      self._screenSharingStreamSettings.video = true;
-
-      // no audio but has video for screensharing
-      if (!checkAudio) {
-        self._trigger('mediaAccessFallback', {
-          error: notSameTracksError,
-          diff: {
-            video: { expected: 1, received: sStream.getVideoTracks().length },
-            audio: { expected: requireAudio ? 1 : 0, received: sStream.getAudioTracks().length }
-          }
-        }, 1, true, false);
-        self._screenSharingStreamSettings.audio = false;
-      }
-
-      self._onUserMediaSuccess(sStream, true);
-
-    } else {
-      self._onUserMediaError(notSameTracksError, true);
-    }
-
-    self._timestamp.screen = true;
-  };
-
-  if (window.webrtcDetectedBrowser === 'firefox') {
-    settings.audio = !!enableAudio;
   }
 
   var throttleFn = function (fn, wait) {
@@ -11977,77 +12316,121 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     self._timestamp.func = now;
   };
 
-  var toShareScreen = function(){
-    try {
-      window.getUserMedia(settings, function (stream) {
-        self.once('mediaAccessSuccess', function (stream) {
-          if (self._inRoom) {
-            if (self._hasMCU) {
-              self._restartMCUConnection();
-            } else {
-              self._trigger('incomingStream', self._user.sid, stream,
-                true, self.getPeerInfo(), false);
-              for (var peer in self._peerConnections) {
-                if (self._peerConnections.hasOwnProperty(peer)) {
-                  self._restartPeerConnection(peer, true, false, null, true);
-                }
+  throttleFn(function () {
+    var settings = {
+      settings: {
+        audio: enableAudio,
+        video: {
+          screenshare: true
+        }
+      },
+      getUserMediaSettings: {
+        video: {
+          mediaSource: 'window'
+        }
+      }
+    };
+
+    var mediaAccessSuccessFn = function (stream) {
+      self.off('mediaAccessError', mediaAccessErrorFn);
+
+      if (self._inRoom) {
+        self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo());
+        self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+
+        if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
+          self._refreshPeerConnection(Object.keys(self._peerConnections), false, function (err, success) {
+            if (err) {
+              log.error('Failed refreshing connections for shareScreen() ->', err);
+              if (typeof callback === 'function') {
+                callback(new Error('Failed refreshing connections.'), null);
               }
+              return;
             }
-          } else if (typeof callback === 'function') {
-            callback(null, stream);
-          }
-        }, function (stream, isScreenSharing) {
-          return isScreenSharing;
-        });
-
-        if (window.webrtcDetectedBrowser !== 'firefox' && enableAudio) {
-          window.getUserMedia({
-            audio: true
-          }, function (audioStream) {
-            try {
-              audioStream.addTrack(stream.getVideoTracks()[0]);
-              self._mediaScreenClone = stream;
-              hasAudio = true;
-              triggerSuccessFn(audioStream, true);
-
-            } catch (error) {
-              log.error('Failed retrieving audio stream for screensharing stream', error);
-              triggerSuccessFn(stream, true);
+            if (typeof callback === 'function') {
+              callback(null, stream);
             }
-
-          }, function (error) {
-            log.error('Failed retrieving audio stream for screensharing stream', error);
-            triggerSuccessFn(stream, true);
           });
-        } else {
-          hasAudio = window.webrtcDetectedBrowser === 'firefox' ? enableAudio : false;
-          triggerSuccessFn(stream, true);
+        } else if (typeof callback === 'function') {
+          callback(null, stream);
         }
+      } else if (typeof callback === 'function') {
+        callback(null, stream);
+      }
+    };
 
-      }, function (error) {
-        self._onUserMediaError(error, true, false);
-
-        self._timestamp.screen = true;
-
-        if (typeof callback === 'function') {
-          callback(error, null);
-        }
-      });
-
-    } catch (error) {
-      self._onUserMediaError(error, true, false);
+    var mediaAccessErrorFn = function (error) {
+      self.off('mediaAccessSuccess', mediaAccessSuccessFn);
 
       if (typeof callback === 'function') {
         callback(error, null);
       }
-    }
-  };
+    };
 
-  //self._throttle(toShareScreen,10000)();
-  throttleFn(toShareScreen, 10000);
+    self.once('mediaAccessSuccess', mediaAccessSuccessFn, function (stream, isScreensharing) {
+      return isScreensharing;
+    });
+
+    self.once('mediaAccessError', mediaAccessErrorFn, function (error, isScreensharing) {
+      return isScreensharing;
+    });
+
+    try {
+      if (enableAudio && window.webrtcDetectedBrowser === 'firefox') {
+        settings.getUserMediaSettings.audio = true;
+      }
+
+      navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
+        if (window.webrtcDetectedBrowser === 'firefox' || !enableAudio) {
+          self._onStreamAccessSuccess(stream, settings, true, false);
+          return;
+        }
+
+        navigator.getUserMedia({
+          audio: true
+
+        }, function (audioStream) {
+          try {
+            audioStream.addTrack(stream.getVideoTracks()[0]);
+
+            self.once('mediaAccessSuccess', function () {
+              self._streams.screenshare.streamClone = stream;
+            }, function (stream, isScreensharing) {
+              return isScreensharing;
+            });
+
+            self._onStreamAccessSuccess(audioStream, settings, true, false);
+
+          } catch (error) {
+            log.error('Failed retrieving audio stream for screensharing stream', error);
+            self._onStreamAccessSuccess(stream, settings, true, false);
+          }
+        }, function (error) {
+          log.error('Failed retrieving audio stream for screensharing stream', error);
+          self._onStreamAccessSuccess(stream, settings, true, false);
+        });
+
+      }, function (error) {
+        self._onStreamAccessError(error, settings, true, false);
+      });
+
+    } catch (error) {
+      self._onStreamAccessError(error, settings, true, false);
+    }
+
+  }, 10000);
 };
 
 /**
+ * <blockquote class="info">
+ *   Note that broadcasted events from <a href="#method_muteStream"><code>muteStream()</code> method</a>,
+ *   <a href="#method_stopStream"><code>stopStream()</code> method</a>,
+ *   <a href="#method_stopScreen"><code>stopScreen()</code> method</a>,
+ *   <a href="#method_sendMessage"><code>sendMessage()</code> method</a>,
+ *   <a href="#method_unlockRoom"><code>unlockRoom()</code> method</a> and
+ *   <a href="#method_lockRoom"><code>lockRoom()</code> method</a> may be queued when
+ *   sent within less than an interval.
+ * </blockquote>
  * Function that stops <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>.
  * @method stopScreen
  * @example
@@ -12057,206 +12440,466 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
  *
  *   skylinkDemo.shareScreen();
  * @trigger <ol class="desc-seq">
- *   <li><a href="#event_mediaAccessStopped"><code>mediaAccessStopped</code> event</a> triggers parameter payload
- *   <code>isScreensharing</code> value as <code>true</code>.</li>
- *   <li>If User is in the Room, <a href="#event_streamEnded"><code>streamEnded</code> event</a> triggers
- *   parameter payload <code>isScreensharing</code> value as <code>true</code> and <code>isSelf</code> value
- *   as <code>true</code>, and <a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers
- *   parameter payload <code>isSelf</code> value as <code>true</code>.</li>
- *   <li>If User has <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> and is in the Room,
- *   the Stream will be sent to Peers and <a href="#event_incomingStream"><code>incomingStream</code> event</a>
- *   triggers with parameter payload <code>isSelf</code> value as <code>true</code> using the
+ *   <li>Checks if there is <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>. <ol>
+ *   <li>If there is <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>: <ol>
+ *   <li>Stop <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> Stream. <ol>
+ *   <li><a href="#event_mediaAccessStopped"><code>mediaAccessStopped</code> event</a>
+ *   triggers parameter payload <code>isScreensharing</code> value as <code>true</code> and
+ *   <code>isAudioFallback</code> value as <code>false</code>.</li><li>If User is in Room: <ol>
+ *   <li><a href="#event_streamEnded"><code>streamEnded</code> event</a> triggers parameter payload
+ *   <code>isSelf</code> value as <code>true</code> and <code>isScreensharing</code> value as <code>true</code>.</li>
+ *   <li><a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers parameter payload
+ *   <code>isSelf</code> value as <code>true</code>.</li>
+ *   </ol></li></ol></li><li>If User is in Room: <small><b>SKIP</b> this step if <code>stopScreen()</code>
+ *   was invoked from <a href="#method_shareScreen"><code>shareScreen()</code> method</a>.</small> <ol>
+ *   <li>If there is <a href="#method_getUserMedia"> <code>getUserMedia()</code>Stream</a> Stream: <ol>
+ *   <li><a href="#event_incomingStream"><code>incomingStream</code> event</a> triggers parameter payload
+ *   <code>isSelf</code> value as <code>true</code> and <code>stream</code> as
  *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a>.</li>
- *   <li>Invokes <a href="#method_refreshConnection"><code>refreshConnection()</code> method</a>.</li></ol>
+ *   <li><a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers parameter payload
+ *   <code>isSelf</code> value as <code>true</code>.</li></ol></li>
+ *   <li>Invoke <a href="#method_refreshConnection"><code>refreshConnection()</code> method</a>.</li>
+ *   </ol></li></ol></li></ol></li></ol>
  * @for Skylink
  * @since 0.6.0
  */
 Skylink.prototype.stopScreen = function () {
-  if (this._mediaScreen && this._mediaScreen !== null) {
-    this._stopLocalMediaStreams({
+  if (this._streams.screenshare) {
+    this._stopStreams({
       screenshare: true
     });
 
-    /*// for changes where the audio is not muted in here but the original mediastream has no audio
-    if (!this._mediaStreamsStatus.audioMuted && !this._streamSettings.audio) {
-      this._mediaStreamsStatus.audioMuted = true;
-    }
-
-    // for changes where the video is not muted in here but the original mediastream has no video
-    if (!this._mediaStreamsStatus.videoMuted && !this._streamSettings.video) {
-      this._mediaStreamsStatus.videoMuted = true;
-    }*/
-
     if (this._inRoom) {
-      if (this._hasMCU) {
-        this._restartMCUConnection();
-      } else {
-        if (!!this._mediaStream && this._mediaStream !== null) {
-          this._trigger('incomingStream', this._user.sid, this._mediaStream, true,
-            this.getPeerInfo(), false);
-        }
-        for (var peer in this._peerConnections) {
-          if (this._peerConnections.hasOwnProperty(peer)) {
-            this._restartPeerConnection(peer, true, false, null, true);
-          }
-        }
+      if (this._streams.userMedia && this._streams.userMedia.stream) {
+        this._trigger('incomingStream', this._user.sid, this._streams.userMedia.stream, true, this.getPeerInfo());
+        this._trigger('peerUpdated', this._user.sid, this.getPeerInfo(), true);
       }
+      this._refreshPeerConnection(Object.keys(this._peerConnections), false);
     }
   }
 };
 
 /**
+ * Function that handles the muting of Stream audio and video tracks.
+ * @method _muteStreams
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._muteStreams = function () {
+  var self = this;
+  var hasVideo = false;
+  var hasAudio = false;
+
+  var muteFn = function (stream) {
+    var audioTracks = stream.getAudioTracks();
+    var videoTracks = stream.getVideoTracks();
+
+    for (var a = 0; a < audioTracks.length; a++) {
+      audioTracks[a].enabled = !self._streamsMutedSettings.audioMuted;
+      hasAudio = true;
+    }
+
+    for (var v = 0; v < videoTracks.length; v++) {
+      videoTracks[v].enabled = !self._streamsMutedSettings.videoMuted;
+      hasVideo = true;
+    }
+  };
+
+  if (self._streams.userMedia && self._streams.userMedia.stream) {
+    muteFn(self._streams.userMedia.stream);
+  }
+
+  if (self._streams.screenshare && self._streams.screenshare.stream) {
+    muteFn(self._streams.screenshare.stream);
+  }
+
+  if (self._streams.screenshare && self._streams.screenshare.streamClone) {
+    muteFn(self._streams.screenshare.streamClone);
+  }
+
+  log.debug('Updated Streams muted status ->', self._streamsMutedSettings);
+
+  return {
+    hasVideo: hasVideo,
+    hasAudio: hasAudio
+  };
+};
+
+/**
+ * Function that handles stopping the Stream streaming.
+ * @method _stopStreams
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._stopStreams = function (options) {
+  var self = this;
+  var stopFn = function (stream) {
+    var streamId = stream.id || stream.label;
+    log.debug([null, 'MediaStream', streamId, 'Stopping Stream ->'], stream);
+
+    try {
+      var audioTracks = stream.getAudioTracks();
+      var videoTracks = stream.getVideoTracks();
+
+      for (var a = 0; a < audioTracks.length; a++) {
+        audioTracks[a].stop();
+      }
+
+      for (var v = 0; v < videoTracks.length; v++) {
+        videoTracks[v].stop();
+      }
+
+    } catch (error) {
+      stream.stop();
+    }
+
+    if (self._streamsStoppedCbs[streamId]) {
+      self._streamsStoppedCbs[streamId]();
+    }
+  };
+
+  var stopUserMedia = false;
+  var stopScreenshare = false;
+  var hasStoppedMedia = false;
+
+  if (typeof options === 'object') {
+    stopUserMedia = options.userMedia === true;
+    stopScreenshare = options.screenshare === true;
+  }
+
+  if (stopUserMedia && self._streams.userMedia) {
+    if (self._streams.userMedia.stream) {
+      stopFn(self._streams.userMedia.stream);
+    }
+
+    self._streams.userMedia = null;
+    hasStoppedMedia = true;
+  }
+
+  if (stopScreenshare && self._streams.screenshare) {
+    if (self._streams.screenshare.streamClone) {
+      stopFn(self._streams.screenshare.streamClone);
+    }
+
+    if (self._streams.screenshare.stream) {
+      stopFn(self._streams.screenshare.stream);
+    }
+
+    self._streams.screenshare = null;
+    hasStoppedMedia = true;
+  }
+
+  if (self._inRoom && hasStoppedMedia) {
+    self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+  }
+
+  log.log('Stopping Streams with settings ->', options);
+};
+
+/**
+ * Function that parses the <code>getUserMedia()</code> settings provided.
+ * @method _parseStreamSettings
+ * @private
+ * @for Skylink
+ * @since 0.6.15
+ */
+Skylink.prototype._parseStreamSettings = function(options) {
+  var settings = {
+    settings: { audio: false, video: false },
+    mutedSettings: { shouldAudioMuted: false, shouldVideoMuted: false },
+    getUserMediaSettings: { audio: false, video: false }
+  };
+
+  if (options.audio) {
+    settings.settings.audio = {
+      stereo: false,
+      exactConstraints: !!options.useExactConstraints
+    };
+    settings.getUserMediaSettings.audio = {};
+
+    if (typeof options.audio.stereo === 'boolean') {
+      settings.settings.audio.stereo = options.audio.stereo;
+    }
+
+    if (typeof options.audio.mute === 'boolean') {
+      settings.mutedSettings.shouldAudioMuted = options.audio.mute;
+    }
+
+    if (Array.isArray(options.audio.optional)) {
+      settings.settings.audio.optional = clone(options.audio.optional);
+      settings.getUserMediaSettings.audio.optional = clone(options.audio.optional);
+    }
+
+    if (options.audio.deviceId && typeof options.audio.deviceId === 'string' &&
+      window.webrtcDetectedBrowser !== 'firefox') {
+      settings.settings.audio.deviceId = options.audio.deviceId;
+
+      if (options.useExactConstraints) {
+        settings.getUserMediaSettings.audio.deviceId = { exact: options.audio.deviceId };
+
+      } else {
+        if (!Array.isArray(settings.getUserMediaSettings.audio.optional)) {
+          settings.getUserMediaSettings.audio.optional = [];
+        }
+
+        settings.getUserMediaSettings.audio.optional.push({
+          sourceId: options.audio.deviceId
+        });
+      }
+    }
+
+    // For Edge to work since they do not support the advanced constraints yet
+    if (window.webrtcDetectedBrowser === 'edge') {
+      settings.getUserMediaSettings.audio = true;
+    }
+  }
+
+  if (options.video) {
+    settings.settings.video = {
+      resolution: clone(this.VIDEO_RESOLUTION.VGA),
+      screenshare: false,
+      exactConstraints: !!options.useExactConstraints
+    };
+    settings.getUserMediaSettings.video = {};
+
+    if (typeof options.video.mute === 'boolean') {
+      settings.mutedSettings.shouldVideoMuted = options.video.mute;
+    }
+
+    if (Array.isArray(options.video.optional)) {
+      settings.settings.video.optional = clone(options.video.optional);
+      settings.getUserMediaSettings.video.optional = clone(options.video.optional);
+    }
+
+    if (options.video.deviceId && typeof options.video.deviceId === 'string' &&
+      window.webrtcDetectedBrowser !== 'firefox') {
+      settings.settings.video.deviceId = options.video.deviceId;
+
+      if (options.useExactConstraints) {
+        settings.getUserMediaSettings.video.deviceId = { exact: options.video.deviceId };
+
+      } else {
+        if (!Array.isArray(settings.getUserMediaSettings.video.optional)) {
+          settings.getUserMediaSettings.video.optional = [];
+        }
+
+        settings.getUserMediaSettings.video.optional.push({
+          sourceId: options.video.deviceId
+        });
+      }
+    }
+
+    if (options.video.resolution && typeof options.video.resolution === 'object') {
+      if (typeof options.video.resolution.width === 'number') {
+        settings.settings.video.resolution.width = options.video.resolution.width;
+      }
+      if (typeof options.video.resolution.height === 'number') {
+        settings.settings.video.resolution.height = options.video.resolution.height;
+      }
+    }
+
+    if (options.useExactConstraints) {
+      settings.getUserMediaSettings.video.width = { exact: settings.settings.video.resolution.width };
+      settings.getUserMediaSettings.video.height = { exact: settings.settings.video.resolution.height };
+
+      if (typeof options.video.frameRate === 'number') {
+        settings.settings.video.frameRate = options.video.frameRate;
+        settings.getUserMediaSettings.video.frameRate = { exact: options.video.frameRate };
+      }
+
+    } else {
+      settings.getUserMediaSettings.video.mandatory = {
+        maxWidth: settings.settings.video.resolution.width,
+        maxHeight: settings.settings.video.resolution.height
+      };
+
+      if (typeof options.video.frameRate === 'number' && ['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) === -1) {
+        settings.settings.video.frameRate = options.video.frameRate;
+        settings.getUserMediaSettings.video.mandatory.maxFrameRate = options.video.frameRate;
+      }
+    }
+
+    // For Edge to work since they do not support the advanced constraints yet
+    if (window.webrtcDetectedBrowser === 'edge') {
+      settings.getUserMediaSettings.video = true;
+    }
+  }
+
+  return settings;
+};
+
+/**
  * Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.
- * @method _onUserMediaSuccess
+ * @method _onStreamAccessSuccess
  * @private
  * @for Skylink
  * @since 0.3.0
  */
-Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
+Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSharing, isAudioFallback) {
   var self = this;
-  log.log([null, 'MediaStream', stream.id,
-    'User has granted access to local media'], stream);
+  var streamId = stream.id || stream.label;
 
-  var streamEnded = function () {
-    log.log([null, 'MediaStream', stream.id, 'Local mediastream has ended'], {
-      inRoom: self._inRoom,
-      currentTime: stream.currentTime,
-      ended: typeof stream.active === 'boolean' ?
-        stream.active : stream.ended
+  log.log([null, 'MediaStream', streamId, 'Has access to stream ->'], stream);
+
+  // Stop previous stream
+  if (!isScreenSharing && self._streams.userMedia) {
+    self._stopStreams({
+      userMedia: true,
+      screenshare: false
     });
 
+  } else if (isScreenSharing && self._streams.screenshare) {
+    self._stopStreams({
+      userMedia: false,
+      screenshare: true
+    });
+  }
+
+  self._streamsStoppedCbs[streamId] = function () {
+    log.log([null, 'MediaStream', streamId, 'Stream has ended']);
+
+    self._trigger('mediaAccessStopped', !!isScreenSharing, !!isAudioFallback, streamId);
+
     if (self._inRoom) {
-      log.debug([null, 'MediaStream', stream.id, 'Sending mediastream ended status']);
+      log.debug([null, 'MediaStream', streamId, 'Sending Stream ended status to Peers']);
+
       self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.STREAM,
         mid: self._user.sid,
         rid: self._room.id,
         cid: self._key,
         sessionType: !!isScreenSharing ? 'screensharing' : 'stream',
+        streamId: streamId,
         status: 'ended'
       });
+
+      self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true, !!isScreenSharing, streamId);
+
+      if (isScreenSharing && self._streams.screenshare && self._streams.screenshare.stream &&
+        (self._streams.screenshare.stream.id || self._streams.screenshare.stream.label) === streamId) {
+        self._streams.screenshare = null;
+
+      } else if (!isScreenSharing && self._streams.userMedia && self._streams.userMedia.stream &&
+        (self._streams.userMedia.stream.id || self._streams.userMedia.stream.label) === streamId) {
+        self._streams.userMedia = null;
+      }
     }
-    self._trigger('streamEnded', self._user.sid || null, self.getPeerInfo(), true, !!isScreenSharing);
   };
 
-  // chrome uses the new specs
-  if (window.webrtcDetectedBrowser === 'chrome' || window.webrtcDetectedBrowser === 'opera') {
-    stream.oninactive = streamEnded;
-  // Workaround for local stream.onended because firefox has not yet implemented it
+  // Handle event for Chrome / Opera
+  if (['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1) {
+    stream.oninactive = function () {
+      if (self._streamsStoppedCbs[streamId]) {
+        self._streamsStoppedCbs[streamId]();
+      }
+    };
+
+  // Handle event for Firefox (use an interval)
   } else if (window.webrtcDetectedBrowser === 'firefox') {
     stream.endedInterval = setInterval(function () {
       if (typeof stream.recordedTime === 'undefined') {
         stream.recordedTime = 0;
       }
-
       if (stream.recordedTime === stream.currentTime) {
         clearInterval(stream.endedInterval);
-        // trigger that it has ended
-        streamEnded();
+
+        if (self._streamsStoppedCbs[streamId]) {
+          self._streamsStoppedCbs[streamId]();
+        }
 
       } else {
         stream.recordedTime = stream.currentTime;
       }
-
     }, 1000);
+
   } else {
-    stream.onended = streamEnded;
+    stream.onended = function () {
+      if (self._streamsStoppedCbs[streamId]) {
+        self._streamsStoppedCbs[streamId]();
+      }
+    };
   }
 
-  // check if readyStateChange is done
-  if (!isScreenSharing) {
-    self._mediaStream = stream;
-  } else {
-    self._mediaScreen = stream;
+  if ((settings.settings.audio && stream.getAudioTracks().length === 0) ||
+    (settings.settings.video && stream.getVideoTracks().length === 0)) {
 
-    /*// for the case where local user media (audio) is not available for screensharing audio is, do not mute it
-    if (!self._streamSettings.audio) {
-      self._mediaStreamsStatus.audioMuted = !self._screenSharingStreamSettings.audio;
+    var tracksNotSameError = 'Expected audio tracks length with ' +
+      (settings.settings.audio ? '1' : '0') + ' and video tracks length with ' +
+      (settings.settings.video ? '1' : '0') + ' but received audio tracks length ' +
+      'with ' + stream.getAudioTracks().length + ' and video ' +
+      'tracks length with ' + stream.getVideoTracks().length;
+
+    log.warn([null, 'MediaStream', streamId, tracksNotSameError]);
+
+    var requireAudio = !!settings.settings.audio;
+    var requireVideo = !!settings.settings.video;
+
+    if (settings.settings.audio && stream.getAudioTracks().length === 0) {
+      settings.settings.audio = false;
     }
 
-    // for the case where local user media (video) is not available for screensharing video is, do not mute it
-    // logically, this should always pass because screensharing will always require video
-    if (!self._streamSettings.video) {
-      self._mediaStreamsStatus.videoMuted = !self._screenSharingStreamSettings.video;
-    }*/
+    if (settings.settings.video && stream.getVideoTracks().length === 0) {
+      settings.settings.video = false;
+    }
+
+    self._trigger('mediaAccessFallback', {
+      error: new Error(tracksNotSameError),
+      diff: {
+        video: { expected: requireVideo ? 1 : 0, received: stream.getVideoTracks().length },
+        audio: { expected: requireAudio ? 1 : 0, received: stream.getAudioTracks().length }
+      }
+    }, self.MEDIA_ACCESS_FALLBACK_STATE.FALLBACKED, !!isScreenSharing, !!isAudioFallback, streamId);
   }
 
-  self._muteLocalMediaStreams();
-
-  self._wait(function () {
-    self._trigger('mediaAccessSuccess', stream, !!isScreenSharing);
-  }, function () {
-    if (!isScreenSharing) {
-      return self._mediaStream && self._mediaStream !== null;
-    } else {
-      return self._mediaScreen && self._mediaScreen !== null;
-    }
-  });
-
-  /*self._condition('readyStateChange', function () {
-    // check if users is in the room already
-    self._condition('peerJoined', function () {
-      self._trigger('incomingStream', self._user.sid, stream, true,
-        self.getPeerInfo(), !!isScreenSharing);
-    }, function () {
-      return self._inRoom;
-    }, function (peerId, peerInfo, isSelf) {
-      return isSelf;
-    });
-  }, function () {
-    return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
-  }, function (state) {
-    return state === self.READY_STATE_CHANGE.COMPLETED;
-  });*/
+  self._streams[ isScreenSharing ? 'screenshare' : 'userMedia' ] = {
+    stream: stream,
+    settings: settings.settings,
+    constraints: settings.getUserMediaSettings
+  };
+  self._muteStreams();
+  self._trigger('mediaAccessSuccess', stream, !!isScreenSharing, !!isAudioFallback, streamId);
 };
 
 /**
  * Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.
- * @method _onUserMediaError
+ * @method _onStreamAccessError
  * @private
  * @for Skylink
- * @since 0.5.4
+ * @since 0.6.15
  */
-Skylink.prototype._onUserMediaError = function(error, isScreenSharing, audioFallback) {
+Skylink.prototype._onStreamAccessError = function(error, settings, isScreenSharing) {
   var self = this;
-  var hasAudioVideoRequest = !!self._streamSettings.video && !!self._streamSettings.audio;
 
-  if (self._audioFallback && hasAudioVideoRequest && audioFallback) {
-    // redefined the settings for video as false
-    self._streamSettings.video = false;
-    self._getUserMediaSettings.video = false;
-
-    log.debug([null, 'MediaStream', null, 'Falling back to audio stream call']);
+  if (!isScreenSharing && settings.settings.audio && settings.settings.video && self._audioFallback) {
+    log.debug('Fallbacking to retrieve audio only Stream');
 
     self._trigger('mediaAccessFallback', {
       error: error,
       diff: null
-    }, 0, false, true);
+    }, self.MEDIA_ACCESS_FALLBACK_STATE.FALLBACKING, false, true);
 
-    window.getUserMedia({
+    navigator.getUserMedia({
       audio: true
-    }, function(stream) {
-      self._onUserMediaSuccess(stream);
-      self._trigger('mediaAccessFallback', {
-        error: null,
-        diff: {
-          video: { expected: 1, received: stream.getVideoTracks().length },
-          audio: { expected: 1, received: stream.getAudioTracks().length }
-        }
-      }, 1, false, true);
-    }, function(error) {
-      log.error([null, 'MediaStream', null,
-        'Failed retrieving audio in audio fallback:'], error);
-      self._trigger('mediaAccessError', error, !!isScreenSharing, true);
+    }, function (stream) {
+      self._onStreamAccessSuccess(stream, settings, false, true);
+
+    }, function (error) {
+      log.error('Failed fallbacking to retrieve audio only Stream ->', error);
+
+      self._trigger('mediaAccessError', error, false, true);
       self._trigger('mediaAccessFallback', {
         error: error,
         diff: null
-      }, -1, false, true);
+      }, self.MEDIA_ACCESS_FALLBACK_STATE.ERROR, false, true);
     });
-  } else {
-    log.error([null, 'MediaStream', null, 'Failed retrieving stream:'], error);
-   self._trigger('mediaAccessError', error, !!isScreenSharing, false);
+    return;
   }
+
+  log.error('Failed retrieving ' + (isScreenSharing ? 'screensharing' : 'camera') + ' Stream ->', error);
+
+  self._trigger('mediaAccessError', error, !!isScreenSharing, false);
 };
 
 /**
@@ -12270,267 +12913,27 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
   var self = this;
 
   if (!self._peerInformations[targetMid]) {
-    log.error([targetMid, 'MediaStream', stream.id,
-        'Received remote stream when peer is not connected. ' +
-        'Ignoring stream ->'], stream);
+    log.warn([targetMid, 'MediaStream', stream.id,
+      'Received remote stream when peer is not connected. ' +
+      'Ignoring stream ->'], stream);
     return;
   }
 
-  if (!self._peerInformations[targetMid].settings.audio &&
+  /*if (!self._peerInformations[targetMid].settings.audio &&
     !self._peerInformations[targetMid].settings.video && !isScreenSharing) {
     log.log([targetMid, 'MediaStream', stream.id,
       'Receive remote stream but ignoring stream as it is empty ->'
       ], stream);
     return;
-  }
-  log.log([targetMid, 'MediaStream', stream.id,
-    'Received remote stream ->'], stream);
+  }*/
+  log.log([targetMid, 'MediaStream', stream.id, 'Received remote stream ->'], stream);
 
   if (isScreenSharing) {
-    log.log([targetMid, 'MediaStream', stream.id,
-      'Peer is having a screensharing session with user']);
+    log.log([targetMid, 'MediaStream', stream.id, 'Peer is having a screensharing session with user']);
   }
 
-  self._trigger('incomingStream', targetMid, stream,
-    false, self.getPeerInfo(targetMid), !!isScreenSharing);
-};
-
-/**
- * Function that parses the <code>getUserMedia()</code> audio settings provided.
- * This parses correctly for the native <code>navigator.getUserMedia()</code> API audio constraints and
- *   sets any missing values to default.
- * @method _parseAudioStreamSettings
- * @private
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._parseAudioStreamSettings = function (audioOptions) {
-  audioOptions = (typeof audioOptions === 'object') ?
-    audioOptions : !!audioOptions;
-
-  var hasOptional = false;
-
-  // Cleaning of unwanted keys
-  if (audioOptions !== false) {
-    audioOptions = (typeof audioOptions === 'boolean') ? {} : audioOptions;
-    var tempAudioOptions = {};
-    tempAudioOptions.stereo = !!audioOptions.stereo;
-    tempAudioOptions.optional = [];
-
-    if (Array.isArray(audioOptions.optional)) {
-      tempAudioOptions.optional = audioOptions.optional;
-      hasOptional = true;
-    }
-
-    audioOptions = tempAudioOptions;
-  }
-
-  var userMedia = (typeof audioOptions === 'object') ?
-    true : audioOptions;
-
-  if (hasOptional) {
-    userMedia = {
-      optional: audioOptions.optional
-    };
-  }
-
-  return {
-    settings: audioOptions,
-    userMedia: userMedia
-  };
-};
-
-/**
- * Function that parses the <code>getUserMedia()</code> video settings provided.
- * This parses correctly for the native <code>navigator.getUserMedia()</code> API video constraints and
- *   sets any missing values to default.
- * @method _parseVideoStreamSettings
- * @private
- * @for Skylink
- * @since 0.5.8
- */
-Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
-  videoOptions = (typeof videoOptions === 'object') ?
-    videoOptions : !!videoOptions;
-
-  var userMedia = false;
-
-  // Cleaning of unwanted keys
-  if (videoOptions !== false) {
-    videoOptions = (typeof videoOptions === 'boolean') ?
-      { resolution: {} } : videoOptions;
-    var tempVideoOptions = {};
-    // set the resolution parsing
-    videoOptions.resolution = videoOptions.resolution || {};
-    tempVideoOptions.resolution = tempVideoOptions.resolution || {};
-    // set resolution
-    tempVideoOptions.resolution.width = videoOptions.resolution.width ||
-      this._defaultStreamSettings.video.resolution.width;
-    tempVideoOptions.resolution.height = videoOptions.resolution.height ||
-      this._defaultStreamSettings.video.resolution.height;
-    // set the framerate
-    tempVideoOptions.frameRate = videoOptions.frameRate ||
-      this._defaultStreamSettings.video.frameRate;
-    // set the screenshare option
-    tempVideoOptions.screenshare = false;
-
-    tempVideoOptions.optional = [];
-
-    if (Array.isArray(videoOptions.optional)) {
-      tempVideoOptions.optional = videoOptions.optional;
-    }
-
-    videoOptions = tempVideoOptions;
-
-    userMedia = {
-      mandatory: {
-        //minWidth: videoOptions.resolution.width,
-        //minHeight: videoOptions.resolution.height,
-        maxWidth: videoOptions.resolution.width,
-        maxHeight: videoOptions.resolution.height,
-        //minFrameRate: videoOptions.frameRate,
-        maxFrameRate: videoOptions.frameRate
-      },
-      optional: tempVideoOptions.optional
-    };
-
-    //Remove maxFrameRate for AdapterJS to work with Safari
-    if (window.webrtcDetectedType === 'plugin') {
-      delete userMedia.mandatory.maxFrameRate;
-    }
-
-    // Check if screensharing is available and enabled
-    /*if (this._screenSharingAvailable && videoOptions.screenshare) {
-      userMedia.optional.push({ sourceId: AdapterJS.WebRTCPlugin.plugin.screensharingKey });
-    }*/
-
-    //For Edge
-    if (window.webrtcDetectedBrowser === 'edge') {
-      userMedia = true;
-    }
-  }
-
-  return {
-    settings: videoOptions,
-    userMedia: userMedia
-  };
-};
-
-/**
- * Function that parses the <code>joinRoom()</code> bandwidth settings provided.
- * This parses and sets any missing values to default.
- * @method _parseBandwidthSettings
- * @private
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._parseBandwidthSettings = function (bwOptions) {
-  this._streamSettings.bandwidth = {};
-
-  bwOptions = (typeof bwOptions === 'object') ?
-    bwOptions : {};
-
-  // Configure the audio bandwidth. Recommended = 50
-  if (typeof bwOptions.audio === 'number') {
-    this._streamSettings.bandwidth.audio = bwOptions.audio;
-  }
-
-  // Configure the video bandwidth. Recommended = 256
-  if (typeof bwOptions.video === 'number') {
-    this._streamSettings.bandwidth.video = bwOptions.video;
-  }
-
-  // Configure the data bandwidth. Recommended = 1638400
-  if (typeof bwOptions.data === 'number') {
-    this._streamSettings.bandwidth.data = bwOptions.data;
-  }
-};
-
-/**
- * Function that parses the <code>getUserMedia()</code> audio/video mute settings provided.
- * This parses and sets any missing values to default.
- * @method _parseMutedSettings
- * @private
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._parseMutedSettings = function (options) {
-  // the stream options
-  options = (typeof options === 'object') ?
-    options : { audio: false, video: false };
-
-  var updateAudioMuted = (typeof options.audio === 'object') ?
-    !!options.audio.mute : false;//!options.audio;
-  var updateVideoMuted = (typeof options.video === 'object') ?
-    !!options.video.mute : false;//!options.video;
-
-  return {
-    audioMuted: updateAudioMuted,
-    videoMuted: updateVideoMuted
-  };
-};
-
-/**
- * Function that parses the <code>getUserMedia()</code> default settings received from the API result.
- * @method _parseDefaultMediaStreamSettings
- * @private
- * @for Skylink
- * @since 0.5.7
- */
-Skylink.prototype._parseDefaultMediaStreamSettings = function(options) {
-  var hasMediaChanged = false;
-
-  // prevent undefined error
-  options = options || {};
-
-  log.debug('Parsing stream settings. Default stream options:', options);
-
-  options.maxWidth = (typeof options.maxWidth === 'number') ? options.maxWidth :
-    640;
-  options.maxHeight = (typeof options.maxHeight === 'number') ? options.maxHeight :
-    480;
-
-  // parse video resolution. that's for now
-  this._defaultStreamSettings.video.resolution.width = options.maxWidth;
-  this._defaultStreamSettings.video.resolution.height = options.maxHeight;
-
-  log.debug('Parsed default media stream settings', this._defaultStreamSettings);
-};
-
-/**
- * Function that parses the <code>getUserMedia()</code> settings provided.
- * @method _parseMediaStreamSettings
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._parseMediaStreamSettings = function(options) {
-  var hasMediaChanged = false;
-
-  options = options || {};
-
-  log.debug('Parsing stream settings. Stream options:', options);
-
-  // Set audio settings
-  var audioSettings = this._parseAudioStreamSettings(options.audio);
-  // check for change
-  this._streamSettings.audio = audioSettings.settings;
-  this._getUserMediaSettings.audio = audioSettings.userMedia;
-
-  // Set video settings
-  var videoSettings = this._parseVideoStreamSettings(options.video);
-  // check for change
-  this._streamSettings.video = videoSettings.settings;
-  this._getUserMediaSettings.video = videoSettings.userMedia;
-
-  // Set user media status options
-  var mutedSettings = this._parseMutedSettings(options);
-
-  this._mediaStreamsStatus = mutedSettings;
-
-  log.debug('Parsed user media stream settings', this._streamSettings);
-
-  log.debug('User media status:', this._mediaStreamsStatus);
+  self._trigger('incomingStream', targetMid, stream, false, self.getPeerInfo(targetMid));
+  self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
 };
 
 /**
@@ -12542,16 +12945,18 @@ Skylink.prototype._parseMediaStreamSettings = function(options) {
  * @since 0.5.2
  */
 Skylink.prototype._addLocalMediaStreams = function(peerId) {
+  var self = this;
+
   // NOTE ALEX: here we could do something smarter
   // a mediastream is mainly a container, most of the info
   // are attached to the tracks. We should iterates over track and print
   try {
     log.log([peerId, null, null, 'Adding local stream']);
 
-    var pc = this._peerConnections[peerId];
+    var pc = self._peerConnections[peerId];
 
     if (pc) {
-      if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
+      if (pc.signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
         // Updates the streams accordingly
         var updateStreamFn = function (updatedStream) {
           var hasStream = false;
@@ -12572,15 +12977,15 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
           }
         };
 
-        if (this._mediaScreen && this._mediaScreen !== null) {
-          log.debug([peerId, 'MediaStream', null, 'Sending screen'], this._mediaScreen);
+        if (self._streams.screenshare && self._streams.screenshare.stream) {
+          log.debug([peerId, 'MediaStream', null, 'Sending screen'], self._streams.screenshare.stream);
 
-          updateStreamFn(this._mediaScreen);
+          updateStreamFn(self._streams.screenshare.stream);
 
-        } else if (this._mediaStream && this._mediaStream !== null) {
-          log.debug([peerId, 'MediaStream', null, 'Sending stream'], this._mediaStream);
+        } else if (self._streams.userMedia && self._streams.userMedia.stream) {
+          log.debug([peerId, 'MediaStream', null, 'Sending stream'], self._streams.userMedia.stream);
 
-          updateStreamFn(this._mediaStream);
+          updateStreamFn(self._streams.userMedia.stream);
 
         } else {
           log.warn([peerId, 'MediaStream', null, 'No media to send. Will be only receiving']);
@@ -12593,7 +12998,7 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
           'Not adding any stream as signalingState is closed']);
       }
     } else {
-      log.warn([peerId, 'MediaStream', this._mediaStream,
+      log.warn([peerId, 'MediaStream', self._mediaStream,
         'Not adding stream as peerconnection object does not exists']);
     }
   } catch (error) {
@@ -12604,278 +13009,49 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
       log.error([peerId, null, null, 'Failed adding local stream'], error);
     }
   }
+
+  setTimeout(function () {
+    var streamId = null;
+
+    if (self._streams.screenshare && self._streams.screenshare.stream) {
+      streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
+    } else if (self._streams.userMedia && self._streams.userMedia.stream) {
+      streamId = self._streams.userMedia.stream.id || self._streams.userMedia.stream.label;
+    }
+
+    if (self._inRoom) {
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.STREAM,
+        mid: self._user.sid,
+        rid: self._room.id,
+        cid: self._key,
+        sessionType: self._streams.screenshare && self._streams.screenshare.stream ? 'screensharing' : 'stream',
+        streamId: streamId,
+        status: 'check'
+      });
+    }
+  }, 3500);
 };
+Skylink.prototype._selectedAudioCodec = 'auto';
 
 /**
- * Function that handles the muting of Stream audio and video tracks.
- * @method _muteLocalMediaStreams
+ * Stores the preferred sending Peer connection streaming video codec.
+ * @attribute _selectedVideoCodec
+ * @type String
+ * @default "auto"
  * @private
  * @for Skylink
- * @since 0.5.6
+ * @since 0.5.10
  */
-Skylink.prototype._muteLocalMediaStreams = function () {
-  var hasAudioTracks = false;
-  var hasVideoTracks = false;
-
-  var audioTracks;
-  var videoTracks;
-  var a, v;
-
-  // Loop and enable tracks accordingly (mediaStream)
-  if (this._mediaStream && this._mediaStream !== null) {
-    audioTracks = this._mediaStream.getAudioTracks();
-    videoTracks = this._mediaStream.getVideoTracks();
-
-    hasAudioTracks = audioTracks.length > 0 || hasAudioTracks;
-    hasVideoTracks = videoTracks.length > 0 || hasVideoTracks;
-
-    // loop audio tracks
-    for (a = 0; a < audioTracks.length; a++) {
-      if (this._mediaStreamsStatus.audioMuted) {
-        audioTracks[a].enabled = false;
-      } else {
-        audioTracks[a].enabled = true;
-      }
-    }
-    // loop video tracks
-    for (v = 0; v < videoTracks.length; v++) {
-      if (this._mediaStreamsStatus.videoMuted) {
-        videoTracks[v].enabled = false;
-      } else {
-        videoTracks[v].enabled = true;
-      }
-    }
-  }
-
-  // Loop and enable tracks accordingly (mediaScreen)
-  if (this._mediaScreen && this._mediaScreen !== null) {
-    audioTracks = this._mediaScreen.getAudioTracks();
-    videoTracks = this._mediaScreen.getVideoTracks();
-
-    hasAudioTracks = hasAudioTracks || audioTracks.length > 0;
-    hasVideoTracks = hasVideoTracks || videoTracks.length > 0;
-
-    // loop audio tracks
-    for (a = 0; a < audioTracks.length; a++) {
-      if (this._mediaStreamsStatus.audioMuted) {
-        audioTracks[a].enabled = false;
-      } else {
-        audioTracks[a].enabled = true;
-      }
-    }
-    // loop video tracks
-    for (v = 0; v < videoTracks.length; v++) {
-      if (this._mediaStreamsStatus.videoMuted) {
-        videoTracks[v].enabled = false;
-      } else {
-        videoTracks[v].enabled = true;
-      }
-    }
-  }
-
-  // Loop and enable tracks accordingly (mediaScreenClone)
-  if (this._mediaScreenClone && this._mediaScreenClone !== null) {
-    videoTracks = this._mediaScreen.getVideoTracks();
-
-    hasVideoTracks = hasVideoTracks || videoTracks.length > 0;
-
-    // loop video tracks
-    for (v = 0; v < videoTracks.length; v++) {
-      if (this._mediaStreamsStatus.videoMuted) {
-        videoTracks[v].enabled = false;
-      } else {
-        videoTracks[v].enabled = true;
-      }
-    }
-  }
-
-  // update accordingly if failed
-  if (!hasAudioTracks) {
-    //this._mediaStreamsStatus.audioMuted = true;
-    this._streamSettings.audio = false;
-  }
-  if (!hasVideoTracks) {
-    //this._mediaStreamsStatus.videoMuted = true;
-    this._streamSettings.video = false;
-  }
-
-  log.log('Update to muted status ->', this._mediaStreamsStatus);
-
-  return {
-    hasAudioTracks: hasAudioTracks,
-    hasVideoTracks: hasVideoTracks
-  };
-};
+Skylink.prototype._selectedVideoCodec = 'auto';
 
 /**
- * Function that handles stopping the Stream streaming.
- * @method _stopLocalMediaStreams
+ * Function that modifies the SessionDescription string to enable OPUS stereo.
+ * @method _addSDPStereo
  * @private
  * @for Skylink
- * @since 0.6.3
+ * @since 0.5.10
  */
-Skylink.prototype._stopLocalMediaStreams = function (options) {
-  var self = this;
-  var stopUserMedia = false;
-  var stopScreenshare = false;
-  var triggerStopped = false;
-
-  if (typeof options === 'object') {
-    stopUserMedia = options.userMedia === true;
-    stopScreenshare = options.screenshare === true;
-  }
-
-  var stopTracksFn = function (stream) {
-    var audioTracks = stream.getAudioTracks();
-    var videoTracks = stream.getVideoTracks();
-
-    for (var i = 0; i < audioTracks.length; i++) {
-      audioTracks[i].stop();
-    }
-
-    for (var j = 0; j < videoTracks.length; j++) {
-      videoTracks[j].stop();
-    }
-  };
-
-  var stopFn = function (stream, name) {
-    //if (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 44) {
-    // chrome/opera/firefox uses mediastreamtrack.stop()
-    if (['chrome', 'opera', 'firefox'].indexOf(window.webrtcDetectedBrowser) > -1) {
-      stopTracksFn(stream);
-    } else {
-      try {
-        stream.stop();
-      } catch (error) {
-        log.warn('Failed stopping MediaStreamTracks for ' + name + '.' +
-          ' Stopping MediaStream instead', error);
-        stopTracksFn(stream);
-      }
-    }
-  };
-
-  if (stopScreenshare) {
-    log.log([null, 'MediaStream', self._selectedRoom, 'Stopping screensharing MediaStream']);
-
-    if (this._mediaScreen && this._mediaScreen !== null) {
-      stopFn(this._mediaScreen, '_mediaScreen');
-      this._mediaScreen = null;
-      triggerStopped = true;
-    }
-
-    if (this._mediaScreenClone && this._mediaScreenClone !== null) {
-      stopFn(this._mediaScreenClone, '_mediaScreenClone');
-      this._mediaScreenClone = null;
-    }
-
-    if (triggerStopped) {
-      this._screenSharingStreamSettings.audio = false;
-      this._screenSharingStreamSettings.video = false;
-      this._trigger('mediaAccessStopped', true);
-    }
-
-  } else {
-    log.log([null, 'MediaStream', self._selectedRoom, 'Screensharing MediaStream will not be stopped']);
-  }
-
-  if (stopUserMedia) {
-    log.log([null, 'MediaStream', self._selectedRoom, 'Stopping user\'s MediaStream']);
-
-    if (this._mediaStream && this._mediaStream !== null) {
-      stopFn(this._mediaStream, '_mediaStream');
-      this._mediaStream = null;
-      triggerStopped = true;
-    }
-
-    if (triggerStopped) {
-      this._streamSettings.audio = false;
-      this._streamSettings.video = false;
-      this._trigger('mediaAccessStopped', false);
-    }
-  } else {
-    log.log([null, 'MediaStream', self._selectedRoom, 'User\'s MediaStream will not be stopped']);
-  }
-
-  // prevent triggering when user is not in the room
-  if (this._inRoom) {
-    this._trigger('peerUpdated', this._user.sid, this.getPeerInfo(), true);
-  }
-};
-
-/**
- * Function that waits for Stream to be retrieved before firing callback.
- * @method _waitForLocalMediaStream
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
-  var self = this;
-  options = options || {};
-
-  // get the stream
-  if (options.manualGetUserMedia === true) {
-    self._trigger('mediaAccessRequired');
-  }
-  // If options video or audio false, do the opposite to throw a true.
-  var requireAudio = !!options.audio;
-  var requireVideo = !!options.video;
-
-  log.log('Requested audio:', requireAudio);
-  log.log('Requested video:', requireVideo);
-
-  // check if it requires audio or video
-  if (!requireAudio && !requireVideo && !options.manualGetUserMedia) {
-    // set to default
-    if (options.audio === false && options.video === false) {
-      self._parseMediaStreamSettings(options);
-    }
-
-    callback(null);
-    return;
-  }
-
-  // get the user media
-  if (!options.manualGetUserMedia && (options.audio || options.video)) {
-    self.getUserMedia({
-      audio: options.audio,
-      video: options.video
-
-    }, function (error, success) {
-      if (error) {
-        callback(error);
-      } else {
-        callback(null, success);
-      }
-    });
-  }
-
-  // clear previous mediastreams
-  self.stopStream();
-
-  if (options.manualGetUserMedia === true) {
-    var current50Block = 0;
-    var mediaAccessRequiredFailure = false;
-    // wait for available audio or video stream
-    self._wait(function () {
-      if (mediaAccessRequiredFailure === true) {
-        self._onUserMediaError(new Error('Waiting for stream timeout'), false, false);
-      } else {
-        callback(null, self._mediaStream);
-      }
-    }, function () {
-      current50Block += 1;
-      if (current50Block === 600) {
-        mediaAccessRequiredFailure = true;
-        return true;
-      }
-
-      if (self._mediaStream && self._mediaStream !== null) {
-        return true;
-      }
-    }, 50);
-  }
-};
 Skylink.prototype._addSDPStereo = function(sdpLines) {
   var opusRtmpLineIndex = 0;
   var opusLineFound = false;
@@ -12933,7 +13109,7 @@ Skylink.prototype._addSDPStereo = function(sdpLines) {
  * @since 0.5.10
  */
 Skylink.prototype._setSDPVideoResolution = function(sdpLines){
-  var video = this._streamSettings.video;
+  var video = this._streams.userMedia && this._streams.userMedia.settings.video;
   var frameRate = video.frameRate || 50;
   var resolution = {
     width: 320,
@@ -13019,7 +13195,7 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
  */
 Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
   // Find if user has audioStream
-  var bandwidth = this._streamSettings.bandwidth;
+  var bandwidth = this._streamsBandwidthSettings;
 
   // Prevent setting of bandwidth audio if not configured
   if (typeof bandwidth.audio === 'number' && bandwidth.audio > 0) {
@@ -13029,7 +13205,8 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
       // set the audio bandwidth
       if (sdpLines[i].indexOf('m=audio') === 0) {
       //if (sdpLines[i].indexOf('a=audio') === 0 || sdpLines[i].indexOf('m=audio') === 0) {
-        sdpLines.splice(i + 1, 0, 'b=AS:' + bandwidth.audio);
+        sdpLines.splice(i + 1, 0, window.webrtcDetectedBrowser === 'firefox' ?
+          'b=TIAS:' + (bandwidth.audio * 1024) : 'b=AS:' + bandwidth.audio);
 
         log.info([null, 'SDP', null, 'Setting maximum sending audio bandwidth bitrate @(index:' + i + ') -> '], bandwidth.audio);
         hasSetAudio = true;
@@ -13052,7 +13229,8 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
       // set the video bandwidth
       if (sdpLines[j].indexOf('m=video') === 0) {
       //if (sdpLines[j].indexOf('a=video') === 0 || sdpLines[j].indexOf('m=video') === 0) {
-        sdpLines.splice(j + 1, 0, 'b=AS:' + bandwidth.video);
+        sdpLines.splice(j + 1, 0, window.webrtcDetectedBrowser === 'firefox' ?
+          'b=TIAS:' + (bandwidth.video * 1024) : 'b=AS:' + bandwidth.video);
 
         log.info([null, 'SDP', null, 'Setting maximum sending video bandwidth bitrate @(index:' + j + ') -> '], bandwidth.video);
         hasSetVideo = true;
@@ -13075,7 +13253,8 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
       // set the data bandwidth
       if (sdpLines[k].indexOf('m=application') === 0) {
       //if (sdpLines[k].indexOf('a=application') === 0 || sdpLines[k].indexOf('m=application') === 0) {
-        sdpLines.splice(k + 1, 0, 'b=AS:' + bandwidth.data);
+        sdpLines.splice(k + 1, 0, window.webrtcDetectedBrowser === 'firefox' ?
+          'b=TIAS:' + (bandwidth.data * 1024) : 'b=AS:' + bandwidth.data);
 
         log.info([null, 'SDP', null, 'Setting maximum sending data bandwidth bitrate @(index:' + k + ') -> '], bandwidth.data);
         hasSetData = true;
