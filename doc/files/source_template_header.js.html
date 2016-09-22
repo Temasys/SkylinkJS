@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.14</title>
+    <title>SkylinkJS 0.6.15</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.14</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.15</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -199,13 +199,25 @@ var clone = function (obj) {
     return obj;
   }
 
-  var copy = obj.constructor();
-  for (var attr in obj) {
-    if (obj.hasOwnProperty(attr)) {
-      copy[attr] = obj[attr];
+  var copy = function (data) {
+    var copy = data.constructor();
+    for (var attr in data) {
+      if (data.hasOwnProperty(attr)) {
+        copy[attr] = data[attr];
+      }
+    }
+    return copy;
+  };
+
+  if (typeof obj === &#x27;object&#x27; &amp;&amp; !Array.isArray(obj)) {
+    try {
+      return JSON.parse( JSON.stringify(obj) );
+    } catch (err) {
+      return copy(obj);
     }
   }
-  return copy;
+  
+  return copy(obj);
 };
 
 /**

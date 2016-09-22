@@ -213,7 +213,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
  *   messaging Datachannel type state has to be "opened" (if Datachannel is enabled)
  *   and Signaling state has to be "stable".
  * Should consider dropping of counting messaging Datachannel type being opened as
- *   it should not involve the actual Peer connection for media (audio/video) streaming. 
+ *   it should not involve the actual Peer connection for media (audio/video) streaming.
  * @method _startPeerConnectionHealthCheck
  * @private
  * @for Skylink
@@ -378,32 +378,24 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
   // remove h264 invalid pref
   sdpLines = self._removeSDPFirefoxH264Pref(sdpLines);
+
   // Check if stereo was enabled
-  if (self._streamSettings.hasOwnProperty('audio')) {
-    if (self._streamSettings.audio.stereo) {
+  if (self._streams.userMedia && self._streams.userMedia.settings.audio) {
+    if (self._streams.userMedia.settings.stereo) {
+      log.info([targetMid, null, null, 'Enabling OPUS stereo flag']);
       self._addSDPStereo(sdpLines);
     }
   }
 
-  log.info([targetMid, null, null, 'Requested stereo:'], (self._streamSettings.audio ?
-    (self._streamSettings.audio.stereo ? self._streamSettings.audio.stereo : false) :
-    false));
-
-  // set sdp bitrate
-  if (self._streamSettings.hasOwnProperty('bandwidth')) {
-    var peerSettings = (self._peerInformations[targetMid] || {}).settings || {};
-
-    sdpLines = self._setSDPBitrate(sdpLines, peerSettings);
+  // Set SDP max bitrate
+  if (self._streamsBandwidthSettings) {
+    sdpLines = self._setSDPBitrate(sdpLines, self._streamsBandwidthSettings);
   }
 
   // set sdp resolution
   /*if (self._streamSettings.hasOwnProperty('video')) {
     sdpLines = self._setSDPVideoResolution(sdpLines, self._streamSettings.video);
   }*/
-
-  self._streamSettings.bandwidth = self._streamSettings.bandwidth || {};
-
-  self._streamSettings.video = self._streamSettings.video || false;
 
   /*log.info([targetMid, null, null, 'Custom bandwidth settings:'], {
     audio: (self._streamSettings.bandwidth.audio || 'Not set') + ' kB/s',
@@ -436,22 +428,23 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
   sessionDescription.sdp = sdpLines.join('\r\n');
 
-  // Remove REMB packet for MCU connection consistent video quality
-  // NOTE: This is a temporary solution. This is bad to modify from the client since REMB packet
-  //   is required to control quality based on network conditions.
-  if (self._hasMCU && ['chrome', 'opera', 'safari', 'IE'].indexOf(window.webrtcDetectedBrowser) > -1) {
-    log.warn([targetMid, null, null, 'Removing REMB packet for streaming quality in MCU environment']);
+  var removeVP9AptRtxPayload = false;
+  var agent = (self._peerInformations[targetMid] || {}).agent || {};
 
-    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtcp-fb:100 goog-remb\r\n/g, '');
+  if (agent.pluginVersion) {
+    // 0.8.870 supports
+    var parts = agent.pluginVersion.split('.');
+    removeVP9AptRtxPayload = parseInt(parts[0], 10) >= 0 && parseInt(parts[1], 10) >= 8 &&
+      parseInt(parts[2], 10) >= 870;
   }
 
   // Remove rtx or apt= lines that prevent connections for browsers without VP8 or VP9 support
   // See: https://bugs.chromium.org/p/webrtc/issues/detail?id=3962
-  if (['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1) {
+  if (['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1 && removeVP9AptRtxPayload) {
     log.warn([targetMid, null, null, 'Removing apt= and rtx payload lines causing connectivity issues']);
 
-    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\n/g, '');
-    sessionDescription.sdp = sessionDescription.sdp.replace(/a=fmtp:\d+ apt=\d+\r\n/g, '');
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=101\r\n/g, '');
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=107\r\n/g, '');
   }
 
   // NOTE ALEX: opus should not be used for mobile
@@ -500,7 +493,8 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       sdp: sessionDescription.sdp,
       mid: self._user.sid,
       target: targetMid,
-      rid: self._room.id
+      rid: self._room.id,
+      userInfo: self._getUserInfo()
     });
 
   }, function(error) {

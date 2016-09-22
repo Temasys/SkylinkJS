@@ -45,7 +45,7 @@ You can raise tickets on [our support portal](http://support.temasys.com.sg) or 
 ##### Current versions and stability
 Always use the latest versions of the SkylinkJS library as WebRTC is still evolving and we adapt to changes very frequently.
 
-[Latest version: `0.6.14`](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.14).
+[Latest version: `0.6.15`](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.15).
 
 #### Noted Issues and Solutions
 ##### Installing `0.6.3` - `0.6.10` versions in NPM
