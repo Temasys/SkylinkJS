@@ -352,7 +352,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.mediaStatus The Peer Stream muted settings.
    * @param {Boolean} peerInfo.mediaStatus.audioMuted The flag if Peer Stream audio tracks is muted or not.
    *   &lt;small&gt;If Peer &lt;code&gt;peerInfo.settings.audio&lt;/code&gt; is false, this will be defined as &lt;code&gt;true&lt;/code&gt;.&lt;/small&gt;
-   * @param {Boolean} peerInfo.mediaStatus.videoMuted The flag if Peer Stream audio tracks is muted or not.
+   * @param {Boolean} peerInfo.mediaStatus.videoMuted The flag if Peer Stream video tracks is muted or not.
    *   &lt;small&gt;If Peer &lt;code&gt;peerInfo.settings.video&lt;/code&gt; is false, this will be defined as &lt;code&gt;true&lt;/code&gt;.&lt;/small&gt;
    * @param {JSON} peerInfo.agent The Peer agent information.
    * @param {String} peerInfo.agent.name The Peer agent name.
@@ -611,7 +611,7 @@ Skylink.prototype._EVENTS = {
   streamEnded: [],
 
   /**
-   * Event triggered when Peer Stream audio or video tracks has been muted.
+   * Event triggered when Peer Stream audio or video tracks has been muted / unmuted.
    * @event streamMuted
    * @param {String} peerId The Peer ID.
    * @param {JSON} peerInfo The Peer session information.
@@ -738,7 +738,24 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.14
    */
-  getConnectionStatusStateChange: []
+  getConnectionStatusStateChange: [],
+
+  /**
+   * Event triggered when &lt;a href=&quot;#method_muteStream&quot;&gt;&lt;code&gt;muteStream()&lt;/code&gt; method&lt;/a&gt; changes
+   * User Streams audio and video tracks muted status.
+   * @event localMediaMuted
+   * @param {JSON} mediaStatus The Streams muted settings.
+   *   &lt;small&gt;This indicates the muted settings for both
+   *   &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; Stream&lt;/a&gt; and
+   *   &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt;.&lt;/small&gt;
+   * @param {Boolean} mediaStatus.audioMuted The flag if all Streams audio tracks is muted or not.
+   *   &lt;small&gt;If User&#x27;s &lt;code&gt;peerInfo.settings.audio&lt;/code&gt; is false, this will be defined as &lt;code&gt;true&lt;/code&gt;.&lt;/small&gt;
+   * @param {Boolean} mediaStatus.videoMuted The flag if all Streams video tracks is muted or not.
+   *   &lt;small&gt;If User&#x27;s &lt;code&gt;peerInfo.settings.video&lt;/code&gt; is false, this will be defined as &lt;code&gt;true&lt;/code&gt;.&lt;/small&gt;
+   * @for Skylink
+   * @since 0.6.15
+   */
+  localMediaMuted: []
 };
 
 /**

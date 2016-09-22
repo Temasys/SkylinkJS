@@ -4239,7 +4239,7 @@
                                 },
                                 {
                                     "name": "videoMuted",
-                                    "description": "The flag if Peer Stream audio tracks is muted or not.\n  <small>If Peer <code>peerInfo.settings.video</code> is false, this will be defined as <code>true</code>.</small>",
+                                    "description": "The flag if Peer Stream video tracks is muted or not.\n  <small>If Peer <code>peerInfo.settings.video</code> is false, this will be defined as <code>true</code>.</small>",
                                     "type": "Boolean"
                                 }
                             ]
@@ -4814,7 +4814,7 @@
         {
             "file": "source/skylink-events.js",
             "line": 522,
-            "description": "Event triggered when Peer Stream audio or video tracks has been muted.",
+            "description": "Event triggered when Peer Stream audio or video tracks has been muted / unmuted.",
             "itemtype": "event",
             "name": "streamMuted",
             "params": [
@@ -5231,7 +5231,35 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 653,
+            "line": 652,
+            "description": "Event triggered when <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> changes\nUser Streams audio and video tracks muted status.",
+            "itemtype": "event",
+            "name": "localMediaMuted",
+            "params": [
+                {
+                    "name": "mediaStatus",
+                    "description": "The Streams muted settings.\n  <small>This indicates the muted settings for both\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n  <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>.</small>",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "audioMuted",
+                            "description": "The flag if all Streams audio tracks is muted or not.\n  <small>If User's <code>peerInfo.settings.audio</code> is false, this will be defined as <code>true</code>.</small>",
+                            "type": "Boolean"
+                        },
+                        {
+                            "name": "videoMuted",
+                            "description": "The flag if all Streams video tracks is muted or not.\n  <small>If User's <code>peerInfo.settings.video</code> is false, this will be defined as <code>true</code>.</small>",
+                            "type": "Boolean"
+                        }
+                    ]
+                }
+            ],
+            "since": "0.6.15",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 670,
             "description": "Stores the list of <code>once()</code> event handlers.\nThese events are only triggered once.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -5257,7 +5285,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 666,
+            "line": 683,
             "description": "Stores the timestamps data used for throttling.",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -5269,7 +5297,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 679,
+            "line": 696,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -5293,7 +5321,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 703,
+            "line": 720,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -5330,7 +5358,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 761,
+            "line": 778,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -5355,7 +5383,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 810,
+            "line": 827,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -5366,7 +5394,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 864,
+            "line": 881,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -5377,7 +5405,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 890,
+            "line": 907,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -5388,7 +5416,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 928,
+            "line": 945,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",

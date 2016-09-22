@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Thu Sep 22 2016 16:00:25 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Thu Sep 22 2016 16:34:09 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10548,7 +10548,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Thu Sep 22 2016 16:00:25 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Thu Sep 22 2016 16:34:09 GMT+0800 (SGT) */
 
 (function() {
 
@@ -18844,7 +18844,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.mediaStatus The Peer Stream muted settings.
    * @param {Boolean} peerInfo.mediaStatus.audioMuted The flag if Peer Stream audio tracks is muted or not.
    *   <small>If Peer <code>peerInfo.settings.audio</code> is false, this will be defined as <code>true</code>.</small>
-   * @param {Boolean} peerInfo.mediaStatus.videoMuted The flag if Peer Stream audio tracks is muted or not.
+   * @param {Boolean} peerInfo.mediaStatus.videoMuted The flag if Peer Stream video tracks is muted or not.
    *   <small>If Peer <code>peerInfo.settings.video</code> is false, this will be defined as <code>true</code>.</small>
    * @param {JSON} peerInfo.agent The Peer agent information.
    * @param {String} peerInfo.agent.name The Peer agent name.
@@ -19103,7 +19103,7 @@ Skylink.prototype._EVENTS = {
   streamEnded: [],
 
   /**
-   * Event triggered when Peer Stream audio or video tracks has been muted.
+   * Event triggered when Peer Stream audio or video tracks has been muted / unmuted.
    * @event streamMuted
    * @param {String} peerId The Peer ID.
    * @param {JSON} peerInfo The Peer session information.
@@ -19230,7 +19230,24 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.14
    */
-  getConnectionStatusStateChange: []
+  getConnectionStatusStateChange: [],
+
+  /**
+   * Event triggered when <a href="#method_muteStream"><code>muteStream()</code> method</a> changes
+   * User Streams audio and video tracks muted status.
+   * @event localMediaMuted
+   * @param {JSON} mediaStatus The Streams muted settings.
+   *   <small>This indicates the muted settings for both
+   *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> and
+   *   <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>.</small>
+   * @param {Boolean} mediaStatus.audioMuted The flag if all Streams audio tracks is muted or not.
+   *   <small>If User's <code>peerInfo.settings.audio</code> is false, this will be defined as <code>true</code>.</small>
+   * @param {Boolean} mediaStatus.videoMuted The flag if all Streams video tracks is muted or not.
+   *   <small>If User's <code>peerInfo.settings.video</code> is false, this will be defined as <code>true</code>.</small>
+   * @for Skylink
+   * @since 0.6.15
+   */
+  localMediaMuted: []
 };
 
 /**
