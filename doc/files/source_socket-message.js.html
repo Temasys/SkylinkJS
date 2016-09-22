@@ -333,11 +333,13 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
  *     console.info(&quot;Recording session has started. ID -&gt;&quot;, success);
  *   });
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
- *   &lt;li&gt;&lt;a href=&quot;#event_recordingState&quot;&gt;&lt;code&gt;recordingState&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
- *   &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;START&lt;/code&gt;.&lt;/li&gt;
- *   &lt;li&gt;When recording session has errors (and aborted), 
- *   &lt;a href=&quot;#event_recordingState&quot;&gt;&lt;code&gt;recordingState&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
- *   &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;ERROR&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;
+ *   &lt;li&gt;If MCU is not connected: &lt;ol&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;If there is an existing recording session currently going on: &lt;ol&gt;
+ *   &lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;Sends to MCU via Signaling server to start recording session. &lt;ol&gt;
+ *   &lt;li&gt;If recording session has been started successfully: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_recordingState&quot;&gt;&lt;code&gt;recordingState&lt;/code&gt; event&lt;/a&gt; triggers
+ *   parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;START&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @beta
  * @for Skylink
  * @since 0.6.x
@@ -424,14 +426,26 @@ Skylink.prototype.startRecording = function (callback) {
  *     console.info(&quot;Recording session has compiled with links -&gt;&quot;, success.link);
  *   }, true);
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
- *   &lt;li&gt;&lt;a href=&quot;#event_recordingState&quot;&gt;&lt;code&gt;recordingState&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
- *   &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;STOP&lt;/code&gt;.&lt;/li&gt;
- *   &lt;li&gt;When recording session mixin has errors (and aborted), 
- *   &lt;a href=&quot;#event_recordingState&quot;&gt;&lt;code&gt;recordingState&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
- *   &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;ERROR&lt;/code&gt;.&lt;/li&gt;
- *   &lt;li&gt;When recording session mixin has completed with video links, 
- *   &lt;a href=&quot;#event_recordingState&quot;&gt;&lt;code&gt;recordingState&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
- *   &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;LINK&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;
+ *   &lt;li&gt;If MCU is not connected: &lt;ol&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;If there is no existing recording session currently going on: &lt;ol&gt;
+ *   &lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;If existing recording session recording time has not elapsed more than 4 seconds:
+ *   &lt;small&gt;4 seconds is mandatory for recording session to ensure better recording
+ *   experience and stability.&lt;/small&gt; &lt;ol&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;Sends to MCU via Signaling server to stop recording session: &lt;ol&gt;
+ *   &lt;li&gt;If recording session has been stopped successfully: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_recordingState&quot;&gt;&lt;code&gt;recordingState&lt;/code&gt; event&lt;/a&gt;
+ *   triggers parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;START&lt;/code&gt;.
+ *   &lt;li&gt;MCU starts mixin recorded session videos: &lt;ol&gt;
+ *   &lt;li&gt;If recording session has been mixin successfully with links: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_recordingState&quot;&gt;&lt;code&gt;recordingState&lt;/code&gt; event&lt;/a&gt; triggers
+ *   parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;LINK&lt;/code&gt;.&lt;li&gt;Else: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_recordingState&quot;&gt;&lt;code&gt;recordingState&lt;/code&gt; event&lt;/a&gt; triggers
+ *   parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;ERROR&lt;/code&gt;.&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;li&gt;Else: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_recordingState&quot;&gt;&lt;code&gt;recordingState&lt;/code&gt; event&lt;/a&gt;
+ *   triggers parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;ERROR&lt;/code&gt;.&lt;/li&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;
+ *   &lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @beta
  * @for Skylink
  * @since 0.6.x
@@ -992,12 +1006,12 @@ Skylink.prototype._recordingEventHandler = function (message) {
       log.warn([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Recording stopped abruptly before 4 seconds&#x27;]);
       self._recordingStartInterval = null;
     }
-  
+
     log.debug([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Stopped recording&#x27;]);
-    
+
     self._recordings[message.recordingId].isOn = false;
     self._trigger(&#x27;recordingState&#x27;, self.RECORDING_STATE.STOP, message.recordingId, null, null);
-  
+
   } else if (message.action === &#x27;url&#x27;) {
     if (!self._recordings[message.recordingId]) {
       log.error([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Received URL but the session is empty&#x27;]);
@@ -1006,24 +1020,24 @@ Skylink.prototype._recordingEventHandler = function (message) {
 
     self._recordings[message.recordingId].url = message.url;
     var links = message.url &amp;&amp; typeof message.url === &#x27;object&#x27; ? message.url : { mixin: message.url };
-       
+
     self._trigger(&#x27;recordingState&#x27;, self.RECORDING_STATE.LINK, message.recordingId, links, null);
-  
+
   } else {
     var recordingError = new Error(message.error || &#x27;Unknown error&#x27;);
     if (!self._recordings[message.recordingId]) {
       log.error([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Received error but the session is empty -&gt;&#x27;], recordingError);
       return;
     }
-    
+
     log.error([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Recording failure -&gt;&#x27;], recordingError);
-    
+
     self._recordings[message.recordingId].error = recordingError;
     self._trigger(&#x27;recordingState&#x27;, self.RECORDING_STATE.ERROR, message.recordingId, null, recordingError);
-    
+
     if (self._recordings[message.recordingId].isOn) {
       log.debug([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Stopped recording abruptly&#x27;]);
-      
+
       self._recordings[message.recordingId].isOn = false;
       self._trigger(&#x27;recordingState&#x27;, self.RECORDING_STATE.STOP, message.recordingId, null, recordingError);
     }
