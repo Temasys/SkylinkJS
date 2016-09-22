@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.14 - Thu Sep 22 2016 15:58:28 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Thu Sep 22 2016 16:00:25 GMT+0800 (SGT) */
 
 (function() {
 
@@ -220,7 +220,7 @@ function Skylink() {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.VERSION = '0.6.14';
+Skylink.prototype.VERSION = '0.6.15';
 
 /**
  * Function that generates an <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">UUID</a> (Unique ID).
