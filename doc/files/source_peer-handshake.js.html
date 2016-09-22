@@ -585,7 +585,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       mid: self._user.sid,
       target: targetMid,
       rid: self._room.id,
-      userInfo: self.getPeerInfo()
+      userInfo: self._getUserInfo()
     });
 
   }, function(error) {
