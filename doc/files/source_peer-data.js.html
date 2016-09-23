@@ -239,8 +239,9 @@ Skylink.prototype.getPeerInfo = function(peerId) {
   if (typeof peerId === &#x27;string&#x27; &amp;&amp; typeof this._peerInformations[peerId] === &#x27;object&#x27;) {
     peerInfo = clone(this._peerInformations[peerId]);
     peerInfo.room = clone(this._selectedRoom);
-    
-    if (peerInfo.settings.video &amp;&amp; peerInfo.settings.video.frameRate === -1) {
+
+    if (userInfo.settings.video &amp;&amp; typeof userInfo.settings.video === &#x27;object&#x27; &amp;&amp;
+      peerInfo.settings.video.frameRate === -1) {
       delete peerInfo.settings.video.frameRate;
     }
 
@@ -289,7 +290,8 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 Skylink.prototype._getUserInfo = function(peerId) {
   var userInfo = clone(this.getPeerInfo());
 
-  if (userInfo.settings.video &amp;&amp; !userInfo.settings.video.frameRate) {
+  if (userInfo.settings.video &amp;&amp; typeof userInfo.settings.video === &#x27;object&#x27; &amp;&amp;
+    typeof userInfo.settings.video.frameRate !== &#x27;number&#x27;) {
     userInfo.settings.video.frameRate = -1;
   }
 
