@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Fri Sep 23 2016 01:46:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Fri Sep 23 2016 19:00:55 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1231,36 +1231,6 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
   this._startDataTransfer(data, dataInfo, listOfPeers, callback);
 };
 
-/**
- * <blockquote class="info">
- *   <b>Deprecation Warning!</b> This method has been deprecated, please use <a href="#method_acceptDataTransfer">
- *   <code>acceptDataTransfer()</code> method</a> instead.
- * </blockquote>
- * Function that accepts or rejects an upload data transfer request from Peer to User.
- * <small>Parameter signature follows <a href="#method_acceptDataTransfer">
- * <code>acceptDataTransfer()</code> method</a>.</small>
- * @method respondBlobRequest
- * @example
- *   // Example 1: Accept Peer upload data transfer request
- *   skylinkDemo.on("incomingDataRequest", function (transferId, peerId, transferInfo, isSelf) {
- *      if (!isSelf) {
- *        skylinkDemo.respondBlobRequest(peerId, transferId, true);
- *      }
- *   });
- *
- *   // Example 2: Reject Peer upload data transfer request
- *   skylinkDemo.on("incomingDataRequest", function (transferId, peerId, transferInfo, isSelf) {
- *      if (!isSelf) {
- *        skylinkDemo.respondBlobRequest(peerId, transferId, false);
- *      }
- *   });
- * @deprecated true
- * @trigger <small>Event sequence follows <a href="#method_sendBlobData">
- * <code>sendBlobData()</code> method</a> after <code>acceptDataTransfer()</code> method is invoked.</small>
- * @for Skylink
- * @since 0.5.0
- */
-Skylink.prototype.respondBlobRequest =
 /**
  * Function that accepts or rejects an upload data transfer request from Peer to User.
  * @method acceptDataTransfer
