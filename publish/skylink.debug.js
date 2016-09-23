@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Thu Sep 22 2016 18:47:20 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Sep 24 2016 01:13:23 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5048,8 +5048,9 @@ Skylink.prototype.getPeerInfo = function(peerId) {
   if (typeof peerId === 'string' && typeof this._peerInformations[peerId] === 'object') {
     peerInfo = clone(this._peerInformations[peerId]);
     peerInfo.room = clone(this._selectedRoom);
-    
-    if (peerInfo.settings.video && peerInfo.settings.video.frameRate === -1) {
+
+    if (userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
+      peerInfo.settings.video.frameRate === -1) {
       delete peerInfo.settings.video.frameRate;
     }
 
@@ -5098,7 +5099,8 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 Skylink.prototype._getUserInfo = function(peerId) {
   var userInfo = clone(this.getPeerInfo());
 
-  if (userInfo.settings.video && !userInfo.settings.video.frameRate) {
+  if (userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
+    typeof userInfo.settings.video.frameRate !== 'number') {
     userInfo.settings.video.frameRate = -1;
   }
 
