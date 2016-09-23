@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Fri Sep 23 2016 19:00:55 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Fri Sep 23 2016 19:02:41 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1256,7 +1256,8 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
  * @for Skylink
  * @since 0.6.1
  */
-Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
+Skylink.prototype.acceptDataTransfer =
+Skylink.prototype.respondBlobRequest = function (peerId, transferId, accept) {
   if (typeof transferId !== 'string' && typeof peerId !== 'string') {
     log.error([peerId, 'RTCDataChannel', null, 'Aborting accept data transfer as ' +
       'transfer ID and peer ID is not provided'], {

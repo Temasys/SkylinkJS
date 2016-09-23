@@ -531,7 +531,8 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
  * @for Skylink
  * @since 0.6.1
  */
-Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
+Skylink.prototype.acceptDataTransfer =
+Skylink.prototype.respondBlobRequest = function (peerId, transferId, accept) {
   if (typeof transferId !== 'string' && typeof peerId !== 'string') {
     log.error([peerId, 'RTCDataChannel', null, 'Aborting accept data transfer as ' +
       'transfer ID and peer ID is not provided'], {
