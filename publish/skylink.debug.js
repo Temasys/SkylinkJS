@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Sat Sep 24 2016 17:59:13 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Sep 24 2016 18:19:57 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6640,15 +6640,16 @@ Skylink.prototype._forceTURN = false;
 Skylink.prototype._path = null;
 
 /**
- * Stores the server region for the Signaling server to use.
- * This is already deprecated an no longer useful. To discuss and remove.
- * @attribute _serverRegion
- * @type String
+ * Spoofs the REGIONAL_SERVER to prevent errors on deployed apps except the fact this no longer works.
+ * Automatic regional selection has already been implemented hence REGIONAL_SERVER is no longer useful.
+ * @attribute REGIONAL_SERVER
+ * @type JSON
+ * @readOnly
  * @private
  * @for Skylink
- * @since 0.5.0
+ * @since 0.6.16
  */
-Skylink.prototype._serverRegion = null;
+Skylink.prototype.REGIONAL_SERVER = {};
 
 /**
  * Stores the API server url.
