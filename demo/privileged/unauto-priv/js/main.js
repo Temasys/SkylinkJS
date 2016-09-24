@@ -559,11 +559,17 @@ $(document).ready(function () {
   });
   //---------------------------------------------------
   $('#enable_audio_btn').click(function () {
-    Demo.Skylink.enableAudio();
+    Demo.Skylink.muteStream({
+      audioMuted: false,
+      videoMuted: Demo.Skylink.getPeerInfo().mediaStatus.videoMuted
+    });
   });
   //---------------------------------------------------
   $('#disable_audio_btn').click(function () {
-    Demo.Skylink.disableAudio();
+    Demo.Skylink.muteStream({
+      audioMuted: true,
+      videoMuted: Demo.Skylink.getPeerInfo().mediaStatus.videoMuted
+    });
   });
   //---------------------------------------------------
   $('#stop_stream_btn').click(function () {
@@ -571,11 +577,17 @@ $(document).ready(function () {
   });
   //---------------------------------------------------
   $('#enable_video_btn').click(function () {
-    Demo.Skylink.enableVideo();
+    Demo.Skylink.muteStream({
+      videoMuted: false,
+      audioMuted: Demo.Skylink.getPeerInfo().mediaStatus.audioMuted
+    });
   });
   //---------------------------------------------------
   $('#disable_video_btn').click(function () {
-    Demo.Skylink.disableVideo();
+    Demo.Skylink.muteStream({
+      videoMuted: true,
+      audioMuted: Demo.Skylink.getPeerInfo().mediaStatus.audioMuted
+    });
   });
   //---------------------------------------------------
   $('#leave_room_btn').click(function () {
