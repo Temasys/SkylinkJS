@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Sat Sep 24 2016 17:56:55 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Sep 24 2016 17:59:13 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6592,29 +6592,6 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
 };
 
 /**
- * <blockquote class="info"><b>Deprecation Warning!</b>
- *   This constant has been deprecated.<br>Automatic nearest regional server has been implemented
- *   on the platform.
- * </blockquote>
- * The list of available Auth servers in these regions configured in the
- * <a href="#method_init"><code>init()</code> method</a>.
- * @attribute REGIONAL_SERVER
- * @param {String} APAC1 <small>Value <code>"sg"</code></small>
- *   The value of the option to use the Auth server in Asia Pacific (APAC).
- * @param {String} US1   <small>Value <code>"us2"</code></small>
- *   The value of the option to use the Auth server in United States (US).
- * @deprecated
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.5.0
- */
-Skylink.prototype.REGIONAL_SERVER = {
-  APAC1: 'sg',
-  US1: 'us2'
-};
-
-/**
  * Stores the flag if HTTPS connections should be enforced when connecting to
  *   the API or Signaling server if App is accessing from HTTP domain.
  * HTTPS connections are enforced if App is accessing from HTTPS domains.
@@ -6801,11 +6778,6 @@ Skylink.prototype._room = null;
  *   The Room that User will be connected to is the <code>defaultRoom</code> provided.</small>
  * @param {String} [options.roomServer] The Auth server.
  * <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>
- * @param {String} [options.region] <blockquote class="info"><b>Deprecation Warning!</b>
- *   This option has been deprecated.<br>Automatic nearest regional server has been implemented
- *   on the platform.</blockquote>
- *   The Auth server in the various regions to connect to for better connectivity.
- *   [Rel: Skylink.REGIONAL_SERVER]
  * @param {Boolean} [options.enableIceTrickle=true] The flag if Peer connections should
  *   trickle ICE for faster connectivity.
  * @param {Boolean} [options.enableDataChannel=true] The flag if Datachannel connections should be enabled.
@@ -6918,7 +6890,6 @@ Skylink.prototype._room = null;
  * @param {Boolean} callback.success.enableTURNServer The configured value of the <code>options.enableTURNServer</code>.
  * @param {Boolean} callback.success.enableSTUNServer The configured value of the <code>options.enableSTUNServer</code>.
  * @param {Boolean} callback.success.TURNTransport The configured value of the <code>options.TURNServerTransport</code>.
- * @param {String} callback.success.serverRegion The configured value of the <code>options.region</code>.
  * @param {Boolean} callback.success.audioFallback The configured value of the <code>options.audioFallback</code>.
  * @param {Boolean} callback.success.forceSSL The configured value of the <code>options.forceSSL</code>.
  * @param {String} callback.success.audioCodec The configured value of the <code>options.audioCodec</code>.

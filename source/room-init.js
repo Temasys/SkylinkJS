@@ -311,11 +311,6 @@ Skylink.prototype._room = null;
  *   The Room that User will be connected to is the <code>defaultRoom</code> provided.</small>
  * @param {String} [options.roomServer] The Auth server.
  * <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>
- * @param {String} [options.region] <blockquote class="info"><b>Deprecation Warning!</b>
- *   This option has been deprecated.<br>Automatic nearest regional server has been implemented
- *   on the platform.</blockquote>
- *   The Auth server in the various regions to connect to for better connectivity.
- *   [Rel: Skylink.REGIONAL_SERVER]
  * @param {Boolean} [options.enableIceTrickle=true] The flag if Peer connections should
  *   trickle ICE for faster connectivity.
  * @param {Boolean} [options.enableDataChannel=true] The flag if Datachannel connections should be enabled.
@@ -428,7 +423,6 @@ Skylink.prototype._room = null;
  * @param {Boolean} callback.success.enableTURNServer The configured value of the <code>options.enableTURNServer</code>.
  * @param {Boolean} callback.success.enableSTUNServer The configured value of the <code>options.enableSTUNServer</code>.
  * @param {Boolean} callback.success.TURNTransport The configured value of the <code>options.TURNServerTransport</code>.
- * @param {String} callback.success.serverRegion The configured value of the <code>options.region</code>.
  * @param {Boolean} callback.success.audioFallback The configured value of the <code>options.audioFallback</code>.
  * @param {Boolean} callback.success.forceSSL The configured value of the <code>options.forceSSL</code>.
  * @param {String} callback.success.audioCodec The configured value of the <code>options.audioCodec</code>.

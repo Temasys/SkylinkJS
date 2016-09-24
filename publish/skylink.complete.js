@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Sat Sep 24 2016 17:56:55 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Sep 24 2016 17:59:13 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10461,7 +10461,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Sat Sep 24 2016 17:56:55 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Sep 24 2016 17:59:13 GMT+0800 (SGT) */
 
 (function() {
 
@@ -17055,29 +17055,6 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
 };
 
 /**
- * <blockquote class="info"><b>Deprecation Warning!</b>
- *   This constant has been deprecated.<br>Automatic nearest regional server has been implemented
- *   on the platform.
- * </blockquote>
- * The list of available Auth servers in these regions configured in the
- * <a href="#method_init"><code>init()</code> method</a>.
- * @attribute REGIONAL_SERVER
- * @param {String} APAC1 <small>Value <code>"sg"</code></small>
- *   The value of the option to use the Auth server in Asia Pacific (APAC).
- * @param {String} US1   <small>Value <code>"us2"</code></small>
- *   The value of the option to use the Auth server in United States (US).
- * @deprecated
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.5.0
- */
-Skylink.prototype.REGIONAL_SERVER = {
-  APAC1: 'sg',
-  US1: 'us2'
-};
-
-/**
  * Stores the flag if HTTPS connections should be enforced when connecting to
  *   the API or Signaling server if App is accessing from HTTP domain.
  * HTTPS connections are enforced if App is accessing from HTTPS domains.
@@ -17264,11 +17241,6 @@ Skylink.prototype._room = null;
  *   The Room that User will be connected to is the <code>defaultRoom</code> provided.</small>
  * @param {String} [options.roomServer] The Auth server.
  * <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>
- * @param {String} [options.region] <blockquote class="info"><b>Deprecation Warning!</b>
- *   This option has been deprecated.<br>Automatic nearest regional server has been implemented
- *   on the platform.</blockquote>
- *   The Auth server in the various regions to connect to for better connectivity.
- *   [Rel: Skylink.REGIONAL_SERVER]
  * @param {Boolean} [options.enableIceTrickle=true] The flag if Peer connections should
  *   trickle ICE for faster connectivity.
  * @param {Boolean} [options.enableDataChannel=true] The flag if Datachannel connections should be enabled.
@@ -17381,7 +17353,6 @@ Skylink.prototype._room = null;
  * @param {Boolean} callback.success.enableTURNServer The configured value of the <code>options.enableTURNServer</code>.
  * @param {Boolean} callback.success.enableSTUNServer The configured value of the <code>options.enableSTUNServer</code>.
  * @param {Boolean} callback.success.TURNTransport The configured value of the <code>options.TURNServerTransport</code>.
- * @param {String} callback.success.serverRegion The configured value of the <code>options.region</code>.
  * @param {Boolean} callback.success.audioFallback The configured value of the <code>options.audioFallback</code>.
  * @param {Boolean} callback.success.forceSSL The configured value of the <code>options.forceSSL</code>.
  * @param {String} callback.success.audioCodec The configured value of the <code>options.audioCodec</code>.
