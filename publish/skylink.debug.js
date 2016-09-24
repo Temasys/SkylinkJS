@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Sat Sep 24 2016 13:36:19 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Sep 24 2016 17:56:55 GMT+0800 (SGT) */
 
 (function() {
 
@@ -942,32 +942,6 @@ Skylink.prototype._dataTransfersTimeout = {};
  *   as <code>UPLOAD_COMPLETED</code> for all Peers targeted for request success.</small>
  * @param {JSON} callback.error The error result in request.
  *   <small>Defined as <code>null</code> when there are no errors in request</small>
- * @param {String} callback.error.transferId <blockquote class="info">
- *   <b>Deprecation Warning!</b> This property has been deprecated.
- *   Please use <code>callback.error.transferInfo.transferId</code> instead.
- *   </blockquote> The data transfer ID.
- *   <small>Defined only for single targeted Peer data transfer.</small>
- * @param {String} callback.error.state <blockquote class="info">
- *   <b>Deprecation Warning!</b> This property has been deprecated.
- *   Please use <a href="#event_dataTransferState"><code>dataTransferState</code>
- *   event</a> instead. </blockquote> The data transfer state that resulted in error.
- *   <small>Defined only for single targeted Peer data transfer.</small> [Rel: Skylink.DATA_TRANSFER_STATE]
- * @param {String} callback.error.peerId <blockquote class="info">
- *   <b>Deprecation Warning!</b> This property has been deprecated.
- *   Please use <code>callback.error.listOfPeers</code> instead.
- *   </blockquote> The targeted Peer ID for data transfer.
- *   <small>Defined only for single targeted Peer data transfer.</small>
- * @param {Boolean} callback.error.isPrivate <blockquote class="info">
- *   <b>Deprecation Warning!</b> This property has been deprecated.
- *   Please use <code>callback.error.transferInfo.isPrivate</code> instead.
- *   </blockquote> The flag if data transfer is targeted or not, basing
- *   off the <code>targetPeerId</code> parameter being defined.
- *   <small>Defined only for single targeted Peer data transfer.</small>
- * @param {Error|String} callback.error.error <blockquote class="info">
- *   <b>Deprecation Warning!</b> This property has been deprecated.
- *   Please use <code>callback.error.transferErrors</code> instead.
- *   </blockquote> The error received that resulted in error.
- *   <small>Defined only for single targeted Peer data transfer.</small>
  * @param {Array} callback.error.listOfPeers The list Peer IDs targeted for the data transfer.
  * @param {JSON} callback.error.transferErrors The list of data transfer errors.
  * @param {Error|String} callback.error.transferErrors.#peerId The data transfer error associated
@@ -979,26 +953,6 @@ Skylink.prototype._dataTransfersTimeout = {};
  *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
  * @param {JSON} callback.success The success result in request.
  *   <small>Defined as <code>null</code> when there are errors in request</small>
- * @param {String} callback.success.transferId <blockquote class="info">
- *   <b>Deprecation Warning!</b> This property has been deprecated.
- *   Please use <code>callback.success.transferInfo.transferId</code> instead.
- *   </blockquote> The data transfer ID.
- * @param {String} callback.success.state <blockquote class="info">
- *   <b>Deprecation Warning!</b> This property has been deprecated.
- *   Please use <a href="#event_dataTransferState"><code>dataTransferState</code>
- *   event</a> instead. </blockquote> The data transfer state that resulted in error.
- *   <small>Defined only for single targeted Peer data transfer.</small> [Rel: Skylink.DATA_TRANSFER_STATE]
- * @param {String} callback.success.peerId <blockquote class="info">
- *   <b>Deprecation Warning!</b> This property has been deprecated.
- *   Please use <code>callback.success.listOfPeers</code> instead.
- *   </blockquote> The targeted Peer ID for data transfer.
- *   <small>Defined only for single targeted Peer data transfer.</small>
- * @param {Boolean} callback.success.isPrivate <blockquote class="info">
- *   <b>Deprecation Warning!</b> This property has been deprecated.
- *   Please use <code>callback.success.transferInfo.isPrivate</code> instead.
- *   </blockquote> The flag if data transfer is targeted or not, basing
- *   off the <code>targetPeerId</code> parameter being defined.
- *   <small>Defined only for single targeted Peer data transfer.</small>
  * @param {Array} callback.success.listOfPeers The list Peer IDs targeted for the data transfer.
  * @param {JSON} callback.success.transferInfo The data transfer information.
  *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
@@ -1278,36 +1232,6 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
 };
 
 /**
- * <blockquote class="info">
- *   <b>Deprecation Warning!</b> This method has been deprecated, please use <a href="#method_acceptDataTransfer">
- *   <code>acceptDataTransfer()</code> method</a> instead.
- * </blockquote>
- * Function that accepts or rejects an upload data transfer request from Peer to User.
- * <small>Parameter signature follows <a href="#method_acceptDataTransfer">
- * <code>acceptDataTransfer()</code> method</a>.</small>
- * @method respondBlobRequest
- * @example
- *   // Example 1: Accept Peer upload data transfer request
- *   skylinkDemo.on("incomingDataRequest", function (transferId, peerId, transferInfo, isSelf) {
- *      if (!isSelf) {
- *        skylinkDemo.respondBlobRequest(peerId, transferId, true);
- *      }
- *   });
- *
- *   // Example 2: Reject Peer upload data transfer request
- *   skylinkDemo.on("incomingDataRequest", function (transferId, peerId, transferInfo, isSelf) {
- *      if (!isSelf) {
- *        skylinkDemo.respondBlobRequest(peerId, transferId, false);
- *      }
- *   });
- * @deprecated true
- * @trigger <small>Event sequence follows <a href="#method_sendBlobData">
- * <code>sendBlobData()</code> method</a> after <code>acceptDataTransfer()</code> method is invoked.</small>
- * @for Skylink
- * @since 0.5.0
- */
-Skylink.prototype.respondBlobRequest =
-/**
  * Function that accepts or rejects an upload data transfer request from Peer to User.
  * @method acceptDataTransfer
  * @param {String} peerId The Peer ID.
@@ -1332,6 +1256,7 @@ Skylink.prototype.respondBlobRequest =
  * @for Skylink
  * @since 0.6.1
  */
+Skylink.prototype.respondBlobRequest =
 Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
   if (typeof transferId !== 'string' && typeof peerId !== 'string') {
     log.error([peerId, 'RTCDataChannel', null, 'Aborting accept data transfer as ' +
@@ -1405,43 +1330,6 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
 };
 
 /**
- * <blockquote class="info">
- *   <b>Deprecation Warning!</b> This method has been deprecated, please use <a href="#method_cancelDataTransfer">
- *   <code>method_cancelDataTransfer()</code> method</a> instead.
- * </blockquote>
- * Function that terminates a currently uploading / downloading data transfer from / to Peer.
- * <small>Parameter signature follows <a href="#method_cancelDataTransfer">
- * <code>cancelDataTransfer()</code> method</a>.</small>
- * @method cancelBlobTransfer
- * @trigger <small>Event sequence follows <a href="#method_acceptDataTransfer">
- * @example
- *   // Example 1: Cancel Peer data transfer
- *   var transferSessions = {};
- *
- *   skylinkDemo.on("dataTransferState", function (state, transferId, peerId) {
- *     if ([skylinkDemo.DATA_TRANSFER_STATE.DOWNLOAD_STARTED,
- *       skylinkDemo.DATA_TRANSFER_STATE.UPLOAD_STARTED].indexOf(state) > -1) {
- *       if (!Array.isArray(transferSessions[transferId])) {
- *         transferSessions[transferId] = [];
- *       }
- *       transferSessions[transferId].push(peerId);
- *     } else {
- *       transferSessions[transferId].splice(transferSessions[transferId].indexOf(peerId), 1);
- *     }
- *   });
- *
- *   function cancelTransfer (peerId, transferId) {
- *     skylinkDemo.cancelBlobTransfer(peerId, transferId);
- *   }
- * @trigger <small>Event sequence follows <a href="#method_sendBlobData">
- * <code>sendBlobData()</code> method</a> after <code>cancelDataTransfer()</code> method is invoked.</small>
- * @for Skylink
- * @deprecated true
- * @for Skylink
- * @since 0.5.7
- */
-Skylink.prototype.cancelBlobTransfer =
-/**
  * Function that terminates a currently uploading / downloading data transfer from / to Peer.
  * @method cancelDataTransfer
  * @param {String} peerId The Peer ID.
@@ -1470,6 +1358,7 @@ Skylink.prototype.cancelBlobTransfer =
  * @for Skylink
  * @since 0.6.1
  */
+Skylink.prototype.cancelBlobTransfer =
 Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
   var data;
 
@@ -8267,7 +8156,8 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean|JSON} peerInfo.settings.audio The Peer Stream audio settings.
    *   <small>When defined as <code>false</code>, it means there is no audio being sent from Peer.</small>
    *   <small>When defined as <code>true</code>, the <code>peerInfo.settings.audio.stereo</code> value is
-   *   considered as <code>false</code>.</small>
+   *   considered as <code>false</code> and the <code>peerInfo.settings.audio.exactConstraints</code>
+   *   value is considered as <code>false</code>.</small>
    * @param {Boolean} peerInfo.settings.audio.stereo The flag if stereo band is configured
    *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for receiving audio data.
    * @param {Array} [peerInfo.settings.audio.optional] The Peer Stream <code>navigator.getUserMedia()</code> API
@@ -8277,8 +8167,9 @@ Skylink.prototype._EVENTS = {
    *   requested values of <code>peerInfo.settings.audio.deviceId</code> when provided.
    * @param {Boolean|JSON} peerInfo.settings.video The Peer Stream video settings.
    *   <small>When defined as <code>false</code>, it means there is no video being sent from Peer.</small>
-   *   <small>When defined as <code>true</code>, the <code>peerInfo.settings.audio.screenshare</code> value is
-   *   considered as <code>false</code>.</small>
+   *   <small>When defined as <code>true</code>, the <code>peerInfo.settings.video.screenshare</code> value is
+   *   considered as <code>false</code>  and the <code>peerInfo.settings.video.exactConstraints</code>
+   *   value is considered as <code>false</code>.</small>
    * @param {JSON} peerInfo.settings.video.resolution The Peer Stream video resolution.
    *   [Rel: Skylink.VIDEO_RESOLUTION]
    * @param {Number} peerInfo.settings.video.resolution.width The Peer Stream video resolution width.
