@@ -553,36 +553,6 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
 };
 
 /**
- * <blockquote class="info">
- *   <b>Deprecation Warning!</b> This method has been deprecated, please use <a href="#method_acceptDataTransfer">
- *   <code>acceptDataTransfer()</code> method</a> instead.
- * </blockquote>
- * Function that accepts or rejects an upload data transfer request from Peer to User.
- * <small>Parameter signature follows <a href="#method_acceptDataTransfer">
- * <code>acceptDataTransfer()</code> method</a>.</small>
- * @method respondBlobRequest
- * @example
- *   // Example 1: Accept Peer upload data transfer request
- *   skylinkDemo.on("incomingDataRequest", function (transferId, peerId, transferInfo, isSelf) {
- *      if (!isSelf) {
- *        skylinkDemo.respondBlobRequest(peerId, transferId, true);
- *      }
- *   });
- *
- *   // Example 2: Reject Peer upload data transfer request
- *   skylinkDemo.on("incomingDataRequest", function (transferId, peerId, transferInfo, isSelf) {
- *      if (!isSelf) {
- *        skylinkDemo.respondBlobRequest(peerId, transferId, false);
- *      }
- *   });
- * @deprecated true
- * @trigger <small>Event sequence follows <a href="#method_sendBlobData">
- * <code>sendBlobData()</code> method</a> after <code>acceptDataTransfer()</code> method is invoked.</small>
- * @for Skylink
- * @since 0.5.0
- */
-Skylink.prototype.respondBlobRequest =
-/**
  * Function that accepts or rejects an upload data transfer request from Peer to User.
  * @method acceptDataTransfer
  * @param {String} peerId The Peer ID.
@@ -607,6 +577,7 @@ Skylink.prototype.respondBlobRequest =
  * @for Skylink
  * @since 0.6.1
  */
+Skylink.prototype.respondBlobRequest =
 Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
   if (typeof transferId !== 'string' && typeof peerId !== 'string') {
     log.error([peerId, 'RTCDataChannel', null, 'Aborting accept data transfer as ' +
@@ -680,43 +651,6 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
 };
 
 /**
- * <blockquote class="info">
- *   <b>Deprecation Warning!</b> This method has been deprecated, please use <a href="#method_cancelDataTransfer">
- *   <code>method_cancelDataTransfer()</code> method</a> instead.
- * </blockquote>
- * Function that terminates a currently uploading / downloading data transfer from / to Peer.
- * <small>Parameter signature follows <a href="#method_cancelDataTransfer">
- * <code>cancelDataTransfer()</code> method</a>.</small>
- * @method cancelBlobTransfer
- * @trigger <small>Event sequence follows <a href="#method_acceptDataTransfer">
- * @example
- *   // Example 1: Cancel Peer data transfer
- *   var transferSessions = {};
- *
- *   skylinkDemo.on("dataTransferState", function (state, transferId, peerId) {
- *     if ([skylinkDemo.DATA_TRANSFER_STATE.DOWNLOAD_STARTED,
- *       skylinkDemo.DATA_TRANSFER_STATE.UPLOAD_STARTED].indexOf(state) > -1) {
- *       if (!Array.isArray(transferSessions[transferId])) {
- *         transferSessions[transferId] = [];
- *       }
- *       transferSessions[transferId].push(peerId);
- *     } else {
- *       transferSessions[transferId].splice(transferSessions[transferId].indexOf(peerId), 1);
- *     }
- *   });
- *
- *   function cancelTransfer (peerId, transferId) {
- *     skylinkDemo.cancelBlobTransfer(peerId, transferId);
- *   }
- * @trigger <small>Event sequence follows <a href="#method_sendBlobData">
- * <code>sendBlobData()</code> method</a> after <code>cancelDataTransfer()</code> method is invoked.</small>
- * @for Skylink
- * @deprecated true
- * @for Skylink
- * @since 0.5.7
- */
-Skylink.prototype.cancelBlobTransfer =
-/**
  * Function that terminates a currently uploading / downloading data transfer from / to Peer.
  * @method cancelDataTransfer
  * @param {String} peerId The Peer ID.
@@ -745,6 +679,7 @@ Skylink.prototype.cancelBlobTransfer =
  * @for Skylink
  * @since 0.6.1
  */
+Skylink.prototype.cancelBlobTransfer =
 Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
   var data;
 
