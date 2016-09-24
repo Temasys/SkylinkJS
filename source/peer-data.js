@@ -149,7 +149,7 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     peerInfo = clone(this._peerInformations[peerId]);
     peerInfo.room = clone(this._selectedRoom);
 
-    if (userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
+    if (peerInfo.settings.video && typeof peerInfo.settings.video === 'object' &&
       peerInfo.settings.video.frameRate === -1) {
       delete peerInfo.settings.video.frameRate;
     }

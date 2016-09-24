@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Sat Sep 24 2016 01:13:23 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Sep 24 2016 13:36:19 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10461,7 +10461,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Sat Sep 24 2016 01:13:23 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Sep 24 2016 13:36:19 GMT+0800 (SGT) */
 
 (function() {
 
@@ -15512,7 +15512,7 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     peerInfo = clone(this._peerInformations[peerId]);
     peerInfo.room = clone(this._selectedRoom);
 
-    if (userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
+    if (peerInfo.settings.video && typeof peerInfo.settings.video === 'object' &&
       peerInfo.settings.video.frameRate === -1) {
       delete peerInfo.settings.video.frameRate;
     }
@@ -18729,6 +18729,8 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.settings The Peer sending Stream settings.
    * @param {Boolean|JSON} peerInfo.settings.audio The Peer Stream audio settings.
    *   <small>When defined as <code>false</code>, it means there is no audio being sent from Peer.</small>
+   *   <small>When defined as <code>true</code>, the <code>peerInfo.settings.audio.stereo</code> value is
+   *   considered as <code>false</code>.</small>
    * @param {Boolean} peerInfo.settings.audio.stereo The flag if stereo band is configured
    *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for receiving audio data.
    * @param {Array} [peerInfo.settings.audio.optional] The Peer Stream <code>navigator.getUserMedia()</code> API
@@ -18738,6 +18740,8 @@ Skylink.prototype._EVENTS = {
    *   requested values of <code>peerInfo.settings.audio.deviceId</code> when provided.
    * @param {Boolean|JSON} peerInfo.settings.video The Peer Stream video settings.
    *   <small>When defined as <code>false</code>, it means there is no video being sent from Peer.</small>
+   *   <small>When defined as <code>true</code>, the <code>peerInfo.settings.audio.screenshare</code> value is
+   *   considered as <code>false</code>.</small>
    * @param {JSON} peerInfo.settings.video.resolution The Peer Stream video resolution.
    *   [Rel: Skylink.VIDEO_RESOLUTION]
    * @param {Number} peerInfo.settings.video.resolution.width The Peer Stream video resolution width.
