@@ -322,6 +322,9 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.settings The Peer sending Stream settings.
    * @param {Boolean|JSON} peerInfo.settings.audio The Peer Stream audio settings.
    *   &lt;small&gt;When defined as &lt;code&gt;false&lt;/code&gt;, it means there is no audio being sent from Peer.&lt;/small&gt;
+   *   &lt;small&gt;When defined as &lt;code&gt;true&lt;/code&gt;, the &lt;code&gt;peerInfo.settings.audio.stereo&lt;/code&gt; value is
+   *   considered as &lt;code&gt;false&lt;/code&gt; and the &lt;code&gt;peerInfo.settings.audio.exactConstraints&lt;/code&gt;
+   *   value is considered as &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;
    * @param {Boolean} peerInfo.settings.audio.stereo The flag if stereo band is configured
    *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for receiving audio data.
    * @param {Array} [peerInfo.settings.audio.optional] The Peer Stream &lt;code&gt;navigator.getUserMedia()&lt;/code&gt; API
@@ -331,6 +334,9 @@ Skylink.prototype._EVENTS = {
    *   requested values of &lt;code&gt;peerInfo.settings.audio.deviceId&lt;/code&gt; when provided.
    * @param {Boolean|JSON} peerInfo.settings.video The Peer Stream video settings.
    *   &lt;small&gt;When defined as &lt;code&gt;false&lt;/code&gt;, it means there is no video being sent from Peer.&lt;/small&gt;
+   *   &lt;small&gt;When defined as &lt;code&gt;true&lt;/code&gt;, the &lt;code&gt;peerInfo.settings.video.screenshare&lt;/code&gt; value is
+   *   considered as &lt;code&gt;false&lt;/code&gt;  and the &lt;code&gt;peerInfo.settings.video.exactConstraints&lt;/code&gt;
+   *   value is considered as &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;
    * @param {JSON} peerInfo.settings.video.resolution The Peer Stream video resolution.
    *   [Rel: Skylink.VIDEO_RESOLUTION]
    * @param {Number} peerInfo.settings.video.resolution.width The Peer Stream video resolution width.
