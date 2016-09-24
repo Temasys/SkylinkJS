@@ -125,29 +125,6 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
 };
 
 /**
- * <blockquote class="info"><b>Deprecation Warning!</b>
- *   This constant has been deprecated.<br>Automatic nearest regional server has been implemented
- *   on the platform.
- * </blockquote>
- * The list of available Auth servers in these regions configured in the
- * <a href="#method_init"><code>init()</code> method</a>.
- * @attribute REGIONAL_SERVER
- * @param {String} APAC1 <small>Value <code>"sg"</code></small>
- *   The value of the option to use the Auth server in Asia Pacific (APAC).
- * @param {String} US1   <small>Value <code>"us2"</code></small>
- *   The value of the option to use the Auth server in United States (US).
- * @deprecated
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.5.0
- */
-Skylink.prototype.REGIONAL_SERVER = {
-  APAC1: 'sg',
-  US1: 'us2'
-};
-
-/**
  * Stores the flag if HTTPS connections should be enforced when connecting to
  *   the API or Signaling server if App is accessing from HTTP domain.
  * HTTPS connections are enforced if App is accessing from HTTPS domains.
