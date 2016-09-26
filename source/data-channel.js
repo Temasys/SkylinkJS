@@ -202,9 +202,19 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
   }
 
   if (channelType === self.DATA_CHANNEL_TYPE.MESSAGING) {
-    self._dataChannels[peerId].main = dataChannel;
+    self._dataChannels[peerId].main = {
+      channelName: channelName,
+      channelType: channelType,
+      transferId: null,
+      channel: dataChannel
+    };
   } else {
-    self._dataChannels[peerId][channelName] = dataChannel;
+    self._dataChannels[peerId][channelName] = {
+      channelName: channelName,
+      channelType: channelType,
+      transferId: null,
+      channel: dataChannel
+    };
   }
 };
 
@@ -242,18 +252,20 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
     return;
   }
 
-  if (self._dataChannels[peerId][channelProp].readyState !== self.DATA_CHANNEL_STATE.OPEN) {
+  if (self._dataChannels[peerId][channelProp].channel.readyState !== self.DATA_CHANNEL_STATE.OPEN) {
     log.error([peerId, 'RTCDataChannel', 'prop:' + channelProp,
       'Dropping of sending message as Datachannel connection is not opened ->'], data);
 
     self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.SEND_MESSAGE_ERROR, peerId,
-      new Error('Datachannel is not ready.\nState is: ' + self._dataChannels[peerId][channelProp].readyState));
+      new Error('Datachannel is not ready.\nState is: ' + self._dataChannels[peerId][channelProp].readyState),
+      self._dataChannels[peerId][channelProp].channelName,
+      self._dataChannels[peerId][channelProp].channelType);
     return;
   }
 
   log.debug([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Sending message ->'], data);
 
-  self._dataChannels[peerId][channelProp].send(typeof data === 'object' ? JSON.stringify(data) : data);
+  self._dataChannels[peerId][channelProp].channel.send(typeof data === 'object' ? JSON.stringify(data) : data);
 };
 
 /**
@@ -272,15 +284,28 @@ Skylink.prototype._closeDataChannel = function(peerId, channelName) {
     return;
   }
 
+  var closeFn = function (channelProp) {
+    var channelName = self._dataChannels[peerId][channelProp].channelName;
+    var channelType = self._dataChannels[peerId][channelProp].channelType;
+
+    if (self._dataChannels[peerId][channelProp].readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
+      log.debug([peerId, 'RTCDataChannel', channelName, 'Closing Datachannel']);
+
+      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSING, peerId, null, channelName, channelType);
+
+      self._dataChannels[peerId][channelProp].channel.close();
+
+      // TODO: Handle when Datachannel did not fire close naturally
+      delete self._dataChannels[peerId][channelProp];
+    }
+  };
+
   if (!channelName) {
     for (var channelNameProp in self._dataChannels) {
-      if (self._dataChannels.hasOwnProperty(channelNameProp)) {
-        if (self._dataChannels[peerId][channelNameProp] &&
-          self._dataChannels[peerId][channelNameProp].readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
-          log.debug([peerId, 'RTCDataChannel', channelNameProp, 'Closing Datachannel']);
-          self._dataChannels[peerId][channelNameProp].close();
+      if (self._dataChannels[peerId].hasOwnProperty(channelNameProp)) {
+        if (self._dataChannels[peerId][channelNameProp]) {
+          closeFn(channelNameProp);
         }
-        delete self._dataChannels[peerId][channelNameProp];
       }
     }
   } else {
@@ -289,12 +314,6 @@ Skylink.prototype._closeDataChannel = function(peerId, channelName) {
       return;
     }
 
-    log.debug([peerId, 'RTCDataChannel', channelName, 'Closing Datachannel']);
-
-    self._dataChannels[peerId][channelName].close();
-
-    delete self._dataChannels[peerId][channelName];
-
-    // TODO: Handle when Datachannel did not fire close naturally
+    closeFn(channelName);
   }
 };

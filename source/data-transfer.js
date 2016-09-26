@@ -1305,7 +1305,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
       throwTransferErrorFn('Main datachannel does not exists');
       return;
 
-    } else if (self._dataChannels[targetPeerId].main.readyState !==
+    } else if (self._dataChannels[targetPeerId].main.channel.readyState !==
       self.DATA_CHANNEL_STATE.OPEN) {
       log.error([targetPeerId, 'RTCDataChannel', targetChannel,
         'Main datachannel is not opened'], {
