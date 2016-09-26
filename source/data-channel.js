@@ -157,7 +157,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
       log.debug([peerId, 'RTCDataChannel', channelName, 'Reviving Datachannel connection']);
 
       setTimeout(function () {
-        if (self._peerConnections &&
+        if (self._peerConnections[peerId] &&
           self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
           self._createDataChannel(peerId, channelName, true);
         }
