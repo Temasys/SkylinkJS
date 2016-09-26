@@ -1036,8 +1036,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.processingRemoteSDP = false;
   pc.gathered = false;
 
-  // datachannels
-  self._dataChannels[targetMid] = {};
   // candidates
   self._gatheredCandidates[targetMid] = {
     sending: { host: [], srflx: [], relay: [] },
@@ -1061,8 +1059,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
         pc.hasMainChannel = true;
       }
 
-      self._dataChannels[targetMid][channelKey] =
-        self._createDataChannel(targetMid, channelType, dc, dc.label);
+      self._createDataChannel(targetMid, dc);
 
     } else {
       log.warn([targetMid, 'RTCDataChannel', dc.label, 'Not adding datachannel as enable datachannel ' +

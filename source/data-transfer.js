@@ -1316,8 +1316,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
       return;
     }
 
-    self._dataChannels[targetPeerId][targetChannel] =
-      self._createDataChannel(targetPeerId, self.DATA_CHANNEL_TYPE.DATA, null, targetChannel);
+    self._createDataChannel(targetPeerId, targetChannel);
 
   } else {
     var ongoingTransfer = null;

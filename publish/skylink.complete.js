@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Sat Sep 24 2016 18:19:57 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Sep 26 2016 13:23:45 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7248,7 +7248,7 @@ function toArray(list, index) {
 },{}]},{},[31])(31)
 });
 
-/*! adapterjs - v0.13.3 - 2016-04-13 */
+/*! adapterjs - v0.13.4 - 2016-09-22 */
 
 // Adapter's interface.
 var AdapterJS = AdapterJS || {};
@@ -7267,7 +7267,7 @@ AdapterJS.options = AdapterJS.options || {};
 // AdapterJS.options.hidePluginInstallPrompt = true;
 
 // AdapterJS version
-AdapterJS.VERSION = '0.13.3';
+AdapterJS.VERSION = '0.13.4';
 
 // This function will be called when the WebRTC API is ready to be used
 // Whether it is the native implementation (Chrome, Firefox, Opera) or
@@ -7309,7 +7309,7 @@ AdapterJS.WebRTCPlugin = AdapterJS.WebRTCPlugin || {};
 
 // The object to store plugin information
 /* jshint ignore:start */
-AdapterJS.WebRTCPlugin.pluginInfo = {
+AdapterJS.WebRTCPlugin.pluginInfo = AdapterJS.WebRTCPlugin.pluginInfo || {
   prefix : 'Tem',
   plugName : 'TemWebRTCPlugin',
   pluginId : 'plugin0',
@@ -7317,14 +7317,21 @@ AdapterJS.WebRTCPlugin.pluginInfo = {
   onload : '__TemWebRTCReady0',
   portalLink : 'http://skylink.io/plugin/',
   downloadLink : null, //set below
-  companyName: 'Temasys'
+  companyName: 'Temasys',
+  downloadLinks : {
+    mac: 'http://bit.ly/1n77hco',
+    win: 'http://bit.ly/1kkS4FN'
+  }
 };
-if(!!navigator.platform.match(/^Mac/i)) {
-  AdapterJS.WebRTCPlugin.pluginInfo.downloadLink = 'http://bit.ly/1n77hco';
+if(typeof AdapterJS.WebRTCPlugin.pluginInfo.downloadLinks !== "undefined" && AdapterJS.WebRTCPlugin.pluginInfo.downloadLinks !== null) {
+  if(!!navigator.platform.match(/^Mac/i)) {
+    AdapterJS.WebRTCPlugin.pluginInfo.downloadLink = AdapterJS.WebRTCPlugin.pluginInfo.downloadLinks.mac;
+  }
+  else if(!!navigator.platform.match(/^Win/i)) {
+    AdapterJS.WebRTCPlugin.pluginInfo.downloadLink = AdapterJS.WebRTCPlugin.pluginInfo.downloadLinks.win;
+  }
 }
-else if(!!navigator.platform.match(/^Win/i)) {
-  AdapterJS.WebRTCPlugin.pluginInfo.downloadLink = 'http://bit.ly/1kkS4FN';
-}
+
 /* jshint ignore:end */
 
 AdapterJS.WebRTCPlugin.TAGS = {
@@ -7497,8 +7504,8 @@ AdapterJS.isDefined = null;
 //   - 'plugin': Using the plugin implementation.
 AdapterJS.parseWebrtcDetectedBrowser = function () {
   var hasMatch = null;
-  if ((!!window.opr && !!opr.addons) || 
-    !!window.opera || 
+  if ((!!window.opr && !!opr.addons) ||
+    !!window.opera ||
     navigator.userAgent.indexOf(' OPR/') >= 0) {
     // Opera 8.0+
     webrtcDetectedBrowser = 'opera';
@@ -7526,7 +7533,7 @@ AdapterJS.parseWebrtcDetectedBrowser = function () {
     webrtcDetectedVersion = parseInt(hasMatch[1] || '0', 10);
     if (!webrtcDetectedVersion) {
       hasMatch = /\bMSIE[ :]+(\d+)/g.exec(navigator.userAgent) || [];
-      webrtcDetectedVersion = parseInt(hasMatch[1] || '0', 10);      
+      webrtcDetectedVersion = parseInt(hasMatch[1] || '0', 10);
     }
   } else if (!!window.StyleMedia) {
     // Edge 20+
@@ -7536,13 +7543,20 @@ AdapterJS.parseWebrtcDetectedBrowser = function () {
     // Chrome 1+
     // Bowser and Version set in Google's adapter
     webrtcDetectedType    = 'webkit';
-  } else if ((webrtcDetectedBrowser === 'chrome'|| webrtcDetectedBrowser === 'opera') && 
+  } else if ((webrtcDetectedBrowser === 'chrome'|| webrtcDetectedBrowser === 'opera') &&
     !!window.CSS) {
     // Blink engine detection
     webrtcDetectedBrowser = 'blink';
     // TODO: detected WebRTC version
   }
-
+  if ((navigator.userAgent.match(/android/ig) || []).length === 0 &&
+  (navigator.userAgent.match(/chrome/ig) || []).length === 0 && 
+  navigator.userAgent.indexOf('Safari/') > 0) {
+    webrtcDetectedBrowser = 'safari';
+    webrtcDetectedVersion = parseInt((navigator.userAgent.match(/Version\/(.*)\ /) || ['', '0'])[1], 10);
+    webrtcMinimumVersion = 7;
+    webrtcDetectedType = 'plugin';
+  }
   window.webrtcDetectedBrowser = webrtcDetectedBrowser;
   window.webrtcDetectedVersion = webrtcDetectedVersion;
   window.webrtcMinimumVersion  = webrtcMinimumVersion;
@@ -7614,6 +7628,7 @@ AdapterJS.renderNotificationBar = function (text, buttonText, buttonLink, openNe
         AdapterJS.WebRTCPlugin.isPluginInstalled(
           AdapterJS.WebRTCPlugin.pluginInfo.prefix,
           AdapterJS.WebRTCPlugin.pluginInfo.plugName,
+          AdapterJS.WebRTCPlugin.pluginInfo.type,
           function() { // plugin now installed
             clearInterval(pluginInstallInterval);
             AdapterJS.WebRTCPlugin.defineWebRTCInterface();
@@ -7801,10 +7816,12 @@ webrtcDetectedVersion = null;
 webrtcMinimumVersion  = null;
 
 // Check for browser types and react accordingly
-if ( navigator.mozGetUserMedia || 
-  navigator.webkitGetUserMedia || 
-  (navigator.mediaDevices && 
-    navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)) ) { 
+if ( (navigator.mozGetUserMedia || 
+      navigator.webkitGetUserMedia || 
+      (navigator.mediaDevices && 
+       navigator.userAgent.match(/Edge\/(\d+).(\d+)$/))) 
+    && !((navigator.userAgent.match(/android/ig) || []).length === 0 &&
+          (navigator.userAgent.match(/chrome/ig) || []).length === 0 && navigator.userAgent.indexOf('Safari/') > 0)) { 
 
   ///////////////////////////////////////////////////////////////////
   // INJECTION OF GOOGLE'S ADAPTER.JS CONTENT
@@ -9683,9 +9700,21 @@ if ( navigator.mozGetUserMedia ||
   // Need to override attachMediaStream and reattachMediaStream
   // to support the plugin's logic
   attachMediaStream_base = attachMediaStream;
+
+  if (webrtcDetectedBrowser === 'opera') {
+    attachMediaStream_base = function (element, stream) {
+      if (webrtcDetectedVersion > 38) {
+        element.srcObject = stream;
+      } else if (typeof element.src !== 'undefined') {
+        element.src = URL.createObjectURL(stream);
+      }
+      // Else it doesn't work
+    };
+  }
+
   attachMediaStream = function (element, stream) {
     if ((webrtcDetectedBrowser === 'chrome' ||
-         webrtcDetectedBrowser === 'opera') && 
+         webrtcDetectedBrowser === 'opera') &&
         !stream) {
       // Chrome does not support "src = null"
       element.src = '';
@@ -9865,11 +9894,11 @@ if ( navigator.mozGetUserMedia ||
   };
 
   AdapterJS.WebRTCPlugin.isPluginInstalled =
-    function (comName, plugName, installedCb, notInstalledCb) {
+    function (comName, plugName, plugType, installedCb, notInstalledCb) {
     if (!isIE) {
-      var pluginArray = navigator.plugins;
+      var pluginArray = navigator.mimeTypes;
       for (var i = 0; i < pluginArray.length; i++) {
-        if (pluginArray[i].name.indexOf(plugName) >= 0) {
+        if (pluginArray[i].type.indexOf(plugType) >= 0) {
           installedCb();
           return;
         }
@@ -9944,11 +9973,11 @@ if ( navigator.mozGetUserMedia ||
       if (typeof constraints !== 'undefined' && constraints !== null) {
         var invalidConstraits = false;
         invalidConstraits |= typeof constraints !== 'object';
-        invalidConstraits |= constraints.hasOwnProperty('mandatory') && 
-                              constraints.mandatory !== undefined && 
-                              constraints.mandatory !== null && 
+        invalidConstraits |= constraints.hasOwnProperty('mandatory') &&
+                              constraints.mandatory !== undefined &&
+                              constraints.mandatory !== null &&
                               constraints.mandatory.constructor !== Object;
-        invalidConstraits |= constraints.hasOwnProperty('optional') && 
+        invalidConstraits |= constraints.hasOwnProperty('optional') &&
                               constraints.optional !== undefined &&
                               constraints.optional !== null &&
                               !Array.isArray(constraints.optional);
@@ -9993,20 +10022,76 @@ if ( navigator.mozGetUserMedia ||
       }
     };
 
-    MediaStreamTrack = {};
+    MediaStreamTrack = function(){};
     MediaStreamTrack.getSources = function (callback) {
       AdapterJS.WebRTCPlugin.callWhenPluginReady(function() {
         AdapterJS.WebRTCPlugin.plugin.GetSources(callback);
       });
     };
 
+    // getUserMedia constraints shim.
+    // Copied from Chrome
+    var constraintsToPlugin = function(c) {
+      if (typeof c !== 'object' || c.mandatory || c.optional) {
+        return c;
+      }
+      var cc = {};
+      Object.keys(c).forEach(function(key) {
+        if (key === 'require' || key === 'advanced' || key === 'mediaSource') {
+          return;
+        }
+        var r = (typeof c[key] === 'object') ? c[key] : {ideal: c[key]};
+        if (r.exact !== undefined && typeof r.exact === 'number') {
+          r.min = r.max = r.exact;
+        }
+        var oldname = function(prefix, name) {
+          if (prefix) {
+            return prefix + name.charAt(0).toUpperCase() + name.slice(1);
+          }
+          return (name === 'deviceId') ? 'sourceId' : name;
+        };
+        if (r.ideal !== undefined) {
+          cc.optional = cc.optional || [];
+          var oc = {};
+          if (typeof r.ideal === 'number') {
+            oc[oldname('min', key)] = r.ideal;
+            cc.optional.push(oc);
+            oc = {};
+            oc[oldname('max', key)] = r.ideal;
+            cc.optional.push(oc);
+          } else {
+            oc[oldname('', key)] = r.ideal;
+            cc.optional.push(oc);
+          }
+        }
+        if (r.exact !== undefined && typeof r.exact !== 'number') {
+          cc.mandatory = cc.mandatory || {};
+          cc.mandatory[oldname('', key)] = r.exact;
+        } else {
+          ['min', 'max'].forEach(function(mix) {
+            if (r[mix] !== undefined) {
+              cc.mandatory = cc.mandatory || {};
+              cc.mandatory[oldname(mix, key)] = r[mix];
+            }
+          });
+        }
+      });
+      if (c.advanced) {
+        cc.optional = (cc.optional || []).concat(c.advanced);
+      }
+      return cc;
+    };
+
     getUserMedia = function (constraints, successCallback, failureCallback) {
-      constraints.audio = constraints.audio || false;
-      constraints.video = constraints.video || false;
+      var cc = {};
+      cc.audio = constraints.audio ?
+        constraintsToPlugin(constraints.audio) : false;
+      cc.video = constraints.video ?
+        constraintsToPlugin(constraints.video) : false;
 
       AdapterJS.WebRTCPlugin.callWhenPluginReady(function() {
         AdapterJS.WebRTCPlugin.plugin.
-          getUserMedia(constraints, successCallback, failureCallback);
+          getUserMedia(cc, successCallback, failureCallback);
       });
     };
     window.navigator.getUserMedia = getUserMedia;
@@ -10152,7 +10237,7 @@ if ( navigator.mozGetUserMedia ||
           propName = properties[prop];
 
           if (typeof propName.slice === 'function' &&
-              propName.slice(0,2) === 'on' && 
+              propName.slice(0,2) === 'on' &&
               typeof srcElem[propName] === 'function') {
               AdapterJS.addEvent(destElem, propName.slice(2), srcElem[propName]);
           }
@@ -10214,10 +10299,12 @@ if ( navigator.mozGetUserMedia ||
     }
   };
 
+
   // Try to detect the plugin and act accordingly
   AdapterJS.WebRTCPlugin.isPluginInstalled(
     AdapterJS.WebRTCPlugin.pluginInfo.prefix,
     AdapterJS.WebRTCPlugin.pluginInfo.plugName,
+    AdapterJS.WebRTCPlugin.pluginInfo.type,
     AdapterJS.WebRTCPlugin.defineWebRTCInterface,
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 
@@ -10301,7 +10388,7 @@ if ( navigator.mozGetUserMedia ||
       });
     };
 
-  } else if (window.navigator.webkitGetUserMedia) {
+  } else if (window.navigator.webkitGetUserMedia && window.webrtcDetectedBrowser !== 'safari') {
     baseGetUserMedia = window.navigator.getUserMedia;
 
     navigator.getUserMedia = function (constraints, successCb, failureCb) {
@@ -10461,7 +10548,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Sat Sep 24 2016 18:19:57 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Sep 26 2016 13:23:45 GMT+0800 (SGT) */
 
 (function() {
 
@@ -10754,8 +10841,8 @@ Skylink.prototype._enableDataChannel = true;
 /**
  * Stores the list of Peer Datachannel connections.
  * @attribute _dataChannels
- * @param {JSON} (#peerId) The list of Datachannels associated with Peer ID.
- * @param {RTCDataChannel} (#peerId).<#channelLabel> The Datachannel connection.
+ * @param {JSON} #peerId The list of Datachannels associated with Peer ID.
+ * @param {RTCDataChannel} #peerId.#channelLabel The Datachannel connection.
  *   The property name <code>"main"</code> is reserved for messaging Datachannel type.
  * @type JSON
  * @private
@@ -10771,162 +10858,110 @@ Skylink.prototype._dataChannels = {};
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customChannelName) {
+Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMessagingChannel) {
   var self = this;
 
-  if (typeof dc === 'string') {
-    customChannelName = dc;
-    dc = null;
-  }
-
-  if (!customChannelName) {
-    log.error([peerId, 'RTCDataChannel', null, 'Aborting of creating Datachannel as no ' +
-      'channel name is provided for channel. Aborting of creating Datachannel'], {
-        channelType: channelType
-      });
+  if (!self._user) {
+    log.error([peerId, 'RTCDataChannel', null,
+      'Aborting of creating or initializing Datachannel as User does not have Room session']);
     return;
   }
 
-  var channelName = (dc) ? dc.label : customChannelName;
-  var pc = self._peerConnections[peerId];
-
-  var SctpSupported =
-    !(window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion < 30 ||
-      window.webrtcDetectedBrowser === 'opera'  && window.webrtcDetectedVersion < 20 );
-
-  if (!SctpSupported) {
-    log.warn([peerId, 'RTCDataChannel', channelName, 'SCTP not supported'], {
-      channelType: channelType
-    });
+  if (!(self._peerConnections[peerId] &&
+    self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
+    log.error([peerId, 'RTCDataChannel', null,
+      'Aborting of creating or initializing Datachannel as Peer connection does not exists']);
     return;
   }
 
-  var dcHasOpened = function () {
-    log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], {
-      readyState: 'open',
-      channelType: channelType
-    });
+  var channelName = self._user.sid + '_' + peerId;
+  var channelType = createAsMessagingChannel ? self.DATA_CHANNEL_TYPE.MESSAGING : self.DATA_CHANNEL_TYPE.DATA;
 
-    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.OPEN,
-      peerId, null, channelName, channelType);
-  };
+  if (dataChannel && typeof dataChannel === 'object') {
+    channelName = dataChannel.label;
+  
+  } else if (typeof dataChannel === 'string') {
+    channelName = dataChannel;
+    dataChannel = null;
+  }
 
-  if (!dc) {
+  if (!dataChannel) {
     try {
-      dc = pc.createDataChannel(channelName);
-
-      if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
-        // the datachannel was not defined in array before it was triggered
-        // set a timeout to allow the dc objec to be returned before triggering "open"
-        setTimeout(dcHasOpened, 500);
-      } else {
-        self._trigger('dataChannelState', dc.readyState, peerId, null,
-          channelName, channelType);
-
-        self._wait(function () {
-          log.log([peerId, 'RTCDataChannel', dc.label, 'Firing callback. ' +
-            'Datachannel state has opened ->'], dc.readyState);
-          dcHasOpened();
-        }, function () {
-          return dc.readyState === self.DATA_CHANNEL_STATE.OPEN;
-        });
-      }
-
-      log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel RTC object is created'], {
-        readyState: dc.readyState,
-        channelType: channelType
-      });
+      dataChannel = self._peerConnections[peerId].createDataChannel(channelName);
 
     } catch (error) {
-      log.error([peerId, 'RTCDataChannel', channelName, 'Exception occurred in datachannel:'], {
-        channelType: channelType,
-        error: error
-      });
-      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error,
-        channelName, channelType);
+      log.error([peerId, 'RTCDataChannel', channelName, 'Failed creating Datachannel ->'], error);
+      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CREATE_ERROR, peerId, error, channelName, channelType);
       return;
-    }
-  } else {
-    if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
-      // the datachannel was not defined in array before it was triggered
-      // set a timeout to allow the dc objec to be returned before triggering "open"
-      setTimeout(dcHasOpened, 500);
-    } else {
-      dc.onopen = dcHasOpened;
     }
   }
 
-  log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], {
-    binaryType: dc.binaryType,
-    readyState: dc.readyState,
-    channelType: channelType
-  });
+  if (!self._dataChannels[peerId]) {
+    log.debug([peerId, 'RTCDataChannel', channelName, 'initializing main DataChannel']);
 
-  dc.dcType = channelType;
+    channelType = self.DATA_CHANNEL_TYPE.MESSAGING;
 
-  dc.onerror = function(error) {
-    log.error([peerId, 'RTCDataChannel', channelName, 'Exception occurred in datachannel:'], {
-      channelType: channelType,
-      readyState: dc.readyState,
-      error: error
-    });
-    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error,
-       channelName, channelType);
+    self._dataChannels[peerId] = {};
+  }
+
+  /**
+   * Subscribe to events
+   */
+  dataChannel.onerror = function (evt) {
+    var channelError = evt.error || evt;
+
+    log.error([peerId, 'RTCDataChannel', channelName, 'Datachannel has an exception ->'], channelError);
+
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, channelError, channelName, channelType);
   };
 
-  dc.onclose = function() {
-    log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], {
-      readyState: 'closed',
-      channelType: channelType
-    });
+  dataChannel.onbufferedamountlow = function () {
+    log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel buffering data transfer low']);
 
-    dc.hasFiredClosed = true;
-
-    // give it some time to set the variable before actually closing and checking.
-    setTimeout(function () {
-      // redefine pc
-      pc = self._peerConnections[peerId];
-      // if closes because of firefox, reopen it again
-      // if it is closed because of a restart, ignore
-
-      var checkIfChannelClosedDuringConn = !!pc ? !pc.dataChannelClosed : false;
-
-      if (checkIfChannelClosedDuringConn && dc.dcType === self.DATA_CHANNEL_TYPE.MESSAGING) {
-        log.debug([peerId, 'RTCDataChannel', channelName, 'Re-opening closed datachannel in ' +
-          'on-going connection'], {
-            channelType: channelType,
-            readyState: dc.readyState,
-            isClosedDuringConnection: checkIfChannelClosedDuringConn
-        });
-
-        self._dataChannels[peerId].main =
-          self._createDataChannel(peerId, self.DATA_CHANNEL_TYPE.MESSAGING, null, peerId);
-
-        log.debug([peerId, 'RTCDataChannel', channelName, 'Re-opened closed datachannel'], {
-          channelType: channelType,
-          readyState: dc.readyState,
-          isClosedDuringConnection: checkIfChannelClosedDuringConn
-        });
-
-      } else {
-        self._closeDataChannel(peerId, channelName);
-        self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId, null,
-          channelName, channelType);
-
-        log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel has closed'], {
-          channelType: channelType,
-          readyState: dc.readyState,
-          isClosedDuringConnection: checkIfChannelClosedDuringConn
-        });
-      }
-    }, 100);
+    // TODO: Should we add an event here
   };
 
-  dc.onmessage = function(event) {
+  dataChannel.onclose = function () {
+    log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel has closed']);
+
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId, null, channelName, channelType);
+
+    if (channelType === self.DATA_CHANNEL_TYPE.MESSAGING) {
+      log.debug([peerId, 'RTCDataChannel', channelName, 'Reviving Datachannel connection']);
+
+      setTimeout(function () {
+        if (self._peerConnections &&
+          self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
+          self._createDataChannel(peerId, channelName, true);
+        }
+      }, 100);
+    }
+  };
+
+  dataChannel.onmessage = function(event) {
     self._dataChannelProtocolHandler(event.data, peerId, channelName, channelType);
   };
 
-  return dc;
+  var onOpenHandlerFn = function () {
+    log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel has opened']);
+
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.OPEN, peerId, null, channelName, channelType);
+  };
+
+  if (dataChannel.readyState === self.DATA_CHANNEL_STATE.OPEN) {
+    setTimeout(onOpenHandlerFn, 500);
+
+  } else {
+    self._trigger('dataChannelState', dataChannel.readyState, peerId, null, channelName, channelType);
+
+    dataChannel.onopen = onOpenHandlerFn;
+  }
+
+  if (channelType === self.DATA_CHANNEL_TYPE.MESSAGING) {
+    self._dataChannels[peerId].main = dataChannel;
+  } else {
+    self._dataChannels[peerId][channelName] = dataChannel;
+  }
 };
 
 /**
@@ -12504,8 +12539,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
       return;
     }
 
-    self._dataChannels[targetPeerId][targetChannel] =
-      self._createDataChannel(targetPeerId, self.DATA_CHANNEL_TYPE.DATA, null, targetChannel);
+    self._createDataChannel(targetPeerId, targetChannel);
 
   } else {
     var ongoingTransfer = null;
@@ -14990,8 +15024,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.processingRemoteSDP = false;
   pc.gathered = false;
 
-  // datachannels
-  self._dataChannels[targetMid] = {};
   // candidates
   self._gatheredCandidates[targetMid] = {
     sending: { host: [], srflx: [], relay: [] },
@@ -15015,8 +15047,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
         pc.hasMainChannel = true;
       }
 
-      self._dataChannels[targetMid][channelKey] =
-        self._createDataChannel(targetMid, channelType, dc, dc.label);
+      self._createDataChannel(targetMid, dc);
 
     } else {
       log.warn([targetMid, 'RTCDataChannel', dc.label, 'Not adding datachannel as enable datachannel ' +
@@ -15574,16 +15605,10 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
   }
 
   if (self._enableDataChannel) {
-    if (typeof self._dataChannels[targetMid] !== 'object') {
-      log.error([targetMid, 'RTCDataChannel', null, 'Create offer error as unable to create datachannel ' +
-        'as datachannels array is undefined'], self._dataChannels[targetMid]);
-      return;
-    }
-
     // Edge doesn't support datachannels yet
-    if (!self._dataChannels[targetMid].main && window.webrtcDetectedBrowser !== 'edge') {
-      self._dataChannels[targetMid].main =
-        self._createDataChannel(targetMid, self.DATA_CHANNEL_TYPE.MESSAGING, null, targetMid);
+    if (!(self._dataChannels[targetMid] && self._dataChannels[targetMid].main) &&
+      window.webrtcDetectedBrowser !== 'edge') {
+      self._createDataChannel(targetMid);
       self._peerConnections[targetMid].hasMainChannel = true;
     }
   }
