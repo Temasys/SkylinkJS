@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Mon Sep 26 2016 14:55:19 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Sep 26 2016 15:05:27 GMT+0800 (SGT) */
 
 (function() {
 
@@ -430,6 +430,11 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
   // Set it as "main" (MESSAGING) Datachannel
   if (!channelProp || channelProp === peerId) {
     channelProp = 'main';
+  }
+
+  if (typeof data === 'undefined') {
+    log.warn([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Dropping empty message']);
+    return;
   }
 
   if (!(self._peerConnections[peerId] &&

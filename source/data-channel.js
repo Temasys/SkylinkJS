@@ -223,6 +223,11 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
     channelProp = 'main';
   }
 
+  if (typeof data === 'undefined') {
+    log.warn([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Dropping empty message']);
+    return;
+  }
+
   if (!(self._peerConnections[peerId] &&
     self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
     log.warn([peerId, 'RTCDataChannel', 'prop:' + channelProp,
