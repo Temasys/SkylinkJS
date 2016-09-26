@@ -11,6 +11,14 @@
  *   The value of the state when Datachannel connection has closed.
  * @param {String} ERROR      <small>Value <code>"error"</code></small>
  *   The value of the state when Datachannel connection has errors.
+ * @param {String} CREATE_ERROR <small>Value <code>"createError"</code></small>
+ *   The value of the state when Datachannel has failed to establish a connection.
+ * @param {String} BUFFERED_AMOUNT_LOW <small>Value <code>"bufferedAmountLow"</code></small>
+ *   The value of the state when Datachannel when the amount of data buffered to be sent
+ *   falls below the Datachannel threshold.
+ *   <small>This state should occur only during after <a href="#method_sendBlobData">
+ *   <code>sendBlobData()</code> method</a> or <a href="#method_sendURLData"><code>sendURLData()</code> method</a> or
+ *   <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>.</small>
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -21,7 +29,9 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
   OPEN: 'open',
   CLOSING: 'closing',
   CLOSED: 'closed',
-  ERROR: 'error'
+  ERROR: 'error',
+  CREATE_ERROR: 'createError',
+  BUFFERED_AMOUNT_LOW: 'bufferedAmountLow'
 };
 
 /**
@@ -146,6 +156,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
     log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel buffering data transfer low']);
 
     // TODO: Should we add an event here
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.BUFFERED_AMOUNT_LOW, peerId, null, channelName, channelType);
   };
 
   dataChannel.onclose = function () {

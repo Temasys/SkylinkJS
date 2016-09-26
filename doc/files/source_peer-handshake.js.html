@@ -228,16 +228,10 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
   }
 
   if (self._enableDataChannel) {
-    if (typeof self._dataChannels[targetMid] !== &#x27;object&#x27;) {
-      log.error([targetMid, &#x27;RTCDataChannel&#x27;, null, &#x27;Create offer error as unable to create datachannel &#x27; +
-        &#x27;as datachannels array is undefined&#x27;], self._dataChannels[targetMid]);
-      return;
-    }
-
     // Edge doesn&#x27;t support datachannels yet
-    if (!self._dataChannels[targetMid].main &amp;&amp; window.webrtcDetectedBrowser !== &#x27;edge&#x27;) {
-      self._dataChannels[targetMid].main =
-        self._createDataChannel(targetMid, self.DATA_CHANNEL_TYPE.MESSAGING, null, targetMid);
+    if (!(self._dataChannels[targetMid] &amp;&amp; self._dataChannels[targetMid].main) &amp;&amp;
+      window.webrtcDetectedBrowser !== &#x27;edge&#x27;) {
+      self._createDataChannel(targetMid);
       self._peerConnections[targetMid].hasMainChannel = true;
     }
   }
