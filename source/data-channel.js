@@ -166,22 +166,6 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
     self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.BUFFERED_AMOUNT_LOW, peerId, null, channelName, channelType);
   };
 
-  dataChannel.onclose = function () {
-    log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel has closed']);
-
-    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId, null, channelName, channelType);
-
-    if (channelType === self.DATA_CHANNEL_TYPE.MESSAGING) {
-      setTimeout(function () {
-        if (self._peerConnections[peerId] &&
-          self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
-          log.debug([peerId, 'RTCDataChannel', channelName, 'Reviving Datachannel connection']);
-          self._createDataChannel(peerId, channelName, true);
-        }
-      }, 100);
-    }
-  };
-
   dataChannel.onmessage = function(event) {
     self._dataChannelProtocolHandler(event.data, peerId, channelName, channelType);
   };
@@ -199,6 +183,55 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
     self._trigger('dataChannelState', dataChannel.readyState, peerId, null, channelName, channelType);
 
     dataChannel.onopen = onOpenHandlerFn;
+  }
+
+  var onCloseHandlerFn = function () {
+    log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel has closed']);
+
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId, null, channelName, channelType);
+
+    if (channelType === self.DATA_CHANNEL_TYPE.MESSAGING) {
+      setTimeout(function () {
+        if (self._peerConnections[peerId] &&
+          self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
+          log.debug([peerId, 'RTCDataChannel', channelName, 'Reviving Datachannel connection']);
+          self._createDataChannel(peerId, channelName, true);
+        }
+      }, 100);
+    }
+  };
+
+  // Fixes for Firefox bug (49 is working) -> https://bugzilla.mozilla.org/show_bug.cgi?id=1118398
+  if (window.webrtcDetectedBrowser === 'firefox') {
+    var hasTriggeredClose = false;
+    var timeBlockAfterClosing = 0;
+
+    dataChannel.onclose = function () {
+      if (!hasTriggeredClose) {
+        hasTriggeredClose = true;
+        onCloseHandlerFn();
+      }
+    };
+
+    var onFFClosed = setInterval(function () {
+      if (dataChannel.readyState === self.DATA_CHANNEL_STATE.CLOSED ||
+        hasTriggeredClose || timeBlockAfterClosing === 5) {
+        clearInterval(onFFClosed);
+        
+        if (!hasTriggeredClose) {
+          hasTriggeredClose = true;
+          onCloseHandlerFn();
+        }
+      // After 5 seconds from CLOSING state and Firefox is not rendering to close, we have to assume to close it.
+      // It is dead! This fixes the case where if it's Firefox who closes the Datachannel, the connection will
+      // still assume as CLOSING..
+      } else if (dataChannel.readyState === self.DATA_CHANNEL_STATE.CLOSING) {
+        timeBlockAfterClosing++;
+      }
+    }, 1000);
+
+  } else {
+    dataChannel.onclose = onCloseHandlerFn;
   }
 
   if (channelType === self.DATA_CHANNEL_TYPE.MESSAGING) {
@@ -295,7 +328,6 @@ Skylink.prototype._closeDataChannel = function(peerId, channelName) {
 
       self._dataChannels[peerId][channelProp].channel.close();
 
-      // TODO: Handle when Datachannel did not fire close naturally
       delete self._dataChannels[peerId][channelProp];
     }
   };
