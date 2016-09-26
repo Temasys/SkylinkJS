@@ -223,8 +223,9 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
     channelProp = 'main';
   }
 
-  if (typeof data === 'undefined') {
-    log.warn([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Dropping empty message']);
+  // TODO: What happens when we want to send binary data over or ArrayBuffers?
+  if (!(typeof data === 'object' && data) && !(data && typeof data === 'string')) {
+    log.warn([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Dropping invalid data ->'], data);
     return;
   }
 
