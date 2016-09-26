@@ -31,7 +31,8 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
   CLOSED: 'closed',
   ERROR: 'error',
   CREATE_ERROR: 'createError',
-  BUFFERED_AMOUNT_LOW: 'bufferedAmountLow'
+  BUFFERED_AMOUNT_LOW: 'bufferedAmountLow',
+  SEND_MESSAGE_ERROR: 'sendMessageError'
 };
 
 /**
@@ -203,60 +204,44 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
 
 /**
  * Function that sends data over the Datachannel connection.
- * @method _sendDataChannelMessage
+ * @method _sendMessageToDataChannel
  * @private
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._sendDataChannelMessage = function(peerId, data, channelKey) {
+Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp) {
   var self = this;
 
-  var channelName;
-
-  if (!channelKey || channelKey === peerId) {
-    channelKey = 'main';
+  // Set it as "main" (MESSAGING) Datachannel
+  if (!channelProp || channelProp === peerId) {
+    channelProp = 'main';
   }
 
-  var dcList = self._dataChannels[peerId] || {};
-  var dc = dcList[channelKey];
-
-  if (!dc) {
-    log.error([peerId, 'RTCDataChannel', channelKey + '|' + channelName,
-      'Datachannel connection to peer does not exist'], {
-        enabledState: self._enableDataChannel,
-        dcList: dcList,
-        dc: dc,
-        type: (data.type || 'DATA'),
-        data: data,
-        channelKey: channelKey
-    });
+  if (!(self._peerConnections[peerId] &&
+    self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
+    log.warn([peerId, 'RTCDataChannel', 'prop:' + channelProp,
+      'Dropping for sending message as Peer connection does not exists or is closed ->'], data);
     return;
-  } else {
-    channelName = dc.label;
-
-    log.debug([peerId, 'RTCDataChannel', channelKey + '|' + channelName,
-      'Sending data using this channel key'], data);
-
-    if (dc.readyState === this.DATA_CHANNEL_STATE.OPEN) {
-      var dataString = (typeof data === 'object') ? JSON.stringify(data) : data;
-      log.debug([peerId, 'RTCDataChannel', channelKey + '|' + dc.label,
-        'Sending to peer ->'], {
-          readyState: dc.readyState,
-          type: (data.type || 'DATA'),
-          data: data
-      });
-      dc.send(dataString);
-    } else {
-      log.error([peerId, 'RTCDataChannel', channelKey + '|' + dc.label,
-        'Datachannel is not opened'], {
-          readyState: dc.readyState,
-          type: (data.type || 'DATA'),
-          data: data
-      });
-      this._trigger('dataChannelState', this.DATA_CHANNEL_STATE.ERROR,
-        peerId, 'Datachannel is not ready.\nState is: ' + dc.readyState);
-    }
   }
+
+  if (!(self._dataChannels[peerId] && self._dataChannels[peerId][channelProp])) {
+    log.warn([peerId, 'RTCDataChannel', 'prop:' + channelProp,
+      'Dropping for sending message as Datachannel connection does not exists ->'], data);
+    return;
+  }
+
+  if (self._dataChannels[peerId][channelProp].readyState !== self.DATA_CHANNEL_STATE.OPEN) {
+    log.error([peerId, 'RTCDataChannel', 'prop:' + channelProp,
+      'Dropping of sending message as Datachannel connection is not opened ->'], data);
+
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.SEND_MESSAGE_ERROR, peerId,
+      new Error('Datachannel is not ready.\nState is: ' + self._dataChannels[peerId][channelProp].readyState));
+    return;
+  }
+
+  log.debug([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Sending message ->'], data);
+
+  self._dataChannels[peerId][channelProp].send(typeof data === 'object' ? JSON.stringify(data) : data);
 };
 
 /**
