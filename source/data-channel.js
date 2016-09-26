@@ -165,11 +165,10 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
     self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId, null, channelName, channelType);
 
     if (channelType === self.DATA_CHANNEL_TYPE.MESSAGING) {
-      log.debug([peerId, 'RTCDataChannel', channelName, 'Reviving Datachannel connection']);
-
       setTimeout(function () {
         if (self._peerConnections[peerId] &&
           self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
+          log.debug([peerId, 'RTCDataChannel', channelName, 'Reviving Datachannel connection']);
           self._createDataChannel(peerId, channelName, true);
         }
       }, 100);
@@ -269,42 +268,36 @@ Skylink.prototype._sendDataChannelMessage = function(peerId, data, channelKey) {
  */
 Skylink.prototype._closeDataChannel = function(peerId, channelName) {
   var self = this;
-  var dcList = self._dataChannels[peerId] || {};
-  var dcKeysList = Object.keys(dcList);
 
-
-  if (channelName) {
-    dcKeysList = [channelName];
+  if (!self._dataChannels[peerId]) {
+    log.warn([peerId, 'RTCDataChannel', channelName || null,
+      'Aborting closing Datachannels as Peer connection does not have Datachannel sessions']);
+    return;
   }
 
-  for (var i = 0; i < dcKeysList.length; i++) {
-    var channelKey = dcKeysList[i];
-    var dc = dcList[channelKey];
-
-    if (dc) {
-      if (dc.readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
-        log.log([peerId, 'RTCDataChannel', channelKey + '|' + dc.label,
-          'Closing datachannel']);
-        dc.close();
-      } else {
-        if (!dc.hasFiredClosed && window.webrtcDetectedBrowser === 'firefox') {
-          log.log([peerId, 'RTCDataChannel', channelKey + '|' + dc.label,
-            'Closed Firefox datachannel']);
-          self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId,
-            null, channelName, channelKey === 'main' ? self.DATA_CHANNEL_TYPE.MESSAGING :
-            self.DATA_CHANNEL_TYPE.DATA);
+  if (!channelName) {
+    for (var channelNameProp in self._dataChannels) {
+      if (self._dataChannels.hasOwnProperty(channelNameProp)) {
+        if (self._dataChannels[peerId][channelNameProp] &&
+          self._dataChannels[peerId][channelNameProp].readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
+          log.debug([peerId, 'RTCDataChannel', channelNameProp, 'Closing Datachannel']);
+          self._dataChannels[peerId][channelNameProp].close();
         }
+        delete self._dataChannels[peerId][channelNameProp];
       }
-      delete self._dataChannels[peerId][channelKey];
-
-      log.log([peerId, 'RTCDataChannel', channelKey + '|' + dc.label,
-        'Sucessfully removed datachannel']);
-    } else {
-      log.log([peerId, 'RTCDataChannel', channelKey + '|' + channelName,
-        'Unable to close Datachannel as it does not exists'], {
-          dc: dc,
-          dcList: dcList
-      });
     }
+  } else {
+    if (!self._dataChannels[peerId][channelName]) {
+      log.warn([peerId, 'RTCDataChannel', channelName, 'Aborting closing Datachannel as it does not exists']);
+      return;
+    }
+
+    log.debug([peerId, 'RTCDataChannel', channelName, 'Closing Datachannel']);
+
+    self._dataChannels[peerId][channelName].close();
+
+    delete self._dataChannels[peerId][channelName];
+
+    // TODO: Handle when Datachannel did not fire close naturally
   }
 };

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Mon Sep 26 2016 13:23:45 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Sep 26 2016 13:49:56 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10548,7 +10548,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Mon Sep 26 2016 13:23:45 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Sep 26 2016 13:49:56 GMT+0800 (SGT) */
 
 (function() {
 
@@ -10794,7 +10794,9 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
   OPEN: 'open',
   CLOSING: 'closing',
   CLOSED: 'closed',
-  ERROR: 'error'
+  ERROR: 'error',
+  CREATE_ERROR: 'createError',
+  BUFFERED_AMOUNT_LOW: 'bufferedAmountLow'
 };
 
 /**
@@ -10919,6 +10921,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
     log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel buffering data transfer low']);
 
     // TODO: Should we add an event here
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.BUFFERED_AMOUNT_LOW, peerId, null, channelName, channelType);
   };
 
   dataChannel.onclose = function () {
@@ -10927,11 +10930,10 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
     self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId, null, channelName, channelType);
 
     if (channelType === self.DATA_CHANNEL_TYPE.MESSAGING) {
-      log.debug([peerId, 'RTCDataChannel', channelName, 'Reviving Datachannel connection']);
-
       setTimeout(function () {
-        if (self._peerConnections &&
+        if (self._peerConnections[peerId] &&
           self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
+          log.debug([peerId, 'RTCDataChannel', channelName, 'Reviving Datachannel connection']);
           self._createDataChannel(peerId, channelName, true);
         }
       }, 100);
@@ -11031,43 +11033,37 @@ Skylink.prototype._sendDataChannelMessage = function(peerId, data, channelKey) {
  */
 Skylink.prototype._closeDataChannel = function(peerId, channelName) {
   var self = this;
-  var dcList = self._dataChannels[peerId] || {};
-  var dcKeysList = Object.keys(dcList);
 
-
-  if (channelName) {
-    dcKeysList = [channelName];
+  if (!self._dataChannels[peerId]) {
+    log.warn([peerId, 'RTCDataChannel', channelName || null,
+      'Aborting closing Datachannels as Peer connection does not have Datachannel sessions']);
+    return;
   }
 
-  for (var i = 0; i < dcKeysList.length; i++) {
-    var channelKey = dcKeysList[i];
-    var dc = dcList[channelKey];
-
-    if (dc) {
-      if (dc.readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
-        log.log([peerId, 'RTCDataChannel', channelKey + '|' + dc.label,
-          'Closing datachannel']);
-        dc.close();
-      } else {
-        if (!dc.hasFiredClosed && window.webrtcDetectedBrowser === 'firefox') {
-          log.log([peerId, 'RTCDataChannel', channelKey + '|' + dc.label,
-            'Closed Firefox datachannel']);
-          self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId,
-            null, channelName, channelKey === 'main' ? self.DATA_CHANNEL_TYPE.MESSAGING :
-            self.DATA_CHANNEL_TYPE.DATA);
+  if (!channelName) {
+    for (var channelNameProp in self._dataChannels) {
+      if (self._dataChannels.hasOwnProperty(channelNameProp)) {
+        if (self._dataChannels[peerId][channelNameProp] &&
+          self._dataChannels[peerId][channelNameProp].readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
+          log.debug([peerId, 'RTCDataChannel', channelNameProp, 'Closing Datachannel']);
+          self._dataChannels[peerId][channelNameProp].close();
         }
+        delete self._dataChannels[peerId][channelNameProp];
       }
-      delete self._dataChannels[peerId][channelKey];
-
-      log.log([peerId, 'RTCDataChannel', channelKey + '|' + dc.label,
-        'Sucessfully removed datachannel']);
-    } else {
-      log.log([peerId, 'RTCDataChannel', channelKey + '|' + channelName,
-        'Unable to close Datachannel as it does not exists'], {
-          dc: dc,
-          dcList: dcList
-      });
     }
+  } else {
+    if (!self._dataChannels[peerId][channelName]) {
+      log.warn([peerId, 'RTCDataChannel', channelName, 'Aborting closing Datachannel as it does not exists']);
+      return;
+    }
+
+    log.debug([peerId, 'RTCDataChannel', channelName, 'Closing Datachannel']);
+
+    self._dataChannels[peerId][channelName].close();
+
+    delete self._dataChannels[peerId][channelName];
+
+    // TODO: Handle when Datachannel did not fire close naturally
   }
 };
 Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
