@@ -723,8 +723,8 @@ Before using any Skylink functionalities, you will need to authenticate your App
                     </span>
                   </a>
                 
-                  <a href="#method__sendDataChannelMessage" class="list-group-item code-menu-item  private-method-item ">
-                    &nbsp;&nbsp;_sendDataChannelMessage
+                  <a href="#method__sendMessageToDataChannel" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_sendMessageToDataChannel
                     <span class="settings">
                       
                       
@@ -4303,7 +4303,7 @@ If provided string length is lesser than or equals to the chunk size, it should 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l263"><code>source&#x2F;data-channel.js:263</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l253"><code>source&#x2F;data-channel.js:253</code></a>
       </small>
     
 
@@ -4470,7 +4470,7 @@ If provided string length is lesser than or equals to the chunk size, it should 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l91"><code>source&#x2F;data-channel.js:91</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l98"><code>source&#x2F;data-channel.js:98</code></a>
       </small>
     
 
@@ -8370,8 +8370,8 @@ This will open a new data type of Datachannel connection with Peer if
   <hr>
 </div>
             
-              <div id="method__sendDataChannelMessage" class="code-item method item private-method-item ">
-  <h3 class="code-item-name"><code>_sendDataChannelMessage</code></h3>
+              <div id="method__sendMessageToDataChannel" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_sendMessageToDataChannel</code></h3>
   
     <span class="paren">()</span>
   
@@ -8417,7 +8417,7 @@ This will open a new data type of Datachannel connection with Peer if
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l205"><code>source&#x2F;data-channel.js:205</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l211"><code>source&#x2F;data-channel.js:211</code></a>
       </small>
     
 
@@ -18734,7 +18734,7 @@ If enabled, the Peers connecting the same Room will receive each others &quot;en
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l78"><code>source&#x2F;data-channel.js:78</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l85"><code>source&#x2F;data-channel.js:85</code></a>
       </small>
     
 
@@ -19377,7 +19377,7 @@ If enabled, the Peers connecting the same Room will receive each others &quot;en
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l67"><code>source&#x2F;data-channel.js:67</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l74"><code>source&#x2F;data-channel.js:74</code></a>
       </small>
     
 
@@ -25761,6 +25761,26 @@ The list of Peer connection ICE gathering states.</p>
             
           </li>
       
+          <li class="param">
+            <code class="param-name">SEND_MESSAGE_ERROR</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p><small>Value <code>&quot;sendMessageError&quot;</code></small>
+  The value of the state when Datachannel when data transfer packets or P2P message fails to send
+  because Datachannel state is not at <code>OPEN</code>.
+  <small>This state should occur only during after <a href="#method_sendBlobData">
+  <code>sendBlobData()</code> method</a> or <a href="#method_sendURLData"><code>sendURLData()</code> method</a> or
+  <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>.</small></p>
+
+            </div>
+
+            
+          </li>
+      
       </ul>
     </div>
   
@@ -25819,7 +25839,7 @@ The list of Peer connection ICE gathering states.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l37"><code>source&#x2F;data-channel.js:37</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l44"><code>source&#x2F;data-channel.js:44</code></a>
       </small>
     
 

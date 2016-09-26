@@ -281,6 +281,11 @@
                     "name": "BUFFERED_AMOUNT_LOW",
                     "description": "<small>Value <code>\"bufferedAmountLow\"</code></small>\n  The value of the state when Datachannel when the amount of data buffered to be sent\n  falls below the Datachannel threshold.\n  <small>This state should occur only during after <a href=\"#method_sendBlobData\">\n  <code>sendBlobData()</code> method</a> or <a href=\"#method_sendURLData\"><code>sendURLData()</code> method</a> or\n  <a href=\"#method_sendP2PMessage\"><code>sendP2PMessage()</code> method</a>.</small>",
                     "type": "String"
+                },
+                {
+                    "name": "SEND_MESSAGE_ERROR",
+                    "description": "<small>Value <code>\"sendMessageError\"</code></small>\n  The value of the state when Datachannel when data transfer packets or P2P message fails to send\n  because Datachannel state is not at <code>OPEN</code>.\n  <small>This state should occur only during after <a href=\"#method_sendBlobData\">\n  <code>sendBlobData()</code> method</a> or <a href=\"#method_sendURLData\"><code>sendURLData()</code> method</a> or\n  <a href=\"#method_sendP2PMessage\"><code>sendP2PMessage()</code> method</a>.</small>",
+                    "type": "String"
                 }
             ],
             "type": "JSON",
@@ -290,7 +295,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 37,
+            "line": 44,
             "description": "The list of Datachannel types.",
             "itemtype": "attribute",
             "name": "DATA_CHANNEL_TYPE",
@@ -313,7 +318,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 67,
+            "line": 74,
             "description": "Stores the flag if Peers should have any Datachannel connections.",
             "itemtype": "attribute",
             "name": "_enableDataChannel",
@@ -326,7 +331,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 78,
+            "line": 85,
             "description": "Stores the list of Peer Datachannel connections.",
             "itemtype": "attribute",
             "name": "_dataChannels",
@@ -352,7 +357,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 91,
+            "line": 98,
             "description": "Function that starts a Datachannel connection with Peer.",
             "itemtype": "method",
             "name": "_createDataChannel",
@@ -363,16 +368,16 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 144,
+            "line": 151,
             "description": "Subscribe to events",
             "class": "Skylink"
         },
         {
             "file": "source/data-channel.js",
-            "line": 205,
+            "line": 211,
             "description": "Function that sends data over the Datachannel connection.",
             "itemtype": "method",
-            "name": "_sendDataChannelMessage",
+            "name": "_sendMessageToDataChannel",
             "access": "private",
             "tagname": "",
             "since": "0.5.2",
@@ -380,7 +385,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 263,
+            "line": 253,
             "description": "Function that stops the Datachannel connection and removes object references.",
             "itemtype": "method",
             "name": "_closeDataChannel",
@@ -6904,7 +6909,7 @@
         },
         {
             "message": "Missing item type\nSubscribe to events",
-            "line": " source/data-channel.js:144"
+            "line": " source/data-channel.js:151"
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self._getUserInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
