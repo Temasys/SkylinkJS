@@ -146,6 +146,9 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
     channelType = self.DATA_CHANNEL_TYPE.MESSAGING;
 
     self._dataChannels[peerId] = {};
+
+  } else if (self._dataChannels[peerId].main && self._dataChannels[peerId].main.channel.label === channelName) {
+    channelType = self.DATA_CHANNEL_TYPE.MESSAGING;
   }
 
   /**
@@ -193,7 +196,9 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
     if (channelType === self.DATA_CHANNEL_TYPE.MESSAGING) {
       setTimeout(function () {
         if (self._peerConnections[peerId] &&
-          self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
+          self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED &&
+          (self._peerConnections[peerId].localDescription &&
+            self._peerConnections[peerId].localDescription.type === self.HANDSHAKE_PROGRESS.OFFER)) {
           log.debug([peerId, 'RTCDataChannel', channelName, 'Reviving Datachannel connection']);
           self._createDataChannel(peerId, channelName, true);
         }

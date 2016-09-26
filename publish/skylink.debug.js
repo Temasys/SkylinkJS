@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Mon Sep 26 2016 16:39:04 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Sep 26 2016 17:01:59 GMT+0800 (SGT) */
 
 (function() {
 
@@ -330,6 +330,8 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
   var channelName = self._user.sid + '_' + peerId;
   var channelType = createAsMessagingChannel ? self.DATA_CHANNEL_TYPE.MESSAGING : self.DATA_CHANNEL_TYPE.DATA;
 
+  console.info('datachannel type', createAsMessagingChannel, channelType);
+
   if (dataChannel && typeof dataChannel === 'object') {
     channelName = dataChannel.label;
   
@@ -355,6 +357,9 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
     channelType = self.DATA_CHANNEL_TYPE.MESSAGING;
 
     self._dataChannels[peerId] = {};
+
+  } else if (self._dataChannels[peerId].main && self._dataChannels[peerId].main.channel.label === channelName) {
+    channelType = self.DATA_CHANNEL_TYPE.MESSAGING;
   }
 
   /**
@@ -402,7 +407,9 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
     if (channelType === self.DATA_CHANNEL_TYPE.MESSAGING) {
       setTimeout(function () {
         if (self._peerConnections[peerId] &&
-          self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
+          self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED &&
+          (self._peerConnections[peerId].localDescription &&
+            self._peerConnections[peerId].localDescription.type === self.HANDSHAKE_PROGRESS.OFFER)) {
           log.debug([peerId, 'RTCDataChannel', channelName, 'Reviving Datachannel connection']);
           self._createDataChannel(peerId, channelName, true);
         }
