@@ -144,59 +144,15 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
 Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['Android', 'iOS'];
 
 /**
- * Stores the list of uploading data transfers chunks to Peers.
- * @attribute _uploadDataTransfers
- * @param {Array} <#transferId> The uploading data transfer chunks.
+ * Stores the list of data transfers from / to Peers.
+ * @attribute _dataTransfers
+ * @param {Array} #transferId The data transfer session.
  * @type JSON
  * @private
  * @for Skylink
  * @since 0.4.1
  */
-Skylink.prototype._uploadDataTransfers = {};
-
-/**
- * Stores the list of uploading data transfer sessions to Peers.
- * @attribute _uploadDataSessions
- * @param {JSON} <#transferId> The uploading data transfer session.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.4.1
- */
-Skylink.prototype._uploadDataSessions = {};
-
-/**
- * Stores the list of downloading data transfers chunks to Peers.
- * @attribute _downloadDataTransfers
- * @param {Array} <#transferId> The downloading data transfer chunks.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.4.1
- */
-Skylink.prototype._downloadDataTransfers = {};
-
-/**
- * Stores the list of downloading data transfer sessions to Peers.
- * @attribute _downloadDataSessions
- * @param {JSON} <#transferId> The downloading data transfer session.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.4.1
- */
-Skylink.prototype._downloadDataSessions = {};
-
-/**
- * Stores the list of data transfer "wait-for-response" timeouts.
- * @attribute _dataTransfersTimeout
- * @param {Object} <#transferId> The data transfer session "wait-for-response" timeout.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.4.1
- */
-Skylink.prototype._dataTransfersTimeout = {};
+Skylink.prototype._dataTransfers = {};
 
 /**
  * <blockquote class="info">
@@ -361,149 +317,7 @@ Skylink.prototype._dataTransfersTimeout = {};
  * @since 0.5.5
  */
 Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback) {
-  var listOfPeers = Object.keys(this._peerConnections);
-  var isPrivate = false;
-  var dataInfo = {};
-  var transferId = this._user.sid + this.DATA_TRANSFER_TYPE.UPLOAD +
-    (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
-  // for error case
-  var errorMsg, errorPayload, i, peerId; // for jshint
-  var singleError = null;
-  var transferErrors = {};
-  var stateError = null;
-  var singlePeerId = null;
-
-  //Shift parameters
-  // timeout
-  if (typeof timeout === 'function') {
-    callback = timeout;
-
-  } else if (typeof timeout === 'string') {
-    listOfPeers = [timeout];
-    isPrivate = true;
-
-  } else if (Array.isArray(timeout)) {
-    listOfPeers = timeout;
-    isPrivate = true;
-  }
-
-  // targetPeerId
-  if (typeof targetPeerId === 'function'){
-    callback = targetPeerId;
-
-  // data, timeout, target [array], callback
-  } else if(Array.isArray(targetPeerId)) {
-    listOfPeers = targetPeerId;
-    isPrivate = true;
-
-  // data, timeout, target [string], callback
-  } else if (typeof targetPeerId === 'string') {
-    listOfPeers = [targetPeerId];
-    isPrivate = true;
-  }
-
-  //state: String, Deprecated. But for consistency purposes. Null if not a single peer
-  //error: Object, Deprecated. But for consistency purposes. Null if not a single peer
-  //transferId: String,
-  //peerId: String, Deprecated. But for consistency purposes. Null if not a single peer
-  //listOfPeers: Array, NEW!!
-  //isPrivate: isPrivate, NEW!!
-  //transferErrors: JSON, NEW!! - Array of errors
-  //transferInfo: JSON The same payload as dataTransferState transferInfo payload
-
-  // check if it's blob data
-  if (!(typeof data === 'object' && data instanceof Blob)) {
-    errorMsg = 'Provided data is not a Blob data';
-
-    if (listOfPeers.length === 0) {
-      transferErrors.self = errorMsg;
-
-    } else {
-      for (i = 0; i < listOfPeers.length; i++) {
-        peerId = listOfPeers[i];
-        transferErrors[peerId] = errorMsg;
-      }
-
-      // Deprecated but for consistency purposes. Null if not a single peer.
-      if (listOfPeers.length === 1 && isPrivate) {
-        stateError = self.DATA_TRANSFER_STATE.ERROR;
-        singleError = errorMsg;
-        singlePeerId = listOfPeers[0];
-      }
-    }
-
-    errorPayload = {
-      state: stateError,
-      error: singleError,
-      transferId: transferId,
-      peerId: singlePeerId,
-      listOfPeers: listOfPeers,
-      transferErrors: transferErrors,
-      transferInfo: dataInfo,
-      isPrivate: isPrivate
-    };
-
-    log.error(errorMsg, errorPayload);
-
-    if (typeof callback === 'function'){
-      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback ' +
-        'with error -> '],errorPayload);
-      callback(errorPayload, null);
-    }
-    return;
-  }
-
-  // populate data
-  dataInfo.name = data.name || transferId;
-  dataInfo.size = data.size;
-  dataInfo.timeout = typeof timeout === 'number' ? timeout : 60;
-  dataInfo.transferId = transferId;
-  dataInfo.dataType = 'blob';
-  dataInfo.isPrivate = isPrivate;
-
-  // check if datachannel is enabled first or not
-  if (!this._enableDataChannel) {
-    errorMsg = 'Unable to send any blob data. Datachannel is disabled';
-
-    if (listOfPeers.length === 0) {
-      transferErrors.self = errorMsg;
-
-    } else {
-      for (i = 0; i < listOfPeers.length; i++) {
-        peerId = listOfPeers[i];
-        transferErrors[peerId] = errorMsg;
-      }
-
-      // Deprecated but for consistency purposes. Null if not a single peer.
-      if (listOfPeers.length === 1 && isPrivate) {
-        stateError = self.DATA_TRANSFER_STATE.ERROR;
-        singleError = errorMsg;
-        singlePeerId = listOfPeers[0];
-      }
-    }
-
-    errorPayload = {
-      state: stateError,
-      error: singleError,
-      transferId: transferId,
-      peerId: singlePeerId,
-      listOfPeers: listOfPeers,
-      transferErrors: transferErrors,
-      transferInfo: dataInfo,
-      isPrivate: isPrivate
-    };
-
-    log.error(errorMsg, errorPayload);
-
-    if (typeof callback === 'function'){
-      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback ' +
-        'with error -> '], errorPayload);
-      callback(errorPayload, null);
-    }
-    return;
-  }
-
-  this._startDataTransfer(data, dataInfo, listOfPeers, callback);
+  this._startDataTransfer(this.DATA_TRANSFER_SESSION_TYPE.BLOB, data, dataInfo, listOfPeers, callback);
 };
 
 /**
@@ -947,149 +761,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
  * @since 0.6.1
  */
 Skylink.prototype.sendURLData = function(data, timeout, targetPeerId, callback) {
-  var listOfPeers = Object.keys(this._peerConnections);
-  var isPrivate = false;
-  var dataInfo = {};
-  var transferId = this._user.sid + this.DATA_TRANSFER_TYPE.UPLOAD +
-    (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
-  // for error case
-  var errorMsg, errorPayload, i, peerId; // for jshint
-  var singleError = null;
-  var transferErrors = {};
-  var stateError = null;
-  var singlePeerId = null;
-
-  //Shift parameters
-  // timeout
-  if (typeof timeout === 'function') {
-    callback = timeout;
-
-  } else if (typeof timeout === 'string') {
-    listOfPeers = [timeout];
-    isPrivate = true;
-
-  } else if (Array.isArray(timeout)) {
-    listOfPeers = timeout;
-    isPrivate = true;
-  }
-
-  // targetPeerId
-  if (typeof targetPeerId === 'function'){
-    callback = targetPeerId;
-
-  // data, timeout, target [array], callback
-  } else if(Array.isArray(targetPeerId)) {
-    listOfPeers = targetPeerId;
-    isPrivate = true;
-
-  // data, timeout, target [string], callback
-  } else if (typeof targetPeerId === 'string') {
-    listOfPeers = [targetPeerId];
-    isPrivate = true;
-  }
-
-  //state: String, Deprecated. But for consistency purposes. Null if not a single peer
-  //error: Object, Deprecated. But for consistency purposes. Null if not a single peer
-  //transferId: String,
-  //peerId: String, Deprecated. But for consistency purposes. Null if not a single peer
-  //listOfPeers: Array, NEW!!
-  //isPrivate: isPrivate, NEW!!
-  //transferErrors: JSON, NEW!! - Array of errors
-  //transferInfo: JSON The same payload as dataTransferState transferInfo payload
-
-  // check if it's blob data
-  if (typeof data !== 'string') {
-    errorMsg = 'Provided data is not a dataURL';
-
-    if (listOfPeers.length === 0) {
-      transferErrors.self = errorMsg;
-
-    } else {
-      for (i = 0; i < listOfPeers.length; i++) {
-        peerId = listOfPeers[i];
-        transferErrors[peerId] = errorMsg;
-      }
-
-      // Deprecated but for consistency purposes. Null if not a single peer.
-      if (listOfPeers.length === 1 && isPrivate) {
-        stateError = self.DATA_TRANSFER_STATE.ERROR;
-        singleError = errorMsg;
-        singlePeerId = listOfPeers[0];
-      }
-    }
-
-    errorPayload = {
-      state: stateError,
-      error: singleError,
-      transferId: transferId,
-      peerId: singlePeerId,
-      listOfPeers: listOfPeers,
-      transferErrors: transferErrors,
-      transferInfo: dataInfo,
-      isPrivate: isPrivate
-    };
-
-    log.error(errorMsg, errorPayload);
-
-    if (typeof callback === 'function'){
-      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback ' +
-        'with error -> '],errorPayload);
-      callback(errorPayload, null);
-    }
-    return;
-  }
-
-  // populate data
-  dataInfo.name = data.name || transferId;
-  dataInfo.size = data.size || data.length;
-  dataInfo.timeout = typeof timeout === 'number' ? timeout : 60;
-  dataInfo.transferId = transferId;
-  dataInfo.dataType = 'dataURL';
-  dataInfo.isPrivate = isPrivate;
-
-  // check if datachannel is enabled first or not
-  if (!this._enableDataChannel) {
-    errorMsg = 'Unable to send any dataURL. Datachannel is disabled';
-
-    if (listOfPeers.length === 0) {
-      transferErrors.self = errorMsg;
-
-    } else {
-      for (i = 0; i < listOfPeers.length; i++) {
-        peerId = listOfPeers[i];
-        transferErrors[peerId] = errorMsg;
-      }
-
-      // Deprecated but for consistency purposes. Null if not a single peer.
-      if (listOfPeers.length === 1 && isPrivate) {
-        stateError = self.DATA_TRANSFER_STATE.ERROR;
-        singleError = errorMsg;
-        singlePeerId = listOfPeers[0];
-      }
-    }
-
-    errorPayload = {
-      state: stateError,
-      error: singleError,
-      transferId: transferId,
-      peerId: singlePeerId,
-      listOfPeers: listOfPeers,
-      transferErrors: transferErrors,
-      transferInfo: dataInfo,
-      isPrivate: isPrivate
-    };
-
-    log.error(errorMsg, errorPayload);
-
-    if (typeof callback === 'function'){
-      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback ' +
-        'with error -> '], errorPayload);
-      callback(errorPayload, null);
-    }
-    return;
-  }
-
-  this._startDataTransfer(data, dataInfo, listOfPeers, callback);
+  this._startDataTransfer(this.DATA_TRANSFER_SESSION_TYPE.DATA_URL, data, dataInfo, listOfPeers, callback);
 };
 
 /**
@@ -2013,22 +1685,181 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  * @for Skylink
  * @since 0.6.1
  */
-Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, callback) {
+Skylink.prototype._startDataTransfer = function(dataType, data, timeout, targetPeerId, callback) {
   var self = this;
-  var error = '';
-  var noOfPeersSent = 0;
-  var transferId = dataInfo.transferId;
-  var dataType = dataInfo.dataType;
-  var isPrivate = dataInfo.isPrivate;
-  var i;
-  var peerId;
+  // Data transfer session
+  var defaultSession = {
+    transferId: null,
+    name: null,
+    mimeType: '',
+    size: 0,
+    dataType: dataType,
+    timeout: 60,
+    isPrivate: false
+  };
+  var listOfPeers = Object.keys(self._peerConnections);
+  var listOfPeersErrors = {};
+  var listOfPeersCompleted [];
 
-  // for callback
-  var listOfPeersTransferState = {};
-  var transferSuccess = true;
-  var listOfPeersTransferErrors = {};
-  var listOfPeersChannels = {};
-  var successfulPeerTransfers = [];
+  // Parse parameters
+  // sendBlobData(.., timeout, .., ..);
+  if (typeof timeout === 'number') {
+    tempSession.timeout = timeout;
+
+  } else if (Array.isArray(timeout)) {
+    listOfPeers = timeout;
+    tempSession.isPrivate = true;
+
+  } else if (timeout && typeof timeout === 'string') {
+    listOfPeers = [timeout];
+    tempSession.isPrivate = true;
+
+  } else if (typeof timeout === 'function') {
+    callback = timeout;
+  }
+
+  // sendBlobData(.., ..., targetPeerId, ..);
+  if (Array.isArray(targetPeerId)) {
+    listOfPeers = targetPeerId;
+    tempSession.isPrivate = true;
+
+  } else if (targetPeerId && typeof targetPeerId === 'string') {
+    listOfPeers = [targetPeerId];
+    tempSession.isPrivate = true;
+
+  } else if (typeof targetPeerId === 'function') {
+    callback = targetPeerId;
+  }
+
+  // Function that emits all the data transfer errors to all Peers
+  var emitErrorToPeers = function (errorMsg) {
+    log.error(errorMsg);
+
+    if (typeof callback === 'function') {
+      if (listOfPeers.length === 0) {
+        listOfPeersErrors.self = new Error(errorMsg);
+
+      } else {
+        for (var i = 0; i < listOfPeers.length; i++) {
+          listOfPeersErrors[ listOfPeers[i] ] = new Error(errorMsg);
+        }
+      }
+
+      callback({
+        transferId: tempSession.transferId,
+        listOfPeers: listOfPeers,
+        transferErrors: listOfPeersErrors,
+        transferInfo: {
+          data: null,
+          name: tempSession.name,
+          size: tempSession.size,
+          dataType: dataType,
+          timeout: tempSession.timeout,
+          isPrivate: tempSession.isPrivate
+        }
+      }, null);
+    }
+  };
+
+  // Remove MCU from list
+  if (listOfPeers.indexOf('MCU') > -1) {
+    listOfPeers.splice(listOfPeers.indexOf('MCU'), 1);
+  }
+
+  // User session is not defined
+  if (!self._user) {
+    emitErrorToPeers('Unable to start data transfer as User is not in the Room.');
+    return;
+  }
+
+  tempSession.transferId = self._user.sid + '_' + (new Date()).getTime();
+  tempSession.name = tempSession.transferId;
+
+  // Parse the data
+  if (dataType === self.DATA_TRANSFER_SESSION_TYPE.BLOB) {
+    if (!(data && typeof data === 'object' && data instanceof Blob)) {
+      emitErrorToPeers('Provided data is not a Blob data');
+      return;
+    }
+
+    if (data.name) {
+      tempSession.name = data.name;
+    }
+
+    if (data.size === 0) {
+      emitErrorToPeers('Provided data is not a valid Blob data');
+      return;
+    }
+
+    tempSession.size = data.size;
+    tempSession.mimeType = data.type;
+
+    if (!self._enableDataChannel) {
+      emitErrorToPeers('Unable to send any blob data. Datachannel is disabled');
+      return;
+    }
+
+  } else {
+    if (!(data && typeof data === 'string')) {
+      emitErrorToPeers('Provided data is not a dataURL');
+      return;
+    }
+
+    if (!self._enableDataChannel) {
+      emitErrorToPeers('Unable to send any dataURL. Datachannel is disabled');
+      return;
+    }
+
+    tempSession.size = data.length || data.size;
+  }
+
+  if (listOfPeers.length === 0) {
+    emitErrorToPeers('Unable to start data transfer as there are no Peers in the Room.');
+    return;
+  }
+
+  self._dataTransfers[tempSession.transferId] = {
+
+  };
+
+  // Complete Peer
+  var completePeer = function (peerId, error) {
+    log.debug([peerId, 'RTCDataChannel', null, 'Peer completed (is there error?) ->'], error);
+
+    if (typeof callback === 'function') {
+      if (error) {
+        listOfPeersErrors[peerId] = error;
+      }
+
+      if (listOfPeersCompleted.indexOf(peerId) === -1) {
+        listOfPeersCompleted.push(peerId);
+
+        if (listOfPeersCompleted.length === listOfPeers.length) {
+          if (Object.keys(listOfPeersErrors).length > 0) {
+            callback({
+              transferId: tempSession.transferId,
+              
+            })
+          }
+        }
+      }
+    }
+  }
+
+  if (self._hasMCU) {
+
+
+  } else {
+    for (var p = 0; p < listOfPeers.length; p++) {
+      if (!self._peerInformations[ listOfPeers[p] ] || !self._peerConnections[ listOfPeers[p] ]) {
+        emit
+      }
+      var agentName = self._peerInformations(p)
+      if (self._INTEROP_MULTI_TRANSFERS.indexOf())
+    }
+
+  }
+
 
   var triggerCallbackFn = function () {
     for (i = 0; i < listOfPeers.length; i++) {
