@@ -170,7 +170,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
   };
 
   dataChannel.onmessage = function(event) {
-    self._dataChannelProtocolHandler(event.data, peerId, channelName, channelType);
+    self._processDataChannelData(event.data, peerId, channelName, channelType);
   };
 
   var onOpenHandlerFn = function () {

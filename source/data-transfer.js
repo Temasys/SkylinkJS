@@ -1373,68 +1373,67 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
 
 /**
  * Function that handles the data received from Datachannel and
- *   routes to the relevant data transfer protocol handler.
- * @method _dataChannelProtocolHandler
+ * routes to the relevant data transfer protocol handler.
+ * @method _processDataChannelData
  * @private
  * @for Skylink
- * @since 0.5.2
+ * @since 0.6.16
  */
-Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, channelName, channelType) {
-  // PROTOCOL ESTABLISHMENT
-
-  if (!(this._peerInformations[peerId] || {}).agent) {
-    log.error([peerId, 'RTCDataChannel', channelName, 'Peer informations is missing during protocol ' +
-      'handling. Dropping packet'], dataString);
+Skylink.prototype._processDataChannelData = function(rawData, peerId, channelName, channelType) {
+  if (!this._peerConnections[peerId]) {
+    log.error([peerId, 'RTCDataChannel', channelName, 'Dropping data received from Peer ' +
+      'as connection is not present ->'], rawData);
     return;
   }
 
-  /*var useChannel = channelName;
-  var peerAgent = this._peerInformations[peerId].agent.name;
+  var data = rawData;
+  //var channelProp = channelType === this.DATA_CHANNEL_TYPE.MESSAGING ? 'main' : channelName;
 
-  if (channelType === this.DATA_CHANNEL_TYPE.MESSAGING ||
-    this._INTEROP_MULTI_TRANSFERS[peerAgent] > -1) {
-    useChannel = peerId;
-  }*/
-
-  if (typeof dataString === 'string') {
-    var data = {};
+  // Expect as string
+  if (typeof rawData === 'string') {
     try {
-      data = JSON.parse(dataString);
+      data = JSON.parse(rawData);
+
+      log.debug([peerId, 'RTCDataChannel', channelName, 'Received protocol message ->'], data);
+
+      switch (data.type) {
+        case this._DC_PROTOCOL_TYPE.WRQ:
+          this._WRQProtocolHandler(peerId, data, channelName);
+          break;
+        case this._DC_PROTOCOL_TYPE.ACK:
+          this._ACKProtocolHandler(peerId, data, channelName);
+          break;
+        case this._DC_PROTOCOL_TYPE.ERROR:
+          this._ERRORProtocolHandler(peerId, data, channelName);
+          break;
+        case this._DC_PROTOCOL_TYPE.CANCEL:
+          this._CANCELProtocolHandler(peerId, data, channelName);
+          break;
+        case this._DC_PROTOCOL_TYPE.MESSAGE:
+          this._MESSAGEProtocolHandler(peerId, data, channelName);
+          break;
+        default:
+          log.warn([peerId, 'RTCDataChannel', channelName, 'Discarded unknown protocol message ->'], data);
+      }
+    
     } catch (error) {
-      log.debug([peerId, 'RTCDataChannel', channelName, 'Received from peer ->'], {
-        type: 'DATA',
-        data: dataString
-      });
-      this._DATAProtocolHandler(peerId, dataString,
-        this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, channelName);
-      return;
+      log.debug([peerId, 'RTCDataChannel', channelName, 'Received binary string chunk ->'], data);
+
+      this._DATAProtocolHandler(peerId, data, this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, channelName);
     }
-    log.debug([peerId, 'RTCDataChannel', channelName, 'Received from peer ->'], {
-      type: data.type,
-      data: data
-    });
-    switch (data.type) {
-    case this._DC_PROTOCOL_TYPE.WRQ:
-      this._WRQProtocolHandler(peerId, data, channelName);
-      break;
-    case this._DC_PROTOCOL_TYPE.ACK:
-      this._ACKProtocolHandler(peerId, data, channelName);
-      break;
-    case this._DC_PROTOCOL_TYPE.ERROR:
-      this._ERRORProtocolHandler(peerId, data, channelName);
-      break;
-    case this._DC_PROTOCOL_TYPE.CANCEL:
-      this._CANCELProtocolHandler(peerId, data, channelName);
-      break;
-    case this._DC_PROTOCOL_TYPE.MESSAGE: // Not considered a protocol actually?
-      this._MESSAGEProtocolHandler(peerId, data, channelName);
-      break;
-    default:
-      log.error([peerId, 'RTCDataChannel', channelName, 'Unsupported message ->'], {
-        type: data.type,
-        data: data
-      });
+
+  } else {
+    var chunkDataType = rawData instanceof Blob ? this.DATA_TRANSFER_DATA_TYPE.BLOB :
+      this.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
+
+    if (rawData.constructor && rawData.constructor.name === 'Array') {
+      // Need to re-parse on some browsers
+      data = new Int8Array(dataString);
     }
+
+    log.debug([peerId, 'RTCDataChannel', channelName, 'Received binary data chunk ->'], data);
+
+    this._DATAProtocolHandler(peerId, data, chunkDataType, channelName);
   }
 };
 
