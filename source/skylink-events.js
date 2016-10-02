@@ -446,14 +446,26 @@ Skylink.prototype._EVENTS = {
    *   <small>Defined only when <code>state</code> payload is <code>UPLOAD_STARTED</code> or
    *   <code>DOWNLOAD_COMPLETED</code>.</small>
    * @param {String} transferInfo.name The data transfer name.
-   * @param {Number} transferInfo.size The data transfer data object original size.
+   * @param {Number} transferInfo.size The data transfer data object size.
    * @param {String} transferInfo.dataType The data transfer session type.
    *   [Rel: Skylink.DATA_TRANSFER_SESSION_TYPE]
+   * @param {String} transferInfo.chunkType The data transfer type of data chunk being used to send to Peer for transfers.
+   *   <small>For <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a> data transfers, the
+   *   initial data chunks value may change from <code>BINARY_STRING</code> to <code>ARRAY_BUFFER</code> or
+   *   <code>BLOB</code> depending on the received data chunk type received.</small>
+   *   [Rel: Skylink.DATA_TRANSFER_DATA_TYPE]
+   * @param {Number} transferInfo.chunkSize The data transfer data chunk size.
+   * @param {Number} transferInfo.percentage The data transfer uploading / downloading transfer completion percentage.
    * @param {Number} transferInfo.timeout The flag if message is targeted or not, basing
    *   off the <code>targetPeerId</code> parameter being defined in
    *   <a href="#method_sendURLData"><code>sendURLData()</code> method</a> or
    *   <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>.
-   * @param {Boolean} transferInfo.isPrivate The flag if data transfer
+   * @param {Boolean} transferInfo.isPrivate The flag if message is targeted or not, basing
+   *   off the <code>targetPeerId</code> parameter being defined in
+   *   <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a> or
+   *   <a href="#method_sendURLData"><code>sendURLData()</code> method</a>.
+   * @param {String} transferInfo.direction The data transfer direction.
+   *   [Rel: Skylink.DATA_TRANSFER_TYPE]
    * @param {JSON} [error] The error result.
    *   <small>Defined only when <code>state</code> payload is <code>ERROR</code> or <code>CANCEL</code>.</small>
    * @param {Error|String} error.message The error object.

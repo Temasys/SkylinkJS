@@ -90,15 +90,27 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * &lt;blockquote class=&quot;info&quot;&gt;
- *   Currently, we do not support Blob or ArrayBuffer data type of transfers, but we
- *   will look into implementing it in the future.
- * &lt;/blockquote&gt;
  * The list of supported data transfer data types.
  * @attribute DATA_TRANSFER_DATA_TYPE
  * @param {String} BINARY_STRING &lt;small&gt;Value &lt;code&gt;&quot;binaryString&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the transfer type that sends all data packets as string
- *   (or converts them into string) when transferring data over the Datachannel connection.
+ *   The value of data transfer data type when Base64 encoded binary string data chunks are
+ *   sent or received over the Datachannel connection for the data transfer session.
+ *   &lt;small&gt;Used only in &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt; when
+ *   parameter &lt;code&gt;sendChunksAsBinary&lt;/code&gt; value is &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;
+ * @param {String} ARRAY_BUFFER  &lt;small&gt;Value &lt;code&gt;&quot;arrayBuffer&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of data transfer data type when ArrayBuffer binary data chunks are
+ *   sent or received over the Datachannel connection for the data transfer session.
+ *   &lt;small&gt;Used only in &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt; when
+ *   parameter &lt;code&gt;sendChunksAsBinary&lt;/code&gt; value is &lt;code&gt;true&lt;/code&gt;.&lt;/small&gt;
+ * @param {String} BLOB          &lt;small&gt;Value &lt;code&gt;&quot;blob&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of data transfer data type when Blob binary data chunks are
+ *   sent or received over the Datachannel connection for the data transfer session.
+ *   &lt;small&gt;Used only in &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt; when
+ *   parameter &lt;code&gt;sendChunksAsBinary&lt;/code&gt; value is &lt;code&gt;true&lt;/code&gt;.&lt;/small&gt;
+ * @param {String} STRING        &lt;small&gt;Value &lt;code&gt;&quot;string&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of data transfer data type when string data chunks are
+ *   sent or received over the Datachannel connection for the data transfer session.
+ *   &lt;small&gt;Used only in &lt;a href=&quot;#method_sendURLData&quot;&gt;&lt;code&gt;sendURLData()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -107,7 +119,8 @@
 Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
   BINARY_STRING: &#x27;binaryString&#x27;,
   ARRAY_BUFFER: &#x27;arrayBuffer&#x27;,
-  BLOB: &#x27;blob&#x27;
+  BLOB: &#x27;blob&#x27;,
+  STRING: &#x27;string&#x27;
 };
 
 /**

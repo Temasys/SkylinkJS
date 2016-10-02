@@ -1,13 +1,25 @@
 /**
- * <blockquote class="info">
- *   Currently, we do not support Blob or ArrayBuffer data type of transfers, but we
- *   will look into implementing it in the future.
- * </blockquote>
  * The list of supported data transfer data types.
  * @attribute DATA_TRANSFER_DATA_TYPE
  * @param {String} BINARY_STRING <small>Value <code>"binaryString"</code></small>
- *   The value of the transfer type that sends all data packets as string
- *   (or converts them into string) when transferring data over the Datachannel connection.
+ *   The value of data transfer data type when Base64 encoded binary string data chunks are
+ *   sent or received over the Datachannel connection for the data transfer session.
+ *   <small>Used only in <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a> when
+ *   parameter <code>sendChunksAsBinary</code> value is <code>false</code>.</small>
+ * @param {String} ARRAY_BUFFER  <small>Value <code>"arrayBuffer"</code></small>
+ *   The value of data transfer data type when ArrayBuffer binary data chunks are
+ *   sent or received over the Datachannel connection for the data transfer session.
+ *   <small>Used only in <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a> when
+ *   parameter <code>sendChunksAsBinary</code> value is <code>true</code>.</small>
+ * @param {String} BLOB          <small>Value <code>"blob"</code></small>
+ *   The value of data transfer data type when Blob binary data chunks are
+ *   sent or received over the Datachannel connection for the data transfer session.
+ *   <small>Used only in <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a> when
+ *   parameter <code>sendChunksAsBinary</code> value is <code>true</code>.</small>
+ * @param {String} STRING        <small>Value <code>"string"</code></small>
+ *   The value of data transfer data type when string data chunks are
+ *   sent or received over the Datachannel connection for the data transfer session.
+ *   <small>Used only in <a href="#method_sendURLData"><code>sendURLData()</code> method</a>.</small>
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -16,7 +28,8 @@
 Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
   BINARY_STRING: 'binaryString',
   ARRAY_BUFFER: 'arrayBuffer',
-  BLOB: 'blob'
+  BLOB: 'blob',
+  STRING: 'string'
 };
 
 /**

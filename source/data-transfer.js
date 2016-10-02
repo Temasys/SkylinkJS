@@ -221,6 +221,8 @@ Skylink.prototype._dataTransfersTimeout = {};
  * - When provided as an Array, it will start uploading data transfers with all connections
  *   with all the Peer IDs provided.
  * - When not provided, it will start uploading data transfers with all the currently connected Peers in the Room.
+ * @param {Boolean} [sendChunksAsBinary=false] The flag if data transfer binary data chunks should not be
+ *   encoded as Base64 string during data transfers.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_dataTransferState">
@@ -228,6 +230,8 @@ Skylink.prototype._dataTransfersTimeout = {};
  *   as <code>UPLOAD_COMPLETED</code> for all Peers targeted for request success.</small>
  * @param {JSON} callback.error The error result in request.
  *   <small>Defined as <code>null</code> when there are no errors in request</small>
+ * @param {String} callback.error.transferId The data transfer ID.
+ *   <small>Defined as <code>null</code> when <code>sendBlobData()</code> fails to start data transfer.</small>
  * @param {Array} callback.error.listOfPeers The list Peer IDs targeted for the data transfer.
  * @param {JSON} callback.error.transferErrors The list of data transfer errors.
  * @param {Error|String} callback.error.transferErrors.#peerId The data transfer error associated
@@ -239,6 +243,7 @@ Skylink.prototype._dataTransfersTimeout = {};
  *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
  * @param {JSON} callback.success The success result in request.
  *   <small>Defined as <code>null</code> when there are errors in request</small>
+ * @param {String} callback.success.transferId The data transfer ID.
  * @param {Array} callback.success.listOfPeers The list Peer IDs targeted for the data transfer.
  * @param {JSON} callback.success.transferInfo The data transfer information.
  *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
@@ -371,7 +376,7 @@ Skylink.prototype._dataTransfersTimeout = {};
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback) {
+Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunksAsBinary, callback) {
   var listOfPeers = Object.keys(this._peerConnections);
   var isPrivate = false;
   var dataInfo = {};
@@ -834,13 +839,41 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
 
 /**
  * <blockquote class="info">
- *   Currently, the Android and iOS SDKs do not support this type of data transfer.
+ *   Currently, the Android and iOS SDKs do not support this type of data transfer session.
  * </blockquote>
  * Function that starts an uploading string data transfer from User to Peers.
  * @method sendURLData
  * @param {String} data The data string to transfer to Peer.
- *   <small>Parameter signature follows <a href="#method_sendBlobData">
- *   <code>sendBlobData()</code> method</a> except <code>data</code> parameter.</small>
+ * @param {Number} [timeout=60] The timeout to wait for response from Peer.
+ * @param {String|Array} [targetPeerId] The target Peer ID to start data transfer with.
+ * - When provided as an Array, it will start uploading data transfers with all connections
+ *   with all the Peer IDs provided.
+ * - When not provided, it will start uploading data transfers with all the currently connected Peers in the Room.
+ * @param {Function} [callback] The callback function fired when request has completed.
+ *   <small>Function parameters signature is <code>function (error, success)</code></small>
+ *   <small>Function request completion is determined by the <a href="#event_dataTransferState">
+ *   <code>dataTransferState</code> event</a> triggering <code>state</code> parameter payload
+ *   as <code>UPLOAD_COMPLETED</code> for all Peers targeted for request success.</small>
+ * @param {JSON} callback.error The error result in request.
+ *   <small>Defined as <code>null</code> when there are no errors in request</small>
+ * @param {String} callback.error.transferId The data transfer ID.
+ *   <small>Defined as <code>null</code> when <code>sendURLData()</code> fails to start data transfer.</small>
+ * @param {Array} callback.error.listOfPeers The list Peer IDs targeted for the data transfer.
+ * @param {JSON} callback.error.transferErrors The list of data transfer errors.
+ * @param {Error|String} callback.error.transferErrors.#peerId The data transfer error associated
+ *   with the Peer ID defined in <code>#peerId</code> property.
+ *   <small>If <code>#peerId</code> value is <code>"self"</code>, it means that it is the error when there
+ *   are no Peer connections to start data transfer with.</small>
+ * @param {JSON} callback.error.transferInfo The data transfer information.
+ *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
+ *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
+ * @param {JSON} callback.success The success result in request.
+ *   <small>Defined as <code>null</code> when there are errors in request</small>
+ * @param {String} callback.success.transferId The data transfer ID.
+ * @param {Array} callback.success.listOfPeers The list Peer IDs targeted for the data transfer.
+ * @param {JSON} callback.success.transferInfo The data transfer information.
+ *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
+ *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
  * @trigger <small>Event sequence follows <a href="#method_sendBlobData">
  * <code>sendBlobData()</code> method</a>.</small>
  * @example
