@@ -56,6 +56,17 @@ Skylink.prototype._CHUNK_FILE_SIZE = 49152;
 Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 12288;
 
 /**
+ * Stores the data chunk size for binary Blob transfers.
+ * @attribute _BINARY_FILE_SIZE
+ * @type Number
+ * @private
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._BINARY_FILE_SIZE = 65456;
+
+/**
  * Stores the data chunk size for data URI string transfers.
  * @attribute _CHUNK_DATAURL_SIZE
  * @type Number
