@@ -179,24 +179,3 @@ Skylink.prototype._chunkDataURL = function(dataURL, chunkSize) {
 
   return dataURLArray;
 };
-
-/**
- * Function that assembles the data string chunks into a large string.
- * @method _assembleDataURL
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._assembleDataURL = function(dataURLArray) {
-  var outputStr = '';
-
-  for (var i = 0; i < dataURLArray.length; i++) {
-    try {
-      outputStr += dataURLArray[i];
-    } catch (error) {
-      console.error('Malformed', i, dataURLArray[i]);
-    }
-  }
-
-  return outputStr;
-};
