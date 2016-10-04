@@ -138,6 +138,10 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
     $('#' + transferId).find('span').html(transferInfo.percentage + ' %');
     break;
   case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_COMPLETED :
+    if ($('#' + transferId).find('.' + peerId).width() < 1) {
+      $('#' + transferId).append('<tr><td>' + displayName +
+        '</td><td class="' + peerId + '">0%</td></tr>');
+    }
     var displayName = Demo.Skylink.getPeerInfo(peerId).userData;
     Demo.Methods.displayChatMessage(displayName, 'File received: ' + transferInfo.name);
     $('#' + transferId).find('.' + peerId).html('&#10003;');
