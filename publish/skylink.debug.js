@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Tue Oct 04 2016 21:29:43 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Tue Oct 04 2016 21:32:31 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8252,7 +8252,7 @@ Skylink.prototype._trigger = function(eventName) {
         if(once[j][0].apply(this, args) === false) {
           break;
         }
-        if (!once[j][2]) {
+        if (once[j] && !once[j][2]) {
           log.log([null, 'Event', eventName, 'Removing event after firing once']);
           once.splice(j, 1);
           //After removing current element, the next element should be element of the same index
