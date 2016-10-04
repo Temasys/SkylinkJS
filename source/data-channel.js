@@ -263,7 +263,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp) {
+Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp, doNotConvert) {
   var self = this;
 
   // Set it as "main" (MESSAGING) Datachannel
@@ -303,7 +303,11 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
 
   log.debug([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Sending message ->'], data);
 
-  self._dataChannels[peerId][channelProp].channel.send(typeof data === 'object' ? JSON.stringify(data) : data);
+  if (doNotConvert) {
+    self._dataChannels[peerId][channelProp].channel.send(data);
+  } else {
+    self._dataChannels[peerId][channelProp].channel.send(typeof data === 'object' ? JSON.stringify(data) : data);
+  }
 };
 
 /**

@@ -115,6 +115,26 @@ Skylink.prototype._blobToBase64 = function(data, callback) {
 };
 
 /**
+ * Function that converts a Blob object into ArrayBuffer object.
+ * @method _blobToArrayBuffer
+ * @private
+ * @for Skylink
+ * @since 0.1.0
+ */
+Skylink.prototype._blobToArrayBuffer = function(data, callback) {
+  var fileReader = new FileReader();
+  fileReader.onload = function() {
+    // Load Blob as dataurl base64 string
+    if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1) {
+      callback(new Int8Array(fileReader.result));
+    } else {
+      callback(fileReader.result);
+    }
+  };
+  fileReader.readAsArrayBuffer(data);
+};
+
+/**
  * Function that chunks Blob object based on the data chunk size provided.
  * If provided Blob object size is lesser than or equals to the chunk size, it should return an array
  *   of length of <code>1</code>.

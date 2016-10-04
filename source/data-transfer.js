@@ -397,6 +397,20 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
     transferInfo.chunkSize = self._MOZ_CHUNK_FILE_SIZE;
   }
 
+  if (self._hasMCU && transferInfo.chunkType === self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER) {
+    log.warn('Binary data chunks transfer is not yet supported with MCU environment. ' +
+      'Fallbacking to binary string data chunks transfer.');
+    transferInfo.chunkType = self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING;
+    transferInfo.chunkSize = self._CHUNK_FILE_SIZE;
+  }
+
+  // Use BLOB for Firefox
+  if (transferInfo.chunkType === self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER &&
+    window.webrtcDetectedBrowser === 'firefox') {
+    transferInfo.chunkType = self.DATA_TRANSFER_DATA_TYPE.BLOB;
+    transferInfo.chunkSize = self._MOZ_CHUNK_FILE_SIZE;
+  }
+
   // Start checking if data transfer can start
   if (!(data && typeof data === 'object' && data instanceof Blob)) {
     emitErrorBeforeDataTransferFn('Provided data is not a Blob data');
@@ -1264,36 +1278,36 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
     try {
       data = JSON.parse(rawData);
 
-      log.debug([peerId, 'RTCDataChannel', channelName, 'Received protocol message ->'], data);
+      log.debug([peerId, 'RTCDataChannel', channelProp, 'Received protocol message ->'], data);
 
       switch (data.type) {
         case this._DC_PROTOCOL_TYPE.WRQ:
           this._WRQProtocolHandler(peerId, data, channelProp);
           break;
         case this._DC_PROTOCOL_TYPE.ACK:
-          this._ACKProtocolHandler(peerId, data, channelName);
+          this._ACKProtocolHandler(peerId, data, channelProp);
           break;
         case this._DC_PROTOCOL_TYPE.ERROR:
-          this._ERRORProtocolHandler(peerId, data, channelName);
+          this._ERRORProtocolHandler(peerId, data, channelProp);
           break;
         case this._DC_PROTOCOL_TYPE.CANCEL:
-          this._CANCELProtocolHandler(peerId, data, channelName);
+          this._CANCELProtocolHandler(peerId, data, channelProp);
           break;
         case this._DC_PROTOCOL_TYPE.MESSAGE:
-          this._MESSAGEProtocolHandler(peerId, data, channelName);
+          this._MESSAGEProtocolHandler(peerId, data, channelProp);
           break;
         default:
-          log.warn([peerId, 'RTCDataChannel', channelName, 'Discarded unknown protocol message ->'], data);
+          log.warn([peerId, 'RTCDataChannel', channelProp, 'Discarded unknown protocol message ->'], data);
       }
 
     } catch (error) {
       if (rawData.indexOf('{') > -1 && rawData.indexOf('}') > 0) {
-        log.error([peerId, 'RTCDataChannel', channelName, 'Received error ->'], error);
+        log.error([peerId, 'RTCDataChannel', channelProp, 'Received error ->'], error);
         throw error;
       }
-      log.debug([peerId, 'RTCDataChannel', channelName, 'Received data chunk']);
+      log.debug([peerId, 'RTCDataChannel', channelProp, 'Received data chunk']);
 
-      this._DATAProtocolHandler(peerId, data, this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, channelName);
+      this._DATAProtocolHandler(peerId, data, this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, channelProp);
     }
 
   } else {
@@ -1302,12 +1316,12 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
 
     if (rawData.constructor && rawData.constructor.name === 'Array') {
       // Need to re-parse on some browsers
-      data = new Int8Array(dataString);
+      data = new Int8Array(rawData);
     }
 
-    log.debug([peerId, 'RTCDataChannel', channelName, 'Received binary data chunk']);
+    log.debug([peerId, 'RTCDataChannel', channelProp, 'Received binary data chunk']);
 
-    this._DATAProtocolHandler(peerId, data, chunkDataType, channelName);
+    this._DATAProtocolHandler(peerId, data, chunkDataType, channelProp);
   }
 };
 
@@ -1507,12 +1521,22 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelProp) {
         self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_STARTED, transferId, evtPeerId,
           self._getTransferInfo(transferId, peerId, true, false, 0), null);
       });
+    } else if (data.ackN === self._dataTransfers[transferId].chunks.length) {
+      delete self._dataTransfers[transferId].sessions[peerId];
+
+      if (self._dataChannels[peerId][channelProp]) {
+        self._dataChannels[peerId][channelProp].transferId = null;
+
+        if (channelProp !== 'main') {
+          self._closeDataChannel(peerId, channelProp);
+        }
+      }
+      return;
     }
 
     var uploadFn = function (chunk) {
-      self._sendMessageToDataChannel(peerId, chunk, channelProp);
+      self._sendMessageToDataChannel(peerId, chunk, channelProp, true);
 
-      // Upload completed
       if (data.ackN === (self._dataTransfers[transferId].chunks.length - 1)) {
         emitEventFn(function (evtPeerId) {
           self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, transferId, evtPeerId,
@@ -1520,16 +1544,6 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelProp) {
           self._trigger('incomingData', self._getTransferData(transferId), transferId, evtPeerId,
             self._getTransferInfo(transferId, peerId, false, false, false), true);
         });
-
-        delete self._dataTransfers[transferId].sessions[peerId];
-
-        if (self._dataChannels[peerId][channelProp]) {
-          self._dataChannels[peerId][channelProp].transferId = null;
-
-          if (channelProp !== 'main') {
-            self._closeDataChannel(peerId, channelProp);
-          }
-        }
       } else {
         emitEventFn(function (evtPeerId) {
           self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOADING, transferId, evtPeerId,
@@ -1542,6 +1556,8 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelProp) {
 
     if (self._dataTransfers[transferId].chunkType === self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING) {
       self._blobToBase64(self._dataTransfers[transferId].chunks[data.ackN], uploadFn);
+    } else if (self._dataTransfers[transferId].chunkType === self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER) {
+      self._blobToArrayBuffer(self._dataTransfers[transferId].chunks[data.ackN], uploadFn);
     } else {
       uploadFn(self._dataTransfers[transferId].chunks[data.ackN]);
     }
@@ -1710,7 +1726,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, data, chunkType, chann
   }
 
   if (channelProp === 'main') {
-    transferId = self._dataTransfers[transferId].main.transferId;
+    transferId = self._dataChannels[peerId].main.transferId;
   }
 
   if (!(self._dataTransfers[transferId] && self._dataTransfers[transferId].sessions[peerId])) {
