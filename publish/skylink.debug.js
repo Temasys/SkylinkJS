@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Oct 05 2016 00:34:12 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Oct 05 2016 01:09:06 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1149,6 +1149,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
   }
 
   transferInfo.name = data.name || null;
+  transferInfo.mimeType = data.type || null;
 
   if (data.size < 1) {
     emitErrorBeforeDataTransferFn('Provided data is not a valid Blob data.');

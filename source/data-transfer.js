@@ -418,6 +418,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
   }
 
   transferInfo.name = data.name || null;
+  transferInfo.mimeType = data.type || null;
 
   if (data.size < 1) {
     emitErrorBeforeDataTransferFn('Provided data is not a valid Blob data.');
