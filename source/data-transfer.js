@@ -1147,8 +1147,13 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
     return;
   }
 
-  var agentName = (this._peerInformations[peerId].agent || {}).name || '';
+  var agentName = (self._peerInformations[peerId].agent || {}).name || '';
   var requireInterop = self._INTEROP_MULTI_TRANSFERS.indexOf(agentName) > -1;
+
+  if (requireInterop && self._dataTransfers[transferId].dataType === self.DATA_TRANSFER_SESSION_TYPE.DATA_URL) {
+    returnErrorBeforeTransferFn('Unable to start data transfer as Peer do not support DATA_URL type of data transfers');
+    return;
+  }
 
   if (peerId !== 'MCU' && self._hasMCU) {
     channelProp = requireInterop ? 'main' : transferId;
