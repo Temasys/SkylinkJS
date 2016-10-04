@@ -47,13 +47,14 @@ Demo.Methods.displayChatItemHTML = function (peerId, timestamp, content, isPriva
   else
     Seconds = timestamp.getSeconds();
 
-  return '<div class="chat-item list-group-item active">' +
+  return '<div ' + (typeof isPrivate === 'string' ? 'id="file-' + isPrivate + '"' : '') +
+    ' class="chat-item list-group-item active">' +
     '<p class="list-group-item-heading">' + '<b>' + peerId + '</b>' +
     '<em title="' + timestamp.toString() + '">' + Hours +
     ':' + Minutes + ':' + Seconds +
     '</em></p>' + '<p class="list-group-item-text">' +
-    (isPrivate ? '<i>[pvt msg] ' : '') + content +
-    (isPrivate ? '</i>' : '') + '</p></div>';
+    (isPrivate === true ? '<i>[pvt msg] ' : '') + content +
+    (isPrivate === true ? '</i>' : '') + '</p></div>';
 };
 
 Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
@@ -88,9 +89,7 @@ Demo.Skylink.on('incomingDataRequest', function (transferId, peerId, transferInf
   }
 })
 Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transferInfo, error){
-  transferInfo = transferInfo || {};
-
-  if (transferInfo.dataType !== 'blob') {
+  if (transferInfo.dataType !== Demo.Skylink.DATA_TRANSFER_SESSION_TYPE.BLOB) {
     return;
   }
 
@@ -101,19 +100,27 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
     Demo.Skylink.acceptDataTransfer(peerId, transferId, result);
     break;
   case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_STARTED :
+    if (document.getElementById('file-' + transferId)) {
+      $('#dV0jAXh88hkY78X1AANY_1475589480912').append('<tbody class="' + peerId + '"></tbody>');
+      return;
+    }
     var displayName = Demo.Skylink.getUserData();
     transferInfo.transferId = transferId;
     transferInfo.isUpload = true;
     transferInfo.data = URL.createObjectURL(transferInfo.data);
-    Demo.Methods.displayChatMessage(displayName, transferInfo);
+    Demo.Methods.displayChatMessage(displayName, transferInfo, transferId);
     Demo.Methods.displayChatMessage(displayName, 'File sent: ' + transferInfo.name);
     break;
   case Demo.Skylink.DATA_TRANSFER_STATE.DOWNLOAD_STARTED :
+    if (document.getElementById('file-' + transferId)) {
+      $('#dV0jAXh88hkY78X1AANY_1475589480912').append('<tbody class="' + peerId + '"></tbody>');
+      return;
+    }
     var displayName = Demo.Skylink.getPeerInfo(transferInfo.senderPeerId).userData;
     transferInfo.transferId = transferId;
     transferInfo.data = '#';
     transferInfo.isUpload = false;
-    Demo.Methods.displayChatMessage(displayName, transferInfo);
+    Demo.Methods.displayChatMessage(displayName, transferInfo, transferId);
     Demo.Methods.displayChatMessage(displayName, 'File sent: ' + transferInfo.name);
     break;
   case Demo.Skylink.DATA_TRANSFER_STATE.UPLOADING :
