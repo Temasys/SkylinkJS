@@ -15,7 +15,7 @@ var _peerId = null;
 
 var selectedPeers = [];
 
-Demo.Skylink.setLogLevel(Demo.Skylink.LOG_LEVEL.DEBUG);
+//Demo.Skylink.setLogLevel(Demo.Skylink.LOG_LEVEL.DEBUG);
 
 Demo.Methods.displayFileItemHTML = function (content) {
   return '<p>' + content.name + '<small style="float:right;color:#aaa;">' + content.size + ' B</small></p>' +
@@ -89,6 +89,7 @@ Demo.Skylink.on('incomingDataRequest', function (transferId, peerId, transferInf
   }
 })
 Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transferInfo, error){
+  console.info('state', state, transferId, peerId, transferInfo, error);
   if (transferInfo.dataType !== Demo.Skylink.DATA_TRANSFER_SESSION_TYPE.BLOB) {
     return;
   }

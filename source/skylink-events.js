@@ -451,11 +451,16 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.DATA_TRANSFER_SESSION_TYPE]
    * @param {String} transferInfo.chunkType The data transfer type of data chunk being used to send to Peer for transfers.
    *   <small>For <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a> data transfers, the
-   *   initial data chunks value may change from <code>BINARY_STRING</code> to <code>ARRAY_BUFFER</code> or
-   *   <code>BLOB</code> depending on the received data chunk type received.</small>
+   *   initial data chunks value may change depending on the currently received data chunk type or the
+   *   agent supported sending type of data chunks.</small>
+   *   <small>For <a href="#method_sendURLData"><code>sendURLData()</code> method</a> data transfers, it is
+   *   <code>STRING</code> always.</small>
    *   [Rel: Skylink.DATA_TRANSFER_DATA_TYPE]
+   * @param {String} [transferInfo.mimeType] The data transfer data object MIME type.
+   *   <small>Defined only when <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>
+   *   data object sent MIME type information is defined.</small>
    * @param {Number} transferInfo.chunkSize The data transfer data chunk size.
-   * @param {Number} transferInfo.percentage The data transfer uploading / downloading transfer completion percentage.
+   * @param {Number} transferInfo.percentage The data transfer percentage of completion progress.
    * @param {Number} transferInfo.timeout The flag if message is targeted or not, basing
    *   off the <code>targetPeerId</code> parameter being defined in
    *   <a href="#method_sendURLData"><code>sendURLData()</code> method</a> or
@@ -467,7 +472,8 @@ Skylink.prototype._EVENTS = {
    * @param {String} transferInfo.direction The data transfer direction.
    *   [Rel: Skylink.DATA_TRANSFER_TYPE]
    * @param {JSON} [error] The error result.
-   *   <small>Defined only when <code>state</code> payload is <code>ERROR</code> or <code>CANCEL</code>.</small>
+   *   <small>Defined only when <code>state</code> payload is <code>ERROR</code>, <code>CANCEL</code>
+   *   <code>REJECTED</code> or <code>USER_REJECTED</code>.</small>
    * @param {Error|String} error.message The error object.
    * @param {String} error.transferType The data transfer direction from where the error occurred.
    *   [Rel: Skylink.DATA_TRANSFER_TYPE]

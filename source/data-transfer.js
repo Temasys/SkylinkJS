@@ -158,7 +158,9 @@ Skylink.prototype._dataTransfers = {};
  * - When provided as an Array, it will start uploading data transfers with all connections
  *   with all the Peer IDs provided.
  * - When not provided, it will start uploading data transfers with all the currently connected Peers in the Room.
- * @param {Boolean} [sendChunksAsBinary=false] The flag if data transfer binary data chunks should not be
+ * @param {Boolean} [sendChunksAsBinary=false] <blockquote class="info">
+ *   Note that this is currently not supported during a MCU connected environment.
+ * </blockquote> The flag if data transfer binary data chunks should not be
  *   encoded as Base64 string during data transfers.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
@@ -177,14 +179,16 @@ Skylink.prototype._dataTransfers = {};
  *   are no Peer connections to start data transfer with.</small>
  * @param {JSON} callback.error.transferInfo The data transfer information.
  *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
- *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
+ *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> except without the
+ *   <code>percentage</code> and <code>data</code> property.</small>
  * @param {JSON} callback.success The success result in request.
  *   <small>Defined as <code>null</code> when there are errors in request</small>
  * @param {String} callback.success.transferId The data transfer ID.
  * @param {Array} callback.success.listOfPeers The list Peer IDs targeted for the data transfer.
  * @param {JSON} callback.success.transferInfo The data transfer information.
  *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
- *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
+ *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> except without the
+ *   <code>percentage</code> property and <code>data</code>.</small>
  * @trigger <ol class="desc-seq">
  *   <li>Checks if should open a new Datachannel <ol>
  *   <li>If Peer connection has closed: <small>This can be checked with <a href="#event_peerConnectionState">
@@ -483,14 +487,16 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
  *   are no Peer connections to start data transfer with.</small>
  * @param {JSON} callback.error.transferInfo The data transfer information.
  *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
- *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
+ *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> except without the
+ *   <code>percentage</code> property and <code>data</code>.</small>
  * @param {JSON} callback.success The success result in request.
  *   <small>Defined as <code>null</code> when there are errors in request</small>
  * @param {String} callback.success.transferId The data transfer ID.
  * @param {Array} callback.success.listOfPeers The list Peer IDs targeted for the data transfer.
  * @param {JSON} callback.success.transferInfo The data transfer information.
  *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
- *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
+ *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> except without the
+ *   <code>percentage</code> property and <code>data</code>.</small>
  * @trigger <small>Event sequence follows <a href="#method_sendBlobData">
  * <code>sendBlobData()</code> method</a>.</small>
  * @example
@@ -791,11 +797,20 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
     self._dataChannels[peerId][transferId].transferId = null;
 
     self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.USER_REJECTED, transferId, peerId,
-      self._getTransferInfo(transferId, peerId, true, false, false), null);
+      self._getTransferInfo(transferId, peerId, true, false, false), {
+      message: new Error('Data transfer terminated as User has rejected data transfer request.'),
+      transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD
+    });
+
+    delete self._dataTransfers[transferId];
   }
 };
 
 /**
+ * <blockquote class="info">
+ *   Note that invoking this method during in MCU connected environment will result in all Peers
+ *   related to the data transfer ID to be terminated.
+ * </blockquote>
  * Function that terminates a currently uploading / downloading data transfer from / to Peer.
  * @method cancelDataTransfer
  * @param {String} peerId The Peer ID.
