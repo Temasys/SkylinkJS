@@ -123,7 +123,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
 
   if (dataChannel && typeof dataChannel === 'object') {
     channelName = dataChannel.label;
-  
+
   } else if (typeof dataChannel === 'string') {
     channelName = dataChannel;
     dataChannel = null;
@@ -222,7 +222,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
       if (dataChannel.readyState === self.DATA_CHANNEL_STATE.CLOSED ||
         hasTriggeredClose || timeBlockAfterClosing === 5) {
         clearInterval(onFFClosed);
-        
+
         if (!hasTriggeredClose) {
           hasTriggeredClose = true;
           onCloseHandlerFn();
@@ -250,7 +250,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
     self._dataChannels[peerId][channelName] = {
       channelName: channelName,
       channelType: channelType,
-      transferId: null,
+      transferId: channelName,
       channel: dataChannel
     };
   }
