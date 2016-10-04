@@ -826,53 +826,95 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
  */
 Skylink.prototype.cancelBlobTransfer =
 Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
+  var self = this;
+
   if (typeof transferId !== 'string' && typeof peerId !== 'string') {
     log.error([peerId, 'RTCDataChannel', transferId, 'Aborting cancel data transfer as ' +
       'data transfer ID or peer ID is not provided']);
     return;
   }
 
-  if (!this._dataChannels[peerId]) {
-    log.error([peerId, 'RTCDataChannel', transferId, 'Aborting cancel data transfer as ' +
+  var targetPeerId = peerId;
+
+  if (self._hasMCU) {
+    targetPeerId = 'MCU';
+
+    log.warn([targetPeerId, 'RTCDataChannel', transferId, 'Aborting all data transfers to Peers']);
+  }
+
+  if (!self._dataChannels[targetPeerId]) {
+    log.error([targetPeerId, 'RTCDataChannel', transferId, 'Aborting cancel data transfer as ' +
       'Peer does not have any Datachannel connections']);
     return;
   }
 
-  if (!this._dataTransfers[transferId]) {
-    log.error([peerId, 'RTCDataChannel', transferId, 'Aborting cancel data transfer as ' +
+  if (!self._dataTransfers[transferId]) {
+    log.error([targetPeerId, 'RTCDataChannel', transferId, 'Aborting cancel data transfer as ' +
       'invalid transfer ID is provided']);
     return;
   }
 
-  var channelProp = 'main';
+  var emitEventFn = function (cb) {
+    if (self._hasMCU) {
+      var peers = Object.keys(self._dataTransfers[transferId].peers.main).concat(
+        Object.keys(self._dataTransfers[transferId].peers[transferId]));
+      for (var i = 0; i < peers.length; i++) {
+        cb(peers[i]);
+      }
+    } else {
+      cb(targetPeerId);
+    }
+  };
 
-  if (this._dataChannels[peerId][transferId]) {
-    channelProp = transferId;
+  log.debug([targetPeerId, 'RTCDataChannel', transferId, 'Canceling data transfer ...']);
+
+  if (self._hasMCU) {
+    if (Object.keys(self._dataTransfers[transferId].peers.main).length > 0) {
+      self._sendMessageToDataChannel(targetPeerId, {
+        type: this._DC_PROTOCOL_TYPE.CANCEL,
+        sender: this._user.sid,
+        content: 'Peer cancelled download transfer',
+        ackN: 0
+      }, 'main');
+    }
+
+    if (Object.keys(self._dataTransfers[transferId].peers[transferId]).length > 0) {
+      self._sendMessageToDataChannel(targetPeerId, {
+        type: this._DC_PROTOCOL_TYPE.CANCEL,
+        sender: this._user.sid,
+        content: 'Peer cancelled download transfer',
+        ackN: 0
+      }, transferId);
+    }
+
+  } else {
+    var channelProp = 'main';
+
+    if (self._dataChannels[targetPeerId][transferId]) {
+      channelProp = transferId;
+    }
+
+    self._sendMessageToDataChannel(targetPeerId, {
+      type: this._DC_PROTOCOL_TYPE.CANCEL,
+      sender: this._user.sid,
+      content: 'Peer cancelled download transfer',
+      ackN: 0
+    }, channelProp);
   }
 
-  log.debug([peerId, 'RTCDataChannel', transferId, 'Canceling data transfer ...']);
-
-  this._sendMessageToDataChannel(peerId, {
-    type: this._DC_PROTOCOL_TYPE.CANCEL,
-    sender: this._user.sid,
-    content: 'Peer cancelled download transfer',
-    ackN: 0
-  }, channelProp);
-
-  this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL,
-    data.transferId, peerId, {
-      name: data.name,
-      size: data.size,
-      percentage: data.percentage,
-      data: null,
-      dataType: data.dataType,
-      senderPeerId: data.senderPeerId,
-      timeout: data.timeout,
-      isPrivate: data.isPrivate
-  }, {
-    transferType: this._dataTransfers[transferId].direction,
-    message: 'User cancelled download transfer'
+  emitEventFn(function (evtPeerId) {
+    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL, transferId, evtPeerId,
+      this._getTransferInfo(transferId, targetPeerId, false, false, false), {
+      transferType: this._dataTransfers[transferId].direction,
+      message: new Error('User cancelled download transfer')
+    });
   });
+
+  if (self._dataTransfers[transferId].direction === self.DATA_TRANSFER_TYPE.DOWNLOAD || self._hasMCU) {
+    delete self._dataTransfers[transferId];
+  } else {
+    delete self._dataTransfers[transferId].sessions[targetPeerId];
+  }
 };
 
 /**
