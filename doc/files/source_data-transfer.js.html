@@ -282,15 +282,19 @@ Skylink.prototype._dataTransfers = {};
  *   &lt;code&gt;percentage&lt;/code&gt; property and &lt;code&gt;data&lt;/code&gt;.&lt;/small&gt;
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
  *   &lt;li&gt;Checks if should open a new Datachannel &lt;ol&gt;
+ *   &lt;li&gt;If Peer connection or session does not exists: &lt;ol&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; step and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
  *   &lt;li&gt;If Peer connection has closed: &lt;small&gt;This can be checked with &lt;a href=&quot;#event_peerConnectionState&quot;&gt;
  *   &lt;code&gt;peerConnectionState&lt;/code&gt; event&lt;/a&gt; triggering parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;CLOSED&lt;/code&gt;
  *   for Peer.&lt;/small&gt; &lt;ol&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; step and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
  *   &lt;li&gt;If Peer supports simultaneous data transfer, open new Datachannel: &lt;ol&gt;
  *   &lt;li&gt;&lt;a href=&quot;#event_dataChannelState&quot;&gt;&lt;code&gt;dataChannelState&lt;/code&gt; event&lt;/a&gt; triggers parameter
  *   payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;CONNECTING&lt;/code&gt; and &lt;code&gt;channelType&lt;/code&gt; as &lt;code&gt;DATA&lt;/code&gt;.&lt;/li&gt;
- *   &lt;li&gt;If Datachannel has opened successfully: &lt;ol&gt;
+ *   &lt;li&gt;If Datachannel has been created and opened successfully: &lt;ol&gt;
  *   &lt;li&gt; &lt;a href=&quot;#event_dataChannelState&quot;&gt;&lt;code&gt;dataChannelState&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
- *   &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;OPEN&lt;/code&gt; and &lt;code&gt;channelType&lt;/code&gt; as &lt;code&gt;DATA&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;OPEN&lt;/code&gt; and &lt;code&gt;channelType&lt;/code&gt; as &lt;code&gt;DATA&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;Else: &lt;ol&gt;&lt;li&gt;&lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt; triggers
+ *   parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;ERROR&lt;/code&gt;.&lt;/li&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; step and
+ *   return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
  *   &lt;li&gt;Else: &lt;ol&gt;&lt;li&gt;If Peer connection Datachannel has not been opened &lt;small&gt;This can be checked with
  *   &lt;a href=&quot;#event_dataChannelState&quot;&gt;&lt;code&gt;dataChannelState&lt;/code&gt; event&lt;/a&gt; triggering parameter
  *   payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;OPEN&lt;/code&gt; and &lt;code&gt;channelType&lt;/code&gt; as
@@ -310,7 +314,7 @@ Skylink.prototype._dataTransfers = {};
  *   &lt;li&gt;If Peer / User invokes &lt;a href=&quot;#method_cancelDataTransfer&quot;&gt;&lt;code&gt;cancelDataTransfer()&lt;/code&gt; method&lt;/a&gt;: &lt;ol&gt;
  *   &lt;li&gt;&lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt; triggers parameter
  *   &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;CANCEL&lt;/code&gt;.&lt;/li&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; step and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
- *   &lt;li&gt;If data transfer has errors: &lt;ol&gt;
+ *   &lt;li&gt;If data transfer has timeout errors: &lt;ol&gt;
  *   &lt;li&gt;&lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt; triggers parameter
  *   &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;ERROR&lt;/code&gt;.&lt;/li&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; step and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
  *   &lt;li&gt;If Datachannel has closed abruptly during data transfer:
@@ -1038,6 +1042,8 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
  *  &lt;a href=&quot;#event_dataChannelState&quot;&gt;&lt;code&gt;dataChannelState&lt;/code&gt; event&lt;/a&gt;
  *  triggering parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;OPEN&lt;/code&gt; and
  *  &lt;code&gt;channelType&lt;/code&gt; as &lt;code&gt;MESSAGING&lt;/code&gt; for Peer.&lt;/small&gt; &lt;ol&gt;
+ *  &lt;li&gt;&lt;a href=&quot;#event_dataChannelState&quot;&gt;&lt;code&gt;dataChannelState&lt;/code&gt; event&lt;/a&gt; triggers
+ *  parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;SEND_MESSAGE_ERROR&lt;/code&gt;.&lt;/li&gt;
  *  &lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; step and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
  *  &lt;li&gt;&lt;a href=&quot;#event_incomingMessage&quot;&gt;&lt;code&gt;incomingMessage&lt;/code&gt; event&lt;/a&gt; triggers
  *  parameter payload &lt;code&gt;message.isDataChannel&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt; and
@@ -1389,7 +1395,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
         sendWRQFn();
         return false;
       }
-      return [self.DATA_CHANNEL_STATE.ERROR, self.DATA_CHANNEL_STATE.CLOSING,
+      return [self.DATA_CHANNEL_STATE.CREATE_ERROR, self.DATA_CHANNEL_STATE.ERROR, self.DATA_CHANNEL_STATE.CLOSING,
         self.DATA_CHANNEL_STATE.CLOSED].indexOf(state) &gt; -1;
     }
   });
