@@ -67,6 +67,8 @@ Skylink.prototype.DATA_TRANSFER_SESSION_TYPE = {
  *   <a href="#method_cancelDataTransfer"><code>cancelDataTransfer()</code> method</a>.</small>
  * @param {String} REJECTED           <small>Value <code>"rejected"</code></small>
  *   The value of the state when upload data transfer request to Peer has been rejected and terminated.
+ * @param {String} USER_REJECTED      <small>Value <code>"userRejected"</code></small>
+ *   The value of the state when User rejected and terminated upload data transfer request from Peer.
  * @param {String} UPLOADING          <small>Value <code>"uploading"</code></small>
  *   The value of the state when data transfer is uploading data to Peer.
  * @param {String} DOWNLOADING        <small>Value <code>"downloading"</code></small>
@@ -94,7 +96,8 @@ Skylink.prototype.DATA_TRANSFER_STATE = {
   UPLOADING: 'uploading',
   DOWNLOADING: 'downloading',
   UPLOAD_COMPLETED: 'uploadCompleted',
-  DOWNLOAD_COMPLETED: 'downloadCompleted'
+  DOWNLOAD_COMPLETED: 'downloadCompleted',
+  USER_REJECTED: 'userRejected'
 };
 
 /**
@@ -1488,37 +1491,41 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelProp) {
       });
     }
 
+    var uploadFn = function (chunk) {
+      self._sendMessageToDataChannel(peerId, chunk, channelProp);
+
+      // Upload completed
+      if (data.ackN === (self._dataTransfers[transferId].chunks.length - 1)) {
+        emitEventFn(function (evtPeerId) {
+          self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, transferId, evtPeerId,
+            self._getTransferInfo(transferId, peerId, true, false, 100), null);
+          self._trigger('incomingData', self._getTransferData(transferId), transferId, evtPeerId,
+            self._getTransferInfo(transferId, peerId, false, false, false), true);
+        });
+
+        delete self._dataTransfers[transferId].sessions[peerId];
+
+        if (self._dataChannels[peerId][channelProp]) {
+          self._dataChannels[peerId][channelProp].transferId = null;
+
+          if (channelProp !== 'main') {
+            self._closeDataChannel(peerId, channelProp);
+          }
+        }
+      } else {
+        emitEventFn(function (evtPeerId) {
+          self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOADING, transferId, evtPeerId,
+            self._getTransferInfo(transferId, peerId, true, false, false), null);
+        });
+      }
+    };
+
     self._dataTransfers[transferId].sessions[peerId].ackN = data.ackN;
 
     if (self._dataTransfers[transferId].chunkType === self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING) {
-      self._blobToBase64(self._dataTransfers[transferId].chunks[data.ackN], function (base64StrChunk) {
-        self._sendMessageToDataChannel(peerId, base64StrChunk, channelProp);
-      });
+      self._blobToBase64(self._dataTransfers[transferId].chunks[data.ackN], uploadFn);
     } else {
-      self._sendMessageToDataChannel(peerId, self._dataTransfers[transferId].chunks[data.ackN], channelProp);
-    }
-
-    // Upload completed
-    if (data.ackN === (self._dataTransfers[transferId].chunks.length - 1)) {
-      emitEventFn(function (evtPeerId) {
-        self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, transferId, evtPeerId,
-          self._getTransferInfo(transferId, peerId, true, false, 100), null);
-        self._trigger('incomingData', self._getTransferData(transferId), transferId, evtPeerId,
-          self._getTransferInfo(transferId, peerId, false, false, false), true);
-      });
-
-      self._dataChannels[peerId][channelProp].transferId = null;
-
-      delete self._dataTransfers[transferId].sessions[peerId];
-
-      if (channelProp !== 'main') {
-        self._closeDataChannel(peerId, channelProp);
-      }
-    } else {
-      emitEventFn(function (evtPeerId) {
-        self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOADING, transferId, evtPeerId,
-          self._getTransferInfo(transferId, peerId, true, false, false), null);
-      });
+      uploadFn(self._dataTransfers[transferId].chunks[data.ackN]);
     }
   } else {
     self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.REJECTED, transferId, senderPeerId,
@@ -1746,12 +1753,14 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, data, chunkType, chann
     self._trigger('incomingData', self._getTransferData(transferId), transferId, senderPeerId,
       self._getTransferInfo(transferId, peerId, false, false, false), null);
 
-    self._dataChannels[transferId][channelProp].transferId = null;
-
     delete self._dataTransfers[transferId];
 
-    if (channelProp !== 'main') {
-      self._closeDataChannel(peerId, channelProp);
+    if (self._dataChannels[peerId][channelProp]) {
+      self._dataChannels[peerId][channelProp].transferId = null;
+
+      if (channelProp !== 'main') {
+        self._closeDataChannel(peerId, channelProp);
+      }
     }
     return;
   }
