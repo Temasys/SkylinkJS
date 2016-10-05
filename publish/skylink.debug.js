@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Oct 05 2016 17:38:12 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Oct 05 2016 19:55:18 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1566,6 +1566,14 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
 
     self.once('dataTransferState', function () {
       self.off('dataChannelState', dataChannelStateCbFn);
+
+      self._dataChannels[peerId][transferId].transferId = null;
+
+      delete self._dataTransfers[transferId];
+
+      if (channelProp === transferId) {
+        self._closeDataChannel(peerId, transferId);
+      }
     }, function (state, evtTransferId, evtPeerId) {
       return [self.DATA_TRANSFER_STATE.ERROR, self.DATA_TRANSFER_STATE.CANCEL,
         self.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED].indexOf(state) > -1 &&
@@ -1647,7 +1655,7 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
 
   var targetPeerId = peerId;
 
-  if (self._hasMCU) {
+  if (self._hasMCU && self._dataTransfers[transferId].direction === self.DATA_TRANSFER_TYPE.UPLOAD) {
     targetPeerId = 'MCU';
 
     log.warn([targetPeerId, 'RTCDataChannel', transferId, 'Aborting all data transfers to Peers']);
@@ -1666,7 +1674,7 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
   }
 
   var emitEventFn = function (cb) {
-    if (self._hasMCU) {
+    if (self._hasMCU && self._dataTransfers[transferId].direction === self.DATA_TRANSFER_TYPE.UPLOAD) {
       var peers = Object.keys(self._dataTransfers[transferId].peers.main).concat(
         Object.keys(self._dataTransfers[transferId].peers[transferId]));
       for (var i = 0; i < peers.length; i++) {
@@ -1679,11 +1687,11 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
 
   log.debug([targetPeerId, 'RTCDataChannel', transferId, 'Canceling data transfer ...']);
 
-  if (self._hasMCU) {
+  if (self._hasMCU && self._dataTransfers[transferId].direction === self.DATA_TRANSFER_TYPE.UPLOAD) {
     if (Object.keys(self._dataTransfers[transferId].peers.main).length > 0) {
       self._sendMessageToDataChannel(targetPeerId, {
-        type: this._DC_PROTOCOL_TYPE.CANCEL,
-        sender: this._user.sid,
+        type: self._DC_PROTOCOL_TYPE.CANCEL,
+        sender: self._user.sid,
         content: 'Peer cancelled download transfer',
         ackN: 0
       }, 'main');
@@ -1691,13 +1699,12 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
 
     if (Object.keys(self._dataTransfers[transferId].peers[transferId]).length > 0) {
       self._sendMessageToDataChannel(targetPeerId, {
-        type: this._DC_PROTOCOL_TYPE.CANCEL,
-        sender: this._user.sid,
+        type: self._DC_PROTOCOL_TYPE.CANCEL,
+        sender: self._user.sid,
         content: 'Peer cancelled download transfer',
         ackN: 0
       }, transferId);
     }
-
   } else {
     var channelProp = 'main';
 
@@ -1706,26 +1713,20 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
     }
 
     self._sendMessageToDataChannel(targetPeerId, {
-      type: this._DC_PROTOCOL_TYPE.CANCEL,
-      sender: this._user.sid,
+      type: self._DC_PROTOCOL_TYPE.CANCEL,
+      sender: self._user.sid,
       content: 'Peer cancelled download transfer',
       ackN: 0
     }, channelProp);
   }
 
   emitEventFn(function (evtPeerId) {
-    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL, transferId, evtPeerId,
-      this._getTransferInfo(transferId, targetPeerId, false, false, false), {
-      transferType: this._dataTransfers[transferId].direction,
+    self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.CANCEL, transferId, evtPeerId,
+      self._getTransferInfo(transferId, targetPeerId, false, false, false), {
+      transferType: self._dataTransfers[transferId].direction,
       message: new Error('User cancelled download transfer')
     });
   });
-
-  if (self._dataTransfers[transferId].direction === self.DATA_TRANSFER_TYPE.DOWNLOAD || self._hasMCU) {
-    delete self._dataTransfers[transferId];
-  } else {
-    delete self._dataTransfers[transferId].sessions[targetPeerId];
-  }
 };
 
 /**
@@ -1994,6 +1995,50 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
         callback(peerId, 'Data transfer request has been rejected by Peer');
       } else {
         callback(peerId, error.message.message || error.message.toString());
+      }
+
+      if (self._hasMCU && self._dataTransfers[transferId].direction === self.DATA_TRANSFER_TYPE.UPLOAD) {
+        var isNotEmpty = false;
+
+        for (var ipEvtPeerId in self._dataTransfers[transferId].peers.main) {
+          if (self._dataTransfers[transferId].peers.main.hasOwnProperty(ipEvtPeerId)) {
+            if (!self._dataTransfers[transferId].peers.main[ipEvtPeerId]) {
+              isNotEmpty = true;
+              break;
+            }
+          }
+        }
+
+        if (!isNotEmpty) {
+          for (var inpEvtPeerId in self._dataTransfers[transferId].peers[transferId]) {
+            if (self._dataTransfers[transferId].peers[transferId].hasOwnProperty(inpEvtPeerId)) {
+              if (!self._dataTransfers[transferId].peers[transferId][inpEvtPeerId]) {
+                isNotEmpty = true;
+                break;
+              }
+            }
+          }
+        }
+
+        if (!isNotEmpty) {
+          delete self._dataTransfers[transferId];
+
+          if (self._dataChannels.MCU) {
+            if (self._dataChannels.MCU.main) {
+              self._dataChannels.MCU.main.transferId = null;
+            }
+
+            if (self._dataChannels.MCU[transferId]) {
+              self._closeDataChannel('MCU', transferId);
+            }
+          }
+        }
+      } else {
+        delete self._dataTransfers[transferId].sessions[targetPeerId];
+
+        if (Object.keys(self._dataTransfers[transferId]).length === 0) {
+          delete self._dataTransfers[transferId];
+        }
       }
     }, function (state, evtTransferId, evtPeerId) {
       return [self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, self.DATA_TRANSFER_STATE.ERROR,
@@ -2396,7 +2441,12 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelProp) {
           self._getTransferInfo(transferId, peerId, true, false, 0), null);
       });
     } else if (data.ackN === self._dataTransfers[transferId].chunks.length) {
-      delete self._dataTransfers[transferId].sessions[peerId];
+      emitEventFn(function (evtPeerId) {
+        self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, transferId, evtPeerId,
+          self._getTransferInfo(transferId, peerId, true, false, 100), null);
+        self._trigger('incomingData', self._getTransferData(transferId), transferId, evtPeerId,
+          self._getTransferInfo(transferId, peerId, false, false, false), true);
+      });
 
       if (self._dataChannels[peerId][channelProp]) {
         self._dataChannels[peerId][channelProp].transferId = null;
@@ -2411,14 +2461,7 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelProp) {
     var uploadFn = function (chunk) {
       self._sendMessageToDataChannel(peerId, chunk, channelProp, true);
 
-      if (data.ackN === (self._dataTransfers[transferId].chunks.length - 1)) {
-        emitEventFn(function (evtPeerId) {
-          self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, transferId, evtPeerId,
-            self._getTransferInfo(transferId, peerId, true, false, 100), null);
-          self._trigger('incomingData', self._getTransferData(transferId), transferId, evtPeerId,
-            self._getTransferInfo(transferId, peerId, false, false, false), true);
-        });
-      } else {
+      if (data.ackN !== (self._dataTransfers[transferId].chunks.length - 1)) {
         emitEventFn(function (evtPeerId) {
           self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOADING, transferId, evtPeerId,
             self._getTransferInfo(transferId, peerId, true, false, false), null);
@@ -2519,8 +2562,6 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelProp) {
       transferType: self._dataTransfers[transferId].direction
     });
   });
-
-  delete self._dataTransfers[transferId].sessions[peerId];
 };
 
 /**
@@ -2577,8 +2618,6 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelProp) {
       transferType: self._dataTransfers[transferId].direction
     });
   });
-
-  delete self._dataTransfers[transferId].sessions[peerId];
 };
 
 /**
@@ -2666,8 +2705,6 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, data, chunkType, chann
       self._getTransferInfo(transferId, peerId, true, false, false), null);
     self._trigger('incomingData', self._getTransferData(transferId), transferId, senderPeerId,
       self._getTransferInfo(transferId, peerId, false, false, false), null);
-
-    delete self._dataTransfers[transferId];
 
     if (self._dataChannels[peerId][channelProp]) {
       self._dataChannels[peerId][channelProp].transferId = null;
