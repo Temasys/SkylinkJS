@@ -247,11 +247,11 @@ Skylink.prototype._dataTransfers = {};
  *   triggers parameter payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and
  *   return error.</li></ol></li></li></ol></ol></li></ol></li>
  *   <li>Starts the data transfer to Peer. <ol>
+ *   <li><a href="#event_incomingDataRequest"><code>incomingDataRequest</code> event</a> triggers.</li>
  *   <li><em>For User only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
  *   triggers parameter payload <code>state</code> as <code>USER_UPLOAD_REQUEST</code>.</li>
  *   <li><em>For Peer only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
  *   triggers parameter payload <code>state</code> as <code>UPLOAD_REQUEST</code>.</li>
- *   <li><a href="#event_incomingDataRequest"><code>incomingDataRequest</code> event</a> triggers.</li>
  *   <li>Peer invokes <a href="#method_acceptDataTransfer"><code>acceptDataTransfer()</code> method</a>. <ol>
  *   <li>If parameter <code>accept</code> value is <code>true</code>: <ol>
  *   <li>User starts upload data transfer to Peer. <ol>
@@ -298,11 +298,11 @@ Skylink.prototype._dataTransfers = {};
  *   <li><em>For Peer only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
  *   triggers parameter payload <code>state</code> as <code>DOWNLOADING</code>.</li></ol></li>
  *   <li>If data transfer has completed <ol>
+ *   <li><a href="#event_incomingData"><code>incomingData</code> event</a> triggers.</li>
  *   <li><em>For User only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
  *   triggers parameter payload <code>state</code> as <code>UPLOAD_COMPLETED</code>.</li>
  *   <li><em>For Peer only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
- *   triggers parameter payload <code>state</code> as <code>DOWNLOAD_COMPLETED</code>.</li>
- *   <li><a href="#event_incomingData"><code>incomingData</code> event</a> triggers.</li></ol></li></ol></li>
+ *   triggers parameter payload <code>state</code> as <code>DOWNLOAD_COMPLETED</code>.</li></ol></li></ol></li>
  *   <li>If parameter <code>accept</code> value is <code>false</code>: <ol>
  *   <li><em>For User only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
  *   triggers parameter payload <code>state</code> as <code>REJECTED</code>.</li>
