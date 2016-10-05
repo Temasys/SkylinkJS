@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Oct 05 2016 22:37:29 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Oct 05 2016 23:17:59 GMT+0800 (SGT) */
 
 (function() {
 
@@ -2331,6 +2331,97 @@ Skylink.prototype._getTransferData = function (transferId) {
 };
 
 /**
+ * Function that handles the data transfers sessions timeouts.
+ * @method _handleDataTransferTimeoutForPeer
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._handleDataTransferTimeoutForPeer = function (transferId, peerId, setPeerTO) {
+  var self = this;
+
+  if (!(self._dataTransfers[transferId] && self._dataTransfers[transferId].sessions[peerId])) {
+    log.debug([peerId, 'RTCDataChannel', transferId, 'Data transfer does not exists for Peer. Ignoring timeout.']);
+    return;
+  }
+
+  log.debug([peerId, 'RTCDataChannel', transferId, 'Clearing data transfer timer for Peer.']);
+
+  if (self._dataTransfers[transferId].sessions[peerId].timer) {
+    clearTimeout(self._dataTransfers[transferId].sessions[peerId].timer);
+  }
+
+  self._dataTransfers[transferId].sessions[peerId].timer = null;
+
+  if (setPeerTO) {
+    log.debug([peerId, 'RTCDataChannel', transferId, 'Setting data transfer timer for Peer.']);
+
+    self._dataTransfers[transferId].sessions[peerId].timer = setTimeout(function () {
+      if (!(self._dataTransfers[transferId] && self._dataTransfers[transferId].sessions[peerId])) {
+        log.debug([peerId, 'RTCDataChannel', transferId, 'Data transfer already ended for Peer. Ignoring expired timeout.']);
+        return;
+      }
+
+      if (!self._user) {
+        log.debug([peerId, 'RTCDataChannel', transferId, 'User is not in Room. Ignoring expired timeout.']);
+        return;
+      }
+
+      if (!self._dataChannels[peerId]) {
+        log.debug([peerId, 'RTCDataChannel', transferId, 'Datachannel connection does not exists. Ignoring expired timeout.']);
+        return;
+      }
+
+      log.error([peerId, 'RTCDataChannel', transferId, 'Data transfer response has timed out.']);
+
+      /**
+       * Emit event for Peers function.
+       */
+      var emitEventFn = function (cb) {
+        if (peerId === 'MCU') {
+          var broadcastedPeers = [self._dataTransfers[transferId].peers.main,
+            self._dataTransfers[transferId].peers[transferId]];
+
+          for (var i = 0; i < broadcastedPeers.length; i++) {
+            // Should not happen but insanity check
+            if (!broadcastedPeers[i]) {
+              return;
+            }
+
+            for (var bcPeerId in broadcastedPeers[i]) {
+              if (broadcastedPeers[i].hasOwnProperty(bcPeerId) && !broadcastedPeers[i][bcPeerId]) {
+                cb(bcPeerId);
+              }
+            }
+          }
+        } else {
+          cb(peerId);
+        }
+      };
+
+      var errorMsg = 'Connection Timeout. Longer than ' + self._dataTransfers[transferId].timeout +
+        ' seconds. Connection is abolished.';
+
+      self._sendMessageToDataChannel(peerId, {
+        type: self._DC_PROTOCOL_TYPE.ERROR,
+        content: errorMsg,
+        isUploadError: self._dataTransfers[transferId].direction === self.DATA_TRANSFER_TYPE.UPLOAD,
+        sender: self._user.sid,
+        name: self._dataTransfers[transferId].name
+      }, self._dataChannels[peerId][transferId] ? transferId : 'main');
+
+      emitEventFn(function (evtPeerId) {
+        self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR, transferId, peerId,
+          self._getTransferInfo(transferId, peerId, true, false, false), {
+          transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD,
+          message: new Error(errorMsg)
+        });
+      });
+    }, self._dataTransfers[transferId].timeout * 1000);
+  }
+};
+
+/**
  * Function that handles the data received from Datachannel and
  * routes to the relevant data transfer protocol handler.
  * @method _processDataChannelData
@@ -2521,6 +2612,11 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelProp) {
     transferId = self._dataTransfers[peerId].main.transferId;
   }
 
+  //self._handleDataTransferTimeoutForPeer(transferId, peerId, false);
+
+  /**
+   * Emit event for Peers function.
+   */
   var emitEventFn = function (cb) {
     if (peerId === 'MCU') {
       if (!self._dataTransfers[transferId].peers[channelProp]) {
@@ -2575,6 +2671,8 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelProp) {
             self._getTransferInfo(transferId, peerId, true, false, false), null);
         });
       }
+
+      self._handleDataTransferTimeoutForPeer(transferId, peerId, true);
     };
 
     self._dataTransfers[transferId].sessions[peerId].ackN = data.ackN;
@@ -2586,6 +2684,8 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelProp) {
     } else {
       uploadFn(self._dataTransfers[transferId].chunks[data.ackN]);
     }
+
+
   } else {
     self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.REJECTED, transferId, senderPeerId,
       self._getTransferInfo(transferId, peerId, true, false, false), {
@@ -2633,6 +2733,8 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelProp) {
     transferId = self._dataTransfers[peerId].main.transferId;
   }
 
+  self._handleDataTransferTimeoutForPeer(transferId, peerId, false);
+
   /**
    * Emit event for Peers function.
    */
@@ -2679,6 +2781,8 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelProp) {
   if (channelProp === 'main') {
     transferId = self._dataTransfers[peerId].main.transferId;
   }
+
+  self._handleDataTransferTimeoutForPeer(transferId, peerId, false);
 
   /**
    * Emit event for Peers function.
@@ -2732,6 +2836,8 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, chunk, chunkType, chun
     senderPeerId = self._dataTransfers[transferId].senderPeerId;
   }
 
+  //self._handleDataTransferTimeoutForPeer(transferId, peerId, false);
+
   self._dataTransfers[transferId].chunkType = chunkType;
   self._dataTransfers[transferId].sessions[peerId].receivedSize += chunkSize;
   self._dataTransfers[transferId].chunks[self._dataTransfers[transferId].sessions[peerId].ackN] = chunk;
@@ -2761,6 +2867,8 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, chunk, chunkType, chun
     sender: self._user.sid,
     ackN: self._dataTransfers[transferId].sessions[peerId].ackN
   }, channelProp);
+
+  self._handleDataTransferTimeoutForPeer(transferId, peerId, true);
 
   self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.DOWNLOADING, transferId, senderPeerId,
     self._getTransferInfo(transferId, peerId, true, false, false), null);
