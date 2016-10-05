@@ -1632,10 +1632,9 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
 
       log.debug([peerId, 'RTCDataChannel', channelProp, 'Received protocol message ->'], protocolData);
 
-      // TODO: Discard iOS bidirectional upload when Datachannel is in-progress for data transfers
-      if ([self._DC_PROTOCOL_TYPE.ACK, self._DC_PROTOCOL_TYPE.ERROR, self._DC_PROTOCOL_TYPE.CANCEL].indexOf(
-        protocolData.type) > -1 && !(transferId && self._dataTransfers[transferId] &&
-        self._dataTransfers[transferId].sessions[peerId])) {
+      // Ignore ACK, ERROR and CANCEL if there is no data transfer session in-progress
+      if ([self._DC_PROTOCOL_TYPE.ACK, self._DC_PROTOCOL_TYPE.ERROR, self._DC_PROTOCOL_TYPE.CANCEL].indexOf(protocolData.type) > -1 &&
+        !(transferId && self._dataTransfers[transferId] && self._dataTransfers[transferId].sessions[peerId])) {
           log.warn([peerId, 'RTCDataChannel', channelProp, 'Discarded protocol message as data transfer session ' +
             'is not present ->'], protocolData);
           return;
@@ -1643,6 +1642,18 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
 
       switch (protocolData.type) {
         case self._DC_PROTOCOL_TYPE.WRQ:
+          // Discard iOS bidirectional upload when Datachannel is in-progress for data transfers
+          if (transferId && self._dataTransfers[transferId] && self._dataTransfers[transferId].sessions[peerId]) {
+            log.warn([peerId, 'RTCDataChannel', channelProp, 'Rejecting bidirectional data transfer request as ' +
+              'it is currently not supported in the SDK']);
+
+            self._sendMessageToDataChannel(peerId, {
+              type: self._DC_PROTOCOL_TYPE.ACK,
+              ackN: -1,
+              sender: self._user.sid
+            }, channelProp);
+            return;
+          }
           self._WRQProtocolHandler(peerId, protocolData, channelProp);
           break;
         case self._DC_PROTOCOL_TYPE.ACK:

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Oct 05 2016 22:23:08 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Oct 05 2016 22:37:29 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10548,7 +10548,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Wed Oct 05 2016 22:23:08 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Oct 05 2016 22:37:29 GMT+0800 (SGT) */
 
 (function() {
 
@@ -12913,10 +12913,9 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
 
       log.debug([peerId, 'RTCDataChannel', channelProp, 'Received protocol message ->'], protocolData);
 
-      // TODO: Discard iOS bidirectional upload when Datachannel is in-progress for data transfers
-      if ([self._DC_PROTOCOL_TYPE.ACK, self._DC_PROTOCOL_TYPE.ERROR, self._DC_PROTOCOL_TYPE.CANCEL].indexOf(
-        protocolData.type) > -1 && !(transferId && self._dataTransfers[transferId] &&
-        self._dataTransfers[transferId].sessions[peerId])) {
+      // Ignore ACK, ERROR and CANCEL if there is no data transfer session in-progress
+      if ([self._DC_PROTOCOL_TYPE.ACK, self._DC_PROTOCOL_TYPE.ERROR, self._DC_PROTOCOL_TYPE.CANCEL].indexOf(protocolData.type) > -1 &&
+        !(transferId && self._dataTransfers[transferId] && self._dataTransfers[transferId].sessions[peerId])) {
           log.warn([peerId, 'RTCDataChannel', channelProp, 'Discarded protocol message as data transfer session ' +
             'is not present ->'], protocolData);
           return;
@@ -12924,6 +12923,18 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
 
       switch (protocolData.type) {
         case self._DC_PROTOCOL_TYPE.WRQ:
+          // Discard iOS bidirectional upload when Datachannel is in-progress for data transfers
+          if (transferId && self._dataTransfers[transferId] && self._dataTransfers[transferId].sessions[peerId]) {
+            log.warn([peerId, 'RTCDataChannel', channelProp, 'Rejecting bidirectional data transfer request as ' +
+              'it is currently not supported in the SDK']);
+
+            self._sendMessageToDataChannel(peerId, {
+              type: self._DC_PROTOCOL_TYPE.ACK,
+              ackN: -1,
+              sender: self._user.sid
+            }, channelProp);
+            return;
+          }
           self._WRQProtocolHandler(peerId, protocolData, channelProp);
           break;
         case self._DC_PROTOCOL_TYPE.ACK:
