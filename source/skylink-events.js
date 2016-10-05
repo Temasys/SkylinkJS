@@ -472,7 +472,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} transferInfo.direction The data transfer direction.
    *   [Rel: Skylink.DATA_TRANSFER_TYPE]
    * @param {JSON} [error] The error result.
-   *   <small>Defined only when <code>state</code> payload is <code>ERROR</code>, <code>CANCEL</code>
+   *   <small>Defined only when <code>state</code> payload is <code>ERROR</code>, <code>CANCEL</code>,
    *   <code>REJECTED</code> or <code>USER_REJECTED</code>.</small>
    * @param {Error|String} error.message The error object.
    * @param {String} error.transferType The data transfer direction from where the error occurred.
