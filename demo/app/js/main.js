@@ -31,7 +31,7 @@ Demo.Methods.displayFileItemHTML = function (content) {
     'href="#" style="display: block;" download="' + content.name +
     '"><span class="glyphicon glyphicon-cloud-download"></span> <b>Download file</b></a>' +
     (content.direction === Demo.Skylink.DATA_TRANSFER_TYPE.DOWNLOAD ?
-    '<a class="btn btn-default c-cancel ' + content.peerId + '" style="border-color: #d9534f; color: #d9534f;" ' +
+    '<a class="btn btn-default cancel c-' + content.peerId + '" style="margin-top: 15px; border-color: #d9534f; color: #d9534f;" ' +
     'onclick="cancelTransfer(\'' + content.peerId + '\', \'' + content.transferId + '\')">' +
     '<span class="glyphicon glyphicon-remove"></span> Cancel Transfer</a></p>' : '');
 };
@@ -133,7 +133,6 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
     }
     var displayName = Demo.Skylink.getPeerInfo(transferInfo.senderPeerId).userData;
     transferInfo.transferId = transferId;
-    transferInfo.data = '#';
     transferInfo.isUpload = false;
     Demo.Methods.displayChatMessage(displayName, transferInfo, transferId);
     Demo.Methods.displayChatMessage(displayName, 'File sent: ' + transferInfo.name);
@@ -179,8 +178,8 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
     $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
     $('#' + transferId + '_btn').css('display', 'block');
     Demo.Methods.displayChatMessage(displayName, 'File received: ' + transferInfo.name);
-    $('#' + transferId + ' .' + peerId + '.cancel').css('opacity', .5);
-    $('#' + transferId + ' .c-' + peerId + '.cancel').css('cursor', 'not-allowed');
+    $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
+    $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('cursor', 'not-allowed');
     Demo.TransfersDone[transferId][peerId] = true;
     break;
   case Demo.Skylink.DATA_TRANSFER_STATE.REJECTED :
@@ -196,6 +195,8 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
     $('#' + transferId).parent().addClass('progress-bar-danger');
     $('#' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
     $('#' + transferId + ' .c-' + peerId + '.cancel').css('cursor', 'not-allowed');
+    $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
+    $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('cursor', 'not-allowed');
     Demo.TransfersDone[transferId][peerId] = true;
     break;
   case Demo.Skylink.DATA_TRANSFER_STATE.CANCEL :
@@ -205,6 +206,8 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
     $('#' + transferId).parent().addClass('progress-bar-danger');
     $('#' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
     $('#' + transferId + ' .c-' + peerId + '.cancel').css('cursor', 'not-allowed');
+    $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
+    $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('cursor', 'not-allowed');
     Demo.TransfersDone[transferId][peerId] = true;
   }
 });
@@ -664,9 +667,9 @@ $(document).ready(function () {
       var file = Demo.Files[i];
       if(file.size <= Demo.FILE_SIZE_LIMIT) {
         if (selectedPeers.length > 0) {
-          Demo.Skylink.sendBlobData(file, selectedPeers);
+          Demo.Skylink.sendBlobData(file, selectedPeers, true);
         } else {
-          Demo.Skylink.sendBlobData(file);
+          Demo.Skylink.sendBlobData(file, true);
         }
         $('#file_input').val('');
       } else {
