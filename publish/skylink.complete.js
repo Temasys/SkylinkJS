@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Oct 05 2016 23:17:59 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Thu Oct 06 2016 18:01:16 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7248,7 +7248,7 @@ function toArray(list, index) {
 },{}]},{},[31])(31)
 });
 
-/*! adapterjs - v0.13.4 - 2016-09-22 */
+/*! adapterjs - v0.13.3 - 2016-04-13 */
 
 // Adapter's interface.
 var AdapterJS = AdapterJS || {};
@@ -7267,7 +7267,7 @@ AdapterJS.options = AdapterJS.options || {};
 // AdapterJS.options.hidePluginInstallPrompt = true;
 
 // AdapterJS version
-AdapterJS.VERSION = '0.13.4';
+AdapterJS.VERSION = '0.13.3';
 
 // This function will be called when the WebRTC API is ready to be used
 // Whether it is the native implementation (Chrome, Firefox, Opera) or
@@ -7309,7 +7309,7 @@ AdapterJS.WebRTCPlugin = AdapterJS.WebRTCPlugin || {};
 
 // The object to store plugin information
 /* jshint ignore:start */
-AdapterJS.WebRTCPlugin.pluginInfo = AdapterJS.WebRTCPlugin.pluginInfo || {
+AdapterJS.WebRTCPlugin.pluginInfo = {
   prefix : 'Tem',
   plugName : 'TemWebRTCPlugin',
   pluginId : 'plugin0',
@@ -7317,21 +7317,14 @@ AdapterJS.WebRTCPlugin.pluginInfo = AdapterJS.WebRTCPlugin.pluginInfo || {
   onload : '__TemWebRTCReady0',
   portalLink : 'http://skylink.io/plugin/',
   downloadLink : null, //set below
-  companyName: 'Temasys',
-  downloadLinks : {
-    mac: 'http://bit.ly/1n77hco',
-    win: 'http://bit.ly/1kkS4FN'
-  }
+  companyName: 'Temasys'
 };
-if(typeof AdapterJS.WebRTCPlugin.pluginInfo.downloadLinks !== "undefined" && AdapterJS.WebRTCPlugin.pluginInfo.downloadLinks !== null) {
-  if(!!navigator.platform.match(/^Mac/i)) {
-    AdapterJS.WebRTCPlugin.pluginInfo.downloadLink = AdapterJS.WebRTCPlugin.pluginInfo.downloadLinks.mac;
-  }
-  else if(!!navigator.platform.match(/^Win/i)) {
-    AdapterJS.WebRTCPlugin.pluginInfo.downloadLink = AdapterJS.WebRTCPlugin.pluginInfo.downloadLinks.win;
-  }
+if(!!navigator.platform.match(/^Mac/i)) {
+  AdapterJS.WebRTCPlugin.pluginInfo.downloadLink = 'http://bit.ly/1n77hco';
 }
-
+else if(!!navigator.platform.match(/^Win/i)) {
+  AdapterJS.WebRTCPlugin.pluginInfo.downloadLink = 'http://bit.ly/1kkS4FN';
+}
 /* jshint ignore:end */
 
 AdapterJS.WebRTCPlugin.TAGS = {
@@ -7504,8 +7497,8 @@ AdapterJS.isDefined = null;
 //   - 'plugin': Using the plugin implementation.
 AdapterJS.parseWebrtcDetectedBrowser = function () {
   var hasMatch = null;
-  if ((!!window.opr && !!opr.addons) ||
-    !!window.opera ||
+  if ((!!window.opr && !!opr.addons) || 
+    !!window.opera || 
     navigator.userAgent.indexOf(' OPR/') >= 0) {
     // Opera 8.0+
     webrtcDetectedBrowser = 'opera';
@@ -7533,7 +7526,7 @@ AdapterJS.parseWebrtcDetectedBrowser = function () {
     webrtcDetectedVersion = parseInt(hasMatch[1] || '0', 10);
     if (!webrtcDetectedVersion) {
       hasMatch = /\bMSIE[ :]+(\d+)/g.exec(navigator.userAgent) || [];
-      webrtcDetectedVersion = parseInt(hasMatch[1] || '0', 10);
+      webrtcDetectedVersion = parseInt(hasMatch[1] || '0', 10);      
     }
   } else if (!!window.StyleMedia) {
     // Edge 20+
@@ -7543,20 +7536,13 @@ AdapterJS.parseWebrtcDetectedBrowser = function () {
     // Chrome 1+
     // Bowser and Version set in Google's adapter
     webrtcDetectedType    = 'webkit';
-  } else if ((webrtcDetectedBrowser === 'chrome'|| webrtcDetectedBrowser === 'opera') &&
+  } else if ((webrtcDetectedBrowser === 'chrome'|| webrtcDetectedBrowser === 'opera') && 
     !!window.CSS) {
     // Blink engine detection
     webrtcDetectedBrowser = 'blink';
     // TODO: detected WebRTC version
   }
-  if ((navigator.userAgent.match(/android/ig) || []).length === 0 &&
-  (navigator.userAgent.match(/chrome/ig) || []).length === 0 && 
-  navigator.userAgent.indexOf('Safari/') > 0) {
-    webrtcDetectedBrowser = 'safari';
-    webrtcDetectedVersion = parseInt((navigator.userAgent.match(/Version\/(.*)\ /) || ['', '0'])[1], 10);
-    webrtcMinimumVersion = 7;
-    webrtcDetectedType = 'plugin';
-  }
+
   window.webrtcDetectedBrowser = webrtcDetectedBrowser;
   window.webrtcDetectedVersion = webrtcDetectedVersion;
   window.webrtcMinimumVersion  = webrtcMinimumVersion;
@@ -7628,7 +7614,6 @@ AdapterJS.renderNotificationBar = function (text, buttonText, buttonLink, openNe
         AdapterJS.WebRTCPlugin.isPluginInstalled(
           AdapterJS.WebRTCPlugin.pluginInfo.prefix,
           AdapterJS.WebRTCPlugin.pluginInfo.plugName,
-          AdapterJS.WebRTCPlugin.pluginInfo.type,
           function() { // plugin now installed
             clearInterval(pluginInstallInterval);
             AdapterJS.WebRTCPlugin.defineWebRTCInterface();
@@ -7816,12 +7801,10 @@ webrtcDetectedVersion = null;
 webrtcMinimumVersion  = null;
 
 // Check for browser types and react accordingly
-if ( (navigator.mozGetUserMedia || 
-      navigator.webkitGetUserMedia || 
-      (navigator.mediaDevices && 
-       navigator.userAgent.match(/Edge\/(\d+).(\d+)$/))) 
-    && !((navigator.userAgent.match(/android/ig) || []).length === 0 &&
-          (navigator.userAgent.match(/chrome/ig) || []).length === 0 && navigator.userAgent.indexOf('Safari/') > 0)) { 
+if ( navigator.mozGetUserMedia || 
+  navigator.webkitGetUserMedia || 
+  (navigator.mediaDevices && 
+    navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)) ) { 
 
   ///////////////////////////////////////////////////////////////////
   // INJECTION OF GOOGLE'S ADAPTER.JS CONTENT
@@ -9700,21 +9683,9 @@ if ( (navigator.mozGetUserMedia ||
   // Need to override attachMediaStream and reattachMediaStream
   // to support the plugin's logic
   attachMediaStream_base = attachMediaStream;
-
-  if (webrtcDetectedBrowser === 'opera') {
-    attachMediaStream_base = function (element, stream) {
-      if (webrtcDetectedVersion > 38) {
-        element.srcObject = stream;
-      } else if (typeof element.src !== 'undefined') {
-        element.src = URL.createObjectURL(stream);
-      }
-      // Else it doesn't work
-    };
-  }
-
   attachMediaStream = function (element, stream) {
     if ((webrtcDetectedBrowser === 'chrome' ||
-         webrtcDetectedBrowser === 'opera') &&
+         webrtcDetectedBrowser === 'opera') && 
         !stream) {
       // Chrome does not support "src = null"
       element.src = '';
@@ -9894,11 +9865,11 @@ if ( (navigator.mozGetUserMedia ||
   };
 
   AdapterJS.WebRTCPlugin.isPluginInstalled =
-    function (comName, plugName, plugType, installedCb, notInstalledCb) {
+    function (comName, plugName, installedCb, notInstalledCb) {
     if (!isIE) {
-      var pluginArray = navigator.mimeTypes;
+      var pluginArray = navigator.plugins;
       for (var i = 0; i < pluginArray.length; i++) {
-        if (pluginArray[i].type.indexOf(plugType) >= 0) {
+        if (pluginArray[i].name.indexOf(plugName) >= 0) {
           installedCb();
           return;
         }
@@ -9973,11 +9944,11 @@ if ( (navigator.mozGetUserMedia ||
       if (typeof constraints !== 'undefined' && constraints !== null) {
         var invalidConstraits = false;
         invalidConstraits |= typeof constraints !== 'object';
-        invalidConstraits |= constraints.hasOwnProperty('mandatory') &&
-                              constraints.mandatory !== undefined &&
-                              constraints.mandatory !== null &&
+        invalidConstraits |= constraints.hasOwnProperty('mandatory') && 
+                              constraints.mandatory !== undefined && 
+                              constraints.mandatory !== null && 
                               constraints.mandatory.constructor !== Object;
-        invalidConstraits |= constraints.hasOwnProperty('optional') &&
+        invalidConstraits |= constraints.hasOwnProperty('optional') && 
                               constraints.optional !== undefined &&
                               constraints.optional !== null &&
                               !Array.isArray(constraints.optional);
@@ -10022,76 +9993,20 @@ if ( (navigator.mozGetUserMedia ||
       }
     };
 
-    MediaStreamTrack = function(){};
+    MediaStreamTrack = {};
     MediaStreamTrack.getSources = function (callback) {
       AdapterJS.WebRTCPlugin.callWhenPluginReady(function() {
         AdapterJS.WebRTCPlugin.plugin.GetSources(callback);
       });
     };
 
-    // getUserMedia constraints shim.
-    // Copied from Chrome
-    var constraintsToPlugin = function(c) {
-      if (typeof c !== 'object' || c.mandatory || c.optional) {
-        return c;
-      }
-      var cc = {};
-      Object.keys(c).forEach(function(key) {
-        if (key === 'require' || key === 'advanced' || key === 'mediaSource') {
-          return;
-        }
-        var r = (typeof c[key] === 'object') ? c[key] : {ideal: c[key]};
-        if (r.exact !== undefined && typeof r.exact === 'number') {
-          r.min = r.max = r.exact;
-        }
-        var oldname = function(prefix, name) {
-          if (prefix) {
-            return prefix + name.charAt(0).toUpperCase() + name.slice(1);
-          }
-          return (name === 'deviceId') ? 'sourceId' : name;
-        };
-        if (r.ideal !== undefined) {
-          cc.optional = cc.optional || [];
-          var oc = {};
-          if (typeof r.ideal === 'number') {
-            oc[oldname('min', key)] = r.ideal;
-            cc.optional.push(oc);
-            oc = {};
-            oc[oldname('max', key)] = r.ideal;
-            cc.optional.push(oc);
-          } else {
-            oc[oldname('', key)] = r.ideal;
-            cc.optional.push(oc);
-          }
-        }
-        if (r.exact !== undefined && typeof r.exact !== 'number') {
-          cc.mandatory = cc.mandatory || {};
-          cc.mandatory[oldname('', key)] = r.exact;
-        } else {
-          ['min', 'max'].forEach(function(mix) {
-            if (r[mix] !== undefined) {
-              cc.mandatory = cc.mandatory || {};
-              cc.mandatory[oldname(mix, key)] = r[mix];
-            }
-          });
-        }
-      });
-      if (c.advanced) {
-        cc.optional = (cc.optional || []).concat(c.advanced);
-      }
-      return cc;
-    };
-
     getUserMedia = function (constraints, successCallback, failureCallback) {
-      var cc = {};
-      cc.audio = constraints.audio ?
-        constraintsToPlugin(constraints.audio) : false;
-      cc.video = constraints.video ?
-        constraintsToPlugin(constraints.video) : false;
+      constraints.audio = constraints.audio || false;
+      constraints.video = constraints.video || false;
 
       AdapterJS.WebRTCPlugin.callWhenPluginReady(function() {
         AdapterJS.WebRTCPlugin.plugin.
-          getUserMedia(cc, successCallback, failureCallback);
+          getUserMedia(constraints, successCallback, failureCallback);
       });
     };
     window.navigator.getUserMedia = getUserMedia;
@@ -10237,7 +10152,7 @@ if ( (navigator.mozGetUserMedia ||
           propName = properties[prop];
 
           if (typeof propName.slice === 'function' &&
-              propName.slice(0,2) === 'on' &&
+              propName.slice(0,2) === 'on' && 
               typeof srcElem[propName] === 'function') {
               AdapterJS.addEvent(destElem, propName.slice(2), srcElem[propName]);
           }
@@ -10299,12 +10214,10 @@ if ( (navigator.mozGetUserMedia ||
     }
   };
 
-
   // Try to detect the plugin and act accordingly
   AdapterJS.WebRTCPlugin.isPluginInstalled(
     AdapterJS.WebRTCPlugin.pluginInfo.prefix,
     AdapterJS.WebRTCPlugin.pluginInfo.plugName,
-    AdapterJS.WebRTCPlugin.pluginInfo.type,
     AdapterJS.WebRTCPlugin.defineWebRTCInterface,
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 
@@ -10388,7 +10301,7 @@ if ( (navigator.mozGetUserMedia ||
       });
     };
 
-  } else if (window.navigator.webkitGetUserMedia && window.webrtcDetectedBrowser !== 'safari') {
+  } else if (window.navigator.webkitGetUserMedia) {
     baseGetUserMedia = window.navigator.getUserMedia;
 
     navigator.getUserMedia = function (constraints, successCb, failureCb) {
@@ -10548,7 +10461,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Wed Oct 05 2016 23:17:59 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Thu Oct 06 2016 18:01:16 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11159,6 +11072,17 @@ Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 12288;
 Skylink.prototype._BINARY_FILE_SIZE = 65456;
 
 /**
+ * Stores the data chunk size for binary Blob transfers.
+ * @attribute _MOZ_BINARY_FILE_SIZE
+ * @type Number
+ * @private
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._MOZ_BINARY_FILE_SIZE = 16384;
+
+/**
  * Stores the data chunk size for data URI string transfers.
  * @attribute _CHUNK_DATAURL_SIZE
  * @type Number
@@ -11445,10 +11369,10 @@ Skylink.prototype._dataTransfers = {};
  *   with all the Peer IDs provided.
  * - When not provided, it will start uploading data transfers with all the currently connected Peers in the Room.
  * @param {Boolean} [sendChunksAsBinary=false] <blockquote class="info">
- *   Note that this is currently not supported for MCU enabled Peer connections. This would fallback to
- *   <code>transferInfo.chunkType</code> to <code>BINARY_STRING</code> when MCU is connected.
- *   </blockquote> The flag if data transfer binary data chunks should not be
- *   encoded as Base64 string during data transfers.
+ *   Note that this is currently not supported for MCU enabled Peer connections or Peer connections connecting from
+ *   Android, iOS and Linux SDKs. This would fallback to <code>transferInfo.chunkType</code> to
+ *   <code>BINARY_STRING</code> when MCU is connected. </blockquote> The flag if data transfer
+ *   binary data chunks should not be encoded as Base64 string during data transfers.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_dataTransferState">
@@ -11528,11 +11452,11 @@ Skylink.prototype._dataTransfers = {};
  *   triggers parameter payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and
  *   return error.</li></ol></li></li></ol></ol></li></ol></li>
  *   <li>Starts the data transfer to Peer. <ol>
+ *   <li><a href="#event_incomingDataRequest"><code>incomingDataRequest</code> event</a> triggers.</li>
  *   <li><em>For User only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
  *   triggers parameter payload <code>state</code> as <code>USER_UPLOAD_REQUEST</code>.</li>
  *   <li><em>For Peer only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
  *   triggers parameter payload <code>state</code> as <code>UPLOAD_REQUEST</code>.</li>
- *   <li><a href="#event_incomingDataRequest"><code>incomingDataRequest</code> event</a> triggers.</li>
  *   <li>Peer invokes <a href="#method_acceptDataTransfer"><code>acceptDataTransfer()</code> method</a>. <ol>
  *   <li>If parameter <code>accept</code> value is <code>true</code>: <ol>
  *   <li>User starts upload data transfer to Peer. <ol>
@@ -11579,11 +11503,11 @@ Skylink.prototype._dataTransfers = {};
  *   <li><em>For Peer only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
  *   triggers parameter payload <code>state</code> as <code>DOWNLOADING</code>.</li></ol></li>
  *   <li>If data transfer has completed <ol>
+ *   <li><a href="#event_incomingData"><code>incomingData</code> event</a> triggers.</li>
  *   <li><em>For User only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
  *   triggers parameter payload <code>state</code> as <code>UPLOAD_COMPLETED</code>.</li>
  *   <li><em>For Peer only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
- *   triggers parameter payload <code>state</code> as <code>DOWNLOAD_COMPLETED</code>.</li>
- *   <li><a href="#event_incomingData"><code>incomingData</code> event</a> triggers.</li></ol></li></ol></li>
+ *   triggers parameter payload <code>state</code> as <code>DOWNLOAD_COMPLETED</code>.</li></ol></li></ol></li>
  *   <li>If parameter <code>accept</code> value is <code>false</code>: <ol>
  *   <li><em>For User only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
  *   triggers parameter payload <code>state</code> as <code>REJECTED</code>.</li>
@@ -11758,7 +11682,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
   if (transferInfo.chunkType === self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER &&
     window.webrtcDetectedBrowser === 'firefox') {
     transferInfo.chunkType = self.DATA_TRANSFER_DATA_TYPE.BLOB;
-    transferInfo.chunkSize = self._MOZ_CHUNK_FILE_SIZE;
+    transferInfo.chunkSize = self._MOZ_BINARY_FILE_SIZE;
   }
 
   // Start checking if data transfer can start
@@ -12455,6 +12379,32 @@ Skylink.prototype._startDataTransfer = function(chunks, transferInfo, listOfPeer
   self._dataTransfers[transferId].peers[transferId] = {};
   self._dataTransfers[transferId].sessions = {};
   self._dataTransfers[transferId].chunks = chunks;
+  self._dataTransfers[transferId].enforceBSPeers = [];
+  self._dataTransfers[transferId].enforcedBSInfo = {};
+
+  // Check if fallback chunks is required
+  if ([self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER, self.DATA_TRANSFER_DATA_TYPE.BLOB].indexOf(
+    transferInfo.chunkType) > -1) {
+    for (var p = 0; p < listOfPeers.length; p++) {
+      var agentName = (((self._peerInformations[listOfPeers[p]]) || {}).agent || {}).name || '';
+
+      if (self._INTEROP_MULTI_TRANSFERS.indexOf(agentName) > -1) {
+        self._dataTransfers[transferId].enforceBSPeers.push(listOfPeers[p]);
+      }
+    }
+
+    if (self._dataTransfers[transferId].enforceBSPeers.length > 0) {
+      var bsChunkSize = window.webrtcDetectedBrowser === 'firefox' ? self._MOZ_CHUNK_FILE_SIZE : self._CHUNK_FILE_SIZE;
+      var bsChunks = self._chunkBlobData(new Blob(chunks), bsChunkSize);
+
+      self._dataTransfers[transferId].enforceBSInfo = {
+        chunkSize: 4 * Math.ceil(bsChunkSize / 3),
+        chunkType: self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
+        size: 4 * Math.ceil(transferInfo.originalSize / 3),
+        chunks: bsChunks
+      };
+    }
+  }
 
   /**
    * Complete Peer function.
@@ -12565,16 +12515,29 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
    * Send WRQ protocol to start data transfers.
    */
   var sendWRQFn = function () {
+    var size = self._dataTransfers[transferId].size;
+    var chunkSize = self._dataTransfers[transferId].chunkSize;
+    var chunkType = self._dataTransfers[transferId].chunkType;
+
+    if (self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) > -1) {
+      log.warn('Binary data chunks transfer is not yet supported with Peer connecting from Android/iOS SDK. ' +
+        'Fallbacking to binary string data chunks transfer.');
+
+      size = self._dataTransfers[transferId].enforceBSInfo.size;
+      chunkSize = self._dataTransfers[transferId].enforceBSInfo.chunkSize;
+      chunkType = self._dataTransfers[transferId].enforceBSInfo.chunkType;
+    }
+
     self._sendMessageToDataChannel(peerId, {
       type: self._DC_PROTOCOL_TYPE.WRQ,
       transferId: transferId,
       name: self._dataTransfers[transferId].name,
-      size: self._dataTransfers[transferId].size,
+      size: size,
       originalSize: self._dataTransfers[transferId].originalSize,
       dataType: self._dataTransfers[transferId].dataType,
       mimeType: self._dataTransfers[transferId].mimeType,
-      chunkType: self._dataTransfers[transferId].chunkType,
-      chunkSize: self._dataTransfers[transferId].chunkSize,
+      chunkType: chunkType,
+      chunkSize: chunkSize,
       timeout: self._dataTransfers[transferId].timeout,
       isPrivate: self._dataTransfers[transferId].isPrivate,
       sender: self._user.sid,
@@ -12588,7 +12551,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
         self._getTransferInfo(transferId, peerId, false, false, false), true);
 
       self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.USER_UPLOAD_REQUEST, transferId, evtPeerId,
-        self._getTransferInfo(transferId, peerId, true, false, false), null);      
+        self._getTransferInfo(transferId, peerId, true, false, false), null);
     });
   };
 
@@ -12603,7 +12566,9 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
         self.off('dataChannelState', dataChannelStateCbFn);
       }
 
-      self._dataTransfers[transferId].peers[channelProp][peerId] = true;
+      if (channelProp) {
+        self._dataTransfers[transferId].peers[channelProp][peerId] = true;
+      }
 
       if (state === self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED) {
         callback(peerId, null);
@@ -12627,7 +12592,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
             }
           }
         }
-        
+
         delete self._dataTransfers[transferId];
 
         if (self._dataChannels.MCU) {
@@ -12650,11 +12615,11 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
     };
 
     self.once('dataTransferState', dataTransferStateCbFn, function (state, evtTransferId, evtPeerId) {
-      if (!self._dataTransfers[transferId]) {
+      if (!(self._dataTransfers[transferId] && self._dataTransfers[transferId].sessions[peerId])) {
         self.off('dataTransferState', dataTransferStateCbFn);
         return;
       }
-      return evtTransferId === transferId && evtPeerId === peerId && 
+      return evtTransferId === transferId && evtPeerId === peerId &&
         [self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, self.DATA_TRANSFER_STATE.ERROR,
         self.DATA_TRANSFER_STATE.CANCEL, self.DATA_TRANSFER_STATE.REJECTED].indexOf(state) > -1;
     });
@@ -12770,6 +12735,8 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
     self._createDataChannel(peerId, transferId);
 
   } else {
+    self._dataChannels[peerId].main.transferId = transferId;
+
     sendWRQFn();
   }
 };
@@ -12818,18 +12785,21 @@ Skylink.prototype._getTransferInfo = function (transferId, peerId, returnDataPro
     if (this._dataTransfers[transferId].direction === this.DATA_TRANSFER_TYPE.DOWNLOAD) {
       if (this._dataTransfers[transferId].sessions[peerId].receivedSize === this._dataTransfers[transferId].sessions[peerId].size) {
         transferInfo.percentage = 100;
-  
+
       } else {
         transferInfo.percentage = parseFloat(((this._dataTransfers[transferId].sessions[peerId].receivedSize /
           this._dataTransfers[transferId].size) * 100).toFixed(2), 10);
       }
     } else {
-      if (this._dataTransfers[transferId].sessions[peerId].ackN === this._dataTransfers[transferId].chunks.length) {
+      var chunksLength = (this._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) > -1 ?
+        this._dataTransfers[transferId].enforceBSInfo.chunks.length : this._dataTransfers[transferId].chunks.length);
+
+      if (this._dataTransfers[transferId].sessions[peerId].ackN === chunksLength) {
         transferInfo.percentage = 100;
 
       } else {
         transferInfo.percentage = parseFloat(((this._dataTransfers[transferId].sessions[peerId].ackN /
-          this._dataTransfers[transferId].chunks.length) * 100).toFixed(2), 10);
+          chunksLength) * 100).toFixed(2), 10);
       }
     }
 
@@ -13159,7 +13129,7 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelProp) {
   var senderPeerId = data.sender || peerId;
 
   if (channelProp === 'main') {
-    transferId = self._dataTransfers[peerId].main.transferId;
+    transferId = self._dataChannels[peerId].main.transferId;
   }
 
   //self._handleDataTransferTimeoutForPeer(transferId, peerId, false);
@@ -13191,7 +13161,9 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelProp) {
         self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_STARTED, transferId, evtPeerId,
           self._getTransferInfo(transferId, peerId, true, false, 0), null);
       });
-    } else if (data.ackN === self._dataTransfers[transferId].chunks.length) {
+    } else if (self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) > -1 ?
+      data.ackN === self._dataTransfers[transferId].enforceBSInfo.chunks.length :
+      data.ackN === self._dataTransfers[transferId].chunks.length) {
       self._dataTransfers[transferId].sessions[peerId].ackN = data.ackN;
 
       emitEventFn(function (evtPeerId) {
@@ -13199,7 +13171,7 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelProp) {
           self._getTransferInfo(transferId, peerId, false, false, false), true);
 
         self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, transferId, evtPeerId,
-          self._getTransferInfo(transferId, peerId, true, false, 100), null);        
+          self._getTransferInfo(transferId, peerId, true, false, 100), null);
       });
 
       if (self._dataChannels[peerId][channelProp]) {
@@ -13227,15 +13199,15 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelProp) {
 
     self._dataTransfers[transferId].sessions[peerId].ackN = data.ackN;
 
-    if (self._dataTransfers[transferId].chunkType === self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING) {
+    if (self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) > -1) {
+      self._blobToBase64(self._dataTransfers[transferId].enforceBSInfo.chunks[data.ackN], uploadFn);
+    } else if (self._dataTransfers[transferId].chunkType === self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING) {
       self._blobToBase64(self._dataTransfers[transferId].chunks[data.ackN], uploadFn);
     } else if (self._dataTransfers[transferId].chunkType === self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER) {
       self._blobToArrayBuffer(self._dataTransfers[transferId].chunks[data.ackN], uploadFn);
     } else {
       uploadFn(self._dataTransfers[transferId].chunks[data.ackN]);
     }
-
-
   } else {
     self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.REJECTED, transferId, senderPeerId,
       self._getTransferInfo(transferId, peerId, true, false, false), {
@@ -13280,7 +13252,7 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelProp) {
   var senderPeerId = data.sender || peerId;
 
   if (channelProp === 'main') {
-    transferId = self._dataTransfers[peerId].main.transferId;
+    transferId = self._dataChannels[peerId].main.transferId;
   }
 
   self._handleDataTransferTimeoutForPeer(transferId, peerId, false);
@@ -13329,7 +13301,7 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelProp) {
   var transferId = channelProp;
 
   if (channelProp === 'main') {
-    transferId = self._dataTransfers[peerId].main.transferId;
+    transferId = self._dataChannels[peerId].main.transferId;
   }
 
   self._handleDataTransferTimeoutForPeer(transferId, peerId, false);

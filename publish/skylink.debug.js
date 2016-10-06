@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Oct 05 2016 23:17:59 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Thu Oct 06 2016 18:01:16 GMT+0800 (SGT) */
 
 (function() {
 
@@ -609,6 +609,17 @@ Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 12288;
 Skylink.prototype._BINARY_FILE_SIZE = 65456;
 
 /**
+ * Stores the data chunk size for binary Blob transfers.
+ * @attribute _MOZ_BINARY_FILE_SIZE
+ * @type Number
+ * @private
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._MOZ_BINARY_FILE_SIZE = 16384;
+
+/**
  * Stores the data chunk size for data URI string transfers.
  * @attribute _CHUNK_DATAURL_SIZE
  * @type Number
@@ -895,10 +906,10 @@ Skylink.prototype._dataTransfers = {};
  *   with all the Peer IDs provided.
  * - When not provided, it will start uploading data transfers with all the currently connected Peers in the Room.
  * @param {Boolean} [sendChunksAsBinary=false] <blockquote class="info">
- *   Note that this is currently not supported for MCU enabled Peer connections. This would fallback to
- *   <code>transferInfo.chunkType</code> to <code>BINARY_STRING</code> when MCU is connected.
- *   </blockquote> The flag if data transfer binary data chunks should not be
- *   encoded as Base64 string during data transfers.
+ *   Note that this is currently not supported for MCU enabled Peer connections or Peer connections connecting from
+ *   Android, iOS and Linux SDKs. This would fallback to <code>transferInfo.chunkType</code> to
+ *   <code>BINARY_STRING</code> when MCU is connected. </blockquote> The flag if data transfer
+ *   binary data chunks should not be encoded as Base64 string during data transfers.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_dataTransferState">
@@ -978,11 +989,11 @@ Skylink.prototype._dataTransfers = {};
  *   triggers parameter payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and
  *   return error.</li></ol></li></li></ol></ol></li></ol></li>
  *   <li>Starts the data transfer to Peer. <ol>
+ *   <li><a href="#event_incomingDataRequest"><code>incomingDataRequest</code> event</a> triggers.</li>
  *   <li><em>For User only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
  *   triggers parameter payload <code>state</code> as <code>USER_UPLOAD_REQUEST</code>.</li>
  *   <li><em>For Peer only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
  *   triggers parameter payload <code>state</code> as <code>UPLOAD_REQUEST</code>.</li>
- *   <li><a href="#event_incomingDataRequest"><code>incomingDataRequest</code> event</a> triggers.</li>
  *   <li>Peer invokes <a href="#method_acceptDataTransfer"><code>acceptDataTransfer()</code> method</a>. <ol>
  *   <li>If parameter <code>accept</code> value is <code>true</code>: <ol>
  *   <li>User starts upload data transfer to Peer. <ol>
@@ -1029,11 +1040,11 @@ Skylink.prototype._dataTransfers = {};
  *   <li><em>For Peer only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
  *   triggers parameter payload <code>state</code> as <code>DOWNLOADING</code>.</li></ol></li>
  *   <li>If data transfer has completed <ol>
+ *   <li><a href="#event_incomingData"><code>incomingData</code> event</a> triggers.</li>
  *   <li><em>For User only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
  *   triggers parameter payload <code>state</code> as <code>UPLOAD_COMPLETED</code>.</li>
  *   <li><em>For Peer only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
- *   triggers parameter payload <code>state</code> as <code>DOWNLOAD_COMPLETED</code>.</li>
- *   <li><a href="#event_incomingData"><code>incomingData</code> event</a> triggers.</li></ol></li></ol></li>
+ *   triggers parameter payload <code>state</code> as <code>DOWNLOAD_COMPLETED</code>.</li></ol></li></ol></li>
  *   <li>If parameter <code>accept</code> value is <code>false</code>: <ol>
  *   <li><em>For User only</em> <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
  *   triggers parameter payload <code>state</code> as <code>REJECTED</code>.</li>
@@ -1208,7 +1219,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
   if (transferInfo.chunkType === self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER &&
     window.webrtcDetectedBrowser === 'firefox') {
     transferInfo.chunkType = self.DATA_TRANSFER_DATA_TYPE.BLOB;
-    transferInfo.chunkSize = self._MOZ_CHUNK_FILE_SIZE;
+    transferInfo.chunkSize = self._MOZ_BINARY_FILE_SIZE;
   }
 
   // Start checking if data transfer can start
@@ -1905,6 +1916,32 @@ Skylink.prototype._startDataTransfer = function(chunks, transferInfo, listOfPeer
   self._dataTransfers[transferId].peers[transferId] = {};
   self._dataTransfers[transferId].sessions = {};
   self._dataTransfers[transferId].chunks = chunks;
+  self._dataTransfers[transferId].enforceBSPeers = [];
+  self._dataTransfers[transferId].enforcedBSInfo = {};
+
+  // Check if fallback chunks is required
+  if ([self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER, self.DATA_TRANSFER_DATA_TYPE.BLOB].indexOf(
+    transferInfo.chunkType) > -1) {
+    for (var p = 0; p < listOfPeers.length; p++) {
+      var agentName = (((self._peerInformations[listOfPeers[p]]) || {}).agent || {}).name || '';
+
+      if (self._INTEROP_MULTI_TRANSFERS.indexOf(agentName) > -1) {
+        self._dataTransfers[transferId].enforceBSPeers.push(listOfPeers[p]);
+      }
+    }
+
+    if (self._dataTransfers[transferId].enforceBSPeers.length > 0) {
+      var bsChunkSize = window.webrtcDetectedBrowser === 'firefox' ? self._MOZ_CHUNK_FILE_SIZE : self._CHUNK_FILE_SIZE;
+      var bsChunks = self._chunkBlobData(new Blob(chunks), bsChunkSize);
+
+      self._dataTransfers[transferId].enforceBSInfo = {
+        chunkSize: 4 * Math.ceil(bsChunkSize / 3),
+        chunkType: self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
+        size: 4 * Math.ceil(transferInfo.originalSize / 3),
+        chunks: bsChunks
+      };
+    }
+  }
 
   /**
    * Complete Peer function.
@@ -2015,16 +2052,29 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
    * Send WRQ protocol to start data transfers.
    */
   var sendWRQFn = function () {
+    var size = self._dataTransfers[transferId].size;
+    var chunkSize = self._dataTransfers[transferId].chunkSize;
+    var chunkType = self._dataTransfers[transferId].chunkType;
+
+    if (self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) > -1) {
+      log.warn('Binary data chunks transfer is not yet supported with Peer connecting from Android/iOS SDK. ' +
+        'Fallbacking to binary string data chunks transfer.');
+
+      size = self._dataTransfers[transferId].enforceBSInfo.size;
+      chunkSize = self._dataTransfers[transferId].enforceBSInfo.chunkSize;
+      chunkType = self._dataTransfers[transferId].enforceBSInfo.chunkType;
+    }
+
     self._sendMessageToDataChannel(peerId, {
       type: self._DC_PROTOCOL_TYPE.WRQ,
       transferId: transferId,
       name: self._dataTransfers[transferId].name,
-      size: self._dataTransfers[transferId].size,
+      size: size,
       originalSize: self._dataTransfers[transferId].originalSize,
       dataType: self._dataTransfers[transferId].dataType,
       mimeType: self._dataTransfers[transferId].mimeType,
-      chunkType: self._dataTransfers[transferId].chunkType,
-      chunkSize: self._dataTransfers[transferId].chunkSize,
+      chunkType: chunkType,
+      chunkSize: chunkSize,
       timeout: self._dataTransfers[transferId].timeout,
       isPrivate: self._dataTransfers[transferId].isPrivate,
       sender: self._user.sid,
@@ -2038,7 +2088,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
         self._getTransferInfo(transferId, peerId, false, false, false), true);
 
       self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.USER_UPLOAD_REQUEST, transferId, evtPeerId,
-        self._getTransferInfo(transferId, peerId, true, false, false), null);      
+        self._getTransferInfo(transferId, peerId, true, false, false), null);
     });
   };
 
@@ -2053,7 +2103,9 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
         self.off('dataChannelState', dataChannelStateCbFn);
       }
 
-      self._dataTransfers[transferId].peers[channelProp][peerId] = true;
+      if (channelProp) {
+        self._dataTransfers[transferId].peers[channelProp][peerId] = true;
+      }
 
       if (state === self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED) {
         callback(peerId, null);
@@ -2077,7 +2129,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
             }
           }
         }
-        
+
         delete self._dataTransfers[transferId];
 
         if (self._dataChannels.MCU) {
@@ -2100,11 +2152,11 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
     };
 
     self.once('dataTransferState', dataTransferStateCbFn, function (state, evtTransferId, evtPeerId) {
-      if (!self._dataTransfers[transferId]) {
+      if (!(self._dataTransfers[transferId] && self._dataTransfers[transferId].sessions[peerId])) {
         self.off('dataTransferState', dataTransferStateCbFn);
         return;
       }
-      return evtTransferId === transferId && evtPeerId === peerId && 
+      return evtTransferId === transferId && evtPeerId === peerId &&
         [self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, self.DATA_TRANSFER_STATE.ERROR,
         self.DATA_TRANSFER_STATE.CANCEL, self.DATA_TRANSFER_STATE.REJECTED].indexOf(state) > -1;
     });
@@ -2220,6 +2272,8 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
     self._createDataChannel(peerId, transferId);
 
   } else {
+    self._dataChannels[peerId].main.transferId = transferId;
+
     sendWRQFn();
   }
 };
@@ -2268,18 +2322,21 @@ Skylink.prototype._getTransferInfo = function (transferId, peerId, returnDataPro
     if (this._dataTransfers[transferId].direction === this.DATA_TRANSFER_TYPE.DOWNLOAD) {
       if (this._dataTransfers[transferId].sessions[peerId].receivedSize === this._dataTransfers[transferId].sessions[peerId].size) {
         transferInfo.percentage = 100;
-  
+
       } else {
         transferInfo.percentage = parseFloat(((this._dataTransfers[transferId].sessions[peerId].receivedSize /
           this._dataTransfers[transferId].size) * 100).toFixed(2), 10);
       }
     } else {
-      if (this._dataTransfers[transferId].sessions[peerId].ackN === this._dataTransfers[transferId].chunks.length) {
+      var chunksLength = (this._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) > -1 ?
+        this._dataTransfers[transferId].enforceBSInfo.chunks.length : this._dataTransfers[transferId].chunks.length);
+
+      if (this._dataTransfers[transferId].sessions[peerId].ackN === chunksLength) {
         transferInfo.percentage = 100;
 
       } else {
         transferInfo.percentage = parseFloat(((this._dataTransfers[transferId].sessions[peerId].ackN /
-          this._dataTransfers[transferId].chunks.length) * 100).toFixed(2), 10);
+          chunksLength) * 100).toFixed(2), 10);
       }
     }
 
@@ -2609,7 +2666,7 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelProp) {
   var senderPeerId = data.sender || peerId;
 
   if (channelProp === 'main') {
-    transferId = self._dataTransfers[peerId].main.transferId;
+    transferId = self._dataChannels[peerId].main.transferId;
   }
 
   //self._handleDataTransferTimeoutForPeer(transferId, peerId, false);
@@ -2641,7 +2698,9 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelProp) {
         self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_STARTED, transferId, evtPeerId,
           self._getTransferInfo(transferId, peerId, true, false, 0), null);
       });
-    } else if (data.ackN === self._dataTransfers[transferId].chunks.length) {
+    } else if (self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) > -1 ?
+      data.ackN === self._dataTransfers[transferId].enforceBSInfo.chunks.length :
+      data.ackN === self._dataTransfers[transferId].chunks.length) {
       self._dataTransfers[transferId].sessions[peerId].ackN = data.ackN;
 
       emitEventFn(function (evtPeerId) {
@@ -2649,7 +2708,7 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelProp) {
           self._getTransferInfo(transferId, peerId, false, false, false), true);
 
         self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, transferId, evtPeerId,
-          self._getTransferInfo(transferId, peerId, true, false, 100), null);        
+          self._getTransferInfo(transferId, peerId, true, false, 100), null);
       });
 
       if (self._dataChannels[peerId][channelProp]) {
@@ -2677,15 +2736,15 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelProp) {
 
     self._dataTransfers[transferId].sessions[peerId].ackN = data.ackN;
 
-    if (self._dataTransfers[transferId].chunkType === self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING) {
+    if (self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) > -1) {
+      self._blobToBase64(self._dataTransfers[transferId].enforceBSInfo.chunks[data.ackN], uploadFn);
+    } else if (self._dataTransfers[transferId].chunkType === self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING) {
       self._blobToBase64(self._dataTransfers[transferId].chunks[data.ackN], uploadFn);
     } else if (self._dataTransfers[transferId].chunkType === self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER) {
       self._blobToArrayBuffer(self._dataTransfers[transferId].chunks[data.ackN], uploadFn);
     } else {
       uploadFn(self._dataTransfers[transferId].chunks[data.ackN]);
     }
-
-
   } else {
     self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.REJECTED, transferId, senderPeerId,
       self._getTransferInfo(transferId, peerId, true, false, false), {
@@ -2730,7 +2789,7 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelProp) {
   var senderPeerId = data.sender || peerId;
 
   if (channelProp === 'main') {
-    transferId = self._dataTransfers[peerId].main.transferId;
+    transferId = self._dataChannels[peerId].main.transferId;
   }
 
   self._handleDataTransferTimeoutForPeer(transferId, peerId, false);
@@ -2779,7 +2838,7 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelProp) {
   var transferId = channelProp;
 
   if (channelProp === 'main') {
-    transferId = self._dataTransfers[peerId].main.transferId;
+    transferId = self._dataChannels[peerId].main.transferId;
   }
 
   self._handleDataTransferTimeoutForPeer(transferId, peerId, false);
