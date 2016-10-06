@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Thu Oct 06 2016 18:01:16 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Thu Oct 06 2016 18:09:15 GMT+0800 (SGT) */
 
 (function() {
 
@@ -873,6 +873,7 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
 
 /**
  * Stores the list of types of SDKs that do not support simultaneous data transfers.
+ * This is also used for Web only fixes we allow.
  * @attribute _INTEROP_MULTI_TRANSFERS
  * @type Array
  * @readOnly
@@ -880,7 +881,7 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
  * @for Skylink
  * @since 0.6.1
  */
-Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['Android', 'iOS'];
+Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['Android', 'iOS', 'cpp'];
 
 /**
  * Stores the list of data transfers from / to Peers.
@@ -895,7 +896,7 @@ Skylink.prototype._dataTransfers = {};
 
 /**
  * <blockquote class="info">
- *   Note that Android and iOS SDKs do not support simultaneous data transfers.
+ *   Note that Android, iOS and C++ SDKs do not support simultaneous data transfers.
  * </blockquote>
  * Function that starts an uploading data transfer from User to Peers.
  * @method sendBlobData
@@ -1267,7 +1268,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
 
 /**
  * <blockquote class="info">
- *   Currently, the Android and iOS SDKs do not support this type of data transfer session.
+ *   Currently, the Android, iOS and C++ SDKs do not support this type of data transfer session.
  * </blockquote>
  * Function that starts an uploading string data transfer from User to Peers.
  * @method sendURLData
@@ -2057,8 +2058,9 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
     var chunkType = self._dataTransfers[transferId].chunkType;
 
     if (self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) > -1) {
-      log.warn('Binary data chunks transfer is not yet supported with Peer connecting from Android/iOS SDK. ' +
-        'Fallbacking to binary string data chunks transfer.');
+      log.warn([peerId, 'RTCDataChannel', transferId,
+        'Binary data chunks transfer is not yet supported with Peer connecting from ' +
+        'Android, iOS and C++ SDK. Fallbacking to binary string data chunks transfer.']);
 
       size = self._dataTransfers[transferId].enforceBSInfo.size;
       chunkSize = self._dataTransfers[transferId].enforceBSInfo.chunkSize;
@@ -3545,7 +3547,7 @@ Skylink.prototype._peerConnections = {};
  * <blockquote class="info">
  *   For MCU enabled Peer connections, the restart functionality may differ, you may learn more about how to workaround
  *   it <a href="http://support.temasys.com.sg/support/discussions/topics/12000002853">in this article here</a>.<br>
- *   For restarts with Peers connecting from Android or iOS SDKs, restarts might not work as written in
+ *   For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in
  *   <a href="http://support.temasys.com.sg/support/discussions/topics/12000005188">in this article here</a>.<br>
  *   Note that this functionality should be used when Peer connection stream freezes during a connection,
  *   and is throttled when invoked many times in less than 3 seconds interval.
@@ -4272,7 +4274,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // prevent restarts for other SDK clients
-  if (['Android', 'iOS', 'cpp'].indexOf(agent.name) > -1) {
+  if (self._INTEROP_MULTI_TRANSFERS.indexOf(agent.name) > -1) {
     var notSupportedError = new Error('Failed restarting with other agents connecting from other SDKs as ' +
       're-negotiation is not supported by other SDKs');
 

@@ -131,6 +131,7 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
 
 /**
  * Stores the list of types of SDKs that do not support simultaneous data transfers.
+ * This is also used for Web only fixes we allow.
  * @attribute _INTEROP_MULTI_TRANSFERS
  * @type Array
  * @readOnly
@@ -138,7 +139,7 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
  * @for Skylink
  * @since 0.6.1
  */
-Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['Android', 'iOS'];
+Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['Android', 'iOS', 'cpp'];
 
 /**
  * Stores the list of data transfers from / to Peers.
@@ -153,7 +154,7 @@ Skylink.prototype._dataTransfers = {};
 
 /**
  * <blockquote class="info">
- *   Note that Android and iOS SDKs do not support simultaneous data transfers.
+ *   Note that Android, iOS and C++ SDKs do not support simultaneous data transfers.
  * </blockquote>
  * Function that starts an uploading data transfer from User to Peers.
  * @method sendBlobData
@@ -525,7 +526,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
 
 /**
  * <blockquote class="info">
- *   Currently, the Android and iOS SDKs do not support this type of data transfer session.
+ *   Currently, the Android, iOS and C++ SDKs do not support this type of data transfer session.
  * </blockquote>
  * Function that starts an uploading string data transfer from User to Peers.
  * @method sendURLData
@@ -1315,8 +1316,9 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
     var chunkType = self._dataTransfers[transferId].chunkType;
 
     if (self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) > -1) {
-      log.warn('Binary data chunks transfer is not yet supported with Peer connecting from Android/iOS SDK. ' +
-        'Fallbacking to binary string data chunks transfer.');
+      log.warn([peerId, 'RTCDataChannel', transferId,
+        'Binary data chunks transfer is not yet supported with Peer connecting from ' +
+        'Android, iOS and C++ SDK. Fallbacking to binary string data chunks transfer.']);
 
       size = self._dataTransfers[transferId].enforceBSInfo.size;
       chunkSize = self._dataTransfers[transferId].enforceBSInfo.chunkSize;

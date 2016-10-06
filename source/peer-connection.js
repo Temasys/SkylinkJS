@@ -109,7 +109,7 @@ Skylink.prototype._peerConnections = {};
  * <blockquote class="info">
  *   For MCU enabled Peer connections, the restart functionality may differ, you may learn more about how to workaround
  *   it <a href="http://support.temasys.com.sg/support/discussions/topics/12000002853">in this article here</a>.<br>
- *   For restarts with Peers connecting from Android or iOS SDKs, restarts might not work as written in
+ *   For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in
  *   <a href="http://support.temasys.com.sg/support/discussions/topics/12000005188">in this article here</a>.<br>
  *   Note that this functionality should be used when Peer connection stream freezes during a connection,
  *   and is throttled when invoked many times in less than 3 seconds interval.
@@ -836,7 +836,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // prevent restarts for other SDK clients
-  if (['Android', 'iOS', 'cpp'].indexOf(agent.name) > -1) {
+  if (self._INTEROP_MULTI_TRANSFERS.indexOf(agent.name) > -1) {
     var notSupportedError = new Error('Failed restarting with other agents connecting from other SDKs as ' +
       're-negotiation is not supported by other SDKs');
 
