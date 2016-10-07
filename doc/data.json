@@ -803,31 +803,6 @@
                             "type": "JSON",
                             "props": [
                                 {
-                                    "name": "transferId",
-                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <code>callback.error.transferInfo.transferId</code> instead.\n  </blockquote> The data transfer ID.\n  <small>Defined only for single targeted Peer data transfer.</small>",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "state",
-                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <a href=\"#event_dataTransferState\"><code>dataTransferState</code>\n  event</a> instead. </blockquote> The data transfer state that resulted in error.\n  <small>Defined only for single targeted Peer data transfer.</small> [Rel: Skylink.DATA_TRANSFER_STATE]",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "peerId",
-                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <code>callback.error.listOfPeers</code> instead.\n  </blockquote> The targeted Peer ID for data transfer.\n  <small>Defined only for single targeted Peer data transfer.</small>",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "isPrivate",
-                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <code>callback.error.transferInfo.isPrivate</code> instead.\n  </blockquote> The flag if data transfer is targeted or not, basing\n  off the <code>targetPeerId</code> parameter being defined.\n  <small>Defined only for single targeted Peer data transfer.</small>",
-                                    "type": "Boolean"
-                                },
-                                {
-                                    "name": "error",
-                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <code>callback.error.transferErrors</code> instead.\n  </blockquote> The error received that resulted in error.\n  <small>Defined only for single targeted Peer data transfer.</small>",
-                                    "type": "Error|String"
-                                },
-                                {
                                     "name": "listOfPeers",
                                     "description": "The list Peer IDs targeted for the data transfer.",
                                     "type": "Array"
@@ -855,26 +830,6 @@
                             "type": "JSON",
                             "props": [
                                 {
-                                    "name": "transferId",
-                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <code>callback.success.transferInfo.transferId</code> instead.\n  </blockquote> The data transfer ID.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "state",
-                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <a href=\"#event_dataTransferState\"><code>dataTransferState</code>\n  event</a> instead. </blockquote> The data transfer state that resulted in error.\n  <small>Defined only for single targeted Peer data transfer.</small> [Rel: Skylink.DATA_TRANSFER_STATE]",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "peerId",
-                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <code>callback.success.listOfPeers</code> instead.\n  </blockquote> The targeted Peer ID for data transfer.\n  <small>Defined only for single targeted Peer data transfer.</small>",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "isPrivate",
-                                    "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This property has been deprecated.\n  Please use <code>callback.success.transferInfo.isPrivate</code> instead.\n  </blockquote> The flag if data transfer is targeted or not, basing\n  off the <code>targetPeerId</code> parameter being defined.\n  <small>Defined only for single targeted Peer data transfer.</small>",
-                                    "type": "Boolean"
-                                },
-                                {
                                     "name": "listOfPeers",
                                     "description": "The list Peer IDs targeted for the data transfer.",
                                     "type": "Array"
@@ -898,22 +853,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 555,
-            "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This method has been deprecated, please use <a href=\"#method_acceptDataTransfer\">\n  <code>acceptDataTransfer()</code> method</a> instead.\n</blockquote>\nFunction that accepts or rejects an upload data transfer request from Peer to User.\n<small>Parameter signature follows <a href=\"#method_acceptDataTransfer\">\n<code>acceptDataTransfer()</code> method</a>.</small>",
-            "itemtype": "method",
-            "name": "respondBlobRequest",
-            "example": [
-                "\n  // Example 1: Accept Peer upload data transfer request\n  skylinkDemo.on(\"incomingDataRequest\", function (transferId, peerId, transferInfo, isSelf) {\n     if (!isSelf) {\n       skylinkDemo.respondBlobRequest(peerId, transferId, true);\n     }\n  });\n\n  // Example 2: Reject Peer upload data transfer request\n  skylinkDemo.on(\"incomingDataRequest\", function (transferId, peerId, transferInfo, isSelf) {\n     if (!isSelf) {\n       skylinkDemo.respondBlobRequest(peerId, transferId, false);\n     }\n  });"
-            ],
-            "deprecated": true,
-            "deprecationMessage": "true",
-            "trigger": "<small>Event sequence follows <a href=\"#method_sendBlobData\">\n<code>sendBlobData()</code> method</a> after <code>acceptDataTransfer()</code> method is invoked.</small>",
-            "since": "0.5.0",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/data-transfer.js",
-            "line": 585,
+            "line": 509,
             "description": "Function that accepts or rejects an upload data transfer request from Peer to User.",
             "itemtype": "method",
             "name": "acceptDataTransfer",
@@ -945,22 +885,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 682,
-            "description": "<blockquote class=\"info\">\n  <b>Deprecation Warning!</b> This method has been deprecated, please use <a href=\"#method_cancelDataTransfer\">\n  <code>method_cancelDataTransfer()</code> method</a> instead.\n</blockquote>\nFunction that terminates a currently uploading / downloading data transfer from / to Peer.\n<small>Parameter signature follows <a href=\"#method_cancelDataTransfer\">\n<code>cancelDataTransfer()</code> method</a>.</small>",
-            "itemtype": "method",
-            "name": "cancelBlobTransfer",
-            "trigger": "<small>Event sequence follows <a href=\"#method_sendBlobData\">\n<code>sendBlobData()</code> method</a> after <code>cancelDataTransfer()</code> method is invoked.</small>",
-            "example": [
-                "\n  // Example 1: Cancel Peer data transfer\n  var transferSessions = {};\n\n  skylinkDemo.on(\"dataTransferState\", function (state, transferId, peerId) {\n    if ([skylinkDemo.DATA_TRANSFER_STATE.DOWNLOAD_STARTED,\n      skylinkDemo.DATA_TRANSFER_STATE.UPLOAD_STARTED].indexOf(state) > -1) {\n      if (!Array.isArray(transferSessions[transferId])) {\n        transferSessions[transferId] = [];\n      }\n      transferSessions[transferId].push(peerId);\n    } else {\n      transferSessions[transferId].splice(transferSessions[transferId].indexOf(peerId), 1);\n    }\n  });\n\n  function cancelTransfer (peerId, transferId) {\n    skylinkDemo.cancelBlobTransfer(peerId, transferId);\n  }"
-            ],
-            "deprecated": true,
-            "deprecationMessage": "true",
-            "since": "0.5.7",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/data-transfer.js",
-            "line": 719,
+            "line": 607,
             "description": "Function that terminates a currently uploading / downloading data transfer from / to Peer.",
             "itemtype": "method",
             "name": "cancelDataTransfer",
@@ -985,7 +910,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 824,
+            "line": 713,
             "description": "Function that sends a message to Peers via the Datachannel connection.\n<small>Consider using <a href=\"#method_sendURLData\"><code>sendURLData()</code> method</a> if you are\nsending large strings to Peers.</small>",
             "itemtype": "method",
             "name": "sendP2PMessage",
@@ -1011,7 +936,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 956,
+            "line": 845,
             "description": "<blockquote class=\"info\">\n  Currently, the Android and iOS SDKs do not support this type of data transfer.\n</blockquote>\nFunction that starts an uploading string data transfer from User to Peers.",
             "itemtype": "method",
             "name": "sendURLData",
@@ -1031,7 +956,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1206,
+            "line": 1095,
             "description": "Function that sets the data transfer \"wait-for-response\" timeout.\nWhen there is not response after timeout, the data transfer will be terminated.",
             "itemtype": "method",
             "name": "_setDataChannelTimeout",
@@ -1042,7 +967,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1252,
+            "line": 1141,
             "description": "Function that stops and clears the data transfer \"wait-for-response\" timeout.",
             "itemtype": "method",
             "name": "_clearDataChannelTimeout",
@@ -1053,7 +978,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1270,
+            "line": 1159,
             "description": "Function that starts a data transfer to Peer.\nThis will open a new data type of Datachannel connection with Peer if\n  simultaneous data transfers is supported by Peer.",
             "itemtype": "method",
             "name": "_sendBlobDataToPeer",
@@ -1064,7 +989,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1486,
+            "line": 1375,
             "description": "Function that handles the data received from Datachannel and\n  routes to the relevant data transfer protocol handler.",
             "itemtype": "method",
             "name": "_dataChannelProtocolHandler",
@@ -1075,7 +1000,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1553,
+            "line": 1442,
             "description": "Function that handles the \"WRQ\" data transfer protocol.",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
@@ -1086,7 +1011,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1607,
+            "line": 1496,
             "description": "Function that handles the \"ACK\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
@@ -1097,7 +1022,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1754,
+            "line": 1643,
             "description": "Function that handles the \"MESSAGE\" data transfer protocol.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -1108,7 +1033,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1774,
+            "line": 1663,
             "description": "Function that handles the \"ERROR\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -1119,7 +1044,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1814,
+            "line": 1703,
             "description": "Function that handles the \"CANCEL\" data transfer protocol.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -1130,7 +1055,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1893,
+            "line": 1782,
             "description": "Function that handles the data transfer chunk received.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
@@ -1141,7 +1066,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2118,
+            "line": 2007,
             "description": "Function that start the data transfer with the list of targeted Peer IDs provided.\nAt this stage, it will open a new Datachannel connection if simultaneous data transfers is\n  supported by Peer, or it will using the messaging type Datachannel connection.\nNote that 1 data transfer can occur at a time in 1 Datachannel connection.",
             "itemtype": "method",
             "name": "_startDataTransfer",
@@ -2754,30 +2679,6 @@
         {
             "file": "source/room-init.js",
             "line": 127,
-            "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This constant has been deprecated.<br>Automatic nearest regional server has been implemented\n  on the platform.\n</blockquote>\nThe list of available Auth servers in these regions configured in the\n<a href=\"#method_init\"><code>init()</code> method</a>.",
-            "itemtype": "attribute",
-            "name": "REGIONAL_SERVER",
-            "params": [
-                {
-                    "name": "APAC1",
-                    "description": "<small>Value <code>\"sg\"</code></small>\n  The value of the option to use the Auth server in Asia Pacific (APAC).",
-                    "type": "String"
-                },
-                {
-                    "name": "US1",
-                    "description": "<small>Value <code>\"us2\"</code></small>\n  The value of the option to use the Auth server in United States (US).",
-                    "type": "String"
-                }
-            ],
-            "deprecated": true,
-            "type": "JSON",
-            "readonly": "",
-            "since": "0.5.0",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/room-init.js",
-            "line": 150,
             "description": "Stores the flag if HTTPS connections should be enforced when connecting to\n  the API or Signaling server if App is accessing from HTTP domain.\nHTTPS connections are enforced if App is accessing from HTTPS domains.",
             "itemtype": "attribute",
             "name": "_forceSSL",
@@ -2790,7 +2691,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 163,
+            "line": 140,
             "description": "Stores the flag if TURNS connections should be enforced when connecting to\n  the TURN server if App is accessing from HTTP domain.\nTURNS connections are enforced if App is accessing from HTTPS domains.",
             "itemtype": "attribute",
             "name": "_forceTURNSSL",
@@ -2803,7 +2704,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 176,
+            "line": 153,
             "description": "Stores the flag if TURN connections should be enforced when connecting to Peers.\nThis filters all non \"relay\" ICE candidates to enforce connections via the TURN server.",
             "itemtype": "attribute",
             "name": "_forceTURN",
@@ -2816,7 +2717,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 188,
+            "line": 165,
             "description": "Stores the construct API REST path to obtain Room credentials.",
             "itemtype": "attribute",
             "name": "_path",
@@ -2828,19 +2729,20 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 198,
-            "description": "Stores the server region for the Signaling server to use.\nThis is already deprecated an no longer useful. To discuss and remove.",
+            "line": 175,
+            "description": "Spoofs the REGIONAL_SERVER to prevent errors on deployed apps except the fact this no longer works.\nAutomatic regional selection has already been implemented hence REGIONAL_SERVER is no longer useful.",
             "itemtype": "attribute",
-            "name": "_serverRegion",
-            "type": "String",
+            "name": "REGIONAL_SERVER",
+            "type": "JSON",
+            "readonly": "",
             "access": "private",
             "tagname": "",
-            "since": "0.5.0",
+            "since": "0.6.16",
             "class": "Skylink"
         },
         {
             "file": "source/room-init.js",
-            "line": 209,
+            "line": 187,
             "description": "Stores the API server url.",
             "itemtype": "attribute",
             "name": "_roomServer",
@@ -2852,7 +2754,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 219,
+            "line": 197,
             "description": "Stores the App Key configured in <code>init()</code>.",
             "itemtype": "attribute",
             "name": "_appKey",
@@ -2864,7 +2766,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 229,
+            "line": 207,
             "description": "Stores the default Room name to connect to when <code>joinRoom()</code> does not provide a Room name.",
             "itemtype": "attribute",
             "name": "_defaultRoom",
@@ -2876,7 +2778,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 239,
+            "line": 217,
             "description": "Stores the <code>init()</code> credentials starting DateTime stamp in ISO 8601.",
             "itemtype": "attribute",
             "name": "_roomStart",
@@ -2888,7 +2790,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 249,
+            "line": 227,
             "description": "Stores the <code>init()</code> credentials duration counted in hours.",
             "itemtype": "attribute",
             "name": "_roomDuration",
@@ -2900,7 +2802,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 259,
+            "line": 237,
             "description": "Stores the <code>init()</code> generated credentials string.",
             "itemtype": "attribute",
             "name": "_roomCredentials",
@@ -2912,7 +2814,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 269,
+            "line": 247,
             "description": "Stores the current <code>init()</code> readyState.",
             "itemtype": "attribute",
             "name": "_readyState",
@@ -2924,7 +2826,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 279,
+            "line": 257,
             "description": "Stores the \"cid\" used for <code>joinRoom()</code>.",
             "itemtype": "attribute",
             "name": "_key",
@@ -2936,7 +2838,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 289,
+            "line": 267,
             "description": "Stores the \"apiOwner\" used for <code>joinRoom()</code>.",
             "itemtype": "attribute",
             "name": "_appKeyOwner",
@@ -2948,7 +2850,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 299,
+            "line": 277,
             "description": "Stores the Room credentials information for <code>joinRoom()</code>.",
             "itemtype": "attribute",
             "name": "_room",
@@ -2987,7 +2889,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 315,
+            "line": 293,
             "description": "Function that authenticates and initialises App Key used for Room connections.",
             "itemtype": "method",
             "name": "init",
@@ -3011,12 +2913,6 @@
                         {
                             "name": "roomServer",
                             "description": "The Auth server.\n<small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>",
-                            "type": "String",
-                            "optional": true
-                        },
-                        {
-                            "name": "region",
-                            "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This option has been deprecated.<br>Automatic nearest regional server has been implemented\n  on the platform.</blockquote>\n  The Auth server in the various regions to connect to for better connectivity.\n  [Rel: Skylink.REGIONAL_SERVER]",
                             "type": "String",
                             "optional": true
                         },
@@ -3222,11 +3118,6 @@
                                     "type": "Boolean"
                                 },
                                 {
-                                    "name": "serverRegion",
-                                    "description": "The configured value of the <code>options.region</code>.",
-                                    "type": "String"
-                                },
-                                {
                                     "name": "audioFallback",
                                     "description": "The configured value of the <code>options.audioFallback</code>.",
                                     "type": "Boolean"
@@ -3280,7 +3171,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 770,
+            "line": 742,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -3291,7 +3182,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 844,
+            "line": 816,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -3302,7 +3193,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 917,
+            "line": 889,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -3313,7 +3204,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1008,
+            "line": 980,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -6821,31 +6712,19 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:555"
+            "line": " source/data-transfer.js:509"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:585"
+            "line": " source/data-transfer.js:607"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:682"
+            "line": " source/data-transfer.js:713"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:682"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:719"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:824"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:956"
+            "line": " source/data-transfer.js:845"
         },
         {
             "message": "unknown tag: trigger",
@@ -6885,7 +6764,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:315"
+            "line": " source/room-init.js:293"
         },
         {
             "message": "unknown tag: scoped",

@@ -216,29 +216,6 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
 };
 
 /**
- * &lt;blockquote class=&quot;info&quot;&gt;&lt;b&gt;Deprecation Warning!&lt;/b&gt;
- *   This constant has been deprecated.&lt;br&gt;Automatic nearest regional server has been implemented
- *   on the platform.
- * &lt;/blockquote&gt;
- * The list of available Auth servers in these regions configured in the
- * &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;.
- * @attribute REGIONAL_SERVER
- * @param {String} APAC1 &lt;small&gt;Value &lt;code&gt;&quot;sg&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the option to use the Auth server in Asia Pacific (APAC).
- * @param {String} US1   &lt;small&gt;Value &lt;code&gt;&quot;us2&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the option to use the Auth server in United States (US).
- * @deprecated
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.5.0
- */
-Skylink.prototype.REGIONAL_SERVER = {
-  APAC1: &#x27;sg&#x27;,
-  US1: &#x27;us2&#x27;
-};
-
-/**
  * Stores the flag if HTTPS connections should be enforced when connecting to
  *   the API or Signaling server if App is accessing from HTTP domain.
  * HTTPS connections are enforced if App is accessing from HTTPS domains.
@@ -287,15 +264,16 @@ Skylink.prototype._forceTURN = false;
 Skylink.prototype._path = null;
 
 /**
- * Stores the server region for the Signaling server to use.
- * This is already deprecated an no longer useful. To discuss and remove.
- * @attribute _serverRegion
- * @type String
+ * Spoofs the REGIONAL_SERVER to prevent errors on deployed apps except the fact this no longer works.
+ * Automatic regional selection has already been implemented hence REGIONAL_SERVER is no longer useful.
+ * @attribute REGIONAL_SERVER
+ * @type JSON
+ * @readOnly
  * @private
  * @for Skylink
- * @since 0.5.0
+ * @since 0.6.16
  */
-Skylink.prototype._serverRegion = null;
+Skylink.prototype.REGIONAL_SERVER = {};
 
 /**
  * Stores the API server url.
@@ -425,11 +403,6 @@ Skylink.prototype._room = null;
  *   The Room that User will be connected to is the &lt;code&gt;defaultRoom&lt;/code&gt; provided.&lt;/small&gt;
  * @param {String} [options.roomServer] The Auth server.
  * &lt;small&gt;Note that this is a debugging feature and is only used when instructed for debugging purposes.&lt;/small&gt;
- * @param {String} [options.region] &lt;blockquote class=&quot;info&quot;&gt;&lt;b&gt;Deprecation Warning!&lt;/b&gt;
- *   This option has been deprecated.&lt;br&gt;Automatic nearest regional server has been implemented
- *   on the platform.&lt;/blockquote&gt;
- *   The Auth server in the various regions to connect to for better connectivity.
- *   [Rel: Skylink.REGIONAL_SERVER]
  * @param {Boolean} [options.enableIceTrickle=true] The flag if Peer connections should
  *   trickle ICE for faster connectivity.
  * @param {Boolean} [options.enableDataChannel=true] The flag if Datachannel connections should be enabled.
@@ -542,7 +515,6 @@ Skylink.prototype._room = null;
  * @param {Boolean} callback.success.enableTURNServer The configured value of the &lt;code&gt;options.enableTURNServer&lt;/code&gt;.
  * @param {Boolean} callback.success.enableSTUNServer The configured value of the &lt;code&gt;options.enableSTUNServer&lt;/code&gt;.
  * @param {Boolean} callback.success.TURNTransport The configured value of the &lt;code&gt;options.TURNServerTransport&lt;/code&gt;.
- * @param {String} callback.success.serverRegion The configured value of the &lt;code&gt;options.region&lt;/code&gt;.
  * @param {Boolean} callback.success.audioFallback The configured value of the &lt;code&gt;options.audioFallback&lt;/code&gt;.
  * @param {Boolean} callback.success.forceSSL The configured value of the &lt;code&gt;options.forceSSL&lt;/code&gt;.
  * @param {String} callback.success.audioCodec The configured value of the &lt;code&gt;options.audioCodec&lt;/code&gt;.
