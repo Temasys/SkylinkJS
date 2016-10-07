@@ -327,13 +327,16 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
     throw new Error(notOpenError);
   }
 
-  log.debug([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Sending message ->'], data);
-
   try {
-    if (doNotConvert) {
-      self._dataChannels[peerId][channelProp].channel.send(data);
+    if (!doNotConvert && typeof data === 'object') {
+      log.debug([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Sending message ->'], data);
+
+      self._dataChannels[peerId][channelProp].channel.send(JSON.stringify(data));
+
     } else {
-      self._dataChannels[peerId][channelProp].channel.send(typeof data === 'object' ? JSON.stringify(data) : data);
+      log.debug([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Sending data with size ->'], data.size || data.length);
+
+      self._dataChannels[peerId][channelProp].channel.send(data);
     }
   } catch (error) {
     log.error([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Failed sending message ->'], error);

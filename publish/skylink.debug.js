@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Fri Oct 07 2016 17:38:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Fri Oct 07 2016 18:50:39 GMT+0800 (SGT) */
 
 (function() {
 
@@ -537,13 +537,16 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
     throw new Error(notOpenError);
   }
 
-  log.debug([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Sending message ->'], data);
-
   try {
-    if (doNotConvert) {
-      self._dataChannels[peerId][channelProp].channel.send(data);
+    if (!doNotConvert && typeof data === 'object') {
+      log.debug([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Sending message ->'], data);
+
+      self._dataChannels[peerId][channelProp].channel.send(JSON.stringify(data));
+
     } else {
-      self._dataChannels[peerId][channelProp].channel.send(typeof data === 'object' ? JSON.stringify(data) : data);
+      log.debug([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Sending data with size ->'], data.size || data.length);
+
+      self._dataChannels[peerId][channelProp].channel.send(data);
     }
   } catch (error) {
     log.error([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Failed sending message ->'], error);
@@ -2275,7 +2278,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
 
   dataChannelStateCbFn = function (state, evtPeerId, error) {
     // Prevent from triggering in instances where the ackN === chunks.length
-    if (self._dataTransfers[transferId].sessions[peerId].ackN === (self._dataTransfers[transferId].chunks.length - 1)) {
+    if (self._dataTransfers[transferId].sessions[peerId].ackN >= (self._dataTransfers[transferId].chunks.length - 1)) {
       return;
     }
 
@@ -2592,6 +2595,8 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
     } catch (error) {
       if (rawData.indexOf('{') > -1 && rawData.indexOf('}') > 0) {
         log.error([peerId, 'RTCDataChannel', channelProp, 'Received error ->'], error);
+
+        self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error, channelName, channelType, null);
         throw error;
       }
 
@@ -2610,14 +2615,18 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
 
       if (self._dataTransfers[transferId].dataType === self.DATA_TRANSFER_SESSION_TYPE.DATA_URL) {
         log.debug([peerId, 'RTCDataChannel', channelProp, 'Received string data chunk @' +
-          self._dataTransfers[transferId].sessions[peerId].ackN]);
+          self._dataTransfers[transferId].sessions[peerId].ackN], rawData.length || rawData.size);
 
         self._DATAProtocolHandler(peerId, rawData, self.DATA_TRANSFER_DATA_TYPE.STRING,
           rawData.length || rawData.size || 0, channelProp);
 
       } else {
         log.debug([peerId, 'RTCDataChannel', channelProp, 'Received binary string data chunk @' +
-          self._dataTransfers[transferId].sessions[peerId].ackN]);
+          self._dataTransfers[transferId].sessions[peerId].ackN], {
+            original: rawData.length || rawData.size,
+            computed: self._base64ToBlob(rawData).size,
+            testing: (new Blob([rawData])).size
+          });
 
         self._DATAProtocolHandler(peerId, self._base64ToBlob(rawData), self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
           rawData.length || rawData.size || 0, channelProp);
@@ -2626,13 +2635,13 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
   } else {
     if (rawData instanceof Blob) {
       log.debug([peerId, 'RTCDataChannel', channelProp, 'Received blob data chunk @' +
-        self._dataTransfers[transferId].sessions[peerId].ackN]);
+        self._dataTransfers[transferId].sessions[peerId].ackN], rawData.size);
 
       self._DATAProtocolHandler(peerId, rawData, self.DATA_TRANSFER_DATA_TYPE.BLOB, rawData.size, channelProp);
 
     } else {
       log.debug([peerId, 'RTCDataChannel', channelProp, 'Received arraybuffer data chunk @' +
-        self._dataTransfers[transferId].sessions[peerId].ackN]);
+        self._dataTransfers[transferId].sessions[peerId].ackN], rawData.length);
 
       var byteArray = rawData;
 
@@ -2707,7 +2716,7 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelProp) {
     transferId = self._dataChannels[peerId].main.transferId;
   }
 
-  //self._handleDataTransferTimeoutForPeer(transferId, peerId, false);
+  self._handleDataTransferTimeoutForPeer(transferId, peerId, false);
 
   /**
    * Emit event for Peers function.
@@ -2933,7 +2942,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, chunk, chunkType, chun
     senderPeerId = self._dataTransfers[transferId].senderPeerId;
   }
 
-  //self._handleDataTransferTimeoutForPeer(transferId, peerId, false);
+  self._handleDataTransferTimeoutForPeer(transferId, peerId, false);
 
   self._dataTransfers[transferId].chunkType = chunkType;
   self._dataTransfers[transferId].sessions[peerId].receivedSize += chunkSize;
