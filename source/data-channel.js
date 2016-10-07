@@ -10,7 +10,7 @@
  * @param {String} CLOSED              <small>Value <code>"closed"</code></small>
  *   The value of the state when Datachannel connection has closed.
  * @param {String} ERROR               <small>Value <code>"error"</code></small>
- *   The value of the state when Datachannel connection has errors.
+ *   The value of the state when Datachannel has encountered an exception during connection.
  * @param {String} CREATE_ERROR        <small>Value <code>"createError"</code></small>
  *   The value of the state when Datachannel has failed to establish a connection.
  * @param {String} BUFFERED_AMOUNT_LOW <small>Value <code>"bufferedAmountLow"</code></small>
@@ -20,8 +20,7 @@
  *   <code>sendBlobData()</code> method</a> or <a href="#method_sendURLData"><code>sendURLData()</code> method</a> or
  *   <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>.</small>
  * @param {String} SEND_MESSAGE_ERROR  <small>Value <code>"sendMessageError"</code></small>
- *   The value of the state when Datachannel when data transfer packets or P2P message fails to send
- *   because Datachannel state is not at <code>OPEN</code>.
+ *   The value of the state when Datachannel when data transfer packets or P2P message fails to send.
  *   <small>This state should occur only during after <a href="#method_sendBlobData">
  *   <code>sendBlobData()</code> method</a> or <a href="#method_sendURLData"><code>sendURLData()</code> method</a> or
  *   <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>.</small>
@@ -69,6 +68,26 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
 Skylink.prototype.DATA_CHANNEL_TYPE = {
   MESSAGING: 'messaging',
   DATA: 'data'
+};
+
+/**
+ * The list of Datachannel sending message error types.
+ * @attribute DATA_CHANNEL_MESSAGE_ERROR
+ * @param {String} MESSAGE <small>Value <code>"message"</code></small>
+ *   The value of the Datachannel sending message error type when encountered during
+ *   sending P2P message from <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>.
+ * @param {String} TRANSFER <small>Value <code>"transfer"</code></small>
+ *   The value of the Datachannel sending message error type when encountered during
+ *   data transfers from <a href="#method_sendURLData"><code>sendURLData()</code> method</a> or
+ *   <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>.
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype.DATA_CHANNEL_MESSAGE_ERROR = {
+  MESSAGE: 'message',
+  TRANSFER: 'transfer'
 };
 
 /**
@@ -135,7 +154,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
 
     } catch (error) {
       log.error([peerId, 'RTCDataChannel', channelName, 'Failed creating Datachannel ->'], error);
-      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CREATE_ERROR, peerId, error, channelName, channelType);
+      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CREATE_ERROR, peerId, error, channelName, channelType, null);
       return;
     }
   }
@@ -159,14 +178,14 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
 
     log.error([peerId, 'RTCDataChannel', channelName, 'Datachannel has an exception ->'], channelError);
 
-    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, channelError, channelName, channelType);
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, channelError, channelName, channelType, null);
   };
 
   dataChannel.onbufferedamountlow = function () {
     log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel buffering data transfer low']);
 
     // TODO: Should we add an event here
-    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.BUFFERED_AMOUNT_LOW, peerId, null, channelName, channelType);
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.BUFFERED_AMOUNT_LOW, peerId, null, channelName, channelType, null);
   };
 
   dataChannel.onmessage = function(event) {
@@ -176,14 +195,14 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
   var onOpenHandlerFn = function () {
     log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel has opened']);
 
-    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.OPEN, peerId, null, channelName, channelType);
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.OPEN, peerId, null, channelName, channelType, null);
   };
 
   if (dataChannel.readyState === self.DATA_CHANNEL_STATE.OPEN) {
     setTimeout(onOpenHandlerFn, 500);
 
   } else {
-    self._trigger('dataChannelState', dataChannel.readyState, peerId, null, channelName, channelType);
+    self._trigger('dataChannelState', dataChannel.readyState, peerId, null, channelName, channelType, null);
 
     dataChannel.onopen = onOpenHandlerFn;
   }
@@ -191,7 +210,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
   var onCloseHandlerFn = function () {
     log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel has closed']);
 
-    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId, null, channelName, channelType);
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId, null, channelName, channelType, null);
 
     if (channelType === self.DATA_CHANNEL_TYPE.MESSAGING) {
       setTimeout(function () {
@@ -290,23 +309,39 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
     return;
   }
 
-  if (self._dataChannels[peerId][channelProp].channel.readyState !== self.DATA_CHANNEL_STATE.OPEN) {
-    log.error([peerId, 'RTCDataChannel', 'prop:' + channelProp,
-      'Dropping of sending message as Datachannel connection is not opened ->'], data);
+  var channelName = self._dataChannels[peerId][channelProp].channelName;
+  var channelType = self._dataChannels[peerId][channelProp].channelType;
+  var readyState  = self._dataChannels[peerId][channelProp].channel.readyState;
+  var messageType = typeof data === 'object' && data.type === self._DC_PROTOCOL_TYPE.MESSAGE ?
+    self.DATA_CHANNEL_MESSAGE_ERROR.MESSAGE : self.DATA_CHANNEL_MESSAGE_ERROR.TRANSFER;
+
+  if (readyState !== self.DATA_CHANNEL_STATE.OPEN) {
+    var notOpenError = 'Failed sending message as Datachannel connection state is not opened. Current ' +
+      'readyState is "' + readyState + '"';
+
+    log.error([peerId, 'RTCDataChannel', 'prop:' + channelProp, notOpenError + ' ->'], data);
 
     self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.SEND_MESSAGE_ERROR, peerId,
-      new Error('Datachannel is not ready.\nState is: ' + self._dataChannels[peerId][channelProp].readyState),
-      self._dataChannels[peerId][channelProp].channelName,
-      self._dataChannels[peerId][channelProp].channelType);
-    return;
+      new Error(notOpenError), channelName, channelType, messageType);
+    
+    throw new Error(notOpenError);
   }
 
   log.debug([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Sending message ->'], data);
 
-  if (doNotConvert) {
-    self._dataChannels[peerId][channelProp].channel.send(data);
-  } else {
-    self._dataChannels[peerId][channelProp].channel.send(typeof data === 'object' ? JSON.stringify(data) : data);
+  try {
+    if (doNotConvert) {
+      self._dataChannels[peerId][channelProp].channel.send(data);
+    } else {
+      self._dataChannels[peerId][channelProp].channel.send(typeof data === 'object' ? JSON.stringify(data) : data);
+    }
+  } catch (error) {
+    log.error([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Failed sending message ->'], error);
+
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.SEND_MESSAGE_ERROR, peerId,
+      error, channelName, channelType, messageType);
+
+    throw error;
   }
 };
 
@@ -333,7 +368,7 @@ Skylink.prototype._closeDataChannel = function(peerId, channelName) {
     if (self._dataChannels[peerId][channelProp].readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
       log.debug([peerId, 'RTCDataChannel', channelName, 'Closing Datachannel']);
 
-      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSING, peerId, null, channelName, channelType);
+      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSING, peerId, null, channelName, channelType, null);
 
       self._dataChannels[peerId][channelProp].channel.close();
 

@@ -425,10 +425,13 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.DATA_CHANNEL_STATE]
    * @param {String} peerId The Peer ID.
    * @param {Error} [error] The error object.
-   *   <small>Defined only when <code>state</code> payload is <code>ERROR</code>.</small>
-   * @param {String} channelName The DataChannel ID.
-   * @param {String} channelType The DataChannel type.
+   *   <small>Defined only when <code>state</code> payload is <code>ERROR</code> or <code>SEND_MESSAGE_ERROR</code>.</small>
+   * @param {String} channelName The Datachannel ID.
+   * @param {String} channelType The Datachannel type.
    *   [Rel: Skylink.DATA_CHANNEL_TYPE]
+   * @param {String} messageType The Datachannel sending Datachannel message error type.
+   *   <small>Defined only when <cod>state</code> payload is <code>SEND_MESSAGE_ERROR</code>.<small>
+   *   [Rel: Skylink.DATA_CHANNEL_MESSAGE_ERROR]
    * @for Skylink
    * @since 0.1.0
    */
