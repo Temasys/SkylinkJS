@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Fri Oct 07 2016 18:50:39 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Oct 10 2016 16:08:28 GMT+0800 (SGT) */
 
 (function() {
 
@@ -678,7 +678,7 @@ Skylink.prototype._CHUNK_DATAURL_SIZE = 1212;
  * @since 0.1.0
  */
 Skylink.prototype._base64ToBlob = function(dataURL) {
-  var byteString = atob(dataURL.replace(/\s\r\n/g, ''));
+  var byteString = atob(dataURL.replace(/\s|\r|\n/g, ''));
   // write the bytes of the string to an ArrayBuffer
   var ab = new ArrayBuffer(byteString.length);
   var ia = new Uint8Array(ab);
