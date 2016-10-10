@@ -130,6 +130,10 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
         target: targetMid,
         rid: self._room.id
       });
+
+      if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
+        self._checkIfStreamMismatch();
+      }
     }
 
     // We should remove this.. this could be due to ICE failures

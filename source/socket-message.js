@@ -551,30 +551,14 @@ Skylink.prototype._streamEventHandler = function(message) {
       }
 
       // Prevent restarts unless its stable
-      if (this._peerConnections[targetMid] && this._peerConnections[targetMid].signalingState ===
-        this.PEER_CONNECTION_STATE.STABLE) {
+      if (this._peerConnections[targetMid] &&
+        this._peerConnections[targetMid].signalingState === this.PEER_CONNECTION_STATE.STABLE) {
         var streams = this._peerConnections[targetMid].getRemoteStreams();
-        if (streams.length > 0 && message.streamId !== (streams[0].id || streams[0].label)) {
-          this._sendChannelMessage({
-            type: this._SIG_MESSAGE_TYPE.RESTART,
-            mid: this._user.sid,
-            rid: this._room.id,
-            agent: window.webrtcDetectedBrowser,
-            version: window.webrtcDetectedVersion,
-            os: window.navigator.platform,
-            userInfo: this._getUserInfo(),
-            target: targetMid,
-            weight: this._peerPriorityWeight,
-            enableIceTrickle: this._enableIceTrickle,
-            enableDataChannel: this._enableDataChannel,
-            receiveOnly: this._peerConnections[targetMid] && this._peerConnections[targetMid].receiveOnly,
-            sessionType: !!this._streams.screenshare ? 'screensharing' : 'stream',
-            // SkylinkJS parameters (copy the parameters from received message parameters)
-            isConnectionRestart: !!message.isConnectionRestart,
-            lastRestart: message.lastRestart,
-            explicit: !!message.explicit,
-            temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
-          });
+        var currentStreamId = streams[0].id || streams[0].label;
+
+        if (streams.length > 0 && message.streamId !== currentStreamId) {
+          this._trigger('streamMismatch', targetMid, this.getPeerInfo(targetMid),
+            false, message.sessionType === 'screensharing', currentStreamId, message.streamId);
         }
       }
     }
@@ -1276,6 +1260,7 @@ Skylink.prototype._answerHandler = function(message) {
     pc.processingRemoteSDP = false;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
+    self._checkIfStreamMismatch();
 
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);

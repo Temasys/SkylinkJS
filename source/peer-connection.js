@@ -156,7 +156,13 @@ Skylink.prototype._peerConnections = {};
  *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter payload
  *   <code>isSelfInitiateRestart</code> value as <code>true</code> for all targeted Peer connections.</li></ol></li>
  *   <li>Else: <ol><li><b>ABORT</b> and return error.</li></ol></li>
- *   </ol></li></ol></li></ol>
+ *   </ol></li></ol></li></ol></li></ol></li><li>If Peer's Stream received does not match the actual Stream
+ *   sending from Peer and User is in Room: <ol>
+ *   <li><a href="#event_streamMismatch"><code>streamMismatch</code> event</a> triggers <small>
+ *   Note that this event may trigger multiple times depending on how many consecutive <code>refreshConnection</code>
+ *   method invokes have been made. When being triggered with this event, the recommended solution is to invoke
+ *   <code>refreshConnection([peerId])</code> method again when parameter payload <code>isSelf</code> value is
+ *   <code>false</code>.</small></li></ol></li></ol>
  * @example
  *   // Example 1: Refreshing a Peer connection
  *   function refreshFrozenVideoStream (peerId) {
@@ -300,7 +306,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle,
 
       if (now - self.lastRestart < 3000) {
         error = 'Last restart was so tight. Aborting.';
-        log.error([peerId, null, null, error]);
+        log.warn([peerId, null, null, error]);
         listOfPeerRestartErrors[peerId] = new Error(error);
         return;
       }

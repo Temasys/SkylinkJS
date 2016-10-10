@@ -1871,26 +1871,51 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
       log.error([peerId, null, null, 'Failed adding local stream'], error);
     }
   }
+};
 
-  setTimeout(function () {
-    var streamId = null;
+/**
+ * Function that checks if User's Stream matches the one received in Peer.
+ * @method _checkIfStreamMismatch
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._checkIfStreamMismatch = function () {
+  var self = this;
+  var streamId = null;
 
-    if (self._streams.screenshare && self._streams.screenshare.stream) {
-      streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
-    } else if (self._streams.userMedia && self._streams.userMedia.stream) {
-      streamId = self._streams.userMedia.stream.id || self._streams.userMedia.stream.label;
+  if (self._streams.screenshare && self._streams.screenshare.stream) {
+    streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
+  } else if (self._streams.userMedia && self._streams.userMedia.stream) {
+    streamId = self._streams.userMedia.stream.id || self._streams.userMedia.stream.label;
+  }
+
+  if (self._inRoom && streamId) {
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.STREAM,
+      mid: self._user.sid,
+      rid: self._room.id,
+      cid: self._key,
+      sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
+      streamId: streamId,
+      status: 'check'
+    });
+
+    var listOfPeers = Object.keys(self._peerConnections);
+
+    for (var peerId in self._peerConnections) {
+      if (self._peerConnections.hasOwnProperty(peerId) && self._peerConnections[peerId] &&
+        self._peerConnections[peerId].signalingState === self.PEER_CONNECTION_STATE.STABLE &&
+        !!self._peerConnections[peerId].localDescription && !!self._peerConnections[peerId].localDescription.sdp &&
+        !!self._peerConnections[peerId].remoteDescription && !!self._peerConnections[peerId].remoteDescription.sdp) {
+        var streams = self._peerConnections[peerId].getLocalStreams();
+        var currentStreamId = streams.length > 0 ? (streams[0].id || streams[0].label) : null;
+
+        if (currentStreamId !== streamId) {
+          self._trigger('streamMismatch', peerId, this.getPeerInfo(peerId),
+            true, !!self._streams.screenshare, currentStreamId, streamId);
+        }
+      }
     }
-
-    if (self._inRoom) {
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.STREAM,
-        mid: self._user.sid,
-        rid: self._room.id,
-        cid: self._key,
-        sessionType: self._streams.screenshare && self._streams.screenshare.stream ? 'screensharing' : 'stream',
-        streamId: streamId,
-        status: 'check'
-      });
-    }
-  }, 3500);
+  }
 };

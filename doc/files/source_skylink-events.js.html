@@ -761,7 +761,24 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.15
    */
-  localMediaMuted: []
+  localMediaMuted: [],
+
+  /**
+   * Event triggered when the current Stream received does not match the actual Stream from Peer currently.
+   * @event streamMismatch
+   * @param {String} peerId The Peer ID.
+   * @param {JSON} peerInfo The Peer session information.
+   *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo&lt;/code&gt; parameter payload received in the
+   *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
+   * @param {Boolean} isSelf The flag if Peer is User.
+   * @param {Boolean} isScreensharing The flag if Peer Stream is a screensharing Stream.
+   * @param {String} [currentStreamId] The current Stream ID that is received.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when no Stream is sent to Peer.&lt;/small&gt;
+   * @param {String} actualStreamId The actual Stream ID that Peer is sending.
+   * @for Skylink
+   * @since 0.6.16
+   */
+  streamMismatch: [],
 };
 
 /**

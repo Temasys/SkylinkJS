@@ -49,6 +49,11 @@ SkylinkDemo.on('peerLeft', function(peerID) {
     DOMcontainer.removeChild(DOMvideo);
   }
 });
+//--------
+SkylinkDemo.on('streamMismatch', function(peerID, peerInfo, isSelf) {
+  if (isSelf) return;
+  SkylinkDemo.refreshConnection(peerID);
+});
 
 SkylinkDemo.init(config, function (error, success) {
   if (success) {
