@@ -97,7 +97,7 @@ Skylink.prototype._CHUNK_DATAURL_SIZE = 1212;
  * @since 0.1.0
  */
 Skylink.prototype._base64ToBlob = function(dataURL) {
-  var byteString = atob(dataURL.replace(/\s|\r|\n/g, ''));
+  var byteString = atob(dataURL);
   // write the bytes of the string to an ArrayBuffer
   var ab = new ArrayBuffer(byteString.length);
   var ia = new Uint8Array(ab);

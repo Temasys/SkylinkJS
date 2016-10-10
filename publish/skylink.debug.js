@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Mon Oct 10 2016 16:08:28 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Oct 10 2016 16:24:15 GMT+0800 (SGT) */
 
 (function() {
 
@@ -678,7 +678,7 @@ Skylink.prototype._CHUNK_DATAURL_SIZE = 1212;
  * @since 0.1.0
  */
 Skylink.prototype._base64ToBlob = function(dataURL) {
-  var byteString = atob(dataURL.replace(/\s|\r|\n/g, ''));
+  var byteString = atob(dataURL);
   // write the bytes of the string to an ArrayBuffer
   var ab = new ArrayBuffer(byteString.length);
   var ia = new Uint8Array(ab);
@@ -2615,34 +2615,30 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
 
       if (self._dataTransfers[transferId].dataType === self.DATA_TRANSFER_SESSION_TYPE.DATA_URL) {
         log.debug([peerId, 'RTCDataChannel', channelProp, 'Received string data chunk @' +
-          self._dataTransfers[transferId].sessions[peerId].ackN], rawData.length || rawData.size);
+          self._dataTransfers[transferId].sessions[peerId].ackN + ' with size ->'], rawData.length || rawData.size);
 
         self._DATAProtocolHandler(peerId, rawData, self.DATA_TRANSFER_DATA_TYPE.STRING,
           rawData.length || rawData.size || 0, channelProp);
 
       } else {
-        log.debug([peerId, 'RTCDataChannel', channelProp, 'Received binary string data chunk @' +
-          self._dataTransfers[transferId].sessions[peerId].ackN], {
-            original: rawData.length || rawData.size,
-            computed: self._base64ToBlob(rawData).size,
-            testing: (new Blob([rawData])).size
-          });
+        var removeSpaceData = rawData.replace(/\s|\r|\n/g, '');
 
-        self._DATAProtocolHandler(peerId, self._base64ToBlob(rawData), self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
-          rawData.length || rawData.size || 0, channelProp);
+        log.debug([peerId, 'RTCDataChannel', channelProp, 'Received binary string data chunk @' +
+          self._dataTransfers[transferId].sessions[peerId].ackN + ' with size ->'],
+          removeSpaceData.length || removeSpaceData.size);
+
+        self._DATAProtocolHandler(peerId, self._base64ToBlob(removeSpaceData), self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
+          removeSpaceData.length || removeSpaceData.size || 0, channelProp);
       }
     }
   } else {
     if (rawData instanceof Blob) {
       log.debug([peerId, 'RTCDataChannel', channelProp, 'Received blob data chunk @' +
-        self._dataTransfers[transferId].sessions[peerId].ackN], rawData.size);
+        self._dataTransfers[transferId].sessions[peerId].ackN + ' with size ->'], rawData.size);
 
       self._DATAProtocolHandler(peerId, rawData, self.DATA_TRANSFER_DATA_TYPE.BLOB, rawData.size, channelProp);
 
     } else {
-      log.debug([peerId, 'RTCDataChannel', channelProp, 'Received arraybuffer data chunk @' +
-        self._dataTransfers[transferId].sessions[peerId].ackN], rawData.length);
-
       var byteArray = rawData;
 
       if (rawData.constructor && rawData.constructor.name === 'Array') {
@@ -2651,6 +2647,9 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
       }
 
       var blob = new Blob([byteArray]);
+
+      log.debug([peerId, 'RTCDataChannel', channelProp, 'Received arraybuffer data chunk @' +
+        self._dataTransfers[transferId].sessions[peerId].ackN + ' with size ->'], blob.size);
 
       self._DATAProtocolHandler(peerId, blob, self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER, blob.size, channelProp);
     }
