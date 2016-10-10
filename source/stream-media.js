@@ -1415,6 +1415,7 @@ Skylink.prototype._stopStreams = function (options) {
 
     if (self._streamsStoppedCbs[streamId]) {
       self._streamsStoppedCbs[streamId]();
+      delete self._streamsStoppedCbs[streamId];
     }
   };
 
@@ -1651,6 +1652,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
     stream.oninactive = function () {
       if (self._streamsStoppedCbs[streamId]) {
         self._streamsStoppedCbs[streamId]();
+        delete self._streamsStoppedCbs[streamId];
       }
     };
 
@@ -1665,6 +1667,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
 
         if (self._streamsStoppedCbs[streamId]) {
           self._streamsStoppedCbs[streamId]();
+          delete self._streamsStoppedCbs[streamId];
         }
 
       } else {
@@ -1676,6 +1679,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
     stream.onended = function () {
       if (self._streamsStoppedCbs[streamId]) {
         self._streamsStoppedCbs[streamId]();
+        delete self._streamsStoppedCbs[streamId];
       }
     };
   }

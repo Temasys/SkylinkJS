@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Sat Sep 24 2016 18:19:57 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Tue Oct 11 2016 00:02:04 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6649,7 +6649,10 @@ Skylink.prototype._path = null;
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype.REGIONAL_SERVER = {};
+Skylink.prototype.REGIONAL_SERVER = {
+  APAC1: '',
+  US1: ''
+};
 
 /**
  * Stores the API server url.
@@ -12055,6 +12058,7 @@ Skylink.prototype._stopStreams = function (options) {
 
     if (self._streamsStoppedCbs[streamId]) {
       self._streamsStoppedCbs[streamId]();
+      delete self._streamsStoppedCbs[streamId];
     }
   };
 
@@ -12291,6 +12295,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
     stream.oninactive = function () {
       if (self._streamsStoppedCbs[streamId]) {
         self._streamsStoppedCbs[streamId]();
+        delete self._streamsStoppedCbs[streamId];
       }
     };
 
@@ -12305,6 +12310,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
 
         if (self._streamsStoppedCbs[streamId]) {
           self._streamsStoppedCbs[streamId]();
+          delete self._streamsStoppedCbs[streamId];
         }
 
       } else {
@@ -12316,6 +12322,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
     stream.onended = function () {
       if (self._streamsStoppedCbs[streamId]) {
         self._streamsStoppedCbs[streamId]();
+        delete self._streamsStoppedCbs[streamId];
       }
     };
   }
