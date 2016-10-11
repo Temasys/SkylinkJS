@@ -10,6 +10,7 @@ Demo.Stats = {};
 Demo.Methods = {};
 Demo.Skylink = new Skylink();
 Demo.ShowStats = {};
+Demo.TransfersDone = {};
 
 var _peerId = null;
 
@@ -27,9 +28,12 @@ Demo.Methods.displayFileItemHTML = function (content) {
     '" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"' +
     ' style="width: 0%"><span>Downloading...</span></div></div>')) +
     '<p><a id="'  + content.transferId + '_btn" class="btn btn-default" ' +
-    'href="' + content.data + '" style="display: ' + ((content.data.length > 1) ?
-    'block' : 'none') + ';" download="' + content.name +
-    '"><span class="glyphicon glyphicon-cloud-download"></span> <b>Download file</b></a></p>';
+    'href="#" style="display: block;" download="' + content.name +
+    '"><span class="glyphicon glyphicon-cloud-download"></span> <b>Download file</b></a>' +
+    (content.direction === Demo.Skylink.DATA_TRANSFER_TYPE.DOWNLOAD ?
+    '<a class="btn btn-default cancel c-' + content.peerId + '" style="margin-top: 15px; border-color: #d9534f; color: #d9534f;" ' +
+    'onclick="cancelTransfer(\'' + content.peerId + '\', \'' + content.transferId + '\')">' +
+    '<span class="glyphicon glyphicon-remove"></span> Cancel Transfer</a></p>' : '');
 };
 
 Demo.Methods.displayChatItemHTML = function (peerId, timestamp, content, isPrivate) {
@@ -47,13 +51,14 @@ Demo.Methods.displayChatItemHTML = function (peerId, timestamp, content, isPriva
   else
     Seconds = timestamp.getSeconds();
 
-  return '<div class="chat-item list-group-item active">' +
+  return '<div ' + (typeof isPrivate === 'string' ? 'id="file-' + isPrivate + '"' : '') +
+    ' class="chat-item list-group-item active">' +
     '<p class="list-group-item-heading">' + '<b>' + peerId + '</b>' +
     '<em title="' + timestamp.toString() + '">' + Hours +
     ':' + Minutes + ':' + Seconds +
     '</em></p>' + '<p class="list-group-item-text">' +
-    (isPrivate ? '<i>[pvt msg] ' : '') + content +
-    (isPrivate ? '</i>' : '') + '</p></div>';
+    (isPrivate === true ? '<i>[pvt msg] ' : '') + content +
+    (isPrivate === true ? '</i>' : '') + '</p></div>';
 };
 
 Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
@@ -88,11 +93,15 @@ Demo.Skylink.on('incomingDataRequest', function (transferId, peerId, transferInf
   }
 })
 Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transferInfo, error){
-  transferInfo = transferInfo || {};
-
-  if (transferInfo.dataType !== 'blob') {
+  if (transferInfo.dataType !== Demo.Skylink.DATA_TRANSFER_SESSION_TYPE.BLOB) {
     return;
   }
+
+  if (!Demo.TransfersDone[transferId]) {
+    Demo.TransfersDone[transferId] = {};
+  }
+
+  transferInfo.peerId = peerId;
 
   switch (state) {
   case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_REQUEST :
@@ -100,26 +109,44 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
       '" from ' + peerId + '?\n\n[size: ' + transferInfo.size + ']');
     Demo.Skylink.acceptDataTransfer(peerId, transferId, result);
     break;
+  case Demo.Skylink.DATA_TRANSFER_STATE.USER_UPLOAD_REQUEST :
   case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_STARTED :
+    if (document.getElementById('file-' + transferId) &&
+      $('#' + transferId + ' .' + peerId).length === 0) {
+      $('#' + transferId + ' .' + peerId).append('<tbody class="' + peerId + '"></tbody>');
+      return;
+    }
     var displayName = Demo.Skylink.getUserData();
     transferInfo.transferId = transferId;
     transferInfo.isUpload = true;
-    transferInfo.data = URL.createObjectURL(transferInfo.data);
-    Demo.Methods.displayChatMessage(displayName, transferInfo);
+    Demo.Methods.displayChatMessage(displayName, transferInfo, transferId);
     Demo.Methods.displayChatMessage(displayName, 'File sent: ' + transferInfo.name);
     break;
   case Demo.Skylink.DATA_TRANSFER_STATE.DOWNLOAD_STARTED :
+    if (document.getElementById('file-' + transferId) &&
+      $('#' + transferId + ' .' + peerId).length === 0) {
+      $('#' + transferId + ' .' + peerId).append('<tbody class="' + peerId + '"></tbody>');
+      if (transferInfo.data) {
+        $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
+      }
+      return;
+    }
     var displayName = Demo.Skylink.getPeerInfo(transferInfo.senderPeerId).userData;
     transferInfo.transferId = transferId;
-    transferInfo.data = '#';
     transferInfo.isUpload = false;
-    Demo.Methods.displayChatMessage(displayName, transferInfo);
+    Demo.Methods.displayChatMessage(displayName, transferInfo, transferId);
     Demo.Methods.displayChatMessage(displayName, 'File sent: ' + transferInfo.name);
+
+    if (transferInfo.data) {
+      $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
+    }
     break;
   case Demo.Skylink.DATA_TRANSFER_STATE.UPLOADING :
     var displayName = Demo.Skylink.getPeerInfo(peerId).userData;
     if ($('#' + transferId).find('.' + peerId).width() < 1) {
-      $('#' + transferId).append('<tr><td>' + displayName +
+      $('#' + transferId).append('<tr><td>' + displayName + '<a class="c-' + peerId + ' cancel" ' +
+        'style="color: #d9534f;" onclick="cancelTransfer(\'' + peerId + '\', \'' + transferId + '\');">' +
+        '<span class="glyphicon glyphicon-remove"></span></a>' +
         '</td><td class="' + peerId + '">' + transferInfo.percentage + '%</td></tr>');
     } else {
       $('#' + transferId).find('.' + peerId).html(transferInfo.percentage + '%');
@@ -131,9 +158,18 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
     $('#' + transferId).find('span').html(transferInfo.percentage + ' %');
     break;
   case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_COMPLETED :
+    if ($('#' + transferId).find('.' + peerId).width() < 1) {
+      $('#' + transferId).append('<tr><td>' + displayName + '<a class="c-' + peerId + ' cancel" ' +
+        'style="color: #d9534f;" onclick="cancelTransfer(\'' + peerId + '\', \'' + transferId + '\');">' +
+        '<span class="glyphicon glyphicon-remove"></span></a>' +
+        '</td><td class="' + peerId + '">0%</td></tr>');
+    }
     var displayName = Demo.Skylink.getPeerInfo(peerId).userData;
     Demo.Methods.displayChatMessage(displayName, 'File received: ' + transferInfo.name);
     $('#' + transferId).find('.' + peerId).html('&#10003;');
+    $('#' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
+    $('#' + transferId + ' .c-' + peerId + '.cancel').css('cursor', 'not-allowed');
+    Demo.TransfersDone[transferId][peerId] = true;
     break;
   case Demo.Skylink.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED :
     // If completed, display download button
@@ -142,21 +178,37 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
     $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
     $('#' + transferId + '_btn').css('display', 'block');
     Demo.Methods.displayChatMessage(displayName, 'File received: ' + transferInfo.name);
+    $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
+    $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('cursor', 'not-allowed');
+    Demo.TransfersDone[transferId][peerId] = true;
     break;
   case Demo.Skylink.DATA_TRANSFER_STATE.REJECTED :
     alert('User "' + peerId + '" has rejected your file');
+    $('#' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
+    $('#' + transferId + ' .c-' + peerId + '.cancel').css('cursor', 'not-allowed');
+    Demo.TransfersDone[transferId][peerId] = true;
     break;
   case Demo.Skylink.DATA_TRANSFER_STATE.ERROR :
     alert(error.transferType + ' failed. Reason: \n' +
       error.message);
     $('#' + transferId).parent().removeClass('progress-bar-info');
     $('#' + transferId).parent().addClass('progress-bar-danger');
+    $('#' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
+    $('#' + transferId + ' .c-' + peerId + '.cancel').css('cursor', 'not-allowed');
+    $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
+    $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('cursor', 'not-allowed');
+    Demo.TransfersDone[transferId][peerId] = true;
     break;
   case Demo.Skylink.DATA_TRANSFER_STATE.CANCEL :
     alert(error.transferType + ' canceled. Reason: \n' +
       error.message);
     $('#' + transferId).parent().removeClass('progress-bar-info');
     $('#' + transferId).parent().addClass('progress-bar-danger');
+    $('#' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
+    $('#' + transferId + ' .c-' + peerId + '.cancel').css('cursor', 'not-allowed');
+    $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
+    $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('cursor', 'not-allowed');
+    Demo.TransfersDone[transferId][peerId] = true;
   }
 });
 //---------------------------------------------------
@@ -446,8 +498,12 @@ Demo.Skylink.on('peerConnectionState', function (state, peerId) {
   $('#user' + peerId + ' .6' ).css('color', color);
 });
 //---------------------------------------------------
-Demo.Skylink.on('dataChannelState', function (state, peerId, error, channelName, channelType) {
+Demo.Skylink.on('dataChannelState', function (state, peerId, error, channelName, channelType, messageType) {
   if (channelType !== Demo.Skylink.DATA_CHANNEL_TYPE.MESSAGING) {
+    return;
+  }
+
+  if (state === Demo.Skylink.DATA_CHANNEL_STATE.SEND_MESSAGE_ERROR) {
     return;
   }
 
@@ -620,9 +676,9 @@ $(document).ready(function () {
       var file = Demo.Files[i];
       if(file.size <= Demo.FILE_SIZE_LIMIT) {
         if (selectedPeers.length > 0) {
-          Demo.Skylink.sendBlobData(file, selectedPeers);
+          Demo.Skylink.sendBlobData(file, selectedPeers, true);
         } else {
-          Demo.Skylink.sendBlobData(file);
+          Demo.Skylink.sendBlobData(file, true);
         }
         $('#file_input').val('');
       } else {
@@ -772,6 +828,13 @@ $(document).ready(function () {
       $(panelDom).find('.all').show();
       selectedPeers.push(peerId);
     }
+  };
+
+  window.cancelTransfer = function (peerId, transferId) {
+    if (Demo.TransfersDone[transferId][peerId]) {
+      return;
+    }
+    Demo.Skylink.cancelDataTransfer(peerId, transferId);
   };
 
   $('#clear-selected-users').click(function () {

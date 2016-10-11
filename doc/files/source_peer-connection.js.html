@@ -200,7 +200,7 @@ Skylink.prototype._peerConnections = {};
  * &lt;blockquote class=&quot;info&quot;&gt;
  *   For MCU enabled Peer connections, the restart functionality may differ, you may learn more about how to workaround
  *   it &lt;a href=&quot;http://support.temasys.com.sg/support/discussions/topics/12000002853&quot;&gt;in this article here&lt;/a&gt;.&lt;br&gt;
- *   For restarts with Peers connecting from Android or iOS SDKs, restarts might not work as written in
+ *   For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in
  *   &lt;a href=&quot;http://support.temasys.com.sg/support/discussions/topics/12000005188&quot;&gt;in this article here&lt;/a&gt;.&lt;br&gt;
  *   Note that this functionality should be used when Peer connection stream freezes during a connection,
  *   and is throttled when invoked many times in less than 3 seconds interval.
@@ -933,7 +933,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // prevent restarts for other SDK clients
-  if ([&#x27;Android&#x27;, &#x27;iOS&#x27;, &#x27;cpp&#x27;].indexOf(agent.name) &gt; -1) {
+  if (self._INTEROP_MULTI_TRANSFERS.indexOf(agent.name) &gt; -1) {
     var notSupportedError = new Error(&#x27;Failed restarting with other agents connecting from other SDKs as &#x27; +
       &#x27;re-negotiation is not supported by other SDKs&#x27;);
 
@@ -1133,8 +1133,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.processingRemoteSDP = false;
   pc.gathered = false;
 
-  // datachannels
-  self._dataChannels[targetMid] = {};
   // candidates
   self._gatheredCandidates[targetMid] = {
     sending: { host: [], srflx: [], relay: [] },
@@ -1158,8 +1156,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
         pc.hasMainChannel = true;
       }
 
-      self._dataChannels[targetMid][channelKey] =
-        self._createDataChannel(targetMid, channelType, dc, dc.label);
+      self._createDataChannel(targetMid, dc);
 
     } else {
       log.warn([targetMid, &#x27;RTCDataChannel&#x27;, dc.label, &#x27;Not adding datachannel as enable datachannel &#x27; +
