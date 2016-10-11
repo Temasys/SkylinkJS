@@ -269,7 +269,7 @@
                 },
                 {
                     "name": "ERROR",
-                    "description": "<small>Value <code>\"error\"</code></small>\n  The value of the state when Datachannel connection has errors.",
+                    "description": "<small>Value <code>\"error\"</code></small>\n  The value of the state when Datachannel has encountered an exception during connection.",
                     "type": "String"
                 },
                 {
@@ -284,7 +284,7 @@
                 },
                 {
                     "name": "SEND_MESSAGE_ERROR",
-                    "description": "<small>Value <code>\"sendMessageError\"</code></small>\n  The value of the state when Datachannel when data transfer packets or P2P message fails to send\n  because Datachannel state is not at <code>OPEN</code>.\n  <small>This state should occur only during after <a href=\"#method_sendBlobData\">\n  <code>sendBlobData()</code> method</a> or <a href=\"#method_sendURLData\"><code>sendURLData()</code> method</a> or\n  <a href=\"#method_sendP2PMessage\"><code>sendP2PMessage()</code> method</a>.</small>",
+                    "description": "<small>Value <code>\"sendMessageError\"</code></small>\n  The value of the state when Datachannel when data transfer packets or P2P message fails to send.\n  <small>This state should occur only during after <a href=\"#method_sendBlobData\">\n  <code>sendBlobData()</code> method</a> or <a href=\"#method_sendURLData\"><code>sendURLData()</code> method</a> or\n  <a href=\"#method_sendP2PMessage\"><code>sendP2PMessage()</code> method</a>.</small>",
                     "type": "String"
                 }
             ],
@@ -295,7 +295,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 44,
+            "line": 43,
             "description": "The list of Datachannel types.",
             "itemtype": "attribute",
             "name": "DATA_CHANNEL_TYPE",
@@ -318,7 +318,30 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 74,
+            "line": 73,
+            "description": "The list of Datachannel sending message error types.",
+            "itemtype": "attribute",
+            "name": "DATA_CHANNEL_MESSAGE_ERROR",
+            "params": [
+                {
+                    "name": "MESSAGE",
+                    "description": "<small>Value <code>\"message\"</code></small>\n  The value of the Datachannel sending message error type when encountered during\n  sending P2P message from <a href=\"#method_sendP2PMessage\"><code>sendP2PMessage()</code> method</a>.",
+                    "type": "String"
+                },
+                {
+                    "name": "TRANSFER",
+                    "description": "<small>Value <code>\"transfer\"</code></small>\n  The value of the Datachannel sending message error type when encountered during\n  data transfers from <a href=\"#method_sendURLData\"><code>sendURLData()</code> method</a> or\n  <a href=\"#method_sendBlobData\"><code>sendBlobData()</code> method</a>.",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.6.16",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-channel.js",
+            "line": 93,
             "description": "Stores the flag if Peers should have any Datachannel connections.",
             "itemtype": "attribute",
             "name": "_enableDataChannel",
@@ -331,7 +354,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 85,
+            "line": 104,
             "description": "Stores the list of Peer Datachannel connections.",
             "itemtype": "attribute",
             "name": "_dataChannels",
@@ -357,7 +380,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 98,
+            "line": 117,
             "description": "Function that starts a Datachannel connection with Peer.",
             "itemtype": "method",
             "name": "_createDataChannel",
@@ -368,13 +391,13 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 154,
+            "line": 173,
             "description": "Subscribe to events",
             "class": "Skylink"
         },
         {
             "file": "source/data-channel.js",
-            "line": 259,
+            "line": 278,
             "description": "Function that sends data over the Datachannel connection.",
             "itemtype": "method",
             "name": "_sendMessageToDataChannel",
@@ -385,7 +408,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 313,
+            "line": 351,
             "description": "Function that stops the Datachannel connection and removes object references.",
             "itemtype": "method",
             "name": "_closeDataChannel",
@@ -469,6 +492,19 @@
         {
             "file": "source/data-process.js",
             "line": 69,
+            "description": "Stores the data chunk size for binary Blob transfers.",
+            "itemtype": "attribute",
+            "name": "_MOZ_BINARY_FILE_SIZE",
+            "type": "Number",
+            "access": "private",
+            "tagname": "",
+            "readonly": "",
+            "since": "0.6.16",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-process.js",
+            "line": 80,
             "description": "Stores the data chunk size for data URI string transfers.",
             "itemtype": "attribute",
             "name": "_CHUNK_DATAURL_SIZE",
@@ -481,7 +517,7 @@
         },
         {
             "file": "source/data-process.js",
-            "line": 80,
+            "line": 91,
             "description": "Function that converts Base64 string into Blob object.\nThis is referenced from devnull69@stackoverflow.com #6850276.",
             "itemtype": "method",
             "name": "_base64ToBlob",
@@ -492,7 +528,7 @@
         },
         {
             "file": "source/data-process.js",
-            "line": 100,
+            "line": 111,
             "description": "Function that converts a Blob object into Base64 string.",
             "itemtype": "method",
             "name": "_blobToBase64",
@@ -503,7 +539,7 @@
         },
         {
             "file": "source/data-process.js",
-            "line": 117,
+            "line": 128,
             "description": "Function that converts a Blob object into ArrayBuffer object.",
             "itemtype": "method",
             "name": "_blobToArrayBuffer",
@@ -514,7 +550,7 @@
         },
         {
             "file": "source/data-process.js",
-            "line": 137,
+            "line": 148,
             "description": "Function that chunks Blob object based on the data chunk size provided.\nIf provided Blob object size is lesser than or equals to the chunk size, it should return an array\n  of length of <code>1</code>.",
             "itemtype": "method",
             "name": "_chunkBlobData",
@@ -525,7 +561,7 @@
         },
         {
             "file": "source/data-process.js",
-            "line": 169,
+            "line": 180,
             "description": "Function that chunks large string into string chunks based on the data chunk size provided.\nIf provided string length is lesser than or equals to the chunk size, it should return an array\n  of length of <code>1</code>.",
             "itemtype": "method",
             "name": "_chunkDataURL",
@@ -707,7 +743,7 @@
         {
             "file": "source/data-transfer.js",
             "line": 132,
-            "description": "Stores the list of types of SDKs that do not support simultaneous data transfers.",
+            "description": "Stores the list of types of SDKs that do not support simultaneous data transfers.\nThis is also used for Web only fixes we allow.",
             "itemtype": "attribute",
             "name": "_INTEROP_MULTI_TRANSFERS",
             "type": "Array",
@@ -719,7 +755,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 143,
+            "line": 144,
             "description": "Stores the list of data transfers from / to Peers.",
             "itemtype": "attribute",
             "name": "_dataTransfers",
@@ -738,8 +774,8 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 154,
-            "description": "<blockquote class=\"info\">\n  Note that Android and iOS SDKs do not support simultaneous data transfers.\n</blockquote>\nFunction that starts an uploading data transfer from User to Peers.",
+            "line": 155,
+            "description": "<blockquote class=\"info\">\n  Note that Android, iOS and C++ SDKs do not support simultaneous data transfers.\n</blockquote>\nFunction that starts an uploading data transfer from User to Peers.",
             "itemtype": "method",
             "name": "sendBlobData",
             "params": [
@@ -763,7 +799,7 @@
                 },
                 {
                     "name": "sendChunksAsBinary",
-                    "description": "<blockquote class=\"info\">\n  Note that this is currently not supported for MCU enabled Peer connections. This would fallback to\n  <code>transferInfo.chunkType</code> to <code>BINARY_STRING</code> when MCU is connected.\n  </blockquote> The flag if data transfer binary data chunks should not be\n  encoded as Base64 string during data transfers.",
+                    "description": "<blockquote class=\"info\">\n  Note that this is currently not supported for MCU enabled Peer connections or Peer connections connecting from\n  Android, iOS and Linux SDKs. This would fallback to <code>transferInfo.chunkType</code> to\n  <code>BINARY_STRING</code> when MCU is connected. </blockquote> The flag if data transfer\n  binary data chunks should not be encoded as Base64 string during data transfers.",
                     "type": "Boolean",
                     "optional": true,
                     "optdefault": "false"
@@ -840,8 +876,8 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 526,
-            "description": "<blockquote class=\"info\">\n  Currently, the Android and iOS SDKs do not support this type of data transfer session.\n</blockquote>\nFunction that starts an uploading string data transfer from User to Peers.",
+            "line": 527,
+            "description": "<blockquote class=\"info\">\n  Currently, the Android, iOS and C++ SDKs do not support this type of data transfer session.\n</blockquote>\nFunction that starts an uploading string data transfer from User to Peers.",
             "itemtype": "method",
             "name": "sendURLData",
             "params": [
@@ -935,7 +971,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 755,
+            "line": 756,
             "description": "Function that accepts or rejects an upload data transfer request from Peer to User.",
             "itemtype": "method",
             "name": "acceptDataTransfer",
@@ -967,7 +1003,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 890,
+            "line": 891,
             "description": "<blockquote class=\"info\">\n  For MCU enabled Peer connections, the cancel data transfer functionality may differ, as it\n  will result in all Peers related to the data transfer ID to be terminated.\n</blockquote>\nFunction that terminates a currently uploading / downloading data transfer from / to Peer.",
             "itemtype": "method",
             "name": "cancelDataTransfer",
@@ -992,13 +1028,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 945,
+            "line": 946,
             "description": "Emit data state event function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1015,
+            "line": 1016,
             "description": "Function that sends a message to Peers via the Datachannel connection.\n<small>Consider using <a href=\"#method_sendURLData\"><code>sendURLData()</code> method</a> if you are\nsending large strings to Peers.</small>",
             "itemtype": "method",
             "name": "sendP2PMessage",
@@ -1024,7 +1060,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1152,
+            "line": 1153,
             "description": "Function that starts the data transfer to Peers.",
             "itemtype": "method",
             "name": "_startDataTransfer",
@@ -1035,13 +1071,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1178,
+            "line": 1205,
             "description": "Complete Peer function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1242,
+            "line": 1269,
             "description": "Function that starts or listens the data transfer status to Peer.\nThis reacts differently during MCU environment.",
             "itemtype": "method",
             "name": "_startDataTransferToPeer",
@@ -1056,25 +1092,25 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1257,
+            "line": 1284,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1267,
+            "line": 1294,
             "description": "Return error and trigger them if failed before or during data transfers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1283,
+            "line": 1310,
             "description": "Send WRQ protocol to start data transfers.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1496,
+            "line": 1541,
             "description": "Function that returns the data transfer session.",
             "itemtype": "method",
             "name": "_getTransferInfo",
@@ -1085,7 +1121,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1575,
+            "line": 1623,
             "description": "Function that returns the compiled data transfer data.",
             "itemtype": "method",
             "name": "_getTransferData",
@@ -1096,7 +1132,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1602,
+            "line": 1650,
             "description": "Function that handles the data transfers sessions timeouts.",
             "itemtype": "method",
             "name": "_handleDataTransferTimeoutForPeer",
@@ -1107,13 +1143,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1646,
+            "line": 1694,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1693,
+            "line": 1741,
             "description": "Function that handles the data received from Datachannel and\nroutes to the relevant data transfer protocol handler.",
             "itemtype": "method",
             "name": "_processDataChannelData",
@@ -1124,7 +1160,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1825,
+            "line": 1878,
             "description": "Function that handles the \"WRQ\" data transfer protocol.",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
@@ -1135,7 +1171,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1867,
+            "line": 1920,
             "description": "Function that handles the \"ACK\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
@@ -1146,13 +1182,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1886,
+            "line": 1939,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1967,
+            "line": 2022,
             "description": "Function that handles the \"MESSAGE\" data transfer protocol.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -1163,7 +1199,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1988,
+            "line": 2043,
             "description": "Function that handles the \"ERROR\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -1174,13 +1210,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2007,
+            "line": 2062,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2039,
+            "line": 2094,
             "description": "Function that handles the \"CANCEL\" data transfer protocol.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -1191,13 +1227,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2056,
+            "line": 2111,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2088,
+            "line": 2143,
             "description": "Function that handles the data transfer chunk received.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
@@ -1299,7 +1335,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 157,
+            "line": 161,
             "description": "Function that buffers the Peer connection ICE candidate when received\n  before remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateToQueue",
@@ -1310,7 +1346,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 173,
+            "line": 177,
             "description": "Function that handles when the Peer connection received ICE candidate\n  has been added or processed successfully.\nSeparated in a function to prevent jshint errors.",
             "itemtype": "method",
             "name": "_onAddIceCandidateSuccess",
@@ -1321,7 +1357,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 186,
+            "line": 190,
             "description": "Function that handles when the Peer connection received ICE candidate\n  has failed adding or processing.\nSeparated in a function to prevent jshint errors.",
             "itemtype": "method",
             "name": "_onAddIceCandidateFailure",
@@ -1332,7 +1368,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 199,
+            "line": 203,
             "description": "Function that adds all the Peer connection buffered ICE candidates received.\nThis should be called only after the remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateFromQueue",
@@ -1648,7 +1684,7 @@
         {
             "file": "source/peer-connection.js",
             "line": 108,
-            "description": "<blockquote class=\"info\">\n  For MCU enabled Peer connections, the restart functionality may differ, you may learn more about how to workaround\n  it <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002853\">in this article here</a>.<br>\n  For restarts with Peers connecting from Android or iOS SDKs, restarts might not work as written in\n  <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000005188\">in this article here</a>.<br>\n  Note that this functionality should be used when Peer connection stream freezes during a connection,\n  and is throttled when invoked many times in less than 3 seconds interval.\n</blockquote>\nFunction that refreshes Peer connections to update with the current streaming.",
+            "description": "<blockquote class=\"info\">\n  For MCU enabled Peer connections, the restart functionality may differ, you may learn more about how to workaround\n  it <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002853\">in this article here</a>.<br>\n  For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in\n  <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000005188\">in this article here</a>.<br>\n  Note that this functionality should be used when Peer connection stream freezes during a connection,\n  and is throttled when invoked many times in less than 3 seconds interval.\n</blockquote>\nFunction that refreshes Peer connections to update with the current streaming.",
             "itemtype": "method",
             "name": "refreshConnection",
             "params": [
@@ -1701,7 +1737,7 @@
                     ]
                 }
             ],
-            "trigger": "<ol class=\"desc-seq\">\n  <li>Checks if MCU is enabled for App Key provided in <a href=\"#method_init\"><code>init()</code> method</a><ol>\n  <li>If MCU is enabled: <ol><li>If there are connected Peers in the Room: <ol>\n  <li><a href=\"#event_peerRestart\"><code>peerRestart</code> event</a> triggers parameter payload\n  <code>isSelfInitiateRestart</code> value as <code>true</code> for all connected Peer connections.</li>\n  <li><a href=\"#event_serverPeerRestart\"><code>serverPeerRestart</code> event</a> triggers for\n  connected MCU server Peer connection.</li></ol></li>\n  <li>Invokes <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a> <small><code>refreshConnection()</code>\n  will retain the User session information except the Peer ID will be a different assigned ID due to restarting the\n  Room session.</small> <ol><li>If request has errors <ol><li><b>ABORT</b> and return error.\n  </li></ol></li></ol></li></ol></li>\n  <li>Else: <ol><li>If there are connected Peers in the Room: <ol>\n  <li>Refresh connections for all targeted Peers. <ol>\n  <li>If Peer connection exists: <ol>\n  <li><a href=\"#event_peerRestart\"><code>peerRestart</code> event</a> triggers parameter payload\n  <code>isSelfInitiateRestart</code> value as <code>true</code> for all targeted Peer connections.</li></ol></li>\n  <li>Else: <ol><li><b>ABORT</b> and return error.</li></ol></li>\n  </ol></li></ol></li></ol>",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>Checks if MCU is enabled for App Key provided in <a href=\"#method_init\"><code>init()</code> method</a><ol>\n  <li>If MCU is enabled: <ol><li>If there are connected Peers in the Room: <ol>\n  <li><a href=\"#event_peerRestart\"><code>peerRestart</code> event</a> triggers parameter payload\n  <code>isSelfInitiateRestart</code> value as <code>true</code> for all connected Peer connections.</li>\n  <li><a href=\"#event_serverPeerRestart\"><code>serverPeerRestart</code> event</a> triggers for\n  connected MCU server Peer connection.</li></ol></li>\n  <li>Invokes <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a> <small><code>refreshConnection()</code>\n  will retain the User session information except the Peer ID will be a different assigned ID due to restarting the\n  Room session.</small> <ol><li>If request has errors <ol><li><b>ABORT</b> and return error.\n  </li></ol></li></ol></li></ol></li>\n  <li>Else: <ol><li>If there are connected Peers in the Room: <ol>\n  <li>Refresh connections for all targeted Peers. <ol>\n  <li>If Peer connection exists: <ol>\n  <li><a href=\"#event_peerRestart\"><code>peerRestart</code> event</a> triggers parameter payload\n  <code>isSelfInitiateRestart</code> value as <code>true</code> for all targeted Peer connections.</li></ol></li>\n  <li>Else: <ol><li><b>ABORT</b> and return error.</li></ol></li>\n  </ol></li></ol></li></ol></li></ol></li><li>If Peer's Stream received does not match the actual Stream\n  sending from Peer and User is in Room: <ol>\n  <li><a href=\"#event_streamMismatch\"><code>streamMismatch</code> event</a> triggers <small>\n  Note that this event may trigger multiple times depending on how many consecutive <code>refreshConnection</code>\n  method invokes have been made. When being triggered with this event, the recommended solution is to invoke\n  <code>refreshConnection([peerId])</code> method again when parameter payload <code>isSelf</code> value is\n  <code>false</code>.</small></li></ol></li></ol>",
             "example": [
                 "\n  // Example 1: Refreshing a Peer connection\n  function refreshFrozenVideoStream (peerId) {\n    skylinkDemo.refreshConnection(peerId, function (error, success) {\n      if (error) return;\n      console.log(\"Refreshing connection for '\" + peerId + \"'\");\n    });\n  }\n\n  // Example 2: Refreshing a list of Peer connections\n  function refreshFrozenVideoStreamGroup (peerIdA, peerIdB) {\n    skylinkDemo.refreshConnection([peerIdA, peerIdB], function (error, success) {\n      if (error) {\n        if (error.transferErrors[peerIdA]) {\n          console.error(\"Failed refreshing connection for '\" + peerIdA + \"'\");\n        } else {\n          console.log(\"Refreshing connection for '\" + peerIdA + \"'\");\n        }\n        if (error.transferErrors[peerIdB]) {\n          console.error(\"Failed refreshing connection for '\" + peerIdB + \"'\");\n        } else {\n          console.log(\"Refreshing connection for '\" + peerIdB + \"'\");\n        }\n      } else {\n        console.log(\"Refreshing connection for '\" + peerIdA + \"' and '\" + peerIdB + \"'\");\n      }\n    });\n  }\n\n  // Example 3: Refreshing all Peer connections\n  function refreshFrozenVideoStreamAll () {\n    skylinkDemo.refreshConnection(function (error, success) {\n      if (error) {\n        for (var i = 0; i < error.listOfPeers.length; i++) {\n          if (error.refreshErrors[error.listOfPeers[i]]) {\n            console.error(\"Failed refreshing connection for '\" + error.listOfPeers[i] + \"'\");\n          } else {\n            console.info(\"Refreshing connection for '\" + error.listOfPeers[i] + \"'\");\n          }\n        }\n      } else {\n        console.log(\"Refreshing connection for all Peers\", success.listOfPeers);\n      }\n    });\n  }"
             ],
@@ -1710,7 +1746,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 246,
+            "line": 252,
             "description": "Function that refresh connections.",
             "itemtype": "method",
             "name": "_refreshPeerConnection",
@@ -1721,7 +1757,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 344,
+            "line": 350,
             "description": "Function that retrieves Peer connection bandwidth and ICE connection stats.",
             "itemtype": "method",
             "name": "getConnectionStatus",
@@ -1804,7 +1840,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 760,
+            "line": 766,
             "description": "Function that starts the Peer connection session.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_addPeer",
@@ -1815,7 +1851,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 812,
+            "line": 818,
             "description": "Function that re-negotiates a Peer connection.\nWe currently do not implement the ICE restart functionality.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -1826,7 +1862,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 943,
+            "line": 949,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -1837,7 +1873,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1004,
+            "line": 1010,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -1848,13 +1884,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1139,
+            "line": 1145,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self._getUserInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1202,
+            "line": 1208,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -2873,7 +2909,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 187,
+            "line": 190,
             "description": "Stores the API server url.",
             "itemtype": "attribute",
             "name": "_roomServer",
@@ -2885,7 +2921,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 197,
+            "line": 200,
             "description": "Stores the App Key configured in <code>init()</code>.",
             "itemtype": "attribute",
             "name": "_appKey",
@@ -2897,7 +2933,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 207,
+            "line": 210,
             "description": "Stores the default Room name to connect to when <code>joinRoom()</code> does not provide a Room name.",
             "itemtype": "attribute",
             "name": "_defaultRoom",
@@ -2909,7 +2945,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 217,
+            "line": 220,
             "description": "Stores the <code>init()</code> credentials starting DateTime stamp in ISO 8601.",
             "itemtype": "attribute",
             "name": "_roomStart",
@@ -2921,7 +2957,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 227,
+            "line": 230,
             "description": "Stores the <code>init()</code> credentials duration counted in hours.",
             "itemtype": "attribute",
             "name": "_roomDuration",
@@ -2933,7 +2969,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 237,
+            "line": 240,
             "description": "Stores the <code>init()</code> generated credentials string.",
             "itemtype": "attribute",
             "name": "_roomCredentials",
@@ -2945,7 +2981,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 247,
+            "line": 250,
             "description": "Stores the current <code>init()</code> readyState.",
             "itemtype": "attribute",
             "name": "_readyState",
@@ -2957,7 +2993,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 257,
+            "line": 260,
             "description": "Stores the \"cid\" used for <code>joinRoom()</code>.",
             "itemtype": "attribute",
             "name": "_key",
@@ -2969,7 +3005,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 267,
+            "line": 270,
             "description": "Stores the \"apiOwner\" used for <code>joinRoom()</code>.",
             "itemtype": "attribute",
             "name": "_appKeyOwner",
@@ -2981,7 +3017,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 277,
+            "line": 280,
             "description": "Stores the Room credentials information for <code>joinRoom()</code>.",
             "itemtype": "attribute",
             "name": "_room",
@@ -3020,7 +3056,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 293,
+            "line": 296,
             "description": "Function that authenticates and initialises App Key used for Room connections.",
             "itemtype": "method",
             "name": "init",
@@ -3302,7 +3338,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 742,
+            "line": 745,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -3313,7 +3349,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 816,
+            "line": 819,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -3324,7 +3360,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 889,
+            "line": 892,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -3335,7 +3371,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 980,
+            "line": 983,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -4608,18 +4644,23 @@
                 },
                 {
                     "name": "error",
-                    "description": "The error object.\n  <small>Defined only when <code>state</code> payload is <code>ERROR</code>.</small>",
+                    "description": "The error object.\n  <small>Defined only when <code>state</code> payload is <code>ERROR</code> or <code>SEND_MESSAGE_ERROR</code>.</small>",
                     "type": "Error",
                     "optional": true
                 },
                 {
                     "name": "channelName",
-                    "description": "The DataChannel ID.",
+                    "description": "The Datachannel ID.",
                     "type": "String"
                 },
                 {
                     "name": "channelType",
-                    "description": "The DataChannel type.\n  [Rel: Skylink.DATA_CHANNEL_TYPE]",
+                    "description": "The Datachannel type.\n  [Rel: Skylink.DATA_CHANNEL_TYPE]",
+                    "type": "String"
+                },
+                {
+                    "name": "messageType",
+                    "description": "The Datachannel sending Datachannel message error type.\n  <small>Defined only when <cod>state</code> payload is <code>SEND_MESSAGE_ERROR</code>.<small>\n  [Rel: Skylink.DATA_CHANNEL_MESSAGE_ERROR]",
                     "type": "String"
                 }
             ],
@@ -4628,7 +4669,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 437,
+            "line": 440,
             "description": "Event triggered when a data transfer state has changed.",
             "itemtype": "event",
             "name": "dataTransferState",
@@ -4736,7 +4777,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 485,
+            "line": 488,
             "description": "Event triggered when Signaling server reaction state has changed.",
             "itemtype": "event",
             "name": "systemAction",
@@ -4762,7 +4803,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 498,
+            "line": 501,
             "description": "Event triggered when a server Peer joins the room.",
             "itemtype": "event",
             "name": "serverPeerJoined",
@@ -4783,7 +4824,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 509,
+            "line": 512,
             "description": "Event triggered when a server Peer leaves the room.",
             "itemtype": "event",
             "name": "serverPeerLeft",
@@ -4804,7 +4845,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 520,
+            "line": 523,
             "description": "Event triggered when a server Peer connection has been refreshed.",
             "itemtype": "event",
             "name": "serverPeerRestart",
@@ -4825,7 +4866,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 531,
+            "line": 534,
             "description": "Event triggered when Peer Stream streaming has stopped.",
             "itemtype": "event",
             "name": "streamEnded",
@@ -4861,7 +4902,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 546,
+            "line": 549,
             "description": "Event triggered when Peer Stream audio or video tracks has been muted / unmuted.",
             "itemtype": "event",
             "name": "streamMuted",
@@ -4892,7 +4933,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 560,
+            "line": 563,
             "description": "Event triggered when <a href=\"#method_getPeers\"><code>getPeers()</code> method</a> retrieval state changes.",
             "itemtype": "event",
             "name": "getPeersStateChange",
@@ -4925,7 +4966,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 573,
+            "line": 576,
             "description": "Event triggered when <a href=\"#method_introducePeer\"><code>introducePeer()</code> method</a>\nintroduction request state changes.",
             "itemtype": "event",
             "name": "introduceStateChange",
@@ -4962,7 +5003,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 589,
+            "line": 592,
             "description": "Event triggered when <a href=\"#method_getConnectionStatus\"><code>getConnectionStatus()</code> method</a>\nretrieval state changes.",
             "itemtype": "event",
             "name": "getConnectionStatusStateChange",
@@ -5279,7 +5320,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 676,
+            "line": 679,
             "description": "Event triggered when <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> changes\nUser Streams audio and video tracks muted status.",
             "itemtype": "event",
             "name": "localMediaMuted",
@@ -5307,7 +5348,49 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 694,
+            "line": 696,
+            "description": "Event triggered when the current Stream received does not match the actual Stream from Peer currently.",
+            "itemtype": "event",
+            "name": "streamMismatch",
+            "params": [
+                {
+                    "name": "peerId",
+                    "description": "The Peer ID.",
+                    "type": "String"
+                },
+                {
+                    "name": "peerInfo",
+                    "description": "The Peer session information.\n  <small>Object signature matches the <code>peerInfo</code> parameter payload received in the\n  <a href=\"#event_peerJoined\"><code>peerJoined</code> event</a>.</small>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "isSelf",
+                    "description": "The flag if Peer is User.",
+                    "type": "Boolean"
+                },
+                {
+                    "name": "isScreensharing",
+                    "description": "The flag if Peer Stream is a screensharing Stream.",
+                    "type": "Boolean"
+                },
+                {
+                    "name": "currentStreamId",
+                    "description": "The current Stream ID that is received.\n  <small>Defined as <code>null</code> when no Stream is sent to Peer.</small>",
+                    "type": "String",
+                    "optional": true
+                },
+                {
+                    "name": "actualStreamId",
+                    "description": "The actual Stream ID that Peer is sending.",
+                    "type": "String"
+                }
+            ],
+            "since": "0.6.16",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 714,
             "description": "Stores the list of <code>once()</code> event handlers.\nThese events are only triggered once.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -5333,7 +5416,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 707,
+            "line": 727,
             "description": "Stores the timestamps data used for throttling.",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -5345,7 +5428,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 720,
+            "line": 740,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -5369,7 +5452,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 744,
+            "line": 764,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -5406,7 +5489,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 802,
+            "line": 822,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -5431,7 +5514,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 851,
+            "line": 871,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -5442,7 +5525,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 905,
+            "line": 925,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -5453,7 +5536,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 931,
+            "line": 951,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -5464,7 +5547,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 969,
+            "line": 989,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",
@@ -5969,7 +6052,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 587,
+            "line": 573,
             "description": "Function that handles the \"bye\" socket message received.\nSee confluence docs for the \"bye\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -5980,7 +6063,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 608,
+            "line": 594,
             "description": "Function that handles the \"private\" socket message received.\nSee confluence docs for the \"private\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -5991,7 +6074,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 630,
+            "line": 616,
             "description": "Function that handles the \"public\" socket message received.\nSee confluence docs for the \"public\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -6002,7 +6085,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 652,
+            "line": 638,
             "description": "Function that handles the \"inRoom\" socket message received.\nSee confluence docs for the \"inRoom\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -6013,7 +6096,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 709,
+            "line": 695,
             "description": "Function that handles the \"enter\" socket message received.\nSee confluence docs for the \"enter\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -6024,7 +6107,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 782,
+            "line": 768,
             "description": "Function that handles the \"restart\" socket message received.\nSee confluence docs for the \"restart\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -6035,7 +6118,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 897,
+            "line": 883,
             "description": "Function that handles the \"welcome\" socket message received.\nSee confluence docs for the \"welcome\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -6046,7 +6129,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 997,
+            "line": 983,
             "description": "Function that handles the \"offer\" socket message received.\nSee confluence docs for the \"offer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -6057,7 +6140,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1090,
+            "line": 1076,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -6068,7 +6151,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1182,
+            "line": 1168,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -6095,6 +6178,11 @@
                     "type": "String"
                 },
                 {
+                    "name": "VP9",
+                    "description": "<small>Value <code>\"VP9\"</code></small>\n  The value of the option to prefer the <a href=\"https://en.wikipedia.org/wiki/VP9\">VP9</a> video codec.",
+                    "type": "String"
+                },
+                {
                     "name": "H264",
                     "description": "<small>Value <code>\"H264\"</code></small>\n  The value of the option to prefer the <a href=\"https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC\">H264</a> video codec.",
                     "type": "String"
@@ -6107,7 +6195,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 29,
+            "line": 32,
             "description": "<blockquote class=\"info\">\n  Note that if the audio codec is not supported, the SDK will not configure the local <code>\"offer\"</code> or\n  <code>\"answer\"</code> session description to prefer the codec.\n</blockquote>\nThe list of available audio codecs to set as the preferred audio codec to use to encode\nsending audio data when available encoded audio codec for Peer connections\nconfigured in the <a href=\"#method_init\"><code>init()</code> method</a>.",
             "itemtype": "attribute",
             "name": "AUDIO_CODEC",
@@ -6135,7 +6223,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 60,
+            "line": 63,
             "description": "<blockquote class=\"info\">\n  Note that currently <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> method</a> only configures\n  the maximum resolution of the Stream due to browser interopability and support.\n</blockquote>\nThe list of <a href=\"https://en.wikipedia.org/wiki/Graphics_display_resolution#Video_Graphics_Array\">\nvideo resolutions</a> sets configured in the <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> method</a>.",
             "itemtype": "attribute",
             "name": "VIDEO_RESOLUTION",
@@ -6248,7 +6336,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 173,
+            "line": 176,
             "description": "The list of <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> method</a> or\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> method</a> Stream fallback states.",
             "itemtype": "attribute",
             "name": "MEDIA_ACCESS_FALLBACK_STATE",
@@ -6275,7 +6363,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 198,
+            "line": 201,
             "description": "Stores the flag that indicates if <code>getUserMedia()</code> should fallback to retrieve\n  audio only Stream after retrieval of audio and video Stream had failed.",
             "itemtype": "attribute",
             "name": "_audioFallback",
@@ -6288,7 +6376,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 210,
+            "line": 213,
             "description": "Stores the Streams.",
             "itemtype": "attribute",
             "name": "_streams",
@@ -6300,7 +6388,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 223,
+            "line": 226,
             "description": "Stores the default camera Stream settings.",
             "itemtype": "attribute",
             "name": "_streamsDefaultSettings",
@@ -6312,7 +6400,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 249,
+            "line": 252,
             "description": "Stores all the Stream required muted settings.",
             "itemtype": "attribute",
             "name": "_streamsMutedSettings",
@@ -6324,7 +6412,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 262,
+            "line": 265,
             "description": "Stores all the Stream sending maximum bandwidth settings.",
             "itemtype": "attribute",
             "name": "_streamsBandwidthSettings",
@@ -6336,7 +6424,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 272,
+            "line": 275,
             "description": "Stores all the Stream stopped callbacks.",
             "itemtype": "attribute",
             "name": "_streamsStoppedCbs",
@@ -6348,7 +6436,26 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 282,
+            "line": 285,
+            "description": "Stores all the Stream mismatch checks.",
+            "itemtype": "attribute",
+            "name": "_streamsMistmatch",
+            "params": [
+                {
+                    "name": "#peerId",
+                    "description": "The Peer's Stream mismatch concatenated by \"current::actual\".",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.16",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/stream-media.js",
+            "line": 296,
             "description": "Function that retrieves camera Stream.",
             "itemtype": "method",
             "name": "getUserMedia",
@@ -6483,7 +6590,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 569,
+            "line": 583,
             "description": "<blockquote class=\"info\">\n  Note that if <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> is available despite having\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> available, the\n  <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> is sent instead of the\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> to Peers.\n</blockquote>\nFunction that sends a new <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>\nto all connected Peers in the Room.",
             "itemtype": "method",
             "name": "sendStream",
@@ -6521,7 +6628,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 781,
+            "line": 795,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopStream",
@@ -6534,7 +6641,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 820,
+            "line": 834,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio or video tracks.",
             "itemtype": "method",
             "name": "muteStream",
@@ -6570,7 +6677,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 958,
+            "line": 972,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -6585,7 +6692,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 985,
+            "line": 999,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -6600,7 +6707,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1012,
+            "line": 1026,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -6615,7 +6722,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1039,
+            "line": 1053,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -6630,7 +6737,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1066,
+            "line": 1080,
             "description": "Function that retrieves screensharing Stream.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -6670,7 +6777,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1282,
+            "line": 1296,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -6683,7 +6790,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1340,
+            "line": 1354,
             "description": "Function that handles the muting of Stream audio and video tracks.",
             "itemtype": "method",
             "name": "_muteStreams",
@@ -6694,7 +6801,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1387,
+            "line": 1401,
             "description": "Function that handles stopping the Stream streaming.",
             "itemtype": "method",
             "name": "_stopStreams",
@@ -6705,7 +6812,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1459,
+            "line": 1474,
             "description": "Function that parses the <code>getUserMedia()</code> settings provided.",
             "itemtype": "method",
             "name": "_parseStreamSettings",
@@ -6716,7 +6823,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1591,
+            "line": 1606,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -6727,7 +6834,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1723,
+            "line": 1741,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -6738,7 +6845,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1763,
+            "line": 1781,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -6749,13 +6856,24 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1797,
+            "line": 1815,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
             "access": "private",
             "tagname": "",
             "since": "0.5.2",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/stream-media.js",
+            "line": 1890,
+            "description": "Function that checks if User's Stream matches the one received in Peer.",
+            "itemtype": "method",
+            "name": "_checkIfStreamMismatch",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.16",
             "class": "Skylink"
         },
         {
@@ -6869,23 +6987,23 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:154"
+            "line": " source/data-transfer.js:155"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:526"
+            "line": " source/data-transfer.js:527"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:755"
+            "line": " source/data-transfer.js:756"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:890"
+            "line": " source/data-transfer.js:891"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1015"
+            "line": " source/data-transfer.js:1016"
         },
         {
             "message": "unknown tag: trigger",
@@ -6893,7 +7011,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:344"
+            "line": " source/peer-connection.js:350"
         },
         {
             "message": "unknown tag: trigger",
@@ -6925,7 +7043,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:293"
+            "line": " source/room-init.js:296"
         },
         {
             "message": "unknown tag: scoped",
@@ -6993,43 +7111,43 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:282"
+            "line": " source/stream-media.js:296"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:569"
+            "line": " source/stream-media.js:583"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:781"
+            "line": " source/stream-media.js:795"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:820"
+            "line": " source/stream-media.js:834"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:958"
+            "line": " source/stream-media.js:972"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:985"
+            "line": " source/stream-media.js:999"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1012"
+            "line": " source/stream-media.js:1026"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1039"
+            "line": " source/stream-media.js:1053"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1066"
+            "line": " source/stream-media.js:1080"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1282"
+            "line": " source/stream-media.js:1296"
         },
         {
             "message": "Missing item type\nPolyfill for Object.keys() from Mozilla\nFrom https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys",
@@ -7049,47 +7167,47 @@
         },
         {
             "message": "Missing item type\nSubscribe to events",
-            "line": " source/data-channel.js:154"
+            "line": " source/data-channel.js:173"
         },
         {
             "message": "Missing item type\nEmit data state event function.",
-            "line": " source/data-transfer.js:945"
+            "line": " source/data-transfer.js:946"
         },
         {
             "message": "Missing item type\nComplete Peer function.",
-            "line": " source/data-transfer.js:1178"
+            "line": " source/data-transfer.js:1205"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:1257"
+            "line": " source/data-transfer.js:1284"
         },
         {
             "message": "Missing item type\nReturn error and trigger them if failed before or during data transfers function.",
-            "line": " source/data-transfer.js:1267"
+            "line": " source/data-transfer.js:1294"
         },
         {
             "message": "Missing item type\nSend WRQ protocol to start data transfers.",
-            "line": " source/data-transfer.js:1283"
+            "line": " source/data-transfer.js:1310"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:1646"
+            "line": " source/data-transfer.js:1694"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:1886"
+            "line": " source/data-transfer.js:1939"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2007"
+            "line": " source/data-transfer.js:2062"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2056"
+            "line": " source/data-transfer.js:2111"
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self._getUserInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:1139"
+            "line": " source/peer-connection.js:1145"
         }
     ]
 }

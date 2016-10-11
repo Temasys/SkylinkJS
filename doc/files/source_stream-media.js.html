@@ -103,6 +103,8 @@
  *   local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; / &lt;code&gt;&quot;answer&quot;&lt;/code&gt; session description video codec preference.
  * @param {String} VP8  &lt;small&gt;Value &lt;code&gt;&quot;VP8&quot;&lt;/code&gt;&lt;/small&gt;
  *   The value of the option to prefer the &lt;a href=&quot;https://en.wikipedia.org/wiki/VP8&quot;&gt;VP8&lt;/a&gt; video codec.
+ * @param {String} VP9  &lt;small&gt;Value &lt;code&gt;&quot;VP9&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to prefer the &lt;a href=&quot;https://en.wikipedia.org/wiki/VP9&quot;&gt;VP9&lt;/a&gt; video codec.
  * @param {String} H264 &lt;small&gt;Value &lt;code&gt;&quot;H264&quot;&lt;/code&gt;&lt;/small&gt;
  *   The value of the option to prefer the &lt;a href=&quot;https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC&quot;&gt;H264&lt;/a&gt; video codec.
  * @type JSON
@@ -113,7 +115,8 @@
 Skylink.prototype.VIDEO_CODEC = {
   AUTO: &#x27;auto&#x27;,
   VP8: &#x27;VP8&#x27;,
-  H264: &#x27;H264&#x27;
+  H264: &#x27;H264&#x27;,
+  VP9: &#x27;VP9&#x27;
   //H264UC: &#x27;H264UC&#x27;
 };
 
@@ -369,6 +372,17 @@ Skylink.prototype._streamsBandwidthSettings = {};
  * @since 0.6.15
  */
 Skylink.prototype._streamsStoppedCbs = {};
+
+/**
+ * Stores all the Stream mismatch checks.
+ * @attribute _streamsMistmatch
+ * @param {String} #peerId The Peer&#x27;s Stream mismatch concatenated by &quot;current::actual&quot;.
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._streamsMistmatch = {};
 
 /**
  * Function that retrieves camera Stream.
@@ -1506,6 +1520,7 @@ Skylink.prototype._stopStreams = function (options) {
 
     if (self._streamsStoppedCbs[streamId]) {
       self._streamsStoppedCbs[streamId]();
+      delete self._streamsStoppedCbs[streamId];
     }
   };
 
@@ -1742,6 +1757,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
     stream.oninactive = function () {
       if (self._streamsStoppedCbs[streamId]) {
         self._streamsStoppedCbs[streamId]();
+        delete self._streamsStoppedCbs[streamId];
       }
     };
 
@@ -1756,6 +1772,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
 
         if (self._streamsStoppedCbs[streamId]) {
           self._streamsStoppedCbs[streamId]();
+          delete self._streamsStoppedCbs[streamId];
         }
 
       } else {
@@ -1767,6 +1784,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
     stream.onended = function () {
       if (self._streamsStoppedCbs[streamId]) {
         self._streamsStoppedCbs[streamId]();
+        delete self._streamsStoppedCbs[streamId];
       }
     };
   }
@@ -1958,28 +1976,55 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
       log.error([peerId, null, null, &#x27;Failed adding local stream&#x27;], error);
     }
   }
+};
 
-  setTimeout(function () {
-    var streamId = null;
+/**
+ * Function that checks if User&#x27;s Stream matches the one received in Peer.
+ * @method _checkIfStreamMismatch
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._checkIfStreamMismatch = function () {
+  var self = this;
+  var streamId = null;
 
-    if (self._streams.screenshare &amp;&amp; self._streams.screenshare.stream) {
-      streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
-    } else if (self._streams.userMedia &amp;&amp; self._streams.userMedia.stream) {
-      streamId = self._streams.userMedia.stream.id || self._streams.userMedia.stream.label;
+  if (self._streams.screenshare &amp;&amp; self._streams.screenshare.stream) {
+    streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
+  } else if (self._streams.userMedia &amp;&amp; self._streams.userMedia.stream) {
+    streamId = self._streams.userMedia.stream.id || self._streams.userMedia.stream.label;
+  }
+
+  if (self._inRoom &amp;&amp; streamId) {
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.STREAM,
+      mid: self._user.sid,
+      rid: self._room.id,
+      cid: self._key,
+      sessionType: !!self._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
+      streamId: streamId,
+      status: &#x27;check&#x27;
+    });
+
+    var listOfPeers = Object.keys(self._peerConnections);
+
+    for (var peerId in self._peerConnections) {
+      if (self._peerConnections.hasOwnProperty(peerId) &amp;&amp; self._peerConnections[peerId] &amp;&amp;
+        self._peerConnections[peerId].signalingState === self.PEER_CONNECTION_STATE.STABLE &amp;&amp;
+        !!self._peerConnections[peerId].localDescription &amp;&amp; !!self._peerConnections[peerId].localDescription.sdp &amp;&amp;
+        !!self._peerConnections[peerId].remoteDescription &amp;&amp; !!self._peerConnections[peerId].remoteDescription.sdp) {
+        var streams = self._peerConnections[peerId].getLocalStreams();
+        var currentStreamId = streams.length &gt; 0 ? (streams[0].id || streams[0].label) : null;
+
+        if (currentStreamId !== streamId &amp;&amp;
+          self._streamsMistmatch[self._user.sid] !== (currentStreamId + &#x27;::&#x27; + streamId)) {
+          self._streamsMistmatch[self._user.sid] = currentStreamId + &#x27;::&#x27; + streamId;
+          self._trigger(&#x27;streamMismatch&#x27;, peerId, this.getPeerInfo(peerId),
+            true, !!self._streams.screenshare, currentStreamId, streamId);
+        }
+      }
     }
-
-    if (self._inRoom) {
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.STREAM,
-        mid: self._user.sid,
-        rid: self._room.id,
-        cid: self._key,
-        sessionType: self._streams.screenshare &amp;&amp; self._streams.screenshare.stream ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
-        streamId: streamId,
-        status: &#x27;check&#x27;
-      });
-    }
-  }, 3500);
+  }
 };
     </pre>
 </div>

@@ -182,7 +182,10 @@ Skylink.prototype._path = null;
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype.REGIONAL_SERVER = {};
+Skylink.prototype.REGIONAL_SERVER = {
+  APAC1: '',
+  US1: ''
+};
 
 /**
  * Stores the API server url.

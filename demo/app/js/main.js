@@ -578,6 +578,11 @@ Demo.Skylink.on('channelMessage', function (){
 Demo.Skylink.on('channelError', function (error) {
   Demo.Methods.displayChatMessage('System', 'Channel Error:<br>' + (error.message || error));
 });
+//---------------------------------------------------
+Demo.Skylink.on('streamMismatch', function (peerId, peerInfo, isSelf, isScreensharing, currentStreamId, newStreamId) {
+  if (isSelf) return;
+  SkylinkDemo.refreshConnection(peerId);
+});
 
 Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats, error) {
   if (state === Demo.Skylink.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS) {

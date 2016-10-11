@@ -200,7 +200,7 @@ Skylink.prototype._peerConnections = {};
  * &lt;blockquote class=&quot;info&quot;&gt;
  *   For MCU enabled Peer connections, the restart functionality may differ, you may learn more about how to workaround
  *   it &lt;a href=&quot;http://support.temasys.com.sg/support/discussions/topics/12000002853&quot;&gt;in this article here&lt;/a&gt;.&lt;br&gt;
- *   For restarts with Peers connecting from Android or iOS SDKs, restarts might not work as written in
+ *   For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in
  *   &lt;a href=&quot;http://support.temasys.com.sg/support/discussions/topics/12000005188&quot;&gt;in this article here&lt;/a&gt;.&lt;br&gt;
  *   Note that this functionality should be used when Peer connection stream freezes during a connection,
  *   and is throttled when invoked many times in less than 3 seconds interval.
@@ -247,7 +247,13 @@ Skylink.prototype._peerConnections = {};
  *   &lt;li&gt;&lt;a href=&quot;#event_peerRestart&quot;&gt;&lt;code&gt;peerRestart&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
  *   &lt;code&gt;isSelfInitiateRestart&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt; for all targeted Peer connections.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
  *   &lt;li&gt;Else: &lt;ol&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
- *   &lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
+ *   &lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;li&gt;If Peer&#x27;s Stream received does not match the actual Stream
+ *   sending from Peer and User is in Room: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_streamMismatch&quot;&gt;&lt;code&gt;streamMismatch&lt;/code&gt; event&lt;/a&gt; triggers &lt;small&gt;
+ *   Note that this event may trigger multiple times depending on how many consecutive &lt;code&gt;refreshConnection&lt;/code&gt;
+ *   method invokes have been made. When being triggered with this event, the recommended solution is to invoke
+ *   &lt;code&gt;refreshConnection([peerId])&lt;/code&gt; method again when parameter payload &lt;code&gt;isSelf&lt;/code&gt; value is
+ *   &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @example
  *   // Example 1: Refreshing a Peer connection
  *   function refreshFrozenVideoStream (peerId) {
@@ -391,7 +397,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle,
 
       if (now - self.lastRestart &lt; 3000) {
         error = &#x27;Last restart was so tight. Aborting.&#x27;;
-        log.error([peerId, null, null, error]);
+        log.warn([peerId, null, null, error]);
         listOfPeerRestartErrors[peerId] = new Error(error);
         return;
       }
@@ -927,7 +933,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // prevent restarts for other SDK clients
-  if ([&#x27;Android&#x27;, &#x27;iOS&#x27;, &#x27;cpp&#x27;].indexOf(agent.name) &gt; -1) {
+  if (self._INTEROP_MULTI_TRANSFERS.indexOf(agent.name) &gt; -1) {
     var notSupportedError = new Error(&#x27;Failed restarting with other agents connecting from other SDKs as &#x27; +
       &#x27;re-negotiation is not supported by other SDKs&#x27;);
 
