@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Tue Oct 11 2016 10:40:11 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Tue Oct 11 2016 13:28:23 GMT+0800 (SGT) */
 
 (function() {
 
@@ -10683,7 +10683,8 @@ Skylink.prototype._answerHandler = function(message) {
 Skylink.prototype.VIDEO_CODEC = {
   AUTO: 'auto',
   VP8: 'VP8',
-  H264: 'H264'
+  H264: 'H264',
+  VP9: 'VP9'
   //H264UC: 'H264UC'
 };
 
