@@ -556,7 +556,9 @@ Skylink.prototype._streamEventHandler = function(message) {
         var streams = this._peerConnections[targetMid].getRemoteStreams();
         var currentStreamId = streams[0].id || streams[0].label;
 
-        if (streams.length > 0 && message.streamId !== currentStreamId) {
+        if (streams.length > 0 && message.streamId !== currentStreamId &&
+          this._streamsMistmatch[targetMid] !== (currentStreamId + '::' + message.streamId)) {
+          this._streamsMistmatch[targetMid] = currentStreamId + '::' + message.streamId;
           this._trigger('streamMismatch', targetMid, this.getPeerInfo(targetMid),
             false, message.sessionType === 'screensharing', currentStreamId, message.streamId);
         }

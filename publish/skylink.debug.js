@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Tue Oct 11 2016 01:23:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Tue Oct 11 2016 10:40:11 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8600,7 +8600,7 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.16
    */
-  streamMismatch: [],
+  streamMismatch: []
 };
 
 /**
@@ -9960,7 +9960,9 @@ Skylink.prototype._streamEventHandler = function(message) {
         var streams = this._peerConnections[targetMid].getRemoteStreams();
         var currentStreamId = streams[0].id || streams[0].label;
 
-        if (streams.length > 0 && message.streamId !== currentStreamId) {
+        if (streams.length > 0 && message.streamId !== currentStreamId &&
+          this._streamsMistmatch[targetMid] !== (currentStreamId + '::' + message.streamId)) {
+          this._streamsMistmatch[targetMid] = currentStreamId + '::' + message.streamId;
           this._trigger('streamMismatch', targetMid, this.getPeerInfo(targetMid),
             false, message.sessionType === 'screensharing', currentStreamId, message.streamId);
         }
@@ -10937,6 +10939,17 @@ Skylink.prototype._streamsBandwidthSettings = {};
  * @since 0.6.15
  */
 Skylink.prototype._streamsStoppedCbs = {};
+
+/**
+ * Stores all the Stream mismatch checks.
+ * @attribute _streamsMistmatch
+ * @param {String} #peerId The Peer's Stream mismatch concatenated by "current::actual".
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._streamsMistmatch = {};
 
 /**
  * Function that retrieves camera Stream.
@@ -12570,7 +12583,9 @@ Skylink.prototype._checkIfStreamMismatch = function () {
         var streams = self._peerConnections[peerId].getLocalStreams();
         var currentStreamId = streams.length > 0 ? (streams[0].id || streams[0].label) : null;
 
-        if (currentStreamId !== streamId) {
+        if (currentStreamId !== streamId &&
+          self._streamsMistmatch[self._user.sid] !== (currentStreamId + '::' + streamId)) {
+          self._streamsMistmatch[self._user.sid] = currentStreamId + '::' + streamId;
           self._trigger('streamMismatch', peerId, this.getPeerInfo(peerId),
             true, !!self._streams.screenshare, currentStreamId, streamId);
         }

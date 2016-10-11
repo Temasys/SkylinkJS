@@ -280,6 +280,17 @@ Skylink.prototype._streamsBandwidthSettings = {};
 Skylink.prototype._streamsStoppedCbs = {};
 
 /**
+ * Stores all the Stream mismatch checks.
+ * @attribute _streamsMistmatch
+ * @param {String} #peerId The Peer's Stream mismatch concatenated by "current::actual".
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._streamsMistmatch = {};
+
+/**
  * Function that retrieves camera Stream.
  * @method getUserMedia
  * @param {JSON} [options] The camera Stream configuration options.
@@ -1911,7 +1922,9 @@ Skylink.prototype._checkIfStreamMismatch = function () {
         var streams = self._peerConnections[peerId].getLocalStreams();
         var currentStreamId = streams.length > 0 ? (streams[0].id || streams[0].label) : null;
 
-        if (currentStreamId !== streamId) {
+        if (currentStreamId !== streamId &&
+          self._streamsMistmatch[self._user.sid] !== (currentStreamId + '::' + streamId)) {
+          self._streamsMistmatch[self._user.sid] = currentStreamId + '::' + streamId;
           self._trigger('streamMismatch', peerId, this.getPeerInfo(peerId),
             true, !!self._streams.screenshare, currentStreamId, streamId);
         }

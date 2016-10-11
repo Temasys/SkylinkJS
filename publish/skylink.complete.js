@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Tue Oct 11 2016 01:23:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Tue Oct 11 2016 10:40:11 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10461,7 +10461,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Tue Oct 11 2016 01:23:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Tue Oct 11 2016 10:40:11 GMT+0800 (SGT) */
 
 (function() {
 
@@ -19063,7 +19063,7 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.16
    */
-  streamMismatch: [],
+  streamMismatch: []
 };
 
 /**
@@ -20423,7 +20423,9 @@ Skylink.prototype._streamEventHandler = function(message) {
         var streams = this._peerConnections[targetMid].getRemoteStreams();
         var currentStreamId = streams[0].id || streams[0].label;
 
-        if (streams.length > 0 && message.streamId !== currentStreamId) {
+        if (streams.length > 0 && message.streamId !== currentStreamId &&
+          this._streamsMistmatch[targetMid] !== (currentStreamId + '::' + message.streamId)) {
+          this._streamsMistmatch[targetMid] = currentStreamId + '::' + message.streamId;
           this._trigger('streamMismatch', targetMid, this.getPeerInfo(targetMid),
             false, message.sessionType === 'screensharing', currentStreamId, message.streamId);
         }
@@ -21400,6 +21402,17 @@ Skylink.prototype._streamsBandwidthSettings = {};
  * @since 0.6.15
  */
 Skylink.prototype._streamsStoppedCbs = {};
+
+/**
+ * Stores all the Stream mismatch checks.
+ * @attribute _streamsMistmatch
+ * @param {String} #peerId The Peer's Stream mismatch concatenated by "current::actual".
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._streamsMistmatch = {};
 
 /**
  * Function that retrieves camera Stream.
@@ -23033,7 +23046,9 @@ Skylink.prototype._checkIfStreamMismatch = function () {
         var streams = self._peerConnections[peerId].getLocalStreams();
         var currentStreamId = streams.length > 0 ? (streams[0].id || streams[0].label) : null;
 
-        if (currentStreamId !== streamId) {
+        if (currentStreamId !== streamId &&
+          self._streamsMistmatch[self._user.sid] !== (currentStreamId + '::' + streamId)) {
+          self._streamsMistmatch[self._user.sid] = currentStreamId + '::' + streamId;
           self._trigger('streamMismatch', peerId, this.getPeerInfo(peerId),
             true, !!self._streams.screenshare, currentStreamId, streamId);
         }

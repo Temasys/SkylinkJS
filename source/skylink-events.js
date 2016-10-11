@@ -687,7 +687,7 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.16
    */
-  streamMismatch: [],
+  streamMismatch: []
 };
 
 /**
