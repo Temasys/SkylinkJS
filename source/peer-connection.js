@@ -866,15 +866,11 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         os: window.navigator.platform,
         userInfo: self._getUserInfo(),
         target: peerId,
-        isConnectionRestart: !!isConnectionRestart,
-        lastRestart: (new Date()).getTime(),
-        // This will not be used based off the logic in _restartHandler
         weight: self._peerPriorityWeight,
         receiveOnly: self._peerConnections[peerId] && self._peerConnections[peerId].receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
         sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
-        explicit: !!explicit,
         temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       });
 
@@ -1245,14 +1241,11 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         os: window.navigator.platform,
         userInfo: self._getUserInfo(),
         target: peerId, //'MCU',
-        isConnectionRestart: false,
-        lastRestart: (new Date()).getTime(),
         weight: self._peerPriorityWeight,
         receiveOnly: receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
         sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
-        explicit: true,
         temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       });
     }
