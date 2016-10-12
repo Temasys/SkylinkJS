@@ -278,8 +278,6 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
       // do a complete clean
       if (!self._hasMCU) {
         self._restartPeerConnection(peerId);
-      } else {
-        self._restartMCUConnection();
       }
     } else {
       self._peerConnectionHealth[peerId] = true;
