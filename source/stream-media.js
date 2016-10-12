@@ -1929,15 +1929,15 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
   }
 
   setTimeout(function () {
-    var streamId = null;
+    if (self._inRoom && !self._hasMCU) {
+      var streamId = null;
 
-    if (self._streams.screenshare && self._streams.screenshare.stream) {
-      streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
-    } else if (self._streams.userMedia && self._streams.userMedia.stream) {
-      streamId = self._streams.userMedia.stream.id || self._streams.userMedia.stream.label;
-    }
+      if (self._streams.screenshare && self._streams.screenshare.stream) {
+        streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
+      } else if (self._streams.userMedia && self._streams.userMedia.stream) {
+        streamId = self._streams.userMedia.stream.id || self._streams.userMedia.stream.label;
+      }
 
-    if (self._inRoom) {
       self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.STREAM,
         mid: self._user.sid,

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Thu Sep 22 2016 23:58:12 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Thu Oct 13 2016 01:14:39 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7248,7 +7248,7 @@ function toArray(list, index) {
 },{}]},{},[31])(31)
 });
 
-/*! adapterjs - v0.13.3 - 2016-04-13 */
+/*! adapterjs - v0.13.4 - 2016-09-22 */
 
 // Adapter's interface.
 var AdapterJS = AdapterJS || {};
@@ -7267,7 +7267,7 @@ AdapterJS.options = AdapterJS.options || {};
 // AdapterJS.options.hidePluginInstallPrompt = true;
 
 // AdapterJS version
-AdapterJS.VERSION = '0.13.3';
+AdapterJS.VERSION = '0.13.4';
 
 // This function will be called when the WebRTC API is ready to be used
 // Whether it is the native implementation (Chrome, Firefox, Opera) or
@@ -7309,7 +7309,7 @@ AdapterJS.WebRTCPlugin = AdapterJS.WebRTCPlugin || {};
 
 // The object to store plugin information
 /* jshint ignore:start */
-AdapterJS.WebRTCPlugin.pluginInfo = {
+AdapterJS.WebRTCPlugin.pluginInfo = AdapterJS.WebRTCPlugin.pluginInfo || {
   prefix : 'Tem',
   plugName : 'TemWebRTCPlugin',
   pluginId : 'plugin0',
@@ -7317,14 +7317,21 @@ AdapterJS.WebRTCPlugin.pluginInfo = {
   onload : '__TemWebRTCReady0',
   portalLink : 'http://skylink.io/plugin/',
   downloadLink : null, //set below
-  companyName: 'Temasys'
+  companyName: 'Temasys',
+  downloadLinks : {
+    mac: 'http://bit.ly/1n77hco',
+    win: 'http://bit.ly/1kkS4FN'
+  }
 };
-if(!!navigator.platform.match(/^Mac/i)) {
-  AdapterJS.WebRTCPlugin.pluginInfo.downloadLink = 'http://bit.ly/1n77hco';
+if(typeof AdapterJS.WebRTCPlugin.pluginInfo.downloadLinks !== "undefined" && AdapterJS.WebRTCPlugin.pluginInfo.downloadLinks !== null) {
+  if(!!navigator.platform.match(/^Mac/i)) {
+    AdapterJS.WebRTCPlugin.pluginInfo.downloadLink = AdapterJS.WebRTCPlugin.pluginInfo.downloadLinks.mac;
+  }
+  else if(!!navigator.platform.match(/^Win/i)) {
+    AdapterJS.WebRTCPlugin.pluginInfo.downloadLink = AdapterJS.WebRTCPlugin.pluginInfo.downloadLinks.win;
+  }
 }
-else if(!!navigator.platform.match(/^Win/i)) {
-  AdapterJS.WebRTCPlugin.pluginInfo.downloadLink = 'http://bit.ly/1kkS4FN';
-}
+
 /* jshint ignore:end */
 
 AdapterJS.WebRTCPlugin.TAGS = {
@@ -7497,8 +7504,8 @@ AdapterJS.isDefined = null;
 //   - 'plugin': Using the plugin implementation.
 AdapterJS.parseWebrtcDetectedBrowser = function () {
   var hasMatch = null;
-  if ((!!window.opr && !!opr.addons) || 
-    !!window.opera || 
+  if ((!!window.opr && !!opr.addons) ||
+    !!window.opera ||
     navigator.userAgent.indexOf(' OPR/') >= 0) {
     // Opera 8.0+
     webrtcDetectedBrowser = 'opera';
@@ -7526,7 +7533,7 @@ AdapterJS.parseWebrtcDetectedBrowser = function () {
     webrtcDetectedVersion = parseInt(hasMatch[1] || '0', 10);
     if (!webrtcDetectedVersion) {
       hasMatch = /\bMSIE[ :]+(\d+)/g.exec(navigator.userAgent) || [];
-      webrtcDetectedVersion = parseInt(hasMatch[1] || '0', 10);      
+      webrtcDetectedVersion = parseInt(hasMatch[1] || '0', 10);
     }
   } else if (!!window.StyleMedia) {
     // Edge 20+
@@ -7536,13 +7543,20 @@ AdapterJS.parseWebrtcDetectedBrowser = function () {
     // Chrome 1+
     // Bowser and Version set in Google's adapter
     webrtcDetectedType    = 'webkit';
-  } else if ((webrtcDetectedBrowser === 'chrome'|| webrtcDetectedBrowser === 'opera') && 
+  } else if ((webrtcDetectedBrowser === 'chrome'|| webrtcDetectedBrowser === 'opera') &&
     !!window.CSS) {
     // Blink engine detection
     webrtcDetectedBrowser = 'blink';
     // TODO: detected WebRTC version
   }
-
+  if ((navigator.userAgent.match(/android/ig) || []).length === 0 &&
+  (navigator.userAgent.match(/chrome/ig) || []).length === 0 && 
+  navigator.userAgent.indexOf('Safari/') > 0) {
+    webrtcDetectedBrowser = 'safari';
+    webrtcDetectedVersion = parseInt((navigator.userAgent.match(/Version\/(.*)\ /) || ['', '0'])[1], 10);
+    webrtcMinimumVersion = 7;
+    webrtcDetectedType = 'plugin';
+  }
   window.webrtcDetectedBrowser = webrtcDetectedBrowser;
   window.webrtcDetectedVersion = webrtcDetectedVersion;
   window.webrtcMinimumVersion  = webrtcMinimumVersion;
@@ -7614,6 +7628,7 @@ AdapterJS.renderNotificationBar = function (text, buttonText, buttonLink, openNe
         AdapterJS.WebRTCPlugin.isPluginInstalled(
           AdapterJS.WebRTCPlugin.pluginInfo.prefix,
           AdapterJS.WebRTCPlugin.pluginInfo.plugName,
+          AdapterJS.WebRTCPlugin.pluginInfo.type,
           function() { // plugin now installed
             clearInterval(pluginInstallInterval);
             AdapterJS.WebRTCPlugin.defineWebRTCInterface();
@@ -7801,10 +7816,12 @@ webrtcDetectedVersion = null;
 webrtcMinimumVersion  = null;
 
 // Check for browser types and react accordingly
-if ( navigator.mozGetUserMedia || 
-  navigator.webkitGetUserMedia || 
-  (navigator.mediaDevices && 
-    navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)) ) { 
+if ( (navigator.mozGetUserMedia || 
+      navigator.webkitGetUserMedia || 
+      (navigator.mediaDevices && 
+       navigator.userAgent.match(/Edge\/(\d+).(\d+)$/))) 
+    && !((navigator.userAgent.match(/android/ig) || []).length === 0 &&
+          (navigator.userAgent.match(/chrome/ig) || []).length === 0 && navigator.userAgent.indexOf('Safari/') > 0)) { 
 
   ///////////////////////////////////////////////////////////////////
   // INJECTION OF GOOGLE'S ADAPTER.JS CONTENT
@@ -9683,9 +9700,21 @@ if ( navigator.mozGetUserMedia ||
   // Need to override attachMediaStream and reattachMediaStream
   // to support the plugin's logic
   attachMediaStream_base = attachMediaStream;
+
+  if (webrtcDetectedBrowser === 'opera') {
+    attachMediaStream_base = function (element, stream) {
+      if (webrtcDetectedVersion > 38) {
+        element.srcObject = stream;
+      } else if (typeof element.src !== 'undefined') {
+        element.src = URL.createObjectURL(stream);
+      }
+      // Else it doesn't work
+    };
+  }
+
   attachMediaStream = function (element, stream) {
     if ((webrtcDetectedBrowser === 'chrome' ||
-         webrtcDetectedBrowser === 'opera') && 
+         webrtcDetectedBrowser === 'opera') &&
         !stream) {
       // Chrome does not support "src = null"
       element.src = '';
@@ -9865,11 +9894,11 @@ if ( navigator.mozGetUserMedia ||
   };
 
   AdapterJS.WebRTCPlugin.isPluginInstalled =
-    function (comName, plugName, installedCb, notInstalledCb) {
+    function (comName, plugName, plugType, installedCb, notInstalledCb) {
     if (!isIE) {
-      var pluginArray = navigator.plugins;
+      var pluginArray = navigator.mimeTypes;
       for (var i = 0; i < pluginArray.length; i++) {
-        if (pluginArray[i].name.indexOf(plugName) >= 0) {
+        if (pluginArray[i].type.indexOf(plugType) >= 0) {
           installedCb();
           return;
         }
@@ -9944,11 +9973,11 @@ if ( navigator.mozGetUserMedia ||
       if (typeof constraints !== 'undefined' && constraints !== null) {
         var invalidConstraits = false;
         invalidConstraits |= typeof constraints !== 'object';
-        invalidConstraits |= constraints.hasOwnProperty('mandatory') && 
-                              constraints.mandatory !== undefined && 
-                              constraints.mandatory !== null && 
+        invalidConstraits |= constraints.hasOwnProperty('mandatory') &&
+                              constraints.mandatory !== undefined &&
+                              constraints.mandatory !== null &&
                               constraints.mandatory.constructor !== Object;
-        invalidConstraits |= constraints.hasOwnProperty('optional') && 
+        invalidConstraits |= constraints.hasOwnProperty('optional') &&
                               constraints.optional !== undefined &&
                               constraints.optional !== null &&
                               !Array.isArray(constraints.optional);
@@ -9993,20 +10022,76 @@ if ( navigator.mozGetUserMedia ||
       }
     };
 
-    MediaStreamTrack = {};
+    MediaStreamTrack = function(){};
     MediaStreamTrack.getSources = function (callback) {
       AdapterJS.WebRTCPlugin.callWhenPluginReady(function() {
         AdapterJS.WebRTCPlugin.plugin.GetSources(callback);
       });
     };
 
+    // getUserMedia constraints shim.
+    // Copied from Chrome
+    var constraintsToPlugin = function(c) {
+      if (typeof c !== 'object' || c.mandatory || c.optional) {
+        return c;
+      }
+      var cc = {};
+      Object.keys(c).forEach(function(key) {
+        if (key === 'require' || key === 'advanced' || key === 'mediaSource') {
+          return;
+        }
+        var r = (typeof c[key] === 'object') ? c[key] : {ideal: c[key]};
+        if (r.exact !== undefined && typeof r.exact === 'number') {
+          r.min = r.max = r.exact;
+        }
+        var oldname = function(prefix, name) {
+          if (prefix) {
+            return prefix + name.charAt(0).toUpperCase() + name.slice(1);
+          }
+          return (name === 'deviceId') ? 'sourceId' : name;
+        };
+        if (r.ideal !== undefined) {
+          cc.optional = cc.optional || [];
+          var oc = {};
+          if (typeof r.ideal === 'number') {
+            oc[oldname('min', key)] = r.ideal;
+            cc.optional.push(oc);
+            oc = {};
+            oc[oldname('max', key)] = r.ideal;
+            cc.optional.push(oc);
+          } else {
+            oc[oldname('', key)] = r.ideal;
+            cc.optional.push(oc);
+          }
+        }
+        if (r.exact !== undefined && typeof r.exact !== 'number') {
+          cc.mandatory = cc.mandatory || {};
+          cc.mandatory[oldname('', key)] = r.exact;
+        } else {
+          ['min', 'max'].forEach(function(mix) {
+            if (r[mix] !== undefined) {
+              cc.mandatory = cc.mandatory || {};
+              cc.mandatory[oldname(mix, key)] = r[mix];
+            }
+          });
+        }
+      });
+      if (c.advanced) {
+        cc.optional = (cc.optional || []).concat(c.advanced);
+      }
+      return cc;
+    };
+
     getUserMedia = function (constraints, successCallback, failureCallback) {
-      constraints.audio = constraints.audio || false;
-      constraints.video = constraints.video || false;
+      var cc = {};
+      cc.audio = constraints.audio ?
+        constraintsToPlugin(constraints.audio) : false;
+      cc.video = constraints.video ?
+        constraintsToPlugin(constraints.video) : false;
 
       AdapterJS.WebRTCPlugin.callWhenPluginReady(function() {
         AdapterJS.WebRTCPlugin.plugin.
-          getUserMedia(constraints, successCallback, failureCallback);
+          getUserMedia(cc, successCallback, failureCallback);
       });
     };
     window.navigator.getUserMedia = getUserMedia;
@@ -10152,7 +10237,7 @@ if ( navigator.mozGetUserMedia ||
           propName = properties[prop];
 
           if (typeof propName.slice === 'function' &&
-              propName.slice(0,2) === 'on' && 
+              propName.slice(0,2) === 'on' &&
               typeof srcElem[propName] === 'function') {
               AdapterJS.addEvent(destElem, propName.slice(2), srcElem[propName]);
           }
@@ -10214,10 +10299,12 @@ if ( navigator.mozGetUserMedia ||
     }
   };
 
+
   // Try to detect the plugin and act accordingly
   AdapterJS.WebRTCPlugin.isPluginInstalled(
     AdapterJS.WebRTCPlugin.pluginInfo.prefix,
     AdapterJS.WebRTCPlugin.pluginInfo.plugName,
+    AdapterJS.WebRTCPlugin.pluginInfo.type,
     AdapterJS.WebRTCPlugin.defineWebRTCInterface,
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 
@@ -10301,7 +10388,7 @@ if ( navigator.mozGetUserMedia ||
       });
     };
 
-  } else if (window.navigator.webkitGetUserMedia) {
+  } else if (window.navigator.webkitGetUserMedia && window.webrtcDetectedBrowser !== 'safari') {
     baseGetUserMedia = window.navigator.getUserMedia;
 
     navigator.getUserMedia = function (constraints, successCb, failureCb) {
@@ -10461,7 +10548,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Thu Sep 22 2016 23:58:12 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Thu Oct 13 2016 01:14:39 GMT+0800 (SGT) */
 
 (function() {
 
@@ -20227,11 +20314,13 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
  *     console.info("Recording session has started. ID ->", success);
  *   });
  * @trigger <ol class="desc-seq">
- *   <li><a href="#event_recordingState"><code>recordingState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>START</code>.</li>
- *   <li>When recording session has errors (and aborted), 
- *   <a href="#event_recordingState"><code>recordingState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>ERROR</code>.</li></ol>
+ *   <li>If MCU is not connected: <ol><li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>If there is an existing recording session currently going on: <ol>
+ *   <li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>Sends to MCU via Signaling server to start recording session. <ol>
+ *   <li>If recording session has been started successfully: <ol>
+ *   <li><a href="#event_recordingState"><code>recordingState</code> event</a> triggers
+ *   parameter payload <code>state</code> as <code>START</code>.</li></ol></li></ol></li></ol>
  * @beta
  * @for Skylink
  * @since 0.6.x
@@ -20318,14 +20407,26 @@ Skylink.prototype.startRecording = function (callback) {
  *     console.info("Recording session has compiled with links ->", success.link);
  *   }, true);
  * @trigger <ol class="desc-seq">
- *   <li><a href="#event_recordingState"><code>recordingState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>STOP</code>.</li>
- *   <li>When recording session mixin has errors (and aborted), 
- *   <a href="#event_recordingState"><code>recordingState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>ERROR</code>.</li>
- *   <li>When recording session mixin has completed with video links, 
- *   <a href="#event_recordingState"><code>recordingState</code> event</a> triggers parameter payload
- *   <code>state</code> as <code>LINK</code>.</li></ol>
+ *   <li>If MCU is not connected: <ol><li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>If there is no existing recording session currently going on: <ol>
+ *   <li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>If existing recording session recording time has not elapsed more than 4 seconds:
+ *   <small>4 seconds is mandatory for recording session to ensure better recording
+ *   experience and stability.</small> <ol><li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>Sends to MCU via Signaling server to stop recording session: <ol>
+ *   <li>If recording session has been stopped successfully: <ol>
+ *   <li><a href="#event_recordingState"><code>recordingState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>START</code>.
+ *   <li>MCU starts mixin recorded session videos: <ol>
+ *   <li>If recording session has been mixin successfully with links: <ol>
+ *   <li><a href="#event_recordingState"><code>recordingState</code> event</a> triggers
+ *   parameter payload <code>state</code> as <code>LINK</code>.<li>Else: <ol>
+ *   <li><a href="#event_recordingState"><code>recordingState</code> event</a> triggers
+ *   parameter payload <code>state</code> as <code>ERROR</code>.<li><b>ABORT</b> and return error.</ol></li>
+ *   </ol></li></ol></li><li>Else: <ol>
+ *   <li><a href="#event_recordingState"><code>recordingState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> and return error.</li>
+ *   </ol></li></ol></li></ol>
  * @beta
  * @for Skylink
  * @since 0.6.x
@@ -20735,7 +20836,7 @@ Skylink.prototype._streamEventHandler = function(message) {
         log.log([targetMid, null, message.type, 'Peer connection not found']);
       }
   	} else if (message.status === 'check') {
-      if (!message.streamId) {
+      if (!message.streamId || this._hasMCU) {
         return;
       }
 
@@ -20886,12 +20987,12 @@ Skylink.prototype._recordingEventHandler = function (message) {
       log.warn(['MCU', 'Recording', message.recordingId, 'Recording stopped abruptly before 4 seconds']);
       self._recordingStartInterval = null;
     }
-  
+
     log.debug(['MCU', 'Recording', message.recordingId, 'Stopped recording']);
-    
+
     self._recordings[message.recordingId].isOn = false;
     self._trigger('recordingState', self.RECORDING_STATE.STOP, message.recordingId, null, null);
-  
+
   } else if (message.action === 'url') {
     if (!self._recordings[message.recordingId]) {
       log.error(['MCU', 'Recording', message.recordingId, 'Received URL but the session is empty']);
@@ -20900,24 +21001,24 @@ Skylink.prototype._recordingEventHandler = function (message) {
 
     self._recordings[message.recordingId].url = message.url;
     var links = message.url && typeof message.url === 'object' ? message.url : { mixin: message.url };
-       
+
     self._trigger('recordingState', self.RECORDING_STATE.LINK, message.recordingId, links, null);
-  
+
   } else {
     var recordingError = new Error(message.error || 'Unknown error');
     if (!self._recordings[message.recordingId]) {
       log.error(['MCU', 'Recording', message.recordingId, 'Received error but the session is empty ->'], recordingError);
       return;
     }
-    
+
     log.error(['MCU', 'Recording', message.recordingId, 'Recording failure ->'], recordingError);
-    
+
     self._recordings[message.recordingId].error = recordingError;
     self._trigger('recordingState', self.RECORDING_STATE.ERROR, message.recordingId, null, recordingError);
-    
+
     if (self._recordings[message.recordingId].isOn) {
       log.debug(['MCU', 'Recording', message.recordingId, 'Stopped recording abruptly']);
-      
+
       self._recordings[message.recordingId].isOn = false;
       self._trigger('recordingState', self.RECORDING_STATE.STOP, message.recordingId, null, recordingError);
     }
@@ -23474,15 +23575,15 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
   }
 
   setTimeout(function () {
-    var streamId = null;
+    if (self._inRoom && !self._hasMCU) {
+      var streamId = null;
 
-    if (self._streams.screenshare && self._streams.screenshare.stream) {
-      streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
-    } else if (self._streams.userMedia && self._streams.userMedia.stream) {
-      streamId = self._streams.userMedia.stream.id || self._streams.userMedia.stream.label;
-    }
+      if (self._streams.screenshare && self._streams.screenshare.stream) {
+        streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
+      } else if (self._streams.userMedia && self._streams.userMedia.stream) {
+        streamId = self._streams.userMedia.stream.id || self._streams.userMedia.stream.label;
+      }
 
-    if (self._inRoom) {
       self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.STREAM,
         mid: self._user.sid,
