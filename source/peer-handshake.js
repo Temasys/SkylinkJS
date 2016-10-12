@@ -275,8 +275,27 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
         self._retryCounters[peerId]++;
       }
 
-      // do a complete clean
-      if (!self._hasMCU) {
+      if (!(self._peerConnections[peerId] && self._peerConnections[peerId].localDescription &&
+        self._peerConnections[peerId].localDescription.sdp)) {
+        log.debug([peerId, 'PeerConnectionHealth', null, 'Resending welcome again to Peer']);
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.WELCOME,
+          mid: self._user.sid,
+          rid: self._room.id,
+          receiveOnly: self._peerConnections[peerId] ? !!self._peerConnections[peerId].receiveOnly : false,
+          enableIceTrickle: self._enableIceTrickle,
+          enableDataChannel: self._enableDataChannel,
+          agent: window.webrtcDetectedBrowser,
+          version: window.webrtcDetectedVersion,
+          os: window.navigator.platform,
+          userInfo: self._getUserInfo(),
+          target: peerId,
+          weight: self._peerPriorityWeight,
+          sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
+          temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+        });
+
+      } else if (!self._hasMCU) {
         self._restartPeerConnection(peerId);
       }
     } else {
