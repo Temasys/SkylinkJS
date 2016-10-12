@@ -704,7 +704,7 @@ Skylink.prototype.sendStream = function(options, callback) {
       }
 
       if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
-        self._refreshPeerConnection(Object.keys(self._peerConnections), false, function (err, success) {
+        self._refreshPeerConnection(Object.keys(self._peerConnections), function (err, success) {
           if (err) {
             log.error('Failed refreshing connections for sendStream() ->', err);
             if (typeof callback === 'function') {
@@ -1078,6 +1078,10 @@ Skylink.prototype.disableVideo = function() {
 };
 
 /**
+ * <blockquote class="info">
+ *   For a better user experience, the functionality is throttled when invoked many times in less
+ *   than 10 seconds interval.
+ * </blockquote>
  * Function that retrieves screensharing Stream.
  * @method shareScreen
  * @param {JSON} [enableAudio=false] The flag if audio tracks should be retrieved.
@@ -1125,7 +1129,7 @@ Skylink.prototype.disableVideo = function() {
  *   <code>mediaAccessSuccess</code> event</a> triggers parameter payload <code>isScreensharing</code>
  *   value as <code>true</code> and <code>isAudioFallback</code> value as <code>false</code>.</li></ol></li><li>Else: <ol>
  *   <li>If there is any previous <code>shareScreen()</code> Stream: <ol>
- *   <li>Invokes <a href="#method_stopScreen"><code>stopScreen()</code> method</a>.</li></ol></li> 
+ *   <li>Invokes <a href="#method_stopScreen"><code>stopScreen()</code> method</a>.</li></ol></li>
  *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> triggers parameter payload
  *   <code>state</code> as <code>FALLBACKED</code>, <code>isScreensharing</code> value as <code>true</code> and
  *   <code>isAudioFallback</code> value as <code>false</code>.</li>
@@ -1171,24 +1175,17 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     enableAudio = true;
   }
 
-  var throttleFn = function (fn, wait) {
-    if (!self._timestamp.func){
-      //First time run, need to force timestamp to skip condition
-      self._timestamp.func = self._timestamp.now - wait;
-    }
-    var now = Date.now();
+  self._throttle(function (runFn) {
+    if (!runFn) {
+      var throttleLimitError = 'Unable to run as throttle interval has not reached (10s).';
+      log.error(throttleLimitError);
 
-    if (!self._timestamp.screen) {
-      if (now - self._timestamp.func < wait) {
-        return;
+      if (typeof callback === 'function') {
+        callback(new Error(throttleLimitError), null);
       }
+      return;
     }
-    fn();
-    self._timestamp.screen = false;
-    self._timestamp.func = now;
-  };
 
-  throttleFn(function () {
     var settings = {
       settings: {
         audio: enableAudio,
@@ -1211,7 +1208,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
         self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 
         if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
-          self._refreshPeerConnection(Object.keys(self._peerConnections), false, function (err, success) {
+          self._refreshPeerConnection(Object.keys(self._peerConnections), function (err, success) {
             if (err) {
               log.error('Failed refreshing connections for shareScreen() ->', err);
               if (typeof callback === 'function') {
@@ -1289,8 +1286,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
     }
-
-  }, 10000);
+  }, 'shareScreen', 10000);
 };
 
 /**
@@ -1346,7 +1342,7 @@ Skylink.prototype.stopScreen = function () {
         this._trigger('incomingStream', this._user.sid, this._streams.userMedia.stream, true, this.getPeerInfo());
         this._trigger('peerUpdated', this._user.sid, this.getPeerInfo(), true);
       }
-      this._refreshPeerConnection(Object.keys(this._peerConnections), false);
+      this._refreshPeerConnection(Object.keys(this._peerConnections));
     }
   }
 };
@@ -1898,6 +1894,11 @@ Skylink.prototype._checkIfStreamMismatch = function () {
   var self = this;
   var streamId = null;
 
+  if (self._hasMCU) {
+    return;
+  }
+
+  // TODO: So bad until we have proper fixes on protocol end :(
   if (self._streams.screenshare && self._streams.screenshare.stream) {
     streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
   } else if (self._streams.userMedia && self._streams.userMedia.stream) {
@@ -1919,16 +1920,14 @@ Skylink.prototype._checkIfStreamMismatch = function () {
 
     for (var peerId in self._peerConnections) {
       if (self._peerConnections.hasOwnProperty(peerId) && self._peerConnections[peerId] &&
-        self._peerConnections[peerId].signalingState === self.PEER_CONNECTION_STATE.STABLE &&
-        !!self._peerConnections[peerId].localDescription && !!self._peerConnections[peerId].localDescription.sdp &&
-        !!self._peerConnections[peerId].remoteDescription && !!self._peerConnections[peerId].remoteDescription.sdp) {
+        self._peerConnections[peerId].signalingState === self.PEER_CONNECTION_STATE.STABLE) {
         var streams = self._peerConnections[peerId].getLocalStreams();
         var currentStreamId = streams.length > 0 ? (streams[0].id || streams[0].label) : null;
 
         if (currentStreamId !== streamId &&
           self._streamsMistmatch[self._user.sid] !== (currentStreamId + '::' + streamId)) {
           self._streamsMistmatch[self._user.sid] = currentStreamId + '::' + streamId;
-          self._trigger('streamMismatch', peerId, this.getPeerInfo(peerId),
+          self._trigger('streamMismatch', peerId, self.getPeerInfo(peerId),
             true, !!self._streams.screenshare, currentStreamId, streamId);
         }
       }

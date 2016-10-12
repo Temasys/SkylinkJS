@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Thu Oct 13 2016 00:11:47 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Thu Oct 13 2016 00:13:32 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Thu Oct 13 2016 00:11:47 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Thu Oct 13 2016 00:13:32 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13387,81 +13387,79 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
  * @since 0.5.5
  */
 Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
-  var self = this;
-
-  // Check if User is in Room first
-  if (!self._user) {
-    log.warn('Unable to send any P2P message. User does not have Room session.');
-    return;
-  }
-
-  // Check if datachannel is enabled first or not
-  if (!self._enableDataChannel) {
-    log.warn('Unable to send any P2P message. Datachannel is disabled');
-    return;
-  }
-
-  var listOfPeers = Object.keys(self._dataChannels);
+  var listOfPeers = Object.keys(this._dataChannels);
   var isPrivate = false;
 
-  //targetPeerId is defined -> private message
   if (Array.isArray(targetPeerId)) {
     listOfPeers = targetPeerId;
     isPrivate = true;
-  } else if (typeof targetPeerId === 'string') {
+  } else if (targetPeerId && typeof targetPeerId === 'string') {
     listOfPeers = [targetPeerId];
     isPrivate = true;
   }
 
-  if (listOfPeers.indexOf('MCU') > -1) {
-    listOfPeers.splice(listOfPeers.indexOf('MCU'), 1);
+  if (!this._inRoom || !this._user) {
+    log.error('Unable to send message as User is not in Room. ->', message);
+    return;
   }
 
-  // sending public message to MCU to relay. MCU case only
-  if (self._hasMCU) {
-    if (isPrivate) {
-      log.log(['MCU', 'RTCDataChannel', null,
-        'Sending private P2P message to targeted Peers with Datachannel connections'], listOfPeers);
+  if (!this._enableDataChannel) {
+    log.error('Unable to send message as User does not have Datachannel enabled. ->', message);
+    return;
+  }
 
-      self._sendMessageToDataChannel('MCU', {
-        type: self._DC_PROTOCOL_TYPE.MESSAGE,
-        isPrivate: isPrivate,
-        sender: self._user.sid,
-        target: listOfPeers,
-        data: message
-      });
-    } else {
-      log.log(['MCU', 'RTCDataChannel', null, 'Broadcasting P2P message to all Peers with Datachannel connections']);
+  // Loop out unwanted Peers
+  for (var i = 0; i < listOfPeers.length; i++) {
+    var peerId = listOfPeers[i];
 
-      self._sendMessageToDataChannel('MCU', {
-        type: self._DC_PROTOCOL_TYPE.MESSAGE,
-        isPrivate: isPrivate,
-        sender: self._user.sid,
-        target: 'MCU',
-        data: message
-      });
-    }
-  } else {
-    for (var i = 0; i < listOfPeers.length; i++) {
-      log.log([listOfPeers[i], 'RTCDataChannel', 'prop:main', 'Sending P2P message to peer']);
+    if (!this._dataChannels[peerId]) {
+      log.error([peerId, 'RTCDataChannel', null, 'Dropping of sending message to Peer as ' +
+        'Datachannel connection does not exists']);
+      listOfPeers.splice(i, 1);
+      i--;
+    } else if (peerId === 'MCU') {
+      listOfPeers.splice(i, 1);
+      i--;
+    } else if (!this._hasMCU) {
+      log.debug([peerId, 'RTCDataChannel', null, 'Sending ' + (isPrivate ? 'private' : '') +
+        ' P2P message to Peer']);
 
-      self._sendMessageToDataChannel(listOfPeers[i], {
-        type: self._DC_PROTOCOL_TYPE.MESSAGE,
+      this._sendMessageToDataChannel(peerId, {
+        type: this._DC_PROTOCOL_TYPE.MESSAGE,
         isPrivate: isPrivate,
-        sender: self._user.sid,
-        target: listOfPeers[i],
+        sender: this._user.sid,
+        target: peerId,
         data: message
       }, 'main');
     }
   }
 
-  self._trigger('incomingMessage', {
+  if (listOfPeers.length === 0) {
+    log.error('Unable to send message as there are no Peers to sent to.', message);
+    return;
+  }
+
+  if (this._hasMCU) {
+    log.debug(['MCU', 'RTCDataChannel', null, 'Broadcasting ' + (isPrivate ? 'private' : '') +
+      ' P2P message to Peers']);
+
+    this._sendMessageToDataChannel('MCU', {
+      type: this._DC_PROTOCOL_TYPE.MESSAGE,
+      isPrivate: isPrivate,
+      sender: this._user.sid,
+      target: listOfPeers,
+      data: message
+    }, 'main');
+  }
+
+  this._trigger('incomingMessage', {
     content: message,
     isPrivate: isPrivate,
-    targetPeerId: targetPeerId || listOfPeers,
+    targetPeerId: targetPeerId || null,
+    listOfPeers: listOfPeers,
     isDataChannel: true,
-    senderPeerId: self._user.sid
-  }, self._user.sid, self.getPeerInfo(), true);
+    senderPeerId: this._user.sid
+  }, this._user.sid, this.getPeerInfo(), true);
 };
 
 /**
@@ -15093,25 +15091,15 @@ Skylink.prototype.SERVER_PEER_TYPE = {
 };
 
 /**
- * Stores the restart initiated timestamp to throttle the <code>refreshConnection</code> functionality.
- * @attribute _lastRestart
- * @type Object
- * @private
- * @for Skylink
- * @since 0.5.9
- */
-Skylink.prototype._lastRestart = null;
-
-/**
  * Stores the global number of Peer connection retries that would increase the wait-for-response timeout
  *   for the Peer connection health timer.
- * @attribute _retryCount
- * @type Number
+ * @attribute _retryCounters
+ * @type JSON
  * @private
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._retryCount = 0;
+Skylink.prototype._retryCounters = {};
 
 /**
  * Stores the list of the Peer connections.
@@ -15130,8 +15118,9 @@ Skylink.prototype._peerConnections = {};
  *   it <a href="http://support.temasys.com.sg/support/discussions/topics/12000002853">in this article here</a>.<br>
  *   For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in
  *   <a href="http://support.temasys.com.sg/support/discussions/topics/12000005188">in this article here</a>.<br>
- *   Note that this functionality should be used when Peer connection stream freezes during a connection,
- *   and is throttled when invoked many times in less than 3 seconds interval.
+ *   Note that this functionality should be used when Peer connection stream freezes during a connection.
+ *   For a better user experience, the functionality is throttled when invoked many times in
+ *   less than 3 seconds interval.
  * </blockquote>
  * Function that refreshes Peer connections to update with the current streaming.
  * @method refreshConnection
@@ -15175,13 +15164,13 @@ Skylink.prototype._peerConnections = {};
  *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter payload
  *   <code>isSelfInitiateRestart</code> value as <code>true</code> for all targeted Peer connections.</li></ol></li>
  *   <li>Else: <ol><li><b>ABORT</b> and return error.</li></ol></li>
- *   </ol></li></ol></li></ol></li></ol></li><li>If Peer's Stream received does not match the actual Stream
+ *   </ol></li></ol></li><li>If Peer's Stream received does not match the actual Stream
  *   sending from Peer and User is in Room: <ol>
  *   <li><a href="#event_streamMismatch"><code>streamMismatch</code> event</a> triggers <small>
  *   Note that this event may trigger multiple times depending on how many consecutive <code>refreshConnection</code>
  *   method invokes have been made. When being triggered with this event, the recommended solution is to invoke
  *   <code>refreshConnection([peerId])</code> method again when parameter payload <code>isSelf</code> value is
- *   <code>false</code>.</small></li></ol></li></ol>
+ *   <code>false</code>.</small></li></ol></li></ol></ol></li></ol></li></ol>
  * @example
  *   // Example 1: Refreshing a Peer connection
  *   function refreshFrozenVideoStream (peerId) {
@@ -15234,9 +15223,6 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
   var self = this;
 
   var listOfPeers = Object.keys(self._peerConnections);
-  var listOfPeerRestarts = [];
-  var error = '';
-  var listOfPeerRestartErrors = {};
 
   if(Array.isArray(targetPeerId)) {
     listOfPeers = targetPeerId;
@@ -15247,24 +15233,39 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
     callback = targetPeerId;
   }
 
-  if (listOfPeers.length === 0) {
-    error = 'There is currently no peer connections to restart';
-    log.warn([null, 'PeerConnection', null, error]);
-
-    listOfPeerRestartErrors.self = new Error(error);
+  var emitErrorForPeersFn = function (error) {
+    log.error(error);
 
     if (typeof callback === 'function') {
+      var listOfPeerErrors = {};
+
+      if (listOfPeers.length === 0) {
+        listOfPeerErrors.self = new Error(error);
+      } else {
+        for (var i = 0; i < listOfPeers.length; i++) {
+          listOfPeerErrors[listOfPeers[i]] = new Error(error);
+        }
+      }
+
       callback({
         refreshErrors: listOfPeerRestartErrors,
         listOfPeers: listOfPeers
       }, null);
     }
+  };
+
+  if (listOfPeers.length === 0) {
+    emitErrorForPeersFn('There is currently no peer connections to restart');
     return;
   }
 
-  self._throttle(function () {
-    self._refreshPeerConnection(listOfPeers, true, callback);
-  },5000)();
+  self._throttle(function (runFn) {
+    if (!runFn) {
+      emitErrorForPeersFn('Unable to run as throttle interval has not reached (3s).');
+    } else {
+      self._refreshPeerConnection(listOfPeers, callback);
+    }
+  }, 'restartConnection', 5000);
 
 };
 
@@ -15275,7 +15276,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
  * @for Skylink
  * @since 0.6.15
  */
-Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle, callback) {
+Skylink.prototype._refreshPeerConnection = function(listOfPeers, callback) {
   var self = this;
   var listOfPeerRestarts = [];
   var error = '';
@@ -15283,7 +15284,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle,
 
   // To fix jshint dont put functions within a loop
   var refreshSinglePeerCallback = function (peerId) {
-    return function (error, success) {
+    return function (error) {
       if (listOfPeerRestarts.indexOf(peerId) === -1) {
         if (error) {
           log.error([peerId, 'RTCPeerConnection', null, 'Failed restarting for peer'], error);
@@ -15320,21 +15321,10 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle,
       return;
     }
 
-    if (shouldThrottle) {
-      var now = Date.now() || function() { return +new Date(); };
-
-      if (now - self.lastRestart < 3000) {
-        error = 'Last restart was so tight. Aborting.';
-        log.warn([peerId, null, null, error]);
-        listOfPeerRestartErrors[peerId] = new Error(error);
-        return;
-      }
-    }
-
     log.log([peerId, 'PeerConnection', null, 'Restarting peer connection']);
 
     // do a hard reset on variable object
-    self._restartPeerConnection(peerId, true, false, peerCallback, true);
+    self._restartPeerConnection(peerId, peerCallback);
   };
 
   if(!self._hasMCU) {
@@ -15843,7 +15833,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @for Skylink
  * @since 0.5.8
  */
-Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, isConnectionRestart, callback, explicit) {
+Skylink.prototype._restartPeerConnection = function (peerId, callback) {
   var self = this;
 
   if (!self._peerConnections[peerId]) {
@@ -15870,7 +15860,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
     if (typeof callback === 'function') {
       log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart failure callback']);
-      callback(null, notSupportedError);
+      callback(notSupportedError);
     }
     return;
   }
@@ -15882,43 +15872,30 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
       self._addLocalMediaStreams(peerId);
     }
 
-    if (isSelfInitiatedRestart){
-      log.log([peerId, null, null, 'Sending restart message to signaling server']);
+    log.log([peerId, null, null, 'Sending restart message to signaling server']);
 
-      var lastRestart = Date.now() || function() { return +new Date(); };
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.RESTART,
+      mid: self._user.sid,
+      rid: self._room.id,
+      agent: window.webrtcDetectedBrowser,
+      version: window.webrtcDetectedVersion,
+      os: window.navigator.platform,
+      userInfo: self._getUserInfo(),
+      target: peerId,
+      weight: self._peerPriorityWeight,
+      receiveOnly: self._peerConnections[peerId] && self._peerConnections[peerId].receiveOnly,
+      enableIceTrickle: self._enableIceTrickle,
+      enableDataChannel: self._enableDataChannel,
+      sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+    });
 
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.RESTART,
-        mid: self._user.sid,
-        rid: self._room.id,
-        agent: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
-        os: window.navigator.platform,
-        userInfo: self._getUserInfo(),
-        target: peerId,
-        isConnectionRestart: !!isConnectionRestart,
-        lastRestart: lastRestart,
-        // This will not be used based off the logic in _restartHandler
-        weight: self._peerPriorityWeight,
-        receiveOnly: self._peerConnections[peerId] && self._peerConnections[peerId].receiveOnly,
-        enableIceTrickle: self._enableIceTrickle,
-        enableDataChannel: self._enableDataChannel,
-        sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
-        explicit: !!explicit,
-        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
-      });
+    self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
 
-      self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), false);
-
-      if (typeof callback === 'function') {
-        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
-        callback(null, null);
-      }
-    } else {
-      if (typeof callback === 'function') {
-        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback (receiving peer)']);
-        callback(null, null);
-      }
+    if (typeof callback === 'function') {
+      log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
+      callback(null);
     }
 
     // following the previous logic to do checker always
@@ -15950,7 +15927,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         });
         if (typeof callback === 'function') {
           log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart failure callback']);
-          callback(null, new Error(noLocalDescriptionError));
+          callback(new Error(noLocalDescriptionError));
         }
       }
     // It could have connection state closed
@@ -15959,7 +15936,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
       log.warn([peerId, 'RTCPeerConnection', null, unableToRestartError]);
       if (typeof callback === 'function') {
         log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart failure callback']);
-        callback(null, new Error(unableToRestartError));
+        callback(new Error(unableToRestartError));
       }
     }
   }
@@ -16140,7 +16117,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
           'Peer connection with user is stable']);
         self._peerConnectionHealth[targetMid] = true;
         self._stopPeerConnectionHealthCheck(targetMid);
-        self._retryCount = 0;
       }
 
       if (typeof self._ICEConnectionFailures[targetMid] === 'undefined') {
@@ -16157,7 +16133,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 
         // refresh when failed. ignore for MCU case since restart is handled by MCU in this case
         if (!self._hasMCU) {
-          self._restartPeerConnection(targetMid, true, true, null, false);
+          self._restartPeerConnection(targetMid);
         }
       }
 
@@ -16198,7 +16174,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
         'Peer connection with user is stable']);
       self._peerConnectionHealth[targetMid] = true;
       self._stopPeerConnectionHealthCheck(targetMid);
-      self._retryCount = 0;
     }
   };
   pc.onicegatheringstatechange = function() {
@@ -16245,7 +16220,6 @@ Skylink.prototype._restartMCUConnection = function(callback) {
   var peerId; // j shint is whinning
   var receiveOnly = false;
   // for MCU case, these dont matter at all
-  var lastRestart = Date.now() || function() { return +new Date(); };
   var weight = (new Date()).valueOf();
 
   self._trigger('serverPeerRestart', 'MCU', self.SERVER_PEER_TYPE.MCU);
@@ -16278,14 +16252,11 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         os: window.navigator.platform,
         userInfo: self._getUserInfo(),
         target: peerId, //'MCU',
-        isConnectionRestart: false,
-        lastRestart: lastRestart,
         weight: self._peerPriorityWeight,
         receiveOnly: receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
         sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
-        explicit: true,
         temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       });
     }
@@ -16720,8 +16691,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
  */
 Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var self = this;
-  var timer = self._enableIceTrickle ? (toOffer ? 12500 : 10000) : 50000;
-  timer = (self._hasMCU) ? 105000 : timer;
+  var originalBlock = self._hasMCU ? 105000 : (self._enableIceTrickle ? (toOffer ? 12500 : 10000) : 50000);
 
   // increase timeout for android/ios
   /*var agent = self.getPeerInfo(peerId).agent;
@@ -16729,7 +16699,9 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
     timer = 105000;
   }*/
 
-  timer += self._retryCount*10000;
+  if (!self._retryCounters[peerId]) {
+    self._retryCounters[peerId] = 0;
+  }
 
   log.log([peerId, 'PeerConnectionHealth', null,
     'Initializing check for peer\'s connection health']);
@@ -16774,21 +16746,38 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
         'Ice connection state time out. Re-negotiating connection']);
 
       //Maximum increament is 5 minutes
-      if (self._retryCount<30){
+      if (self._retryCounters[peerId] < 30){
         //Increase after each consecutive connection failure
-        self._retryCount++;
+        self._retryCounters[peerId]++;
       }
 
-      // do a complete clean
-      if (!self._hasMCU) {
-        self._restartPeerConnection(peerId, true, true, null, false);
-      } else {
-        self._restartMCUConnection();
+      if (!(self._peerConnections[peerId] && self._peerConnections[peerId].localDescription &&
+        self._peerConnections[peerId].localDescription.sdp)) {
+        log.debug([peerId, 'PeerConnectionHealth', null, 'Resending welcome again to Peer']);
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.WELCOME,
+          mid: self._user.sid,
+          rid: self._room.id,
+          receiveOnly: self._peerConnections[peerId] ? !!self._peerConnections[peerId].receiveOnly : false,
+          enableIceTrickle: self._enableIceTrickle,
+          enableDataChannel: self._enableDataChannel,
+          agent: window.webrtcDetectedBrowser,
+          version: window.webrtcDetectedVersion,
+          os: window.navigator.platform,
+          userInfo: self._getUserInfo(),
+          target: peerId,
+          weight: self._peerPriorityWeight,
+          sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
+          temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+        });
+
+      } else if (!self._hasMCU) {
+        self._restartPeerConnection(peerId);
       }
     } else {
       self._peerConnectionHealth[peerId] = true;
     }
-  }, timer);
+  }, originalBlock + ((self._retryCounters[peerId] || 0) * 1000));
 };
 
 /**
@@ -17884,9 +17873,6 @@ Skylink.prototype.lockRoom = function() {
     rid: this._room.id,
     lock: true
   });
-  this._roomLocked = true;
-  this._trigger('roomLock', true, this._user.sid,
-    this.getPeerInfo(), true);
 };
 
 /**
@@ -17916,9 +17902,6 @@ Skylink.prototype.unlockRoom = function() {
     rid: this._room.id,
     lock: false
   });
-  this._roomLocked = false;
-  this._trigger('roomLock', false, this._user.sid,
-    this.getPeerInfo(), true);
 };
 
 /**
@@ -19785,9 +19768,15 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} message The message result.
    * @param {JSON|String} message.content The message object.
    * @param {String} message.senderPeerId The sender Peer ID.
-   * @param {String|Array} [message.targetPeerId=null] The value of the <code>targetPeerId</code>
+   * @param {String|Array} [message.targetPeerId] The value of the <code>targetPeerId</code>
    *   defined in <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a> or
    *   <a href="#method_sendMessage"><code>sendMessage()</code> method</a>.
+   *   <small>Defined as User's Peer ID when <code>isSelf</code> payload value is <code>false</code>.</small>
+   *   <small>Defined as <code>null</code> when provided <code>targetPeerId</code> in
+   *   <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a> or
+   *   <a href="#method_sendMessage"><code>sendMessage()</code> method</a> is not defined.</small>
+   * @param {Array} [message.listOfPeers] The list of Peers that the message has been sent to.
+   *  <small>Defined only when <code>isSelf</code> payload value is <code>true</code>.</small>
    * @param {Boolean} message.isPrivate The flag if message is targeted or not, basing
    *   off the <code>targetPeerId</code> parameter being defined in
    *   <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a> or
@@ -19858,7 +19847,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} channelType The Datachannel type.
    *   [Rel: Skylink.DATA_CHANNEL_TYPE]
    * @param {String} messageType The Datachannel sending Datachannel message error type.
-   *   <small>Defined only when <cod>state</code> payload is <code>SEND_MESSAGE_ERROR</code>.<small>
+   *   <small>Defined only when <cod>state</code> payload is <code>SEND_MESSAGE_ERROR</code>.</small>
    *   [Rel: Skylink.DATA_CHANNEL_MESSAGE_ERROR]
    * @for Skylink
    * @since 0.1.0
@@ -20161,8 +20150,10 @@ Skylink.prototype._onceEvents = {};
  * @since 0.5.8
  */
 Skylink.prototype._timestamp = {
-  now: Date.now() || function() { return +new Date(); },
-  screen: false
+  socketMessage: null,
+  shareScreen: null,
+  restartConnection: null,
+  lastRestart: null
 };
 
 /**
@@ -20422,20 +20413,16 @@ Skylink.prototype._wait = function(callback, condition, intervalTime, fireAlways
  * @for Skylink
  * @since 0.5.8
  */
-Skylink.prototype._throttle = function(func, wait){
+Skylink.prototype._throttle = function(func, prop, wait){
   var self = this;
-  return function () {
-      if (!self._timestamp.func){
-        //First time run, need to force timestamp to skip condition
-        self._timestamp.func = self._timestamp.now - wait;
-      }
-      var now = Date.now();
-      if (now - self._timestamp.func < wait) {
-          return;
-      }
-      func.apply(self, arguments);
-      self._timestamp.func = now;
-  };
+  var now = (new Date()).getTime();
+
+  if (!(self._timestamp[prop] && ((now - self._timestamp[prop]) < wait))) {
+    func(true);
+    self._timestamp[prop] = now;
+  } else {
+    func(false);
+  }
 };
 Skylink.prototype.SOCKET_ERROR = {
   CONNECTION_FAILED: 0,
@@ -20607,113 +20594,187 @@ Skylink.prototype._sendChannelMessage = function(message) {
   var interval = 1000;
   var throughput = 16;
 
-  if (!self._channelOpen) {
+  if (!self._channelOpen || !self._user || !self._socket) {
+    log.warn([null, 'Socket', null, 'Dropping of message as Socket connection is not opened or is at ' +
+      'incorrect step ->'], message);
     return;
   }
 
-  var messageString = JSON.stringify(message);
+  if (self._user.sid && !self._peerMessagesStamps[self._user.sid]) {
+    self._peerMessagesStamps[self._user.sid] = {
+      userData: 0,
+      audioMuted: 0,
+      videoMuted: 0
+    };
+  }
 
-  var sendLater = function(){
-    if (self._socketMessageQueue.length > 0){
-
-      if (self._socketMessageQueue.length<throughput){
-
-        log.debug([(message.target ? message.target : 'server'), null, null,
-          'Sending delayed message' + ((!message.target) ? 's' : '') + ' ->'], {
-            type: self._SIG_MESSAGE_TYPE.GROUP,
-            lists: self._socketMessageQueue.slice(0,self._socketMessageQueue.length),
-            mid: self._user.sid,
-            rid: self._room.id
-          });
-
-        // fix for self._socket undefined errors in firefox
-        if (self._socket) {
-          self._socket.send({
-            type: self._SIG_MESSAGE_TYPE.GROUP,
-            lists: self._socketMessageQueue.splice(0,self._socketMessageQueue.length),
-            mid: self._user.sid,
-            rid: self._room.id
-          });
-        } else {
-          log.error([(message.target ? message.target : 'server'), null, null,
-            'Dropping delayed message' + ((!message.target) ? 's' : '') +
-            ' as socket object is no longer defined ->'], {
-            type: self._SIG_MESSAGE_TYPE.GROUP,
-            lists: self._socketMessageQueue.slice(0,self._socketMessageQueue.length),
-            mid: self._user.sid,
-            rid: self._room.id
-          });
-        }
-
-        clearTimeout(self._socketMessageTimeout);
-        self._socketMessageTimeout = null;
-
+  var checkStampFn = function (statusMessage) {
+    if (statusMessage.type === self._SIG_MESSAGE_TYPE.UPDATE_USER) {
+      if (!self._user.sid) {
+        return false;
       }
-      else{
-
-        log.debug([(message.target ? message.target : 'server'), null, null,
-          'Sending delayed message' + ((!message.target) ? 's' : '') + ' ->'], {
-            type: self._SIG_MESSAGE_TYPE.GROUP,
-            lists: self._socketMessageQueue.slice(0,throughput),
-            mid: self._user.sid,
-            rid: self._room.id
-          });
-
-        // fix for self._socket undefined errors in firefox
-        if (self._socket) {
-          self._socket.send({
-            type: self._SIG_MESSAGE_TYPE.GROUP,
-            lists: self._socketMessageQueue.splice(0,throughput),
-            mid: self._user.sid,
-            rid: self._room.id
-          });
-        } else {
-          log.error([(message.target ? message.target : 'server'), null, null,
-            'Dropping delayed message' + ((!message.target) ? 's' : '') +
-            ' as socket object is no longer defined ->'], {
-            type: self._SIG_MESSAGE_TYPE.GROUP,
-            lists: self._socketMessageQueue.slice(0,throughput),
-            mid: self._user.sid,
-            rid: self._room.id
-          });
-        }
-
-        clearTimeout(self._socketMessageTimeout);
-        self._socketMessageTimeout = null;
-        self._socketMessageTimeout = setTimeout(sendLater,interval);
-
+      return statusMessage.stamp > self._peerMessagesStamps[self._user.sid].userData;
+    } else if (statusMessage.type === self._SIG_MESSAGE_TYPE.MUTE_VIDEO) {
+      if (!self._user.sid) {
+        return false;
       }
-      self._timestamp.now = Date.now() || function() { return +new Date(); };
+      return statusMessage.stamp > self._peerMessagesStamps[self._user.sid].videoMuted;
+    } else if (statusMessage.type === self._SIG_MESSAGE_TYPE.MUTE_AUDIO) {
+      if (!self._user.sid) {
+        return false;
+      }
+      return statusMessage.stamp > self._peerMessagesStamps[self._user.sid].audioMuted;
+    }
+    return true;
+  };
+
+  var setStampFn = function (statusMessage) {
+    if (statusMessage.type === self._SIG_MESSAGE_TYPE.UPDATE_USER) {
+      self._peerMessagesStamps[self._user.sid].userData = statusMessage.stamp;
+    } else if (statusMessage.type === self._SIG_MESSAGE_TYPE.MUTE_VIDEO) {
+      self._peerMessagesStamps[self._user.sid].videoMuted = statusMessage.stamp;
+    } else if (statusMessage.type === self._SIG_MESSAGE_TYPE.MUTE_AUDIO) {
+      self._peerMessagesStamps[self._user.sid].audioMuted = statusMessage.stamp;
     }
   };
 
-  //Delay when messages are sent too rapidly
-  if ((Date.now() || function() { return +new Date(); }) - self._timestamp.now < interval &&
-    self._groupMessageList.indexOf(message.type) > -1) {
+  var setQueueFn = function () {
+    log.debug([null, 'Socket', null, 'Starting queue timeout']);
 
-      log.warn([(message.target ? message.target : 'server'), null, null,
-      'Messages fired too rapidly. Delaying.'], {
-        interval: 1000,
-        throughput: 16,
-        message: message
-      });
-
-      self._socketMessageQueue.push(messageString);
-
-      if (!self._socketMessageTimeout){
-        self._socketMessageTimeout = setTimeout(sendLater,
-          interval - ((Date.now() || function() { return +new Date(); })-self._timestamp.now));
+    self._socketMessageTimeout = setTimeout(function () {
+      if (((new Date ()).getTime() - self._timestamp.socketMessage) <= interval) {
+        log.debug([null, 'Socket', null, 'Restarting queue timeout']);
+        setQueueFn();
+        return;
       }
+      startSendingQueuedMessageFn();
+    }, interval - ((new Date ()).getTime() - self._timestamp.socketMessage));
+  };
+
+  var triggerEventFn = function (eventMessage) {
+    if (eventMessage.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE) {
+      self._trigger('incomingMessage', {
+        content: eventMessage.data,
+        isPrivate: false,
+        targetPeerId: null,
+        listOfPeers: Object.keys(self._peerInformations),
+        isDataChannel: false,
+        senderPeerId: self._user.sid
+      }, self._user.sid, self.getPeerInfo(), true);
+
+    } else if (eventMessage.type === self._SIG_MESSAGE_TYPE.ROOM_LOCK) {
+      self._roomLocked = !!eventMessage.lock;
+      self._trigger('roomLock', !!eventMessage.lock, self._user.sid, self.getPeerInfo(), true);
+    }
+  };
+
+  var sendGroupMessageFn = function (groupMessageList) {
+    self._socketMessageTimeout = null;
+
+    if (!self._channelOpen || !(self._user && self._user.sid) || !self._socket) {
+      log.warn([null, 'Socket', null, 'Dropping of group messages as Socket connection is not opened or is at ' +
+        'incorrect step ->'], groupMessageList);
       return;
+    }
+
+    var strGroupMessageList = [];
+    var stamps = {
+      userData: 0,
+      audioMuted: 0,
+      videoMuted: 0
+    };
+
+    for (var k = 0; k < groupMessageList.length; k++) {
+      if (checkStampFn(groupMessageList[k])) {
+        if (groupMessageList[k].type === self._SIG_MESSAGE_TYPE.UPDATE_USER &&
+          groupMessageList[k].stamp > self._peerMessagesStamps[self._user.sid].userData &&
+          groupMessageList[k].stamp > stamps.userData) {
+          stamps.userData = groupMessageList[k].stamp;
+        } else if (groupMessageList[k].type === self._SIG_MESSAGE_TYPE.MUTE_AUDIO &&
+          groupMessageList[k].stamp > self._peerMessagesStamps[self._user.sid].audioMuted &&
+          groupMessageList[k].stamp > stamps.audioMuted) {
+          stamps.audioMuted = groupMessageList[k].stamp;
+        } else if (groupMessageList[k].type === self._SIG_MESSAGE_TYPE.MUTE_VIDEO &&
+          groupMessageList[k].stamp > self._peerMessagesStamps[self._user.sid].videoMuted &&
+          groupMessageList[k].stamp > stamps.videoMuted) {
+          stamps.videoMuted = groupMessageList[k].stamp;
+        }
+      }
+    }
+
+    for (var i = 0; i < groupMessageList.length; i++) {
+      if ((groupMessageList[i].type === self._SIG_MESSAGE_TYPE.UPDATE_USER &&
+          groupMessageList[i].stamp < stamps.userData) ||
+          (groupMessageList[i].type === self._SIG_MESSAGE_TYPE.MUTE_AUDIO &&
+          groupMessageList[i].stamp < stamps.audioMuted) ||
+          (groupMessageList[i].type === self._SIG_MESSAGE_TYPE.MUTE_VIDEO &&
+          groupMessageList[i].stamp < stamps.videoMuted)) {
+        log.warn([null, 'Socket', null, 'Dropping of outdated status message ->'], clone(groupMessageList[i]));
+        groupMessageList.splice(i, 1);
+        i--;
+        continue;
+      }
+      strGroupMessageList.push(JSON.stringify(groupMessageList[i]));
+    }
+
+    if (strGroupMessageList.length > 0) {
+      var groupMessage = {
+        type: self._SIG_MESSAGE_TYPE.GROUP,
+        lists: strGroupMessageList,
+        mid: self._user.sid,
+        rid: self._room.id
+      };
+
+      log.debug([null, 'Socket', null, 'Sending queued messages (max: 16 per group) ->'], groupMessage);
+
+      self._socket.send(JSON.stringify(groupMessage));
+      self._timestamp.socketMessage = (new Date()).getTime();
+
+      for (var j = 0; j < groupMessageList.length; j++) {
+        setStampFn(groupMessageList[j]);
+        triggerEventFn(groupMessageList[j]);
+      }
+    }
+  };
+
+  var startSendingQueuedMessageFn = function(){
+    if (self._socketMessageQueue.length > 0){
+      if (self._socketMessageQueue.length < throughput){
+        sendGroupMessageFn(self._socketMessageQueue.splice(0, self._socketMessageQueue.length));
+      } else {
+        sendGroupMessageFn(self._socketMessageQueue.splice(0, throughput));
+        setQueueFn();
+      }
+    }
+  };
+
+  if (self._groupMessageList.indexOf(message.type) > -1) {
+    if (!(self._timestamp.socketMessage && ((new Date ()).getTime() - self._timestamp.socketMessage) <= interval)) {
+      if (!checkStampFn(message)) {
+        log.warn([null, 'Socket', null, 'Dropping of outdated status message ->'], message);
+        return;
+      }
+      if (self._socketMessageTimeout) {
+        clearTimeout(self._socketMessageTimeout);
+      }
+      self._socket.send(JSON.stringify(message));
+      setStampFn(message);
+      triggerEventFn(message);
+
+      self._timestamp.socketMessage = (new Date()).getTime();
+
+    } else {
+      log.warn([null, 'Socket', null, 'Queueing socket message to prevent message drop ->'], message);
+
+      self._socketMessageQueue.push(message);
+
+      if (!self._socketMessageTimeout) {
+        setQueueFn();
+      }
+    }
+  } else {
+    self._socket.send(JSON.stringify(message));
   }
-
-  log.debug([(message.target ? message.target : 'server'), null, null,
-    'Sending to peer' + ((!message.target) ? 's' : '') + ' ->'], message);
-
-  //Normal case when messages are sent not so rapidly
-  self._socket.send(messageString);
-  self._timestamp.now = Date.now() || function() { return +new Date(); };
-
 };
 
 /**
@@ -21088,49 +21149,36 @@ Skylink.prototype._peerMessagesStamps = {};
  * @since 0.4.0
  */
 Skylink.prototype.sendMessage = function(message, targetPeerId) {
-  var params = {
-    cid: this._key,
-    data: message,
-    mid: this._user.sid,
-    rid: this._room.id,
-    type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
-  };
-
-  var listOfPeers = Object.keys(this._peerConnections);
+  var listOfPeers = Object.keys(this._peerInformations);
   var isPrivate = false;
-  var i;
 
-  if(Array.isArray(targetPeerId)) {
+  if (Array.isArray(targetPeerId)) {
     listOfPeers = targetPeerId;
     isPrivate = true;
-
-  } else if (typeof targetPeerId === 'string') {
+  } else if (targetPeerId && typeof targetPeerId === 'string') {
     listOfPeers = [targetPeerId];
     isPrivate = true;
   }
 
-  if (!isPrivate) {
-    log.log([null, 'Socket', null, 'Broadcasting message to peers']);
-
-    this._sendChannelMessage({
-      cid: this._key,
-      data: message,
-      mid: this._user.sid,
-      rid: this._room.id,
-      type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
-    });
+  if (!this._inRoom || !this._socket || !this._user) {
+    log.error('Unable to send message as User is not in Room. ->', message);
+    return;
   }
 
-  for (i = 0; i < listOfPeers.length; i++) {
+  // Loop out unwanted Peers
+  for (var i = 0; i < listOfPeers.length; i++) {
     var peerId = listOfPeers[i];
 
-    // Ignore MCU peer
-    if (peerId === 'MCU') {
-      continue;
-    }
-
-    if (isPrivate) {
-      log.log([peerId, 'Socket', null, 'Sending message to peer']);
+    if (!this._peerInformations[peerId]) {
+      log.error([peerId, 'Socket', null, 'Dropping of sending message to Peer as ' +
+        'Peer session does not exists']);
+      listOfPeers.splice(i, 1);
+      i--;
+    } else if (peerId === 'MCU') {
+      listOfPeers.splice(i, 1);
+      i--;
+    } else if (isPrivate) {
+      log.debug([peerId, 'Socket', null, 'Sending private message to Peer']);
 
       this._sendChannelMessage({
         cid: this._key,
@@ -21143,13 +21191,31 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
     }
   }
 
-  this._trigger('incomingMessage', {
-    content: message,
-    isPrivate: isPrivate,
-    targetPeerId: targetPeerId,
-    isDataChannel: false,
-    senderPeerId: this._user.sid
-  }, this._user.sid, this.getPeerInfo(), true);
+  if (listOfPeers.length === 0) {
+    log.error('Unable to send message as there is no Peers to sent to.', message);
+    return;
+  }
+
+  if (!isPrivate) {
+    log.debug([null, 'Socket', null, 'Broadcasting message to Peers']);
+
+    this._sendChannelMessage({
+      cid: this._key,
+      data: message,
+      mid: this._user.sid,
+      rid: this._room.id,
+      type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
+    });
+  } else {
+    this._trigger('incomingMessage', {
+      content: message,
+      isPrivate: isPrivate,
+      targetPeerId: targetPeerId || null,
+      listOfPeers: listOfPeers,
+      isDataChannel: false,
+      senderPeerId: this._user.sid
+    }, this._user.sid, this.getPeerInfo(), true);
+  }
 };
 
 /**
@@ -21486,7 +21552,7 @@ Skylink.prototype._streamEventHandler = function(message) {
         log.log([targetMid, null, message.type, 'Peer connection not found']);
       }
   	} else if (message.status === 'check') {
-      if (!message.streamId) {
+      if (!message.streamId || this._hasMCU) {
         return;
       }
 
@@ -21494,9 +21560,14 @@ Skylink.prototype._streamEventHandler = function(message) {
       if (this._peerConnections[targetMid] &&
         this._peerConnections[targetMid].signalingState === this.PEER_CONNECTION_STATE.STABLE) {
         var streams = this._peerConnections[targetMid].getRemoteStreams();
-        var currentStreamId = streams[0].id || streams[0].label;
+        var currentStreamId = streams.length > 0 ? streams[0].id || streams[0].label : null;
 
-        if (streams.length > 0 && message.streamId !== currentStreamId &&
+        log.info([targetMid, null, message.type, 'Peer\'s stream status check ->'], {
+          actualId: message.streamId,
+          currentId: currentStreamId
+        });
+
+        if (message.streamId !== currentStreamId &&
           this._streamsMistmatch[targetMid] !== (currentStreamId + '::' + message.streamId)) {
           this._streamsMistmatch[targetMid] = currentStreamId + '::' + message.streamId;
           this._trigger('streamMismatch', targetMid, this.getPeerInfo(targetMid),
@@ -21730,8 +21801,6 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  self.lastRestart = message.lastRestart || Date.now() || function() { return +new Date(); };
-
   if (!self._peerConnections[targetMid]) {
     log.error([targetMid, null, null, 'Peer does not have an existing ' +
       'connection. Unable to restart']);
@@ -21806,10 +21875,6 @@ Skylink.prototype._restartHandler = function(message){
       enableDataChannel: self._enableDataChannel,
       receiveOnly: self._peerConnections[targetMid] && self._peerConnections[targetMid].receiveOnly,
       sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
-      // SkylinkJS parameters (copy the parameters from received message parameters)
-      isConnectionRestart: !!message.isConnectionRestart,
-      lastRestart: message.lastRestart,
-      explicit: !!message.explicit,
       temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
     });
   }
@@ -22899,7 +22964,7 @@ Skylink.prototype.sendStream = function(options, callback) {
       }
 
       if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
-        self._refreshPeerConnection(Object.keys(self._peerConnections), false, function (err, success) {
+        self._refreshPeerConnection(Object.keys(self._peerConnections), function (err, success) {
           if (err) {
             log.error('Failed refreshing connections for sendStream() ->', err);
             if (typeof callback === 'function') {
@@ -23273,6 +23338,10 @@ Skylink.prototype.disableVideo = function() {
 };
 
 /**
+ * <blockquote class="info">
+ *   For a better user experience, the functionality is throttled when invoked many times in less
+ *   than 10 seconds interval.
+ * </blockquote>
  * Function that retrieves screensharing Stream.
  * @method shareScreen
  * @param {JSON} [enableAudio=false] The flag if audio tracks should be retrieved.
@@ -23320,7 +23389,7 @@ Skylink.prototype.disableVideo = function() {
  *   <code>mediaAccessSuccess</code> event</a> triggers parameter payload <code>isScreensharing</code>
  *   value as <code>true</code> and <code>isAudioFallback</code> value as <code>false</code>.</li></ol></li><li>Else: <ol>
  *   <li>If there is any previous <code>shareScreen()</code> Stream: <ol>
- *   <li>Invokes <a href="#method_stopScreen"><code>stopScreen()</code> method</a>.</li></ol></li> 
+ *   <li>Invokes <a href="#method_stopScreen"><code>stopScreen()</code> method</a>.</li></ol></li>
  *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> triggers parameter payload
  *   <code>state</code> as <code>FALLBACKED</code>, <code>isScreensharing</code> value as <code>true</code> and
  *   <code>isAudioFallback</code> value as <code>false</code>.</li>
@@ -23366,24 +23435,17 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     enableAudio = true;
   }
 
-  var throttleFn = function (fn, wait) {
-    if (!self._timestamp.func){
-      //First time run, need to force timestamp to skip condition
-      self._timestamp.func = self._timestamp.now - wait;
-    }
-    var now = Date.now();
+  self._throttle(function (runFn) {
+    if (!runFn) {
+      var throttleLimitError = 'Unable to run as throttle interval has not reached (10s).';
+      log.error(throttleLimitError);
 
-    if (!self._timestamp.screen) {
-      if (now - self._timestamp.func < wait) {
-        return;
+      if (typeof callback === 'function') {
+        callback(new Error(throttleLimitError), null);
       }
+      return;
     }
-    fn();
-    self._timestamp.screen = false;
-    self._timestamp.func = now;
-  };
 
-  throttleFn(function () {
     var settings = {
       settings: {
         audio: enableAudio,
@@ -23406,7 +23468,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
         self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 
         if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
-          self._refreshPeerConnection(Object.keys(self._peerConnections), false, function (err, success) {
+          self._refreshPeerConnection(Object.keys(self._peerConnections), function (err, success) {
             if (err) {
               log.error('Failed refreshing connections for shareScreen() ->', err);
               if (typeof callback === 'function') {
@@ -23484,8 +23546,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
     }
-
-  }, 10000);
+  }, 'shareScreen', 10000);
 };
 
 /**
@@ -23541,7 +23602,7 @@ Skylink.prototype.stopScreen = function () {
         this._trigger('incomingStream', this._user.sid, this._streams.userMedia.stream, true, this.getPeerInfo());
         this._trigger('peerUpdated', this._user.sid, this.getPeerInfo(), true);
       }
-      this._refreshPeerConnection(Object.keys(this._peerConnections), false);
+      this._refreshPeerConnection(Object.keys(this._peerConnections));
     }
   }
 };
@@ -24093,6 +24154,11 @@ Skylink.prototype._checkIfStreamMismatch = function () {
   var self = this;
   var streamId = null;
 
+  if (self._hasMCU) {
+    return;
+  }
+
+  // TODO: So bad until we have proper fixes on protocol end :(
   if (self._streams.screenshare && self._streams.screenshare.stream) {
     streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
   } else if (self._streams.userMedia && self._streams.userMedia.stream) {
@@ -24114,16 +24180,14 @@ Skylink.prototype._checkIfStreamMismatch = function () {
 
     for (var peerId in self._peerConnections) {
       if (self._peerConnections.hasOwnProperty(peerId) && self._peerConnections[peerId] &&
-        self._peerConnections[peerId].signalingState === self.PEER_CONNECTION_STATE.STABLE &&
-        !!self._peerConnections[peerId].localDescription && !!self._peerConnections[peerId].localDescription.sdp &&
-        !!self._peerConnections[peerId].remoteDescription && !!self._peerConnections[peerId].remoteDescription.sdp) {
+        self._peerConnections[peerId].signalingState === self.PEER_CONNECTION_STATE.STABLE) {
         var streams = self._peerConnections[peerId].getLocalStreams();
         var currentStreamId = streams.length > 0 ? (streams[0].id || streams[0].label) : null;
 
         if (currentStreamId !== streamId &&
           self._streamsMistmatch[self._user.sid] !== (currentStreamId + '::' + streamId)) {
           self._streamsMistmatch[self._user.sid] = currentStreamId + '::' + streamId;
-          self._trigger('streamMismatch', peerId, this.getPeerInfo(peerId),
+          self._trigger('streamMismatch', peerId, self.getPeerInfo(peerId),
             true, !!self._streams.screenshare, currentStreamId, streamId);
         }
       }

@@ -795,7 +795,7 @@ Skylink.prototype.sendStream = function(options, callback) {
       }
 
       if (Object.keys(self._peerConnections).length &gt; 0 || self._hasMCU) {
-        self._refreshPeerConnection(Object.keys(self._peerConnections), false, function (err, success) {
+        self._refreshPeerConnection(Object.keys(self._peerConnections), function (err, success) {
           if (err) {
             log.error(&#x27;Failed refreshing connections for sendStream() -&gt;&#x27;, err);
             if (typeof callback === &#x27;function&#x27;) {
@@ -1169,6 +1169,10 @@ Skylink.prototype.disableVideo = function() {
 };
 
 /**
+ * &lt;blockquote class=&quot;info&quot;&gt;
+ *   For a better user experience, the functionality is throttled when invoked many times in less
+ *   than 10 seconds interval.
+ * &lt;/blockquote&gt;
  * Function that retrieves screensharing Stream.
  * @method shareScreen
  * @param {JSON} [enableAudio=false] The flag if audio tracks should be retrieved.
@@ -1216,7 +1220,7 @@ Skylink.prototype.disableVideo = function() {
  *   &lt;code&gt;mediaAccessSuccess&lt;/code&gt; event&lt;/a&gt; triggers parameter payload &lt;code&gt;isScreensharing&lt;/code&gt;
  *   value as &lt;code&gt;true&lt;/code&gt; and &lt;code&gt;isAudioFallback&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;li&gt;Else: &lt;ol&gt;
  *   &lt;li&gt;If there is any previous &lt;code&gt;shareScreen()&lt;/code&gt; Stream: &lt;ol&gt;
- *   &lt;li&gt;Invokes &lt;a href=&quot;#method_stopScreen&quot;&gt;&lt;code&gt;stopScreen()&lt;/code&gt; method&lt;/a&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt; 
+ *   &lt;li&gt;Invokes &lt;a href=&quot;#method_stopScreen&quot;&gt;&lt;code&gt;stopScreen()&lt;/code&gt; method&lt;/a&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
  *   &lt;li&gt;&lt;a href=&quot;#event_mediaAccessFallback&quot;&gt;&lt;code&gt;mediaAccessFallback&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
  *   &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;FALLBACKED&lt;/code&gt;, &lt;code&gt;isScreensharing&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt; and
  *   &lt;code&gt;isAudioFallback&lt;/code&gt; value as &lt;code&gt;false&lt;/code&gt;.&lt;/li&gt;
@@ -1262,24 +1266,17 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     enableAudio = true;
   }
 
-  var throttleFn = function (fn, wait) {
-    if (!self._timestamp.func){
-      //First time run, need to force timestamp to skip condition
-      self._timestamp.func = self._timestamp.now - wait;
-    }
-    var now = Date.now();
+  self._throttle(function (runFn) {
+    if (!runFn) {
+      var throttleLimitError = &#x27;Unable to run as throttle interval has not reached (10s).&#x27;;
+      log.error(throttleLimitError);
 
-    if (!self._timestamp.screen) {
-      if (now - self._timestamp.func &lt; wait) {
-        return;
+      if (typeof callback === &#x27;function&#x27;) {
+        callback(new Error(throttleLimitError), null);
       }
+      return;
     }
-    fn();
-    self._timestamp.screen = false;
-    self._timestamp.func = now;
-  };
 
-  throttleFn(function () {
     var settings = {
       settings: {
         audio: enableAudio,
@@ -1302,7 +1299,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
         self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
 
         if (Object.keys(self._peerConnections).length &gt; 0 || self._hasMCU) {
-          self._refreshPeerConnection(Object.keys(self._peerConnections), false, function (err, success) {
+          self._refreshPeerConnection(Object.keys(self._peerConnections), function (err, success) {
             if (err) {
               log.error(&#x27;Failed refreshing connections for shareScreen() -&gt;&#x27;, err);
               if (typeof callback === &#x27;function&#x27;) {
@@ -1380,8 +1377,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
     }
-
-  }, 10000);
+  }, &#x27;shareScreen&#x27;, 10000);
 };
 
 /**
@@ -1437,7 +1433,7 @@ Skylink.prototype.stopScreen = function () {
         this._trigger(&#x27;incomingStream&#x27;, this._user.sid, this._streams.userMedia.stream, true, this.getPeerInfo());
         this._trigger(&#x27;peerUpdated&#x27;, this._user.sid, this.getPeerInfo(), true);
       }
-      this._refreshPeerConnection(Object.keys(this._peerConnections), false);
+      this._refreshPeerConnection(Object.keys(this._peerConnections));
     }
   }
 };
@@ -1989,6 +1985,11 @@ Skylink.prototype._checkIfStreamMismatch = function () {
   var self = this;
   var streamId = null;
 
+  if (self._hasMCU) {
+    return;
+  }
+
+  // TODO: So bad until we have proper fixes on protocol end :(
   if (self._streams.screenshare &amp;&amp; self._streams.screenshare.stream) {
     streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
   } else if (self._streams.userMedia &amp;&amp; self._streams.userMedia.stream) {
@@ -2010,16 +2011,14 @@ Skylink.prototype._checkIfStreamMismatch = function () {
 
     for (var peerId in self._peerConnections) {
       if (self._peerConnections.hasOwnProperty(peerId) &amp;&amp; self._peerConnections[peerId] &amp;&amp;
-        self._peerConnections[peerId].signalingState === self.PEER_CONNECTION_STATE.STABLE &amp;&amp;
-        !!self._peerConnections[peerId].localDescription &amp;&amp; !!self._peerConnections[peerId].localDescription.sdp &amp;&amp;
-        !!self._peerConnections[peerId].remoteDescription &amp;&amp; !!self._peerConnections[peerId].remoteDescription.sdp) {
+        self._peerConnections[peerId].signalingState === self.PEER_CONNECTION_STATE.STABLE) {
         var streams = self._peerConnections[peerId].getLocalStreams();
         var currentStreamId = streams.length &gt; 0 ? (streams[0].id || streams[0].label) : null;
 
         if (currentStreamId !== streamId &amp;&amp;
           self._streamsMistmatch[self._user.sid] !== (currentStreamId + &#x27;::&#x27; + streamId)) {
           self._streamsMistmatch[self._user.sid] = currentStreamId + &#x27;::&#x27; + streamId;
-          self._trigger(&#x27;streamMismatch&#x27;, peerId, this.getPeerInfo(peerId),
+          self._trigger(&#x27;streamMismatch&#x27;, peerId, self.getPeerInfo(peerId),
             true, !!self._streams.screenshare, currentStreamId, streamId);
         }
       }

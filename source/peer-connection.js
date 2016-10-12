@@ -74,25 +74,15 @@ Skylink.prototype.SERVER_PEER_TYPE = {
 };
 
 /**
- * Stores the restart initiated timestamp to throttle the <code>refreshConnection</code> functionality.
- * @attribute _lastRestart
- * @type Object
- * @private
- * @for Skylink
- * @since 0.5.9
- */
-Skylink.prototype._lastRestart = null;
-
-/**
  * Stores the global number of Peer connection retries that would increase the wait-for-response timeout
  *   for the Peer connection health timer.
- * @attribute _retryCount
- * @type Number
+ * @attribute _retryCounters
+ * @type JSON
  * @private
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._retryCount = 0;
+Skylink.prototype._retryCounters = {};
 
 /**
  * Stores the list of the Peer connections.
@@ -111,8 +101,9 @@ Skylink.prototype._peerConnections = {};
  *   it <a href="http://support.temasys.com.sg/support/discussions/topics/12000002853">in this article here</a>.<br>
  *   For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in
  *   <a href="http://support.temasys.com.sg/support/discussions/topics/12000005188">in this article here</a>.<br>
- *   Note that this functionality should be used when Peer connection stream freezes during a connection,
- *   and is throttled when invoked many times in less than 3 seconds interval.
+ *   Note that this functionality should be used when Peer connection stream freezes during a connection.
+ *   For a better user experience, the functionality is throttled when invoked many times in
+ *   less than 3 seconds interval.
  * </blockquote>
  * Function that refreshes Peer connections to update with the current streaming.
  * @method refreshConnection
@@ -156,13 +147,13 @@ Skylink.prototype._peerConnections = {};
  *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter payload
  *   <code>isSelfInitiateRestart</code> value as <code>true</code> for all targeted Peer connections.</li></ol></li>
  *   <li>Else: <ol><li><b>ABORT</b> and return error.</li></ol></li>
- *   </ol></li></ol></li></ol></li></ol></li><li>If Peer's Stream received does not match the actual Stream
+ *   </ol></li></ol></li><li>If Peer's Stream received does not match the actual Stream
  *   sending from Peer and User is in Room: <ol>
  *   <li><a href="#event_streamMismatch"><code>streamMismatch</code> event</a> triggers <small>
  *   Note that this event may trigger multiple times depending on how many consecutive <code>refreshConnection</code>
  *   method invokes have been made. When being triggered with this event, the recommended solution is to invoke
  *   <code>refreshConnection([peerId])</code> method again when parameter payload <code>isSelf</code> value is
- *   <code>false</code>.</small></li></ol></li></ol>
+ *   <code>false</code>.</small></li></ol></li></ol></ol></li></ol></li></ol>
  * @example
  *   // Example 1: Refreshing a Peer connection
  *   function refreshFrozenVideoStream (peerId) {
@@ -215,9 +206,6 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
   var self = this;
 
   var listOfPeers = Object.keys(self._peerConnections);
-  var listOfPeerRestarts = [];
-  var error = '';
-  var listOfPeerRestartErrors = {};
 
   if(Array.isArray(targetPeerId)) {
     listOfPeers = targetPeerId;
@@ -228,24 +216,39 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
     callback = targetPeerId;
   }
 
-  if (listOfPeers.length === 0) {
-    error = 'There is currently no peer connections to restart';
-    log.warn([null, 'PeerConnection', null, error]);
-
-    listOfPeerRestartErrors.self = new Error(error);
+  var emitErrorForPeersFn = function (error) {
+    log.error(error);
 
     if (typeof callback === 'function') {
+      var listOfPeerErrors = {};
+
+      if (listOfPeers.length === 0) {
+        listOfPeerErrors.self = new Error(error);
+      } else {
+        for (var i = 0; i < listOfPeers.length; i++) {
+          listOfPeerErrors[listOfPeers[i]] = new Error(error);
+        }
+      }
+
       callback({
         refreshErrors: listOfPeerRestartErrors,
         listOfPeers: listOfPeers
       }, null);
     }
+  };
+
+  if (listOfPeers.length === 0) {
+    emitErrorForPeersFn('There is currently no peer connections to restart');
     return;
   }
 
-  self._throttle(function () {
-    self._refreshPeerConnection(listOfPeers, true, callback);
-  },5000)();
+  self._throttle(function (runFn) {
+    if (!runFn) {
+      emitErrorForPeersFn('Unable to run as throttle interval has not reached (3s).');
+    } else {
+      self._refreshPeerConnection(listOfPeers, callback);
+    }
+  }, 'restartConnection', 5000);
 
 };
 
@@ -256,7 +259,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
  * @for Skylink
  * @since 0.6.15
  */
-Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle, callback) {
+Skylink.prototype._refreshPeerConnection = function(listOfPeers, callback) {
   var self = this;
   var listOfPeerRestarts = [];
   var error = '';
@@ -264,7 +267,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle,
 
   // To fix jshint dont put functions within a loop
   var refreshSinglePeerCallback = function (peerId) {
-    return function (error, success) {
+    return function (error) {
       if (listOfPeerRestarts.indexOf(peerId) === -1) {
         if (error) {
           log.error([peerId, 'RTCPeerConnection', null, 'Failed restarting for peer'], error);
@@ -301,21 +304,10 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle,
       return;
     }
 
-    if (shouldThrottle) {
-      var now = Date.now() || function() { return +new Date(); };
-
-      if (now - self.lastRestart < 3000) {
-        error = 'Last restart was so tight. Aborting.';
-        log.warn([peerId, null, null, error]);
-        listOfPeerRestartErrors[peerId] = new Error(error);
-        return;
-      }
-    }
-
     log.log([peerId, 'PeerConnection', null, 'Restarting peer connection']);
 
     // do a hard reset on variable object
-    self._restartPeerConnection(peerId, true, false, peerCallback, true);
+    self._restartPeerConnection(peerId, peerCallback);
   };
 
   if(!self._hasMCU) {
@@ -824,7 +816,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @for Skylink
  * @since 0.5.8
  */
-Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, isConnectionRestart, callback, explicit) {
+Skylink.prototype._restartPeerConnection = function (peerId, callback) {
   var self = this;
 
   if (!self._peerConnections[peerId]) {
@@ -851,7 +843,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
     if (typeof callback === 'function') {
       log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart failure callback']);
-      callback(null, notSupportedError);
+      callback(notSupportedError);
     }
     return;
   }
@@ -863,43 +855,30 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
       self._addLocalMediaStreams(peerId);
     }
 
-    if (isSelfInitiatedRestart){
-      log.log([peerId, null, null, 'Sending restart message to signaling server']);
+    log.log([peerId, null, null, 'Sending restart message to signaling server']);
 
-      var lastRestart = Date.now() || function() { return +new Date(); };
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.RESTART,
+      mid: self._user.sid,
+      rid: self._room.id,
+      agent: window.webrtcDetectedBrowser,
+      version: window.webrtcDetectedVersion,
+      os: window.navigator.platform,
+      userInfo: self._getUserInfo(),
+      target: peerId,
+      weight: self._peerPriorityWeight,
+      receiveOnly: self._peerConnections[peerId] && self._peerConnections[peerId].receiveOnly,
+      enableIceTrickle: self._enableIceTrickle,
+      enableDataChannel: self._enableDataChannel,
+      sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+    });
 
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.RESTART,
-        mid: self._user.sid,
-        rid: self._room.id,
-        agent: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
-        os: window.navigator.platform,
-        userInfo: self._getUserInfo(),
-        target: peerId,
-        isConnectionRestart: !!isConnectionRestart,
-        lastRestart: lastRestart,
-        // This will not be used based off the logic in _restartHandler
-        weight: self._peerPriorityWeight,
-        receiveOnly: self._peerConnections[peerId] && self._peerConnections[peerId].receiveOnly,
-        enableIceTrickle: self._enableIceTrickle,
-        enableDataChannel: self._enableDataChannel,
-        sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
-        explicit: !!explicit,
-        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
-      });
+    self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
 
-      self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), false);
-
-      if (typeof callback === 'function') {
-        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
-        callback(null, null);
-      }
-    } else {
-      if (typeof callback === 'function') {
-        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback (receiving peer)']);
-        callback(null, null);
-      }
+    if (typeof callback === 'function') {
+      log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
+      callback(null);
     }
 
     // following the previous logic to do checker always
@@ -931,7 +910,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         });
         if (typeof callback === 'function') {
           log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart failure callback']);
-          callback(null, new Error(noLocalDescriptionError));
+          callback(new Error(noLocalDescriptionError));
         }
       }
     // It could have connection state closed
@@ -940,7 +919,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
       log.warn([peerId, 'RTCPeerConnection', null, unableToRestartError]);
       if (typeof callback === 'function') {
         log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart failure callback']);
-        callback(null, new Error(unableToRestartError));
+        callback(new Error(unableToRestartError));
       }
     }
   }
@@ -1121,7 +1100,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
           'Peer connection with user is stable']);
         self._peerConnectionHealth[targetMid] = true;
         self._stopPeerConnectionHealthCheck(targetMid);
-        self._retryCount = 0;
       }
 
       if (typeof self._ICEConnectionFailures[targetMid] === 'undefined') {
@@ -1138,7 +1116,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 
         // refresh when failed. ignore for MCU case since restart is handled by MCU in this case
         if (!self._hasMCU) {
-          self._restartPeerConnection(targetMid, true, true, null, false);
+          self._restartPeerConnection(targetMid);
         }
       }
 
@@ -1179,7 +1157,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
         'Peer connection with user is stable']);
       self._peerConnectionHealth[targetMid] = true;
       self._stopPeerConnectionHealthCheck(targetMid);
-      self._retryCount = 0;
     }
   };
   pc.onicegatheringstatechange = function() {
@@ -1226,7 +1203,6 @@ Skylink.prototype._restartMCUConnection = function(callback) {
   var peerId; // j shint is whinning
   var receiveOnly = false;
   // for MCU case, these dont matter at all
-  var lastRestart = Date.now() || function() { return +new Date(); };
   var weight = (new Date()).valueOf();
 
   self._trigger('serverPeerRestart', 'MCU', self.SERVER_PEER_TYPE.MCU);
@@ -1259,14 +1235,11 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         os: window.navigator.platform,
         userInfo: self._getUserInfo(),
         target: peerId, //'MCU',
-        isConnectionRestart: false,
-        lastRestart: lastRestart,
         weight: self._peerPriorityWeight,
         receiveOnly: receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
         sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
-        explicit: true,
         temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       });
     }

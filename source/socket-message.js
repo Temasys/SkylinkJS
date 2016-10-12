@@ -148,49 +148,36 @@ Skylink.prototype._peerMessagesStamps = {};
  * @since 0.4.0
  */
 Skylink.prototype.sendMessage = function(message, targetPeerId) {
-  var params = {
-    cid: this._key,
-    data: message,
-    mid: this._user.sid,
-    rid: this._room.id,
-    type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
-  };
-
-  var listOfPeers = Object.keys(this._peerConnections);
+  var listOfPeers = Object.keys(this._peerInformations);
   var isPrivate = false;
-  var i;
 
-  if(Array.isArray(targetPeerId)) {
+  if (Array.isArray(targetPeerId)) {
     listOfPeers = targetPeerId;
     isPrivate = true;
-
-  } else if (typeof targetPeerId === 'string') {
+  } else if (targetPeerId && typeof targetPeerId === 'string') {
     listOfPeers = [targetPeerId];
     isPrivate = true;
   }
 
-  if (!isPrivate) {
-    log.log([null, 'Socket', null, 'Broadcasting message to peers']);
-
-    this._sendChannelMessage({
-      cid: this._key,
-      data: message,
-      mid: this._user.sid,
-      rid: this._room.id,
-      type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
-    });
+  if (!this._inRoom || !this._socket || !this._user) {
+    log.error('Unable to send message as User is not in Room. ->', message);
+    return;
   }
 
-  for (i = 0; i < listOfPeers.length; i++) {
+  // Loop out unwanted Peers
+  for (var i = 0; i < listOfPeers.length; i++) {
     var peerId = listOfPeers[i];
 
-    // Ignore MCU peer
-    if (peerId === 'MCU') {
-      continue;
-    }
-
-    if (isPrivate) {
-      log.log([peerId, 'Socket', null, 'Sending message to peer']);
+    if (!this._peerInformations[peerId]) {
+      log.error([peerId, 'Socket', null, 'Dropping of sending message to Peer as ' +
+        'Peer session does not exists']);
+      listOfPeers.splice(i, 1);
+      i--;
+    } else if (peerId === 'MCU') {
+      listOfPeers.splice(i, 1);
+      i--;
+    } else if (isPrivate) {
+      log.debug([peerId, 'Socket', null, 'Sending private message to Peer']);
 
       this._sendChannelMessage({
         cid: this._key,
@@ -203,13 +190,31 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
     }
   }
 
-  this._trigger('incomingMessage', {
-    content: message,
-    isPrivate: isPrivate,
-    targetPeerId: targetPeerId,
-    isDataChannel: false,
-    senderPeerId: this._user.sid
-  }, this._user.sid, this.getPeerInfo(), true);
+  if (listOfPeers.length === 0) {
+    log.error('Unable to send message as there is no Peers to sent to.', message);
+    return;
+  }
+
+  if (!isPrivate) {
+    log.debug([null, 'Socket', null, 'Broadcasting message to Peers']);
+
+    this._sendChannelMessage({
+      cid: this._key,
+      data: message,
+      mid: this._user.sid,
+      rid: this._room.id,
+      type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
+    });
+  } else {
+    this._trigger('incomingMessage', {
+      content: message,
+      isPrivate: isPrivate,
+      targetPeerId: targetPeerId || null,
+      listOfPeers: listOfPeers,
+      isDataChannel: false,
+      senderPeerId: this._user.sid
+    }, this._user.sid, this.getPeerInfo(), true);
+  }
 };
 
 /**
@@ -546,7 +551,7 @@ Skylink.prototype._streamEventHandler = function(message) {
         log.log([targetMid, null, message.type, 'Peer connection not found']);
       }
   	} else if (message.status === 'check') {
-      if (!message.streamId) {
+      if (!message.streamId || this._hasMCU) {
         return;
       }
 
@@ -554,9 +559,14 @@ Skylink.prototype._streamEventHandler = function(message) {
       if (this._peerConnections[targetMid] &&
         this._peerConnections[targetMid].signalingState === this.PEER_CONNECTION_STATE.STABLE) {
         var streams = this._peerConnections[targetMid].getRemoteStreams();
-        var currentStreamId = streams[0].id || streams[0].label;
+        var currentStreamId = streams.length > 0 ? streams[0].id || streams[0].label : null;
 
-        if (streams.length > 0 && message.streamId !== currentStreamId &&
+        log.info([targetMid, null, message.type, 'Peer\'s stream status check ->'], {
+          actualId: message.streamId,
+          currentId: currentStreamId
+        });
+
+        if (message.streamId !== currentStreamId &&
           this._streamsMistmatch[targetMid] !== (currentStreamId + '::' + message.streamId)) {
           this._streamsMistmatch[targetMid] = currentStreamId + '::' + message.streamId;
           this._trigger('streamMismatch', targetMid, this.getPeerInfo(targetMid),
@@ -790,8 +800,6 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  self.lastRestart = message.lastRestart || Date.now() || function() { return +new Date(); };
-
   if (!self._peerConnections[targetMid]) {
     log.error([targetMid, null, null, 'Peer does not have an existing ' +
       'connection. Unable to restart']);
@@ -866,10 +874,6 @@ Skylink.prototype._restartHandler = function(message){
       enableDataChannel: self._enableDataChannel,
       receiveOnly: self._peerConnections[targetMid] && self._peerConnections[targetMid].receiveOnly,
       sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
-      // SkylinkJS parameters (copy the parameters from received message parameters)
-      isConnectionRestart: !!message.isConnectionRestart,
-      lastRestart: message.lastRestart,
-      explicit: !!message.explicit,
       temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
     });
   }

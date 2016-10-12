@@ -215,8 +215,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
  */
 Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var self = this;
-  var timer = self._enableIceTrickle ? (toOffer ? 12500 : 10000) : 50000;
-  timer = (self._hasMCU) ? 105000 : timer;
+  var originalBlock = self._hasMCU ? 105000 : (self._enableIceTrickle ? (toOffer ? 12500 : 10000) : 50000);
 
   // increase timeout for android/ios
   /*var agent = self.getPeerInfo(peerId).agent;
@@ -224,7 +223,9 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
     timer = 105000;
   }*/
 
-  timer += self._retryCount*10000;
+  if (!self._retryCounters[peerId]) {
+    self._retryCounters[peerId] = 0;
+  }
 
   log.log([peerId, 'PeerConnectionHealth', null,
     'Initializing check for peer\'s connection health']);
@@ -269,21 +270,38 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
         'Ice connection state time out. Re-negotiating connection']);
 
       //Maximum increament is 5 minutes
-      if (self._retryCount<30){
+      if (self._retryCounters[peerId] < 30){
         //Increase after each consecutive connection failure
-        self._retryCount++;
+        self._retryCounters[peerId]++;
       }
 
-      // do a complete clean
-      if (!self._hasMCU) {
-        self._restartPeerConnection(peerId, true, true, null, false);
-      } else {
-        self._restartMCUConnection();
+      if (!(self._peerConnections[peerId] && self._peerConnections[peerId].localDescription &&
+        self._peerConnections[peerId].localDescription.sdp)) {
+        log.debug([peerId, 'PeerConnectionHealth', null, 'Resending welcome again to Peer']);
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.WELCOME,
+          mid: self._user.sid,
+          rid: self._room.id,
+          receiveOnly: self._peerConnections[peerId] ? !!self._peerConnections[peerId].receiveOnly : false,
+          enableIceTrickle: self._enableIceTrickle,
+          enableDataChannel: self._enableDataChannel,
+          agent: window.webrtcDetectedBrowser,
+          version: window.webrtcDetectedVersion,
+          os: window.navigator.platform,
+          userInfo: self._getUserInfo(),
+          target: peerId,
+          weight: self._peerPriorityWeight,
+          sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
+          temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+        });
+
+      } else if (!self._hasMCU) {
+        self._restartPeerConnection(peerId);
       }
     } else {
       self._peerConnectionHealth[peerId] = true;
     }
-  }, timer);
+  }, originalBlock + ((self._retryCounters[peerId] || 0) * 1000));
 };
 
 /**

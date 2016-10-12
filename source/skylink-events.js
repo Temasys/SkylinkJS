@@ -357,9 +357,15 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} message The message result.
    * @param {JSON|String} message.content The message object.
    * @param {String} message.senderPeerId The sender Peer ID.
-   * @param {String|Array} [message.targetPeerId=null] The value of the <code>targetPeerId</code>
+   * @param {String|Array} [message.targetPeerId] The value of the <code>targetPeerId</code>
    *   defined in <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a> or
    *   <a href="#method_sendMessage"><code>sendMessage()</code> method</a>.
+   *   <small>Defined as User's Peer ID when <code>isSelf</code> payload value is <code>false</code>.</small>
+   *   <small>Defined as <code>null</code> when provided <code>targetPeerId</code> in
+   *   <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a> or
+   *   <a href="#method_sendMessage"><code>sendMessage()</code> method</a> is not defined.</small>
+   * @param {Array} [message.listOfPeers] The list of Peers that the message has been sent to.
+   *  <small>Defined only when <code>isSelf</code> payload value is <code>true</code>.</small>
    * @param {Boolean} message.isPrivate The flag if message is targeted or not, basing
    *   off the <code>targetPeerId</code> parameter being defined in
    *   <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a> or
@@ -430,7 +436,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} channelType The Datachannel type.
    *   [Rel: Skylink.DATA_CHANNEL_TYPE]
    * @param {String} messageType The Datachannel sending Datachannel message error type.
-   *   <small>Defined only when <cod>state</code> payload is <code>SEND_MESSAGE_ERROR</code>.<small>
+   *   <small>Defined only when <cod>state</code> payload is <code>SEND_MESSAGE_ERROR</code>.</small>
    *   [Rel: Skylink.DATA_CHANNEL_MESSAGE_ERROR]
    * @for Skylink
    * @since 0.1.0
@@ -733,8 +739,10 @@ Skylink.prototype._onceEvents = {};
  * @since 0.5.8
  */
 Skylink.prototype._timestamp = {
-  now: Date.now() || function() { return +new Date(); },
-  screen: false
+  socketMessage: null,
+  shareScreen: null,
+  restartConnection: null,
+  lastRestart: null
 };
 
 /**
@@ -994,18 +1002,14 @@ Skylink.prototype._wait = function(callback, condition, intervalTime, fireAlways
  * @for Skylink
  * @since 0.5.8
  */
-Skylink.prototype._throttle = function(func, wait){
+Skylink.prototype._throttle = function(func, prop, wait){
   var self = this;
-  return function () {
-      if (!self._timestamp.func){
-        //First time run, need to force timestamp to skip condition
-        self._timestamp.func = self._timestamp.now - wait;
-      }
-      var now = Date.now();
-      if (now - self._timestamp.func < wait) {
-          return;
-      }
-      func.apply(self, arguments);
-      self._timestamp.func = now;
-  };
+  var now = (new Date()).getTime();
+
+  if (!(self._timestamp[prop] && ((now - self._timestamp[prop]) < wait))) {
+    func(true);
+    self._timestamp[prop] = now;
+  } else {
+    func(false);
+  }
 };
