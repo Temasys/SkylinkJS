@@ -15766,9 +15766,9 @@ Function that starts an uploading data transfer from User to Peers.</p>
  &lt;input type=&quot;radio&quot; name=&quot;timeout&quot; onchange=&quot;setTransferTimeout(120)&quot;&gt; 2s timeout
  &lt;input type=&quot;radio&quot; name=&quot;timeout&quot; onchange=&quot;setTransferTimeout(300)&quot;&gt; 5s timeout
  &lt;hr&gt;
- &lt;input type=&quot;file&quot; onchange=&quot;uploadFile(this.Files[0], this.getAttribute(&#39;data&#39;))&quot; data=&quot;peerId&quot;&gt;
- &lt;input type=&quot;file&quot; onchange=&quot;uploadFileGroup(this.Files[0], this.getAttribute(&#39;data&#39;).split(&#39;,&#39;)))&quot; data=&quot;peerIdA,peerIdB&quot;&gt;
- &lt;input type=&quot;file&quot; onchange=&quot;uploadFileAll(this.Files[0])&quot; data=&quot;&quot;&gt;
+ &lt;input type=&quot;file&quot; onchange=&quot;uploadFile(this.files[0], this.getAttribute(&#39;data&#39;))&quot; data=&quot;peerId&quot;&gt;
+ &lt;input type=&quot;file&quot; onchange=&quot;uploadFileGroup(this.files[0], this.getAttribute(&#39;data&#39;).split(&#39;,&#39;)))&quot; data=&quot;peerIdA,peerIdB&quot;&gt;
+ &lt;input type=&quot;file&quot; onchange=&quot;uploadFileAll(this.files[0])&quot; data=&quot;&quot;&gt;
  &lt;script&gt;
    var transferTimeout = 0;</p>
 <p>   function setTransferTimeout (timeout) {
@@ -16957,9 +16957,9 @@ Function that starts an uploading string data transfer from User to Peers.</p>
  &lt;input type=&quot;radio&quot; name=&quot;timeout&quot; onchange=&quot;setTransferTimeout(120)&quot;&gt; 2s timeout
  &lt;input type=&quot;radio&quot; name=&quot;timeout&quot; onchange=&quot;setTransferTimeout(300)&quot;&gt; 5s timeout
  &lt;hr&gt;
- &lt;input type=&quot;file&quot; onchange=&quot;showImage(this.Files[0], this.getAttribute(&#39;data&#39;))&quot; data=&quot;peerId&quot;&gt;
- &lt;input type=&quot;file&quot; onchange=&quot;showImageGroup(this.Files[0], this.getAttribute(&#39;data&#39;).split(&#39;,&#39;)))&quot; data=&quot;peerIdA,peerIdB&quot;&gt;
- &lt;input type=&quot;file&quot; onchange=&quot;showImageAll(this.Files[0])&quot; data=&quot;&quot;&gt;
+ &lt;input type=&quot;file&quot; onchange=&quot;showImage(this.files[0], this.getAttribute(&#39;data&#39;))&quot; data=&quot;peerId&quot;&gt;
+ &lt;input type=&quot;file&quot; onchange=&quot;showImageGroup(this.files[0], this.getAttribute(&#39;data&#39;).split(&#39;,&#39;)))&quot; data=&quot;peerIdA,peerIdB&quot;&gt;
+ &lt;input type=&quot;file&quot; onchange=&quot;showImageAll(this.files[0])&quot; data=&quot;&quot;&gt;
  &lt;image id=&quot;target-1&quot; src=&quot;&quot;&gt;
  &lt;image id=&quot;target-2&quot; src=&quot;&quot;&gt;
  &lt;image id=&quot;target-3&quot; src=&quot;&quot;&gt;

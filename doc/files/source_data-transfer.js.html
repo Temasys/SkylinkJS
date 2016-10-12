@@ -407,9 +407,9 @@ Skylink.prototype._dataTransfers = {};
  *  &amp;lt;input type=&quot;radio&quot; name=&quot;timeout&quot; onchange=&quot;setTransferTimeout(120)&quot;&amp;gt; 2s timeout
  *  &amp;lt;input type=&quot;radio&quot; name=&quot;timeout&quot; onchange=&quot;setTransferTimeout(300)&quot;&amp;gt; 5s timeout
  *  &amp;lt;hr&amp;gt;
- *  &amp;lt;input type=&quot;file&quot; onchange=&quot;uploadFile(this.Files[0], this.getAttribute(&#x27;data&#x27;))&quot; data=&quot;peerId&quot;&amp;gt;
- *  &amp;lt;input type=&quot;file&quot; onchange=&quot;uploadFileGroup(this.Files[0], this.getAttribute(&#x27;data&#x27;).split(&#x27;,&#x27;)))&quot; data=&quot;peerIdA,peerIdB&quot;&amp;gt;
- *  &amp;lt;input type=&quot;file&quot; onchange=&quot;uploadFileAll(this.Files[0])&quot; data=&quot;&quot;&amp;gt;
+ *  &amp;lt;input type=&quot;file&quot; onchange=&quot;uploadFile(this.files[0], this.getAttribute(&#x27;data&#x27;))&quot; data=&quot;peerId&quot;&amp;gt;
+ *  &amp;lt;input type=&quot;file&quot; onchange=&quot;uploadFileGroup(this.files[0], this.getAttribute(&#x27;data&#x27;).split(&#x27;,&#x27;)))&quot; data=&quot;peerIdA,peerIdB&quot;&amp;gt;
+ *  &amp;lt;input type=&quot;file&quot; onchange=&quot;uploadFileAll(this.files[0])&quot; data=&quot;&quot;&amp;gt;
  *  &amp;lt;script&amp;gt;
  *    var transferTimeout = 0;
  *
@@ -662,9 +662,9 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
  *  &amp;lt;input type=&quot;radio&quot; name=&quot;timeout&quot; onchange=&quot;setTransferTimeout(120)&quot;&amp;gt; 2s timeout
  *  &amp;lt;input type=&quot;radio&quot; name=&quot;timeout&quot; onchange=&quot;setTransferTimeout(300)&quot;&amp;gt; 5s timeout
  *  &amp;lt;hr&amp;gt;
- *  &amp;lt;input type=&quot;file&quot; onchange=&quot;showImage(this.Files[0], this.getAttribute(&#x27;data&#x27;))&quot; data=&quot;peerId&quot;&amp;gt;
- *  &amp;lt;input type=&quot;file&quot; onchange=&quot;showImageGroup(this.Files[0], this.getAttribute(&#x27;data&#x27;).split(&#x27;,&#x27;)))&quot; data=&quot;peerIdA,peerIdB&quot;&amp;gt;
- *  &amp;lt;input type=&quot;file&quot; onchange=&quot;showImageAll(this.Files[0])&quot; data=&quot;&quot;&amp;gt;
+ *  &amp;lt;input type=&quot;file&quot; onchange=&quot;showImage(this.files[0], this.getAttribute(&#x27;data&#x27;))&quot; data=&quot;peerId&quot;&amp;gt;
+ *  &amp;lt;input type=&quot;file&quot; onchange=&quot;showImageGroup(this.files[0], this.getAttribute(&#x27;data&#x27;).split(&#x27;,&#x27;)))&quot; data=&quot;peerIdA,peerIdB&quot;&amp;gt;
+ *  &amp;lt;input type=&quot;file&quot; onchange=&quot;showImageAll(this.files[0])&quot; data=&quot;&quot;&amp;gt;
  *  &amp;lt;image id=&quot;target-1&quot; src=&quot;&quot;&amp;gt;
  *  &amp;lt;image id=&quot;target-2&quot; src=&quot;&quot;&amp;gt;
  *  &amp;lt;image id=&quot;target-3&quot; src=&quot;&quot;&amp;gt;
