@@ -24,7 +24,7 @@
     "doc-style/**"
   ],
   "dependencies": {
-    "adapterjs": "0.13.4",
+    "adapterjs": "0.14.0",
     "socket.io-client": "1.4.4"
   },
   "keywords": ["webrtc", "real-time", "p2p"]
