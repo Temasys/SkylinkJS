@@ -78,9 +78,7 @@ Demo.Methods.displayRecordingSessionHTML = function(recordingId) {
     'Session ' + recordingId + '</b><em title="' + timestamp.toString() + '">' + Hours + ':' + Minutes + ':' + Seconds +
     '</em></p><p class="list-group-item-text"></p><blockquote style="color:#888;font-size: 14px;padding: 2px 5px;">' +
     '<small><b>STATUS:</b>&nbsp;&nbsp;<em id="recording_' + recordingId + '_state" style="font-style:normal;">STARTED</em></small></blockquote>' +
-    '<p><a id="recording_' + recordingId + '_btn" class="btn btn-default" ' +
-    'href="" style="width:100%;margin:7px 0;display:none;" download="' + recordingId + '.mp4">' +
-    '<span class="glyphicon glyphicon-cloud-download"></span> <b>Download Recording</b></a></p>' +
+    '<p id="recording_' + recordingId + '_btn"></p>' +
     '<div id="recording_' + recordingId + '_error"></div><hr/></div>');
 };
 
@@ -567,7 +565,14 @@ Demo.Skylink.on('recordingState', function(state, recordingId, url, error) {
     case Demo.Skylink.RECORDING_STATE.LINK:
       $('#recording_' + recordingId + '_state_icon').attr('class', 'glyphicon glyphicon-ok');
       $('#recording_' + recordingId + '_state').html('COMPLETED');
-      $('#recording_' + recordingId + '_btn').attr('href', url.mixin).show();
+      //$('#recording_' + recordingId + '_btn').attr('href', url.mixin).show();
+      for (var prop in url) {
+        if (url.hasOwnProperty(prop) && url[prop]) {
+          $('#recording_' + recordingId + '_btn').append(
+            '<a class="btn btn-default" href="" style="width:100%;margin:7px 0;display:block;" download="' + recordingId + '_' + prop + '.mp4">' +
+            '<span class="glyphicon glyphicon-cloud-download"></span> <b>Download Recording (' + (prop !== 'mixin' ? 'Peer ' : '') + prop + ')</b></a>');
+        }
+      }
       $('#recording_' + recordingId + '_error').html('');
       break;
     case Demo.Skylink.RECORDING_STATE.ERROR:
