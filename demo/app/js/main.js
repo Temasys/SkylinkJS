@@ -569,7 +569,7 @@ Demo.Skylink.on('recordingState', function(state, recordingId, url, error) {
       for (var prop in url) {
         if (url.hasOwnProperty(prop) && url[prop]) {
           $('#recording_' + recordingId + '_btn').append(
-            '<a class="btn btn-default" href="" style="width:100%;margin:7px 0;display:block;" download="' + recordingId + '_' + prop + '.mp4">' +
+            '<a class="btn btn-default" href="' + url[prop] + '" style="width:100%;margin:7px 0;display:block;" download="' + recordingId + '_' + prop + '.mp4">' +
             '<span class="glyphicon glyphicon-cloud-download"></span> <b>Download Recording (' + (prop !== 'mixin' ? 'Peer ' : '') + prop + ')</b></a>');
         }
       }
