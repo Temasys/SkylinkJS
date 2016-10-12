@@ -821,11 +821,13 @@ $(document).ready(function () {
 
       if ($(panelDom).find('.selected-users em').length === 0) {
         $(panelDom).find('.all').show();
+      } else {
+        $(panelDom).find('.all').hide();
       }
     } else {
       $(panelDom).find('.selected-users').append('<em id="' +
         peerId + '-selected-user">Peer ' + peerId + '</em>');
-      $(panelDom).find('.all').show();
+      $(panelDom).find('.all').hide();
       selectedPeers.push(peerId);
     }
   };
