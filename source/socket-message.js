@@ -148,49 +148,36 @@ Skylink.prototype._peerMessagesStamps = {};
  * @since 0.4.0
  */
 Skylink.prototype.sendMessage = function(message, targetPeerId) {
-  var params = {
-    cid: this._key,
-    data: message,
-    mid: this._user.sid,
-    rid: this._room.id,
-    type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
-  };
-
-  var listOfPeers = Object.keys(this._peerConnections);
+  var listOfPeers = Object.keys(this._peerInformations);
   var isPrivate = false;
-  var i;
 
-  if(Array.isArray(targetPeerId)) {
+  if (Array.isArray(targetPeerId)) {
     listOfPeers = targetPeerId;
     isPrivate = true;
-
-  } else if (typeof targetPeerId === 'string') {
+  } else if (targetPeerId && typeof targetPeerId === 'string') {
     listOfPeers = [targetPeerId];
     isPrivate = true;
   }
 
-  if (!isPrivate) {
-    log.log([null, 'Socket', null, 'Broadcasting message to peers']);
-
-    this._sendChannelMessage({
-      cid: this._key,
-      data: message,
-      mid: this._user.sid,
-      rid: this._room.id,
-      type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
-    });
+  if (!this._inRoom || !this._socket || !this._user) {
+    log.error('Unable to send message as User is not in Room. ->', message);
+    return;
   }
 
-  for (i = 0; i < listOfPeers.length; i++) {
+  // Loop out unwanted Peers
+  for (var i = 0; i < listOfPeers.length; i++) {
     var peerId = listOfPeers[i];
 
-    // Ignore MCU peer
-    if (peerId === 'MCU') {
-      continue;
-    }
-
-    if (isPrivate) {
-      log.log([peerId, 'Socket', null, 'Sending message to peer']);
+    if (!this._peerInformations[peerId]) {
+      log.error([peerId, 'Socket', null, 'Dropping of sending message to Peer as ' +
+        'Peer session does not exists']);
+      listOfPeers.splice(i, 1);
+      i--;
+    } else if (peerId === 'MCU') {
+      listOfPeers.splice(i, 1);
+      i--;
+    } else if (isPrivate) {
+      log.debug([peerId, 'Socket', null, 'Sending private message to Peer']);
 
       this._sendChannelMessage({
         cid: this._key,
@@ -203,10 +190,28 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
     }
   }
 
+  if (listOfPeers.length === 0) {
+    log.error('Unable to send message as there is no Peers to sent to.', message);
+    return;
+  }
+
+  if (!isPrivate) {
+    log.debug([null, 'Socket', null, 'Broadcasting message to Peers']);
+
+    this._sendChannelMessage({
+      cid: this._key,
+      data: message,
+      mid: this._user.sid,
+      rid: this._room.id,
+      type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
+    });
+  }
+
   this._trigger('incomingMessage', {
     content: message,
     isPrivate: isPrivate,
-    targetPeerId: targetPeerId,
+    targetPeerId: targetPeerId || null,
+    listOfPeers: listOfPeers,
     isDataChannel: false,
     senderPeerId: this._user.sid
   }, this._user.sid, this.getPeerInfo(), true);

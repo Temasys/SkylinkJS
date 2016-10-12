@@ -357,9 +357,11 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} message The message result.
    * @param {JSON|String} message.content The message object.
    * @param {String} message.senderPeerId The sender Peer ID.
-   * @param {String|Array} [message.targetPeerId=null] The value of the <code>targetPeerId</code>
+   * @param {String|Array} [message.targetPeerId] The value of the <code>targetPeerId</code>
    *   defined in <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a> or
    *   <a href="#method_sendMessage"><code>sendMessage()</code> method</a>.
+   *   <small>Defined as <code>null</code> if it is a broadcasted message to all Peers.
+   *   For receiving User, this value will be defined as the User's Peer ID.</small>
    * @param {Boolean} message.isPrivate The flag if message is targeted or not, basing
    *   off the <code>targetPeerId</code> parameter being defined in
    *   <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a> or

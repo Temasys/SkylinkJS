@@ -1164,81 +1164,79 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
  * @since 0.5.5
  */
 Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
-  var self = this;
-
-  // Check if User is in Room first
-  if (!self._user) {
-    log.warn(&#x27;Unable to send any P2P message. User does not have Room session.&#x27;);
-    return;
-  }
-
-  // Check if datachannel is enabled first or not
-  if (!self._enableDataChannel) {
-    log.warn(&#x27;Unable to send any P2P message. Datachannel is disabled&#x27;);
-    return;
-  }
-
-  var listOfPeers = Object.keys(self._dataChannels);
+  var listOfPeers = Object.keys(this._dataChannels);
   var isPrivate = false;
 
-  //targetPeerId is defined -&gt; private message
   if (Array.isArray(targetPeerId)) {
     listOfPeers = targetPeerId;
     isPrivate = true;
-  } else if (typeof targetPeerId === &#x27;string&#x27;) {
+  } else if (targetPeerId &amp;&amp; typeof targetPeerId === &#x27;string&#x27;) {
     listOfPeers = [targetPeerId];
     isPrivate = true;
   }
 
-  if (listOfPeers.indexOf(&#x27;MCU&#x27;) &gt; -1) {
-    listOfPeers.splice(listOfPeers.indexOf(&#x27;MCU&#x27;), 1);
+  if (!this._inRoom || !this._user) {
+    log.error(&#x27;Unable to send message as User is not in Room. -&gt;&#x27;, message);
+    return;
   }
 
-  // sending public message to MCU to relay. MCU case only
-  if (self._hasMCU) {
-    if (isPrivate) {
-      log.log([&#x27;MCU&#x27;, &#x27;RTCDataChannel&#x27;, null,
-        &#x27;Sending private P2P message to targeted Peers with Datachannel connections&#x27;], listOfPeers);
+  if (!this._enableDataChannel) {
+    log.error(&#x27;Unable to send message as User does not have Datachannel enabled. -&gt;&#x27;, message);
+    return;
+  }
 
-      self._sendMessageToDataChannel(&#x27;MCU&#x27;, {
-        type: self._DC_PROTOCOL_TYPE.MESSAGE,
-        isPrivate: isPrivate,
-        sender: self._user.sid,
-        target: listOfPeers,
-        data: message
-      });
-    } else {
-      log.log([&#x27;MCU&#x27;, &#x27;RTCDataChannel&#x27;, null, &#x27;Broadcasting P2P message to all Peers with Datachannel connections&#x27;]);
+  // Loop out unwanted Peers
+  for (var i = 0; i &lt; listOfPeers.length; i++) {
+    var peerId = listOfPeers[i];
 
-      self._sendMessageToDataChannel(&#x27;MCU&#x27;, {
-        type: self._DC_PROTOCOL_TYPE.MESSAGE,
-        isPrivate: isPrivate,
-        sender: self._user.sid,
-        target: &#x27;MCU&#x27;,
-        data: message
-      });
-    }
-  } else {
-    for (var i = 0; i &lt; listOfPeers.length; i++) {
-      log.log([listOfPeers[i], &#x27;RTCDataChannel&#x27;, &#x27;prop:main&#x27;, &#x27;Sending P2P message to peer&#x27;]);
+    if (!this._dataChannels[peerId]) {
+      log.error([peerId, &#x27;RTCDataChannel&#x27;, null, &#x27;Dropping of sending message to Peer as &#x27; +
+        &#x27;Datachannel connection does not exists&#x27;]);
+      listOfPeers.splice(i, 1);
+      i--;
+    } else if (peerId === &#x27;MCU&#x27;) {
+      listOfPeers.splice(i, 1);
+      i--;
+    } else if (!this._hasMCU) {
+      log.debug([peerId, &#x27;RTCDataChannel&#x27;, null, &#x27;Sending &#x27; + (isPrivate ? &#x27;private&#x27; : &#x27;&#x27;) +
+        &#x27; P2P message to Peer&#x27;]);
 
-      self._sendMessageToDataChannel(listOfPeers[i], {
-        type: self._DC_PROTOCOL_TYPE.MESSAGE,
+      this._sendMessageToDataChannel(peerId, {
+        type: this._DC_PROTOCOL_TYPE.MESSAGE,
         isPrivate: isPrivate,
-        sender: self._user.sid,
-        target: listOfPeers[i],
+        sender: this._user.sid,
+        target: peerId,
         data: message
       }, &#x27;main&#x27;);
     }
   }
 
-  self._trigger(&#x27;incomingMessage&#x27;, {
+  if (listOfPeers.length === 0) {
+    log.error(&#x27;Unable to send message as there are no Peers to sent to.&#x27;, message);
+    return;
+  }
+
+  if (this._hasMCU) {
+    log.debug([&#x27;MCU&#x27;, &#x27;RTCDataChannel&#x27;, null, &#x27;Broadcasting &#x27; + (isPrivate ? &#x27;private&#x27; : &#x27;&#x27;) +
+      &#x27; P2P message to Peers&#x27;]);
+
+    this._sendMessageToDataChannel(&#x27;MCU&#x27;, {
+      type: this._DC_PROTOCOL_TYPE.MESSAGE,
+      isPrivate: isPrivate,
+      sender: this._user.sid,
+      target: listOfPeers,
+      data: message
+    }, &#x27;main&#x27;);
+  }
+
+  this._trigger(&#x27;incomingMessage&#x27;, {
     content: message,
     isPrivate: isPrivate,
-    targetPeerId: targetPeerId || listOfPeers,
+    targetPeerId: targetPeerId || null,
+    listOfPeers: listOfPeers,
     isDataChannel: true,
-    senderPeerId: self._user.sid
-  }, self._user.sid, self.getPeerInfo(), true);
+    senderPeerId: this._user.sid
+  }, this._user.sid, this.getPeerInfo(), true);
 };
 
 /**
