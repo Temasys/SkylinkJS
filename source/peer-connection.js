@@ -245,7 +245,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
     if (!runFn) {
       emitErrorForPeersFn('Unable to run as throttle interval has not reached (3s).');
     } else {
-      self._refreshPeerConnection(listOfPeers, true, callback);
+      self._refreshPeerConnection(listOfPeers, callback);
     }
   }, 'restartConnection', 5000);
 
@@ -258,7 +258,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
  * @for Skylink
  * @since 0.6.15
  */
-Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle, callback) {
+Skylink.prototype._refreshPeerConnection = function(listOfPeers, callback) {
   var self = this;
   var listOfPeerRestarts = [];
   var error = '';
@@ -301,17 +301,6 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle,
       log.error([peerId, null, null, error]);
       listOfPeerRestartErrors[peerId] = new Error(error);
       return;
-    }
-
-    if (shouldThrottle) {
-      var now = Date.now() || function() { return +new Date(); };
-
-      if (now - self._timestamp.lastRestart < 3000) {
-        error = 'Last restart was so tight. Aborting.';
-        log.warn([peerId, null, null, error]);
-        listOfPeerRestartErrors[peerId] = new Error(error);
-        return;
-      }
     }
 
     log.log([peerId, 'PeerConnection', null, 'Restarting peer connection']);

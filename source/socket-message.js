@@ -800,8 +800,6 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  self._timestamp.lastRestart = message.lastRestart || (new Date()).getTime();
-
   if (!self._peerConnections[targetMid]) {
     log.error([targetMid, null, null, 'Peer does not have an existing ' +
       'connection. Unable to restart']);
