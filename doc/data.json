@@ -4501,8 +4501,14 @@
                         },
                         {
                             "name": "targetPeerId",
-                            "description": "The value of the <code>targetPeerId</code>\n  defined in <a href=\"#method_sendP2PMessage\"><code>sendP2PMessage()</code> method</a> or\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>.\n  <small>Defined as <code>null</code> if it is a broadcasted message to all Peers.\n  For receiving User, this value will be defined as the User's Peer ID.</small>",
+                            "description": "The value of the <code>targetPeerId</code>\n  defined in <a href=\"#method_sendP2PMessage\"><code>sendP2PMessage()</code> method</a> or\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>.\n  <small>Defined as User's Peer ID when <code>isSelf</code> payload value is <code>false</code>.</small>\n  <small>Defined as <code>null</code> when provided <code>targetPeerId</code> in\n  <a href=\"#method_sendP2PMessage\"><code>sendP2PMessage()</code> method</a> or\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>is not defined.</small>",
                             "type": "String|Array",
+                            "optional": true
+                        },
+                        {
+                            "name": "listOfPeers",
+                            "description": "The list of Peers that the message has been sent to.\n <small>Defined only when <code>isSelf</code> payload value is <code>true</code>.</small>",
+                            "type": "Array",
                             "optional": true
                         },
                         {
@@ -4533,7 +4539,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 380,
+            "line": 384,
             "description": "Event triggered when receiving completed data transfer from Peer.",
             "itemtype": "event",
             "name": "incomingData",
@@ -4569,7 +4575,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 396,
+            "line": 400,
             "description": "Event triggered when receiving upload data transfer from Peer.",
             "itemtype": "event",
             "name": "incomingDataRequest",
@@ -4600,7 +4606,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 410,
+            "line": 414,
             "description": "Event triggered when Room locked status has changed.",
             "itemtype": "event",
             "name": "roomLock",
@@ -4626,7 +4632,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 423,
+            "line": 427,
             "description": "Event triggered when a Datachannel connection state has changed.",
             "itemtype": "event",
             "name": "dataChannelState",
@@ -4668,7 +4674,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 442,
+            "line": 446,
             "description": "Event triggered when a data transfer state has changed.",
             "itemtype": "event",
             "name": "dataTransferState",
@@ -4776,7 +4782,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 490,
+            "line": 494,
             "description": "Event triggered when Signaling server reaction state has changed.",
             "itemtype": "event",
             "name": "systemAction",
@@ -4802,7 +4808,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 503,
+            "line": 507,
             "description": "Event triggered when a server Peer joins the room.",
             "itemtype": "event",
             "name": "serverPeerJoined",
@@ -4823,7 +4829,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 514,
+            "line": 518,
             "description": "Event triggered when a server Peer leaves the room.",
             "itemtype": "event",
             "name": "serverPeerLeft",
@@ -4844,7 +4850,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 525,
+            "line": 529,
             "description": "Event triggered when a server Peer connection has been refreshed.",
             "itemtype": "event",
             "name": "serverPeerRestart",
@@ -4865,7 +4871,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 536,
+            "line": 540,
             "description": "Event triggered when Peer Stream streaming has stopped.",
             "itemtype": "event",
             "name": "streamEnded",
@@ -4901,7 +4907,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 551,
+            "line": 555,
             "description": "Event triggered when Peer Stream audio or video tracks has been muted / unmuted.",
             "itemtype": "event",
             "name": "streamMuted",
@@ -4932,7 +4938,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 565,
+            "line": 569,
             "description": "Event triggered when <a href=\"#method_getPeers\"><code>getPeers()</code> method</a> retrieval state changes.",
             "itemtype": "event",
             "name": "getPeersStateChange",
@@ -4965,7 +4971,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 578,
+            "line": 582,
             "description": "Event triggered when <a href=\"#method_introducePeer\"><code>introducePeer()</code> method</a>\nintroduction request state changes.",
             "itemtype": "event",
             "name": "introduceStateChange",
@@ -5002,7 +5008,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 594,
+            "line": 598,
             "description": "Event triggered when <a href=\"#method_getConnectionStatus\"><code>getConnectionStatus()</code> method</a>\nretrieval state changes.",
             "itemtype": "event",
             "name": "getConnectionStatusStateChange",
@@ -5319,7 +5325,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 681,
+            "line": 685,
             "description": "Event triggered when <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> changes\nUser Streams audio and video tracks muted status.",
             "itemtype": "event",
             "name": "localMediaMuted",
@@ -5347,7 +5353,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 698,
+            "line": 702,
             "description": "Event triggered when the current Stream received does not match the actual Stream from Peer currently.",
             "itemtype": "event",
             "name": "streamMismatch",
@@ -5389,7 +5395,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 716,
+            "line": 720,
             "description": "Stores the list of <code>once()</code> event handlers.\nThese events are only triggered once.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -5415,7 +5421,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 729,
+            "line": 733,
             "description": "Stores the timestamps data used for throttling.",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -5427,7 +5433,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 742,
+            "line": 746,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -5451,7 +5457,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 766,
+            "line": 770,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -5488,7 +5494,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 824,
+            "line": 828,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -5513,7 +5519,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 873,
+            "line": 877,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -5524,7 +5530,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 927,
+            "line": 931,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -5535,7 +5541,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 953,
+            "line": 957,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -5546,7 +5552,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 991,
+            "line": 995,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",

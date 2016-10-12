@@ -451,8 +451,12 @@ Skylink.prototype._EVENTS = {
    * @param {String|Array} [message.targetPeerId] The value of the &lt;code&gt;targetPeerId&lt;/code&gt;
    *   defined in &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt; or
    *   &lt;a href=&quot;#method_sendMessage&quot;&gt;&lt;code&gt;sendMessage()&lt;/code&gt; method&lt;/a&gt;.
-   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it is a broadcasted message to all Peers.
-   *   For receiving User, this value will be defined as the User&#x27;s Peer ID.&lt;/small&gt;
+   *   &lt;small&gt;Defined as User&#x27;s Peer ID when &lt;code&gt;isSelf&lt;/code&gt; payload value is &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when provided &lt;code&gt;targetPeerId&lt;/code&gt; in
+   *   &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt; or
+   *   &lt;a href=&quot;#method_sendMessage&quot;&gt;&lt;code&gt;sendMessage()&lt;/code&gt; method&lt;/a&gt;is not defined.&lt;/small&gt;
+   * @param {Array} [message.listOfPeers] The list of Peers that the message has been sent to.
+   *  &lt;small&gt;Defined only when &lt;code&gt;isSelf&lt;/code&gt; payload value is &lt;code&gt;true&lt;/code&gt;.&lt;/small&gt;
    * @param {Boolean} message.isPrivate The flag if message is targeted or not, basing
    *   off the &lt;code&gt;targetPeerId&lt;/code&gt; parameter being defined in
    *   &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt; or
