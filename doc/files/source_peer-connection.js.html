@@ -165,25 +165,15 @@ Skylink.prototype.SERVER_PEER_TYPE = {
 };
 
 /**
- * Stores the restart initiated timestamp to throttle the &lt;code&gt;refreshConnection&lt;/code&gt; functionality.
- * @attribute _lastRestart
- * @type Object
- * @private
- * @for Skylink
- * @since 0.5.9
- */
-Skylink.prototype._lastRestart = null;
-
-/**
  * Stores the global number of Peer connection retries that would increase the wait-for-response timeout
  *   for the Peer connection health timer.
- * @attribute _retryCount
- * @type Number
+ * @attribute _retryCounters
+ * @type JSON
  * @private
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._retryCount = 0;
+Skylink.prototype._retryCounters = {};
 
 /**
  * Stores the list of the Peer connections.
@@ -202,8 +192,9 @@ Skylink.prototype._peerConnections = {};
  *   it &lt;a href=&quot;http://support.temasys.com.sg/support/discussions/topics/12000002853&quot;&gt;in this article here&lt;/a&gt;.&lt;br&gt;
  *   For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in
  *   &lt;a href=&quot;http://support.temasys.com.sg/support/discussions/topics/12000005188&quot;&gt;in this article here&lt;/a&gt;.&lt;br&gt;
- *   Note that this functionality should be used when Peer connection stream freezes during a connection,
- *   and is throttled when invoked many times in less than 3 seconds interval.
+ *   Note that this functionality should be used when Peer connection stream freezes during a connection.
+ *   For a better user experience, the functionality is throttled when invoked many times in
+ *   less than 3 seconds interval.
  * &lt;/blockquote&gt;
  * Function that refreshes Peer connections to update with the current streaming.
  * @method refreshConnection
@@ -306,9 +297,6 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
   var self = this;
 
   var listOfPeers = Object.keys(self._peerConnections);
-  var listOfPeerRestarts = [];
-  var error = &#x27;&#x27;;
-  var listOfPeerRestartErrors = {};
 
   if(Array.isArray(targetPeerId)) {
     listOfPeers = targetPeerId;
@@ -319,24 +307,39 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
     callback = targetPeerId;
   }
 
-  if (listOfPeers.length === 0) {
-    error = &#x27;There is currently no peer connections to restart&#x27;;
-    log.warn([null, &#x27;PeerConnection&#x27;, null, error]);
-
-    listOfPeerRestartErrors.self = new Error(error);
+  var emitErrorForPeersFn = function (error) {
+    log.error(error);
 
     if (typeof callback === &#x27;function&#x27;) {
+      var listOfPeerErrors = {};
+
+      if (listOfPeers.length === 0) {
+        listOfPeerErrors.self = new Error(error);
+      } else {
+        for (var i = 0; i &lt; listOfPeers.length; i++) {
+          listOfPeerErrors[listOfPeers[i]] = new Error(error);
+        }
+      }
+
       callback({
         refreshErrors: listOfPeerRestartErrors,
         listOfPeers: listOfPeers
       }, null);
     }
+  };
+
+  if (listOfPeers.length === 0) {
+    emitErrorForPeersFn(&#x27;There is currently no peer connections to restart&#x27;);
     return;
   }
 
-  self._throttle(function () {
-    self._refreshPeerConnection(listOfPeers, true, callback);
-  },5000)();
+  self._throttle(function (runFn) {
+    if (!runFn) {
+      emitErrorForPeersFn(&#x27;Unable to run as throttle interval has not reached (3s).&#x27;);
+    } else {
+      self._refreshPeerConnection(listOfPeers, callback);
+    }
+  }, &#x27;restartConnection&#x27;, 5000);
 
 };
 
@@ -347,7 +350,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
  * @for Skylink
  * @since 0.6.15
  */
-Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle, callback) {
+Skylink.prototype._refreshPeerConnection = function(listOfPeers, callback) {
   var self = this;
   var listOfPeerRestarts = [];
   var error = &#x27;&#x27;;
@@ -355,7 +358,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle,
 
   // To fix jshint dont put functions within a loop
   var refreshSinglePeerCallback = function (peerId) {
-    return function (error, success) {
+    return function (error) {
       if (listOfPeerRestarts.indexOf(peerId) === -1) {
         if (error) {
           log.error([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Failed restarting for peer&#x27;], error);
@@ -392,21 +395,10 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle,
       return;
     }
 
-    if (shouldThrottle) {
-      var now = Date.now() || function() { return +new Date(); };
-
-      if (now - self.lastRestart &lt; 3000) {
-        error = &#x27;Last restart was so tight. Aborting.&#x27;;
-        log.warn([peerId, null, null, error]);
-        listOfPeerRestartErrors[peerId] = new Error(error);
-        return;
-      }
-    }
-
     log.log([peerId, &#x27;PeerConnection&#x27;, null, &#x27;Restarting peer connection&#x27;]);
 
     // do a hard reset on variable object
-    self._restartPeerConnection(peerId, true, false, peerCallback, true);
+    self._restartPeerConnection(peerId, peerCallback);
   };
 
   if(!self._hasMCU) {
@@ -915,7 +907,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @for Skylink
  * @since 0.5.8
  */
-Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, isConnectionRestart, callback, explicit) {
+Skylink.prototype._restartPeerConnection = function (peerId, callback) {
   var self = this;
 
   if (!self._peerConnections[peerId]) {
@@ -942,7 +934,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
     if (typeof callback === &#x27;function&#x27;) {
       log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart failure callback&#x27;]);
-      callback(null, notSupportedError);
+      callback(notSupportedError);
     }
     return;
   }
@@ -954,43 +946,30 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
       self._addLocalMediaStreams(peerId);
     }
 
-    if (isSelfInitiatedRestart){
-      log.log([peerId, null, null, &#x27;Sending restart message to signaling server&#x27;]);
+    log.log([peerId, null, null, &#x27;Sending restart message to signaling server&#x27;]);
 
-      var lastRestart = Date.now() || function() { return +new Date(); };
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.RESTART,
+      mid: self._user.sid,
+      rid: self._room.id,
+      agent: window.webrtcDetectedBrowser,
+      version: window.webrtcDetectedVersion,
+      os: window.navigator.platform,
+      userInfo: self._getUserInfo(),
+      target: peerId,
+      weight: self._peerPriorityWeight,
+      receiveOnly: self._peerConnections[peerId] &amp;&amp; self._peerConnections[peerId].receiveOnly,
+      enableIceTrickle: self._enableIceTrickle,
+      enableDataChannel: self._enableDataChannel,
+      sessionType: !!self._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+    });
 
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.RESTART,
-        mid: self._user.sid,
-        rid: self._room.id,
-        agent: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
-        os: window.navigator.platform,
-        userInfo: self._getUserInfo(),
-        target: peerId,
-        isConnectionRestart: !!isConnectionRestart,
-        lastRestart: lastRestart,
-        // This will not be used based off the logic in _restartHandler
-        weight: self._peerPriorityWeight,
-        receiveOnly: self._peerConnections[peerId] &amp;&amp; self._peerConnections[peerId].receiveOnly,
-        enableIceTrickle: self._enableIceTrickle,
-        enableDataChannel: self._enableDataChannel,
-        sessionType: !!self._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
-        explicit: !!explicit,
-        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
-      });
+    self._trigger(&#x27;peerRestart&#x27;, peerId, self.getPeerInfo(peerId), true);
 
-      self._trigger(&#x27;peerRestart&#x27;, peerId, self.getPeerInfo(peerId), false);
-
-      if (typeof callback === &#x27;function&#x27;) {
-        log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart callback&#x27;]);
-        callback(null, null);
-      }
-    } else {
-      if (typeof callback === &#x27;function&#x27;) {
-        log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart callback (receiving peer)&#x27;]);
-        callback(null, null);
-      }
+    if (typeof callback === &#x27;function&#x27;) {
+      log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart callback&#x27;]);
+      callback(null);
     }
 
     // following the previous logic to do checker always
@@ -1022,7 +1001,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         });
         if (typeof callback === &#x27;function&#x27;) {
           log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart failure callback&#x27;]);
-          callback(null, new Error(noLocalDescriptionError));
+          callback(new Error(noLocalDescriptionError));
         }
       }
     // It could have connection state closed
@@ -1031,7 +1010,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
       log.warn([peerId, &#x27;RTCPeerConnection&#x27;, null, unableToRestartError]);
       if (typeof callback === &#x27;function&#x27;) {
         log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart failure callback&#x27;]);
-        callback(null, new Error(unableToRestartError));
+        callback(new Error(unableToRestartError));
       }
     }
   }
@@ -1212,7 +1191,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
           &#x27;Peer connection with user is stable&#x27;]);
         self._peerConnectionHealth[targetMid] = true;
         self._stopPeerConnectionHealthCheck(targetMid);
-        self._retryCount = 0;
       }
 
       if (typeof self._ICEConnectionFailures[targetMid] === &#x27;undefined&#x27;) {
@@ -1229,7 +1207,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 
         // refresh when failed. ignore for MCU case since restart is handled by MCU in this case
         if (!self._hasMCU) {
-          self._restartPeerConnection(targetMid, true, true, null, false);
+          self._restartPeerConnection(targetMid);
         }
       }
 
@@ -1270,7 +1248,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
         &#x27;Peer connection with user is stable&#x27;]);
       self._peerConnectionHealth[targetMid] = true;
       self._stopPeerConnectionHealthCheck(targetMid);
-      self._retryCount = 0;
     }
   };
   pc.onicegatheringstatechange = function() {
@@ -1317,7 +1294,6 @@ Skylink.prototype._restartMCUConnection = function(callback) {
   var peerId; // j shint is whinning
   var receiveOnly = false;
   // for MCU case, these dont matter at all
-  var lastRestart = Date.now() || function() { return +new Date(); };
   var weight = (new Date()).valueOf();
 
   self._trigger(&#x27;serverPeerRestart&#x27;, &#x27;MCU&#x27;, self.SERVER_PEER_TYPE.MCU);
@@ -1350,14 +1326,11 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         os: window.navigator.platform,
         userInfo: self._getUserInfo(),
         target: peerId, //&#x27;MCU&#x27;,
-        isConnectionRestart: false,
-        lastRestart: lastRestart,
         weight: self._peerPriorityWeight,
         receiveOnly: receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
         sessionType: !!self._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
-        explicit: true,
         temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       });
     }

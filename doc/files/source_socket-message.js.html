@@ -650,9 +650,14 @@ Skylink.prototype._streamEventHandler = function(message) {
       if (this._peerConnections[targetMid] &amp;&amp;
         this._peerConnections[targetMid].signalingState === this.PEER_CONNECTION_STATE.STABLE) {
         var streams = this._peerConnections[targetMid].getRemoteStreams();
-        var currentStreamId = streams[0].id || streams[0].label;
+        var currentStreamId = streams.length &gt; 0 ? streams[0].id || streams[0].label : null;
 
-        if (streams.length &gt; 0 &amp;&amp; message.streamId !== currentStreamId &amp;&amp;
+        log.info([targetMid, null, message.type, &#x27;Peer\&#x27;s stream status check -&gt;&#x27;], {
+          actualId: message.streamId,
+          currentId: currentStreamId
+        });
+
+        if (message.streamId !== currentStreamId &amp;&amp;
           this._streamsMistmatch[targetMid] !== (currentStreamId + &#x27;::&#x27; + message.streamId)) {
           this._streamsMistmatch[targetMid] = currentStreamId + &#x27;::&#x27; + message.streamId;
           this._trigger(&#x27;streamMismatch&#x27;, targetMid, this.getPeerInfo(targetMid),
@@ -886,8 +891,6 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  self.lastRestart = message.lastRestart || Date.now() || function() { return +new Date(); };
-
   if (!self._peerConnections[targetMid]) {
     log.error([targetMid, null, null, &#x27;Peer does not have an existing &#x27; +
       &#x27;connection. Unable to restart&#x27;]);
@@ -962,10 +965,6 @@ Skylink.prototype._restartHandler = function(message){
       enableDataChannel: self._enableDataChannel,
       receiveOnly: self._peerConnections[targetMid] &amp;&amp; self._peerConnections[targetMid].receiveOnly,
       sessionType: !!self._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
-      // SkylinkJS parameters (copy the parameters from received message parameters)
-      isConnectionRestart: !!message.isConnectionRestart,
-      lastRestart: message.lastRestart,
-      explicit: !!message.explicit,
       temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
     });
   }
