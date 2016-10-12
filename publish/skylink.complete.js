@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Tue Oct 11 2016 15:12:10 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Oct 12 2016 20:18:22 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10461,7 +10461,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Tue Oct 11 2016 15:12:10 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Oct 12 2016 20:18:22 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11560,9 +11560,9 @@ Skylink.prototype._dataTransfers = {};
  *  &lt;input type="radio" name="timeout" onchange="setTransferTimeout(120)"&gt; 2s timeout
  *  &lt;input type="radio" name="timeout" onchange="setTransferTimeout(300)"&gt; 5s timeout
  *  &lt;hr&gt;
- *  &lt;input type="file" onchange="uploadFile(this.Files[0], this.getAttribute('data'))" data="peerId"&gt;
- *  &lt;input type="file" onchange="uploadFileGroup(this.Files[0], this.getAttribute('data').split(',')))" data="peerIdA,peerIdB"&gt;
- *  &lt;input type="file" onchange="uploadFileAll(this.Files[0])" data=""&gt;
+ *  &lt;input type="file" onchange="uploadFile(this.files[0], this.getAttribute('data'))" data="peerId"&gt;
+ *  &lt;input type="file" onchange="uploadFileGroup(this.files[0], this.getAttribute('data').split(',')))" data="peerIdA,peerIdB"&gt;
+ *  &lt;input type="file" onchange="uploadFileAll(this.files[0])" data=""&gt;
  *  &lt;script&gt;
  *    var transferTimeout = 0;
  *
@@ -11815,9 +11815,9 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
  *  &lt;input type="radio" name="timeout" onchange="setTransferTimeout(120)"&gt; 2s timeout
  *  &lt;input type="radio" name="timeout" onchange="setTransferTimeout(300)"&gt; 5s timeout
  *  &lt;hr&gt;
- *  &lt;input type="file" onchange="showImage(this.Files[0], this.getAttribute('data'))" data="peerId"&gt;
- *  &lt;input type="file" onchange="showImageGroup(this.Files[0], this.getAttribute('data').split(',')))" data="peerIdA,peerIdB"&gt;
- *  &lt;input type="file" onchange="showImageAll(this.Files[0])" data=""&gt;
+ *  &lt;input type="file" onchange="showImage(this.files[0], this.getAttribute('data'))" data="peerId"&gt;
+ *  &lt;input type="file" onchange="showImageGroup(this.files[0], this.getAttribute('data').split(',')))" data="peerIdA,peerIdB"&gt;
+ *  &lt;input type="file" onchange="showImageAll(this.files[0])" data=""&gt;
  *  &lt;image id="target-1" src=""&gt;
  *  &lt;image id="target-2" src=""&gt;
  *  &lt;image id="target-3" src=""&gt;

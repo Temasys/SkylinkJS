@@ -316,9 +316,9 @@ Skylink.prototype._dataTransfers = {};
  *  &lt;input type="radio" name="timeout" onchange="setTransferTimeout(120)"&gt; 2s timeout
  *  &lt;input type="radio" name="timeout" onchange="setTransferTimeout(300)"&gt; 5s timeout
  *  &lt;hr&gt;
- *  &lt;input type="file" onchange="uploadFile(this.Files[0], this.getAttribute('data'))" data="peerId"&gt;
- *  &lt;input type="file" onchange="uploadFileGroup(this.Files[0], this.getAttribute('data').split(',')))" data="peerIdA,peerIdB"&gt;
- *  &lt;input type="file" onchange="uploadFileAll(this.Files[0])" data=""&gt;
+ *  &lt;input type="file" onchange="uploadFile(this.files[0], this.getAttribute('data'))" data="peerId"&gt;
+ *  &lt;input type="file" onchange="uploadFileGroup(this.files[0], this.getAttribute('data').split(',')))" data="peerIdA,peerIdB"&gt;
+ *  &lt;input type="file" onchange="uploadFileAll(this.files[0])" data=""&gt;
  *  &lt;script&gt;
  *    var transferTimeout = 0;
  *
@@ -571,9 +571,9 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
  *  &lt;input type="radio" name="timeout" onchange="setTransferTimeout(120)"&gt; 2s timeout
  *  &lt;input type="radio" name="timeout" onchange="setTransferTimeout(300)"&gt; 5s timeout
  *  &lt;hr&gt;
- *  &lt;input type="file" onchange="showImage(this.Files[0], this.getAttribute('data'))" data="peerId"&gt;
- *  &lt;input type="file" onchange="showImageGroup(this.Files[0], this.getAttribute('data').split(',')))" data="peerIdA,peerIdB"&gt;
- *  &lt;input type="file" onchange="showImageAll(this.Files[0])" data=""&gt;
+ *  &lt;input type="file" onchange="showImage(this.files[0], this.getAttribute('data'))" data="peerId"&gt;
+ *  &lt;input type="file" onchange="showImageGroup(this.files[0], this.getAttribute('data').split(',')))" data="peerIdA,peerIdB"&gt;
+ *  &lt;input type="file" onchange="showImageAll(this.files[0])" data=""&gt;
  *  &lt;image id="target-1" src=""&gt;
  *  &lt;image id="target-2" src=""&gt;
  *  &lt;image id="target-3" src=""&gt;
