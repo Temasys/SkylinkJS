@@ -1902,6 +1902,7 @@ Skylink.prototype._checkIfStreamMismatch = function () {
     return;
   }
 
+  // TODO: So bad until we have proper fixes on protocol end :(
   if (self._streams.screenshare && self._streams.screenshare.stream) {
     streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
   } else if (self._streams.userMedia && self._streams.userMedia.stream) {
@@ -1923,16 +1924,14 @@ Skylink.prototype._checkIfStreamMismatch = function () {
 
     for (var peerId in self._peerConnections) {
       if (self._peerConnections.hasOwnProperty(peerId) && self._peerConnections[peerId] &&
-        self._peerConnections[peerId].signalingState === self.PEER_CONNECTION_STATE.STABLE &&
-        !!self._peerConnections[peerId].localDescription && !!self._peerConnections[peerId].localDescription.sdp &&
-        !!self._peerConnections[peerId].remoteDescription && !!self._peerConnections[peerId].remoteDescription.sdp) {
+        self._peerConnections[peerId].signalingState === self.PEER_CONNECTION_STATE.STABLE) {
         var streams = self._peerConnections[peerId].getLocalStreams();
         var currentStreamId = streams.length > 0 ? (streams[0].id || streams[0].label) : null;
 
         if (currentStreamId !== streamId &&
           self._streamsMistmatch[self._user.sid] !== (currentStreamId + '::' + streamId)) {
           self._streamsMistmatch[self._user.sid] = currentStreamId + '::' + streamId;
-          self._trigger('streamMismatch', peerId, this.getPeerInfo(peerId),
+          self._trigger('streamMismatch', peerId, self.getPeerInfo(peerId),
             true, !!self._streams.screenshare, currentStreamId, streamId);
         }
       }

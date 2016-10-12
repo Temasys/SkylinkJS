@@ -559,9 +559,14 @@ Skylink.prototype._streamEventHandler = function(message) {
       if (this._peerConnections[targetMid] &&
         this._peerConnections[targetMid].signalingState === this.PEER_CONNECTION_STATE.STABLE) {
         var streams = this._peerConnections[targetMid].getRemoteStreams();
-        var currentStreamId = streams[0].id || streams[0].label;
+        var currentStreamId = streams.length > 0 ? streams[0].id || streams[0].label : null;
 
-        if (streams.length > 0 && message.streamId !== currentStreamId &&
+        log.info([targetMid, null, message.type, 'Peer\'s stream status check ->'], {
+          actualId: message.streamId,
+          currentId: currentStreamId
+        });
+
+        if (message.streamId !== currentStreamId &&
           this._streamsMistmatch[targetMid] !== (currentStreamId + '::' + message.streamId)) {
           this._streamsMistmatch[targetMid] = currentStreamId + '::' + message.streamId;
           this._trigger('streamMismatch', targetMid, this.getPeerInfo(targetMid),
