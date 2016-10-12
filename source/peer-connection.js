@@ -74,16 +74,6 @@ Skylink.prototype.SERVER_PEER_TYPE = {
 };
 
 /**
- * Stores the restart initiated timestamp to throttle the <code>refreshConnection</code> functionality.
- * @attribute _lastRestart
- * @type Object
- * @private
- * @for Skylink
- * @since 0.5.9
- */
-Skylink.prototype._lastRestart = null;
-
-/**
  * Stores the global number of Peer connection retries that would increase the wait-for-response timeout
  *   for the Peer connection health timer.
  * @attribute _retryCount
@@ -245,7 +235,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
 
   self._throttle(function () {
     self._refreshPeerConnection(listOfPeers, true, callback);
-  },5000)();
+  }, 'restartConnection', 5000);
 
 };
 
@@ -304,7 +294,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle,
     if (shouldThrottle) {
       var now = Date.now() || function() { return +new Date(); };
 
-      if (now - self.lastRestart < 3000) {
+      if (now - self._timestamp.lastRestart < 3000) {
         error = 'Last restart was so tight. Aborting.';
         log.warn([peerId, null, null, error]);
         listOfPeerRestartErrors[peerId] = new Error(error);
@@ -866,8 +856,6 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
     if (isSelfInitiatedRestart){
       log.log([peerId, null, null, 'Sending restart message to signaling server']);
 
-      var lastRestart = Date.now() || function() { return +new Date(); };
-
       self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.RESTART,
         mid: self._user.sid,
@@ -878,7 +866,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         userInfo: self._getUserInfo(),
         target: peerId,
         isConnectionRestart: !!isConnectionRestart,
-        lastRestart: lastRestart,
+        lastRestart: (new Date()).getTime(),
         // This will not be used based off the logic in _restartHandler
         weight: self._peerPriorityWeight,
         receiveOnly: self._peerConnections[peerId] && self._peerConnections[peerId].receiveOnly,
@@ -1226,7 +1214,6 @@ Skylink.prototype._restartMCUConnection = function(callback) {
   var peerId; // j shint is whinning
   var receiveOnly = false;
   // for MCU case, these dont matter at all
-  var lastRestart = Date.now() || function() { return +new Date(); };
   var weight = (new Date()).valueOf();
 
   self._trigger('serverPeerRestart', 'MCU', self.SERVER_PEER_TYPE.MCU);
@@ -1260,7 +1247,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         userInfo: self._getUserInfo(),
         target: peerId, //'MCU',
         isConnectionRestart: false,
-        lastRestart: lastRestart,
+        lastRestart: (new Date()).getTime(),
         weight: self._peerPriorityWeight,
         receiveOnly: receiveOnly,
         enableIceTrickle: self._enableIceTrickle,

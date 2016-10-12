@@ -739,9 +739,10 @@ Skylink.prototype._onceEvents = {};
  * @since 0.5.8
  */
 Skylink.prototype._timestamp = {
-  now: null,
-  func: null,
-  screen: false
+  socketMessage: null,
+  shareScreen: null,
+  restartConnection: null,
+  lastRestart: null
 };
 
 /**
@@ -1001,18 +1002,12 @@ Skylink.prototype._wait = function(callback, condition, intervalTime, fireAlways
  * @for Skylink
  * @since 0.5.8
  */
-Skylink.prototype._throttle = function(func, wait){
+Skylink.prototype._throttle = function(func, prop, wait){
   var self = this;
-  return function () {
-      if (!self._timestamp.func){
-        //First time run, need to force timestamp to skip condition
-        self._timestamp.func = (new Date ()).getTime() - wait;
-      }
-      var now = (new Date()).getTime();
-      if (now - self._timestamp.func < wait) {
-          return;
-      }
-      func.apply(self, arguments);
-      self._timestamp.func = now;
-  };
+  var now = (new Date()).getTime();
+
+  if (!(self._timestamp[prop] && ((now - self._timestamp[prop]) < wait))) {
+    func();
+    self._timestamp[prop] = now;
+  }
 };

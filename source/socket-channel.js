@@ -242,13 +242,13 @@ Skylink.prototype._sendChannelMessage = function(message) {
     log.debug([null, 'Socket', null, 'Starting queue timeout']);
 
     self._socketMessageTimeout = setTimeout(function () {
-      if (((new Date ()).getTime() - self._timestamp.now) <= interval) {
+      if (((new Date ()).getTime() - self._timestamp.socketMessage) <= interval) {
         log.debug([null, 'Socket', null, 'Restarting queue timeout']);
         setQueueFn();
         return;
       }
       startSendingQueuedMessageFn();
-    }, interval - ((new Date ()).getTime() - self._timestamp.now));
+    }, interval - ((new Date ()).getTime() - self._timestamp.socketMessage));
   };
 
   var triggerEventFn = function (eventMessage) {
@@ -328,7 +328,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
       log.debug([null, 'Socket', null, 'Sending queued messages (max: 16 per group) ->'], groupMessage);
 
       self._socket.send(JSON.stringify(groupMessage));
-      self._timestamp.now = (new Date()).getTime();
+      self._timestamp.socketMessage = (new Date()).getTime();
 
       for (var j = 0; j < groupMessageList.length; j++) {
         setStampFn(groupMessageList[j]);
@@ -349,7 +349,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
   };
 
   if (self._groupMessageList.indexOf(message.type) > -1) {
-    if (!(self._timestamp.now && ((new Date ()).getTime() - self._timestamp.now) <= interval)) {
+    if (!(self._timestamp.socketMessage && ((new Date ()).getTime() - self._timestamp.socketMessage) <= interval)) {
       if (!checkStampFn(message)) {
         log.warn([null, 'Socket', null, 'Dropping of outdated status message ->'], message);
         return;
@@ -361,7 +361,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
       setStampFn(message);
       triggerEventFn(message);
 
-      self._timestamp.now = (new Date()).getTime();
+      self._timestamp.socketMessage = (new Date()).getTime();
 
     } else {
       log.warn([null, 'Socket', null, 'Queueing socket message to prevent message drop ->'], message);

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Oct 12 2016 22:02:47 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Oct 12 2016 22:21:54 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10461,7 +10461,7 @@ if ( navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Wed Oct 12 2016 22:02:47 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Oct 12 2016 22:21:54 GMT+0800 (SGT) */
 
 (function() {
 
@@ -14021,16 +14021,6 @@ Skylink.prototype.SERVER_PEER_TYPE = {
 };
 
 /**
- * Stores the restart initiated timestamp to throttle the <code>refreshConnection</code> functionality.
- * @attribute _lastRestart
- * @type Object
- * @private
- * @for Skylink
- * @since 0.5.9
- */
-Skylink.prototype._lastRestart = null;
-
-/**
  * Stores the global number of Peer connection retries that would increase the wait-for-response timeout
  *   for the Peer connection health timer.
  * @attribute _retryCount
@@ -14192,7 +14182,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
 
   self._throttle(function () {
     self._refreshPeerConnection(listOfPeers, true, callback);
-  },5000)();
+  }, 'restartConnection', 5000);
 
 };
 
@@ -14251,7 +14241,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle,
     if (shouldThrottle) {
       var now = Date.now() || function() { return +new Date(); };
 
-      if (now - self.lastRestart < 3000) {
+      if (now - self._timestamp.lastRestart < 3000) {
         error = 'Last restart was so tight. Aborting.';
         log.warn([peerId, null, null, error]);
         listOfPeerRestartErrors[peerId] = new Error(error);
@@ -14813,8 +14803,6 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
     if (isSelfInitiatedRestart){
       log.log([peerId, null, null, 'Sending restart message to signaling server']);
 
-      var lastRestart = Date.now() || function() { return +new Date(); };
-
       self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.RESTART,
         mid: self._user.sid,
@@ -14825,7 +14813,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         userInfo: self._getUserInfo(),
         target: peerId,
         isConnectionRestart: !!isConnectionRestart,
-        lastRestart: lastRestart,
+        lastRestart: (new Date()).getTime(),
         // This will not be used based off the logic in _restartHandler
         weight: self._peerPriorityWeight,
         receiveOnly: self._peerConnections[peerId] && self._peerConnections[peerId].receiveOnly,
@@ -15173,7 +15161,6 @@ Skylink.prototype._restartMCUConnection = function(callback) {
   var peerId; // j shint is whinning
   var receiveOnly = false;
   // for MCU case, these dont matter at all
-  var lastRestart = Date.now() || function() { return +new Date(); };
   var weight = (new Date()).valueOf();
 
   self._trigger('serverPeerRestart', 'MCU', self.SERVER_PEER_TYPE.MCU);
@@ -15207,7 +15194,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         userInfo: self._getUserInfo(),
         target: peerId, //'MCU',
         isConnectionRestart: false,
-        lastRestart: lastRestart,
+        lastRestart: (new Date()).getTime(),
         weight: self._peerPriorityWeight,
         receiveOnly: receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
@@ -19089,9 +19076,10 @@ Skylink.prototype._onceEvents = {};
  * @since 0.5.8
  */
 Skylink.prototype._timestamp = {
-  now: null,
-  func: null,
-  screen: false
+  socketMessage: null,
+  shareScreen: null,
+  restartConnection: null,
+  lastRestart: null
 };
 
 /**
@@ -19351,20 +19339,14 @@ Skylink.prototype._wait = function(callback, condition, intervalTime, fireAlways
  * @for Skylink
  * @since 0.5.8
  */
-Skylink.prototype._throttle = function(func, wait){
+Skylink.prototype._throttle = function(func, prop, wait){
   var self = this;
-  return function () {
-      if (!self._timestamp.func){
-        //First time run, need to force timestamp to skip condition
-        self._timestamp.func = (new Date ()).getTime() - wait;
-      }
-      var now = (new Date()).getTime();
-      if (now - self._timestamp.func < wait) {
-          return;
-      }
-      func.apply(self, arguments);
-      self._timestamp.func = now;
-  };
+  var now = (new Date()).getTime();
+
+  if (!(self._timestamp[prop] && ((now - self._timestamp[prop]) < wait))) {
+    func();
+    self._timestamp[prop] = now;
+  }
 };
 Skylink.prototype.SOCKET_ERROR = {
   CONNECTION_FAILED: 0,
@@ -19584,13 +19566,13 @@ Skylink.prototype._sendChannelMessage = function(message) {
     log.debug([null, 'Socket', null, 'Starting queue timeout']);
 
     self._socketMessageTimeout = setTimeout(function () {
-      if (((new Date ()).getTime() - self._timestamp.now) <= interval) {
+      if (((new Date ()).getTime() - self._timestamp.socketMessage) <= interval) {
         log.debug([null, 'Socket', null, 'Restarting queue timeout']);
         setQueueFn();
         return;
       }
       startSendingQueuedMessageFn();
-    }, interval - ((new Date ()).getTime() - self._timestamp.now));
+    }, interval - ((new Date ()).getTime() - self._timestamp.socketMessage));
   };
 
   var triggerEventFn = function (eventMessage) {
@@ -19670,7 +19652,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
       log.debug([null, 'Socket', null, 'Sending queued messages (max: 16 per group) ->'], groupMessage);
 
       self._socket.send(JSON.stringify(groupMessage));
-      self._timestamp.now = (new Date()).getTime();
+      self._timestamp.socketMessage = (new Date()).getTime();
 
       for (var j = 0; j < groupMessageList.length; j++) {
         setStampFn(groupMessageList[j]);
@@ -19691,7 +19673,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
   };
 
   if (self._groupMessageList.indexOf(message.type) > -1) {
-    if (!(self._timestamp.now && ((new Date ()).getTime() - self._timestamp.now) <= interval)) {
+    if (!(self._timestamp.socketMessage && ((new Date ()).getTime() - self._timestamp.socketMessage) <= interval)) {
       if (!checkStampFn(message)) {
         log.warn([null, 'Socket', null, 'Dropping of outdated status message ->'], message);
         return;
@@ -19703,7 +19685,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
       setStampFn(message);
       triggerEventFn(message);
 
-      self._timestamp.now = (new Date()).getTime();
+      self._timestamp.socketMessage = (new Date()).getTime();
 
     } else {
       log.warn([null, 'Socket', null, 'Queueing socket message to prevent message drop ->'], message);
@@ -20743,7 +20725,7 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  self._lastRestart = message.lastRestart || Date.now() || function() { return +new Date(); };
+  self._timestamp.lastRestart = message.lastRestart || (new Date()).getTime();
 
   if (!self._peerConnections[targetMid]) {
     log.error([targetMid, null, null, 'Peer does not have an existing ' +
@@ -22286,6 +22268,10 @@ Skylink.prototype.disableVideo = function() {
 };
 
 /**
+ * <blockquote class="info">
+ *   For a better user experience, the functionality is throttled when invoked many times in less
+ *   than 10 seconds interval.
+ * </blockquote>
  * Function that retrieves screensharing Stream.
  * @method shareScreen
  * @param {JSON} [enableAudio=false] The flag if audio tracks should be retrieved.
@@ -22333,7 +22319,7 @@ Skylink.prototype.disableVideo = function() {
  *   <code>mediaAccessSuccess</code> event</a> triggers parameter payload <code>isScreensharing</code>
  *   value as <code>true</code> and <code>isAudioFallback</code> value as <code>false</code>.</li></ol></li><li>Else: <ol>
  *   <li>If there is any previous <code>shareScreen()</code> Stream: <ol>
- *   <li>Invokes <a href="#method_stopScreen"><code>stopScreen()</code> method</a>.</li></ol></li> 
+ *   <li>Invokes <a href="#method_stopScreen"><code>stopScreen()</code> method</a>.</li></ol></li>
  *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> triggers parameter payload
  *   <code>state</code> as <code>FALLBACKED</code>, <code>isScreensharing</code> value as <code>true</code> and
  *   <code>isAudioFallback</code> value as <code>false</code>.</li>
@@ -22379,24 +22365,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     enableAudio = true;
   }
 
-  var throttleFn = function (fn, wait) {
-    if (!self._timestamp.func){
-      //First time run, need to force timestamp to skip condition
-      self._timestamp.func = self._timestamp.now - wait;
-    }
-    var now = Date.now();
-
-    if (!self._timestamp.screen) {
-      if (now - self._timestamp.func < wait) {
-        return;
-      }
-    }
-    fn();
-    self._timestamp.screen = false;
-    self._timestamp.func = now;
-  };
-
-  throttleFn(function () {
+  self._throttle(function () {
     var settings = {
       settings: {
         audio: enableAudio,
@@ -22497,8 +22466,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
     }
-
-  }, 10000);
+  }, 'shareScreen', 10000);
 };
 
 /**
