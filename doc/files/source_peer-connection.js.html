@@ -247,13 +247,13 @@ Skylink.prototype._peerConnections = {};
  *   &lt;li&gt;&lt;a href=&quot;#event_peerRestart&quot;&gt;&lt;code&gt;peerRestart&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
  *   &lt;code&gt;isSelfInitiateRestart&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt; for all targeted Peer connections.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
  *   &lt;li&gt;Else: &lt;ol&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
- *   &lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;li&gt;If Peer&#x27;s Stream received does not match the actual Stream
+ *   &lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;li&gt;If Peer&#x27;s Stream received does not match the actual Stream
  *   sending from Peer and User is in Room: &lt;ol&gt;
  *   &lt;li&gt;&lt;a href=&quot;#event_streamMismatch&quot;&gt;&lt;code&gt;streamMismatch&lt;/code&gt; event&lt;/a&gt; triggers &lt;small&gt;
  *   Note that this event may trigger multiple times depending on how many consecutive &lt;code&gt;refreshConnection&lt;/code&gt;
  *   method invokes have been made. When being triggered with this event, the recommended solution is to invoke
  *   &lt;code&gt;refreshConnection([peerId])&lt;/code&gt; method again when parameter payload &lt;code&gt;isSelf&lt;/code&gt; value is
- *   &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
+ *   &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @example
  *   // Example 1: Refreshing a Peer connection
  *   function refreshFrozenVideoStream (peerId) {

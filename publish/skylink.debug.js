@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Oct 12 2016 19:06:34 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Oct 12 2016 19:25:07 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3640,13 +3640,13 @@ Skylink.prototype._peerConnections = {};
  *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter payload
  *   <code>isSelfInitiateRestart</code> value as <code>true</code> for all targeted Peer connections.</li></ol></li>
  *   <li>Else: <ol><li><b>ABORT</b> and return error.</li></ol></li>
- *   </ol></li></ol></li></ol></li></ol></li><li>If Peer's Stream received does not match the actual Stream
+ *   </ol></li></ol></li><li>If Peer's Stream received does not match the actual Stream
  *   sending from Peer and User is in Room: <ol>
  *   <li><a href="#event_streamMismatch"><code>streamMismatch</code> event</a> triggers <small>
  *   Note that this event may trigger multiple times depending on how many consecutive <code>refreshConnection</code>
  *   method invokes have been made. When being triggered with this event, the recommended solution is to invoke
  *   <code>refreshConnection([peerId])</code> method again when parameter payload <code>isSelf</code> value is
- *   <code>false</code>.</small></li></ol></li></ol>
+ *   <code>false</code>.</small></li></ol></li></ol></ol></li></ol></li></ol>
  * @example
  *   // Example 1: Refreshing a Peer connection
  *   function refreshFrozenVideoStream (peerId) {
@@ -10019,7 +10019,7 @@ Skylink.prototype._streamEventHandler = function(message) {
         log.log([targetMid, null, message.type, 'Peer connection not found']);
       }
   	} else if (message.status === 'check') {
-      if (!message.streamId) {
+      if (!message.streamId || this._hasMCU) {
         return;
       }
 
@@ -12625,6 +12625,10 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
 Skylink.prototype._checkIfStreamMismatch = function () {
   var self = this;
   var streamId = null;
+
+  if (self._hasMCU) {
+    return;
+  }
 
   if (self._streams.screenshare && self._streams.screenshare.stream) {
     streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;

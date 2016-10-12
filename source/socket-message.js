@@ -551,7 +551,7 @@ Skylink.prototype._streamEventHandler = function(message) {
         log.log([targetMid, null, message.type, 'Peer connection not found']);
       }
   	} else if (message.status === 'check') {
-      if (!message.streamId) {
+      if (!message.streamId || this._hasMCU) {
         return;
       }
 

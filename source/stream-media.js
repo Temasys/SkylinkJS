@@ -1898,6 +1898,10 @@ Skylink.prototype._checkIfStreamMismatch = function () {
   var self = this;
   var streamId = null;
 
+  if (self._hasMCU) {
+    return;
+  }
+
   if (self._streams.screenshare && self._streams.screenshare.stream) {
     streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
   } else if (self._streams.userMedia && self._streams.userMedia.stream) {

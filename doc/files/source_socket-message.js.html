@@ -296,16 +296,16 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
       rid: this._room.id,
       type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
     });
+  } else {
+    this._trigger(&#x27;incomingMessage&#x27;, {
+      content: message,
+      isPrivate: isPrivate,
+      targetPeerId: targetPeerId || null,
+      listOfPeers: listOfPeers,
+      isDataChannel: false,
+      senderPeerId: this._user.sid
+    }, this._user.sid, this.getPeerInfo(), true);
   }
-
-  this._trigger(&#x27;incomingMessage&#x27;, {
-    content: message,
-    isPrivate: isPrivate,
-    targetPeerId: targetPeerId || null,
-    listOfPeers: listOfPeers,
-    isDataChannel: false,
-    senderPeerId: this._user.sid
-  }, this._user.sid, this.getPeerInfo(), true);
 };
 
 /**
@@ -642,7 +642,7 @@ Skylink.prototype._streamEventHandler = function(message) {
         log.log([targetMid, null, message.type, &#x27;Peer connection not found&#x27;]);
       }
   	} else if (message.status === &#x27;check&#x27;) {
-      if (!message.streamId) {
+      if (!message.streamId || this._hasMCU) {
         return;
       }
 
