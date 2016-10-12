@@ -306,7 +306,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, callback) {
     log.log([peerId, 'PeerConnection', null, 'Restarting peer connection']);
 
     // do a hard reset on variable object
-    self._restartPeerConnection(peerId, true, false, peerCallback, true);
+    self._restartPeerConnection(peerId, peerCallback);
   };
 
   if(!self._hasMCU) {
@@ -815,7 +815,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @for Skylink
  * @since 0.5.8
  */
-Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, isConnectionRestart, callback, explicit) {
+Skylink.prototype._restartPeerConnection = function (peerId, callback) {
   var self = this;
 
   if (!self._peerConnections[peerId]) {
@@ -854,37 +854,30 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
       self._addLocalMediaStreams(peerId);
     }
 
-    if (isSelfInitiatedRestart){
-      log.log([peerId, null, null, 'Sending restart message to signaling server']);
+    log.log([peerId, null, null, 'Sending restart message to signaling server']);
 
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.RESTART,
-        mid: self._user.sid,
-        rid: self._room.id,
-        agent: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
-        os: window.navigator.platform,
-        userInfo: self._getUserInfo(),
-        target: peerId,
-        weight: self._peerPriorityWeight,
-        receiveOnly: self._peerConnections[peerId] && self._peerConnections[peerId].receiveOnly,
-        enableIceTrickle: self._enableIceTrickle,
-        enableDataChannel: self._enableDataChannel,
-        sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
-        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
-      });
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.RESTART,
+      mid: self._user.sid,
+      rid: self._room.id,
+      agent: window.webrtcDetectedBrowser,
+      version: window.webrtcDetectedVersion,
+      os: window.navigator.platform,
+      userInfo: self._getUserInfo(),
+      target: peerId,
+      weight: self._peerPriorityWeight,
+      receiveOnly: self._peerConnections[peerId] && self._peerConnections[peerId].receiveOnly,
+      enableIceTrickle: self._enableIceTrickle,
+      enableDataChannel: self._enableDataChannel,
+      sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+    });
 
-      self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), false);
+    self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
 
-      if (typeof callback === 'function') {
-        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
-        callback(null, null);
-      }
-    } else {
-      if (typeof callback === 'function') {
-        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback (receiving peer)']);
-        callback(null, null);
-      }
+    if (typeof callback === 'function') {
+      log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
+      callback(null, null);
     }
 
     // following the previous logic to do checker always
@@ -1122,7 +1115,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 
         // refresh when failed. ignore for MCU case since restart is handled by MCU in this case
         if (!self._hasMCU) {
-          self._restartPeerConnection(targetMid, true, true, null, false);
+          self._restartPeerConnection(targetMid);
         }
       }
 
