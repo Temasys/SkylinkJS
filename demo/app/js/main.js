@@ -581,7 +581,7 @@ Demo.Skylink.on('channelError', function (error) {
 //---------------------------------------------------
 Demo.Skylink.on('streamMismatch', function (peerId, peerInfo, isSelf, isScreensharing, currentStreamId, newStreamId) {
   if (isSelf) return;
-  SkylinkDemo.refreshConnection(peerId);
+  Demo.Skylink.refreshConnection(peerId);
 });
 
 Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats, error) {
