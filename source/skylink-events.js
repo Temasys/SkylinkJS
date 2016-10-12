@@ -739,7 +739,8 @@ Skylink.prototype._onceEvents = {};
  * @since 0.5.8
  */
 Skylink.prototype._timestamp = {
-  now: Date.now() || function() { return +new Date(); },
+  now: null,
+  func: null,
   screen: false
 };
 
@@ -1005,9 +1006,9 @@ Skylink.prototype._throttle = function(func, wait){
   return function () {
       if (!self._timestamp.func){
         //First time run, need to force timestamp to skip condition
-        self._timestamp.func = self._timestamp.now - wait;
+        self._timestamp.func = (new Date ()).getTime() - wait;
       }
-      var now = Date.now();
+      var now = (new Date()).getTime();
       if (now - self._timestamp.func < wait) {
           return;
       }

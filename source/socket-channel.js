@@ -238,6 +238,19 @@ Skylink.prototype._sendChannelMessage = function(message) {
     }
   };
 
+  var setQueueFn = function () {
+    log.debug([null, 'Socket', null, 'Starting queue timeout']);
+
+    self._socketMessageTimeout = setTimeout(function () {
+      if (((new Date ()).getTime() - self._timestamp.now) <= interval) {
+        log.debug([null, 'Socket', null, 'Restarting queue timeout']);
+        setQueueFn();
+        return;
+      }
+      startSendingQueuedMessageFn();
+    }, interval - ((new Date ()).getTime() - self._timestamp.now));
+  };
+
   var triggerEventFn = function (eventMessage) {
     if (eventMessage.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE) {
       self._trigger('incomingMessage', {
@@ -256,10 +269,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
   };
 
   var sendGroupMessageFn = function (groupMessageList) {
-    if (self._socketMessageTimeout) {
-      clearTimeout(self._socketMessageTimeout);
-      self._socketMessageTimeout = null;
-    }
+    self._socketMessageTimeout = null;
 
     if (!self._channelOpen || !(self._user && self._user.sid) || !self._socket) {
       log.warn([null, 'Socket', null, 'Dropping of group messages as Socket connection is not opened or is at ' +
@@ -317,7 +327,8 @@ Skylink.prototype._sendChannelMessage = function(message) {
 
       log.debug([null, 'Socket', null, 'Sending queued messages (max: 16 per group) ->'], groupMessage);
 
-      self._socket.send(groupMessage);
+      self._socket.send(JSON.stringify(groupMessage));
+      self._timestamp.now = (new Date()).getTime();
 
       for (var j = 0; j < groupMessageList.length; j++) {
         setStampFn(groupMessageList[j]);
@@ -332,38 +343,38 @@ Skylink.prototype._sendChannelMessage = function(message) {
         sendGroupMessageFn(self._socketMessageQueue.splice(0, self._socketMessageQueue.length));
       } else {
         sendGroupMessageFn(self._socketMessageQueue.splice(0, throughput));
-        self._socketMessageTimeout = setTimeout(startSendingQueuedMessageFn, interval);
+        setQueueFn();
       }
-      self._timestamp.now = Date.now() || function() { return +new Date(); };
     }
   };
 
-  //Delay when messages are sent too rapidly
-  if ((Date.now() || function() { return +new Date(); }) - self._timestamp.now < interval &&
-    self._groupMessageList.indexOf(message.type) > -1) {
-    log.warn([null, 'Socket', null, 'Queueing socket message to prevent message drop ->'], message);
+  if (self._groupMessageList.indexOf(message.type) > -1) {
+    if (!(self._timestamp.now && ((new Date ()).getTime() - self._timestamp.now) <= interval)) {
+      if (!checkStampFn(message)) {
+        log.warn([null, 'Socket', null, 'Dropping of outdated status message ->'], message);
+        return;
+      }
+      if (self._socketMessageTimeout) {
+        clearTimeout(self._socketMessageTimeout);
+      }
+      self._socket.send(JSON.stringify(message));
+      setStampFn(message);
+      triggerEventFn(message);
 
-    self._socketMessageQueue.push(message);
+      self._timestamp.now = (new Date()).getTime();
 
-    if (!self._socketMessageTimeout){
-      self._socketMessageTimeout = setTimeout(startSendingQueuedMessageFn,
-        interval - ((Date.now() || function() { return +new Date(); }) - self._timestamp.now));
+    } else {
+      log.warn([null, 'Socket', null, 'Queueing socket message to prevent message drop ->'], message);
+
+      self._socketMessageQueue.push(message);
+
+      if (!self._socketMessageTimeout) {
+        setQueueFn();
+      }
     }
-    return;
+  } else {
+    self._socket.send(JSON.stringify(message));
   }
-
-  log.debug([null, 'Socket', null, 'Sending socket message ->'], message);
-
-  //Normal case when messages are sent not so rapidly
-  if (!checkStampFn(message)) {
-    log.warn([null, 'Socket', null, 'Dropping of outdated status message ->'], message);
-    return;
-  }
-
-  self._socket.send(JSON.stringify(message));
-  self._timestamp.now = Date.now() || function() { return +new Date(); };
-  setStampFn(message);
-  triggerEventFn(message);
 };
 
 /**
