@@ -205,9 +205,6 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
   var self = this;
 
   var listOfPeers = Object.keys(self._peerConnections);
-  var listOfPeerRestarts = [];
-  var error = '';
-  var listOfPeerRestartErrors = {};
 
   if(Array.isArray(targetPeerId)) {
     listOfPeers = targetPeerId;
@@ -218,23 +215,38 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
     callback = targetPeerId;
   }
 
-  if (listOfPeers.length === 0) {
-    error = 'There is currently no peer connections to restart';
-    log.warn([null, 'PeerConnection', null, error]);
-
-    listOfPeerRestartErrors.self = new Error(error);
+  var emitErrorForPeersFn = function (error) {
+    log.error(error);
 
     if (typeof callback === 'function') {
+      var listOfPeerErrors = {};
+
+      if (listOfPeers.length === 0) {
+        listOfPeerErrors.self = new Error(error);
+      } else {
+        for (var i = 0; i < listOfPeers.length; i++) {
+          listOfPeerErrors[listOfPeers[i]] = new Error(error);
+        }
+      }
+
       callback({
         refreshErrors: listOfPeerRestartErrors,
         listOfPeers: listOfPeers
       }, null);
     }
+  };
+
+  if (listOfPeers.length === 0) {
+    emitErrorForPeersFn('There is currently no peer connections to restart');
     return;
   }
 
-  self._throttle(function () {
-    self._refreshPeerConnection(listOfPeers, true, callback);
+  self._throttle(function (runFn) {
+    if (!runFn) {
+      emitErrorForPeersFn('Unable to run as throttle interval has not reached (3s).');
+    } else {
+      self._refreshPeerConnection(listOfPeers, true, callback);
+    }
   }, 'restartConnection', 5000);
 
 };

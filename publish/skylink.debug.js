@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Oct 12 2016 22:32:24 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Oct 12 2016 22:42:00 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3689,9 +3689,6 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
   var self = this;
 
   var listOfPeers = Object.keys(self._peerConnections);
-  var listOfPeerRestarts = [];
-  var error = '';
-  var listOfPeerRestartErrors = {};
 
   if(Array.isArray(targetPeerId)) {
     listOfPeers = targetPeerId;
@@ -3702,23 +3699,38 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
     callback = targetPeerId;
   }
 
-  if (listOfPeers.length === 0) {
-    error = 'There is currently no peer connections to restart';
-    log.warn([null, 'PeerConnection', null, error]);
-
-    listOfPeerRestartErrors.self = new Error(error);
+  var emitErrorForPeersFn = function (error) {
+    log.error(error);
 
     if (typeof callback === 'function') {
+      var listOfPeerErrors = {};
+
+      if (listOfPeers.length === 0) {
+        listOfPeerErrors.self = new Error(error);
+      } else {
+        for (var i = 0; i < listOfPeers.length; i++) {
+          listOfPeerErrors[listOfPeers[i]] = new Error(error);
+        }
+      }
+
       callback({
         refreshErrors: listOfPeerRestartErrors,
         listOfPeers: listOfPeers
       }, null);
     }
+  };
+
+  if (listOfPeers.length === 0) {
+    emitErrorForPeersFn('There is currently no peer connections to restart');
     return;
   }
 
-  self._throttle(function () {
-    self._refreshPeerConnection(listOfPeers, true, callback);
+  self._throttle(function (runFn) {
+    if (!runFn) {
+      emitErrorForPeersFn('Unable to run as throttle interval has not reached (3s).');
+    } else {
+      self._refreshPeerConnection(listOfPeers, true, callback);
+    }
   }, 'restartConnection', 5000);
 
 };
@@ -8880,8 +8892,10 @@ Skylink.prototype._throttle = function(func, prop, wait){
   var now = (new Date()).getTime();
 
   if (!(self._timestamp[prop] && ((now - self._timestamp[prop]) < wait))) {
-    func();
+    func(true);
     self._timestamp[prop] = now;
+  } else {
+    func(false);
   }
 };
 Skylink.prototype.SOCKET_ERROR = {
@@ -11901,7 +11915,17 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     enableAudio = true;
   }
 
-  self._throttle(function () {
+  self._throttle(function (runFn) {
+    if (!runFn) {
+      var throttleLimitError = 'Unable to run as throttle interval has not reached (10s).';
+      log.error(throttleLimitError);
+
+      if (typeof callback === 'function') {
+        callback(new Error(throttleLimitError), null);
+      }
+      return;
+    }
+
     var settings = {
       settings: {
         audio: enableAudio,

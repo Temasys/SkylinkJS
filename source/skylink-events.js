@@ -1007,7 +1007,9 @@ Skylink.prototype._throttle = function(func, prop, wait){
   var now = (new Date()).getTime();
 
   if (!(self._timestamp[prop] && ((now - self._timestamp[prop]) < wait))) {
-    func();
+    func(true);
     self._timestamp[prop] = now;
+  } else {
+    func(false);
   }
 };

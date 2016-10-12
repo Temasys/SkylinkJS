@@ -1175,7 +1175,17 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     enableAudio = true;
   }
 
-  self._throttle(function () {
+  self._throttle(function (runFn) {
+    if (!runFn) {
+      var throttleLimitError = 'Unable to run as throttle interval has not reached (10s).';
+      log.error(throttleLimitError);
+
+      if (typeof callback === 'function') {
+        callback(new Error(throttleLimitError), null);
+      }
+      return;
+    }
+
     var settings = {
       settings: {
         audio: enableAudio,
