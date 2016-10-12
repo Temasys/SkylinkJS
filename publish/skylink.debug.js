@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Oct 12 2016 23:05:20 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Oct 12 2016 23:10:44 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3750,7 +3750,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, callback) {
 
   // To fix jshint dont put functions within a loop
   var refreshSinglePeerCallback = function (peerId) {
-    return function (error, success) {
+    return function (error) {
       if (listOfPeerRestarts.indexOf(peerId) === -1) {
         if (error) {
           log.error([peerId, 'RTCPeerConnection', null, 'Failed restarting for peer'], error);
@@ -4326,7 +4326,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, callback) {
 
     if (typeof callback === 'function') {
       log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart failure callback']);
-      callback(null, notSupportedError);
+      callback(notSupportedError);
     }
     return;
   }
@@ -4361,7 +4361,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, callback) {
 
     if (typeof callback === 'function') {
       log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
-      callback(null, null);
+      callback(null);
     }
 
     // following the previous logic to do checker always
@@ -4393,7 +4393,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, callback) {
         });
         if (typeof callback === 'function') {
           log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart failure callback']);
-          callback(null, new Error(noLocalDescriptionError));
+          callback(new Error(noLocalDescriptionError));
         }
       }
     // It could have connection state closed
@@ -4402,7 +4402,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, callback) {
       log.warn([peerId, 'RTCPeerConnection', null, unableToRestartError]);
       if (typeof callback === 'function') {
         log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart failure callback']);
-        callback(null, new Error(unableToRestartError));
+        callback(new Error(unableToRestartError));
       }
     }
   }
