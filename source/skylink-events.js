@@ -363,7 +363,7 @@ Skylink.prototype._EVENTS = {
    *   <small>Defined as User's Peer ID when <code>isSelf</code> payload value is <code>false</code>.</small>
    *   <small>Defined as <code>null</code> when provided <code>targetPeerId</code> in
    *   <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a> or
-   *   <a href="#method_sendMessage"><code>sendMessage()</code> method</a>is not defined.</small>
+   *   <a href="#method_sendMessage"><code>sendMessage()</code> method</a> is not defined.</small>
    * @param {Array} [message.listOfPeers] The list of Peers that the message has been sent to.
    *  <small>Defined only when <code>isSelf</code> payload value is <code>true</code>.</small>
    * @param {Boolean} message.isPrivate The flag if message is targeted or not, basing

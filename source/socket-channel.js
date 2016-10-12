@@ -194,81 +194,145 @@ Skylink.prototype._sendChannelMessage = function(message) {
   var interval = 1000;
   var throughput = 16;
 
-  if (!self._channelOpen) {
+  if (!self._channelOpen || !self._user || !self._socket) {
+    log.warn([null, 'Socket', null, 'Dropping of message as Socket connection is not opened or is at ' +
+      'incorrect step ->'], message);
     return;
   }
 
-  var messageString = JSON.stringify(message);
+  if (self._user.sid && !self._peerMessagesStamps[self._user.sid]) {
+    self._peerMessagesStamps[self._user.sid] = {
+      userData: 0,
+      audioMuted: 0,
+      videoMuted: 0
+    };
+  }
 
-  var sendLater = function(){
-    if (self._socketMessageQueue.length > 0){
-
-      if (self._socketMessageQueue.length<throughput){
-
-        log.debug([(message.target ? message.target : 'server'), null, null,
-          'Sending delayed message' + ((!message.target) ? 's' : '') + ' ->'], {
-            type: self._SIG_MESSAGE_TYPE.GROUP,
-            lists: self._socketMessageQueue.slice(0,self._socketMessageQueue.length),
-            mid: self._user.sid,
-            rid: self._room.id
-          });
-
-        // fix for self._socket undefined errors in firefox
-        if (self._socket) {
-          self._socket.send({
-            type: self._SIG_MESSAGE_TYPE.GROUP,
-            lists: self._socketMessageQueue.splice(0,self._socketMessageQueue.length),
-            mid: self._user.sid,
-            rid: self._room.id
-          });
-        } else {
-          log.error([(message.target ? message.target : 'server'), null, null,
-            'Dropping delayed message' + ((!message.target) ? 's' : '') +
-            ' as socket object is no longer defined ->'], {
-            type: self._SIG_MESSAGE_TYPE.GROUP,
-            lists: self._socketMessageQueue.slice(0,self._socketMessageQueue.length),
-            mid: self._user.sid,
-            rid: self._room.id
-          });
-        }
-
-        clearTimeout(self._socketMessageTimeout);
-        self._socketMessageTimeout = null;
-
+  var checkStampFn = function (statusMessage) {
+    if (statusMessage.type === self._SIG_MESSAGE_TYPE.UPDATE_USER) {
+      if (!self._user.sid) {
+        return false;
       }
-      else{
+      return statusMessage.stamp > self._peerMessagesStamps[self._user.sid].userData;
+    } else if (statusMessage.type === self._SIG_MESSAGE_TYPE.MUTE_VIDEO) {
+      if (!self._user.sid) {
+        return false;
+      }
+      return statusMessage.stamp > self._peerMessagesStamps[self._user.sid].videoMuted;
+    } else if (statusMessage.type === self._SIG_MESSAGE_TYPE.MUTE_AUDIO) {
+      if (!self._user.sid) {
+        return false;
+      }
+      return statusMessage.stamp > self._peerMessagesStamps[self._user.sid].audioMuted;
+    }
+    return true;
+  };
 
-        log.debug([(message.target ? message.target : 'server'), null, null,
-          'Sending delayed message' + ((!message.target) ? 's' : '') + ' ->'], {
-            type: self._SIG_MESSAGE_TYPE.GROUP,
-            lists: self._socketMessageQueue.slice(0,throughput),
-            mid: self._user.sid,
-            rid: self._room.id
-          });
+  var setStampFn = function (statusMessage) {
+    if (statusMessage.type === self._SIG_MESSAGE_TYPE.UPDATE_USER) {
+      self._peerMessagesStamps[self._user.sid].userData = statusMessage.stamp;
+    } else if (statusMessage.type === self._SIG_MESSAGE_TYPE.MUTE_VIDEO) {
+      self._peerMessagesStamps[self._user.sid].videoMuted = statusMessage.stamp;
+    } else if (statusMessage.type === self._SIG_MESSAGE_TYPE.MUTE_AUDIO) {
+      self._peerMessagesStamps[self._user.sid].audioMuted = statusMessage.stamp;
+    }
+  };
 
-        // fix for self._socket undefined errors in firefox
-        if (self._socket) {
-          self._socket.send({
-            type: self._SIG_MESSAGE_TYPE.GROUP,
-            lists: self._socketMessageQueue.splice(0,throughput),
-            mid: self._user.sid,
-            rid: self._room.id
-          });
-        } else {
-          log.error([(message.target ? message.target : 'server'), null, null,
-            'Dropping delayed message' + ((!message.target) ? 's' : '') +
-            ' as socket object is no longer defined ->'], {
-            type: self._SIG_MESSAGE_TYPE.GROUP,
-            lists: self._socketMessageQueue.slice(0,throughput),
-            mid: self._user.sid,
-            rid: self._room.id
-          });
+  var triggerEventFn = function (eventMessage) {
+    if (eventMessage.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE) {
+      self._trigger('incomingMessage', {
+        content: eventMessage.data,
+        isPrivate: false,
+        targetPeerId: null,
+        listOfPeers: Object.keys(self._peerInformations),
+        isDataChannel: false,
+        senderPeerId: self._user.sid
+      }, self._user.sid, self.getPeerInfo(), true);
+
+    } else if (eventMessage.type === self._SIG_MESSAGE_TYPE.ROOM_LOCK) {
+      self._roomLocked = !!eventMessage.lock;
+      self._trigger('roomLock', !!eventMessage.lock, self._user.sid, self.getPeerInfo(), true);
+    }
+  };
+
+  var sendGroupMessageFn = function (groupMessageList) {
+    if (self._socketMessageTimeout) {
+      clearTimeout(self._socketMessageTimeout);
+      self._socketMessageTimeout = null;
+    }
+
+    if (!self._channelOpen || !(self._user && self._user.sid) || !self._socket) {
+      log.warn([null, 'Socket', null, 'Dropping of group messages as Socket connection is not opened or is at ' +
+        'incorrect step ->'], groupMessageList);
+      return;
+    }
+
+    var strGroupMessageList = [];
+    var stamps = {
+      userData: 0,
+      audioMuted: 0,
+      videoMuted: 0
+    };
+
+    for (var k = 0; k < groupMessageList.length; k++) {
+      if (checkStampFn(groupMessageList[k])) {
+        if (groupMessageList[k].type === self._SIG_MESSAGE_TYPE.UPDATE_USER &&
+          groupMessageList[k].stamp > self._peerMessagesStamps[self._user.sid].userData &&
+          groupMessageList[k].stamp > stamps.userData) {
+          stamps.userData = groupMessageList[k].stamp;
+        } else if (groupMessageList[k].type === self._SIG_MESSAGE_TYPE.MUTE_AUDIO &&
+          groupMessageList[k].stamp > self._peerMessagesStamps[self._user.sid].audioMuted &&
+          groupMessageList[k].stamp > stamps.audioMuted) {
+          stamps.audioMuted = groupMessageList[k].stamp;
+        } else if (groupMessageList[k].type === self._SIG_MESSAGE_TYPE.MUTE_VIDEO &&
+          groupMessageList[k].stamp > self._peerMessagesStamps[self._user.sid].videoMuted &&
+          groupMessageList[k].stamp > stamps.videoMuted) {
+          stamps.videoMuted = groupMessageList[k].stamp;
         }
+      }
+    }
 
-        clearTimeout(self._socketMessageTimeout);
-        self._socketMessageTimeout = null;
-        self._socketMessageTimeout = setTimeout(sendLater,interval);
+    for (var i = 0; i < groupMessageList.length; i++) {
+      if ((groupMessageList[i].type === self._SIG_MESSAGE_TYPE.UPDATE_USER &&
+          groupMessageList[i].stamp < stamps.userData) ||
+          (groupMessageList[i].type === self._SIG_MESSAGE_TYPE.MUTE_AUDIO &&
+          groupMessageList[i].stamp < stamps.audioMuted) ||
+          (groupMessageList[i].type === self._SIG_MESSAGE_TYPE.MUTE_VIDEO &&
+          groupMessageList[i].stamp < stamps.videoMuted)) {
+        log.warn([null, 'Socket', null, 'Dropping of outdated status message ->'], clone(groupMessageList[i]));
+        groupMessageList.splice(i, 1);
+        i--;
+        continue;
+      }
+      strGroupMessageList.push(JSON.stringify(groupMessageList[i]));
+    }
 
+    if (strGroupMessageList.length > 0) {
+      var groupMessage = {
+        type: self._SIG_MESSAGE_TYPE.GROUP,
+        lists: strGroupMessageList,
+        mid: self._user.sid,
+        rid: self._room.id
+      };
+
+      log.debug([null, 'Socket', null, 'Sending queued messages (max: 16 per group) ->'], groupMessage);
+
+      self._socket.send(groupMessage);
+
+      for (var j = 0; j < groupMessageList.length; j++) {
+        setStampFn(groupMessageList[j]);
+        triggerEventFn(groupMessageList[j]);
+      }
+    }
+  };
+
+  var startSendingQueuedMessageFn = function(){
+    if (self._socketMessageQueue.length > 0){
+      if (self._socketMessageQueue.length < throughput){
+        sendGroupMessageFn(self._socketMessageQueue.splice(0, self._socketMessageQueue.length));
+      } else {
+        sendGroupMessageFn(self._socketMessageQueue.splice(0, throughput));
+        self._socketMessageTimeout = setTimeout(startSendingQueuedMessageFn, interval);
       }
       self._timestamp.now = Date.now() || function() { return +new Date(); };
     }
@@ -277,30 +341,29 @@ Skylink.prototype._sendChannelMessage = function(message) {
   //Delay when messages are sent too rapidly
   if ((Date.now() || function() { return +new Date(); }) - self._timestamp.now < interval &&
     self._groupMessageList.indexOf(message.type) > -1) {
+    log.warn([null, 'Socket', null, 'Queueing socket message to prevent message drop ->'], message);
 
-      log.warn([(message.target ? message.target : 'server'), null, null,
-      'Messages fired too rapidly. Delaying.'], {
-        interval: 1000,
-        throughput: 16,
-        message: message
-      });
+    self._socketMessageQueue.push(message);
 
-      self._socketMessageQueue.push(messageString);
-
-      if (!self._socketMessageTimeout){
-        self._socketMessageTimeout = setTimeout(sendLater,
-          interval - ((Date.now() || function() { return +new Date(); })-self._timestamp.now));
-      }
-      return;
+    if (!self._socketMessageTimeout){
+      self._socketMessageTimeout = setTimeout(startSendingQueuedMessageFn,
+        interval - ((Date.now() || function() { return +new Date(); }) - self._timestamp.now));
+    }
+    return;
   }
 
-  log.debug([(message.target ? message.target : 'server'), null, null,
-    'Sending to peer' + ((!message.target) ? 's' : '') + ' ->'], message);
+  log.debug([null, 'Socket', null, 'Sending socket message ->'], message);
 
   //Normal case when messages are sent not so rapidly
-  self._socket.send(messageString);
-  self._timestamp.now = Date.now() || function() { return +new Date(); };
+  if (!checkStampFn(message)) {
+    log.warn([null, 'Socket', null, 'Dropping of outdated status message ->'], message);
+    return;
+  }
 
+  self._socket.send(JSON.stringify(message));
+  self._timestamp.now = Date.now() || function() { return +new Date(); };
+  setStampFn(message);
+  triggerEventFn(message);
 };
 
 /**

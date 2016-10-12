@@ -205,16 +205,16 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
       rid: this._room.id,
       type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
     });
+  } else {
+    this._trigger('incomingMessage', {
+      content: message,
+      isPrivate: isPrivate,
+      targetPeerId: targetPeerId || null,
+      listOfPeers: listOfPeers,
+      isDataChannel: false,
+      senderPeerId: this._user.sid
+    }, this._user.sid, this.getPeerInfo(), true);
   }
-
-  this._trigger('incomingMessage', {
-    content: message,
-    isPrivate: isPrivate,
-    targetPeerId: targetPeerId || null,
-    listOfPeers: listOfPeers,
-    isDataChannel: false,
-    senderPeerId: this._user.sid
-  }, this._user.sid, this.getPeerInfo(), true);
 };
 
 /**

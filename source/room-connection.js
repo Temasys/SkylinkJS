@@ -666,9 +666,6 @@ Skylink.prototype.lockRoom = function() {
     rid: this._room.id,
     lock: true
   });
-  this._roomLocked = true;
-  this._trigger('roomLock', true, this._user.sid,
-    this.getPeerInfo(), true);
 };
 
 /**
@@ -698,9 +695,6 @@ Skylink.prototype.unlockRoom = function() {
     rid: this._room.id,
     lock: false
   });
-  this._roomLocked = false;
-  this._trigger('roomLock', false, this._user.sid,
-    this.getPeerInfo(), true);
 };
 
 /**
