@@ -432,7 +432,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} channelType The Datachannel type.
    *   [Rel: Skylink.DATA_CHANNEL_TYPE]
    * @param {String} messageType The Datachannel sending Datachannel message error type.
-   *   <small>Defined only when <cod>state</code> payload is <code>SEND_MESSAGE_ERROR</code>.<small>
+   *   <small>Defined only when <cod>state</code> payload is <code>SEND_MESSAGE_ERROR</code>.</small>
    *   [Rel: Skylink.DATA_CHANNEL_MESSAGE_ERROR]
    * @for Skylink
    * @since 0.1.0

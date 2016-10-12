@@ -4659,7 +4659,7 @@
                 },
                 {
                     "name": "messageType",
-                    "description": "The Datachannel sending Datachannel message error type.\n  <small>Defined only when <cod>state</code> payload is <code>SEND_MESSAGE_ERROR</code>.<small>\n  [Rel: Skylink.DATA_CHANNEL_MESSAGE_ERROR]",
+                    "description": "The Datachannel sending Datachannel message error type.\n  <small>Defined only when <cod>state</code> payload is <code>SEND_MESSAGE_ERROR</code>.</small>\n  [Rel: Skylink.DATA_CHANNEL_MESSAGE_ERROR]",
                     "type": "String"
                 }
             ],
