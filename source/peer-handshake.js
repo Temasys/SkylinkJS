@@ -215,8 +215,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
  */
 Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var self = this;
-  var timer = self._enableIceTrickle ? (toOffer ? 12500 : 10000) : 50000;
-  timer = (self._hasMCU) ? 105000 : timer;
+  var originalBlock = self._hasMCU ? 105000 : (self._enableIceTrickle ? (toOffer ? 12500 : 10000) : 50000);
 
   // increase timeout for android/ios
   /*var agent = self.getPeerInfo(peerId).agent;
@@ -224,7 +223,9 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
     timer = 105000;
   }*/
 
-  timer += self._retryCount*10000;
+  if (!self._retryCounters[peerId]) {
+    self._retryCounters[peerId] = 0;
+  }
 
   log.log([peerId, 'PeerConnectionHealth', null,
     'Initializing check for peer\'s connection health']);
@@ -269,9 +270,9 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
         'Ice connection state time out. Re-negotiating connection']);
 
       //Maximum increament is 5 minutes
-      if (self._retryCount<30){
+      if (self._retryCounters[peerId] < 30){
         //Increase after each consecutive connection failure
-        self._retryCount++;
+        self._retryCounters[peerId]++;
       }
 
       // do a complete clean
@@ -283,7 +284,7 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
     } else {
       self._peerConnectionHealth[peerId] = true;
     }
-  }, timer);
+  }, originalBlock + ((self._retryCounters[peerId] || 0) * 1000));
 };
 
 /**

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Oct 12 2016 22:21:54 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Oct 12 2016 22:32:24 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3560,13 +3560,13 @@ Skylink.prototype.SERVER_PEER_TYPE = {
 /**
  * Stores the global number of Peer connection retries that would increase the wait-for-response timeout
  *   for the Peer connection health timer.
- * @attribute _retryCount
- * @type Number
+ * @attribute _retryCounters
+ * @type JSON
  * @private
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._retryCount = 0;
+Skylink.prototype._retryCounters = {};
 
 /**
  * Stores the list of the Peer connections.
@@ -4593,7 +4593,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
           'Peer connection with user is stable']);
         self._peerConnectionHealth[targetMid] = true;
         self._stopPeerConnectionHealthCheck(targetMid);
-        self._retryCount = 0;
       }
 
       if (typeof self._ICEConnectionFailures[targetMid] === 'undefined') {
@@ -4651,7 +4650,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
         'Peer connection with user is stable']);
       self._peerConnectionHealth[targetMid] = true;
       self._stopPeerConnectionHealthCheck(targetMid);
-      self._retryCount = 0;
     }
   };
   pc.onicegatheringstatechange = function() {
@@ -5172,8 +5170,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
  */
 Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var self = this;
-  var timer = self._enableIceTrickle ? (toOffer ? 12500 : 10000) : 50000;
-  timer = (self._hasMCU) ? 105000 : timer;
+  var originalBlock = self._hasMCU ? 105000 : (self._enableIceTrickle ? (toOffer ? 12500 : 10000) : 50000);
 
   // increase timeout for android/ios
   /*var agent = self.getPeerInfo(peerId).agent;
@@ -5181,7 +5178,9 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
     timer = 105000;
   }*/
 
-  timer += self._retryCount*10000;
+  if (!self._retryCounters[peerId]) {
+    self._retryCounters[peerId] = 0;
+  }
 
   log.log([peerId, 'PeerConnectionHealth', null,
     'Initializing check for peer\'s connection health']);
@@ -5226,9 +5225,9 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
         'Ice connection state time out. Re-negotiating connection']);
 
       //Maximum increament is 5 minutes
-      if (self._retryCount<30){
+      if (self._retryCounters[peerId] < 30){
         //Increase after each consecutive connection failure
-        self._retryCount++;
+        self._retryCounters[peerId]++;
       }
 
       // do a complete clean
@@ -5240,7 +5239,7 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
     } else {
       self._peerConnectionHealth[peerId] = true;
     }
-  }, timer);
+  }, originalBlock + ((self._retryCounters[peerId] || 0) * 1000));
 };
 
 /**

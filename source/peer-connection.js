@@ -76,13 +76,13 @@ Skylink.prototype.SERVER_PEER_TYPE = {
 /**
  * Stores the global number of Peer connection retries that would increase the wait-for-response timeout
  *   for the Peer connection health timer.
- * @attribute _retryCount
- * @type Number
+ * @attribute _retryCounters
+ * @type JSON
  * @private
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._retryCount = 0;
+Skylink.prototype._retryCounters = {};
 
 /**
  * Stores the list of the Peer connections.
@@ -1109,7 +1109,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
           'Peer connection with user is stable']);
         self._peerConnectionHealth[targetMid] = true;
         self._stopPeerConnectionHealthCheck(targetMid);
-        self._retryCount = 0;
       }
 
       if (typeof self._ICEConnectionFailures[targetMid] === 'undefined') {
@@ -1167,7 +1166,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
         'Peer connection with user is stable']);
       self._peerConnectionHealth[targetMid] = true;
       self._stopPeerConnectionHealthCheck(targetMid);
-      self._retryCount = 0;
     }
   };
   pc.onicegatheringstatechange = function() {
