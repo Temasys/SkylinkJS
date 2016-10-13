@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Thu Oct 13 2016 13:13:41 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Thu Oct 13 2016 14:07:58 GMT+0800 (SGT) */
 
 (function() {
 
@@ -911,16 +911,15 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
 };
 
 /**
- * Stores the list of types of SDKs that do not support simultaneous data transfers.
- * This is also used for Web only fixes we allow.
- * @attribute _INTEROP_MULTI_TRANSFERS
+ * Stores the list of agent names supported by the Web for Web only functionalities.
+ * @attribute _SUPPORTED_WEB_AGENTS
  * @type Array
  * @readOnly
  * @private
  * @for Skylink
- * @since 0.6.1
+ * @since 0.6.16
  */
-Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['Android', 'iOS', 'cpp'];
+Skylink.prototype._SUPPORTED_WEB_AGENTS = ['chrome', 'firefox', 'safari', 'IE', 'edge' ,'opera', 'bowser', 'blink'];
 
 /**
  * Stores the list of data transfers from / to Peers.
@@ -1963,7 +1962,7 @@ Skylink.prototype._startDataTransfer = function(chunks, transferInfo, listOfPeer
     for (var p = 0; p < listOfPeers.length; p++) {
       var agentName = (((self._peerInformations[listOfPeers[p]]) || {}).agent || {}).name || '';
 
-      if (self._INTEROP_MULTI_TRANSFERS.indexOf(agentName) > -1) {
+      if (self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1) {
         self._dataTransfers[transferId].enforceBSPeers.push(listOfPeers[p]);
       }
     }
@@ -2235,7 +2234,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
   }
 
   var agentName = (self._peerInformations[peerId].agent || {}).name || '';
-  var requireInterop = self._INTEROP_MULTI_TRANSFERS.indexOf(agentName) > -1;
+  var requireInterop = self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1;
 
   // Prevent DATA_URL (or "string" dataType transfers) with Android / iOS / C++ SDKs
   if (requireInterop && self._dataTransfers[transferId].dataType === self.DATA_TRANSFER_SESSION_TYPE.DATA_URL) {
@@ -4308,7 +4307,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, callback) {
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // prevent restarts for other SDK clients
-  if (self._INTEROP_MULTI_TRANSFERS.indexOf(agent.name) > -1) {
+  if (self._SUPPORTED_WEB_AGENTS.indexOf(agent.name) === -1) {
     var notSupportedError = new Error('Failed restarting with other agents connecting from other SDKs as ' +
       're-negotiation is not supported by other SDKs');
 

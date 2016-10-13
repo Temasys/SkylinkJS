@@ -828,7 +828,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, callback) {
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // prevent restarts for other SDK clients
-  if (self._INTEROP_MULTI_TRANSFERS.indexOf(agent.name) > -1) {
+  if (self._SUPPORTED_WEB_AGENTS.indexOf(agent.name) === -1) {
     var notSupportedError = new Error('Failed restarting with other agents connecting from other SDKs as ' +
       're-negotiation is not supported by other SDKs');
 
