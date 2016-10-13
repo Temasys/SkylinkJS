@@ -279,6 +279,14 @@ Skylink.prototype._EVENTS = {
    * @param {String} [peerInfo.agent.pluginVersion] The Peer Temasys Plugin version.
    *  <small>Defined only when Peer is using the Temasys Plugin (IE / Safari).</small>
    * @param {String} peerInfo.room The Room Peer is from.
+   * @param {JSON} peerInfo.config The Peer connection configuration.
+   * @param {Boolean} peerInfo.config.enableIceTrickle The flag if Peer connections should
+   *   trickle ICE for faster connectivity.
+   * @param {Boolean} peerInfo.config.enableDataChannel The flag if Datachannel connections
+   *   would be enabled for Peer.
+   * @param {Number} peerInfo.config.priorityWeight The flag if Peer or User should be the offerer.
+   *   <small>If User's <code>priorityWeight</code> is higher than Peer's, User is the offerer, else Peer is.
+   *   However for the case where the MCU is connected, User will always be the offerer.</small>
    * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
    * @since 0.5.2

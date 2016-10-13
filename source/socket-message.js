@@ -719,6 +719,11 @@ Skylink.prototype._enterHandler = function(message) {
       os: message.os || '',
       pluginVersion: message.temasysPluginVersion
     };
+    self._peerInformations[targetMid].config = {
+      enableIceTrickle: !!message.enableIceTrickle,
+      enableDataChannel: !!message.enableDataChannel,
+      priorityWeight: message.priorityWeight || 0
+    };
 
     if (targetMid !== 'MCU') {
       self._trigger('peerJoined', targetMid, message.userInfo, false);
@@ -816,6 +821,11 @@ Skylink.prototype._restartHandler = function(message){
     os: message.os || '',
     pluginVersion: message.temasysPluginVersion
   };
+  self._peerInformations[targetMid].config = {
+    enableIceTrickle: !!message.enableIceTrickle,
+    enableDataChannel: !!message.enableDataChannel,
+    priorityWeight: message.priorityWeight || 0
+  };
 
   var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
 
@@ -907,6 +917,11 @@ Skylink.prototype._welcomeHandler = function(message) {
       version: message.version,
       os: message.os || '',
       pluginVersion: message.temasysPluginVersion
+    };
+    this._peerInformations[targetMid].config = {
+      enableIceTrickle: !!message.enableIceTrickle,
+      enableDataChannel: !!message.enableDataChannel,
+      priorityWeight: message.priorityWeight || 0
     };
     // disable mcu for incoming peer sent by MCU
     /*if (message.agent === 'MCU') {

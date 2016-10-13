@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Fri Oct 14 2016 01:44:17 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Fri Oct 14 2016 01:59:56 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Fri Oct 14 2016 01:44:17 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Fri Oct 14 2016 01:59:56 GMT+0800 (SGT) */
 
 (function() {
 
@@ -16459,7 +16459,12 @@ Skylink.prototype.getPeerInfo = function(peerId) {
         os: window.navigator.platform,
         pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       },
-      room: clone(this._selectedRoom)
+      room: clone(this._selectedRoom),
+      config: {
+        enableDataChannel: this._enableDataChannel,
+        enableIceTrickle: this._enableIceTrickle,
+        priorityWeight: this._peerPriorityWeight
+      }
     };
 
     if (this._streams.screenshare) {
@@ -19686,6 +19691,14 @@ Skylink.prototype._EVENTS = {
    * @param {String} [peerInfo.agent.pluginVersion] The Peer Temasys Plugin version.
    *  <small>Defined only when Peer is using the Temasys Plugin (IE / Safari).</small>
    * @param {String} peerInfo.room The Room Peer is from.
+   * @param {JSON} peerInfo.config The Peer connection configuration.
+   * @param {Boolean} peerInfo.config.enableIceTrickle The flag if Peer connections should
+   *   trickle ICE for faster connectivity.
+   * @param {Boolean} peerInfo.config.enableDataChannel The flag if Datachannel connections
+   *   would be enabled for Peer.
+   * @param {Number} peerInfo.config.priorityWeight The flag if Peer or User should be the offerer.
+   *   <small>If User's <code>priorityWeight</code> is higher than Peer's, User is the offerer, else Peer is.
+   *   However for the case where the MCU is connected, User will always be the offerer.</small>
    * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
    * @since 0.5.2
@@ -21699,6 +21712,11 @@ Skylink.prototype._enterHandler = function(message) {
       os: message.os || '',
       pluginVersion: message.temasysPluginVersion
     };
+    self._peerInformations[targetMid].config = {
+      enableIceTrickle: !!message.enableIceTrickle,
+      enableDataChannel: !!message.enableDataChannel,
+      priorityWeight: message.priorityWeight || 0
+    };
 
     if (targetMid !== 'MCU') {
       self._trigger('peerJoined', targetMid, message.userInfo, false);
@@ -21796,6 +21814,11 @@ Skylink.prototype._restartHandler = function(message){
     os: message.os || '',
     pluginVersion: message.temasysPluginVersion
   };
+  self._peerInformations[targetMid].config = {
+    enableIceTrickle: !!message.enableIceTrickle,
+    enableDataChannel: !!message.enableDataChannel,
+    priorityWeight: message.priorityWeight || 0
+  };
 
   var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
 
@@ -21887,6 +21910,11 @@ Skylink.prototype._welcomeHandler = function(message) {
       version: message.version,
       os: message.os || '',
       pluginVersion: message.temasysPluginVersion
+    };
+    this._peerInformations[targetMid].config = {
+      enableIceTrickle: !!message.enableIceTrickle,
+      enableDataChannel: !!message.enableDataChannel,
+      priorityWeight: message.priorityWeight || 0
     };
     // disable mcu for incoming peer sent by MCU
     /*if (message.agent === 'MCU') {

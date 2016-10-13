@@ -919,7 +919,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, callback) {
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // prevent restarts for other SDK clients
-  if (self._INTEROP_MULTI_TRANSFERS.indexOf(agent.name) &gt; -1) {
+  if (self._SUPPORTED_WEB_AGENTS.indexOf(agent.name) === -1) {
     var notSupportedError = new Error(&#x27;Failed restarting with other agents connecting from other SDKs as &#x27; +
       &#x27;re-negotiation is not supported by other SDKs&#x27;);
 
@@ -956,7 +956,11 @@ Skylink.prototype._restartPeerConnection = function (peerId, callback) {
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
       sessionType: !!self._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
-      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+      // Deprecated but comply to protocol
+      lastRestart: (new Date()).getTime(),
+      explicit: true,
+      isConnectionRestart: false
     });
 
     self._trigger(&#x27;peerRestart&#x27;, peerId, self.getPeerInfo(peerId), true);
@@ -1325,7 +1329,11 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
         sessionType: !!self._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
-        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+        // Deprecated but comply to protocol
+        lastRestart: (new Date()).getTime(),
+        explicit: true,
+        isConnectionRestart: false
       });
     }
   }

@@ -168,7 +168,12 @@ Skylink.prototype.getPeerInfo = function(peerId) {
         os: window.navigator.platform,
         pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       },
-      room: clone(this._selectedRoom)
+      room: clone(this._selectedRoom),
+      config: {
+        enableDataChannel: this._enableDataChannel,
+        enableIceTrickle: this._enableIceTrickle,
+        priorityWeight: this._peerPriorityWeight
+      }
     };
 
     if (this._streams.screenshare) {

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Fri Oct 14 2016 01:44:17 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Fri Oct 14 2016 01:59:56 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4926,7 +4926,12 @@ Skylink.prototype.getPeerInfo = function(peerId) {
         os: window.navigator.platform,
         pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       },
-      room: clone(this._selectedRoom)
+      room: clone(this._selectedRoom),
+      config: {
+        enableDataChannel: this._enableDataChannel,
+        enableIceTrickle: this._enableIceTrickle,
+        priorityWeight: this._peerPriorityWeight
+      }
     };
 
     if (this._streams.screenshare) {
@@ -8153,6 +8158,14 @@ Skylink.prototype._EVENTS = {
    * @param {String} [peerInfo.agent.pluginVersion] The Peer Temasys Plugin version.
    *  <small>Defined only when Peer is using the Temasys Plugin (IE / Safari).</small>
    * @param {String} peerInfo.room The Room Peer is from.
+   * @param {JSON} peerInfo.config The Peer connection configuration.
+   * @param {Boolean} peerInfo.config.enableIceTrickle The flag if Peer connections should
+   *   trickle ICE for faster connectivity.
+   * @param {Boolean} peerInfo.config.enableDataChannel The flag if Datachannel connections
+   *   would be enabled for Peer.
+   * @param {Number} peerInfo.config.priorityWeight The flag if Peer or User should be the offerer.
+   *   <small>If User's <code>priorityWeight</code> is higher than Peer's, User is the offerer, else Peer is.
+   *   However for the case where the MCU is connected, User will always be the offerer.</small>
    * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
    * @since 0.5.2
@@ -10166,6 +10179,11 @@ Skylink.prototype._enterHandler = function(message) {
       os: message.os || '',
       pluginVersion: message.temasysPluginVersion
     };
+    self._peerInformations[targetMid].config = {
+      enableIceTrickle: !!message.enableIceTrickle,
+      enableDataChannel: !!message.enableDataChannel,
+      priorityWeight: message.priorityWeight || 0
+    };
 
     if (targetMid !== 'MCU') {
       self._trigger('peerJoined', targetMid, message.userInfo, false);
@@ -10263,6 +10281,11 @@ Skylink.prototype._restartHandler = function(message){
     os: message.os || '',
     pluginVersion: message.temasysPluginVersion
   };
+  self._peerInformations[targetMid].config = {
+    enableIceTrickle: !!message.enableIceTrickle,
+    enableDataChannel: !!message.enableDataChannel,
+    priorityWeight: message.priorityWeight || 0
+  };
 
   var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
 
@@ -10354,6 +10377,11 @@ Skylink.prototype._welcomeHandler = function(message) {
       version: message.version,
       os: message.os || '',
       pluginVersion: message.temasysPluginVersion
+    };
+    this._peerInformations[targetMid].config = {
+      enableIceTrickle: !!message.enableIceTrickle,
+      enableDataChannel: !!message.enableDataChannel,
+      priorityWeight: message.priorityWeight || 0
     };
     // disable mcu for incoming peer sent by MCU
     /*if (message.agent === 'MCU') {

@@ -810,6 +810,11 @@ Skylink.prototype._enterHandler = function(message) {
       os: message.os || &#x27;&#x27;,
       pluginVersion: message.temasysPluginVersion
     };
+    self._peerInformations[targetMid].config = {
+      enableIceTrickle: !!message.enableIceTrickle,
+      enableDataChannel: !!message.enableDataChannel,
+      priorityWeight: message.priorityWeight || 0
+    };
 
     if (targetMid !== &#x27;MCU&#x27;) {
       self._trigger(&#x27;peerJoined&#x27;, targetMid, message.userInfo, false);
@@ -907,6 +912,11 @@ Skylink.prototype._restartHandler = function(message){
     os: message.os || &#x27;&#x27;,
     pluginVersion: message.temasysPluginVersion
   };
+  self._peerInformations[targetMid].config = {
+    enableIceTrickle: !!message.enableIceTrickle,
+    enableDataChannel: !!message.enableDataChannel,
+    priorityWeight: message.priorityWeight || 0
+  };
 
   var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
 
@@ -946,7 +956,11 @@ Skylink.prototype._restartHandler = function(message){
       enableDataChannel: self._enableDataChannel,
       receiveOnly: self._peerConnections[targetMid] &amp;&amp; self._peerConnections[targetMid].receiveOnly,
       sessionType: !!self._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
-      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+      // Deprecated but comply to protocol
+      lastRestart: (new Date()).getTime(),
+      explicit: true,
+      isConnectionRestart: false
     });
   }
 
@@ -994,6 +1008,11 @@ Skylink.prototype._welcomeHandler = function(message) {
       version: message.version,
       os: message.os || &#x27;&#x27;,
       pluginVersion: message.temasysPluginVersion
+    };
+    this._peerInformations[targetMid].config = {
+      enableIceTrickle: !!message.enableIceTrickle,
+      enableDataChannel: !!message.enableDataChannel,
+      priorityWeight: message.priorityWeight || 0
     };
     // disable mcu for incoming peer sent by MCU
     /*if (message.agent === &#x27;MCU&#x27;) {

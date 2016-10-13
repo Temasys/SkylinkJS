@@ -221,16 +221,15 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
 };
 
 /**
- * Stores the list of types of SDKs that do not support simultaneous data transfers.
- * This is also used for Web only fixes we allow.
- * @attribute _INTEROP_MULTI_TRANSFERS
+ * Stores the list of agent names supported by the Web for Web only functionalities.
+ * @attribute _SUPPORTED_WEB_AGENTS
  * @type Array
  * @readOnly
  * @private
  * @for Skylink
- * @since 0.6.1
+ * @since 0.6.16
  */
-Skylink.prototype._INTEROP_MULTI_TRANSFERS = [&#x27;Android&#x27;, &#x27;iOS&#x27;, &#x27;cpp&#x27;];
+Skylink.prototype._SUPPORTED_WEB_AGENTS = [&#x27;chrome&#x27;, &#x27;firefox&#x27;, &#x27;safari&#x27;, &#x27;IE&#x27;, &#x27;edge&#x27; ,&#x27;opera&#x27;, &#x27;bowser&#x27;, &#x27;blink&#x27;];
 
 /**
  * Stores the list of data transfers from / to Peers.
@@ -1064,6 +1063,7 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
         type: self._DC_PROTOCOL_TYPE.CANCEL,
         sender: self._user.sid,
         content: &#x27;Peer cancelled download transfer&#x27;,
+        name: self._dataTransfers[transferId].name,
         ackN: 0
       }, &#x27;main&#x27;);
     }
@@ -1074,6 +1074,7 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
         type: self._DC_PROTOCOL_TYPE.CANCEL,
         sender: self._user.sid,
         content: &#x27;Peer cancelled download transfer&#x27;,
+        name: self._dataTransfers[transferId].name,
         ackN: 0
       }, transferId);
     }
@@ -1097,6 +1098,7 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
       type: self._DC_PROTOCOL_TYPE.CANCEL,
       sender: self._user.sid,
       content: &#x27;Peer cancelled download transfer&#x27;,
+      name: self._dataTransfers[transferId].name,
       ackN: 0
     }, channelProp);
 
@@ -1273,7 +1275,7 @@ Skylink.prototype._startDataTransfer = function(chunks, transferInfo, listOfPeer
     for (var p = 0; p &lt; listOfPeers.length; p++) {
       var agentName = (((self._peerInformations[listOfPeers[p]]) || {}).agent || {}).name || &#x27;&#x27;;
 
-      if (self._INTEROP_MULTI_TRANSFERS.indexOf(agentName) &gt; -1) {
+      if (self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1) {
         self._dataTransfers[transferId].enforceBSPeers.push(listOfPeers[p]);
       }
     }
@@ -1545,7 +1547,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
   }
 
   var agentName = (self._peerInformations[peerId].agent || {}).name || &#x27;&#x27;;
-  var requireInterop = self._INTEROP_MULTI_TRANSFERS.indexOf(agentName) &gt; -1;
+  var requireInterop = self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1;
 
   // Prevent DATA_URL (or &quot;string&quot; dataType transfers) with Android / iOS / C++ SDKs
   if (requireInterop &amp;&amp; self._dataTransfers[transferId].dataType === self.DATA_TRANSFER_SESSION_TYPE.DATA_URL) {
