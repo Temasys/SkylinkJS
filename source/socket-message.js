@@ -720,8 +720,8 @@ Skylink.prototype._enterHandler = function(message) {
       pluginVersion: message.temasysPluginVersion
     };
     self._peerInformations[targetMid].config = {
-      enableIceTrickle: !!message.enableIceTrickle,
-      enableDataChannel: !!message.enableDataChannel,
+      enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
+      enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
       priorityWeight: message.priorityWeight || 0
     };
 
@@ -822,8 +822,8 @@ Skylink.prototype._restartHandler = function(message){
     pluginVersion: message.temasysPluginVersion
   };
   self._peerInformations[targetMid].config = {
-    enableIceTrickle: !!message.enableIceTrickle,
-    enableDataChannel: !!message.enableDataChannel,
+    enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
+    enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
     priorityWeight: message.priorityWeight || 0
   };
 
@@ -919,8 +919,8 @@ Skylink.prototype._welcomeHandler = function(message) {
       pluginVersion: message.temasysPluginVersion
     };
     this._peerInformations[targetMid].config = {
-      enableIceTrickle: !!message.enableIceTrickle,
-      enableDataChannel: !!message.enableDataChannel,
+      enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
+      enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
       priorityWeight: message.priorityWeight || 0
     };
     // disable mcu for incoming peer sent by MCU
@@ -1027,7 +1027,8 @@ Skylink.prototype._offerHandler = function(message) {
     'Session description object created'], offer);
 
   // Configure it to force TURN connections by removing non-"relay" candidates
-  if (self._forceTURN && !self._enableIceTrickle) {
+  if (self._forceTURN && !(self._enableIceTrickle && self._peerInformations[targetMid] &&
+      self._peerInformations[targetMid].config.enableIceTrickle)) {
     if (!self._hasMCU) {
       log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from offer ' +
         ' as TURN connections is forced']);
@@ -1227,7 +1228,8 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   // Configure it to force TURN connections by removing non-"relay" candidates
-  if (self._forceTURN && !self._enableIceTrickle) {
+  if (self._forceTURN && !(self._enableIceTrickle && self._peerInformations[targetMid] &&
+      self._peerInformations[targetMid].config.enableIceTrickle)) {
     if (!self._hasMCU) {
       log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from answer ' +
         ' as TURN connections is forced']);

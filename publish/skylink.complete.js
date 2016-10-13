@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Fri Oct 14 2016 01:59:56 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Fri Oct 14 2016 02:10:01 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Fri Oct 14 2016 01:59:56 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Fri Oct 14 2016 02:10:01 GMT+0800 (SGT) */
 
 (function() {
 
@@ -14584,7 +14584,8 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       candidate: candidate.candidate
     });
 
-    if (!self._enableIceTrickle) {
+    if (!(self._enableIceTrickle && self._peerInformations[targetMid] &&
+      self._peerInformations[targetMid].config.enableIceTrickle)) {
       log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
         '" candidate as trickle ICE is disabled'], candidate);
       return;
@@ -15987,12 +15988,12 @@ Skylink.prototype._removePeer = function(peerId) {
   if (typeof this._peerMessagesStamps[peerId] !== 'undefined') {
     delete this._peerMessagesStamps[peerId];
   }
-  
+
   if (typeof this._peerConnectionHealth[peerId] !== 'undefined') {
     delete this._peerConnectionHealth[peerId];
   }
   // close datachannel connection
-  if (this._enableDataChannel) {
+  if (this._dataChannels[peerId]) {
     this._closeDataChannel(peerId);
   }
 
@@ -16045,8 +16046,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.ondatachannel = function(event) {
     var dc = event.channel || event;
     log.debug([targetMid, 'RTCDataChannel', dc.label, 'Received datachannel ->'], dc);
-    if (self._enableDataChannel) {
-
+    if (self._enableDataChannel && self._peerInformations[targetMid] &&
+      self._peerInformations[targetMid].config.enableDataChannel) {
       var channelType = self.DATA_CHANNEL_TYPE.DATA;
       var channelKey = dc.label;
 
@@ -16617,7 +16618,8 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
     };
   }
 
-  if (self._enableDataChannel) {
+  if (self._enableDataChannel && self._peerInformations[targetMid] &&
+    self._peerInformations[targetMid].config.enableDataChannel) {
     // Edge doesn't support datachannels yet
     if (!(self._dataChannels[targetMid] && self._dataChannels[targetMid].main) &&
       window.webrtcDetectedBrowser !== 'edge') {
@@ -21713,8 +21715,8 @@ Skylink.prototype._enterHandler = function(message) {
       pluginVersion: message.temasysPluginVersion
     };
     self._peerInformations[targetMid].config = {
-      enableIceTrickle: !!message.enableIceTrickle,
-      enableDataChannel: !!message.enableDataChannel,
+      enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
+      enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
       priorityWeight: message.priorityWeight || 0
     };
 
@@ -21815,8 +21817,8 @@ Skylink.prototype._restartHandler = function(message){
     pluginVersion: message.temasysPluginVersion
   };
   self._peerInformations[targetMid].config = {
-    enableIceTrickle: !!message.enableIceTrickle,
-    enableDataChannel: !!message.enableDataChannel,
+    enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
+    enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
     priorityWeight: message.priorityWeight || 0
   };
 
@@ -21912,8 +21914,8 @@ Skylink.prototype._welcomeHandler = function(message) {
       pluginVersion: message.temasysPluginVersion
     };
     this._peerInformations[targetMid].config = {
-      enableIceTrickle: !!message.enableIceTrickle,
-      enableDataChannel: !!message.enableDataChannel,
+      enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
+      enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
       priorityWeight: message.priorityWeight || 0
     };
     // disable mcu for incoming peer sent by MCU
@@ -22020,7 +22022,8 @@ Skylink.prototype._offerHandler = function(message) {
     'Session description object created'], offer);
 
   // Configure it to force TURN connections by removing non-"relay" candidates
-  if (self._forceTURN && !self._enableIceTrickle) {
+  if (self._forceTURN && !(self._enableIceTrickle && self._peerInformations[targetMid] &&
+      self._peerInformations[targetMid].config.enableIceTrickle)) {
     if (!self._hasMCU) {
       log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from offer ' +
         ' as TURN connections is forced']);
@@ -22220,7 +22223,8 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   // Configure it to force TURN connections by removing non-"relay" candidates
-  if (self._forceTURN && !self._enableIceTrickle) {
+  if (self._forceTURN && !(self._enableIceTrickle && self._peerInformations[targetMid] &&
+      self._peerInformations[targetMid].config.enableIceTrickle)) {
     if (!self._hasMCU) {
       log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from answer ' +
         ' as TURN connections is forced']);
