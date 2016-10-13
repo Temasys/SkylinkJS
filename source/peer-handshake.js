@@ -509,10 +509,6 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       userInfo: self._getUserInfo()
     });
 
-    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
-      self._checkIfStreamMismatch();
-    }
-
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 

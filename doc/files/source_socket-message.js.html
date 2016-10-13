@@ -645,25 +645,6 @@ Skylink.prototype._streamEventHandler = function(message) {
       if (!message.streamId || this._hasMCU) {
         return;
       }
-
-      // Prevent restarts unless its stable
-      if (this._peerConnections[targetMid] &amp;&amp;
-        this._peerConnections[targetMid].signalingState === this.PEER_CONNECTION_STATE.STABLE) {
-        var streams = this._peerConnections[targetMid].getRemoteStreams();
-        var currentStreamId = streams.length &gt; 0 ? streams[0].id || streams[0].label : null;
-
-        log.info([targetMid, null, message.type, &#x27;Peer\&#x27;s stream status check -&gt;&#x27;], {
-          actualId: message.streamId,
-          currentId: currentStreamId
-        });
-
-        if (message.streamId !== currentStreamId &amp;&amp;
-          this._streamsMistmatch[targetMid] !== (currentStreamId + &#x27;::&#x27; + message.streamId)) {
-          this._streamsMistmatch[targetMid] = currentStreamId + &#x27;::&#x27; + message.streamId;
-          this._trigger(&#x27;streamMismatch&#x27;, targetMid, this.getPeerInfo(targetMid),
-            false, message.sessionType === &#x27;screensharing&#x27;, currentStreamId, message.streamId);
-        }
-      }
     }
 
   } else {
@@ -1357,7 +1338,6 @@ Skylink.prototype._answerHandler = function(message) {
     pc.processingRemoteSDP = false;
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
-    self._checkIfStreamMismatch();
 
   }, function(error) {
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);

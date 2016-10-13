@@ -53,13 +53,6 @@ SkylinkDemo.on('peerLeft', function(peerID) {
     DOMcontainer.removeChild(DOMvideo);
   }
 });
-//--------
-SkylinkDemo.on('streamMismatch', function(peerID, peerInfo, isSelf, isSS, cSI, aSI) {
-  if (isSelf) return;
-  SkylinkDemo.refreshConnection(peerID);
-  console.info("Refreshing connection");
-});
-
 
 SkylinkDemo.init(config, function (error, success) {
   if (success) {
