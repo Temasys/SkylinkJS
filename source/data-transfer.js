@@ -972,6 +972,7 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
         type: self._DC_PROTOCOL_TYPE.CANCEL,
         sender: self._user.sid,
         content: 'Peer cancelled download transfer',
+        name: self._dataTransfers[transferId].name,
         ackN: 0
       }, 'main');
     }
@@ -982,6 +983,7 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
         type: self._DC_PROTOCOL_TYPE.CANCEL,
         sender: self._user.sid,
         content: 'Peer cancelled download transfer',
+        name: self._dataTransfers[transferId].name,
         ackN: 0
       }, transferId);
     }
@@ -1005,6 +1007,7 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
       type: self._DC_PROTOCOL_TYPE.CANCEL,
       sender: self._user.sid,
       content: 'Peer cancelled download transfer',
+      name: self._dataTransfers[transferId].name,
       ackN: 0
     }, channelProp);
 
