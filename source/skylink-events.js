@@ -242,6 +242,9 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.audio.useinbandfec] The flag if capability to take advantage of in-band FEC
    *   is configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
    *   <small>When not defined, the default browser configuration is used.</small>
+   * @param {Number} [enableAudio.maxplaybackrate] The maximum output sampling rate rendered in Hertz (Hz)
+   *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   *   <small>When not defined, the default browser configuration is used.</small>
    * @param {Array} [peerInfo.settings.audio.optional] The Peer Stream <code>navigator.getUserMedia()</code> API
    *   <code>audio: { optional [..] }</code> property.
    * @param {String} [peerInfo.settings.audio.deviceId] The Peer Stream audio track source ID of the device used.

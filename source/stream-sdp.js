@@ -33,7 +33,8 @@ Skylink.prototype._addSDPOpusConfig = function(targetMid, sessionDescription) {
   var settings = {
     stereo: false,
     useinbandfec: null,
-    usedtx: null
+    usedtx: null,
+    maxplaybackrate: null
   };
   var audioSettings = this.getPeerInfo().settings.audio;
 
@@ -41,13 +42,14 @@ Skylink.prototype._addSDPOpusConfig = function(targetMid, sessionDescription) {
     settings.stereo = audioSettings.stereo === true;
     settings.useinbandfec = typeof audioSettings.useinbandfec === 'boolean' ? audioSettings.useinbandfec : null;
     settings.usedtx = typeof audioSettings.usedtx === 'boolean' ? audioSettings.usedtx : null;
+    settings.maxplaybackrate = typeof audioSettings.maxplaybackrate === 'number' ? audioSettings.maxplaybackrate : null;
   }
 
   log.debug([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Received OPUS config ->'], settings);
 
   // Find OPUS RTPMAP line
   for (var i = 0; i < sdpLines.length; i++) {
-    if (sdpLines[i].indexOf('a=rtpmap:') === 0 && (sdpLines[i].toLowerCase()).indexOf('opus/48000/') > 0) {
+    if (sdpLines[i].indexOf('a=rtpmap:') === 0 && (sdpLines[i].toLowerCase()).indexOf('opus/48000') > 0) {
       payload = (sdpLines[i].split(' ')[0] || '').split(':')[1] || null;
       break;
     }
@@ -62,18 +64,28 @@ Skylink.prototype._addSDPOpusConfig = function(targetMid, sessionDescription) {
   // Set OPUS FMTP line
   for (var j = 0; j < sdpLines.length; j++) {
     if (sdpLines[j].indexOf('a=fmtp:' + payload) === 0) {
-      var opusFmtpLine = sdpLines[j].split(':');
+      var opusFmtpLines = (sdpLines[j].split('a=fmtp:' + payload)[1] || '').replace(/\s/g).split(';');
 
-      if ((opusFmtpLine[1] || '').indexOf('useinbandfec=1') > -1 && settings.useinbandfec === null) {
-        log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
-          'Received OPUS useinbandfec as true by default.']);
-        settings.useinbandfec = true;
-      }
+      for (var k = 0; k < opusFmtpLines.length; k++) {
+        if (opusFmtpLines[k] === 'useinbandfec=1' && settings.useinbandfec === null) {
+          log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+            'Received OPUS useinbandfec as true by default.']);
+          settings.useinbandfec = true;
 
-      if ((opusFmtpLine[1] || '').indexOf('usedtx=1') > -1 && settings.usedtx === null) {
-        log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
-          'Received OPUS usedtx as true by default.']);
-        settings.usedtx = true;
+        } else if (opusFmtpLines[k] === 'usedtx=1' && settings.usedtx === null) {
+          log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+            'Received OPUS usedtx as true by default.']);
+          settings.usedtx = true;
+
+        } else if (opusFmtpLines[k].indexOf('maxplaybackrate') === 0 && settings.maxplaybackrate === null) {
+          var maxplaybackrateVal = parseInt(opusFmtpLines[k].split('=')[1] || '0', 10);
+
+          if (maxplaybackrateVal > 0) {
+            log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+              'Received OPUS usedtx as ' + maxplaybackrateVal + ' by default.']);
+            settings.maxplaybackrate = maxplaybackrateVal;
+          }
+        }
       }
 
       log.debug([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Setting OPUS config ->'], settings);
@@ -90,6 +102,10 @@ Skylink.prototype._addSDPOpusConfig = function(targetMid, sessionDescription) {
 
       if (settings.usedtx === true) {
         updatedOpusConfig += 'usedtx=1;';
+      }
+
+      if (settings.maxplaybackrate) {
+        updatedOpusConfig += 'maxplaybackrate=' + settings.maxplaybackrate + ';';
       }
 
       sdpLines[j] = 'a=fmtp:' + payload + ' ' + updatedOpusConfig;

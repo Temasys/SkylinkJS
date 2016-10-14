@@ -309,6 +309,10 @@ Skylink.prototype._streamsStoppedCbs = {};
  * @param {Boolean} [options.audio.useinbandfec] The flag if capability to take advantage of in-band FEC should be configured
  *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
  *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [options.audio.maxplaybackrate] The maximum output sampling rate rendered in Hertz (Hz)
+ *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
  *   <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.audioMuted</code>,
  *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.audioMuted</code> value to
@@ -1090,6 +1094,10 @@ Skylink.prototype.disableVideo = function() {
  * @param {Boolean} [enableAudio.useinbandfec] The flag if capability to take advantage of in-band FEC should be configured
  *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
  *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [enableAudio.maxplaybackrate] The maximum output sampling rate rendered in Hertz (Hz)
+ *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_mediaAccessSuccess">
@@ -1498,6 +1506,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
       stereo: false,
       useinbandfec: null,
       usedtx: null,
+      maxplaybackrate: null,
       deviceId: null,
       optional: null,
       exactConstraints: !!options.useExactConstraints
@@ -1514,6 +1523,11 @@ Skylink.prototype._parseStreamSettings = function(options) {
 
     if (typeof options.audio.usedtx === 'boolean') {
       settings.settings.audio.usedtx = options.audio.usedtx;
+    }
+
+    if (typeof options.audio.maxplaybackrate === 'number' &&
+      options.audio.maxplaybackrate >= 8000 && options.audio.maxplaybackrate <= 48000) {
+      settings.settings.audio.maxplaybackrate = options.audio.maxplaybackrate;
     }
 
     if (typeof options.audio.mute === 'boolean') {

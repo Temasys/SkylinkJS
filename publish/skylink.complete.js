@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 04:21:23 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 04:38:58 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 04:21:23 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 04:38:58 GMT+0800 (SGT) */
 
 (function() {
 
@@ -19559,6 +19559,9 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} [peerInfo.settings.audio.useinbandfec] The flag if capability to take advantage of in-band FEC
    *   is configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
    *   <small>When not defined, the default browser configuration is used.</small>
+   * @param {Number} [enableAudio.maxplaybackrate] The maximum output sampling rate rendered in Hertz (Hz)
+   *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   *   <small>When not defined, the default browser configuration is used.</small>
    * @param {Array} [peerInfo.settings.audio.optional] The Peer Stream <code>navigator.getUserMedia()</code> API
    *   <code>audio: { optional [..] }</code> property.
    * @param {String} [peerInfo.settings.audio.deviceId] The Peer Stream audio track source ID of the device used.
@@ -22473,6 +22476,10 @@ Skylink.prototype._streamsStoppedCbs = {};
  * @param {Boolean} [options.audio.useinbandfec] The flag if capability to take advantage of in-band FEC should be configured
  *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
  *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [options.audio.maxplaybackrate] The maximum output sampling rate rendered in Hertz (Hz)
+ *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
  *   <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.audioMuted</code>,
  *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.audioMuted</code> value to
@@ -23254,6 +23261,10 @@ Skylink.prototype.disableVideo = function() {
  * @param {Boolean} [enableAudio.useinbandfec] The flag if capability to take advantage of in-band FEC should be configured
  *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
  *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [enableAudio.maxplaybackrate] The maximum output sampling rate rendered in Hertz (Hz)
+ *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_mediaAccessSuccess">
@@ -23662,6 +23673,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
       stereo: false,
       useinbandfec: null,
       usedtx: null,
+      maxplaybackrate: null,
       deviceId: null,
       optional: null,
       exactConstraints: !!options.useExactConstraints
@@ -23678,6 +23690,11 @@ Skylink.prototype._parseStreamSettings = function(options) {
 
     if (typeof options.audio.usedtx === 'boolean') {
       settings.settings.audio.usedtx = options.audio.usedtx;
+    }
+
+    if (typeof options.audio.maxplaybackrate === 'number' &&
+      options.audio.maxplaybackrate >= 8000 && options.audio.maxplaybackrate <= 48000) {
+      settings.settings.audio.maxplaybackrate = options.audio.maxplaybackrate;
     }
 
     if (typeof options.audio.mute === 'boolean') {
@@ -24099,7 +24116,8 @@ Skylink.prototype._addSDPOpusConfig = function(targetMid, sessionDescription) {
   var settings = {
     stereo: false,
     useinbandfec: null,
-    usedtx: null
+    usedtx: null,
+    maxplaybackrate: null
   };
   var audioSettings = this.getPeerInfo().settings.audio;
 
@@ -24107,13 +24125,14 @@ Skylink.prototype._addSDPOpusConfig = function(targetMid, sessionDescription) {
     settings.stereo = audioSettings.stereo === true;
     settings.useinbandfec = typeof audioSettings.useinbandfec === 'boolean' ? audioSettings.useinbandfec : null;
     settings.usedtx = typeof audioSettings.usedtx === 'boolean' ? audioSettings.usedtx : null;
+    settings.maxplaybackrate = typeof audioSettings.maxplaybackrate === 'number' ? audioSettings.maxplaybackrate : null;
   }
 
   log.debug([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Received OPUS config ->'], settings);
 
   // Find OPUS RTPMAP line
   for (var i = 0; i < sdpLines.length; i++) {
-    if (sdpLines[i].indexOf('a=rtpmap:') === 0 && (sdpLines[i].toLowerCase()).indexOf('opus/48000/') > 0) {
+    if (sdpLines[i].indexOf('a=rtpmap:') === 0 && (sdpLines[i].toLowerCase()).indexOf('opus/48000') > 0) {
       payload = (sdpLines[i].split(' ')[0] || '').split(':')[1] || null;
       break;
     }
@@ -24128,18 +24147,28 @@ Skylink.prototype._addSDPOpusConfig = function(targetMid, sessionDescription) {
   // Set OPUS FMTP line
   for (var j = 0; j < sdpLines.length; j++) {
     if (sdpLines[j].indexOf('a=fmtp:' + payload) === 0) {
-      var opusFmtpLine = sdpLines[j].split(':');
+      var opusFmtpLines = (sdpLines[j].split('a=fmtp:' + payload)[1] || '').replace(/\s/g).split(';');
 
-      if ((opusFmtpLine[1] || '').indexOf('useinbandfec=1') > -1 && settings.useinbandfec === null) {
-        log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
-          'Received OPUS useinbandfec as true by default.']);
-        settings.useinbandfec = true;
-      }
+      for (var k = 0; k < opusFmtpLines.length; k++) {
+        if (opusFmtpLines[k] === 'useinbandfec=1' && settings.useinbandfec === null) {
+          log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+            'Received OPUS useinbandfec as true by default.']);
+          settings.useinbandfec = true;
 
-      if ((opusFmtpLine[1] || '').indexOf('usedtx=1') > -1 && settings.usedtx === null) {
-        log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
-          'Received OPUS usedtx as true by default.']);
-        settings.usedtx = true;
+        } else if (opusFmtpLines[k] === 'usedtx=1' && settings.usedtx === null) {
+          log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+            'Received OPUS usedtx as true by default.']);
+          settings.usedtx = true;
+
+        } else if (opusFmtpLines[k].indexOf('maxplaybackrate') === 0 && settings.maxplaybackrate === null) {
+          var maxplaybackrateVal = parseInt(opusFmtpLines[k].split('=')[1] || '0', 10);
+
+          if (maxplaybackrateVal > 0) {
+            log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+              'Received OPUS usedtx as ' + maxplaybackrateVal + ' by default.']);
+            settings.maxplaybackrate = maxplaybackrateVal;
+          }
+        }
       }
 
       log.debug([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Setting OPUS config ->'], settings);
@@ -24156,6 +24185,10 @@ Skylink.prototype._addSDPOpusConfig = function(targetMid, sessionDescription) {
 
       if (settings.usedtx === true) {
         updatedOpusConfig += 'usedtx=1;';
+      }
+
+      if (settings.maxplaybackrate) {
+        updatedOpusConfig += 'maxplaybackrate=' + settings.maxplaybackrate + ';';
       }
 
       sdpLines[j] = 'a=fmtp:' + payload + ' ' + updatedOpusConfig;

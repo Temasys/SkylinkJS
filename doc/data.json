@@ -4361,6 +4361,12 @@
                     ]
                 },
                 {
+                    "name": "enableAudio.maxplaybackrate",
+                    "description": "The maximum output sampling rate rendered in Hertz (Hz)\n  when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>When not defined, the default browser configuration is used.</small>",
+                    "type": "Number",
+                    "optional": true
+                },
+                {
                     "name": "isSelf",
                     "description": "The flag if Peer is User.",
                     "type": "Boolean"
@@ -4371,7 +4377,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 302,
+            "line": 305,
             "description": "Event triggered when a Peer connection has been refreshed.",
             "itemtype": "event",
             "name": "peerRestart",
@@ -4397,7 +4403,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 315,
+            "line": 318,
             "description": "Event triggered when a Peer session information has been updated.",
             "itemtype": "event",
             "name": "peerUpdated",
@@ -4423,7 +4429,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 328,
+            "line": 331,
             "description": "Event triggered when a Peer leaves the room.",
             "itemtype": "event",
             "name": "peerLeft",
@@ -4449,7 +4455,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 341,
+            "line": 344,
             "description": "Event triggered when Room session has ended abruptly due to network disconnections.",
             "itemtype": "event",
             "name": "sessionDisconnect",
@@ -4470,7 +4476,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 353,
+            "line": 356,
             "description": "Event triggered when receiving Peer Stream.",
             "itemtype": "event",
             "name": "incomingStream",
@@ -4501,7 +4507,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 368,
+            "line": 371,
             "description": "Event triggered when receiving message from Peer.",
             "itemtype": "event",
             "name": "incomingMessage",
@@ -4561,7 +4567,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 398,
+            "line": 401,
             "description": "Event triggered when receiving completed data transfer from Peer.",
             "itemtype": "event",
             "name": "incomingData",
@@ -4597,7 +4603,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 414,
+            "line": 417,
             "description": "Event triggered when receiving upload data transfer from Peer.",
             "itemtype": "event",
             "name": "incomingDataRequest",
@@ -4628,7 +4634,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 428,
+            "line": 431,
             "description": "Event triggered when Room locked status has changed.",
             "itemtype": "event",
             "name": "roomLock",
@@ -4654,7 +4660,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 441,
+            "line": 444,
             "description": "Event triggered when a Datachannel connection state has changed.",
             "itemtype": "event",
             "name": "dataChannelState",
@@ -4696,7 +4702,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 460,
+            "line": 463,
             "description": "Event triggered when a data transfer state has changed.",
             "itemtype": "event",
             "name": "dataTransferState",
@@ -4804,7 +4810,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 508,
+            "line": 511,
             "description": "Event triggered when Signaling server reaction state has changed.",
             "itemtype": "event",
             "name": "systemAction",
@@ -4830,7 +4836,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 521,
+            "line": 524,
             "description": "Event triggered when a server Peer joins the room.",
             "itemtype": "event",
             "name": "serverPeerJoined",
@@ -4851,7 +4857,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 532,
+            "line": 535,
             "description": "Event triggered when a server Peer leaves the room.",
             "itemtype": "event",
             "name": "serverPeerLeft",
@@ -4872,7 +4878,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 543,
+            "line": 546,
             "description": "Event triggered when a server Peer connection has been refreshed.",
             "itemtype": "event",
             "name": "serverPeerRestart",
@@ -4893,7 +4899,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 554,
+            "line": 557,
             "description": "Event triggered when Peer Stream streaming has stopped.",
             "itemtype": "event",
             "name": "streamEnded",
@@ -4929,7 +4935,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 569,
+            "line": 572,
             "description": "Event triggered when Peer Stream audio or video tracks has been muted / unmuted.",
             "itemtype": "event",
             "name": "streamMuted",
@@ -4960,7 +4966,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 583,
+            "line": 586,
             "description": "Event triggered when <a href=\"#method_getPeers\"><code>getPeers()</code> method</a> retrieval state changes.",
             "itemtype": "event",
             "name": "getPeersStateChange",
@@ -4993,7 +4999,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 596,
+            "line": 599,
             "description": "Event triggered when <a href=\"#method_introducePeer\"><code>introducePeer()</code> method</a>\nintroduction request state changes.",
             "itemtype": "event",
             "name": "introduceStateChange",
@@ -5030,7 +5036,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 612,
+            "line": 615,
             "description": "Event triggered when <a href=\"#method_getConnectionStatus\"><code>getConnectionStatus()</code> method</a>\nretrieval state changes.",
             "itemtype": "event",
             "name": "getConnectionStatusStateChange",
@@ -5347,7 +5353,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 699,
+            "line": 702,
             "description": "Event triggered when <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> changes\nUser Streams audio and video tracks muted status.",
             "itemtype": "event",
             "name": "localMediaMuted",
@@ -5375,7 +5381,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 717,
+            "line": 720,
             "description": "Stores the list of <code>once()</code> event handlers.\nThese events are only triggered once.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -5401,7 +5407,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 730,
+            "line": 733,
             "description": "Stores the timestamps data used for throttling.",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -5413,7 +5419,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 745,
+            "line": 748,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -5437,7 +5443,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 769,
+            "line": 772,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -5474,7 +5480,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 827,
+            "line": 830,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -5499,7 +5505,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 876,
+            "line": 879,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -5510,7 +5516,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 930,
+            "line": 933,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -5521,7 +5527,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 956,
+            "line": 959,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -5532,7 +5538,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 994,
+            "line": 997,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",
@@ -6471,6 +6477,12 @@
                                     "optional": true
                                 },
                                 {
+                                    "name": "maxplaybackrate",
+                                    "description": "The maximum output sampling rate rendered in Hertz (Hz)\n  when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This value must be between <code>8000</code> to <code>48000</code>.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
                                     "name": "mute",
                                     "description": "The flag if audio tracks should be muted upon receiving them.\n  <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.audioMuted</code>,\n  but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.audioMuted</code> value to\n  <code>true</code> and mutes any existing <a href=\"#method_shareScreen\">\n  <code>shareScreen()</code> Stream</a> audio tracks as well.</small>",
                                     "type": "Boolean",
@@ -6573,7 +6585,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 580,
+            "line": 584,
             "description": "<blockquote class=\"info\">\n  Note that if <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> is available despite having\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> available, the\n  <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> is sent instead of the\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> to Peers.\n</blockquote>\nFunction that sends a new <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>\nto all connected Peers in the Room.",
             "itemtype": "method",
             "name": "sendStream",
@@ -6611,7 +6623,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 792,
+            "line": 796,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopStream",
@@ -6624,7 +6636,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 831,
+            "line": 835,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio or video tracks.",
             "itemtype": "method",
             "name": "muteStream",
@@ -6660,7 +6672,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 969,
+            "line": 973,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -6675,7 +6687,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 996,
+            "line": 1000,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -6690,7 +6702,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1023,
+            "line": 1027,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -6705,7 +6717,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1050,
+            "line": 1054,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -6720,7 +6732,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1077,
+            "line": 1081,
             "description": "<blockquote class=\"info\">\n  For a better user experience, the functionality is throttled when invoked many times in less\n  than 10 seconds interval.\n</blockquote>\nFunction that retrieves screensharing Stream.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -6749,6 +6761,12 @@
                             "name": "useinbandfec",
                             "description": "The flag if capability to take advantage of in-band FEC should be configured\n  when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>When not provided, the default browser configuration is used.</small>",
                             "type": "Boolean",
+                            "optional": true
+                        },
+                        {
+                            "name": "maxplaybackrate",
+                            "description": "The maximum output sampling rate rendered in Hertz (Hz)\n  when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This value must be between <code>8000</code> to <code>48000</code>.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
+                            "type": "Number",
                             "optional": true
                         }
                     ]
@@ -6781,7 +6799,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1304,
+            "line": 1312,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -6794,7 +6812,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1362,
+            "line": 1370,
             "description": "Function that handles the muting of Stream audio and video tracks.",
             "itemtype": "method",
             "name": "_muteStreams",
@@ -6805,7 +6823,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1409,
+            "line": 1417,
             "description": "Function that handles stopping the Stream streaming.",
             "itemtype": "method",
             "name": "_stopStreams",
@@ -6816,7 +6834,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1482,
+            "line": 1490,
             "description": "Function that parses the <code>getUserMedia()</code> settings provided.",
             "itemtype": "method",
             "name": "_parseStreamSettings",
@@ -6827,7 +6845,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1629,
+            "line": 1643,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -6838,7 +6856,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1764,
+            "line": 1778,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -6849,7 +6867,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1804,
+            "line": 1818,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -6860,7 +6878,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1838,
+            "line": 1852,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -6908,7 +6926,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 103,
+            "line": 119,
             "description": "Function that modifies the session description to limit the maximum sending bandwidth.\nSetting this may not necessarily work in Firefox.",
             "itemtype": "method",
             "name": "_setSDPBitrate",
@@ -6919,7 +6937,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 144,
+            "line": 160,
             "description": "Function that modifies the session description to set the preferred audio/video codec.",
             "itemtype": "method",
             "name": "_setSDPCodec",
@@ -6930,7 +6948,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 200,
+            "line": 216,
             "description": "Function that modifies the session description to remove the previous experimental H264\ncodec that is apparently breaking connections.\nNOTE: We should perhaps not remove it since H264 is supported?",
             "itemtype": "method",
             "name": "_removeSDPFirefoxH264Pref",
@@ -6941,7 +6959,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 221,
+            "line": 237,
             "description": "Function that modifies the session description to append the MediaStream and MediaStreamTrack IDs that seems\nto be missing from Firefox answer session description to Chrome connection causing freezes in re-negotiation.",
             "itemtype": "method",
             "name": "_addSDPMediaStreamTrackIDs",
@@ -6952,7 +6970,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 295,
+            "line": 311,
             "description": "Function that modifies the session description to remove VP9 and H264 apt/rtx lines to prevent plugin connection breaks.",
             "itemtype": "method",
             "name": "_removeH264VP9AptRtxForOlderPlugin",
@@ -7097,39 +7115,39 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:580"
+            "line": " source/stream-media.js:584"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:792"
+            "line": " source/stream-media.js:796"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:831"
+            "line": " source/stream-media.js:835"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:969"
+            "line": " source/stream-media.js:973"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:996"
+            "line": " source/stream-media.js:1000"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1023"
+            "line": " source/stream-media.js:1027"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1050"
+            "line": " source/stream-media.js:1054"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1077"
+            "line": " source/stream-media.js:1081"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1304"
+            "line": " source/stream-media.js:1312"
         },
         {
             "message": "Missing item type\nPolyfill for Object.keys() from Mozilla\nFrom https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys",
