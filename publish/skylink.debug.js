@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Thu Oct 13 2016 01:14:39 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Fri Oct 14 2016 11:33:55 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5366,8 +5366,6 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
       // do a complete clean
       if (!self._hasMCU) {
         self._restartPeerConnection(peerId, true, true, null, false);
-      } else {
-        self._restartMCUConnection();
       }
     } else {
       self._peerConnectionHealth[peerId] = true;
