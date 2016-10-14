@@ -370,6 +370,14 @@ Skylink.prototype._EVENTS = {
    * @param {String} [peerInfo.agent.pluginVersion] The Peer Temasys Plugin version.
    *  &lt;small&gt;Defined only when Peer is using the Temasys Plugin (IE / Safari).&lt;/small&gt;
    * @param {String} peerInfo.room The Room Peer is from.
+   * @param {JSON} peerInfo.config The Peer connection configuration.
+   * @param {Boolean} peerInfo.config.enableIceTrickle The flag if Peer connections should
+   *   trickle ICE for faster connectivity.
+   * @param {Boolean} peerInfo.config.enableDataChannel The flag if Datachannel connections
+   *   would be enabled for Peer.
+   * @param {Number} peerInfo.config.priorityWeight The flag if Peer or User should be the offerer.
+   *   &lt;small&gt;If User&#x27;s &lt;code&gt;priorityWeight&lt;/code&gt; is higher than Peer&#x27;s, User is the offerer, else Peer is.
+   *   However for the case where the MCU is connected, User will always be the offerer.&lt;/small&gt;
    * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
    * @since 0.5.2
@@ -788,24 +796,7 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.15
    */
-  localMediaMuted: [],
-
-  /**
-   * Event triggered when the current Stream received does not match the actual Stream from Peer currently.
-   * @event streamMismatch
-   * @param {String} peerId The Peer ID.
-   * @param {JSON} peerInfo The Peer session information.
-   *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo&lt;/code&gt; parameter payload received in the
-   *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
-   * @param {Boolean} isSelf The flag if Peer is User.
-   * @param {Boolean} isScreensharing The flag if Peer Stream is a screensharing Stream.
-   * @param {String} [currentStreamId] The current Stream ID that is received.
-   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when no Stream is sent to Peer.&lt;/small&gt;
-   * @param {String} actualStreamId The actual Stream ID that Peer is sending.
-   * @for Skylink
-   * @since 0.6.16
-   */
-  streamMismatch: []
+  localMediaMuted: []
 };
 
 /**

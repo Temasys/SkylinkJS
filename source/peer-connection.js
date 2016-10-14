@@ -147,13 +147,7 @@ Skylink.prototype._peerConnections = {};
  *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter payload
  *   <code>isSelfInitiateRestart</code> value as <code>true</code> for all targeted Peer connections.</li></ol></li>
  *   <li>Else: <ol><li><b>ABORT</b> and return error.</li></ol></li>
- *   </ol></li></ol></li><li>If Peer's Stream received does not match the actual Stream
- *   sending from Peer and User is in Room: <ol>
- *   <li><a href="#event_streamMismatch"><code>streamMismatch</code> event</a> triggers <small>
- *   Note that this event may trigger multiple times depending on how many consecutive <code>refreshConnection</code>
- *   method invokes have been made. When being triggered with this event, the recommended solution is to invoke
- *   <code>refreshConnection([peerId])</code> method again when parameter payload <code>isSelf</code> value is
- *   <code>false</code>.</small></li></ol></li></ol></ol></li></ol></li></ol>
+ *   </ol></li></ol></li></ol></ol></li></ol></li></ol>
  * @example
  *   // Example 1: Refreshing a Peer connection
  *   function refreshFrozenVideoStream (peerId) {
@@ -834,7 +828,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, callback) {
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // prevent restarts for other SDK clients
-  if (self._INTEROP_MULTI_TRANSFERS.indexOf(agent.name) > -1) {
+  if (self._SUPPORTED_WEB_AGENTS.indexOf(agent.name) === -1) {
     var notSupportedError = new Error('Failed restarting with other agents connecting from other SDKs as ' +
       're-negotiation is not supported by other SDKs');
 
@@ -871,7 +865,11 @@ Skylink.prototype._restartPeerConnection = function (peerId, callback) {
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
       sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
-      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+      // Deprecated but comply to protocol
+      lastRestart: (new Date()).getTime(),
+      explicit: true,
+      isConnectionRestart: false
     });
 
     self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
@@ -974,12 +972,12 @@ Skylink.prototype._removePeer = function(peerId) {
   if (typeof this._peerMessagesStamps[peerId] !== 'undefined') {
     delete this._peerMessagesStamps[peerId];
   }
-  
+
   if (typeof this._peerConnectionHealth[peerId] !== 'undefined') {
     delete this._peerConnectionHealth[peerId];
   }
   // close datachannel connection
-  if (this._enableDataChannel) {
+  if (this._dataChannels[peerId]) {
     this._closeDataChannel(peerId);
   }
 
@@ -1032,8 +1030,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.ondatachannel = function(event) {
     var dc = event.channel || event;
     log.debug([targetMid, 'RTCDataChannel', dc.label, 'Received datachannel ->'], dc);
-    if (self._enableDataChannel) {
-
+    if (self._enableDataChannel && self._peerInformations[targetMid] &&
+      self._peerInformations[targetMid].config.enableDataChannel) {
       var channelType = self.DATA_CHANNEL_TYPE.DATA;
       var channelKey = dc.label;
 
@@ -1240,7 +1238,11 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
         sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
-        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+        // Deprecated but comply to protocol
+        lastRestart: (new Date()).getTime(),
+        explicit: true,
+        isConnectionRestart: false
       });
     }
   }

@@ -554,25 +554,6 @@ Skylink.prototype._streamEventHandler = function(message) {
       if (!message.streamId || this._hasMCU) {
         return;
       }
-
-      // Prevent restarts unless its stable
-      if (this._peerConnections[targetMid] &&
-        this._peerConnections[targetMid].signalingState === this.PEER_CONNECTION_STATE.STABLE) {
-        var streams = this._peerConnections[targetMid].getRemoteStreams();
-        var currentStreamId = streams.length > 0 ? streams[0].id || streams[0].label : null;
-
-        log.info([targetMid, null, message.type, 'Peer\'s stream status check ->'], {
-          actualId: message.streamId,
-          currentId: currentStreamId
-        });
-
-        if (message.streamId !== currentStreamId &&
-          this._streamsMistmatch[targetMid] !== (currentStreamId + '::' + message.streamId)) {
-          this._streamsMistmatch[targetMid] = currentStreamId + '::' + message.streamId;
-          this._trigger('streamMismatch', targetMid, this.getPeerInfo(targetMid),
-            false, message.sessionType === 'screensharing', currentStreamId, message.streamId);
-        }
-      }
     }
 
   } else {
@@ -738,6 +719,11 @@ Skylink.prototype._enterHandler = function(message) {
       os: message.os || '',
       pluginVersion: message.temasysPluginVersion
     };
+    self._peerInformations[targetMid].config = {
+      enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
+      enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
+      priorityWeight: message.priorityWeight || 0
+    };
 
     if (targetMid !== 'MCU') {
       self._trigger('peerJoined', targetMid, message.userInfo, false);
@@ -835,6 +821,11 @@ Skylink.prototype._restartHandler = function(message){
     os: message.os || '',
     pluginVersion: message.temasysPluginVersion
   };
+  self._peerInformations[targetMid].config = {
+    enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
+    enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
+    priorityWeight: message.priorityWeight || 0
+  };
 
   var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
 
@@ -874,7 +865,11 @@ Skylink.prototype._restartHandler = function(message){
       enableDataChannel: self._enableDataChannel,
       receiveOnly: self._peerConnections[targetMid] && self._peerConnections[targetMid].receiveOnly,
       sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
-      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+      // Deprecated but comply to protocol
+      lastRestart: (new Date()).getTime(),
+      explicit: true,
+      isConnectionRestart: false
     });
   }
 
@@ -922,6 +917,11 @@ Skylink.prototype._welcomeHandler = function(message) {
       version: message.version,
       os: message.os || '',
       pluginVersion: message.temasysPluginVersion
+    };
+    this._peerInformations[targetMid].config = {
+      enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
+      enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
+      priorityWeight: message.priorityWeight || 0
     };
     // disable mcu for incoming peer sent by MCU
     /*if (message.agent === 'MCU') {
@@ -1027,7 +1027,8 @@ Skylink.prototype._offerHandler = function(message) {
     'Session description object created'], offer);
 
   // Configure it to force TURN connections by removing non-"relay" candidates
-  if (self._forceTURN && !self._enableIceTrickle) {
+  if (self._forceTURN && !(self._enableIceTrickle && self._peerInformations[targetMid] &&
+      self._peerInformations[targetMid].config.enableIceTrickle)) {
     if (!self._hasMCU) {
       log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from offer ' +
         ' as TURN connections is forced']);
@@ -1227,7 +1228,8 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   // Configure it to force TURN connections by removing non-"relay" candidates
-  if (self._forceTURN && !self._enableIceTrickle) {
+  if (self._forceTURN && !(self._enableIceTrickle && self._peerInformations[targetMid] &&
+      self._peerInformations[targetMid].config.enableIceTrickle)) {
     if (!self._hasMCU) {
       log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from answer ' +
         ' as TURN connections is forced']);
@@ -1266,7 +1268,6 @@ Skylink.prototype._answerHandler = function(message) {
     pc.processingRemoteSDP = false;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
-    self._checkIfStreamMismatch();
 
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);

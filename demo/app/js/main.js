@@ -621,11 +621,6 @@ Demo.Skylink.on('channelMessage', function (){
 Demo.Skylink.on('channelError', function (error) {
   Demo.Methods.displayChatMessage('System', 'Channel Error:<br>' + (error.message || error));
 });
-//---------------------------------------------------
-Demo.Skylink.on('streamMismatch', function (peerId, peerInfo, isSelf, isScreensharing, currentStreamId, newStreamId) {
-  if (isSelf) return;
-  Demo.Skylink.refreshConnection(peerId);
-});
 
 Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats, error) {
   if (state === Demo.Skylink.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS) {
@@ -666,8 +661,8 @@ Demo.Skylink.init(config, function (error, success) {
   if (success) {
     Demo.Skylink.joinRoom({
       userData: displayName,
-      //audio: { stereo: true },
-      //video: true
+      audio: { stereo: true },
+      video: true
     });
   }
 });

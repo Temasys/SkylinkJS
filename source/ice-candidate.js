@@ -92,7 +92,8 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       candidate: candidate.candidate
     });
 
-    if (!self._enableIceTrickle) {
+    if (!(self._enableIceTrickle && self._peerInformations[targetMid] &&
+      self._peerInformations[targetMid].config.enableIceTrickle)) {
       log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
         '" candidate as trickle ICE is disabled'], candidate);
       return;
@@ -130,10 +131,6 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
         target: targetMid,
         rid: self._room.id
       });
-
-      if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
-        self._checkIfStreamMismatch();
-      }
     }
 
     // We should remove this.. this could be due to ICE failures

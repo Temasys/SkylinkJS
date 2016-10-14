@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Thu Oct 13 2016 12:17:26 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Fri Oct 14 2016 02:10:01 GMT+0800 (SGT) */
 
 (function() {
 
@@ -911,16 +911,15 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
 };
 
 /**
- * Stores the list of types of SDKs that do not support simultaneous data transfers.
- * This is also used for Web only fixes we allow.
- * @attribute _INTEROP_MULTI_TRANSFERS
+ * Stores the list of agent names supported by the Web for Web only functionalities.
+ * @attribute _SUPPORTED_WEB_AGENTS
  * @type Array
  * @readOnly
  * @private
  * @for Skylink
- * @since 0.6.1
+ * @since 0.6.16
  */
-Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['Android', 'iOS', 'cpp'];
+Skylink.prototype._SUPPORTED_WEB_AGENTS = ['chrome', 'firefox', 'safari', 'IE', 'edge' ,'opera', 'bowser', 'blink'];
 
 /**
  * Stores the list of data transfers from / to Peers.
@@ -1754,6 +1753,7 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
         type: self._DC_PROTOCOL_TYPE.CANCEL,
         sender: self._user.sid,
         content: 'Peer cancelled download transfer',
+        name: self._dataTransfers[transferId].name,
         ackN: 0
       }, 'main');
     }
@@ -1764,6 +1764,7 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
         type: self._DC_PROTOCOL_TYPE.CANCEL,
         sender: self._user.sid,
         content: 'Peer cancelled download transfer',
+        name: self._dataTransfers[transferId].name,
         ackN: 0
       }, transferId);
     }
@@ -1787,6 +1788,7 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
       type: self._DC_PROTOCOL_TYPE.CANCEL,
       sender: self._user.sid,
       content: 'Peer cancelled download transfer',
+      name: self._dataTransfers[transferId].name,
       ackN: 0
     }, channelProp);
 
@@ -1963,7 +1965,7 @@ Skylink.prototype._startDataTransfer = function(chunks, transferInfo, listOfPeer
     for (var p = 0; p < listOfPeers.length; p++) {
       var agentName = (((self._peerInformations[listOfPeers[p]]) || {}).agent || {}).name || '';
 
-      if (self._INTEROP_MULTI_TRANSFERS.indexOf(agentName) > -1) {
+      if (self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1) {
         self._dataTransfers[transferId].enforceBSPeers.push(listOfPeers[p]);
       }
     }
@@ -2235,7 +2237,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
   }
 
   var agentName = (self._peerInformations[peerId].agent || {}).name || '';
-  var requireInterop = self._INTEROP_MULTI_TRANSFERS.indexOf(agentName) > -1;
+  var requireInterop = self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1;
 
   // Prevent DATA_URL (or "string" dataType transfers) with Android / iOS / C++ SDKs
   if (requireInterop && self._dataTransfers[transferId].dataType === self.DATA_TRANSFER_SESSION_TYPE.DATA_URL) {
@@ -3049,7 +3051,8 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       candidate: candidate.candidate
     });
 
-    if (!self._enableIceTrickle) {
+    if (!(self._enableIceTrickle && self._peerInformations[targetMid] &&
+      self._peerInformations[targetMid].config.enableIceTrickle)) {
       log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
         '" candidate as trickle ICE is disabled'], candidate);
       return;
@@ -3087,10 +3090,6 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
         target: targetMid,
         rid: self._room.id
       });
-
-      if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
-        self._checkIfStreamMismatch();
-      }
     }
 
     // We should remove this.. this could be due to ICE failures
@@ -3631,13 +3630,7 @@ Skylink.prototype._peerConnections = {};
  *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter payload
  *   <code>isSelfInitiateRestart</code> value as <code>true</code> for all targeted Peer connections.</li></ol></li>
  *   <li>Else: <ol><li><b>ABORT</b> and return error.</li></ol></li>
- *   </ol></li></ol></li><li>If Peer's Stream received does not match the actual Stream
- *   sending from Peer and User is in Room: <ol>
- *   <li><a href="#event_streamMismatch"><code>streamMismatch</code> event</a> triggers <small>
- *   Note that this event may trigger multiple times depending on how many consecutive <code>refreshConnection</code>
- *   method invokes have been made. When being triggered with this event, the recommended solution is to invoke
- *   <code>refreshConnection([peerId])</code> method again when parameter payload <code>isSelf</code> value is
- *   <code>false</code>.</small></li></ol></li></ol></ol></li></ol></li></ol>
+ *   </ol></li></ol></li></ol></ol></li></ol></li></ol>
  * @example
  *   // Example 1: Refreshing a Peer connection
  *   function refreshFrozenVideoStream (peerId) {
@@ -4318,7 +4311,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, callback) {
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // prevent restarts for other SDK clients
-  if (self._INTEROP_MULTI_TRANSFERS.indexOf(agent.name) > -1) {
+  if (self._SUPPORTED_WEB_AGENTS.indexOf(agent.name) === -1) {
     var notSupportedError = new Error('Failed restarting with other agents connecting from other SDKs as ' +
       're-negotiation is not supported by other SDKs');
 
@@ -4355,7 +4348,11 @@ Skylink.prototype._restartPeerConnection = function (peerId, callback) {
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
       sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
-      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+      // Deprecated but comply to protocol
+      lastRestart: (new Date()).getTime(),
+      explicit: true,
+      isConnectionRestart: false
     });
 
     self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
@@ -4458,12 +4455,12 @@ Skylink.prototype._removePeer = function(peerId) {
   if (typeof this._peerMessagesStamps[peerId] !== 'undefined') {
     delete this._peerMessagesStamps[peerId];
   }
-  
+
   if (typeof this._peerConnectionHealth[peerId] !== 'undefined') {
     delete this._peerConnectionHealth[peerId];
   }
   // close datachannel connection
-  if (this._enableDataChannel) {
+  if (this._dataChannels[peerId]) {
     this._closeDataChannel(peerId);
   }
 
@@ -4516,8 +4513,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.ondatachannel = function(event) {
     var dc = event.channel || event;
     log.debug([targetMid, 'RTCDataChannel', dc.label, 'Received datachannel ->'], dc);
-    if (self._enableDataChannel) {
-
+    if (self._enableDataChannel && self._peerInformations[targetMid] &&
+      self._peerInformations[targetMid].config.enableDataChannel) {
       var channelType = self.DATA_CHANNEL_TYPE.DATA;
       var channelKey = dc.label;
 
@@ -4724,7 +4721,11 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
         sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
-        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+        // Deprecated but comply to protocol
+        lastRestart: (new Date()).getTime(),
+        explicit: true,
+        isConnectionRestart: false
       });
     }
   }
@@ -4926,7 +4927,12 @@ Skylink.prototype.getPeerInfo = function(peerId) {
         os: window.navigator.platform,
         pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
       },
-      room: clone(this._selectedRoom)
+      room: clone(this._selectedRoom),
+      config: {
+        enableDataChannel: this._enableDataChannel,
+        enableIceTrickle: this._enableIceTrickle,
+        priorityWeight: this._peerPriorityWeight
+      }
     };
 
     if (this._streams.screenshare) {
@@ -5079,7 +5085,8 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
     };
   }
 
-  if (self._enableDataChannel) {
+  if (self._enableDataChannel && self._peerInformations[targetMid] &&
+    self._peerInformations[targetMid].config.enableDataChannel) {
     // Edge doesn't support datachannels yet
     if (!(self._dataChannels[targetMid] && self._dataChannels[targetMid].main) &&
       window.webrtcDetectedBrowser !== 'edge') {
@@ -5451,10 +5458,6 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       rid: self._room.id,
       userInfo: self._getUserInfo()
     });
-
-    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
-      self._checkIfStreamMismatch();
-    }
 
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
@@ -8157,6 +8160,14 @@ Skylink.prototype._EVENTS = {
    * @param {String} [peerInfo.agent.pluginVersion] The Peer Temasys Plugin version.
    *  <small>Defined only when Peer is using the Temasys Plugin (IE / Safari).</small>
    * @param {String} peerInfo.room The Room Peer is from.
+   * @param {JSON} peerInfo.config The Peer connection configuration.
+   * @param {Boolean} peerInfo.config.enableIceTrickle The flag if Peer connections should
+   *   trickle ICE for faster connectivity.
+   * @param {Boolean} peerInfo.config.enableDataChannel The flag if Datachannel connections
+   *   would be enabled for Peer.
+   * @param {Number} peerInfo.config.priorityWeight The flag if Peer or User should be the offerer.
+   *   <small>If User's <code>priorityWeight</code> is higher than Peer's, User is the offerer, else Peer is.
+   *   However for the case where the MCU is connected, User will always be the offerer.</small>
    * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
    * @since 0.5.2
@@ -8575,24 +8586,7 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.15
    */
-  localMediaMuted: [],
-
-  /**
-   * Event triggered when the current Stream received does not match the actual Stream from Peer currently.
-   * @event streamMismatch
-   * @param {String} peerId The Peer ID.
-   * @param {JSON} peerInfo The Peer session information.
-   *   <small>Object signature matches the <code>peerInfo</code> parameter payload received in the
-   *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small>
-   * @param {Boolean} isSelf The flag if Peer is User.
-   * @param {Boolean} isScreensharing The flag if Peer Stream is a screensharing Stream.
-   * @param {String} [currentStreamId] The current Stream ID that is received.
-   *   <small>Defined as <code>null</code> when no Stream is sent to Peer.</small>
-   * @param {String} actualStreamId The actual Stream ID that Peer is sending.
-   * @for Skylink
-   * @since 0.6.16
-   */
-  streamMismatch: []
+  localMediaMuted: []
 };
 
 /**
@@ -10022,25 +10016,6 @@ Skylink.prototype._streamEventHandler = function(message) {
       if (!message.streamId || this._hasMCU) {
         return;
       }
-
-      // Prevent restarts unless its stable
-      if (this._peerConnections[targetMid] &&
-        this._peerConnections[targetMid].signalingState === this.PEER_CONNECTION_STATE.STABLE) {
-        var streams = this._peerConnections[targetMid].getRemoteStreams();
-        var currentStreamId = streams.length > 0 ? streams[0].id || streams[0].label : null;
-
-        log.info([targetMid, null, message.type, 'Peer\'s stream status check ->'], {
-          actualId: message.streamId,
-          currentId: currentStreamId
-        });
-
-        if (message.streamId !== currentStreamId &&
-          this._streamsMistmatch[targetMid] !== (currentStreamId + '::' + message.streamId)) {
-          this._streamsMistmatch[targetMid] = currentStreamId + '::' + message.streamId;
-          this._trigger('streamMismatch', targetMid, this.getPeerInfo(targetMid),
-            false, message.sessionType === 'screensharing', currentStreamId, message.streamId);
-        }
-      }
     }
 
   } else {
@@ -10206,6 +10181,11 @@ Skylink.prototype._enterHandler = function(message) {
       os: message.os || '',
       pluginVersion: message.temasysPluginVersion
     };
+    self._peerInformations[targetMid].config = {
+      enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
+      enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
+      priorityWeight: message.priorityWeight || 0
+    };
 
     if (targetMid !== 'MCU') {
       self._trigger('peerJoined', targetMid, message.userInfo, false);
@@ -10303,6 +10283,11 @@ Skylink.prototype._restartHandler = function(message){
     os: message.os || '',
     pluginVersion: message.temasysPluginVersion
   };
+  self._peerInformations[targetMid].config = {
+    enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
+    enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
+    priorityWeight: message.priorityWeight || 0
+  };
 
   var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
 
@@ -10342,7 +10327,11 @@ Skylink.prototype._restartHandler = function(message){
       enableDataChannel: self._enableDataChannel,
       receiveOnly: self._peerConnections[targetMid] && self._peerConnections[targetMid].receiveOnly,
       sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
-      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+      // Deprecated but comply to protocol
+      lastRestart: (new Date()).getTime(),
+      explicit: true,
+      isConnectionRestart: false
     });
   }
 
@@ -10390,6 +10379,11 @@ Skylink.prototype._welcomeHandler = function(message) {
       version: message.version,
       os: message.os || '',
       pluginVersion: message.temasysPluginVersion
+    };
+    this._peerInformations[targetMid].config = {
+      enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
+      enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
+      priorityWeight: message.priorityWeight || 0
     };
     // disable mcu for incoming peer sent by MCU
     /*if (message.agent === 'MCU') {
@@ -10495,7 +10489,8 @@ Skylink.prototype._offerHandler = function(message) {
     'Session description object created'], offer);
 
   // Configure it to force TURN connections by removing non-"relay" candidates
-  if (self._forceTURN && !self._enableIceTrickle) {
+  if (self._forceTURN && !(self._enableIceTrickle && self._peerInformations[targetMid] &&
+      self._peerInformations[targetMid].config.enableIceTrickle)) {
     if (!self._hasMCU) {
       log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from offer ' +
         ' as TURN connections is forced']);
@@ -10695,7 +10690,8 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   // Configure it to force TURN connections by removing non-"relay" candidates
-  if (self._forceTURN && !self._enableIceTrickle) {
+  if (self._forceTURN && !(self._enableIceTrickle && self._peerInformations[targetMid] &&
+      self._peerInformations[targetMid].config.enableIceTrickle)) {
     if (!self._hasMCU) {
       log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from answer ' +
         ' as TURN connections is forced']);
@@ -10734,7 +10730,6 @@ Skylink.prototype._answerHandler = function(message) {
     pc.processingRemoteSDP = false;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
-    self._checkIfStreamMismatch();
 
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
@@ -12606,58 +12601,6 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
     } else {
       // Fix errors thrown like NS_ERROR_UNEXPECTED
       log.error([peerId, null, null, 'Failed adding local stream'], error);
-    }
-  }
-};
-
-/**
- * Function that checks if User's Stream matches the one received in Peer.
- * @method _checkIfStreamMismatch
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._checkIfStreamMismatch = function () {
-  var self = this;
-  var streamId = null;
-
-  if (self._hasMCU) {
-    return;
-  }
-
-  // TODO: So bad until we have proper fixes on protocol end :(
-  if (self._streams.screenshare && self._streams.screenshare.stream) {
-    streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
-  } else if (self._streams.userMedia && self._streams.userMedia.stream) {
-    streamId = self._streams.userMedia.stream.id || self._streams.userMedia.stream.label;
-  }
-
-  if (self._inRoom && streamId) {
-    self._sendChannelMessage({
-      type: self._SIG_MESSAGE_TYPE.STREAM,
-      mid: self._user.sid,
-      rid: self._room.id,
-      cid: self._key,
-      sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
-      streamId: streamId,
-      status: 'check'
-    });
-
-    var listOfPeers = Object.keys(self._peerConnections);
-
-    for (var peerId in self._peerConnections) {
-      if (self._peerConnections.hasOwnProperty(peerId) && self._peerConnections[peerId] &&
-        self._peerConnections[peerId].signalingState === self.PEER_CONNECTION_STATE.STABLE) {
-        var streams = self._peerConnections[peerId].getLocalStreams();
-        var currentStreamId = streams.length > 0 ? (streams[0].id || streams[0].label) : null;
-
-        if (currentStreamId !== streamId &&
-          self._streamsMistmatch[self._user.sid] !== (currentStreamId + '::' + streamId)) {
-          self._streamsMistmatch[self._user.sid] = currentStreamId + '::' + streamId;
-          self._trigger('streamMismatch', peerId, self.getPeerInfo(peerId),
-            true, !!self._streams.screenshare, currentStreamId, streamId);
-        }
-      }
     }
   }
 };
