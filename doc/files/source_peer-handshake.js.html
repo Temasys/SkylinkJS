@@ -434,147 +434,57 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   var self = this;
   var pc = self._peerConnections[targetMid];
 
-  /*if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &amp;&amp; pc.setAnswer) {
-    log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
-      &#x27;Ignoring session description. User has already set local answer&#x27;], sessionDescription);
-    return;
-  }
-  if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &amp;&amp; pc.setOffer) {
-    log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
-      &#x27;Ignoring session description. User has already set local offer&#x27;], sessionDescription);
-    return;
-  }*/
-
   // Added checks to ensure that sessionDescription is defined first
   if (!(!!sessionDescription &amp;&amp; !!sessionDescription.sdp)) {
-    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, null, &#x27;Dropping of setting local unknown sessionDescription &#x27; +
-      &#x27;as received sessionDescription is empty -&gt;&#x27;], sessionDescription);
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, null, &#x27;Local session description is undefined -&gt;&#x27;], sessionDescription);
     return;
   }
 
   // Added checks to ensure that connection object is defined first
   if (!pc) {
-    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Dropping of setting local &quot;&#x27; +
-      sessionDescription.type + &#x27;&quot; as connection does not exists&#x27;]);
-    return;
-  }
-
-  // Added checks to ensure that state is &quot;stable&quot; if setting local &quot;offer&quot;
-  if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &amp;&amp;
-    pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
     log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
-      &#x27;Dropping of setting local &quot;offer&quot; as signalingState is not &quot;&#x27; +
-      self.PEER_CONNECTION_STATE.STABLE + &#x27;&quot; -&gt;&#x27;], pc.signalingState);
+      &#x27;Local session description will not be set as connection does not exists -&gt;&#x27;], sessionDescription);
+    return;
+
+  } else if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &amp;&amp;
+    pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Local session description &#x27; +
+      &#x27;will not be set as signaling state is &quot;&#x27; + pc.signalingState + &#x27;&quot; -&gt;&#x27;], sessionDescription);
     return;
 
   // Added checks to ensure that state is &quot;have-remote-offer&quot; if setting local &quot;answer&quot;
   } else if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &amp;&amp;
     pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
-    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
-      &#x27;Dropping of setting local &quot;answer&quot; as signalingState is not &quot;&#x27; +
-      self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER + &#x27;&quot; -&gt;&#x27;], pc.signalingState);
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Local session description &#x27; +
+      &#x27;will not be set as signaling state is &quot;&#x27; + pc.signalingState + &#x27;&quot; -&gt;&#x27;], sessionDescription);
     return;
-  }
-
-
-  // NOTE ALEX: handle the pc = 0 case, just to be sure
-  var sdpLines = sessionDescription.sdp.split(&#x27;\r\n&#x27;);
-
-  // remove h264 invalid pref
-  sdpLines = self._removeSDPFirefoxH264Pref(sdpLines);
-
-  // Check if stereo was enabled
-  if (self._streams.userMedia &amp;&amp; self._streams.userMedia.settings.audio) {
-    if (self._streams.userMedia.settings.stereo) {
-      log.info([targetMid, null, null, &#x27;Enabling OPUS stereo flag&#x27;]);
-      self._addSDPStereo(sdpLines);
-    }
-  }
-
-  // Set SDP max bitrate
-  if (self._streamsBandwidthSettings) {
-    sdpLines = self._setSDPBitrate(sdpLines, self._streamsBandwidthSettings);
-  }
-
-  // set sdp resolution
-  /*if (self._streamSettings.hasOwnProperty(&#x27;video&#x27;)) {
-    sdpLines = self._setSDPVideoResolution(sdpLines, self._streamSettings.video);
-  }*/
-
-  /*log.info([targetMid, null, null, &#x27;Custom bandwidth settings:&#x27;], {
-    audio: (self._streamSettings.bandwidth.audio || &#x27;Not set&#x27;) + &#x27; kB/s&#x27;,
-    video: (self._streamSettings.bandwidth.video || &#x27;Not set&#x27;) + &#x27; kB/s&#x27;,
-    data: (self._streamSettings.bandwidth.data || &#x27;Not set&#x27;) + &#x27; kB/s&#x27;
-  });*/
-
-  /*if (self._streamSettings.video.hasOwnProperty(&#x27;frameRate&#x27;) &amp;&amp;
-    self._streamSettings.video.hasOwnProperty(&#x27;resolution&#x27;)){
-    log.info([targetMid, null, null, &#x27;Custom resolution settings:&#x27;], {
-      frameRate: (self._streamSettings.video.frameRate || &#x27;Not set&#x27;) + &#x27; fps&#x27;,
-      width: (self._streamSettings.video.resolution.width || &#x27;Not set&#x27;) + &#x27; px&#x27;,
-      height: (self._streamSettings.video.resolution.height || &#x27;Not set&#x27;) + &#x27; px&#x27;
-    });
-  }*/
-
-  // set video codec
-  if (self._selectedVideoCodec !== self.VIDEO_CODEC.AUTO) {
-    sdpLines = self._setSDPVideoCodec(sdpLines);
-  } else {
-    log.log([targetMid, null, null, &#x27;Not setting any video codec&#x27;]);
-  }
-
-  // set audio codec
-  if (self._selectedAudioCodec !== self.AUDIO_CODEC.AUTO) {
-    sdpLines = self._setSDPAudioCodec(sdpLines);
-  } else {
-    log.log([targetMid, null, null, &#x27;Not setting any audio codec&#x27;]);
-  }
-
-  sessionDescription.sdp = sdpLines.join(&#x27;\r\n&#x27;);
-
-  var removeVP9AptRtxPayload = false;
-  var agent = (self._peerInformations[targetMid] || {}).agent || {};
-
-  if (agent.pluginVersion) {
-    // 0.8.870 supports
-    var parts = agent.pluginVersion.split(&#x27;.&#x27;);
-    removeVP9AptRtxPayload = parseInt(parts[0], 10) &gt;= 0 &amp;&amp; parseInt(parts[1], 10) &gt;= 8 &amp;&amp;
-      parseInt(parts[2], 10) &gt;= 870;
-  }
-
-  // Remove rtx or apt= lines that prevent connections for browsers without VP8 or VP9 support
-  // See: https://bugs.chromium.org/p/webrtc/issues/detail?id=3962
-  if ([&#x27;chrome&#x27;, &#x27;opera&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; removeVP9AptRtxPayload) {
-    log.warn([targetMid, null, null, &#x27;Removing apt= and rtx payload lines causing connectivity issues&#x27;]);
-
-    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=101\r\n/g, &#x27;&#x27;);
-    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=107\r\n/g, &#x27;&#x27;);
-  }
-
-  // NOTE ALEX: opus should not be used for mobile
-  // Set Opus as the preferred codec in SDP if Opus is present.
-  //sessionDescription.sdp = preferOpus(sessionDescription.sdp);
-  // limit bandwidth
-  //sessionDescription.sdp = this._limitBandwidth(sessionDescription.sdp);
-  log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
-    &#x27;Updated session description:&#x27;], sessionDescription);
 
   // Added checks if there is a current local sessionDescription being processing before processing this one
-  if (pc.processingLocalSDP) {
+  } else if (pc.processingLocalSDP) {
     log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
-      &#x27;Dropping of setting local &#x27; + sessionDescription.type + &#x27; as there is another &#x27; +
-      &#x27;sessionDescription being processed -&gt;&#x27;], sessionDescription);
+      &#x27;Local session description will not be set as another is being processed -&gt;&#x27;], sessionDescription);
     return;
   }
 
   pc.processingLocalSDP = true;
 
+  sessionDescription.sdp = self._addSDPOpusConfig(targetMid, sessionDescription);
+  sessionDescription.sdp = self._setSDPBitrate(targetMid, sessionDescription);
+  sessionDescription.sdp = self._setSDPCodec(targetMid, sessionDescription);
+  sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
+  sessionDescription.sdp = self._removeH264VP9AptRtxForOlderPlugin(targetMid, sessionDescription);
+
+  log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
+    &#x27;Local session description updated -&gt;&#x27;], sessionDescription.sdp);
+
   pc.setLocalDescription(sessionDescription, function() {
-    log.debug([targetMid, sessionDescription.type, &#x27;Local description set&#x27;]);
+    log.debug([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
+      &#x27;Local session description has been set -&gt;&#x27;], sessionDescription);
 
     pc.processingLocalSDP = false;
 
     self._trigger(&#x27;handshakeProgress&#x27;, sessionDescription.type, targetMid);
+
     if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
       pc.setAnswer = &#x27;local&#x27;;
     } else {
@@ -583,18 +493,13 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
     if (!self._enableIceTrickle &amp;&amp; !pc.gathered) {
       log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
-        &#x27;Waiting for Ice gathering to complete to prevent Ice trickle&#x27;]);
+        &#x27;Local session description sending is halted to complete ICE gathering.&#x27;]);
       return;
-    }
-
-    // make checks for firefox session description
-    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &amp;&amp; window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
-      sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
     }
 
     self._sendChannelMessage({
       type: sessionDescription.type,
-      sdp: sessionDescription.sdp,
+      sdp: self._addSDPMediaStreamTrackIDs(targetMid, sessionDescription),
       mid: self._user.sid,
       target: targetMid,
       rid: self._room.id,
@@ -602,12 +507,11 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     });
 
   }, function(error) {
-    self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+    log.error([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Local description failed setting -&gt;&#x27;], error);
 
     pc.processingLocalSDP = false;
 
-    log.error([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
-      &#x27;Failed setting local description: &#x27;], error);
+    self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   });
 };
 

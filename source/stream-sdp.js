@@ -21,348 +21,304 @@ Skylink.prototype._selectedAudioCodec = 'auto';
 Skylink.prototype._selectedVideoCodec = 'auto';
 
 /**
- * Function that modifies the SessionDescription string to enable OPUS stereo.
- * @method _addSDPStereo
+ * Function that modifies the session description to configure settings for OPUS audio codec.
+ * @method _addSDPOpusConfig
  * @private
  * @for Skylink
- * @since 0.5.10
+ * @since 0.6.16
  */
-Skylink.prototype._addSDPStereo = function(sdpLines) {
-  var opusRtmpLineIndex = 0;
-  var opusLineFound = false;
-  var opusPayload = 0;
-  var fmtpLineFound = false;
+Skylink.prototype._addSDPOpusConfig = function(targetMid, sessionDescription) {
+  var sdpLines = sessionDescription.sdp.split('\r\n');
+  var payload = null;
+  var settings = {
+    stereo: false,
+    useinbandfec: null,
+    usedtx: null
+  };
+  var audioSettings = this.getPeerInfo().settings.audio;
 
-  var i, j;
-  var line;
+  if (audioSettings && typeof audioSettings === 'object') {
+    settings.stereo = audioSettings.stereo === true;
+    settings.useinbandfec = typeof audioSettings.useinbandfec === 'boolean' ? audioSettings.useinbandfec : null;
+    settings.usedtx = typeof audioSettings.usedtx === 'boolean' ? audioSettings.usedtx : null;
+  }
 
-  for (i = 0; i < sdpLines.length; i += 1) {
-    line = sdpLines[i];
+  log.debug([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Received OPUS config ->'], settings);
 
-    if (line.indexOf('a=rtpmap:') === 0) {
-      var parts = line.split(' ');
-
-      if (parts[1].indexOf('opus/48000/') === 0) {
-        opusLineFound = true;
-        opusPayload = parts[0].split(':')[1];
-        opusRtmpLineIndex = i;
-        break;
-      }
+  // Find OPUS RTPMAP line
+  for (var i = 0; i < sdpLines.length; i++) {
+    if (sdpLines[i].indexOf('a=rtpmap:') === 0 && (sdpLines[i].toLowerCase()).indexOf('opus/48000/') > 0) {
+      payload = (sdpLines[i].split(' ')[0] || '').split(':')[1] || null;
+      break;
     }
   }
 
-  // if found
-  if (opusLineFound) {
-    log.debug([null, 'SDP', null, 'OPUS line is found. Enabling stereo']);
+  if (!payload) {
+    log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+      'Failed to find OPUS payload. Not configuring options.']);
+    return sessionDescription.sdp;
+  }
 
-    // loop for fmtp payload
-    for (j = 0; j < sdpLines.length; j += 1) {
-      line = sdpLines[j];
+  // Set OPUS FMTP line
+  for (var j = 0; j < sdpLines.length; j++) {
+    if (sdpLines[j].indexOf('a=fmtp:' + payload) === 0) {
+      var opusFmtpLine = sdpLines[j].split(':');
 
-      if (line.indexOf('a=fmtp:' + opusPayload) === 0) {
-        fmtpLineFound = true;
-        sdpLines[j] += '; stereo=1';
-        break;
+      if ((opusFmtpLine[1] || '').indexOf('useinbandfec=1') > -1 && settings.useinbandfec === null) {
+        log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+          'Received OPUS useinbandfec as true by default.']);
+        settings.useinbandfec = true;
       }
-    }
 
-    // if line doesn't exists for an instance firefox
-    if (!fmtpLineFound) {
-      sdpLines.splice(opusRtmpLineIndex, 0, 'a=fmtp:' + opusPayload + ' stereo=1');
+      if ((opusFmtpLine[1] || '').indexOf('usedtx=1') > -1 && settings.usedtx === null) {
+        log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+          'Received OPUS usedtx as true by default.']);
+        settings.usedtx = true;
+      }
+
+      log.debug([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Setting OPUS config ->'], settings);
+
+      var updatedOpusConfig = '';
+
+      if (settings.stereo === true) {
+        updatedOpusConfig += 'stereo=1;sprop-stereo=1;';
+      }
+
+      if (settings.useinbandfec === true) {
+        updatedOpusConfig += 'useinbandfec=1;';
+      }
+
+      if (settings.usedtx === true) {
+        updatedOpusConfig += 'usedtx=1;';
+      }
+
+      sdpLines[j] = 'a=fmtp:' + payload + ' ' + updatedOpusConfig;
+      break;
     }
   }
 
-  return sdpLines;
+  return sdpLines.join('\r\n');
 };
 
 /**
- * Function that modifies the SessionDescription string to set the sending bandwidth.
+ * Function that modifies the session description to limit the maximum sending bandwidth.
  * Setting this may not necessarily work in Firefox.
  * @method _setSDPBitrate
  * @private
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
-  // Find if user has audioStream
-  var bandwidth = this._streamsBandwidthSettings;
+Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
+  var sdpLines = sessionDescription.sdp.split('\r\n');
+  var parseFn = function (type, bw) {
+    if (!(typeof bw === 'number' && bw > 0)) {
+      log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Not limiting "' + type + '" bandwidth']);
+      return;
+    }
 
-  // Prevent setting of bandwidth audio if not configured
-  if (typeof bandwidth.audio === 'number' && bandwidth.audio > 0) {
-    var hasSetAudio = false;
+    var mLineType = type;
 
-    for (var i = 0; i < sdpLines.length; i += 1) {
-      // set the audio bandwidth
-      if (sdpLines[i].indexOf('m=audio') === 0) {
-      //if (sdpLines[i].indexOf('a=audio') === 0 || sdpLines[i].indexOf('m=audio') === 0) {
+    if (type === 'data') {
+      mLineType = 'application';
+    }
+
+    for (var i = 0; i < sdpLines.length; i++) {
+      if (sdpLines[i].indexOf('m=' + mLineType) === 0) {
+        log.info([targetMid, 'RTCSessionDesription', sessionDescription.type,
+          'Limiting maximum sending "' + type + '" bandwidth ->'], bw);
+
         sdpLines.splice(i + 1, 0, window.webrtcDetectedBrowser === 'firefox' ?
-          'b=TIAS:' + (bandwidth.audio * 1024) : 'b=AS:' + bandwidth.audio);
-
-        log.info([null, 'SDP', null, 'Setting maximum sending audio bandwidth bitrate @(index:' + i + ') -> '], bandwidth.audio);
-        hasSetAudio = true;
-        break;
+          'b=TIAS:' + (bw * 1024) : 'b=AS:' + bw);
+        return;
       }
     }
+  };
 
-    if (!hasSetAudio) {
-      log.warn([null, 'SDP', null, 'Not setting maximum sending audio bandwidth bitrate as m=audio line is not found']);
-    }
-  } else {
-    log.warn([null, 'SDP', null, 'Not setting maximum sending audio bandwidth bitrate and leaving to browser\'s defaults']);
-  }
+  parseFn('audio', this._streamsBandwidthSettings.audio);
+  parseFn('video', this._streamsBandwidthSettings.video);
+  parseFn('data', this._streamsBandwidthSettings.data);
 
-  // Prevent setting of bandwidth video if not configured
-  if (typeof bandwidth.video === 'number' && bandwidth.video > 0) {
-    var hasSetVideo = false;
-
-    for (var j = 0; j < sdpLines.length; j += 1) {
-      // set the video bandwidth
-      if (sdpLines[j].indexOf('m=video') === 0) {
-      //if (sdpLines[j].indexOf('a=video') === 0 || sdpLines[j].indexOf('m=video') === 0) {
-        sdpLines.splice(j + 1, 0, window.webrtcDetectedBrowser === 'firefox' ?
-          'b=TIAS:' + (bandwidth.video * 1024) : 'b=AS:' + bandwidth.video);
-
-        log.info([null, 'SDP', null, 'Setting maximum sending video bandwidth bitrate @(index:' + j + ') -> '], bandwidth.video);
-        hasSetVideo = true;
-        break;
-      }
-    }
-
-    if (!hasSetVideo) {
-      log.warn([null, 'SDP', null, 'Not setting maximum sending video bandwidth bitrate as m=video line is not found']);
-    }
-  } else {
-    log.warn([null, 'SDP', null, 'Not setting maximum sending video bandwidth bitrate and leaving to browser\'s defaults']);
-  }
-
-  // Prevent setting of bandwidth data if not configured
-  if (typeof bandwidth.data === 'number' && bandwidth.data > 0) {
-    var hasSetData = false;
-
-    for (var k = 0; k < sdpLines.length; k += 1) {
-      // set the data bandwidth
-      if (sdpLines[k].indexOf('m=application') === 0) {
-      //if (sdpLines[k].indexOf('a=application') === 0 || sdpLines[k].indexOf('m=application') === 0) {
-        sdpLines.splice(k + 1, 0, window.webrtcDetectedBrowser === 'firefox' ?
-          'b=TIAS:' + (bandwidth.data * 1024) : 'b=AS:' + bandwidth.data);
-
-        log.info([null, 'SDP', null, 'Setting maximum sending data bandwidth bitrate @(index:' + k + ') -> '], bandwidth.data);
-        hasSetData = true;
-        break;
-      }
-    }
-
-    if (!hasSetData) {
-      log.warn([null, 'SDP', null, 'Not setting maximum sending data bandwidth bitrate as m=application line is not found']);
-    }
-  } else {
-    log.warn([null, 'SDP', null, 'Not setting maximum sending data bandwidth bitrate and leaving to browser\'s defaults']);
-  }
-
-  return sdpLines;
+  return sdpLines.join('\r\n');
 };
 
 /**
- * Function that modifies the SessionDescription string to set the preferred sending video codec.
- * @method _setSDPVideoCodec
+ * Function that modifies the session description to set the preferred audio/video codec.
+ * @method _setSDPCodec
  * @private
  * @for Skylink
- * @since 0.5.2
+ * @since 0.6.16
  */
-Skylink.prototype._setSDPVideoCodec = function(sdpLines) {
-  log.log('Setting video codec', this._selectedVideoCodec);
-  var codecFound = false;
-  var payload = 0;
+Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
+  var sdpLines = sessionDescription.sdp.split('\r\n');
+  var parseFn = function (type, codec) {
+    if (codec === 'auto') {
+      log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+        'Not preferring any codec for "' + type + '" streaming. Using browser selection.']);
+      return;
+    }
 
-  var i, j;
-  var line;
+    var payload = null;
 
-  for (i = 0; i < sdpLines.length; i += 1) {
-    line = sdpLines[i];
-
-    if (line.indexOf('a=rtpmap:') === 0) {
-      if (line.toLowerCase().indexOf(this._selectedVideoCodec.toLowerCase()) > 0) {
-        codecFound = true;
-        payload = line.split(':')[1].split(' ')[0];
-        break;
+    // Find the codec first
+    for (var i = 0; i < sdpLines.length; i++) {
+      if (sdpLines[i].indexOf('a=rtpmap:') === 0 && (sdpLines[i].toLowerCase()).indexOf(codec.toLowerCase()) > 0) {
+        payload = sdpLines[i].split(':')[1].split(' ')[0];
       }
     }
-  }
 
-  if (codecFound) {
-    for (j = 0; j < sdpLines.length; j += 1) {
-      line = sdpLines[j];
+    if (!payload) {
+      log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Not preferring "' +
+        codec + '" for "' + type + '" streaming as payload is not found.']);
+      return;
+    }
 
-      if (line.indexOf('m=video') === 0 || line.indexOf('a=video') === 0) {
-        var parts = line.split(' ');
-        var payloads = line.split(' ');
-        payloads.splice(0, 3);
+    for (var j = 0; j < sdpLines.length; j++) {
+      if (sdpLines[j].indexOf('m=' + type) === 0) {
+        log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Preferring "' +
+          codec + '" for "' + type + '" streaming.']);
 
-        var selectedPayloadIndex = payloads.indexOf(payload);
+        var parts = sdpLines[j].split(' ');
 
-        if (selectedPayloadIndex === -1) {
-          payloads.splice(0, 0, payload);
-        } else {
-          var first = payloads[0];
-          payloads[0] = payload;
-          payloads[selectedPayloadIndex] = first;
+        if (parts.indexOf(payload) > 2) {
+          parts.splice(payload, 1);
         }
-        sdpLines[j] = parts[0] + ' ' + parts[1] + ' ' + parts[2] + ' ' + payloads.join(' ');
+
+        // Example: m=audio 9 UDP/TLS/RTP/SAVPF 111
+        parts.splice(3, 0, payload);
+        sdpLines[j] = parts.join(' ');
         break;
       }
     }
-  }
-  return sdpLines;
+  };
+
+  parseFn('audio', this._selectedAudioCodec);
+  parseFn('video', this._selectedVideoCodec);
+
+  return sdpLines.join('\r\n');
 };
 
 /**
- * Function that modifies the SessionDescription string to set the preferred sending audio codec.
- * @method _setSDPAudioCodec
- * @private
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._setSDPAudioCodec = function(sdpLines) {
-  log.log('Setting audio codec', this._selectedAudioCodec);
-  var codecFound = false;
-  var payload = 0;
-
-  var i, j;
-  var line;
-
-  for (i = 0; i < sdpLines.length; i += 1) {
-    line = sdpLines[i];
-
-    if (line.indexOf('a=rtpmap:') === 0) {
-      if (line.toLowerCase().indexOf(this._selectedAudioCodec.toLowerCase()) > 0) {
-        codecFound = true;
-        payload = line.split(':')[1].split(' ')[0];
-      }
-    }
-  }
-
-  if (codecFound) {
-    for (j = 0; j < sdpLines.length; j += 1) {
-      line = sdpLines[j];
-
-      if (line.indexOf('m=audio') === 0 || line.indexOf('a=audio') === 0) {
-        var parts = line.split(' ');
-        var payloads = line.split(' ');
-        payloads.splice(0, 3);
-
-        var selectedPayloadIndex = payloads.indexOf(payload);
-
-        if (selectedPayloadIndex === -1) {
-          payloads.splice(0, 0, payload);
-        } else {
-          var first = payloads[0];
-          payloads[0] = payload;
-          payloads[selectedPayloadIndex] = first;
-        }
-        sdpLines[j] = parts[0] + ' ' + parts[1] + ' ' + parts[2] + ' ' + payloads.join(' ');
-        break;
-      }
-    }
-  }
-  return sdpLines;
-};
-
-/**
- * Function that modifies the SessionDescription string to remove the experimental H264 Firefox flag
- *   that is breaking connections.
- * To evaluate removal of this change once we roll out H264 codec interop.
+ * Function that modifies the session description to remove the previous experimental H264
+ * codec that is apparently breaking connections.
+ * NOTE: We should perhaps not remove it since H264 is supported?
  * @method _removeSDPFirefoxH264Pref
  * @private
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._removeSDPFirefoxH264Pref = function(sdpLines) {
-  var invalidLineIndex = sdpLines.indexOf(
-    'a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1');
-  if (invalidLineIndex > -1) {
-    log.debug([null, 'SDP', null, 'Firefox H264 invalid pref found:'], invalidLineIndex);
-    sdpLines.splice(invalidLineIndex, 1);
+Skylink.prototype._removeSDPFirefoxH264Pref = function(targetMid, sessionDescription) {
+  var sdpLines = sessionDescription.sdp.split('\r\n');
+  var experimentalLineIndex = sdpLines.indexOf('a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1');
+
+  if (experimentalLineIndex > -1) {
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type,
+      'Removing Firefox experimental H264 flag to ensure interopability reliability']);
+    sdpLines.splice(experimentalLineIndex, 1);
   }
-  return sdpLines;
+  return sdpLines.join('\r\n');
 };
 
 /**
- * Function that modifies the SessionDescription string to set with the correct MediaStream ID and
- *   MediaStreamTrack IDs that is not provided from Firefox connection to Chromium connection.
- * @method _addSDPSsrcFirefoxAnswer
+ * Function that modifies the session description to append the MediaStream and MediaStreamTrack IDs that seems
+ * to be missing from Firefox answer session description to Chrome connection causing freezes in re-negotiation.
+ * @method _addSDPMediaStreamTrackIDs
  * @private
  * @for Skylink
- * @since 0.6.6
+ * @since 0.6.16
  */
-Skylink.prototype._addSDPSsrcFirefoxAnswer = function (targetMid, sdp) {
-  var self = this;
-  var agent = self.getPeerInfo(targetMid).agent;
-
-  var pc = self._peerConnections[targetMid];
-
-  if (!pc) {
-    log.error([targetMid, 'RTCSessionDesription', 'answer', 'Peer connection object ' +
-      'not found. Unable to parse answer session description for peer']);
-    return;
+Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescription) {
+  if (!(this._peerConnections[targetMid] && this._peerConnections[targetMid].getLocalStreams().length > 0)) {
+    log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+      'Not enforcing MediaStream IDs as no Streams is sent.']);
+    return sessionDescription.sdp;
   }
 
-  var updatedSdp = sdp;
+  var sdpLines = sessionDescription.sdp.split('\r\n');
+  var agent = ((this._peerInformations[targetMid] || {}).agent || {}).name || '';
+  var localStream = this._peerConnections[targetMid].getLocalStreams()[0];
+  var localStreamId = localStream.id || localStream.label;
 
-  // for this case, this is because firefox uses Unified Plan and Chrome uses
-  // Plan B. we have to remodify this a bit to let the non-ff detect as new mediastream
-  // as chrome/opera/safari detects it as default due to missing ssrc specified as used in plan B.
-  if (window.webrtcDetectedBrowser === 'firefox' && agent.name !== 'firefox' &&
-    //pc.remoteDescription.sdp.indexOf('a=msid-semantic: WMS *') === -1 &&
-    updatedSdp.indexOf('a=msid-semantic:WMS *') > 0) {
-    // start parsing
-    var sdpLines = updatedSdp.split('\r\n');
-    var streamId = '';
-    var replaceSSRCSemantic = -1;
-    var i;
-    var trackId = '';
+  var parseFn = function (type, tracks) {
+    if (tracks.length === 0) {
+      log.debug([targetMid, 'RTCSessionDesription', sessionDescription.type,
+        'Not enforcing "' + type + '" MediaStreamTrack IDs as no Stream "' + type + '" tracks is sent.']);
+      return;
+    }
 
-    var parseTracksSSRC = function (track) {
-      for (i = 0, trackId = ''; i < sdpLines.length; i++) {
-        if (!!trackId) {
-          if (sdpLines[i].indexOf('a=ssrc:') === 0) {
-            var ssrcId = sdpLines[i].split(':')[1].split(' ')[0];
-            sdpLines.splice(i+1, 0, 'a=ssrc:' + ssrcId +  ' msid:' + streamId + ' ' + trackId,
-              'a=ssrc:' + ssrcId + ' mslabel:default',
-              'a=ssrc:' + ssrcId + ' label:' + trackId);
-            break;
-          } else if (sdpLines[i].indexOf('a=mid:') === 0) {
-            break;
-          }
-        } else if (sdpLines[i].indexOf('a=msid:') === 0) {
-          if (i > 0 && sdpLines[i-1].indexOf('a=mid:' + track) === 0) {
-            var parts = sdpLines[i].split(':')[1].split(' ');
+    var trackId = tracks[0].id || tracks[0].label;
+    var ssrcId = null;
+    var hasReachedType = false;
 
-            streamId = parts[0];
-            trackId = parts[1];
-            replaceSSRCSemantic = true;
-          }
-        }
-      }
-    };
-
-    parseTracksSSRC('video');
-    parseTracksSSRC('audio');
-
-    /*if (replaceSSRCSemantic) {
-      for (i = 0; i < sdpLines.length; i++) {
-        if (sdpLines[i].indexOf('a=msid-semantic:WMS ') === 0) {
-          var parts = sdpLines[i].split(' ');
-          parts[parts.length - 1] = streamId;
-          sdpLines[i] = parts.join(' ');
+    // Get SSRC ID
+    for (var i = 0; i < sdpLines.length; i++) {
+      if (sdpLines[i].indexOf('m=' + type) === 0) {
+        if (!hasReachedType) {
+          hasReachedType = true;
+          continue;
+        } else {
           break;
         }
       }
 
-    }*/
-    updatedSdp = sdpLines.join('\r\n');
+      if (hasReachedType && sdpLines[i].indexOf('a=ssrc:') === 0) {
+        ssrcId = (sdpLines[i].split(':')[1] || '').split(' ')[0] || null;
 
-    log.debug([targetMid, 'RTCSessionDesription', 'answer', 'Parsed remote description from firefox'], sdpLines);
+        var msidLine = 'a=ssrc:' + ssrcId + ' msid:' + localStreamId + ' ' + trackId;
+        var mslabelLine = 'a=ssrc:' + ssrcId + ' mslabel:default';
+        var labelLine = 'a=ssrc:' + ssrcId + ' label:' + trackId;
+
+        if (sdpLines.indexOf(msidLine) === -1) {
+          sdpLines.splice(i + 1, 0, msidLine);
+          i++;
+        }
+
+        if (sdpLines.indexOf(mslabelLine) === -1) {
+          sdpLines.splice(i + 1, 0, mslabelLine);
+          i++;
+        }
+
+        if (sdpLines.indexOf(labelLine) === -1) {
+          sdpLines.splice(i + 1, 0, labelLine);
+          i++;
+        }
+        break;
+      }
+    }
+  };
+
+  parseFn('audio', localStream.getAudioTracks());
+  parseFn('video', localStream.getVideoTracks());
+
+  return sdpLines.join('\r\n');
+};
+
+/**
+ * Function that modifies the session description to remove VP9 and H264 apt/rtx lines to prevent plugin connection breaks.
+ * @method _removeH264VP9AptRtxForOlderPlugin
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._removeH264VP9AptRtxForOlderPlugin = function (targetMid, sessionDescription) {
+  var removeVP9AptRtxPayload = false;
+  var agent = (this._peerInformations[targetMid] || {}).agent || {};
+
+  if (agent.pluginVersion) {
+    // 0.8.870 supports
+    var parts = agent.pluginVersion.split('.');
+    removeVP9AptRtxPayload = parseInt(parts[0], 10) >= 0 && parseInt(parts[1], 10) >= 8 &&
+      parseInt(parts[2], 10) >= 870;
   }
 
-  return updatedSdp;
+  // Remove rtx or apt= lines that prevent connections for browsers without VP8 or VP9 support
+  // See: https://bugs.chromium.org/p/webrtc/issues/detail?id=3962
+  if (['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1 && removeVP9AptRtxPayload) {
+    log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+      'Removing VP9/H264 apt= and rtx payload lines causing connectivity issues']);
+
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=101\r\n/g, '');
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=107\r\n/g, '');
+  }
+
+  return sessionDescription.sdp;
 };

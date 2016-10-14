@@ -376,17 +376,6 @@ Skylink.prototype._streamsBandwidthSettings = {};
 Skylink.prototype._streamsStoppedCbs = {};
 
 /**
- * Stores all the Stream mismatch checks.
- * @attribute _streamsMistmatch
- * @param {String} #peerId The Peer&#x27;s Stream mismatch concatenated by &quot;current::actual&quot;.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._streamsMistmatch = {};
-
-/**
  * Function that retrieves camera Stream.
  * @method getUserMedia
  * @param {JSON} [options] The camera Stream configuration options.
@@ -405,6 +394,12 @@ Skylink.prototype._streamsMistmatch = {};
  * @param {Boolean|JSON} [options.audio=false] The audio configuration options.
  * @param {Boolean} [options.audio.stereo=false] The flag if stereo band should be configured
  *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ * @param {Boolean} [options.audio.usedtx] The flag if DTX should be configured
+ *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
+ * @param {Boolean} [options.audio.useinbandfec] The flag if capability to take advantage of in-band FEC should be configured
+ *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
  * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
  *   &lt;small&gt;Providing the value as &lt;code&gt;false&lt;/code&gt; does nothing to &lt;code&gt;peerInfo.mediaStatus.audioMuted&lt;/code&gt;,
  *   but when provided as &lt;code&gt;true&lt;/code&gt;, this sets the &lt;code&gt;peerInfo.mediaStatus.audioMuted&lt;/code&gt; value to
@@ -1177,7 +1172,15 @@ Skylink.prototype.disableVideo = function() {
  * &lt;/blockquote&gt;
  * Function that retrieves screensharing Stream.
  * @method shareScreen
- * @param {JSON} [enableAudio=false] The flag if audio tracks should be retrieved.
+ * @param {JSON|Boolean} [enableAudio=false] The flag if audio tracks should be retrieved.
+ * @param {Boolean} [enableAudio.stereo=false] The flag if stereo band should be configured
+ *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ * @param {Boolean} [enableAudio.usedtx] The flag if DTX should be configured
+ *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
+ * @param {Boolean} [enableAudio.useinbandfec] The flag if capability to take advantage of in-band FEC should be configured
+ *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;
@@ -1258,14 +1261,20 @@ Skylink.prototype.disableVideo = function() {
  */
 Skylink.prototype.shareScreen = function (enableAudio, callback) {
   var self = this;
+  var enableAudioSettings = {
+    useinbandfec: null,
+    usedtx: null,
+    stereo: true
+  };
 
   if (typeof enableAudio === &#x27;function&#x27;) {
     callback = enableAudio;
     enableAudio = true;
-  }
 
-  if (typeof enableAudio !== &#x27;boolean&#x27;) {
-    enableAudio = true;
+  } else if (enableAudio &amp;&amp; typeof enableAudio === &#x27;object&#x27;) {
+    enableAudioSettings.usedtx = typeof enableAudio.usedtx === &#x27;boolean&#x27; ? enableAudio.usedtx : null;
+    enableAudioSettings.useinbandfec = typeof enableAudio.useinbandfec === &#x27;boolean&#x27; ? enableAudio.useinbandfec : null;
+    enableAudioSettings.stereo = enableAudio.stereo === true;
   }
 
   self._throttle(function (runFn) {
@@ -1281,9 +1290,10 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 
     var settings = {
       settings: {
-        audio: enableAudio,
+        audio: enableAudio === true || (enableAudio &amp;&amp; typeof enableAudio === &#x27;object&#x27;) ? enableAudioSettings : false,
         video: {
-          screenshare: true
+          screenshare: true,
+          exactConstraints: false
         }
       },
       getUserMediaSettings: {
@@ -1577,12 +1587,24 @@ Skylink.prototype._parseStreamSettings = function(options) {
   if (options.audio) {
     settings.settings.audio = {
       stereo: false,
+      useinbandfec: null,
+      usedtx: null,
+      deviceId: null,
+      optional: null,
       exactConstraints: !!options.useExactConstraints
     };
     settings.getUserMediaSettings.audio = {};
 
     if (typeof options.audio.stereo === &#x27;boolean&#x27;) {
       settings.settings.audio.stereo = options.audio.stereo;
+    }
+
+    if (typeof options.audio.useinbandfec === &#x27;boolean&#x27;) {
+      settings.settings.audio.useinbandfec = options.audio.useinbandfec;
+    }
+
+    if (typeof options.audio.usedtx === &#x27;boolean&#x27;) {
+      settings.settings.audio.usedtx = options.audio.usedtx;
     }
 
     if (typeof options.audio.mute === &#x27;boolean&#x27;) {
@@ -1622,6 +1644,9 @@ Skylink.prototype._parseStreamSettings = function(options) {
     settings.settings.video = {
       resolution: clone(this.VIDEO_RESOLUTION.VGA),
       screenshare: false,
+      deviceId: null,
+      optional: null,
+      frameRate: null,
       exactConstraints: !!options.useExactConstraints
     };
     settings.getUserMediaSettings.video = {};

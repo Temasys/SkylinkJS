@@ -117,14 +117,13 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
     if (!self._enableIceTrickle) {
       var sessionDescription = self._peerConnections[targetMid].localDescription;
 
-      // make checks for firefox session description
-      if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && window.webrtcDetectedBrowser === 'firefox') {
-        sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
+      if (!(sessionDescription && sessionDescription.type && sessionDescription.sdp)) {
+        return;
       }
 
       self._sendChannelMessage({
         type: sessionDescription.type,
-        sdp: sessionDescription.sdp,
+        sdp: self._addSDPMediaStreamTrackIDs(targetMid, sessionDescription),
         mid: self._user.sid,
         //agent: window.webrtcDetectedBrowser,
         userInfo: self._getUserInfo(),

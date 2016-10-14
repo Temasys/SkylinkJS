@@ -327,6 +327,12 @@ Skylink.prototype._EVENTS = {
    *   value is considered as &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;
    * @param {Boolean} peerInfo.settings.audio.stereo The flag if stereo band is configured
    *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for receiving audio data.
+   * @param {Boolean} [peerInfo.settings.audio.usedtx] The flag if DTX is configured
+   *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+   *   &lt;small&gt;When not defined, the default browser configuration is used.&lt;/small&gt;
+   * @param {Boolean} [peerInfo.settings.audio.useinbandfec] The flag if capability to take advantage of in-band FEC
+   *   is configured when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+   *   &lt;small&gt;When not defined, the default browser configuration is used.&lt;/small&gt;
    * @param {Array} [peerInfo.settings.audio.optional] The Peer Stream &lt;code&gt;navigator.getUserMedia()&lt;/code&gt; API
    *   &lt;code&gt;audio: { optional [..] }&lt;/code&gt; property.
    * @param {String} [peerInfo.settings.audio.deviceId] The Peer Stream audio track source ID of the device used.
