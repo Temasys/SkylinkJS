@@ -45,6 +45,8 @@ Skylink.prototype.VIDEO_CODEC = {
  *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/Opus_(audio_format)">OPUS</a> audio codec.
  * @param {String} ISAC <small>Value <code>"ISAC"</code></small>
  *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/Internet_Speech_Audio_Codec">ISAC</a> audio codec.
+ * @param {String} G722 <small>Value <code>"G722"</code></small>
+ *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/G.722">G722</a> audio codec.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -56,7 +58,7 @@ Skylink.prototype.AUDIO_CODEC = {
   OPUS: 'opus',
   //ILBC: 'ILBC',
   //G711: 'G711',
-  //G722: 'G722',
+  G722: 'G722'
   //SILK: 'SILK'
 };
 

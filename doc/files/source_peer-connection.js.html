@@ -1063,12 +1063,12 @@ Skylink.prototype._removePeer = function(peerId) {
   if (typeof this._peerMessagesStamps[peerId] !== &#x27;undefined&#x27;) {
     delete this._peerMessagesStamps[peerId];
   }
-  
+
   if (typeof this._peerConnectionHealth[peerId] !== &#x27;undefined&#x27;) {
     delete this._peerConnectionHealth[peerId];
   }
   // close datachannel connection
-  if (this._enableDataChannel) {
+  if (this._dataChannels[peerId]) {
     this._closeDataChannel(peerId);
   }
 
@@ -1121,8 +1121,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.ondatachannel = function(event) {
     var dc = event.channel || event;
     log.debug([targetMid, &#x27;RTCDataChannel&#x27;, dc.label, &#x27;Received datachannel -&gt;&#x27;], dc);
-    if (self._enableDataChannel) {
-
+    if (self._enableDataChannel &amp;&amp; self._peerInformations[targetMid] &amp;&amp;
+      self._peerInformations[targetMid].config.enableDataChannel) {
       var channelType = self.DATA_CHANNEL_TYPE.DATA;
       var channelKey = dc.label;
 

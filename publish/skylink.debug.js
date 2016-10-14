@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Fri Oct 14 2016 02:10:01 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 00:53:21 GMT+0800 (SGT) */
 
 (function() {
 
@@ -10767,6 +10767,8 @@ Skylink.prototype.VIDEO_CODEC = {
  *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/Opus_(audio_format)">OPUS</a> audio codec.
  * @param {String} ISAC <small>Value <code>"ISAC"</code></small>
  *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/Internet_Speech_Audio_Codec">ISAC</a> audio codec.
+ * @param {String} G722 <small>Value <code>"G722"</code></small>
+ *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/G.722">G722</a> audio codec.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -10778,7 +10780,7 @@ Skylink.prototype.AUDIO_CODEC = {
   OPUS: 'opus',
   //ILBC: 'ILBC',
   //G711: 'G711',
-  //G722: 'G722',
+  G722: 'G722'
   //SILK: 'SILK'
 };
 

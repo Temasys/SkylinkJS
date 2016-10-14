@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Fri Oct 14 2016 02:10:01 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 00:53:21 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Fri Oct 14 2016 02:10:01 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 00:53:21 GMT+0800 (SGT) */
 
 (function() {
 
@@ -22300,6 +22300,8 @@ Skylink.prototype.VIDEO_CODEC = {
  *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/Opus_(audio_format)">OPUS</a> audio codec.
  * @param {String} ISAC <small>Value <code>"ISAC"</code></small>
  *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/Internet_Speech_Audio_Codec">ISAC</a> audio codec.
+ * @param {String} G722 <small>Value <code>"G722"</code></small>
+ *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/G.722">G722</a> audio codec.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -22311,7 +22313,7 @@ Skylink.prototype.AUDIO_CODEC = {
   OPUS: 'opus',
   //ILBC: 'ILBC',
   //G711: 'G711',
-  //G722: 'G722',
+  G722: 'G722'
   //SILK: 'SILK'
 };
 

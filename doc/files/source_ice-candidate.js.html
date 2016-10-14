@@ -183,7 +183,8 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       candidate: candidate.candidate
     });
 
-    if (!self._enableIceTrickle) {
+    if (!(self._enableIceTrickle &amp;&amp; self._peerInformations[targetMid] &amp;&amp;
+      self._peerInformations[targetMid].config.enableIceTrickle)) {
       log.warn([targetMid, &#x27;RTCICECandidate&#x27;, null, &#x27;Ignoring sending of &quot;&#x27; + candidateType +
         &#x27;&quot; candidate as trickle ICE is disabled&#x27;], candidate);
       return;
