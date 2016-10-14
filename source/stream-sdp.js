@@ -81,7 +81,7 @@ Skylink.prototype._addSDPOpusConfig = function(targetMid, sessionDescription) {
       var updatedOpusConfig = '';
 
       if (settings.stereo === true) {
-        updatedOpusConfig += 'stereo=1;sprop-stereo=1;';
+        updatedOpusConfig += 'stereo=1;';
       }
 
       if (settings.useinbandfec === true) {

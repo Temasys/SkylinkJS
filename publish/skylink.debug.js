@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 04:09:45 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 04:21:23 GMT+0800 (SGT) */
 
 (function() {
 
@@ -12614,7 +12614,7 @@ Skylink.prototype._addSDPOpusConfig = function(targetMid, sessionDescription) {
       var updatedOpusConfig = '';
 
       if (settings.stereo === true) {
-        updatedOpusConfig += 'stereo=1;sprop-stereo=1;';
+        updatedOpusConfig += 'stereo=1;';
       }
 
       if (settings.useinbandfec === true) {
