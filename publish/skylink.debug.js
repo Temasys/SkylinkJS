@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 00:53:21 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 00:54:37 GMT+0800 (SGT) */
 
 (function() {
 
@@ -12865,7 +12865,7 @@ Skylink.prototype._setSDPVideoCodec = function(sdpLines) {
     line = sdpLines[i];
 
     if (line.indexOf('a=rtpmap:') === 0) {
-      if (line.indexOf(this._selectedVideoCodec) > 0) {
+      if (line.toLowerCase().indexOf(this._selectedVideoCodec.toLowerCase()) > 0) {
         codecFound = true;
         payload = line.split(':')[1].split(' ')[0];
         break;
@@ -12918,7 +12918,7 @@ Skylink.prototype._setSDPAudioCodec = function(sdpLines) {
     line = sdpLines[i];
 
     if (line.indexOf('a=rtpmap:') === 0) {
-      if (line.indexOf(this._selectedAudioCodec) > 0) {
+      if (line.toLowerCase().indexOf(this._selectedAudioCodec.toLowerCase()) > 0) {
         codecFound = true;
         payload = line.split(':')[1].split(' ')[0];
       }
