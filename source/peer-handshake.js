@@ -405,26 +405,6 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     sdpLines = self._setSDPBitrate(sdpLines, self._streamsBandwidthSettings);
   }
 
-  // set sdp resolution
-  /*if (self._streamSettings.hasOwnProperty('video')) {
-    sdpLines = self._setSDPVideoResolution(sdpLines, self._streamSettings.video);
-  }*/
-
-  /*log.info([targetMid, null, null, 'Custom bandwidth settings:'], {
-    audio: (self._streamSettings.bandwidth.audio || 'Not set') + ' kB/s',
-    video: (self._streamSettings.bandwidth.video || 'Not set') + ' kB/s',
-    data: (self._streamSettings.bandwidth.data || 'Not set') + ' kB/s'
-  });*/
-
-  /*if (self._streamSettings.video.hasOwnProperty('frameRate') &&
-    self._streamSettings.video.hasOwnProperty('resolution')){
-    log.info([targetMid, null, null, 'Custom resolution settings:'], {
-      frameRate: (self._streamSettings.video.frameRate || 'Not set') + ' fps',
-      width: (self._streamSettings.video.resolution.width || 'Not set') + ' px',
-      height: (self._streamSettings.video.resolution.height || 'Not set') + ' px'
-    });
-  }*/
-
   // set video codec
   if (self._selectedVideoCodec !== self.VIDEO_CODEC.AUTO) {
     sdpLines = self._setSDPVideoCodec(sdpLines);

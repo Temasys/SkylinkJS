@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 00:54:37 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 01:25:03 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5353,26 +5353,6 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   if (self._streamsBandwidthSettings) {
     sdpLines = self._setSDPBitrate(sdpLines, self._streamsBandwidthSettings);
   }
-
-  // set sdp resolution
-  /*if (self._streamSettings.hasOwnProperty('video')) {
-    sdpLines = self._setSDPVideoResolution(sdpLines, self._streamSettings.video);
-  }*/
-
-  /*log.info([targetMid, null, null, 'Custom bandwidth settings:'], {
-    audio: (self._streamSettings.bandwidth.audio || 'Not set') + ' kB/s',
-    video: (self._streamSettings.bandwidth.video || 'Not set') + ' kB/s',
-    data: (self._streamSettings.bandwidth.data || 'Not set') + ' kB/s'
-  });*/
-
-  /*if (self._streamSettings.video.hasOwnProperty('frameRate') &&
-    self._streamSettings.video.hasOwnProperty('resolution')){
-    log.info([targetMid, null, null, 'Custom resolution settings:'], {
-      frameRate: (self._streamSettings.video.frameRate || 'Not set') + ' fps',
-      width: (self._streamSettings.video.resolution.width || 'Not set') + ' px',
-      height: (self._streamSettings.video.resolution.height || 'Not set') + ' px'
-    });
-  }*/
 
   // set video codec
   if (self._selectedVideoCodec !== self.VIDEO_CODEC.AUTO) {
@@ -12671,91 +12651,6 @@ Skylink.prototype._addSDPStereo = function(sdpLines) {
     }
   }
 
-  return sdpLines;
-};
-
-/**
- * Function that modifies the SessionDescription string to set the video resolution.
- * This is not even supported in the specs, and we should re-evalute it to be removed.
- * @method _setSDPVideoResolution
- * @private
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype._setSDPVideoResolution = function(sdpLines){
-  var video = this._streams.userMedia && this._streams.userMedia.settings.video;
-  var frameRate = video.frameRate || 50;
-  var resolution = {
-    width: 320,
-    height: 50
-  }; //video.resolution || {};
-
-  var videoLineFound = false;
-  var videoLineIndex = 0;
-  var fmtpPayloads = [];
-
-  var i, j, k;
-  var line;
-
-  var sdpLineData = 'max-fr=' + frameRate +
-    '; max-recv-width=320' + //(resolution.width ? resolution.width : 640) +
-    '; max-recv-height=160'; //+ (resolution.height ? resolution.height : 480);
-
-  for (i = 0; i < sdpLines.length; i += 1) {
-    line = sdpLines[i];
-
-    if (line.indexOf('a=video') === 0 || line.indexOf('m=video') === 0) {
-      videoLineFound = true;
-      videoLineIndex = i;
-      fmtpPayloads = line.split(' ');
-      fmtpPayloads.splice(0, 3);
-      break;
-    }
-  }
-
-  if (videoLineFound) {
-    // loop for every video codec
-    // ignore if not vp8 or h264
-    for (j = 0; j < fmtpPayloads.length; j += 1) {
-      var payload = fmtpPayloads[j];
-      var rtpmapLineIndex = 0;
-      var fmtpLineIndex = 0;
-      var fmtpLineFound = false;
-      var ignore = false;
-
-      for (k = 0; k < sdpLines.length; k += 1) {
-       line = sdpLines[k];
-
-        if (line.indexOf('a=rtpmap:' + payload) === 0) {
-          // for non h264 or vp8 codec, ignore. these are experimental codecs
-          // that may not exists afterwards
-          if (!(line.indexOf('VP8') > 0 || line.indexOf('H264') > 0)) {
-            ignore = true;
-            break;
-          }
-          rtpmapLineIndex = k;
-        }
-
-        if (line.indexOf('a=fmtp:' + payload) === 0) {
-          fmtpLineFound = true;
-          fmtpLineIndex = k;
-        }
-      }
-
-      if (ignore) {
-        continue;
-      }
-
-      if (fmtpLineFound) {
-        sdpLines[fmtpLineIndex] += ';' + sdpLineData;
-
-      } else {
-        sdpLines.splice(rtpmapLineIndex + 1, 0, 'a=fmtp:' + payload + ' ' + sdpLineData);
-      }
-    }
-
-    log.debug([null, 'SDP', null, 'Setting video resolution (broken)']);
-  }
   return sdpLines;
 };
 
