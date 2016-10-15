@@ -22,14 +22,14 @@ Skylink.prototype._selectedVideoCodec = 'auto';
 
 /**
  * Stores the flag if ulpfec and red codecs should be removed.
- * @attribute _disableUlpfecRedCodecs
+ * @attribute _disableVideoFecCodecs
  * @type Boolean
  * @default false
  * @private
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype._disableUlpfecRedCodecs = false;
+Skylink.prototype._disableVideoFecCodecs = false;
 
 /**
  * Function that modifies the session description to configure settings for OPUS audio codec.
@@ -358,7 +358,7 @@ Skylink.prototype._removeH264VP9AptRtxForOlderPlugin = function (targetMid, sess
  * @since 0.6.16
  */
 Skylink.prototype._removeUlpfecAndRedCodecs = function (targetMid, sessionDescription) {
-  if (!this._disableUlpfecRedCodecs) {
+  if (!this._disableVideoFecCodecs) {
     log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Enabling and not removing ulpfec or red codecs.']);
     return sessionDescription.sdp;
   }

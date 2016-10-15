@@ -236,14 +236,23 @@ Skylink.prototype._EVENTS = {
    *   value is considered as <code>false</code>.</small>
    * @param {Boolean} peerInfo.settings.audio.stereo The flag if stereo band is configured
    *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for receiving audio data.
-   * @param {Boolean} [peerInfo.settings.audio.usedtx] The flag if DTX is configured
-   *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   * @param {Boolean} [peerInfo.settings.audio.usedtx] <blockquote class="info">
+   *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+   *   The flag if DTX (Discontinuous Transmission) is configured when encoding audio codec
+   *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   *   <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>
    *   <small>When not defined, the default browser configuration is used.</small>
-   * @param {Boolean} [peerInfo.settings.audio.useinbandfec] The flag if capability to take advantage of in-band FEC
-   *   is configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   * @param {Boolean} [peerInfo.settings.audio.useinbandfec] <blockquote class="info">
+   *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+   *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) is
+   *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   *   <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>
    *   <small>When not defined, the default browser configuration is used.</small>
-   * @param {Number} [enableAudio.maxplaybackrate] The maximum output sampling rate rendered in Hertz (Hz)
-   *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   * @param {Number} [peerInfo.settings.audio.maxplaybackrate] <blockquote class="info">
+   *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+   *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
+   *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
    *   <small>When not defined, the default browser configuration is used.</small>
    * @param {Array} [peerInfo.settings.audio.optional] The Peer Stream <code>navigator.getUserMedia()</code> API
    *   <code>audio: { optional [..] }</code> property.

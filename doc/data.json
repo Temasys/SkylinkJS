@@ -3120,8 +3120,8 @@
                             "optional": true
                         },
                         {
-                            "name": "disableUlpfecRedCodecs",
-                            "description": "The flag if Ulpfec and Red codecs should be removed in\n  sending session descriptions.\n  <small>This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.</small>",
+                            "name": "disableVideoFecCodecs",
+                            "description": "The flag if video FEC (Forward Error Correction)\n  codecs like ulpfec and red should be removed in sending session descriptions.\n  <small>This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.</small>",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
@@ -3320,8 +3320,8 @@
                                     "type": "Boolean"
                                 },
                                 {
-                                    "name": "disableUlpfecRedCodecs",
-                                    "description": "The configured value of the <code>options.disableUlpfecRedCodecs</code>.",
+                                    "name": "disableVideoFecCodecs",
+                                    "description": "The configured value of the <code>options.disableVideoFecCodecs</code>.",
                                     "type": "Boolean"
                                 }
                             ]
@@ -4197,14 +4197,20 @@
                                 },
                                 {
                                     "name": "audio.usedtx",
-                                    "description": "The flag if DTX is configured\n  when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>When not defined, the default browser configuration is used.</small>",
+                                    "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation.</blockquote>\n  The flag if DTX (Discontinuous Transmission) is configured when encoding audio codec\n  is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>\n  <small>When not defined, the default browser configuration is used.</small>",
                                     "type": "Boolean",
                                     "optional": true
                                 },
                                 {
                                     "name": "audio.useinbandfec",
-                                    "description": "The flag if capability to take advantage of in-band FEC\n  is configured when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>When not defined, the default browser configuration is used.</small>",
+                                    "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation.</blockquote>\n  The flag if capability to take advantage of in-band FEC (Forward Error Correction) is\n  configured when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>\n  <small>When not defined, the default browser configuration is used.</small>",
                                     "type": "Boolean",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "audio.maxplaybackrate",
+                                    "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation.</blockquote>\n  The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is\n  <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This value must be between <code>8000</code> to <code>48000</code>.</small>\n  <small>When not defined, the default browser configuration is used.</small>",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
@@ -4373,12 +4379,6 @@
                     ]
                 },
                 {
-                    "name": "enableAudio.maxplaybackrate",
-                    "description": "The maximum output sampling rate rendered in Hertz (Hz)\n  when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>When not defined, the default browser configuration is used.</small>",
-                    "type": "Number",
-                    "optional": true
-                },
-                {
                     "name": "isSelf",
                     "description": "The flag if Peer is User.",
                     "type": "Boolean"
@@ -4389,7 +4389,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 305,
+            "line": 314,
             "description": "Event triggered when a Peer connection has been refreshed.",
             "itemtype": "event",
             "name": "peerRestart",
@@ -4415,7 +4415,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 318,
+            "line": 327,
             "description": "Event triggered when a Peer session information has been updated.",
             "itemtype": "event",
             "name": "peerUpdated",
@@ -4441,7 +4441,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 331,
+            "line": 340,
             "description": "Event triggered when a Peer leaves the room.",
             "itemtype": "event",
             "name": "peerLeft",
@@ -4467,7 +4467,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 344,
+            "line": 353,
             "description": "Event triggered when Room session has ended abruptly due to network disconnections.",
             "itemtype": "event",
             "name": "sessionDisconnect",
@@ -4488,7 +4488,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 356,
+            "line": 365,
             "description": "Event triggered when receiving Peer Stream.",
             "itemtype": "event",
             "name": "incomingStream",
@@ -4519,7 +4519,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 371,
+            "line": 380,
             "description": "Event triggered when receiving message from Peer.",
             "itemtype": "event",
             "name": "incomingMessage",
@@ -4579,7 +4579,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 401,
+            "line": 410,
             "description": "Event triggered when receiving completed data transfer from Peer.",
             "itemtype": "event",
             "name": "incomingData",
@@ -4615,7 +4615,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 417,
+            "line": 426,
             "description": "Event triggered when receiving upload data transfer from Peer.",
             "itemtype": "event",
             "name": "incomingDataRequest",
@@ -4646,7 +4646,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 431,
+            "line": 440,
             "description": "Event triggered when Room locked status has changed.",
             "itemtype": "event",
             "name": "roomLock",
@@ -4672,7 +4672,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 444,
+            "line": 453,
             "description": "Event triggered when a Datachannel connection state has changed.",
             "itemtype": "event",
             "name": "dataChannelState",
@@ -4714,7 +4714,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 463,
+            "line": 472,
             "description": "Event triggered when a data transfer state has changed.",
             "itemtype": "event",
             "name": "dataTransferState",
@@ -4822,7 +4822,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 511,
+            "line": 520,
             "description": "Event triggered when Signaling server reaction state has changed.",
             "itemtype": "event",
             "name": "systemAction",
@@ -4848,7 +4848,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 524,
+            "line": 533,
             "description": "Event triggered when a server Peer joins the room.",
             "itemtype": "event",
             "name": "serverPeerJoined",
@@ -4869,7 +4869,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 535,
+            "line": 544,
             "description": "Event triggered when a server Peer leaves the room.",
             "itemtype": "event",
             "name": "serverPeerLeft",
@@ -4890,7 +4890,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 546,
+            "line": 555,
             "description": "Event triggered when a server Peer connection has been refreshed.",
             "itemtype": "event",
             "name": "serverPeerRestart",
@@ -4911,7 +4911,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 557,
+            "line": 566,
             "description": "Event triggered when Peer Stream streaming has stopped.",
             "itemtype": "event",
             "name": "streamEnded",
@@ -4947,7 +4947,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 572,
+            "line": 581,
             "description": "Event triggered when Peer Stream audio or video tracks has been muted / unmuted.",
             "itemtype": "event",
             "name": "streamMuted",
@@ -4978,7 +4978,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 586,
+            "line": 595,
             "description": "Event triggered when <a href=\"#method_getPeers\"><code>getPeers()</code> method</a> retrieval state changes.",
             "itemtype": "event",
             "name": "getPeersStateChange",
@@ -5011,7 +5011,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 599,
+            "line": 608,
             "description": "Event triggered when <a href=\"#method_introducePeer\"><code>introducePeer()</code> method</a>\nintroduction request state changes.",
             "itemtype": "event",
             "name": "introduceStateChange",
@@ -5048,7 +5048,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 615,
+            "line": 624,
             "description": "Event triggered when <a href=\"#method_getConnectionStatus\"><code>getConnectionStatus()</code> method</a>\nretrieval state changes.",
             "itemtype": "event",
             "name": "getConnectionStatusStateChange",
@@ -5365,7 +5365,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 702,
+            "line": 711,
             "description": "Event triggered when <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> changes\nUser Streams audio and video tracks muted status.",
             "itemtype": "event",
             "name": "localMediaMuted",
@@ -5393,7 +5393,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 720,
+            "line": 729,
             "description": "Stores the list of <code>once()</code> event handlers.\nThese events are only triggered once.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -5419,7 +5419,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 733,
+            "line": 742,
             "description": "Stores the timestamps data used for throttling.",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -5431,7 +5431,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 748,
+            "line": 757,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -5455,7 +5455,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 772,
+            "line": 781,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -5492,7 +5492,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 830,
+            "line": 839,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -5517,7 +5517,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 879,
+            "line": 888,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -5528,7 +5528,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 933,
+            "line": 942,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -5539,7 +5539,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 959,
+            "line": 968,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -5550,7 +5550,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 997,
+            "line": 1006,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",
@@ -6478,19 +6478,19 @@
                                 },
                                 {
                                     "name": "usedtx",
-                                    "description": "The flag if DTX should be configured\n  when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation.</blockquote>\n  The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec\n  is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
                                     "type": "Boolean",
                                     "optional": true
                                 },
                                 {
                                     "name": "useinbandfec",
-                                    "description": "The flag if capability to take advantage of in-band FEC should be configured\n  when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation.</blockquote>\n  The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be\n  configured when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
                                     "type": "Boolean",
                                     "optional": true
                                 },
                                 {
                                     "name": "maxplaybackrate",
-                                    "description": "The maximum output sampling rate rendered in Hertz (Hz)\n  when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This value must be between <code>8000</code> to <code>48000</code>.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation.</blockquote>\n  The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is\n  <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This value must be between <code>8000</code> to <code>48000</code>.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
                                     "type": "Number",
                                     "optional": true
                                 },
@@ -6597,7 +6597,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 584,
+            "line": 592,
             "description": "<blockquote class=\"info\">\n  Note that if <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> is available despite having\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> available, the\n  <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> is sent instead of the\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> to Peers.\n</blockquote>\nFunction that sends a new <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>\nto all connected Peers in the Room.",
             "itemtype": "method",
             "name": "sendStream",
@@ -6635,7 +6635,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 796,
+            "line": 804,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopStream",
@@ -6648,7 +6648,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 835,
+            "line": 843,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio or video tracks.",
             "itemtype": "method",
             "name": "muteStream",
@@ -6684,7 +6684,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 973,
+            "line": 981,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -6699,7 +6699,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1000,
+            "line": 1008,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -6714,7 +6714,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1027,
+            "line": 1035,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -6729,7 +6729,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1054,
+            "line": 1062,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -6744,7 +6744,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1081,
+            "line": 1089,
             "description": "<blockquote class=\"info\">\n  For a better user experience, the functionality is throttled when invoked many times in less\n  than 10 seconds interval.\n</blockquote>\nFunction that retrieves screensharing Stream.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -6765,19 +6765,19 @@
                         },
                         {
                             "name": "usedtx",
-                            "description": "The flag if DTX should be configured\n  when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>When not provided, the default browser configuration is used.</small>",
+                            "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation.</blockquote>\n  The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec\n  is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
                             "type": "Boolean",
                             "optional": true
                         },
                         {
                             "name": "useinbandfec",
-                            "description": "The flag if capability to take advantage of in-band FEC should be configured\n  when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>When not provided, the default browser configuration is used.</small>",
+                            "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation.</blockquote>\n  The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be\n  configured when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
                             "type": "Boolean",
                             "optional": true
                         },
                         {
                             "name": "maxplaybackrate",
-                            "description": "The maximum output sampling rate rendered in Hertz (Hz)\n  when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This value must be between <code>8000</code> to <code>48000</code>.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
+                            "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation.</blockquote>\n  The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is\n  <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This value must be between <code>8000</code> to <code>48000</code>.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
                             "type": "Number",
                             "optional": true
                         }
@@ -6811,7 +6811,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1312,
+            "line": 1328,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -6824,7 +6824,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1370,
+            "line": 1386,
             "description": "Function that handles the muting of Stream audio and video tracks.",
             "itemtype": "method",
             "name": "_muteStreams",
@@ -6835,7 +6835,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1417,
+            "line": 1433,
             "description": "Function that handles stopping the Stream streaming.",
             "itemtype": "method",
             "name": "_stopStreams",
@@ -6846,7 +6846,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1490,
+            "line": 1506,
             "description": "Function that parses the <code>getUserMedia()</code> settings provided.",
             "itemtype": "method",
             "name": "_parseStreamSettings",
@@ -6857,7 +6857,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1643,
+            "line": 1659,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -6868,7 +6868,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1778,
+            "line": 1794,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -6879,7 +6879,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1818,
+            "line": 1834,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -6890,7 +6890,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1852,
+            "line": 1868,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -6930,7 +6930,7 @@
             "line": 23,
             "description": "Stores the flag if ulpfec and red codecs should be removed.",
             "itemtype": "attribute",
-            "name": "_disableUlpfecRedCodecs",
+            "name": "_disableVideoFecCodecs",
             "type": "Boolean",
             "default": "false",
             "access": "private",
@@ -7151,39 +7151,39 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:584"
+            "line": " source/stream-media.js:592"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:796"
+            "line": " source/stream-media.js:804"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:835"
+            "line": " source/stream-media.js:843"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:973"
+            "line": " source/stream-media.js:981"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1000"
+            "line": " source/stream-media.js:1008"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1027"
+            "line": " source/stream-media.js:1035"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1054"
+            "line": " source/stream-media.js:1062"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1081"
+            "line": " source/stream-media.js:1089"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1312"
+            "line": " source/stream-media.js:1328"
         },
         {
             "message": "Missing item type\nPolyfill for Object.keys() from Mozilla\nFrom https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys",

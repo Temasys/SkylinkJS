@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 14:11:18 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 15:38:36 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 14:11:18 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 15:38:36 GMT+0800 (SGT) */
 
 (function() {
 
@@ -18228,8 +18228,8 @@ Skylink.prototype._room = null;
  *   query parameter in TURN ICE servers when constructing a Peer connections.
  * - When not provided, its value is <code>ANY</code>.
  *   [Rel: Skylink.TURN_TRANSPORT]
- * @param {Boolean} [options.disableUlpfecRedCodecs=false] The flag if Ulpfec and Red codecs should be removed in
- *   sending session descriptions.
+ * @param {Boolean} [options.disableVideoFecCodecs=false] The flag if video FEC (Forward Error Correction)
+ *   codecs like ulpfec and red should be removed in sending session descriptions.
  *   <small>This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.</small>
  * @param {JSON} [options.credentials] The credentials used for authenticating App Key with
  *   credentials to retrieve the Room session token used for connection in <a href="#method_joinRoom">
@@ -18324,7 +18324,7 @@ Skylink.prototype._room = null;
  * @param {Boolean} callback.success.forceTURNSSL The configured value of the <code>options.forceTURNSSL</code>.
  * @param {Boolean} callback.success.forceTURN The configured value of the <code>options.forceTURN</code>.
  * @param {Boolean} callback.success.usePublicSTUN The configured value of the <code>options.usePublicSTUN</code>.
- * @param {Boolean} callback.success.disableUlpfecRedCodecs The configured value of the <code>options.disableUlpfecRedCodecs</code>.
+ * @param {Boolean} callback.success.disableVideoFecCodecs The configured value of the <code>options.disableVideoFecCodecs</code>.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -18419,7 +18419,7 @@ Skylink.prototype.init = function(options, callback) {
   var videoCodec = self.VIDEO_CODEC.AUTO;
   var forceTURN = false;
   var usePublicSTUN = true;
-  var disableUlpfecRedCodecs = false;
+  var disableVideoFecCodecs = false;
 
   log.log('Provided init options:', options);
 
@@ -18482,8 +18482,8 @@ Skylink.prototype.init = function(options, callback) {
     usePublicSTUN = (typeof options.usePublicSTUN === 'boolean') ?
       options.usePublicSTUN : usePublicSTUN;
     // set the use of disabling ulpfec and red codecs
-    disableUlpfecRedCodecs = (typeof options.disableUlpfecRedCodecs === 'boolean') ?
-      options.disableUlpfecRedCodecs : disableUlpfecRedCodecs;
+    disableVideoFecCodecs = (typeof options.disableVideoFecCodecs === 'boolean') ?
+      options.disableVideoFecCodecs : disableVideoFecCodecs;
 
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
@@ -18556,7 +18556,7 @@ Skylink.prototype.init = function(options, callback) {
   self._selectedVideoCodec = videoCodec;
   self._forceTURN = forceTURN;
   self._usePublicSTUN = usePublicSTUN;
-  self._disableUlpfecRedCodecs = disableUlpfecRedCodecs;
+  self._disableVideoFecCodecs = disableVideoFecCodecs;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -18579,7 +18579,7 @@ Skylink.prototype.init = function(options, callback) {
     videoCodec: self._selectedVideoCodec,
     forceTURN: self._forceTURN,
     usePublicSTUN: self._usePublicSTUN,
-    disableUlpfecRedCodecs: self._disableUlpfecRedCodecs
+    disableVideoFecCodecs: self._disableVideoFecCodecs
   });
   // trigger the readystate
   self._readyState = 0;
@@ -18616,7 +18616,7 @@ Skylink.prototype.init = function(options, callback) {
             videoCodec: self._selectedVideoCodec,
             forceTURN: self._forceTURN,
             usePublicSTUN: self._usePublicSTUN,
-            disableUlpfecRedCodecs: self._disableUlpfecRedCodecs
+            disableVideoFecCodecs: self._disableVideoFecCodecs
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +
@@ -19565,14 +19565,23 @@ Skylink.prototype._EVENTS = {
    *   value is considered as <code>false</code>.</small>
    * @param {Boolean} peerInfo.settings.audio.stereo The flag if stereo band is configured
    *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for receiving audio data.
-   * @param {Boolean} [peerInfo.settings.audio.usedtx] The flag if DTX is configured
-   *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   * @param {Boolean} [peerInfo.settings.audio.usedtx] <blockquote class="info">
+   *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+   *   The flag if DTX (Discontinuous Transmission) is configured when encoding audio codec
+   *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   *   <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>
    *   <small>When not defined, the default browser configuration is used.</small>
-   * @param {Boolean} [peerInfo.settings.audio.useinbandfec] The flag if capability to take advantage of in-band FEC
-   *   is configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   * @param {Boolean} [peerInfo.settings.audio.useinbandfec] <blockquote class="info">
+   *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+   *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) is
+   *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   *   <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>
    *   <small>When not defined, the default browser configuration is used.</small>
-   * @param {Number} [enableAudio.maxplaybackrate] The maximum output sampling rate rendered in Hertz (Hz)
-   *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   * @param {Number} [peerInfo.settings.audio.maxplaybackrate] <blockquote class="info">
+   *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+   *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
+   *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
    *   <small>When not defined, the default browser configuration is used.</small>
    * @param {Array} [peerInfo.settings.audio.optional] The Peer Stream <code>navigator.getUserMedia()</code> API
    *   <code>audio: { optional [..] }</code> property.
@@ -22482,14 +22491,22 @@ Skylink.prototype._streamsStoppedCbs = {};
  * @param {Boolean|JSON} [options.audio=false] The audio configuration options.
  * @param {Boolean} [options.audio.stereo=false] The flag if stereo band should be configured
  *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
- * @param {Boolean} [options.audio.usedtx] The flag if DTX should be configured
- *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ * @param {Boolean} [options.audio.usedtx] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec
+ *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
- * @param {Boolean} [options.audio.useinbandfec] The flag if capability to take advantage of in-band FEC should be configured
- *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ * @param {Boolean} [options.audio.useinbandfec] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be
+ *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
- * @param {Number} [options.audio.maxplaybackrate] The maximum output sampling rate rendered in Hertz (Hz)
- *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ * @param {Number} [options.audio.maxplaybackrate] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
+ *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
  *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
@@ -23267,14 +23284,22 @@ Skylink.prototype.disableVideo = function() {
  * @param {JSON|Boolean} [enableAudio=false] The flag if audio tracks should be retrieved.
  * @param {Boolean} [enableAudio.stereo=false] The flag if stereo band should be configured
  *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
- * @param {Boolean} [enableAudio.usedtx] The flag if DTX should be configured
- *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ * @param {Boolean} [enableAudio.usedtx] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec
+ *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
- * @param {Boolean} [enableAudio.useinbandfec] The flag if capability to take advantage of in-band FEC should be configured
- *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ * @param {Boolean} [enableAudio.useinbandfec] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be
+ *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
- * @param {Number} [enableAudio.maxplaybackrate] The maximum output sampling rate rendered in Hertz (Hz)
- *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ * @param {Number} [enableAudio.maxplaybackrate] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
+ *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
  *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Function} [callback] The callback function fired when request has completed.
@@ -24117,14 +24142,14 @@ Skylink.prototype._selectedVideoCodec = 'auto';
 
 /**
  * Stores the flag if ulpfec and red codecs should be removed.
- * @attribute _disableUlpfecRedCodecs
+ * @attribute _disableVideoFecCodecs
  * @type Boolean
  * @default false
  * @private
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype._disableUlpfecRedCodecs = false;
+Skylink.prototype._disableVideoFecCodecs = false;
 
 /**
  * Function that modifies the session description to configure settings for OPUS audio codec.
@@ -24453,7 +24478,7 @@ Skylink.prototype._removeH264VP9AptRtxForOlderPlugin = function (targetMid, sess
  * @since 0.6.16
  */
 Skylink.prototype._removeUlpfecAndRedCodecs = function (targetMid, sessionDescription) {
-  if (!this._disableUlpfecRedCodecs) {
+  if (!this._disableVideoFecCodecs) {
     log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Enabling and not removing ulpfec or red codecs.']);
     return sessionDescription.sdp;
   }

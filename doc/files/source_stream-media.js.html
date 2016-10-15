@@ -394,14 +394,22 @@ Skylink.prototype._streamsStoppedCbs = {};
  * @param {Boolean|JSON} [options.audio=false] The audio configuration options.
  * @param {Boolean} [options.audio.stereo=false] The flag if stereo band should be configured
  *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
- * @param {Boolean} [options.audio.usedtx] The flag if DTX should be configured
- *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ * @param {Boolean} [options.audio.usedtx] &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that this feature might not work depending on the browser support and implementation.&lt;/blockquote&gt;
+ *   The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec
+ *   is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ *   &lt;small&gt;This might help to reduce bandwidth it reduces the bitrate during silence or background noise.&lt;/small&gt;
  *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
- * @param {Boolean} [options.audio.useinbandfec] The flag if capability to take advantage of in-band FEC should be configured
- *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ * @param {Boolean} [options.audio.useinbandfec] &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that this feature might not work depending on the browser support and implementation.&lt;/blockquote&gt;
+ *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be
+ *   configured when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ *   &lt;small&gt;This might help to reduce the harm of packet loss by encoding information about the previous packet.&lt;/small&gt;
  *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
- * @param {Number} [options.audio.maxplaybackrate] The maximum output sampling rate rendered in Hertz (Hz)
- *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ * @param {Number} [options.audio.maxplaybackrate] &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that this feature might not work depending on the browser support and implementation.&lt;/blockquote&gt;
+ *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
+ *   &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
  *   &lt;small&gt;This value must be between &lt;code&gt;8000&lt;/code&gt; to &lt;code&gt;48000&lt;/code&gt;.&lt;/small&gt;
  *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
  * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
@@ -1179,14 +1187,22 @@ Skylink.prototype.disableVideo = function() {
  * @param {JSON|Boolean} [enableAudio=false] The flag if audio tracks should be retrieved.
  * @param {Boolean} [enableAudio.stereo=false] The flag if stereo band should be configured
  *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
- * @param {Boolean} [enableAudio.usedtx] The flag if DTX should be configured
- *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ * @param {Boolean} [enableAudio.usedtx] &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that this feature might not work depending on the browser support and implementation.&lt;/blockquote&gt;
+ *   The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec
+ *   is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ *   &lt;small&gt;This might help to reduce bandwidth it reduces the bitrate during silence or background noise.&lt;/small&gt;
  *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
- * @param {Boolean} [enableAudio.useinbandfec] The flag if capability to take advantage of in-band FEC should be configured
- *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ * @param {Boolean} [enableAudio.useinbandfec] &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that this feature might not work depending on the browser support and implementation.&lt;/blockquote&gt;
+ *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be
+ *   configured when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ *   &lt;small&gt;This might help to reduce the harm of packet loss by encoding information about the previous packet.&lt;/small&gt;
  *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
- * @param {Number} [enableAudio.maxplaybackrate] The maximum output sampling rate rendered in Hertz (Hz)
- *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ * @param {Number} [enableAudio.maxplaybackrate] &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that this feature might not work depending on the browser support and implementation.&lt;/blockquote&gt;
+ *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
+ *   &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
  *   &lt;small&gt;This value must be between &lt;code&gt;8000&lt;/code&gt; to &lt;code&gt;48000&lt;/code&gt;.&lt;/small&gt;
  *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
  * @param {Function} [callback] The callback function fired when request has completed.

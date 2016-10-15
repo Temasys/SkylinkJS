@@ -303,14 +303,22 @@ Skylink.prototype._streamsStoppedCbs = {};
  * @param {Boolean|JSON} [options.audio=false] The audio configuration options.
  * @param {Boolean} [options.audio.stereo=false] The flag if stereo band should be configured
  *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
- * @param {Boolean} [options.audio.usedtx] The flag if DTX should be configured
- *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ * @param {Boolean} [options.audio.usedtx] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec
+ *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
- * @param {Boolean} [options.audio.useinbandfec] The flag if capability to take advantage of in-band FEC should be configured
- *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ * @param {Boolean} [options.audio.useinbandfec] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be
+ *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
- * @param {Number} [options.audio.maxplaybackrate] The maximum output sampling rate rendered in Hertz (Hz)
- *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ * @param {Number} [options.audio.maxplaybackrate] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
+ *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
  *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
@@ -1088,14 +1096,22 @@ Skylink.prototype.disableVideo = function() {
  * @param {JSON|Boolean} [enableAudio=false] The flag if audio tracks should be retrieved.
  * @param {Boolean} [enableAudio.stereo=false] The flag if stereo band should be configured
  *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
- * @param {Boolean} [enableAudio.usedtx] The flag if DTX should be configured
- *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ * @param {Boolean} [enableAudio.usedtx] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec
+ *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
- * @param {Boolean} [enableAudio.useinbandfec] The flag if capability to take advantage of in-band FEC should be configured
- *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ * @param {Boolean} [enableAudio.useinbandfec] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be
+ *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
- * @param {Number} [enableAudio.maxplaybackrate] The maximum output sampling rate rendered in Hertz (Hz)
- *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ * @param {Number} [enableAudio.maxplaybackrate] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
+ *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
  *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Function} [callback] The callback function fired when request has completed.
