@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 15:38:36 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 15:48:57 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5331,6 +5331,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeH264VP9AptRtxForOlderPlugin(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeUlpfecAndRedCodecs(targetMid, sessionDescription);
+  sessionDescription.sdp = self._removeComfortNoiseCodec(targetMid, sessionDescription);
 
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
     'Local session description updated ->'], sessionDescription.sdp);
@@ -6698,6 +6699,10 @@ Skylink.prototype._room = null;
  * @param {Boolean} [options.disableVideoFecCodecs=false] The flag if video FEC (Forward Error Correction)
  *   codecs like ulpfec and red should be removed in sending session descriptions.
  *   <small>This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.</small>
+ * @param {Boolean} [options.disableComfortNoiseCodec=false] The flag if audio
+ *   <a href="https://en.wikipedia.org/wiki/Comfort_noise">Comfort Noise (CN)</a> codec should be removed
+ *   in sending session descriptions.
+ *   <small>This can be useful for debugging purposes to test preferred audio quality and feedback.</small>
  * @param {JSON} [options.credentials] The credentials used for authenticating App Key with
  *   credentials to retrieve the Room session token used for connection in <a href="#method_joinRoom">
  *   <code>joinRoom()</code> method</a>.
@@ -6792,6 +6797,7 @@ Skylink.prototype._room = null;
  * @param {Boolean} callback.success.forceTURN The configured value of the <code>options.forceTURN</code>.
  * @param {Boolean} callback.success.usePublicSTUN The configured value of the <code>options.usePublicSTUN</code>.
  * @param {Boolean} callback.success.disableVideoFecCodecs The configured value of the <code>options.disableVideoFecCodecs</code>.
+ * @param {Boolean} callback.success.disableComfortNoiseCodec The configured value of the <code>options.disableComfortNoiseCodec</code>.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -6887,6 +6893,7 @@ Skylink.prototype.init = function(options, callback) {
   var forceTURN = false;
   var usePublicSTUN = true;
   var disableVideoFecCodecs = false;
+  var disableComfortNoiseCodec = false;
 
   log.log('Provided init options:', options);
 
@@ -6951,6 +6958,9 @@ Skylink.prototype.init = function(options, callback) {
     // set the use of disabling ulpfec and red codecs
     disableVideoFecCodecs = (typeof options.disableVideoFecCodecs === 'boolean') ?
       options.disableVideoFecCodecs : disableVideoFecCodecs;
+    // set the use of disabling CN codecs
+    disableComfortNoiseCodec = (typeof options.disableComfortNoiseCodec === 'boolean') ?
+      options.disableComfortNoiseCodec : disableComfortNoiseCodec;
 
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
@@ -7024,6 +7034,7 @@ Skylink.prototype.init = function(options, callback) {
   self._forceTURN = forceTURN;
   self._usePublicSTUN = usePublicSTUN;
   self._disableVideoFecCodecs = disableVideoFecCodecs;
+  self._disableComfortNoiseCodec = disableComfortNoiseCodec;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -7046,7 +7057,8 @@ Skylink.prototype.init = function(options, callback) {
     videoCodec: self._selectedVideoCodec,
     forceTURN: self._forceTURN,
     usePublicSTUN: self._usePublicSTUN,
-    disableVideoFecCodecs: self._disableVideoFecCodecs
+    disableVideoFecCodecs: self._disableVideoFecCodecs,
+    disableComfortNoiseCodec: self._disableComfortNoiseCodec
   });
   // trigger the readystate
   self._readyState = 0;
@@ -7083,7 +7095,8 @@ Skylink.prototype.init = function(options, callback) {
             videoCodec: self._selectedVideoCodec,
             forceTURN: self._forceTURN,
             usePublicSTUN: self._usePublicSTUN,
-            disableVideoFecCodecs: self._disableVideoFecCodecs
+            disableVideoFecCodecs: self._disableVideoFecCodecs,
+            disableComfortNoiseCodec: self._disableComfortNoiseCodec
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +
@@ -12619,6 +12632,17 @@ Skylink.prototype._selectedVideoCodec = 'auto';
 Skylink.prototype._disableVideoFecCodecs = false;
 
 /**
+ * Stores the flag if CN (Comfort Noise) codec should be removed.
+ * @attribute _disableComfortNoiseCodec
+ * @type Boolean
+ * @default false
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._disableComfortNoiseCodec = false;
+
+/**
  * Function that modifies the session description to configure settings for OPUS audio codec.
  * @method _addSDPOpusConfig
  * @private
@@ -12980,6 +13004,44 @@ Skylink.prototype._removeUlpfecAndRedCodecs = function (targetMid, sessionDescri
 
   parseFn('red');
   parseFn('ulpfec');
+
+  return sessionDescription.sdp;
+};
+
+/**
+ * Function that modifies the session description to remove CN codecs.
+ * @method _removeComfortNoiseCodec
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._removeComfortNoiseCodec = function (targetMid, sessionDescription) {
+  var audioSettings = this.getPeerInfo().settings.audio;
+
+  if (!(this._disableComfortNoiseCodec && audioSettings && typeof audioSettings === 'object' && audioSettings.stereo)) {
+    log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Enabling and not removing CN codec.']);
+    return sessionDescription.sdp;
+  }
+
+  var hasMatch = /a=rtpmap:(\d*)\ CN.*/gi.exec(sessionDescription.sdp);
+
+  if (Array.isArray(hasMatch) && hasMatch.length > 0) {
+    for (var i = 0; i < hasMatch.length; i++) {
+      if (hasMatch[i].indexOf('a=rtpmap:') === 0) {
+        continue;
+      }
+      var payload = parseInt(hasMatch[i] || '-1', 10);
+
+      if (payload > -1) {
+        log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing "CN" payload ->'], payload);
+
+        sessionDescription.sdp = sessionDescription.sdp.replace(
+          new RegExp('a=rtpmap:' + payload + '\\ .*\\r\\n', 'g'), '');
+        sessionDescription.sdp = sessionDescription.sdp.replace(
+          new RegExp('a=fmtp:' + payload + '\\ .*\\r\\n', 'g'), '');
+      }
+    }
+  }
 
   return sessionDescription.sdp;
 };

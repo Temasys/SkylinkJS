@@ -32,6 +32,17 @@ Skylink.prototype._selectedVideoCodec = 'auto';
 Skylink.prototype._disableVideoFecCodecs = false;
 
 /**
+ * Stores the flag if CN (Comfort Noise) codec should be removed.
+ * @attribute _disableComfortNoiseCodec
+ * @type Boolean
+ * @default false
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._disableComfortNoiseCodec = false;
+
+/**
  * Function that modifies the session description to configure settings for OPUS audio codec.
  * @method _addSDPOpusConfig
  * @private
@@ -393,6 +404,44 @@ Skylink.prototype._removeUlpfecAndRedCodecs = function (targetMid, sessionDescri
 
   parseFn('red');
   parseFn('ulpfec');
+
+  return sessionDescription.sdp;
+};
+
+/**
+ * Function that modifies the session description to remove CN codecs.
+ * @method _removeComfortNoiseCodec
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._removeComfortNoiseCodec = function (targetMid, sessionDescription) {
+  var audioSettings = this.getPeerInfo().settings.audio;
+
+  if (!(this._disableComfortNoiseCodec && audioSettings && typeof audioSettings === 'object' && audioSettings.stereo)) {
+    log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Enabling and not removing CN codec.']);
+    return sessionDescription.sdp;
+  }
+
+  var hasMatch = /a=rtpmap:(\d*)\ CN.*/gi.exec(sessionDescription.sdp);
+
+  if (Array.isArray(hasMatch) && hasMatch.length > 0) {
+    for (var i = 0; i < hasMatch.length; i++) {
+      if (hasMatch[i].indexOf('a=rtpmap:') === 0) {
+        continue;
+      }
+      var payload = parseInt(hasMatch[i] || '-1', 10);
+
+      if (payload > -1) {
+        log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing "CN" payload ->'], payload);
+
+        sessionDescription.sdp = sessionDescription.sdp.replace(
+          new RegExp('a=rtpmap:' + payload + '\\ .*\\r\\n', 'g'), '');
+        sessionDescription.sdp = sessionDescription.sdp.replace(
+          new RegExp('a=fmtp:' + payload + '\\ .*\\r\\n', 'g'), '');
+      }
+    }
+  }
 
   return sessionDescription.sdp;
 };

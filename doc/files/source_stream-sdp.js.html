@@ -123,6 +123,17 @@ Skylink.prototype._selectedVideoCodec = &#x27;auto&#x27;;
 Skylink.prototype._disableVideoFecCodecs = false;
 
 /**
+ * Stores the flag if CN (Comfort Noise) codec should be removed.
+ * @attribute _disableComfortNoiseCodec
+ * @type Boolean
+ * @default false
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._disableComfortNoiseCodec = false;
+
+/**
  * Function that modifies the session description to configure settings for OPUS audio codec.
  * @method _addSDPOpusConfig
  * @private
@@ -484,6 +495,44 @@ Skylink.prototype._removeUlpfecAndRedCodecs = function (targetMid, sessionDescri
 
   parseFn(&#x27;red&#x27;);
   parseFn(&#x27;ulpfec&#x27;);
+
+  return sessionDescription.sdp;
+};
+
+/**
+ * Function that modifies the session description to remove CN codecs.
+ * @method _removeComfortNoiseCodec
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._removeComfortNoiseCodec = function (targetMid, sessionDescription) {
+  var audioSettings = this.getPeerInfo().settings.audio;
+
+  if (!(this._disableComfortNoiseCodec &amp;&amp; audioSettings &amp;&amp; typeof audioSettings === &#x27;object&#x27; &amp;&amp; audioSettings.stereo)) {
+    log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Enabling and not removing CN codec.&#x27;]);
+    return sessionDescription.sdp;
+  }
+
+  var hasMatch = /a=rtpmap:(\d*)\ CN.*/gi.exec(sessionDescription.sdp);
+
+  if (Array.isArray(hasMatch) &amp;&amp; hasMatch.length &gt; 0) {
+    for (var i = 0; i &lt; hasMatch.length; i++) {
+      if (hasMatch[i].indexOf(&#x27;a=rtpmap:&#x27;) === 0) {
+        continue;
+      }
+      var payload = parseInt(hasMatch[i] || &#x27;-1&#x27;, 10);
+
+      if (payload &gt; -1) {
+        log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Removing &quot;CN&quot; payload -&gt;&#x27;], payload);
+
+        sessionDescription.sdp = sessionDescription.sdp.replace(
+          new RegExp(&#x27;a=rtpmap:&#x27; + payload + &#x27;\\ .*\\r\\n&#x27;, &#x27;g&#x27;), &#x27;&#x27;);
+        sessionDescription.sdp = sessionDescription.sdp.replace(
+          new RegExp(&#x27;a=fmtp:&#x27; + payload + &#x27;\\ .*\\r\\n&#x27;, &#x27;g&#x27;), &#x27;&#x27;);
+      }
+    }
+  }
 
   return sessionDescription.sdp;
 };

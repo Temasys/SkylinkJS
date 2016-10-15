@@ -345,6 +345,10 @@ Skylink.prototype._room = null;
  * @param {Boolean} [options.disableVideoFecCodecs=false] The flag if video FEC (Forward Error Correction)
  *   codecs like ulpfec and red should be removed in sending session descriptions.
  *   <small>This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.</small>
+ * @param {Boolean} [options.disableComfortNoiseCodec=false] The flag if audio
+ *   <a href="https://en.wikipedia.org/wiki/Comfort_noise">Comfort Noise (CN)</a> codec should be removed
+ *   in sending session descriptions.
+ *   <small>This can be useful for debugging purposes to test preferred audio quality and feedback.</small>
  * @param {JSON} [options.credentials] The credentials used for authenticating App Key with
  *   credentials to retrieve the Room session token used for connection in <a href="#method_joinRoom">
  *   <code>joinRoom()</code> method</a>.
@@ -439,6 +443,7 @@ Skylink.prototype._room = null;
  * @param {Boolean} callback.success.forceTURN The configured value of the <code>options.forceTURN</code>.
  * @param {Boolean} callback.success.usePublicSTUN The configured value of the <code>options.usePublicSTUN</code>.
  * @param {Boolean} callback.success.disableVideoFecCodecs The configured value of the <code>options.disableVideoFecCodecs</code>.
+ * @param {Boolean} callback.success.disableComfortNoiseCodec The configured value of the <code>options.disableComfortNoiseCodec</code>.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -534,6 +539,7 @@ Skylink.prototype.init = function(options, callback) {
   var forceTURN = false;
   var usePublicSTUN = true;
   var disableVideoFecCodecs = false;
+  var disableComfortNoiseCodec = false;
 
   log.log('Provided init options:', options);
 
@@ -598,6 +604,9 @@ Skylink.prototype.init = function(options, callback) {
     // set the use of disabling ulpfec and red codecs
     disableVideoFecCodecs = (typeof options.disableVideoFecCodecs === 'boolean') ?
       options.disableVideoFecCodecs : disableVideoFecCodecs;
+    // set the use of disabling CN codecs
+    disableComfortNoiseCodec = (typeof options.disableComfortNoiseCodec === 'boolean') ?
+      options.disableComfortNoiseCodec : disableComfortNoiseCodec;
 
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
@@ -671,6 +680,7 @@ Skylink.prototype.init = function(options, callback) {
   self._forceTURN = forceTURN;
   self._usePublicSTUN = usePublicSTUN;
   self._disableVideoFecCodecs = disableVideoFecCodecs;
+  self._disableComfortNoiseCodec = disableComfortNoiseCodec;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -693,7 +703,8 @@ Skylink.prototype.init = function(options, callback) {
     videoCodec: self._selectedVideoCodec,
     forceTURN: self._forceTURN,
     usePublicSTUN: self._usePublicSTUN,
-    disableVideoFecCodecs: self._disableVideoFecCodecs
+    disableVideoFecCodecs: self._disableVideoFecCodecs,
+    disableComfortNoiseCodec: self._disableComfortNoiseCodec
   });
   // trigger the readystate
   self._readyState = 0;
@@ -730,7 +741,8 @@ Skylink.prototype.init = function(options, callback) {
             videoCodec: self._selectedVideoCodec,
             forceTURN: self._forceTURN,
             usePublicSTUN: self._usePublicSTUN,
-            disableVideoFecCodecs: self._disableVideoFecCodecs
+            disableVideoFecCodecs: self._disableVideoFecCodecs,
+            disableComfortNoiseCodec: self._disableComfortNoiseCodec
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +

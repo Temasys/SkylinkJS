@@ -3127,6 +3127,13 @@
                             "optdefault": "false"
                         },
                         {
+                            "name": "disableComfortNoiseCodec",
+                            "description": "The flag if audio\n  <a href=\"https://en.wikipedia.org/wiki/Comfort_noise\">Comfort Noise (CN)</a> codec should be removed\n  in sending session descriptions.\n  <small>This can be useful for debugging purposes to test preferred audio quality and feedback.</small>",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "false"
+                        },
+                        {
                             "name": "credentials",
                             "description": "The credentials used for authenticating App Key with\n  credentials to retrieve the Room session token used for connection in <a href=\"#method_joinRoom\">\n  <code>joinRoom()</code> method</a>.\n  <small>Note that switching of Rooms is not allowed when using credentials based authentication, unless\n  <code>init()</code> is invoked again with a different set of credentials followed by invoking\n  the <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a>.</small>",
                             "type": "JSON",
@@ -3323,6 +3330,11 @@
                                     "name": "disableVideoFecCodecs",
                                     "description": "The configured value of the <code>options.disableVideoFecCodecs</code>.",
                                     "type": "Boolean"
+                                },
+                                {
+                                    "name": "disableComfortNoiseCodec",
+                                    "description": "The configured value of the <code>options.disableComfortNoiseCodec</code>.",
+                                    "type": "Boolean"
                                 }
                             ]
                         }
@@ -3338,7 +3350,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 756,
+            "line": 768,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -3349,7 +3361,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 830,
+            "line": 842,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -3360,7 +3372,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 903,
+            "line": 915,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -3371,7 +3383,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 994,
+            "line": 1006,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -6941,6 +6953,19 @@
         {
             "file": "source/stream-sdp.js",
             "line": 34,
+            "description": "Stores the flag if CN (Comfort Noise) codec should be removed.",
+            "itemtype": "attribute",
+            "name": "_disableComfortNoiseCodec",
+            "type": "Boolean",
+            "default": "false",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.16",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/stream-sdp.js",
+            "line": 45,
             "description": "Function that modifies the session description to configure settings for OPUS audio codec.",
             "itemtype": "method",
             "name": "_addSDPOpusConfig",
@@ -6951,7 +6976,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 130,
+            "line": 141,
             "description": "Function that modifies the session description to limit the maximum sending bandwidth.\nSetting this may not necessarily work in Firefox.",
             "itemtype": "method",
             "name": "_setSDPBitrate",
@@ -6962,7 +6987,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 171,
+            "line": 182,
             "description": "Function that modifies the session description to set the preferred audio/video codec.",
             "itemtype": "method",
             "name": "_setSDPCodec",
@@ -6973,7 +6998,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 227,
+            "line": 238,
             "description": "Function that modifies the session description to remove the previous experimental H264\ncodec that is apparently breaking connections.\nNOTE: We should perhaps not remove it since H264 is supported?",
             "itemtype": "method",
             "name": "_removeSDPFirefoxH264Pref",
@@ -6984,7 +7009,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 248,
+            "line": 259,
             "description": "Function that modifies the session description to append the MediaStream and MediaStreamTrack IDs that seems\nto be missing from Firefox answer session description to Chrome connection causing freezes in re-negotiation.",
             "itemtype": "method",
             "name": "_addSDPMediaStreamTrackIDs",
@@ -6995,7 +7020,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 322,
+            "line": 333,
             "description": "Function that modifies the session description to remove VP9 and H264 apt/rtx lines to prevent plugin connection breaks.",
             "itemtype": "method",
             "name": "_removeH264VP9AptRtxForOlderPlugin",
@@ -7006,10 +7031,21 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 353,
+            "line": 364,
             "description": "Function that modifies the session description to remove ulpfec and red codecs.",
             "itemtype": "method",
             "name": "_removeUlpfecAndRedCodecs",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.16",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/stream-sdp.js",
+            "line": 411,
+            "description": "Function that modifies the session description to remove CN codecs.",
+            "itemtype": "method",
+            "name": "_removeComfortNoiseCodec",
             "access": "private",
             "tagname": "",
             "since": "0.6.16",

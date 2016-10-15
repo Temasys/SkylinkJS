@@ -667,6 +667,14 @@ Before using any Skylink functionalities, you will need to authenticate your App
                     </span>
                   </a>
                 
+                  <a href="#method__removeComfortNoiseCodec" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_removeComfortNoiseCodec
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#method__removeH264VP9AptRtxForOlderPlugin" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_removeH264VP9AptRtxForOlderPlugin
                     <span class="settings">
@@ -1299,6 +1307,14 @@ Before using any Skylink functionalities, you will need to authenticate your App
                 
                   <a href="#attr__defaultRoom" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_defaultRoom
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#attr__disableComfortNoiseCodec" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_disableComfortNoiseCodec
                     <span class="settings">
                       
                       
@@ -3034,7 +3050,7 @@ Remember to remove previous method of reconnection (re-creating the Peer connect
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l248"><code>source&#x2F;stream-sdp.js:248</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l259"><code>source&#x2F;stream-sdp.js:259</code></a>
       </small>
     
 
@@ -3118,7 +3134,7 @@ to be missing from Firefox answer session description to Chrome connection causi
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l34"><code>source&#x2F;stream-sdp.js:34</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l45"><code>source&#x2F;stream-sdp.js:45</code></a>
       </small>
     
 
@@ -5463,7 +5479,7 @@ See confluence docs for the &quot;enter&quot; expected properties to be received
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l994"><code>source&#x2F;room-init.js:994</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l1006"><code>source&#x2F;room-init.js:1006</code></a>
       </small>
     
 
@@ -5716,7 +5732,7 @@ See confluence docs for the &quot;introduceError&quot; expected properties to be
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l903"><code>source&#x2F;room-init.js:903</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l915"><code>source&#x2F;room-init.js:915</code></a>
       </small>
     
 
@@ -6891,7 +6907,7 @@ This starts creating the socket connection and called at first not when requirin
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l830"><code>source&#x2F;room-init.js:830</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l842"><code>source&#x2F;room-init.js:842</code></a>
       </small>
     
 
@@ -7768,6 +7784,89 @@ See confluence docs for the &quot;redirect&quot; expected properties to be recei
   <hr>
 </div>
             
+              <div id="method__removeComfortNoiseCodec" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_removeComfortNoiseCodec</code></h3>
+  
+    <span class="paren">()</span>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      <!---->
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l411"><code>source&#x2F;stream-sdp.js:411</code></a>
+      </small>
+    
+
+    <small>
+      
+        <i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.16</span>
+      
+
+      
+    </small>
+  </div>
+
+  <div class="code-item-description">
+    <p>Function that modifies the session description to remove CN codecs.</p>
+
+  </div>
+
+  
+
+  
+
+  
+  <div class="code-item-section">
+    <h4>Events Sequence:</h4>
+    <span class="code-item-trigger"><small>There is no event sequence for this method.</small></span>
+  </div>
+  
+
+  
+
+  
+
+  <hr>
+</div>
+            
               <div id="method__removeH264VP9AptRtxForOlderPlugin" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_removeH264VP9AptRtxForOlderPlugin</code></h3>
   
@@ -7815,7 +7914,7 @@ See confluence docs for the &quot;redirect&quot; expected properties to be recei
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l322"><code>source&#x2F;stream-sdp.js:322</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l333"><code>source&#x2F;stream-sdp.js:333</code></a>
       </small>
     
 
@@ -7981,7 +8080,7 @@ See confluence docs for the &quot;redirect&quot; expected properties to be recei
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l227"><code>source&#x2F;stream-sdp.js:227</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l238"><code>source&#x2F;stream-sdp.js:238</code></a>
       </small>
     
 
@@ -8066,7 +8165,7 @@ NOTE: We should perhaps not remove it since H264 is supported?</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l353"><code>source&#x2F;stream-sdp.js:353</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l364"><code>source&#x2F;stream-sdp.js:364</code></a>
       </small>
     
 
@@ -8149,7 +8248,7 @@ NOTE: We should perhaps not remove it since H264 is supported?</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l756"><code>source&#x2F;room-init.js:756</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l768"><code>source&#x2F;room-init.js:768</code></a>
       </small>
     
 
@@ -8909,7 +9008,7 @@ If trickle ICE is disabled, the local session description will be sent after
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l130"><code>source&#x2F;stream-sdp.js:130</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l141"><code>source&#x2F;stream-sdp.js:141</code></a>
       </small>
     
 
@@ -8993,7 +9092,7 @@ Setting this may not necessarily work in Firefox.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l171"><code>source&#x2F;stream-sdp.js:171</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l182"><code>source&#x2F;stream-sdp.js:182</code></a>
       </small>
     
 
@@ -12898,6 +12997,25 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
                   </li>
                 
                   <li class="param">
+                    <code class="param-name">disableComfortNoiseCodec</code>
+                    <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
+                      <p>The flag if audio
+  <a href="https://en.wikipedia.org/wiki/Comfort_noise">Comfort Noise (CN)</a> codec should be removed
+  in sending session descriptions.
+  <small>This can be useful for debugging purposes to test preferred audio quality and feedback.</small></p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
                     <code class="param-name">credentials</code>
                     <span class="type"><b>{</b>JSON<b>}</b></span>
 
@@ -13468,6 +13586,19 @@ Global_Objects/encodeURIComponent">encodeURIComponent() API</a>.</small></li></o
                             <div class="param-description">
                               
                               The configured value of the <code>options.disableVideoFecCodecs</code>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">disableComfortNoiseCodec</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The configured value of the <code>options.disableComfortNoiseCodec</code>.
                             </div>
                           </li>
                         
@@ -19818,6 +19949,85 @@ If enabled, the Peers connecting the same Room will receive each others &quot;en
   <hr>
 </div>
             
+              <div id="attr__disableComfortNoiseCodec" class="code-item attr item private-attr-item ">
+  <a name="config__disableComfortNoiseCodec"></a> 
+  <h3 class="code-item-name"><code>_disableComfortNoiseCodec</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>Boolean<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This attribute is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      <!---->
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l34"><code>source&#x2F;stream-sdp.js:34</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.16</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Stores the flag if CN (Comfort Noise) codec should be removed.</p>
+
+  </div>
+
+  
+    <div class="code-item-section">
+      <h4>Default value:</h4>
+      <code class="prettyprint">false</code>
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+  <hr>
+</div>
+            
               <div id="attr__disableVideoFecCodecs" class="code-item attr item private-attr-item ">
   <a name="config__disableVideoFecCodecs"></a> 
   <h3 class="code-item-name"><code>_disableVideoFecCodecs</code></h3>
@@ -21069,7 +21279,7 @@ TURNS connections are enforced if App is accessing from HTTPS domains.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l77"><code>source&#x2F;socket-message.js:77</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l50"><code>source&#x2F;socket-message.js:50</code></a>
       </small>
     
 
@@ -21079,8 +21289,7 @@ TURNS connections are enforced if App is accessing from HTTPS domains.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Stores the flag that indicates if MCU is available in the Room.
-If App Key enables MCU but this is false, this means likely there are problems connecting to the MCU server.</p>
+    <p>Stores the flag if MCU environment is enabled.</p>
 
   </div>
 
@@ -21144,7 +21353,7 @@ If App Key enables MCU but this is false, this means likely there are problems c
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l50"><code>source&#x2F;socket-message.js:50</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l77"><code>source&#x2F;socket-message.js:77</code></a>
       </small>
     
 
@@ -21154,7 +21363,8 @@ If App Key enables MCU but this is false, this means likely there are problems c
   </div>
 
   <div class="code-item-description">
-    <p>Stores the flag if MCU environment is enabled.</p>
+    <p>Stores the flag that indicates if MCU is available in the Room.
+If App Key enables MCU but this is false, this means likely there are problems connecting to the MCU server.</p>
 
   </div>
 
