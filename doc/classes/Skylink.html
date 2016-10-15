@@ -5404,7 +5404,7 @@ See confluence docs for the &quot;enter&quot; expected properties to be received
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l470"><code>source&#x2F;stream-sdp.js:470</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l476"><code>source&#x2F;stream-sdp.js:476</code></a>
       </small>
     
 
@@ -5487,7 +5487,7 @@ See confluence docs for the &quot;enter&quot; expected properties to be received
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l1010"><code>source&#x2F;room-init.js:1010</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l1011"><code>source&#x2F;room-init.js:1011</code></a>
       </small>
     
 
@@ -5740,7 +5740,7 @@ See confluence docs for the &quot;introduceError&quot; expected properties to be
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l919"><code>source&#x2F;room-init.js:919</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l920"><code>source&#x2F;room-init.js:920</code></a>
       </small>
     
 
@@ -6915,7 +6915,7 @@ This starts creating the socket connection and called at first not when requirin
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l846"><code>source&#x2F;room-init.js:846</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l847"><code>source&#x2F;room-init.js:847</code></a>
       </small>
     
 
@@ -8173,7 +8173,7 @@ NOTE: We should perhaps not remove it since H264 is supported?</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l450"><code>source&#x2F;stream-sdp.js:450</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l456"><code>source&#x2F;stream-sdp.js:456</code></a>
       </small>
     
 
@@ -8256,7 +8256,7 @@ NOTE: We should perhaps not remove it since H264 is supported?</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l772"><code>source&#x2F;room-init.js:772</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l773"><code>source&#x2F;room-init.js:773</code></a>
       </small>
     
 
@@ -13079,7 +13079,8 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span><code>false</code></small>
                       <p><blockquote class="info">
-  Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled.
+  Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled,
+  and to prevent connectivity issues, these codecs will not be removed for MCU enabled Peer connections.
   </blockquote> The flag if video FEC (Forward Error Correction)
   codecs like ulpfec and red should be removed in sending session descriptions.
   <small>This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.</small></p>

@@ -3121,7 +3121,7 @@
                         },
                         {
                             "name": "disableVideoFecCodecs",
-                            "description": "<blockquote class=\"info\">\n  Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled.\n  </blockquote> The flag if video FEC (Forward Error Correction)\n  codecs like ulpfec and red should be removed in sending session descriptions.\n  <small>This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.</small>",
+                            "description": "<blockquote class=\"info\">\n  Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled,\n  and to prevent connectivity issues, these codecs will not be removed for MCU enabled Peer connections.\n  </blockquote> The flag if video FEC (Forward Error Correction)\n  codecs like ulpfec and red should be removed in sending session descriptions.\n  <small>This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.</small>",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
@@ -3350,7 +3350,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 772,
+            "line": 773,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -3361,7 +3361,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 846,
+            "line": 847,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -3372,7 +3372,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 919,
+            "line": 920,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -3383,7 +3383,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1010,
+            "line": 1011,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -7042,7 +7042,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 450,
+            "line": 456,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
             "name": "_removeSDPNonRelayCandidates",
@@ -7053,7 +7053,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 470,
+            "line": 476,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
             "name": "_handleSDPMCUConnectionCase",

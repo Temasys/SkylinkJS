@@ -343,7 +343,8 @@ Skylink.prototype._room = null;
  * - When not provided, its value is <code>ANY</code>.
  *   [Rel: Skylink.TURN_TRANSPORT]
  * @param {Boolean} [options.disableVideoFecCodecs=false] <blockquote class="info">
- *   Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled.
+ *   Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled,
+ *   and to prevent connectivity issues, these codecs will not be removed for MCU enabled Peer connections.
  *   </blockquote> The flag if video FEC (Forward Error Correction)
  *   codecs like ulpfec and red should be removed in sending session descriptions.
  *   <small>This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.</small>

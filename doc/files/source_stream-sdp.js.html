@@ -489,7 +489,8 @@ Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
     var payloadList = sessionDescription.sdp.match(new RegExp(&#x27;a=rtpmap:(\\d*)\\ &#x27; + codec + &#x27;.*&#x27;, &#x27;gi&#x27;));
 
     if (!(Array.isArray(payloadList) &amp;&amp; payloadList.length &gt; 0)) {
-      log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Not removing &quot;&#x27; + codec + &#x27;&quot; as it does not exists.&#x27;]);
+      log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+        &#x27;Not removing &quot;&#x27; + codec + &#x27;&quot; as it does not exists.&#x27;]);
       return;
     }
 
@@ -527,8 +528,13 @@ Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
   };
 
   if (this._disableVideoFecCodecs) {
-    parseFn(&#x27;video&#x27;, &#x27;red&#x27;);
-    parseFn(&#x27;video&#x27;, &#x27;ulpfec&#x27;);
+    if (this._hasMCU) {
+      log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+        &#x27;Not removing &quot;ulpfec&quot; or &quot;red&quot; codecs as connected to MCU to prevent connectivity issues.&#x27;]);
+    } else {
+      parseFn(&#x27;video&#x27;, &#x27;red&#x27;);
+      parseFn(&#x27;video&#x27;, &#x27;ulpfec&#x27;);
+    }
   }
 
   if (this._disableComfortNoiseCodec &amp;&amp; audioSettings &amp;&amp; typeof audioSettings === &#x27;object&#x27; &amp;&amp; audioSettings.stereo) {

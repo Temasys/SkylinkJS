@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 23:58:28 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sun Oct 16 2016 00:10:26 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 23:58:28 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sun Oct 16 2016 00:10:26 GMT+0800 (SGT) */
 
 (function() {
 
@@ -18230,7 +18230,8 @@ Skylink.prototype._room = null;
  * - When not provided, its value is <code>ANY</code>.
  *   [Rel: Skylink.TURN_TRANSPORT]
  * @param {Boolean} [options.disableVideoFecCodecs=false] <blockquote class="info">
- *   Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled.
+ *   Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled,
+ *   and to prevent connectivity issues, these codecs will not be removed for MCU enabled Peer connections.
  *   </blockquote> The flag if video FEC (Forward Error Correction)
  *   codecs like ulpfec and red should be removed in sending session descriptions.
  *   <small>This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.</small>
@@ -24505,7 +24506,8 @@ Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
     var payloadList = sessionDescription.sdp.match(new RegExp('a=rtpmap:(\\d*)\\ ' + codec + '.*', 'gi'));
 
     if (!(Array.isArray(payloadList) && payloadList.length > 0)) {
-      log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Not removing "' + codec + '" as it does not exists.']);
+      log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+        'Not removing "' + codec + '" as it does not exists.']);
       return;
     }
 
@@ -24543,8 +24545,13 @@ Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
   };
 
   if (this._disableVideoFecCodecs) {
-    parseFn('video', 'red');
-    parseFn('video', 'ulpfec');
+    if (this._hasMCU) {
+      log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+        'Not removing "ulpfec" or "red" codecs as connected to MCU to prevent connectivity issues.']);
+    } else {
+      parseFn('video', 'red');
+      parseFn('video', 'ulpfec');
+    }
   }
 
   if (this._disableComfortNoiseCodec && audioSettings && typeof audioSettings === 'object' && audioSettings.stereo) {
