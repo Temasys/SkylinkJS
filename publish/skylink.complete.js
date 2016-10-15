@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 04:38:58 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 14:11:18 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 04:38:58 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Oct 15 2016 14:11:18 GMT+0800 (SGT) */
 
 (function() {
 
@@ -16863,6 +16863,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   sessionDescription.sdp = self._setSDPCodec(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeH264VP9AptRtxForOlderPlugin(targetMid, sessionDescription);
+  sessionDescription.sdp = self._removeUlpfecAndRedCodecs(targetMid, sessionDescription);
 
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
     'Local session description updated ->'], sessionDescription.sdp);
@@ -18227,6 +18228,9 @@ Skylink.prototype._room = null;
  *   query parameter in TURN ICE servers when constructing a Peer connections.
  * - When not provided, its value is <code>ANY</code>.
  *   [Rel: Skylink.TURN_TRANSPORT]
+ * @param {Boolean} [options.disableUlpfecRedCodecs=false] The flag if Ulpfec and Red codecs should be removed in
+ *   sending session descriptions.
+ *   <small>This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.</small>
  * @param {JSON} [options.credentials] The credentials used for authenticating App Key with
  *   credentials to retrieve the Room session token used for connection in <a href="#method_joinRoom">
  *   <code>joinRoom()</code> method</a>.
@@ -18320,6 +18324,7 @@ Skylink.prototype._room = null;
  * @param {Boolean} callback.success.forceTURNSSL The configured value of the <code>options.forceTURNSSL</code>.
  * @param {Boolean} callback.success.forceTURN The configured value of the <code>options.forceTURN</code>.
  * @param {Boolean} callback.success.usePublicSTUN The configured value of the <code>options.usePublicSTUN</code>.
+ * @param {Boolean} callback.success.disableUlpfecRedCodecs The configured value of the <code>options.disableUlpfecRedCodecs</code>.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -18414,6 +18419,7 @@ Skylink.prototype.init = function(options, callback) {
   var videoCodec = self.VIDEO_CODEC.AUTO;
   var forceTURN = false;
   var usePublicSTUN = true;
+  var disableUlpfecRedCodecs = false;
 
   log.log('Provided init options:', options);
 
@@ -18475,6 +18481,9 @@ Skylink.prototype.init = function(options, callback) {
     // set the use public stun option
     usePublicSTUN = (typeof options.usePublicSTUN === 'boolean') ?
       options.usePublicSTUN : usePublicSTUN;
+    // set the use of disabling ulpfec and red codecs
+    disableUlpfecRedCodecs = (typeof options.disableUlpfecRedCodecs === 'boolean') ?
+      options.disableUlpfecRedCodecs : disableUlpfecRedCodecs;
 
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
@@ -18547,6 +18556,7 @@ Skylink.prototype.init = function(options, callback) {
   self._selectedVideoCodec = videoCodec;
   self._forceTURN = forceTURN;
   self._usePublicSTUN = usePublicSTUN;
+  self._disableUlpfecRedCodecs = disableUlpfecRedCodecs;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -18568,7 +18578,8 @@ Skylink.prototype.init = function(options, callback) {
     audioCodec: self._selectedAudioCodec,
     videoCodec: self._selectedVideoCodec,
     forceTURN: self._forceTURN,
-    usePublicSTUN: self._usePublicSTUN
+    usePublicSTUN: self._usePublicSTUN,
+    disableUlpfecRedCodecs: self._disableUlpfecRedCodecs
   });
   // trigger the readystate
   self._readyState = 0;
@@ -18604,7 +18615,8 @@ Skylink.prototype.init = function(options, callback) {
             audioCodec: self._selectedAudioCodec,
             videoCodec: self._selectedVideoCodec,
             forceTURN: self._forceTURN,
-            usePublicSTUN: self._usePublicSTUN
+            usePublicSTUN: self._usePublicSTUN,
+            disableUlpfecRedCodecs: self._disableUlpfecRedCodecs
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +
@@ -24104,6 +24116,17 @@ Skylink.prototype._selectedAudioCodec = 'auto';
 Skylink.prototype._selectedVideoCodec = 'auto';
 
 /**
+ * Stores the flag if ulpfec and red codecs should be removed.
+ * @attribute _disableUlpfecRedCodecs
+ * @type Boolean
+ * @default false
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._disableUlpfecRedCodecs = false;
+
+/**
  * Function that modifies the session description to configure settings for OPUS audio codec.
  * @method _addSDPOpusConfig
  * @private
@@ -24171,7 +24194,7 @@ Skylink.prototype._addSDPOpusConfig = function(targetMid, sessionDescription) {
         }
       }
 
-      log.debug([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Setting OPUS config ->'], settings);
+      log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Setting OPUS config ->'], settings);
 
       var updatedOpusConfig = '';
 
@@ -24339,7 +24362,7 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
 
   var parseFn = function (type, tracks) {
     if (tracks.length === 0) {
-      log.debug([targetMid, 'RTCSessionDesription', sessionDescription.type,
+      log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
         'Not enforcing "' + type + '" MediaStreamTrack IDs as no Stream "' + type + '" tracks is sent.']);
       return;
     }
@@ -24412,7 +24435,7 @@ Skylink.prototype._removeH264VP9AptRtxForOlderPlugin = function (targetMid, sess
   // Remove rtx or apt= lines that prevent connections for browsers without VP8 or VP9 support
   // See: https://bugs.chromium.org/p/webrtc/issues/detail?id=3962
   if (['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1 && removeVP9AptRtxPayload) {
-    log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type,
       'Removing VP9/H264 apt= and rtx payload lines causing connectivity issues']);
 
     sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=101\r\n/g, '');
@@ -24422,6 +24445,52 @@ Skylink.prototype._removeH264VP9AptRtxForOlderPlugin = function (targetMid, sess
   return sessionDescription.sdp;
 };
 
+/**
+ * Function that modifies the session description to remove ulpfec and red codecs.
+ * @method _removeUlpfecAndRedCodecs
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._removeUlpfecAndRedCodecs = function (targetMid, sessionDescription) {
+  if (!this._disableUlpfecRedCodecs) {
+    log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Enabling and not removing ulpfec or red codecs.']);
+    return sessionDescription.sdp;
+  }
+
+  var parseFn = function (codec) {
+    var hasMatch = (new RegExp('a=rtpmap:(\\d*)\\ ' + codec + '.*', 'gi')).exec(sessionDescription.sdp);
+
+    if (!(Array.isArray(hasMatch) && hasMatch.length > 0)) {
+      log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Not removing "' + codec + '" as it does not exists.']);
+      return;
+    }
+
+    for (var i = 0; i < hasMatch.length; i++) {
+      if (hasMatch[i].indexOf('a=rtpmap:') === 0) {
+        continue;
+      }
+      var payload = parseInt(hasMatch[i] || '-1', 10);
+
+      if (payload > -1) {
+        log.info([targetMid, 'RTCSessionDesription', sessionDescription.type,
+          'Removing "' + codec + '" payload ->'], payload);
+
+        sessionDescription.sdp = sessionDescription.sdp.replace(
+          new RegExp('a=rtpmap:' + payload + '\\ .*\\r\\n', 'g'), '');
+        sessionDescription.sdp = sessionDescription.sdp.replace(
+          new RegExp('a=fmtp:' + payload + '\\ .*\\r\\n', 'g'), '');
+        sessionDescription.sdp = sessionDescription.sdp.replace(
+          new RegExp('a=rtpmap:\\d+ rtx\\/\\d+\\r\\na=fmtp:\\d+ apt=' + payload + '\\r\\n', 'g'), '');
+      }
+    }
+  };
+
+  parseFn('red');
+  parseFn('ulpfec');
+
+  return sessionDescription.sdp;
+};
 this.Skylink = Skylink;
 window.Skylink = Skylink;
 }).call(this);

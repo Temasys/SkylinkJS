@@ -342,6 +342,9 @@ Skylink.prototype._room = null;
  *   query parameter in TURN ICE servers when constructing a Peer connections.
  * - When not provided, its value is <code>ANY</code>.
  *   [Rel: Skylink.TURN_TRANSPORT]
+ * @param {Boolean} [options.disableUlpfecRedCodecs=false] The flag if Ulpfec and Red codecs should be removed in
+ *   sending session descriptions.
+ *   <small>This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.</small>
  * @param {JSON} [options.credentials] The credentials used for authenticating App Key with
  *   credentials to retrieve the Room session token used for connection in <a href="#method_joinRoom">
  *   <code>joinRoom()</code> method</a>.
@@ -435,6 +438,7 @@ Skylink.prototype._room = null;
  * @param {Boolean} callback.success.forceTURNSSL The configured value of the <code>options.forceTURNSSL</code>.
  * @param {Boolean} callback.success.forceTURN The configured value of the <code>options.forceTURN</code>.
  * @param {Boolean} callback.success.usePublicSTUN The configured value of the <code>options.usePublicSTUN</code>.
+ * @param {Boolean} callback.success.disableUlpfecRedCodecs The configured value of the <code>options.disableUlpfecRedCodecs</code>.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -529,6 +533,7 @@ Skylink.prototype.init = function(options, callback) {
   var videoCodec = self.VIDEO_CODEC.AUTO;
   var forceTURN = false;
   var usePublicSTUN = true;
+  var disableUlpfecRedCodecs = false;
 
   log.log('Provided init options:', options);
 
@@ -590,6 +595,9 @@ Skylink.prototype.init = function(options, callback) {
     // set the use public stun option
     usePublicSTUN = (typeof options.usePublicSTUN === 'boolean') ?
       options.usePublicSTUN : usePublicSTUN;
+    // set the use of disabling ulpfec and red codecs
+    disableUlpfecRedCodecs = (typeof options.disableUlpfecRedCodecs === 'boolean') ?
+      options.disableUlpfecRedCodecs : disableUlpfecRedCodecs;
 
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
@@ -662,6 +670,7 @@ Skylink.prototype.init = function(options, callback) {
   self._selectedVideoCodec = videoCodec;
   self._forceTURN = forceTURN;
   self._usePublicSTUN = usePublicSTUN;
+  self._disableUlpfecRedCodecs = disableUlpfecRedCodecs;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -683,7 +692,8 @@ Skylink.prototype.init = function(options, callback) {
     audioCodec: self._selectedAudioCodec,
     videoCodec: self._selectedVideoCodec,
     forceTURN: self._forceTURN,
-    usePublicSTUN: self._usePublicSTUN
+    usePublicSTUN: self._usePublicSTUN,
+    disableUlpfecRedCodecs: self._disableUlpfecRedCodecs
   });
   // trigger the readystate
   self._readyState = 0;
@@ -719,7 +729,8 @@ Skylink.prototype.init = function(options, callback) {
             audioCodec: self._selectedAudioCodec,
             videoCodec: self._selectedVideoCodec,
             forceTURN: self._forceTURN,
-            usePublicSTUN: self._usePublicSTUN
+            usePublicSTUN: self._usePublicSTUN,
+            disableUlpfecRedCodecs: self._disableUlpfecRedCodecs
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +

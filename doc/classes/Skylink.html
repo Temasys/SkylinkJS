@@ -691,6 +691,14 @@ Before using any Skylink functionalities, you will need to authenticate your App
                     </span>
                   </a>
                 
+                  <a href="#method__removeUlpfecAndRedCodecs" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_removeUlpfecAndRedCodecs
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#method__requestServerInfo" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_requestServerInfo
                     <span class="settings">
@@ -1291,6 +1299,14 @@ Before using any Skylink functionalities, you will need to authenticate your App
                 
                   <a href="#attr__defaultRoom" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_defaultRoom
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#attr__disableUlpfecRedCodecs" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_disableUlpfecRedCodecs
                     <span class="settings">
                       
                       
@@ -3018,7 +3034,7 @@ Remember to remove previous method of reconnection (re-creating the Peer connect
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l237"><code>source&#x2F;stream-sdp.js:237</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l248"><code>source&#x2F;stream-sdp.js:248</code></a>
       </small>
     
 
@@ -3102,7 +3118,7 @@ to be missing from Firefox answer session description to Chrome connection causi
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l23"><code>source&#x2F;stream-sdp.js:23</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l34"><code>source&#x2F;stream-sdp.js:34</code></a>
       </small>
     
 
@@ -5447,7 +5463,7 @@ See confluence docs for the &quot;enter&quot; expected properties to be received
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l983"><code>source&#x2F;room-init.js:983</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l994"><code>source&#x2F;room-init.js:994</code></a>
       </small>
     
 
@@ -5700,7 +5716,7 @@ See confluence docs for the &quot;introduceError&quot; expected properties to be
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l892"><code>source&#x2F;room-init.js:892</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l903"><code>source&#x2F;room-init.js:903</code></a>
       </small>
     
 
@@ -6875,7 +6891,7 @@ This starts creating the socket connection and called at first not when requirin
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l819"><code>source&#x2F;room-init.js:819</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l830"><code>source&#x2F;room-init.js:830</code></a>
       </small>
     
 
@@ -7799,7 +7815,7 @@ See confluence docs for the &quot;redirect&quot; expected properties to be recei
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l311"><code>source&#x2F;stream-sdp.js:311</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l322"><code>source&#x2F;stream-sdp.js:322</code></a>
       </small>
     
 
@@ -7965,7 +7981,7 @@ See confluence docs for the &quot;redirect&quot; expected properties to be recei
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l216"><code>source&#x2F;stream-sdp.js:216</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l227"><code>source&#x2F;stream-sdp.js:227</code></a>
       </small>
     
 
@@ -7982,6 +7998,89 @@ See confluence docs for the &quot;redirect&quot; expected properties to be recei
     <p>Function that modifies the session description to remove the previous experimental H264
 codec that is apparently breaking connections.
 NOTE: We should perhaps not remove it since H264 is supported?</p>
+
+  </div>
+
+  
+
+  
+
+  
+  <div class="code-item-section">
+    <h4>Events Sequence:</h4>
+    <span class="code-item-trigger"><small>There is no event sequence for this method.</small></span>
+  </div>
+  
+
+  
+
+  
+
+  <hr>
+</div>
+            
+              <div id="method__removeUlpfecAndRedCodecs" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_removeUlpfecAndRedCodecs</code></h3>
+  
+    <span class="paren">()</span>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      <!---->
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l353"><code>source&#x2F;stream-sdp.js:353</code></a>
+      </small>
+    
+
+    <small>
+      
+        <i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.16</span>
+      
+
+      
+    </small>
+  </div>
+
+  <div class="code-item-description">
+    <p>Function that modifies the session description to remove ulpfec and red codecs.</p>
 
   </div>
 
@@ -8050,7 +8149,7 @@ NOTE: We should perhaps not remove it since H264 is supported?</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l745"><code>source&#x2F;room-init.js:745</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l756"><code>source&#x2F;room-init.js:756</code></a>
       </small>
     
 
@@ -8810,7 +8909,7 @@ If trickle ICE is disabled, the local session description will be sent after
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l119"><code>source&#x2F;stream-sdp.js:119</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l130"><code>source&#x2F;stream-sdp.js:130</code></a>
       </small>
     
 
@@ -8894,7 +8993,7 @@ Setting this may not necessarily work in Firefox.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l160"><code>source&#x2F;stream-sdp.js:160</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l171"><code>source&#x2F;stream-sdp.js:171</code></a>
       </small>
     
 
@@ -12773,6 +12872,24 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
                   </li>
                 
                   <li class="param">
+                    <code class="param-name">disableUlpfecRedCodecs</code>
+                    <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      <small class="default"><span>DEFAULT: </span><code>false</code></small>
+                      <p>The flag if Ulpfec and Red codecs should be removed in
+  sending session descriptions.
+  <small>This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.</small></p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
                     <code class="param-name">credentials</code>
                     <span class="type"><b>{</b>JSON<b>}</b></span>
 
@@ -13330,6 +13447,19 @@ Global_Objects/encodeURIComponent">encodeURIComponent() API</a>.</small></li></o
                             <div class="param-description">
                               
                               The configured value of the <code>options.usePublicSTUN</code>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">disableUlpfecRedCodecs</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The configured value of the <code>options.disableUlpfecRedCodecs</code>.
                             </div>
                           </li>
                         
@@ -19660,6 +19790,85 @@ If enabled, the Peers connecting the same Room will receive each others &quot;en
 
   </div>
 
+  
+
+  
+
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="attr__disableUlpfecRedCodecs" class="code-item attr item private-attr-item ">
+  <a name="config__disableUlpfecRedCodecs"></a> 
+  <h3 class="code-item-name"><code>_disableUlpfecRedCodecs</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>Boolean<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This attribute is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      <!---->
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l23"><code>source&#x2F;stream-sdp.js:23</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.16</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Stores the flag if ulpfec and red codecs should be removed.</p>
+
+  </div>
+
+  
+    <div class="code-item-section">
+      <h4>Default value:</h4>
+      <code class="prettyprint">false</code>
+    </div>
   
 
   

@@ -112,6 +112,17 @@ Skylink.prototype._selectedAudioCodec = &#x27;auto&#x27;;
 Skylink.prototype._selectedVideoCodec = &#x27;auto&#x27;;
 
 /**
+ * Stores the flag if ulpfec and red codecs should be removed.
+ * @attribute _disableUlpfecRedCodecs
+ * @type Boolean
+ * @default false
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._disableUlpfecRedCodecs = false;
+
+/**
  * Function that modifies the session description to configure settings for OPUS audio codec.
  * @method _addSDPOpusConfig
  * @private
@@ -179,7 +190,7 @@ Skylink.prototype._addSDPOpusConfig = function(targetMid, sessionDescription) {
         }
       }
 
-      log.debug([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Setting OPUS config -&gt;&#x27;], settings);
+      log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Setting OPUS config -&gt;&#x27;], settings);
 
       var updatedOpusConfig = &#x27;&#x27;;
 
@@ -347,7 +358,7 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
 
   var parseFn = function (type, tracks) {
     if (tracks.length === 0) {
-      log.debug([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+      log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
         &#x27;Not enforcing &quot;&#x27; + type + &#x27;&quot; MediaStreamTrack IDs as no Stream &quot;&#x27; + type + &#x27;&quot; tracks is sent.&#x27;]);
       return;
     }
@@ -420,7 +431,7 @@ Skylink.prototype._removeH264VP9AptRtxForOlderPlugin = function (targetMid, sess
   // Remove rtx or apt= lines that prevent connections for browsers without VP8 or VP9 support
   // See: https://bugs.chromium.org/p/webrtc/issues/detail?id=3962
   if ([&#x27;chrome&#x27;, &#x27;opera&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; removeVP9AptRtxPayload) {
-    log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+    log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
       &#x27;Removing VP9/H264 apt= and rtx payload lines causing connectivity issues&#x27;]);
 
     sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=101\r\n/g, &#x27;&#x27;);
@@ -430,6 +441,52 @@ Skylink.prototype._removeH264VP9AptRtxForOlderPlugin = function (targetMid, sess
   return sessionDescription.sdp;
 };
 
+/**
+ * Function that modifies the session description to remove ulpfec and red codecs.
+ * @method _removeUlpfecAndRedCodecs
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._removeUlpfecAndRedCodecs = function (targetMid, sessionDescription) {
+  if (!this._disableUlpfecRedCodecs) {
+    log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Enabling and not removing ulpfec or red codecs.&#x27;]);
+    return sessionDescription.sdp;
+  }
+
+  var parseFn = function (codec) {
+    var hasMatch = (new RegExp(&#x27;a=rtpmap:(\\d*)\\ &#x27; + codec + &#x27;.*&#x27;, &#x27;gi&#x27;)).exec(sessionDescription.sdp);
+
+    if (!(Array.isArray(hasMatch) &amp;&amp; hasMatch.length &gt; 0)) {
+      log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Not removing &quot;&#x27; + codec + &#x27;&quot; as it does not exists.&#x27;]);
+      return;
+    }
+
+    for (var i = 0; i &lt; hasMatch.length; i++) {
+      if (hasMatch[i].indexOf(&#x27;a=rtpmap:&#x27;) === 0) {
+        continue;
+      }
+      var payload = parseInt(hasMatch[i] || &#x27;-1&#x27;, 10);
+
+      if (payload &gt; -1) {
+        log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+          &#x27;Removing &quot;&#x27; + codec + &#x27;&quot; payload -&gt;&#x27;], payload);
+
+        sessionDescription.sdp = sessionDescription.sdp.replace(
+          new RegExp(&#x27;a=rtpmap:&#x27; + payload + &#x27;\\ .*\\r\\n&#x27;, &#x27;g&#x27;), &#x27;&#x27;);
+        sessionDescription.sdp = sessionDescription.sdp.replace(
+          new RegExp(&#x27;a=fmtp:&#x27; + payload + &#x27;\\ .*\\r\\n&#x27;, &#x27;g&#x27;), &#x27;&#x27;);
+        sessionDescription.sdp = sessionDescription.sdp.replace(
+          new RegExp(&#x27;a=rtpmap:\\d+ rtx\\/\\d+\\r\\na=fmtp:\\d+ apt=&#x27; + payload + &#x27;\\r\\n&#x27;, &#x27;g&#x27;), &#x27;&#x27;);
+      }
+    }
+  };
+
+  parseFn(&#x27;red&#x27;);
+  parseFn(&#x27;ulpfec&#x27;);
+
+  return sessionDescription.sdp;
+};
     </pre>
 </div>
 
