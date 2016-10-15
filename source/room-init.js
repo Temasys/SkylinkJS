@@ -342,10 +342,14 @@ Skylink.prototype._room = null;
  *   query parameter in TURN ICE servers when constructing a Peer connections.
  * - When not provided, its value is <code>ANY</code>.
  *   [Rel: Skylink.TURN_TRANSPORT]
- * @param {Boolean} [options.disableVideoFecCodecs=false] The flag if video FEC (Forward Error Correction)
+ * @param {Boolean} [options.disableVideoFecCodecs=false] <blockquote class="info">
+ *   Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled.
+ *   </blockquote> The flag if video FEC (Forward Error Correction)
  *   codecs like ulpfec and red should be removed in sending session descriptions.
  *   <small>This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.</small>
- * @param {Boolean} [options.disableComfortNoiseCodec=false] The flag if audio
+ * @param {Boolean} [options.disableComfortNoiseCodec=false] <blockquote class="info">
+ *   Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled.
+ *   </blockquote> The flag if audio
  *   <a href="https://en.wikipedia.org/wiki/Comfort_noise">Comfort Noise (CN)</a> codec should be removed
  *   in sending session descriptions.
  *   <small>This can be useful for debugging purposes to test preferred audio quality and feedback.</small>

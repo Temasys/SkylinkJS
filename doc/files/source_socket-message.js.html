@@ -1117,20 +1117,8 @@ Skylink.prototype._offerHandler = function(message) {
   log.log([targetMid, &#x27;RTCSessionDescription&#x27;, message.type,
     &#x27;Session description object created&#x27;], offer);
 
-  // Configure it to force TURN connections by removing non-&quot;relay&quot; candidates
-  if (self._forceTURN &amp;&amp; !(self._enableIceTrickle &amp;&amp; self._peerInformations[targetMid] &amp;&amp;
-      self._peerInformations[targetMid].config.enableIceTrickle)) {
-    if (!self._hasMCU) {
-      log.warn([targetMid, &#x27;RTCICECandidate&#x27;, null, &#x27;Removing non-&quot;relay&quot; candidates from offer &#x27; +
-        &#x27; as TURN connections is forced&#x27;]);
-
-      offer.sdp = offer.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, &#x27;&#x27;);
-
-    } else {
-      log.warn([targetMid, &#x27;RTCICECandidate&#x27;, null, &#x27;Not removing non-&quot;relay&quot;&#x27; +
-        &#x27;&quot; candidates although TURN connections is forced as MCU is present&#x27;]);
-    }
-  }
+  offer.sdp = self._handleSDPMCUConnectionCase(targetMid, offer, false);
+  offer.sdp = self._removeSDPNonRelayCandidates(targetMid, offer);
 
   // This is always the initial state. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
@@ -1312,26 +1300,8 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }*/
 
-  // if firefox and peer is mcu, replace the sdp to suit mcu needs
-  if (window.webrtcDetectedType === &#x27;moz&#x27; &amp;&amp; targetMid === &#x27;MCU&#x27;) {
-    answer.sdp = answer.sdp.replace(/ generation 0/g, &#x27;&#x27;);
-    answer.sdp = answer.sdp.replace(/ udp /g, &#x27; UDP &#x27;);
-  }
-
-  // Configure it to force TURN connections by removing non-&quot;relay&quot; candidates
-  if (self._forceTURN &amp;&amp; !(self._enableIceTrickle &amp;&amp; self._peerInformations[targetMid] &amp;&amp;
-      self._peerInformations[targetMid].config.enableIceTrickle)) {
-    if (!self._hasMCU) {
-      log.warn([targetMid, &#x27;RTCICECandidate&#x27;, null, &#x27;Removing non-&quot;relay&quot; candidates from answer &#x27; +
-        &#x27; as TURN connections is forced&#x27;]);
-
-      answer.sdp = answer.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, &#x27;&#x27;);
-
-    } else {
-      log.warn([targetMid, &#x27;RTCICECandidate&#x27;, null, &#x27;Not removing non-&quot;relay&quot;&#x27; +
-        &#x27;&quot; candidates although TURN connections is forced as MCU is present&#x27;]);
-    }
-  }
+  answer.sdp = self._handleSDPMCUConnectionCase(targetMid, answer, false);
+  answer.sdp = self._removeSDPNonRelayCandidates(targetMid, answer);
 
   // This should be the state after offer is received. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {

@@ -3121,14 +3121,14 @@
                         },
                         {
                             "name": "disableVideoFecCodecs",
-                            "description": "The flag if video FEC (Forward Error Correction)\n  codecs like ulpfec and red should be removed in sending session descriptions.\n  <small>This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.</small>",
+                            "description": "<blockquote class=\"info\">\n  Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled.\n  </blockquote> The flag if video FEC (Forward Error Correction)\n  codecs like ulpfec and red should be removed in sending session descriptions.\n  <small>This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.</small>",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
                         },
                         {
                             "name": "disableComfortNoiseCodec",
-                            "description": "The flag if audio\n  <a href=\"https://en.wikipedia.org/wiki/Comfort_noise\">Comfort Noise (CN)</a> codec should be removed\n  in sending session descriptions.\n  <small>This can be useful for debugging purposes to test preferred audio quality and feedback.</small>",
+                            "description": "<blockquote class=\"info\">\n  Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled.\n  </blockquote> The flag if audio\n  <a href=\"https://en.wikipedia.org/wiki/Comfort_noise\">Comfort Noise (CN)</a> codec should be removed\n  in sending session descriptions.\n  <small>This can be useful for debugging purposes to test preferred audio quality and feedback.</small>",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
@@ -3350,7 +3350,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 768,
+            "line": 772,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -3361,7 +3361,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 842,
+            "line": 846,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -3372,7 +3372,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 915,
+            "line": 919,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -3383,7 +3383,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1006,
+            "line": 1010,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -6155,7 +6155,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1081,
+            "line": 1069,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -6166,7 +6166,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1173,
+            "line": 1161,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -6968,7 +6968,7 @@
             "line": 45,
             "description": "Function that modifies the session description to configure settings for OPUS audio codec.",
             "itemtype": "method",
-            "name": "_addSDPOpusConfig",
+            "name": "_setSDPOpusConfig",
             "access": "private",
             "tagname": "",
             "since": "0.6.16",
@@ -6976,7 +6976,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 141,
+            "line": 171,
             "description": "Function that modifies the session description to limit the maximum sending bandwidth.\nSetting this may not necessarily work in Firefox.",
             "itemtype": "method",
             "name": "_setSDPBitrate",
@@ -6987,7 +6987,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 182,
+            "line": 212,
             "description": "Function that modifies the session description to set the preferred audio/video codec.",
             "itemtype": "method",
             "name": "_setSDPCodec",
@@ -6998,7 +6998,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 238,
+            "line": 266,
             "description": "Function that modifies the session description to remove the previous experimental H264\ncodec that is apparently breaking connections.\nNOTE: We should perhaps not remove it since H264 is supported?",
             "itemtype": "method",
             "name": "_removeSDPFirefoxH264Pref",
@@ -7009,7 +7009,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 259,
+            "line": 282,
             "description": "Function that modifies the session description to append the MediaStream and MediaStreamTrack IDs that seems\nto be missing from Firefox answer session description to Chrome connection causing freezes in re-negotiation.",
             "itemtype": "method",
             "name": "_addSDPMediaStreamTrackIDs",
@@ -7020,10 +7020,10 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 333,
+            "line": 356,
             "description": "Function that modifies the session description to remove VP9 and H264 apt/rtx lines to prevent plugin connection breaks.",
             "itemtype": "method",
-            "name": "_removeH264VP9AptRtxForOlderPlugin",
+            "name": "_removeSDPH264VP9AptRtxForOlderPlugin",
             "access": "private",
             "tagname": "",
             "since": "0.6.16",
@@ -7031,10 +7031,10 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 364,
-            "description": "Function that modifies the session description to remove ulpfec and red codecs.",
+            "line": 387,
+            "description": "Function that modifies the session description to remove codecs.",
             "itemtype": "method",
-            "name": "_removeUlpfecAndRedCodecs",
+            "name": "_removeSDPCodecs",
             "access": "private",
             "tagname": "",
             "since": "0.6.16",
@@ -7042,10 +7042,21 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 411,
-            "description": "Function that modifies the session description to remove CN codecs.",
+            "line": 450,
+            "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
-            "name": "_removeComfortNoiseCodec",
+            "name": "_removeSDPNonRelayCandidates",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.16",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/stream-sdp.js",
+            "line": 470,
+            "description": "Function that modifies the session description to remove non-relay ICE candidates.",
+            "itemtype": "method",
+            "name": "_handleSDPMCUConnectionCase",
             "access": "private",
             "tagname": "",
             "since": "0.6.16",

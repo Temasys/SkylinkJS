@@ -219,14 +219,6 @@ Before using any Skylink functionalities, you will need to authenticate your App
                     </span>
                   </a>
                 
-                  <a href="#method__addSDPOpusConfig" class="list-group-item code-menu-item  private-method-item ">
-                    &nbsp;&nbsp;_addSDPOpusConfig
-                    <span class="settings">
-                      
-                      
-                    </span>
-                  </a>
-                
                   <a href="#method__answerHandler" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_answerHandler
                     <span class="settings">
@@ -437,6 +429,14 @@ Before using any Skylink functionalities, you will need to authenticate your App
                 
                   <a href="#method__handleDataTransferTimeoutForPeer" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_handleDataTransferTimeoutForPeer
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#method__handleSDPMCUConnectionCase" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_handleSDPMCUConnectionCase
                     <span class="settings">
                       
                       
@@ -667,24 +667,16 @@ Before using any Skylink functionalities, you will need to authenticate your App
                     </span>
                   </a>
                 
-                  <a href="#method__removeComfortNoiseCodec" class="list-group-item code-menu-item  private-method-item ">
-                    &nbsp;&nbsp;_removeComfortNoiseCodec
-                    <span class="settings">
-                      
-                      
-                    </span>
-                  </a>
-                
-                  <a href="#method__removeH264VP9AptRtxForOlderPlugin" class="list-group-item code-menu-item  private-method-item ">
-                    &nbsp;&nbsp;_removeH264VP9AptRtxForOlderPlugin
-                    <span class="settings">
-                      
-                      
-                    </span>
-                  </a>
-                
                   <a href="#method__removePeer" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_removePeer
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#method__removeSDPCodecs" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_removeSDPCodecs
                     <span class="settings">
                       
                       
@@ -699,8 +691,16 @@ Before using any Skylink functionalities, you will need to authenticate your App
                     </span>
                   </a>
                 
-                  <a href="#method__removeUlpfecAndRedCodecs" class="list-group-item code-menu-item  private-method-item ">
-                    &nbsp;&nbsp;_removeUlpfecAndRedCodecs
+                  <a href="#method__removeSDPH264VP9AptRtxForOlderPlugin" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_removeSDPH264VP9AptRtxForOlderPlugin
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#method__removeSDPNonRelayCandidates" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_removeSDPNonRelayCandidates
                     <span class="settings">
                       
                       
@@ -789,6 +789,14 @@ Before using any Skylink functionalities, you will need to authenticate your App
                 
                   <a href="#method__setSDPCodec" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_setSDPCodec
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#method__setSDPOpusConfig" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_setSDPOpusConfig
                     <span class="settings">
                       
                       
@@ -3050,7 +3058,7 @@ Remember to remove previous method of reconnection (re-creating the Peer connect
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l259"><code>source&#x2F;stream-sdp.js:259</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l282"><code>source&#x2F;stream-sdp.js:282</code></a>
       </small>
     
 
@@ -3066,89 +3074,6 @@ Remember to remove previous method of reconnection (re-creating the Peer connect
   <div class="code-item-description">
     <p>Function that modifies the session description to append the MediaStream and MediaStreamTrack IDs that seems
 to be missing from Firefox answer session description to Chrome connection causing freezes in re-negotiation.</p>
-
-  </div>
-
-  
-
-  
-
-  
-  <div class="code-item-section">
-    <h4>Events Sequence:</h4>
-    <span class="code-item-trigger"><small>There is no event sequence for this method.</small></span>
-  </div>
-  
-
-  
-
-  
-
-  <hr>
-</div>
-            
-              <div id="method__addSDPOpusConfig" class="code-item method item private-method-item ">
-  <h3 class="code-item-name"><code>_addSDPOpusConfig</code></h3>
-  
-    <span class="paren">()</span>
-  
-
-  <div class="code-item-properties">
-    <div class="properties-wrapper">
-      
-
-      
-
-      
-
-      
-        <span class="label label-default" title="This method is private.">private</span>
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-    </div>
-
-    <div class="code-item-information">
-      
-        
-          
-        
-      
-      <!---->
-      
-    </div>
-
-    
-      <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l45"><code>source&#x2F;stream-sdp.js:45</code></a>
-      </small>
-    
-
-    <small>
-      
-        <i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.16</span>
-      
-
-      
-    </small>
-  </div>
-
-  <div class="code-item-description">
-    <p>Function that modifies the session description to configure settings for OPUS audio codec.</p>
 
   </div>
 
@@ -3217,7 +3142,7 @@ to be missing from Firefox answer session description to Chrome connection causi
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1173"><code>source&#x2F;socket-message.js:1173</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1161"><code>source&#x2F;socket-message.js:1161</code></a>
       </small>
     
 
@@ -3805,7 +3730,7 @@ See confluence docs for the &quot;bye&quot; expected properties to be received
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1081"><code>source&#x2F;socket-message.js:1081</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1069"><code>source&#x2F;socket-message.js:1069</code></a>
       </small>
     
 
@@ -5432,6 +5357,89 @@ See confluence docs for the &quot;enter&quot; expected properties to be received
   <hr>
 </div>
             
+              <div id="method__handleSDPMCUConnectionCase" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_handleSDPMCUConnectionCase</code></h3>
+  
+    <span class="paren">()</span>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      <!---->
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l470"><code>source&#x2F;stream-sdp.js:470</code></a>
+      </small>
+    
+
+    <small>
+      
+        <i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.16</span>
+      
+
+      
+    </small>
+  </div>
+
+  <div class="code-item-description">
+    <p>Function that modifies the session description to remove non-relay ICE candidates.</p>
+
+  </div>
+
+  
+
+  
+
+  
+  <div class="code-item-section">
+    <h4>Events Sequence:</h4>
+    <span class="code-item-trigger"><small>There is no event sequence for this method.</small></span>
+  </div>
+  
+
+  
+
+  
+
+  <hr>
+</div>
+            
               <div id="method__initSelectedRoom" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_initSelectedRoom</code></h3>
   
@@ -5479,7 +5487,7 @@ See confluence docs for the &quot;enter&quot; expected properties to be received
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l1006"><code>source&#x2F;room-init.js:1006</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l1010"><code>source&#x2F;room-init.js:1010</code></a>
       </small>
     
 
@@ -5732,7 +5740,7 @@ See confluence docs for the &quot;introduceError&quot; expected properties to be
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l915"><code>source&#x2F;room-init.js:915</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l919"><code>source&#x2F;room-init.js:919</code></a>
       </small>
     
 
@@ -6907,7 +6915,7 @@ This starts creating the socket connection and called at first not when requirin
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l842"><code>source&#x2F;room-init.js:842</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l846"><code>source&#x2F;room-init.js:846</code></a>
       </small>
     
 
@@ -7784,172 +7792,6 @@ See confluence docs for the &quot;redirect&quot; expected properties to be recei
   <hr>
 </div>
             
-              <div id="method__removeComfortNoiseCodec" class="code-item method item private-method-item ">
-  <h3 class="code-item-name"><code>_removeComfortNoiseCodec</code></h3>
-  
-    <span class="paren">()</span>
-  
-
-  <div class="code-item-properties">
-    <div class="properties-wrapper">
-      
-
-      
-
-      
-
-      
-        <span class="label label-default" title="This method is private.">private</span>
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-    </div>
-
-    <div class="code-item-information">
-      
-        
-          
-        
-      
-      <!---->
-      
-    </div>
-
-    
-      <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l411"><code>source&#x2F;stream-sdp.js:411</code></a>
-      </small>
-    
-
-    <small>
-      
-        <i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.16</span>
-      
-
-      
-    </small>
-  </div>
-
-  <div class="code-item-description">
-    <p>Function that modifies the session description to remove CN codecs.</p>
-
-  </div>
-
-  
-
-  
-
-  
-  <div class="code-item-section">
-    <h4>Events Sequence:</h4>
-    <span class="code-item-trigger"><small>There is no event sequence for this method.</small></span>
-  </div>
-  
-
-  
-
-  
-
-  <hr>
-</div>
-            
-              <div id="method__removeH264VP9AptRtxForOlderPlugin" class="code-item method item private-method-item ">
-  <h3 class="code-item-name"><code>_removeH264VP9AptRtxForOlderPlugin</code></h3>
-  
-    <span class="paren">()</span>
-  
-
-  <div class="code-item-properties">
-    <div class="properties-wrapper">
-      
-
-      
-
-      
-
-      
-        <span class="label label-default" title="This method is private.">private</span>
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-    </div>
-
-    <div class="code-item-information">
-      
-        
-          
-        
-      
-      <!---->
-      
-    </div>
-
-    
-      <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l333"><code>source&#x2F;stream-sdp.js:333</code></a>
-      </small>
-    
-
-    <small>
-      
-        <i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.16</span>
-      
-
-      
-    </small>
-  </div>
-
-  <div class="code-item-description">
-    <p>Function that modifies the session description to remove VP9 and H264 apt/rtx lines to prevent plugin connection breaks.</p>
-
-  </div>
-
-  
-
-  
-
-  
-  <div class="code-item-section">
-    <h4>Events Sequence:</h4>
-    <span class="code-item-trigger"><small>There is no event sequence for this method.</small></span>
-  </div>
-  
-
-  
-
-  
-
-  <hr>
-</div>
-            
               <div id="method__removePeer" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_removePeer</code></h3>
   
@@ -8033,6 +7875,89 @@ See confluence docs for the &quot;redirect&quot; expected properties to be recei
   <hr>
 </div>
             
+              <div id="method__removeSDPCodecs" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_removeSDPCodecs</code></h3>
+  
+    <span class="paren">()</span>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      <!---->
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l387"><code>source&#x2F;stream-sdp.js:387</code></a>
+      </small>
+    
+
+    <small>
+      
+        <i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.16</span>
+      
+
+      
+    </small>
+  </div>
+
+  <div class="code-item-description">
+    <p>Function that modifies the session description to remove codecs.</p>
+
+  </div>
+
+  
+
+  
+
+  
+  <div class="code-item-section">
+    <h4>Events Sequence:</h4>
+    <span class="code-item-trigger"><small>There is no event sequence for this method.</small></span>
+  </div>
+  
+
+  
+
+  
+
+  <hr>
+</div>
+            
               <div id="method__removeSDPFirefoxH264Pref" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_removeSDPFirefoxH264Pref</code></h3>
   
@@ -8080,7 +8005,7 @@ See confluence docs for the &quot;redirect&quot; expected properties to be recei
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l238"><code>source&#x2F;stream-sdp.js:238</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l266"><code>source&#x2F;stream-sdp.js:266</code></a>
       </small>
     
 
@@ -8118,8 +8043,8 @@ NOTE: We should perhaps not remove it since H264 is supported?</p>
   <hr>
 </div>
             
-              <div id="method__removeUlpfecAndRedCodecs" class="code-item method item private-method-item ">
-  <h3 class="code-item-name"><code>_removeUlpfecAndRedCodecs</code></h3>
+              <div id="method__removeSDPH264VP9AptRtxForOlderPlugin" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_removeSDPH264VP9AptRtxForOlderPlugin</code></h3>
   
     <span class="paren">()</span>
   
@@ -8165,7 +8090,7 @@ NOTE: We should perhaps not remove it since H264 is supported?</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l364"><code>source&#x2F;stream-sdp.js:364</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l356"><code>source&#x2F;stream-sdp.js:356</code></a>
       </small>
     
 
@@ -8179,7 +8104,90 @@ NOTE: We should perhaps not remove it since H264 is supported?</p>
   </div>
 
   <div class="code-item-description">
-    <p>Function that modifies the session description to remove ulpfec and red codecs.</p>
+    <p>Function that modifies the session description to remove VP9 and H264 apt/rtx lines to prevent plugin connection breaks.</p>
+
+  </div>
+
+  
+
+  
+
+  
+  <div class="code-item-section">
+    <h4>Events Sequence:</h4>
+    <span class="code-item-trigger"><small>There is no event sequence for this method.</small></span>
+  </div>
+  
+
+  
+
+  
+
+  <hr>
+</div>
+            
+              <div id="method__removeSDPNonRelayCandidates" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_removeSDPNonRelayCandidates</code></h3>
+  
+    <span class="paren">()</span>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      <!---->
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l450"><code>source&#x2F;stream-sdp.js:450</code></a>
+      </small>
+    
+
+    <small>
+      
+        <i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.16</span>
+      
+
+      
+    </small>
+  </div>
+
+  <div class="code-item-description">
+    <p>Function that modifies the session description to remove non-relay ICE candidates.</p>
 
   </div>
 
@@ -8248,7 +8256,7 @@ NOTE: We should perhaps not remove it since H264 is supported?</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l768"><code>source&#x2F;room-init.js:768</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l772"><code>source&#x2F;room-init.js:772</code></a>
       </small>
     
 
@@ -9008,7 +9016,7 @@ If trickle ICE is disabled, the local session description will be sent after
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l141"><code>source&#x2F;stream-sdp.js:141</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l171"><code>source&#x2F;stream-sdp.js:171</code></a>
       </small>
     
 
@@ -9092,7 +9100,7 @@ Setting this may not necessarily work in Firefox.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l182"><code>source&#x2F;stream-sdp.js:182</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l212"><code>source&#x2F;stream-sdp.js:212</code></a>
       </small>
     
 
@@ -9107,6 +9115,89 @@ Setting this may not necessarily work in Firefox.</p>
 
   <div class="code-item-description">
     <p>Function that modifies the session description to set the preferred audio/video codec.</p>
+
+  </div>
+
+  
+
+  
+
+  
+  <div class="code-item-section">
+    <h4>Events Sequence:</h4>
+    <span class="code-item-trigger"><small>There is no event sequence for this method.</small></span>
+  </div>
+  
+
+  
+
+  
+
+  <hr>
+</div>
+            
+              <div id="method__setSDPOpusConfig" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_setSDPOpusConfig</code></h3>
+  
+    <span class="paren">()</span>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      <!---->
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l45"><code>source&#x2F;stream-sdp.js:45</code></a>
+      </small>
+    
+
+    <small>
+      
+        <i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.16</span>
+      
+
+      
+    </small>
+  </div>
+
+  <div class="code-item-description">
+    <p>Function that modifies the session description to configure settings for OPUS audio codec.</p>
 
   </div>
 
@@ -12987,7 +13078,9 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span><code>false</code></small>
-                      <p>The flag if video FEC (Forward Error Correction)
+                      <p><blockquote class="info">
+  Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled.
+  </blockquote> The flag if video FEC (Forward Error Correction)
   codecs like ulpfec and red should be removed in sending session descriptions.
   <small>This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.</small></p>
 
@@ -13005,7 +13098,9 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span><code>false</code></small>
-                      <p>The flag if audio
+                      <p><blockquote class="info">
+  Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled.
+  </blockquote> The flag if audio
   <a href="https://en.wikipedia.org/wiki/Comfort_noise">Comfort Noise (CN)</a> codec should be removed
   in sending session descriptions.
   <small>This can be useful for debugging purposes to test preferred audio quality and feedback.</small></p>
