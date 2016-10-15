@@ -44,12 +44,12 @@ Skylink.prototype._disableComfortNoiseCodec = false;
 
 /**
  * Function that modifies the session description to configure settings for OPUS audio codec.
- * @method _addSDPOpusConfig
+ * @method _setSDPOpusConfig
  * @private
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype._addSDPOpusConfig = function(targetMid, sessionDescription) {
+Skylink.prototype._setSDPOpusConfig = function(targetMid, sessionDescription) {
   var sdpLines = sessionDescription.sdp.split('\r\n');
   var payload = null;
   var settings = {
@@ -86,33 +86,39 @@ Skylink.prototype._addSDPOpusConfig = function(targetMid, sessionDescription) {
   // Set OPUS FMTP line
   for (var j = 0; j < sdpLines.length; j++) {
     if (sdpLines[j].indexOf('a=fmtp:' + payload) === 0) {
-      var opusFmtpLines = (sdpLines[j].split('a=fmtp:' + payload)[1] || '').replace(/\s/g).split(';');
+      var opusFmtpLines = (sdpLines[j].split('a=fmtp:' + payload)[1] || '').replace(/\s/g, '').split(';');
+      var updatedOpusConfig = '';
 
       for (var k = 0; k < opusFmtpLines.length; k++) {
-        if (opusFmtpLines[k] === 'useinbandfec=1' && settings.useinbandfec === null) {
-          log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
-            'Received OPUS useinbandfec as true by default.']);
-          settings.useinbandfec = true;
+        if (!(opusFmtpLines[k] && opusFmtpLines[k].indexOf('=') > 0)) {
+          continue;
+        }
 
-        } else if (opusFmtpLines[k] === 'usedtx=1' && settings.usedtx === null) {
-          log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
-            'Received OPUS usedtx as true by default.']);
-          settings.usedtx = true;
+        var parts = opusFmtpLines[k].split('=');
 
-        } else if (opusFmtpLines[k].indexOf('maxplaybackrate') === 0 && settings.maxplaybackrate === null) {
-          var maxplaybackrateVal = parseInt(opusFmtpLines[k].split('=')[1] || '0', 10);
-
-          if (maxplaybackrateVal > 0) {
+        if (['useinbandfec', 'usedtx', 'sprop-stereo', 'stereo', 'maxplaybackrate'].indexOf(parts[0]) > -1) {
+          // Get default OPUS useinbandfec
+          if (parts[0] === 'useinbandfec' && parts[1] === '1' && settings.useinbandfec === null) {
             log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
-              'Received OPUS usedtx as ' + maxplaybackrateVal + ' by default.']);
-            settings.maxplaybackrate = maxplaybackrateVal;
+              'Received OPUS useinbandfec as true by default.']);
+            settings.useinbandfec = true;
+
+          // Get default OPUS usedtx
+          } else if (parts[0] === 'usedtx' && parts[1] === '1' && settings.usedtx === null) {
+            log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+              'Received OPUS usedtx as true by default.']);
+            settings.usedtx = true;
+
+          // Get default OPUS maxplaybackrate
+          } else if (parts[0] === 'maxplaybackrate' && parseInt(parts[1] || '0', 10) > 0 && settings.maxplaybackrate === null) {
+            log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+              'Received OPUS maxplaybackrate as ' + parts[1] + ' by default.']);
+            settings.maxplaybackrate = parts[1];
           }
+        } else {
+          updatedOpusConfig += opusFmtpLines[k] + ';';
         }
       }
-
-      log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Setting OPUS config ->'], settings);
-
-      var updatedOpusConfig = '';
 
       if (settings.stereo === true) {
         updatedOpusConfig += 'stereo=1;';
@@ -129,6 +135,8 @@ Skylink.prototype._addSDPOpusConfig = function(targetMid, sessionDescription) {
       if (settings.maxplaybackrate) {
         updatedOpusConfig += 'maxplaybackrate=' + settings.maxplaybackrate + ';';
       }
+
+      log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Setting OPUS config ->'], updatedOpusConfig);
 
       sdpLines[j] = 'a=fmtp:' + payload + ' ' + updatedOpusConfig;
       break;
