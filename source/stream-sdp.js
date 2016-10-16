@@ -482,7 +482,7 @@ Skylink.prototype._removeSDPNonRelayCandidates = function (targetMid, sessionDes
  */
 Skylink.prototype._handleSDPMCUConnectionCase = function (targetMid, sessionDescription, isLocal) {
   if (!this._hasMCU) {
-    return;
+    return sessionDescription.sdp;
   }
 
   log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Handling MCU connection case.']);

@@ -27,6 +27,41 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
 };
 
 /**
+ * <blockquote class="info">
+ *   Learn more about how ICE works in this
+ *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+ * </blockquote>
+ * The list of Peer connection remote ICE candidate processing states for trickle ICE connections.
+ * @attribute CANDIDATE_PROCESSING_STATE
+ * @param {String} RECEIVED <small>Value <code>"received"</code></small>
+ *   The value of the state when the remote ICE candidate was received.
+ * @param {String} DROPPED  <small>Value <code>"received"</code></small>
+ *   The value of the state when the remote ICE candidate is dropped.
+ * @param {String} BUFFERED  <small>Value <code>"buffered"</code></small>
+ *   The value of the state when the remote ICE candidate is buffered.
+ * @param {String} PROCESSING  <small>Value <code>"processing"</code></small>
+ *   The value of the state when the remote ICE candidate is being processed.
+ * @param {String} PROCESS_SUCCESS  <small>Value <code>"processSuccess"</code></small>
+ *   The value of the state when the remote ICE candidate has been processed successfully.
+ *   <small>The ICE candidate that is processed will be used to check against the list of
+ *   locally generated ICE candidate to start matching for the suitable pair for the best ICE connection.</small>
+ * @param {String} PROCESS_ERROR  <small>Value <code>"processError"</code></small>
+ *   The value of the state when the remote ICE candidate has failed to be processed.
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype.CANDIDATE_PROCESSING_STATE = {
+  RECEIVED: 'received',
+  DROPPED: 'dropped',
+  BUFFERED: 'buffered',
+  PROCESSING: 'processing',
+  PROCESS_SUCCESS: 'processSuccess',
+  PROCESS_ERROR: 'processError'
+};
+
+/**
  * Stores the list of buffered ICE candidates that is received before
  *   remote session description is received and set.
  * @attribute _peerCandidatesQueue
@@ -61,22 +96,36 @@ Skylink.prototype._gatheredCandidates = {};
  */
 Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
   var self = this;
+  var pc = self._peerConnections[targetMid];
+
+  if (!pc) {
+    log.warn([targetMid, 'RTCIceCandidate', null, 'Ignoring of ICE candidate event as ' +
+      'Peer connection does not exists ->'], candidate);
+    return;
+  }
 
   if (candidate.candidate) {
-    var messageCan = candidate.candidate.split(' ');
-    var candidateType = messageCan[7];
-    log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
-      candidateType + ' candidate:'], candidate);
+    if (!pc.gathering) {
+      log.log([targetMid, 'RTCIceCandidate', null, 'ICE gathering has started.']);
+
+      pc.gathering = true;
+
+      self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.GATHERING, targetMid);
+    }
+
+    var candidateType = candidate.candidate.split(' ')[7];
+
+    log.debug([targetMid, 'RTCIceCandidate', candidateType, 'Generated ICE candidate ->'], candidate);
 
     if (self._forceTURN && candidateType !== 'relay') {
       if (!self._hasMCU) {
-        log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
-          '" candidate as TURN connections is forced'], candidate);
+        log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate as ' +
+          'TURN connections are enforced ->'], candidate);
         return;
       }
 
-      log.warn([targetMid, 'RTCICECandidate', null, 'Not ignoring sending of "' + candidateType +
-        '" candidate although TURN connections is forced as MCU is present'], candidate);
+      log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Not dropping of sending ICE candidate although ' +
+        'TURN connections are enforced as MCU is present (and act as a TURN itself) ->'], candidate);
     }
 
     if (!self._gatheredCandidates[targetMid]) {
@@ -94,10 +143,12 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
 
     if (!(self._enableIceTrickle && self._peerInformations[targetMid] &&
       self._peerInformations[targetMid].config.enableIceTrickle)) {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
-        '" candidate as trickle ICE is disabled'], candidate);
+      log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate as ' +
+        'trickle ICE is disabled ->'], candidate);
       return;
     }
+
+    log.debug([targetMid, 'RTCIceCandidate', candidateType, 'Sending ICE candidate ->'], candidate);
 
     self._sendChannelMessage({
       type: self._SIG_MESSAGE_TYPE.CANDIDATE,
@@ -110,14 +161,20 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
     });
 
   } else {
-    log.debug([targetMid, 'RTCIceCandidate', null, 'End of gathering']);
-    self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.COMPLETED,
-      targetMid);
+    log.log([targetMid, 'RTCIceCandidate', null, 'ICE gathering has completed.']);
+
+    pc.gathering = false;
+
+    self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.COMPLETED, targetMid);
+
     // Disable Ice trickle option
-    if (!self._enableIceTrickle) {
+    if (!(self._enableIceTrickle && self._peerInformations[targetMid] &&
+      self._peerInformations[targetMid].config.enableIceTrickle)) {
       var sessionDescription = self._peerConnections[targetMid].localDescription;
 
       if (!(sessionDescription && sessionDescription.type && sessionDescription.sdp)) {
+        log.warn([targetMid, 'RTCSessionDescription', null, 'Not sending any session description after ' +
+          'ICE gathering completed as it is not present.']);
         return;
       }
 
@@ -125,32 +182,11 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
         type: sessionDescription.type,
         sdp: self._addSDPMediaStreamTrackIDs(targetMid, sessionDescription),
         mid: self._user.sid,
-        //agent: window.webrtcDetectedBrowser,
         userInfo: self._getUserInfo(),
         target: targetMid,
         rid: self._room.id
       });
     }
-
-    // We should remove this.. this could be due to ICE failures
-    // Adding this fix is bad
-    // Does the restart in the case when the candidates are extremely a lot
-    /*var doACandidateRestart = self._addedCandidates[targetMid].relay.length > 20 &&
-      (window.webrtcDetectedBrowser === 'chrome' || window.webrtcDetectedBrowser === 'opera');
-
-    log.debug([targetMid, 'RTCIceCandidate', null, 'Relay candidates generated length'], self._addedCandidates[targetMid].relay.length);
-
-    if (doACandidateRestart) {
-      setTimeout(function () {
-        if (self._peerConnections[targetMid]) {
-          if(self._peerConnections[targetMid].iceConnectionState !== self.ICE_CONNECTION_STATE.CONNECTED &&
-            self._peerConnections[targetMid].iceConnectionState !== self.ICE_CONNECTION_STATE.COMPLETED) {
-            // restart
-            self._restartPeerConnection(targetMid, true, true, null, false);
-          }
-        }
-      }, self._addedCandidates[targetMid].relay.length * 50);
-    }*/
   }
 };
 
@@ -162,38 +198,16 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
-  log.debug([targetMid, null, null, 'Queued candidate to add after ' +
-    'setRemoteDescription'], candidate);
-  this._peerCandidatesQueue[targetMid] =
-    this._peerCandidatesQueue[targetMid] || [];
-  this._peerCandidatesQueue[targetMid].push(candidate);
-};
+Skylink.prototype._addIceCandidateToQueue = function(targetMid, canId, candidate) {
+  var candidateType = candidate.candidate.split(' ')[7];
 
-/**
- * Function that handles when the Peer connection received ICE candidate
- *   has been added or processed successfully.
- * Separated in a function to prevent jshint errors.
- * @method _onAddIceCandidateSuccess
- * @private
- * @for Skylink
- * @since 0.5.9
- */
-Skylink.prototype._onAddIceCandidateSuccess = function () {
-  log.debug([null, 'RTCICECandidate', null, 'Successfully added ICE candidate']);
-};
+  log.debug([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Buffering ICE candidate.']);
 
-/**
- * Function that handles when the Peer connection received ICE candidate
- *   has failed adding or processing.
-  * Separated in a function to prevent jshint errors.
- * @method _onAddIceCandidateFailure
- * @private
- * @for Skylink
- * @since 0.5.9
- */
-Skylink.prototype._onAddIceCandidateFailure = function (error) {
-  log.error([null, 'RTCICECandidate', null, 'Error'], error);
+  this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.BUFFERED,
+    targetMid, canId, candidateType, candidate.candidate, null);
+
+  this._peerCandidatesQueue[targetMid] = this._peerCandidatesQueue[targetMid] || [];
+  this._peerCandidatesQueue[targetMid].push([canId, candidate]);
 };
 
 /**
@@ -205,17 +219,59 @@ Skylink.prototype._onAddIceCandidateFailure = function (error) {
  * @since 0.5.2
  */
 Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
-  this._peerCandidatesQueue[targetMid] =
-    this._peerCandidatesQueue[targetMid] || [];
-  if(this._peerCandidatesQueue[targetMid].length > 0) {
-    for (var i = 0; i < this._peerCandidatesQueue[targetMid].length; i++) {
-      var candidate = this._peerCandidatesQueue[targetMid][i];
-      log.debug([targetMid, null, null, 'Added queued candidate'], candidate);
-      this._peerConnections[targetMid].addIceCandidate(candidate,
-        this._onAddIceCandidateSuccess, this._onAddIceCandidateFailure);
-    }
-    delete this._peerCandidatesQueue[targetMid];
-  } else {
-    log.log([targetMid, null, null, 'No queued candidates to add']);
+  this._peerCandidatesQueue[targetMid] = this._peerCandidatesQueue[targetMid] || [];
+
+  for (var i = 0; i < this._peerCandidatesQueue[targetMid].length; i++) {
+    var canArray = this._peerCandidatesQueue[targetMid][i];
+    var candidateType = canArray[1].candidate.split(' ')[7];
+
+    log.debug([targetMid, 'RTCIceCandidate', canArray[0] + ':' + candidateType, 'Adding buffered ICE candidate.']);
+
+    this._addIceCandidate(targetMid, canArray[0], canArray[1]);
   }
+
+  delete this._peerCandidatesQueue[targetMid];
+};
+
+/**
+ * Function that adds the ICE candidate to Peer connection.
+ * @method _addIceCandidate
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
+  var self = this;
+  var candidateType = candidate.candidate.split(' ')[7];
+
+  var onSuccessCbFn = function () {
+    log.log([targetMid, 'RTCIceCandidate', canId + ':' + candidateType,
+      'Added ICE candidate successfully.']);
+    self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.PROCESS_SUCCESS,
+      targetMid, canId, candidateType, candidate.candidate, null);
+  };
+
+  var onErrorCbFn = function (error) {
+    log.error([targetMid, 'RTCIceCandidate', canId + ':' + candidateType,
+      'Failed adding ICE candidate ->'], error);
+    self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.PROCESS_ERROR,
+      targetMid, canId, candidateType, candidate.candidate, error);
+  };
+
+  log.debug([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Adding ICE candidate.']);
+
+  self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.PROCESSING,
+    targetMid, canId, candidateType, candidate.candidate, null);
+
+  if (!(self._peerConnections[targetMid] &&
+    self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
+    log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping ICE candidate ' +
+      'as Peer connection does not exists or is closed']);
+    self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.DROPPED,
+      targetMid, canId, candidateType, candidate.candidate,
+      new Error('Failed processing ICE candidate as Peer connection does not exists or is closed.'));
+    return;
+  }
+
+  self._peerConnections[targetMid].addIceCandidate(candidate, onSuccessCbFn, onErrorCbFn);
 };

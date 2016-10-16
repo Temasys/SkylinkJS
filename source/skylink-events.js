@@ -106,6 +106,10 @@ Skylink.prototype._EVENTS = {
   handshakeProgress: [],
 
   /**
+   * <blockquote class="info">
+   *   Learn more about how ICE works in this
+   *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+   * </blockquote>
    * Event triggered when a Peer connection ICE gathering state has changed.
    * @event candidateGenerationState
    * @param {String} state The current Peer connection ICE gathering state.
@@ -117,6 +121,10 @@ Skylink.prototype._EVENTS = {
   candidateGenerationState: [],
 
   /**
+   * <blockquote class="info">
+   *   Learn more about how ICE works in this
+   *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+   * </blockquote>
    * Event triggered when a Peer connection session description exchanging state has changed.
    * @event peerConnectionState
    * @param {String} state The current Peer connection session description exchanging state.
@@ -128,6 +136,10 @@ Skylink.prototype._EVENTS = {
   peerConnectionState: [],
 
   /**
+   * <blockquote class="info">
+   *   Learn more about how ICE works in this
+   *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+   * </blockquote>
    * Event triggered when a Peer connection ICE connection state has changed.
    * @event iceConnectionState
    * @param {String} state The current Peer connection ICE connection state.
@@ -723,7 +735,30 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.15
    */
-  localMediaMuted: []
+  localMediaMuted: [],
+
+  /**
+   * <blockquote class="info">
+   *   Learn more about how ICE works in this
+   *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+   * </blockquote>
+   * Event triggered when remote ICE candidate processing state has changed for trickle ICE connections.
+   * @event candidateProcessingState
+   * @param {String} state The ICE candidate processing state.
+   *   [Rel: Skylink.CANDIDATE_PROCESSING_STATE]
+   * @param {String} peerId The Peer ID.
+   * @param {String} candidateId The remote ICE candidate session ID.
+   *   <small>Note that this value is not related to WebRTC API but for identification of remote ICE candidate received.</small>
+   * @param {String} candidateType The remote ICE candidate type.
+   *   <small>Expected values are <code>"host"</code> for local network ICE candidates, <code>"srflx"</code> for
+   *   STUN ICE candidates and <code>"relay"</code> for TURN ICE candidates.</small>
+   * @param {String} candidateSdp The remote ICE candidate connection string.
+   * @param {Error} [error] The error object.
+   *   <small>Defined only when <code>state</code> is <code>DROPPED</code> or <code>PROCESS_ERROR</code>.</small>
+   * @for Skylink
+   * @since 0.6.16
+   */
+  candidateProcessingState: []
 };
 
 /**

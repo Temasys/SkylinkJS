@@ -1168,71 +1168,54 @@ Skylink.prototype._offerHandler = function(message) {
  */
 Skylink.prototype._candidateHandler = function(message) {
   var targetMid = message.mid;
-  var pc = this._peerConnections[targetMid];
-  log.log([targetMid, null, message.type, &#x27;Received candidate from peer. Candidate config:&#x27;], {
-    sdp: message.sdp,
-    target: message.target,
-    candidate: message.candidate,
-    label: message.label
-  });
-  // create ice candidate object
-  var messageCan = message.candidate.split(&#x27; &#x27;);
-  var canType = messageCan[7];
-  log.log([targetMid, null, message.type, &#x27;Candidate type:&#x27;], canType);
-  // if (canType !== &#x27;relay&#x27; &amp;&amp; canType !== &#x27;srflx&#x27;) {
-  // trace(&#x27;Skipping non relay and non srflx candidates.&#x27;);
-  var index = message.label;
-  var candidate = new window.RTCIceCandidate({
-    sdpMLineIndex: index,
-    candidate: message.candidate,
-    //id: message.id,
-    sdpMid: message.id
-    //label: index
-  });
 
-  if (this._forceTURN &amp;&amp; canType !== &#x27;relay&#x27;) {
-    if (!this._hasMCU) {
-      log.warn([targetMid, &#x27;RTCICECandidate&#x27;, null, &#x27;Ignoring adding of &quot;&#x27; + canType +
-        &#x27;&quot; candidate as TURN connections is forced&#x27;], candidate);
-      return;
-    }
-
-    log.warn([targetMid, &#x27;RTCICECandidate&#x27;, null, &#x27;Not ignoring adding of &quot;&#x27; + canType +
-      &#x27;&quot; candidate although TURN connections is forced as MCU is present&#x27;], candidate);
+  if (!message.candidate &amp;&amp; !message.id) {
+    log.warn([targetMid, &#x27;RTCIceCandidate&#x27;, null, &#x27;Received invalid ICE candidate message -&gt;&#x27;], message);
+    return;
   }
 
-  if (pc) {
-  	if (pc.signalingState === this.PEER_CONNECTION_STATE.CLOSED) {
-  		log.warn([targetMid, null, message.type, &#x27;Peer connection state &#x27; +
-  			&#x27;is closed. Not adding candidate&#x27;], candidate);
-	    return;
-  	}
-    /*if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
-      log.debug([targetMid, null, null,
-        &#x27;Received but not adding Candidate as we are already connected to this peer&#x27;]);
+  var canId = &#x27;can-&#x27; + (new Date()).getTime();
+  var candidateType = message.candidate.split(&#x27; &#x27;)[7] || &#x27;&#x27;;
+  var candidate = new RTCIceCandidate({
+    sdpMLineIndex: message.label,
+    candidate: message.candidate,
+    sdpMid: message.id
+  });
+
+  log.debug([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType, &#x27;Received ICE candidate -&gt;&#x27;], candidate);
+
+  this._trigger(&#x27;candidateProcessingState&#x27;, this.CANDIDATE_PROCESSING_STATE.RECEIVED,
+    targetMid, canId, candidateType, candidate.candidate, null);
+
+  if (!(this._peerConnections[targetMid] &amp;&amp;
+    this._peerConnections[targetMid].signalingState !== this.PEER_CONNECTION_STATE.CLOSED)) {
+    log.warn([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType, &#x27;Dropping ICE candidate &#x27; +
+      &#x27;as Peer connection does not exists or is closed&#x27;], this._peerConnections[targetMid].signalingState);
+    this._trigger(&#x27;candidateProcessingState&#x27;, this.CANDIDATE_PROCESSING_STATE.DROPPED,
+      targetMid, canId, candidateType, candidate.candidate,
+      new Error(&#x27;Failed processing ICE candidate as Peer connection does not exists or is closed.&#x27;));
+    return;
+  }
+
+  if (this._forceTURN &amp;&amp; candidateType !== &#x27;relay&#x27;) {
+    if (!this._hasMCU) {
+      log.warn([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType,
+        &#x27;Dropping of processing ICE candidate as TURN connections are enforced -&gt;&#x27;], candidate);
+      this._trigger(&#x27;candidateProcessingState&#x27;, this.CANDIDATE_PROCESSING_STATE.DROPPED,
+        targetMid, canId, candidateType, candidate.candidate,
+        new Error(&#x27;Dropping of processing ICE candidate as TURN connections is enforced.&#x27;));
       return;
-    }*/
-    // set queue before ice candidate cannot be added before setRemoteDescription.
-    // this will cause a black screen of media stream
-    if ((pc.setOffer === &#x27;local&#x27; &amp;&amp; pc.setAnswer === &#x27;remote&#x27;) ||
-      (pc.setAnswer === &#x27;local&#x27; &amp;&amp; pc.setOffer === &#x27;remote&#x27;)) {
-      pc.addIceCandidate(candidate, this._onAddIceCandidateSuccess, this._onAddIceCandidateFailure);
-      // NOTE ALEX: not implemented in chrome yet, need to wait
-      // function () { trace(&#x27;ICE  -  addIceCandidate Succesfull. &#x27;); },
-      // function (error) { trace(&#x27;ICE  - AddIceCandidate Failed: &#x27; + error); }
-      //);
-      log.debug([targetMid, &#x27;RTCIceCandidate&#x27;, message.type,
-        &#x27;Added candidate&#x27;], candidate);
-    } else {
-      this._addIceCandidateToQueue(targetMid, candidate);
     }
+
+    log.warn([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType, &#x27;Not dropping of processing ICE candidate &#x27; +
+      &#x27;although TURN connections are enforced as MCU is present (and act as a TURN itself) -&gt;&#x27;], candidate);
+  }
+
+  if (this._peerConnections[targetMid].remoteDescription &amp;&amp; this._peerConnections[targetMid].remoteDescription.sdp &amp;&amp;
+    this._peerConnections[targetMid].localDescription &amp;&amp; this._peerConnections[targetMid].localDescription.sdp) {
+    this._addIceCandidate(targetMid, canId, candidate);
   } else {
-    // Added ice candidate to queue because it may be received before sending the offer
-    log.debug([targetMid, &#x27;RTCIceCandidate&#x27;, message.type,
-      &#x27;Not adding candidate as peer connection not present&#x27;], candidate);
-    // NOTE ALEX: if the offer was slow, this can happen
-    // we might keep a buffer of candidates to replay after receiving an offer.
-    this._addIceCandidateToQueue(targetMid, candidate);
+    this._addIceCandidateToQueue(targetMid, canId, candidate);
   }
 
   if (!this._gatheredCandidates[targetMid]) {
@@ -1242,7 +1225,7 @@ Skylink.prototype._candidateHandler = function(message) {
     };
   }
 
-  this._gatheredCandidates[targetMid].receiving[canType].push({
+  this._gatheredCandidates[targetMid].receiving[candidateType].push({
     sdpMid: candidate.sdpMid,
     sdpMLineIndex: candidate.sdpMLineIndex,
     candidate: candidate.candidate
