@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Fri Oct 14 2016 02:10:01 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Sat Oct 29 2016 15:54:04 GMT+0800 (SGT) */
 
 (function() {
 
@@ -10161,12 +10161,19 @@ Skylink.prototype._enterHandler = function(message) {
 
   log.log([targetMid, null, message.type, 'Received Peer\'s presence ->'], message.userInfo);
 
+  var agent = {
+    agent: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
+    version: typeof message.version === 'number' ? message.version : 0,
+    os: message.os || '',
+    pluginVersion: message.temasysPluginVersion || null
+  };
+
   if (!self._peerInformations[targetMid]) {
     isNewPeer = true;
     self._addPeer(targetMid, {
-      agent: message.agent,
-      version: message.version,
-      os: message.os
+      agent: agent.name,
+      version: agent.version,
+      os: agent.os
     }, false, false, message.receiveOnly, message.sessionType === 'screensharing');
 
     self._peerInformations[targetMid] = message.userInfo || {};
@@ -10175,12 +10182,7 @@ Skylink.prototype._enterHandler = function(message) {
       audioMuted: 0,
       videoMuted: 0
     };
-    self._peerInformations[targetMid].agent = {
-      name: message.agent,
-      version: message.version,
-      os: message.os || '',
-      pluginVersion: message.temasysPluginVersion
-    };
+    self._peerInformations[targetMid].agent = agent;
     self._peerInformations[targetMid].config = {
       enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
       enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
@@ -10261,10 +10263,16 @@ Skylink.prototype._restartHandler = function(message){
     self._hasMCU = true;
   }
 
+  var agent = {
+    agent: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
+    version: typeof message.version === 'number' ? message.version : 0,
+    os: message.os || '',
+    pluginVersion: message.temasysPluginVersion || null
+  };
+
   // Uncomment because we do not need this
   //self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
 
-  message.agent = (!message.agent) ? 'chrome' : message.agent;
   /*self._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
     message.enableIceTrickle : self._enableIceTrickle;
   self._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
@@ -10277,19 +10285,12 @@ Skylink.prototype._restartHandler = function(message){
     audioMuted: 0,
     videoMuted: 0
   };
-  self._peerInformations[targetMid].agent = {
-    name: message.agent,
-    version: message.version,
-    os: message.os || '',
-    pluginVersion: message.temasysPluginVersion
-  };
+  self._peerInformations[targetMid].agent = agent;
   self._peerInformations[targetMid].config = {
     enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
     enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
     priorityWeight: message.priorityWeight || 0
   };
-
-  var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
 
   // This variable is not used
   //var peerConnectionStateStable = false;
@@ -10358,13 +10359,11 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   log.log([targetMid, null, message.type, 'Received Peer\'s presence ->'], message.userInfo);
 
-  // We shouldn't assume as chrome
-  message.agent = (!message.agent) ? 'unknown' : message.agent;
-
   var agent = {
-    agent: message.agent,
-    version: message.version,
-    os: message.os
+    agent: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
+    version: typeof message.version === 'number' ? message.version : 0,
+    os: message.os || '',
+    pluginVersion: message.temasysPluginVersion || null
   };
 
   if (!this._peerInformations[targetMid]) {
@@ -10374,12 +10373,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       audioMuted: 0,
       videoMuted: 0
     };
-    this._peerInformations[targetMid].agent = {
-      name: message.agent,
-      version: message.version,
-      os: message.os || '',
-      pluginVersion: message.temasysPluginVersion
-    };
+    this._peerInformations[targetMid].agent = agent;
     this._peerInformations[targetMid].config = {
       enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
       enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
