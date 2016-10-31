@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Sat Oct 29 2016 15:54:04 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Oct 31 2016 17:20:16 GMT+0800 (SGT) */
 
 (function() {
 
@@ -7946,7 +7946,7 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when attempt to establish socket connection to Signaling server has failed.
    * @event socketError
-   * @param {String} errorCode The socket connection error code.
+   * @param {Number} errorCode The socket connection error code.
    *   [Rel: Skylink.SOCKET_ERROR]
    * @param {Error|String|Number} error The error object.
    * @param {String} type The fallback state of the socket connection attempt.
@@ -7959,7 +7959,7 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when <a href="#method_init"><code>init()</code> method</a> ready state changes.
    * @event readyStateChange
-   * @param {String} readyState The current <code>init()</code> ready state.
+   * @param {Number} readyState The current <code>init()</code> ready state.
    *   [Rel: Skylink.READY_STATE_CHANGE]
    * @param {JSON} [error] The error result.
    *   <small>Defined only when <code>state</code> is <code>ERROR</code>.</small>
@@ -8261,6 +8261,7 @@ Skylink.prototype._EVENTS = {
    *   <a href="#method_sendMessage"><code>sendMessage()</code> method</a>.
    * @param {Boolean} message.isDataChannel The flag if message is sent from
    *   <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>.
+   * @param {String} peerId The Peer ID.
    * @param {JSON} peerInfo The Peer session information.
    *   <small>Object signature matches the <code>peerInfo</code> parameter payload received in the
    *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small>
@@ -8304,6 +8305,7 @@ Skylink.prototype._EVENTS = {
    * Event triggered when Room locked status has changed.
    * @event roomLock
    * @param {Boolean} isLocked The flag if Room is locked.
+   * @param {String} peerId The Peer ID.
    * @param {JSON} peerInfo The Peer session information.
    *   <small>Object signature matches the <code>peerInfo</code> parameter payload received in the
    *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small>
