@@ -276,6 +276,7 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
     }
 
     var mLineType = type;
+    var mLineIndex = -1;
 
     if (type === &#x27;data&#x27;) {
       mLineType = &#x27;application&#x27;;
@@ -283,12 +284,22 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
 
     for (var i = 0; i &lt; sdpLines.length; i++) {
       if (sdpLines[i].indexOf(&#x27;m=&#x27; + mLineType) === 0) {
-        log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
-          &#x27;Limiting maximum sending &quot;&#x27; + type + &#x27;&quot; bandwidth -&gt;&#x27;], bw);
+        mLineIndex = i;
+      } else if (mLineIndex &gt; 0) {
+        if (sdpLines[i].indexOf(&#x27;m=&#x27;) === 0) {
+          log.error([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Failed setting &quot;&#x27; +
+            type + &#x27;&quot; bandwidth as c-line is missing.&#x27;]);
+          return;
+        }
 
-        sdpLines.splice(i + 1, 0, window.webrtcDetectedBrowser === &#x27;firefox&#x27; ?
-          &#x27;b=TIAS:&#x27; + (bw * 1024) : &#x27;b=AS:&#x27; + bw);
-        return;
+        // Follow RFC 4566, that the b-line should follow after c-line.
+        if (sdpLines[i].indexOf(&#x27;c=&#x27;) === 0) {
+          log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+            &#x27;Limiting maximum sending &quot;&#x27; + type + &#x27;&quot; bandwidth -&gt;&#x27;], bw);
+          sdpLines.splice(i + 1, 0, window.webrtcDetectedBrowser === &#x27;firefox&#x27; ?
+            &#x27;b=TIAS:&#x27; + (bw * 1024) : &#x27;b=AS:&#x27; + bw);
+          return;
+        }
       }
     }
   };

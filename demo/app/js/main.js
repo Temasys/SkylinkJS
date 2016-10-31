@@ -663,15 +663,12 @@ Demo.Skylink.init(config, function (error, success) {
       userData: displayName,
       audio: { stereo: true },
       video: true,
-      /*bandwidth: {
+      bandwidth: {
         audio: 50,
         video: 256,
         data: 10000
-      },*/
-      googleXBandwidth: {
-        min: 200,
-        max: 210
-      }
+      },
+      googleXBandwidth: {}
     });
   }
 });
