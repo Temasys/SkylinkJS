@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Sun Oct 16 2016 23:55:06 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Oct 31 2016 20:01:04 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3047,6 +3047,20 @@ Skylink.prototype._peerCandidatesQueue = {};
 Skylink.prototype._gatheredCandidates = {};
 
 /**
+ * Stores the flags for ICE candidate filtering.
+ * @attribute _filterCandidatesType
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._filterCandidatesType = {
+  host: false,
+  srflx: false,
+  relay: false
+};
+
+/**
  * Function that handles the Peer connection gathered ICE candidate to be sent.
  * @method _onIceCandidate
  * @private
@@ -3076,15 +3090,16 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
 
     log.debug([targetMid, 'RTCIceCandidate', candidateType, 'Generated ICE candidate ->'], candidate);
 
-    if (self._forceTURN && candidateType !== 'relay') {
-      if (!self._hasMCU) {
+    if (self._filterCandidatesType[candidateType]) {
+      if (!(self._hasMCU && self._forceTURN)) {
         log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate as ' +
-          'TURN connections are enforced ->'], candidate);
+          'it matches ICE candidate filtering flag ->'], candidate);
         return;
       }
 
-      log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Not dropping of sending ICE candidate although ' +
-        'TURN connections are enforced as MCU is present (and act as a TURN itself) ->'], candidate);
+      log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Not dropping of sending ICE candidate as ' +
+        'TURN connections are enforced as MCU is present (and act as a TURN itself) so filtering of ICE candidate ' +
+        'flags are not honoured ->'], candidate);
     }
 
     if (!self._gatheredCandidates[targetMid]) {
@@ -6728,10 +6743,14 @@ Skylink.prototype._room = null;
  *   be used when constructing Peer connections to allow TURN connections when required.
  * @param {Boolean} [options.forceTURN=false] The flag if Peer connections should enforce
  *   connections over the TURN server.
- *   <small>This sets <code>options.enableTURNServer</code> value to <code>true</code> and
- *   <code>options.enableSTUNServer</code> value to <code>false</code>.</small>
- *   <small>During Peer connections, it filters out non <code>"relay"</code> ICE candidates to
- *   ensure that TURN connections is enforced.</small>
+ *   <small>This overrides <code>options.enableTURNServer</code> value to <code>true</code> and
+ *   <code>options.enableSTUNServer</code> value to <code>false</code>, <code>options.filterCandidatesType.host</code>
+ *   value to <code>true</code>, <code>options.filterCandidatesType.srflx</code> value to <code>true</code> and
+ *   <code>options.filterCandidatesType.relay</code> value to <code>false</code>.</small>
+ *   <small>Note that currently for MCU enabled Peer connections, the <code>options.filterCandidatesType</code>
+ *   configuration is not honoured as Peers connected with MCU is similar as a forced TURN connection. The flags
+ *   will act as if the value is <code>false</code> and ICE candidates will never be filtered regardless of the
+ *   <code>options.filterCandidatesType</code> configuration.</small>
  * @param {Boolean} [options.usePublicSTUN=true] The flag if publicly available STUN ICE servers should
  *   be used if <code>options.enableSTUNServer</code> is enabled.
  * @param {Boolean} [options.TURNServerTransport] <blockquote class="info">
@@ -6796,7 +6815,7 @@ Skylink.prototype._room = null;
  * - When not provided, its value is <code>AUTO</code>.
  *   [Rel: Skylink.AUDIO_CODEC]
  * @param {String} [options.videoCodec] <blockquote class="info">
- *    Note that if the video codec is not supported, the SDK will not configure the local <code>"offer"</code> or
+ *   Note that if the video codec is not supported, the SDK will not configure the local <code>"offer"</code> or
  *   <code>"answer"</code> session description to prefer the codec.</blockquote>
  *   The option to configure the preferred video codec
  *   to use to encode sending video data when available for Peer connection.
@@ -6810,6 +6829,12 @@ Skylink.prototype._room = null;
  *   TURN ICE servers using port <code>443</code> will be used instead.</blockquote>
  *   The flag if TURNS protocol should be used when <code>options.enableTURNServer</code> is enabled.
  *   <small>By default, <code>"https:"</code> protocol connections uses TURNS protocol.</small>
+ * @param {JSON} [options.filterCandidatesType] <blockquote class="info">
+ *   Note that this a debugging feature and there might be connectivity issues when toggling these flags.
+ *   </blockquote> The configuration options to filter the type of ICE candidates sent and received.
+ * @param {Boolean} [options.filterCandidatesType.host=false] The flag if local network ICE candidates should be filtered out.
+ * @param {Boolean} [options.filterCandidatesType.srflx=false] The flag if STUN ICE candidates should be filtered out.
+ * @param {Boolean} [options.filterCandidatesType.relay=false] The flag if TURN ICE candidates should be filtered out.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_readyStateChange">
@@ -6850,6 +6875,7 @@ Skylink.prototype._room = null;
  * @param {Boolean} callback.success.usePublicSTUN The configured value of the <code>options.usePublicSTUN</code>.
  * @param {Boolean} callback.success.disableVideoFecCodecs The configured value of the <code>options.disableVideoFecCodecs</code>.
  * @param {Boolean} callback.success.disableComfortNoiseCodec The configured value of the <code>options.disableComfortNoiseCodec</code>.
+ * @param {JSON} callback.success.filterCandidatesType The configured value of the <code>options.filterCandidatesType</code>.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -6946,6 +6972,11 @@ Skylink.prototype.init = function(options, callback) {
   var usePublicSTUN = true;
   var disableVideoFecCodecs = false;
   var disableComfortNoiseCodec = false;
+  var filterCandidatesType = {
+    host: false,
+    srflx: false,
+    relay: false
+  };
 
   log.log('Provided init options:', options);
 
@@ -7013,6 +7044,15 @@ Skylink.prototype.init = function(options, callback) {
     // set the use of disabling CN codecs
     disableComfortNoiseCodec = (typeof options.disableComfortNoiseCodec === 'boolean') ?
       options.disableComfortNoiseCodec : disableComfortNoiseCodec;
+    // set the use of filtering ICE candidates
+    if (typeof options.filterCandidatesType === 'object' && options.filterCandidatesType) {
+      filterCandidatesType.host = (typeof options.filterCandidatesType.host === 'boolean') ?
+        options.filterCandidatesType.host : false;
+      filterCandidatesType.srflx = (typeof options.filterCandidatesType.srflx === 'boolean') ?
+        options.filterCandidatesType.srflx : false;
+      filterCandidatesType.relay = (typeof options.filterCandidatesType.relay === 'boolean') ?
+        options.filterCandidatesType.relay : false;
+    }
 
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
@@ -7047,6 +7087,9 @@ Skylink.prototype.init = function(options, callback) {
     if (forceTURN === true) {
       enableTURNServer = true;
       enableSTUNServer = false;
+      filterCandidatesType.host = true;
+      filterCandidatesType.srflx = true;
+      filterCandidatesType.relay = false;
     }
   }
   // api key path options
@@ -7087,6 +7130,7 @@ Skylink.prototype.init = function(options, callback) {
   self._usePublicSTUN = usePublicSTUN;
   self._disableVideoFecCodecs = disableVideoFecCodecs;
   self._disableComfortNoiseCodec = disableComfortNoiseCodec;
+  self._filterCandidatesType = filterCandidatesType;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -7110,7 +7154,8 @@ Skylink.prototype.init = function(options, callback) {
     forceTURN: self._forceTURN,
     usePublicSTUN: self._usePublicSTUN,
     disableVideoFecCodecs: self._disableVideoFecCodecs,
-    disableComfortNoiseCodec: self._disableComfortNoiseCodec
+    disableComfortNoiseCodec: self._disableComfortNoiseCodec,
+    filterCandidatesType: self._filterCandidatesType
   });
   // trigger the readystate
   self._readyState = 0;
@@ -7148,7 +7193,8 @@ Skylink.prototype.init = function(options, callback) {
             forceTURN: self._forceTURN,
             usePublicSTUN: self._usePublicSTUN,
             disableVideoFecCodecs: self._disableVideoFecCodecs,
-            disableComfortNoiseCodec: self._disableComfortNoiseCodec
+            disableComfortNoiseCodec: self._disableComfortNoiseCodec,
+            filterCandidatesType: self._filterCandidatesType
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +
@@ -8611,8 +8657,6 @@ Skylink.prototype._EVENTS = {
    * @param {String} candidateId The remote ICE candidate session ID.
    *   <small>Note that this value is not related to WebRTC API but for identification of remote ICE candidate received.</small>
    * @param {String} candidateType The remote ICE candidate type.
-   *   <small>Expected values are <code>"host"</code> for local network ICE candidates, <code>"srflx"</code> for
-   *   STUN ICE candidates and <code>"relay"</code> for TURN ICE candidates.</small>
    * @param {String} candidateSdp The remote ICE candidate connection string.
    * @param {Error} [error] The error object.
    *   <small>Defined only when <code>state</code> is <code>DROPPED</code> or <code>PROCESS_ERROR</code>.</small>
@@ -10522,7 +10566,7 @@ Skylink.prototype._offerHandler = function(message) {
     'Session description object created'], offer);
 
   offer.sdp = self._handleSDPMCUConnectionCase(targetMid, offer, false);
-  offer.sdp = self._removeSDPNonRelayCandidates(targetMid, offer);
+  offer.sdp = self._removeSDPFilteredCandidates(targetMid, offer);
 
   // This is always the initial state. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
@@ -10601,18 +10645,19 @@ Skylink.prototype._candidateHandler = function(message) {
     return;
   }
 
-  if (this._forceTURN && candidateType !== 'relay') {
-    if (!this._hasMCU) {
-      log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType,
-        'Dropping of processing ICE candidate as TURN connections are enforced ->'], candidate);
+  if (this._filterCandidatesType[candidateType]) {
+    if (!(this._hasMCU && this._forceTURN)) {
+      log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping received ICE candidate as ' +
+        'it matches ICE candidate filtering flag ->'], candidate);
       this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.DROPPED,
         targetMid, canId, candidateType, candidate.candidate,
-        new Error('Dropping of processing ICE candidate as TURN connections is enforced.'));
+        new Error('Dropping of processing ICE candidate as it matches ICE candidate filtering flag.'));
       return;
     }
 
-    log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Not dropping of processing ICE candidate ' +
-      'although TURN connections are enforced as MCU is present (and act as a TURN itself) ->'], candidate);
+    log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Not dropping received ICE candidate as ' +
+      'TURN connections are enforced as MCU is present (and act as a TURN itself) so filtering of ICE candidate ' +
+      'flags are not honoured ->'], candidate);
   }
 
   if (this._peerConnections[targetMid].remoteDescription && this._peerConnections[targetMid].remoteDescription.sdp &&
@@ -10688,7 +10733,7 @@ Skylink.prototype._answerHandler = function(message) {
   }*/
 
   answer.sdp = self._handleSDPMCUConnectionCase(targetMid, answer, false);
-  answer.sdp = self._removeSDPNonRelayCandidates(targetMid, answer);
+  answer.sdp = self._removeSDPFilteredCandidates(targetMid, answer);
 
   // This should be the state after offer is received. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
@@ -13095,22 +13140,37 @@ Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
 
 /**
  * Function that modifies the session description to remove non-relay ICE candidates.
- * @method _removeSDPNonRelayCandidates
+ * @method _removeSDPFilteredCandidates
  * @private
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype._removeSDPNonRelayCandidates = function (targetMid, sessionDescription) {
-  if (!(this._forceTURN && !this._hasMCU)) {
-    log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Not removing non-relay ' +
-      'ICE candidates as either MCU is present (which acts like TURN) or TURN connections is not forced.']);
+Skylink.prototype._removeSDPFilteredCandidates = function (targetMid, sessionDescription) {
+  if (this._forceTURN && this._hasMCU) {
+    log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Not filtering ICE candidates as ' +
+      'TURN connections are enforced as MCU is present (and act as a TURN itself) so filtering of ICE candidate ' +
+      'flags are not honoured']);
     return sessionDescription.sdp;
   }
 
-  log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing non-relay ICE candidates as ' +
-    'TURN connections is forced.']);
+  if (this._filterCandidatesType.host) {
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing "host" ICE candidates.']);
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*host.*\r\n/g, '');
+  }
 
-  return sessionDescription.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
+  if (this._filterCandidatesType.srflx) {
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing "srflx" ICE candidates.']);
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*srflx.*\r\n/g, '');
+  }
+
+  if (this._filterCandidatesType.relay) {
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing "relay" ICE candidates.']);
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*relay.*\r\n/g, '');
+  }
+
+  // sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
+
+  return sessionDescription.sdp;
 };
 
 /**

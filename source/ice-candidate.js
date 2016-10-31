@@ -88,6 +88,20 @@ Skylink.prototype._peerCandidatesQueue = {};
 Skylink.prototype._gatheredCandidates = {};
 
 /**
+ * Stores the flags for ICE candidate filtering.
+ * @attribute _filterCandidatesType
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._filterCandidatesType = {
+  host: false,
+  srflx: false,
+  relay: false
+};
+
+/**
  * Function that handles the Peer connection gathered ICE candidate to be sent.
  * @method _onIceCandidate
  * @private
@@ -117,15 +131,16 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
 
     log.debug([targetMid, 'RTCIceCandidate', candidateType, 'Generated ICE candidate ->'], candidate);
 
-    if (self._forceTURN && candidateType !== 'relay') {
-      if (!self._hasMCU) {
+    if (self._filterCandidatesType[candidateType]) {
+      if (!(self._hasMCU && self._forceTURN)) {
         log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate as ' +
-          'TURN connections are enforced ->'], candidate);
+          'it matches ICE candidate filtering flag ->'], candidate);
         return;
       }
 
-      log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Not dropping of sending ICE candidate although ' +
-        'TURN connections are enforced as MCU is present (and act as a TURN itself) ->'], candidate);
+      log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Not dropping of sending ICE candidate as ' +
+        'TURN connections are enforced as MCU is present (and act as a TURN itself) so filtering of ICE candidate ' +
+        'flags are not honoured ->'], candidate);
     }
 
     if (!self._gatheredCandidates[targetMid]) {

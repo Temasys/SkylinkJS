@@ -1118,7 +1118,7 @@ Skylink.prototype._offerHandler = function(message) {
     &#x27;Session description object created&#x27;], offer);
 
   offer.sdp = self._handleSDPMCUConnectionCase(targetMid, offer, false);
-  offer.sdp = self._removeSDPNonRelayCandidates(targetMid, offer);
+  offer.sdp = self._removeSDPFilteredCandidates(targetMid, offer);
 
   // This is always the initial state. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
@@ -1197,18 +1197,19 @@ Skylink.prototype._candidateHandler = function(message) {
     return;
   }
 
-  if (this._forceTURN &amp;&amp; candidateType !== &#x27;relay&#x27;) {
-    if (!this._hasMCU) {
-      log.warn([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType,
-        &#x27;Dropping of processing ICE candidate as TURN connections are enforced -&gt;&#x27;], candidate);
+  if (this._filterCandidatesType[candidateType]) {
+    if (!(this._hasMCU &amp;&amp; this._forceTURN)) {
+      log.warn([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType, &#x27;Dropping received ICE candidate as &#x27; +
+        &#x27;it matches ICE candidate filtering flag -&gt;&#x27;], candidate);
       this._trigger(&#x27;candidateProcessingState&#x27;, this.CANDIDATE_PROCESSING_STATE.DROPPED,
         targetMid, canId, candidateType, candidate.candidate,
-        new Error(&#x27;Dropping of processing ICE candidate as TURN connections is enforced.&#x27;));
+        new Error(&#x27;Dropping of processing ICE candidate as it matches ICE candidate filtering flag.&#x27;));
       return;
     }
 
-    log.warn([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType, &#x27;Not dropping of processing ICE candidate &#x27; +
-      &#x27;although TURN connections are enforced as MCU is present (and act as a TURN itself) -&gt;&#x27;], candidate);
+    log.warn([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType, &#x27;Not dropping received ICE candidate as &#x27; +
+      &#x27;TURN connections are enforced as MCU is present (and act as a TURN itself) so filtering of ICE candidate &#x27; +
+      &#x27;flags are not honoured -&gt;&#x27;], candidate);
   }
 
   if (this._peerConnections[targetMid].remoteDescription &amp;&amp; this._peerConnections[targetMid].remoteDescription.sdp &amp;&amp;
@@ -1284,7 +1285,7 @@ Skylink.prototype._answerHandler = function(message) {
   }*/
 
   answer.sdp = self._handleSDPMCUConnectionCase(targetMid, answer, false);
-  answer.sdp = self._removeSDPNonRelayCandidates(targetMid, answer);
+  answer.sdp = self._removeSDPFilteredCandidates(targetMid, answer);
 
   // This should be the state after offer is received. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {

@@ -455,22 +455,37 @@ Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
 
 /**
  * Function that modifies the session description to remove non-relay ICE candidates.
- * @method _removeSDPNonRelayCandidates
+ * @method _removeSDPFilteredCandidates
  * @private
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype._removeSDPNonRelayCandidates = function (targetMid, sessionDescription) {
-  if (!(this._forceTURN && !this._hasMCU)) {
-    log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Not removing non-relay ' +
-      'ICE candidates as either MCU is present (which acts like TURN) or TURN connections is not forced.']);
+Skylink.prototype._removeSDPFilteredCandidates = function (targetMid, sessionDescription) {
+  if (this._forceTURN && this._hasMCU) {
+    log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Not filtering ICE candidates as ' +
+      'TURN connections are enforced as MCU is present (and act as a TURN itself) so filtering of ICE candidate ' +
+      'flags are not honoured']);
     return sessionDescription.sdp;
   }
 
-  log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing non-relay ICE candidates as ' +
-    'TURN connections is forced.']);
+  if (this._filterCandidatesType.host) {
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing "host" ICE candidates.']);
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*host.*\r\n/g, '');
+  }
 
-  return sessionDescription.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
+  if (this._filterCandidatesType.srflx) {
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing "srflx" ICE candidates.']);
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*srflx.*\r\n/g, '');
+  }
+
+  if (this._filterCandidatesType.relay) {
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing "relay" ICE candidates.']);
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*relay.*\r\n/g, '');
+  }
+
+  // sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
+
+  return sessionDescription.sdp;
 };
 
 /**

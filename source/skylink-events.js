@@ -750,8 +750,6 @@ Skylink.prototype._EVENTS = {
    * @param {String} candidateId The remote ICE candidate session ID.
    *   <small>Note that this value is not related to WebRTC API but for identification of remote ICE candidate received.</small>
    * @param {String} candidateType The remote ICE candidate type.
-   *   <small>Expected values are <code>"host"</code> for local network ICE candidates, <code>"srflx"</code> for
-   *   STUN ICE candidates and <code>"relay"</code> for TURN ICE candidates.</small>
    * @param {String} candidateSdp The remote ICE candidate connection string.
    * @param {Error} [error] The error object.
    *   <small>Defined only when <code>state</code> is <code>DROPPED</code> or <code>PROCESS_ERROR</code>.</small>

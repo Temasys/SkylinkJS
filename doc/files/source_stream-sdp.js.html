@@ -546,22 +546,37 @@ Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
 
 /**
  * Function that modifies the session description to remove non-relay ICE candidates.
- * @method _removeSDPNonRelayCandidates
+ * @method _removeSDPFilteredCandidates
  * @private
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype._removeSDPNonRelayCandidates = function (targetMid, sessionDescription) {
-  if (!(this._forceTURN &amp;&amp; !this._hasMCU)) {
-    log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Not removing non-relay &#x27; +
-      &#x27;ICE candidates as either MCU is present (which acts like TURN) or TURN connections is not forced.&#x27;]);
+Skylink.prototype._removeSDPFilteredCandidates = function (targetMid, sessionDescription) {
+  if (this._forceTURN &amp;&amp; this._hasMCU) {
+    log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Not filtering ICE candidates as &#x27; +
+      &#x27;TURN connections are enforced as MCU is present (and act as a TURN itself) so filtering of ICE candidate &#x27; +
+      &#x27;flags are not honoured&#x27;]);
     return sessionDescription.sdp;
   }
 
-  log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Removing non-relay ICE candidates as &#x27; +
-    &#x27;TURN connections is forced.&#x27;]);
+  if (this._filterCandidatesType.host) {
+    log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Removing &quot;host&quot; ICE candidates.&#x27;]);
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*host.*\r\n/g, &#x27;&#x27;);
+  }
 
-  return sessionDescription.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, &#x27;&#x27;);
+  if (this._filterCandidatesType.srflx) {
+    log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Removing &quot;srflx&quot; ICE candidates.&#x27;]);
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*srflx.*\r\n/g, &#x27;&#x27;);
+  }
+
+  if (this._filterCandidatesType.relay) {
+    log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Removing &quot;relay&quot; ICE candidates.&#x27;]);
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*relay.*\r\n/g, &#x27;&#x27;);
+  }
+
+  // sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, &#x27;&#x27;);
+
+  return sessionDescription.sdp;
 };
 
 /**

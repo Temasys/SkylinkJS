@@ -1368,6 +1368,18 @@
         {
             "file": "source/ice-candidate.js",
             "line": 90,
+            "description": "Stores the flags for ICE candidate filtering.",
+            "itemtype": "attribute",
+            "name": "_filterCandidatesType",
+            "type": "JSON",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.16",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/ice-candidate.js",
+            "line": 104,
             "description": "Function that handles the Peer connection gathered ICE candidate to be sent.",
             "itemtype": "method",
             "name": "_onIceCandidate",
@@ -1378,7 +1390,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 193,
+            "line": 208,
             "description": "Function that buffers the Peer connection ICE candidate when received\n  before remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateToQueue",
@@ -1389,7 +1401,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 213,
+            "line": 228,
             "description": "Function that adds all the Peer connection buffered ICE candidates received.\nThis should be called only after the remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateFromQueue",
@@ -1400,7 +1412,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 236,
+            "line": 251,
             "description": "Function that adds the ICE candidate to Peer connection.",
             "itemtype": "method",
             "name": "_addIceCandidate",
@@ -3133,7 +3145,7 @@
                         },
                         {
                             "name": "forceTURN",
-                            "description": "The flag if Peer connections should enforce\n  connections over the TURN server.\n  <small>This sets <code>options.enableTURNServer</code> value to <code>true</code> and\n  <code>options.enableSTUNServer</code> value to <code>false</code>.</small>\n  <small>During Peer connections, it filters out non <code>\"relay\"</code> ICE candidates to\n  ensure that TURN connections is enforced.</small>",
+                            "description": "The flag if Peer connections should enforce\n  connections over the TURN server.\n  <small>This overrides <code>options.enableTURNServer</code> value to <code>true</code> and\n  <code>options.enableSTUNServer</code> value to <code>false</code>, <code>options.filterCandidatesType.host</code>\n  value to <code>true</code>, <code>options.filterCandidatesType.srflx</code> value to <code>true</code> and\n  <code>options.filterCandidatesType.relay</code> value to <code>false</code>.</small>\n  <small>Note that currently for MCU enabled Peer connections, the <code>options.filterCandidatesType</code>\n  configuration is not honoured as Peers connected with MCU is similar as a forced TURN connection. The flags\n  will act as if the value is <code>false</code> and ICE candidates will never be filtered regardless of the\n  <code>options.filterCandidatesType</code> configuration.</small>",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
@@ -3210,7 +3222,7 @@
                         },
                         {
                             "name": "videoCodec",
-                            "description": "<blockquote class=\"info\">\n   Note that if the video codec is not supported, the SDK will not configure the local <code>\"offer\"</code> or\n  <code>\"answer\"</code> session description to prefer the codec.</blockquote>\n  The option to configure the preferred video codec\n  to use to encode sending video data when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.VIDEO_CODEC]",
+                            "description": "<blockquote class=\"info\">\n  Note that if the video codec is not supported, the SDK will not configure the local <code>\"offer\"</code> or\n  <code>\"answer\"</code> session description to prefer the codec.</blockquote>\n  The option to configure the preferred video codec\n  to use to encode sending video data when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.VIDEO_CODEC]",
                             "type": "String",
                             "optional": true
                         },
@@ -3227,6 +3239,35 @@
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
+                        },
+                        {
+                            "name": "filterCandidatesType",
+                            "description": "<blockquote class=\"info\">\n  Note that this a debugging feature and there might be connectivity issues when toggling these flags.\n  </blockquote> The configuration options to filter the type of ICE candidates sent and received.",
+                            "type": "JSON",
+                            "optional": true,
+                            "props": [
+                                {
+                                    "name": "host",
+                                    "description": "The flag if local network ICE candidates should be filtered out.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "srflx",
+                                    "description": "The flag if STUN ICE candidates should be filtered out.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "relay",
+                                    "description": "The flag if TURN ICE candidates should be filtered out.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                }
+                            ]
                         }
                     ]
                 },
@@ -3367,6 +3408,11 @@
                                     "name": "disableComfortNoiseCodec",
                                     "description": "The configured value of the <code>options.disableComfortNoiseCodec</code>.",
                                     "type": "Boolean"
+                                },
+                                {
+                                    "name": "filterCandidatesType",
+                                    "description": "The configured value of the <code>options.filterCandidatesType</code>.",
+                                    "type": "JSON"
                                 }
                             ]
                         }
@@ -3382,7 +3428,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 773,
+            "line": 804,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -3393,7 +3439,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 847,
+            "line": 878,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -3404,7 +3450,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 920,
+            "line": 951,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -3415,7 +3461,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1011,
+            "line": 1042,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -5459,7 +5505,7 @@
                 },
                 {
                     "name": "candidateType",
-                    "description": "The remote ICE candidate type.\n  <small>Expected values are <code>\"host\"</code> for local network ICE candidates, <code>\"srflx\"</code> for\n  STUN ICE candidates and <code>\"relay\"</code> for TURN ICE candidates.</small>",
+                    "description": "The remote ICE candidate type.",
                     "type": "String"
                 },
                 {
@@ -5479,7 +5525,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 764,
+            "line": 762,
             "description": "Stores the list of <code>once()</code> event handlers.\nThese events are only triggered once.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -5505,7 +5551,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 777,
+            "line": 775,
             "description": "Stores the timestamps data used for throttling.",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -5517,7 +5563,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 792,
+            "line": 790,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -5541,7 +5587,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 816,
+            "line": 814,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -5578,7 +5624,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 874,
+            "line": 872,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -5603,7 +5649,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 923,
+            "line": 921,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -5614,7 +5660,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 977,
+            "line": 975,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -5625,7 +5671,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1003,
+            "line": 1001,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -5636,7 +5682,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1041,
+            "line": 1039,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",
@@ -6240,7 +6286,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1144,
+            "line": 1145,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -7119,7 +7165,7 @@
             "line": 456,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
-            "name": "_removeSDPNonRelayCandidates",
+            "name": "_removeSDPFilteredCandidates",
             "access": "private",
             "tagname": "",
             "since": "0.6.16",
@@ -7127,7 +7173,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 476,
+            "line": 491,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
             "name": "_handleSDPMCUConnectionCase",
