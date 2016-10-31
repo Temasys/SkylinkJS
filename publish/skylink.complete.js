@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Mon Oct 31 2016 20:04:54 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Oct 31 2016 20:08:11 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10548,7 +10548,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Mon Oct 31 2016 20:04:54 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Oct 31 2016 20:08:11 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13945,7 +13945,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
 
 
 
-  if (window.location.protocol === 'https:' || this._forceTURNSSL) {
+  if (this._forceTURNSSL) {
     if (window.webrtcDetectedBrowser === 'chrome' ||
       window.webrtcDetectedBrowser === 'safari' ||
       window.webrtcDetectedBrowser === 'IE') {
@@ -17378,7 +17378,6 @@ Skylink.prototype._room = null;
  *   Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,
  *   TURN ICE servers using port <code>443</code> will be used instead.</blockquote>
  *   The flag if TURNS protocol should be used when <code>options.enableTURNServer</code> is enabled.
- *   <small>By default, <code>"https:"</code> protocol connections uses TURNS protocol.</small>
  * @param {JSON} [options.filterCandidatesType] <blockquote class="info">
  *   Note that this a debugging feature and there might be connectivity issues when toggling these flags.
  *   </blockquote> The configuration options to filter the type of ICE candidates sent and received.

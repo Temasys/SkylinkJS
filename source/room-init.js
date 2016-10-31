@@ -412,7 +412,6 @@ Skylink.prototype._room = null;
  *   Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,
  *   TURN ICE servers using port <code>443</code> will be used instead.</blockquote>
  *   The flag if TURNS protocol should be used when <code>options.enableTURNServer</code> is enabled.
- *   <small>By default, <code>"https:"</code> protocol connections uses TURNS protocol.</small>
  * @param {JSON} [options.filterCandidatesType] <blockquote class="info">
  *   Note that this a debugging feature and there might be connectivity issues when toggling these flags.
  *   </blockquote> The configuration options to filter the type of ICE candidates sent and received.

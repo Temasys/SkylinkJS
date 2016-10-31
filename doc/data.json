@@ -3235,7 +3235,7 @@
                         },
                         {
                             "name": "forceTURNSSL",
-                            "description": "<blockquote class=\"info\">\n  Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,\n  TURN ICE servers using port <code>443</code> will be used instead.</blockquote>\n  The flag if TURNS protocol should be used when <code>options.enableTURNServer</code> is enabled.\n  <small>By default, <code>\"https:\"</code> protocol connections uses TURNS protocol.</small>",
+                            "description": "<blockquote class=\"info\">\n  Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,\n  TURN ICE servers using port <code>443</code> will be used instead.</blockquote>\n  The flag if TURNS protocol should be used when <code>options.enableTURNServer</code> is enabled.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
@@ -3428,7 +3428,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 804,
+            "line": 803,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -3439,7 +3439,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 878,
+            "line": 877,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -3450,7 +3450,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 951,
+            "line": 950,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -3461,7 +3461,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1042,
+            "line": 1041,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
