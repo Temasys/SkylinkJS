@@ -5484,7 +5484,7 @@
         {
             "file": "source/skylink-events.js",
             "line": 740,
-            "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.\n</blockquote>\nEvent triggered when remote ICE candidate processing state has changed for trickle ICE connections.",
+            "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.<br>\n  Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates\n  may be received in the session description instead.\n</blockquote>\nEvent triggered when remote ICE candidate processing state has changed for trickle ICE connections.",
             "itemtype": "event",
             "name": "candidateProcessingState",
             "params": [
@@ -5525,7 +5525,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 762,
+            "line": 764,
             "description": "Stores the list of <code>once()</code> event handlers.\nThese events are only triggered once.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -5551,7 +5551,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 775,
+            "line": 777,
             "description": "Stores the timestamps data used for throttling.",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -5563,7 +5563,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 790,
+            "line": 792,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -5587,7 +5587,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 814,
+            "line": 816,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -5624,7 +5624,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 872,
+            "line": 874,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -5649,7 +5649,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 921,
+            "line": 923,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -5660,7 +5660,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 975,
+            "line": 977,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -5671,7 +5671,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1001,
+            "line": 1003,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -5682,7 +5682,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1039,
+            "line": 1041,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",

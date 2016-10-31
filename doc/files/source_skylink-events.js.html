@@ -831,7 +831,9 @@ Skylink.prototype._EVENTS = {
   /**
    * &lt;blockquote class=&quot;info&quot;&gt;
    *   Learn more about how ICE works in this
-   *   &lt;a href=&quot;https://temasys.com.sg/ice-what-is-this-sorcery/&quot;&gt;article here&lt;/a&gt;.
+   *   &lt;a href=&quot;https://temasys.com.sg/ice-what-is-this-sorcery/&quot;&gt;article here&lt;/a&gt;.&lt;br&gt;
+   *   Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates
+   *   may be received in the session description instead.
    * &lt;/blockquote&gt;
    * Event triggered when remote ICE candidate processing state has changed for trickle ICE connections.
    * @event candidateProcessingState
