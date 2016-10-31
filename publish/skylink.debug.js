@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Mon Oct 31 2016 20:08:11 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Oct 31 2016 21:00:23 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5001,6 +5001,9 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     } else if (this._streams.userMedia) {
       peerInfo.settings = clone(this._streams.userMedia.settings);
     }
+
+    peerInfo.settings.bandwidth = clone(this._streamsBandwidthSettings.bAS);
+    peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
   }
 
   if (!peerInfo.settings.audio) {
@@ -5388,12 +5391,12 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   pc.processingLocalSDP = true;
 
   sessionDescription.sdp = self._setSDPOpusConfig(targetMid, sessionDescription);
-  sessionDescription.sdp = self._setSDPBitrate(targetMid, sessionDescription);
   sessionDescription.sdp = self._setSDPCodec(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPH264VP9AptRtxForOlderPlugin(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
   sessionDescription.sdp = self._handleSDPMCUConnectionCase(targetMid, sessionDescription, true);
+  sessionDescription.sdp = self._setSDPBitrate(targetMid, sessionDescription);
 
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
     'Local session description updated ->'], sessionDescription.sdp);
@@ -5811,6 +5814,14 @@ Skylink.prototype._inRoom = false;
  *   <small>This affects the P2P messaging in <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>,
  *   and data transfers in <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a> and
  *   <a href="#method_sendURLData"><code>sendURLData()</code> method</a>.</small>
+ * @param {JSON} [options.googleXBandwidth] <blockquote class="info">Note that this is an experimental configuration
+ *   and may cause disruptions in connections or connectivity issues when toggled, or may not work depending on
+ *   browser supports. Currently, this only toggles the video codec bandwidth configuration.</blockquote>
+ *   The configuration to set the experimental google video streaming bandwidth sent to Peers.
+ * @param {Number} [options.googleXBandwidth.min] The minimum experimental google video streaming bandwidth sent to Peers.
+ *   <small>This toggles the <code>"x-google-min-bitrate"</code> flag in the session description.</small>
+ * @param {Number} [options.googleXBandwidth.max] The maximum experimental google video streaming bandwidth sent to Peers.
+ *   <small>This toggles the <code>"x-google-max-bitrate"</code> flag in the session description.</small>
  * @param {Boolean} [options.manualGetUserMedia] The flag if <code>joinRoom()</code> should trigger
  *   <a href="#event_mediaAccessRequired"><code>mediaAccessRequired</code> event</a> in which the
  *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> or
@@ -6359,19 +6370,32 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
       mediaOptions = mediaOptions || {};
 
       self._userData = mediaOptions.userData || self._userData || '';
-      self._streamsBandwidthSettings = {};
+      self._streamsBandwidthSettings = {
+        googleX: {},
+        bAS: {}
+      };
 
       if (mediaOptions.bandwidth) {
         if (typeof mediaOptions.bandwidth.audio === 'number') {
-          self._streamsBandwidthSettings.audio = mediaOptions.bandwidth.audio;
+          self._streamsBandwidthSettings.bAS.audio = mediaOptions.bandwidth.audio;
         }
 
         if (typeof mediaOptions.bandwidth.video === 'number') {
-          self._streamsBandwidthSettings.video = mediaOptions.bandwidth.video;
+          self._streamsBandwidthSettings.bAS.video = mediaOptions.bandwidth.video;
         }
 
         if (typeof mediaOptions.bandwidth.data === 'number') {
-          self._streamsBandwidthSettings.data = mediaOptions.bandwidth.data;
+          self._streamsBandwidthSettings.bAS.data = mediaOptions.bandwidth.data;
+        }
+      }
+
+      if (mediaOptions.googleXBandwidth) {
+        if (typeof mediaOptions.googleXBandwidth.min === 'number') {
+          self._streamsBandwidthSettings.googleX.min = mediaOptions.googleXBandwidth.min;
+        }
+
+        if (typeof mediaOptions.googleXBandwidth.max === 'number') {
+          self._streamsBandwidthSettings.googleX.max = mediaOptions.googleXBandwidth.max;
         }
       }
 
@@ -8200,6 +8224,8 @@ Skylink.prototype._EVENTS = {
    * @param {Number} [peerInfo.settings.bandwidth.audio] The maximum audio streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.video] The maximum video streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.data] The maximum data streaming bandwidth sent from Peer.
+   * @param {Number} [peerInfo.settings.googleXBandwidth.min] The minimum experimental google video streaming bandwidth sent to Peers.
+   * @param {Number} [peerInfo.settings.googleXBandwidth.max] The maximum experimental google video streaming bandwidth sent to Peers.
    * @param {JSON} peerInfo.mediaStatus The Peer Stream muted settings.
    * @param {Boolean} peerInfo.mediaStatus.audioMuted The flag if Peer Stream audio tracks is muted or not.
    *   <small>If Peer <code>peerInfo.settings.audio</code> is false, this will be defined as <code>true</code>.</small>
@@ -11026,7 +11052,10 @@ Skylink.prototype._streamsMutedSettings = {
  * @for Skylink
  * @since 0.6.15
  */
-Skylink.prototype._streamsBandwidthSettings = {};
+Skylink.prototype._streamsBandwidthSettings = {
+  googleX: {},
+  bAS: {}
+};
 
 /**
  * Stores all the Stream stopped callbacks.
@@ -12888,9 +12917,49 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
     }
   };
 
-  parseFn('audio', this._streamsBandwidthSettings.audio);
-  parseFn('video', this._streamsBandwidthSettings.video);
-  parseFn('data', this._streamsBandwidthSettings.data);
+  parseFn('audio', this._streamsBandwidthSettings.bAS.audio);
+  parseFn('video', this._streamsBandwidthSettings.bAS.video);
+  parseFn('data', this._streamsBandwidthSettings.bAS.data);
+
+  // Sets the experimental google bandwidth
+  if ((typeof this._streamsBandwidthSettings.googleX.min === 'number' && this._streamsBandwidthSettings.googleX.min > 0) ||
+    (typeof this._streamsBandwidthSettings.googleX.max === 'number' && this._streamsBandwidthSettings.googleX.max === 'number')) {
+    var codec = null;
+    var codecFmtpLineFound = false;
+    var mVideoLineIndex = -1;
+
+    for (var j = 0; j < sdpLines.length; j++) {
+      if (sdpLines[j].indexOf('m=video') === 0) {
+        codec = sdpLines[j].split(' ')[3];
+        mVideoLineIndex = j;
+
+      } else if (codec) {
+        if (sdpLines[j].indexOf('m=') === 0) {
+          break;
+        }
+        if (sdpLines[j].indexOf('a=fmtp:' + codec) === 0 && sdpLines[j].indexOf('x-google-') > 0) {
+          sdpLines.splice(j, 1);
+          j--;
+          continue;
+        }
+      }
+    }
+
+    if (codec && mVideoLineIndex > 0) {
+      var xGoogleParams = '';
+
+      if (typeof this._streamsBandwidthSettings.googleX.min === 'number') {
+        xGoogleParams += 'x-google-min-bitrate=' + this._streamsBandwidthSettings.googleX.min + ';';
+      }
+
+      if (typeof this._streamsBandwidthSettings.googleX.max === 'number') {
+        xGoogleParams += 'x-google-max-bitrate=' + this._streamsBandwidthSettings.googleX.max + ';';
+      }
+
+      sdpLines.splice(mVideoLineIndex + (sdpLines[mVideoLineIndex + 1] &&
+        sdpLines[mVideoLineIndex + 1].indexOf('b=AS:') === 0 ? 2 : 1), 0, 'a=fmtp:' + codec + ' ' + xGoogleParams);
+    }
+  }
 
   return sdpLines.join('\r\n');
 };
@@ -12929,7 +12998,7 @@ Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
 
             var parts = sdpLines[j].split(' ');
 
-            if (parts.indexOf(payload) >= 2) {
+            if (parts.indexOf(payload) >= 3) {
               parts.splice(parts.indexOf(payload), 1);
             }
 

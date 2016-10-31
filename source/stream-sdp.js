@@ -202,9 +202,49 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
     }
   };
 
-  parseFn('audio', this._streamsBandwidthSettings.audio);
-  parseFn('video', this._streamsBandwidthSettings.video);
-  parseFn('data', this._streamsBandwidthSettings.data);
+  parseFn('audio', this._streamsBandwidthSettings.bAS.audio);
+  parseFn('video', this._streamsBandwidthSettings.bAS.video);
+  parseFn('data', this._streamsBandwidthSettings.bAS.data);
+
+  // Sets the experimental google bandwidth
+  if ((typeof this._streamsBandwidthSettings.googleX.min === 'number' && this._streamsBandwidthSettings.googleX.min > 0) ||
+    (typeof this._streamsBandwidthSettings.googleX.max === 'number' && this._streamsBandwidthSettings.googleX.max === 'number')) {
+    var codec = null;
+    var codecFmtpLineFound = false;
+    var mVideoLineIndex = -1;
+
+    for (var j = 0; j < sdpLines.length; j++) {
+      if (sdpLines[j].indexOf('m=video') === 0) {
+        codec = sdpLines[j].split(' ')[3];
+        mVideoLineIndex = j;
+
+      } else if (codec) {
+        if (sdpLines[j].indexOf('m=') === 0) {
+          break;
+        }
+        if (sdpLines[j].indexOf('a=fmtp:' + codec) === 0 && sdpLines[j].indexOf('x-google-') > 0) {
+          sdpLines.splice(j, 1);
+          j--;
+          continue;
+        }
+      }
+    }
+
+    if (codec && mVideoLineIndex > 0) {
+      var xGoogleParams = '';
+
+      if (typeof this._streamsBandwidthSettings.googleX.min === 'number') {
+        xGoogleParams += 'x-google-min-bitrate=' + this._streamsBandwidthSettings.googleX.min + ';';
+      }
+
+      if (typeof this._streamsBandwidthSettings.googleX.max === 'number') {
+        xGoogleParams += 'x-google-max-bitrate=' + this._streamsBandwidthSettings.googleX.max + ';';
+      }
+
+      sdpLines.splice(mVideoLineIndex + (sdpLines[mVideoLineIndex + 1] &&
+        sdpLines[mVideoLineIndex + 1].indexOf('b=AS:') === 0 ? 2 : 1), 0, 'a=fmtp:' + codec + ' ' + xGoogleParams);
+    }
+  }
 
   return sdpLines.join('\r\n');
 };
@@ -243,7 +283,7 @@ Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
 
             var parts = sdpLines[j].split(' ');
 
-            if (parts.indexOf(payload) >= 2) {
+            if (parts.indexOf(payload) >= 3) {
               parts.splice(parts.indexOf(payload), 1);
             }
 

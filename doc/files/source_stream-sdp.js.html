@@ -293,9 +293,49 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
     }
   };
 
-  parseFn(&#x27;audio&#x27;, this._streamsBandwidthSettings.audio);
-  parseFn(&#x27;video&#x27;, this._streamsBandwidthSettings.video);
-  parseFn(&#x27;data&#x27;, this._streamsBandwidthSettings.data);
+  parseFn(&#x27;audio&#x27;, this._streamsBandwidthSettings.bAS.audio);
+  parseFn(&#x27;video&#x27;, this._streamsBandwidthSettings.bAS.video);
+  parseFn(&#x27;data&#x27;, this._streamsBandwidthSettings.bAS.data);
+
+  // Sets the experimental google bandwidth
+  if ((typeof this._streamsBandwidthSettings.googleX.min === &#x27;number&#x27; &amp;&amp; this._streamsBandwidthSettings.googleX.min &gt; 0) ||
+    (typeof this._streamsBandwidthSettings.googleX.max === &#x27;number&#x27; &amp;&amp; this._streamsBandwidthSettings.googleX.max === &#x27;number&#x27;)) {
+    var codec = null;
+    var codecFmtpLineFound = false;
+    var mVideoLineIndex = -1;
+
+    for (var j = 0; j &lt; sdpLines.length; j++) {
+      if (sdpLines[j].indexOf(&#x27;m=video&#x27;) === 0) {
+        codec = sdpLines[j].split(&#x27; &#x27;)[3];
+        mVideoLineIndex = j;
+
+      } else if (codec) {
+        if (sdpLines[j].indexOf(&#x27;m=&#x27;) === 0) {
+          break;
+        }
+        if (sdpLines[j].indexOf(&#x27;a=fmtp:&#x27; + codec) === 0 &amp;&amp; sdpLines[j].indexOf(&#x27;x-google-&#x27;) &gt; 0) {
+          sdpLines.splice(j, 1);
+          j--;
+          continue;
+        }
+      }
+    }
+
+    if (codec &amp;&amp; mVideoLineIndex &gt; 0) {
+      var xGoogleParams = &#x27;&#x27;;
+
+      if (typeof this._streamsBandwidthSettings.googleX.min === &#x27;number&#x27;) {
+        xGoogleParams += &#x27;x-google-min-bitrate=&#x27; + this._streamsBandwidthSettings.googleX.min + &#x27;;&#x27;;
+      }
+
+      if (typeof this._streamsBandwidthSettings.googleX.max === &#x27;number&#x27;) {
+        xGoogleParams += &#x27;x-google-max-bitrate=&#x27; + this._streamsBandwidthSettings.googleX.max + &#x27;;&#x27;;
+      }
+
+      sdpLines.splice(mVideoLineIndex + (sdpLines[mVideoLineIndex + 1] &amp;&amp;
+        sdpLines[mVideoLineIndex + 1].indexOf(&#x27;b=AS:&#x27;) === 0 ? 2 : 1), 0, &#x27;a=fmtp:&#x27; + codec + &#x27; &#x27; + xGoogleParams);
+    }
+  }
 
   return sdpLines.join(&#x27;\r\n&#x27;);
 };
@@ -334,7 +374,7 @@ Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
 
             var parts = sdpLines[j].split(&#x27; &#x27;);
 
-            if (parts.indexOf(payload) &gt;= 2) {
+            if (parts.indexOf(payload) &gt;= 3) {
               parts.splice(parts.indexOf(payload), 1);
             }
 

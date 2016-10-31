@@ -662,7 +662,16 @@ Demo.Skylink.init(config, function (error, success) {
     Demo.Skylink.joinRoom({
       userData: displayName,
       audio: { stereo: true },
-      video: true
+      video: true,
+      /*bandwidth: {
+        audio: 50,
+        video: 256,
+        data: 10000
+      },*/
+      googleXBandwidth: {
+        min: 200,
+        max: 210
+      }
     });
   }
 });
