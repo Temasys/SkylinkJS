@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Tue Nov 01 2016 23:00:27 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Tue Nov 01 2016 23:22:48 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10548,7 +10548,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Tue Nov 01 2016 23:00:27 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Tue Nov 01 2016 23:22:48 GMT+0800 (SGT) */
 
 (function() {
 
@@ -15652,7 +15652,8 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     }
 
     peerInfo.settings.bandwidth = clone(this._streamsBandwidthSettings.bAS);
-    peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
+    // Uncommented to ensure adherence to the current SM protocol
+    //peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
   }
 
   if (!peerInfo.settings.audio) {
@@ -18873,8 +18874,6 @@ Skylink.prototype._EVENTS = {
    * @param {Number} [peerInfo.settings.bandwidth.audio] The maximum audio streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.video] The maximum video streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.data] The maximum data streaming bandwidth sent from Peer.
-   * @param {Number} [peerInfo.settings.googleXBandwidth.min] The minimum experimental google video streaming bandwidth sent to Peers.
-   * @param {Number} [peerInfo.settings.googleXBandwidth.max] The maximum experimental google video streaming bandwidth sent to Peers.
    * @param {JSON} peerInfo.mediaStatus The Peer Stream muted settings.
    * @param {Boolean} peerInfo.mediaStatus.audioMuted The flag if Peer Stream audio tracks is muted or not.
    *   <small>If Peer <code>peerInfo.settings.audio</code> is false, this will be defined as <code>true</code>.</small>

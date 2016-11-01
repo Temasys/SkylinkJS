@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Tue Nov 01 2016 23:00:27 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Tue Nov 01 2016 23:22:48 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5102,7 +5102,8 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     }
 
     peerInfo.settings.bandwidth = clone(this._streamsBandwidthSettings.bAS);
-    peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
+    // Uncommented to ensure adherence to the current SM protocol
+    //peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
   }
 
   if (!peerInfo.settings.audio) {
@@ -8323,8 +8324,6 @@ Skylink.prototype._EVENTS = {
    * @param {Number} [peerInfo.settings.bandwidth.audio] The maximum audio streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.video] The maximum video streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.data] The maximum data streaming bandwidth sent from Peer.
-   * @param {Number} [peerInfo.settings.googleXBandwidth.min] The minimum experimental google video streaming bandwidth sent to Peers.
-   * @param {Number} [peerInfo.settings.googleXBandwidth.max] The maximum experimental google video streaming bandwidth sent to Peers.
    * @param {JSON} peerInfo.mediaStatus The Peer Stream muted settings.
    * @param {Boolean} peerInfo.mediaStatus.audioMuted The flag if Peer Stream audio tracks is muted or not.
    *   <small>If Peer <code>peerInfo.settings.audio</code> is false, this will be defined as <code>true</code>.</small>

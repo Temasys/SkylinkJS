@@ -274,7 +274,8 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     }
 
     peerInfo.settings.bandwidth = clone(this._streamsBandwidthSettings.bAS);
-    peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
+    // Uncommented to ensure adherence to the current SM protocol
+    //peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
   }
 
   if (!peerInfo.settings.audio) {
