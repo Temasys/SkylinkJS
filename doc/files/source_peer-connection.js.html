@@ -639,7 +639,8 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
         candidates: clone(self._gatheredCandidates[peerId] || {
           sending: { host: [], srflx: [], relay: [] },
           receiving: { host: [], srflx: [], relay: [] }
-        })
+        }),
+        dataChannels: {}
       },
       audio: {
         sending: {
@@ -647,13 +648,23 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           bytes: 0,
           packets: 0,
           packetsLost: 0,
-          rtt: 0
+          rtt: 0,
+          jitter: 0,
+          jitterBufferMs: null,
+          codec: self._getSDPSelectedCodec(peerId, pc.localDescription, &#x27;audio&#x27;),
+          inputLevel: null,
+          echoReturnLoss: null,
+          echoReturnLossEnhancement: null
         },
         receiving: {
           ssrc: null,
           bytes: 0,
           packets: 0,
-          packetsLost: 0
+          packetsLost: 0,
+          jitter: 0,
+          jitterBufferMs: null,
+          codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, &#x27;audio&#x27;),
+          outputLevel: null
         }
       },
       video: {
@@ -662,13 +673,39 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           bytes: 0,
           packets: 0,
           packetsLost: 0,
-          rtt: 0
+          rtt: 0,
+          jitter: 0,
+          jitterBufferMs: null,
+          codec: self._getSDPSelectedCodec(peerId, pc.localDescription, &#x27;video&#x27;),
+          frameWidth: null,
+          frameHeight: null,
+          framesInput: null,
+          frames: null,
+          frameRateMean: null,
+          frameRateStdDev: null,
+          framesDropped: null,
+          nacks: null,
+          plis: null,
+          firs: null
         },
         receiving: {
           ssrc: null,
           bytes: 0,
           packets: 0,
-          packetsLost: 0
+          packetsLost: 0,
+          jitter: 0,
+          jitterBufferMs: null,
+          codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, &#x27;video&#x27;),
+          frameWidth: null,
+          frameHeight: null,
+          framesDecoded: null,
+          framesOutput: null,
+          frames: null,
+          frameRateMean: null,
+          frameRateStdDev: null,
+          nacks: null,
+          plis: null,
+          firs: null
         }
       },
       selectedCandidate: {
@@ -676,6 +713,18 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
         remote: { ipAddress: null, candidateType: null, portNumber: null, transport: null }
       }
     };
+
+    for (var channelProp in self._dataChannels[peerId]) {
+      if (self._dataChannels[peerId].hasOwnProperty(channelProp) &amp;&amp; self._dataChannels[peerId][channelProp]) {
+        result.connection.dataChannels[self._dataChannels[peerId][channelProp].channel.label] = {
+          label: self._dataChannels[peerId][channelProp].channel.label,
+          readyState: self._dataChannels[peerId][channelProp].channel.readyState,
+          channelType: channelProp === &#x27;main&#x27; ? self.DATA_CHANNEL_TYPE.MESSAGING : self.DATA_CHANNEL_TYPE.DATA,
+          currentTransferId: self._dataChannels[peerId][channelProp].transferId || null
+        };
+      }
+    }
+
     var loopFn = function (obj, fn) {
       for (var prop in obj) {
         if (obj.hasOwnProperty(prop) &amp;&amp; obj[prop]) {
@@ -683,6 +732,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
         }
       }
     };
+
     var formatCandidateFn = function (candidateDirType, candidate) {
       result.selectedCandidate[candidateDirType].ipAddress = candidate.ipAddress;
       result.selectedCandidate[candidateDirType].candidateType = candidate.candidateType;
@@ -710,16 +760,26 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
 
             if (dirType === &#x27;receiving&#x27;) {
               result[obj.mediaType][dirType].packetsLost = obj.packetsLost || 0;
+              result[obj.mediaType][dirType].jitter = obj.jitter || 0;
+            }
+
+            if (obj.mediaType === &#x27;video&#x27;) {
+              result.video[dirType].frameRateMean = obj.framerateMean || 0;
+              result.video[dirType].frameRateStdDev = obj.framerateStdDev || 0;
+
+              if (dirType === &#x27;sending&#x27;) {
+                result.video.sending.framesDropped = obj.framesDropped || 0;
+              }
             }
 
           // Sending RTP packets lost
-          } else if (prop.indexOf(&#x27;outbound_rtcp&#x27;) === 0) {
+          } else if (prop.indexOf(&#x27;inbound_rtcp&#x27;) === 0 || prop.indexOf(&#x27;outbound_rtcp&#x27;) === 0) {
             dirType = prop.indexOf(&#x27;inbound_rtp&#x27;) === 0 ? &#x27;receiving&#x27; : &#x27;sending&#x27;;
-
-            result[obj.mediaType][dirType].packetsLost = obj.packetsLost || 0;
 
             if (dirType === &#x27;sending&#x27;) {
               result[obj.mediaType].sending.rtt = obj.mozRtt || 0;
+              result[obj.mediaType].sending.packetsLost = obj.packetsLost || 0;
+              result[obj.mediaType].sending.jitter = obj.jitter || 0;
             }
 
           // Candidates
@@ -776,10 +836,49 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
               obj.packetsReceived : obj.packetsSent) || &#x27;0&#x27;, 10);
             result[obj.mediaType][dirType].ssrc = parseInt(obj.ssrc || &#x27;0&#x27;, 10);
             result[obj.mediaType][dirType].packetsLost = parseInt(obj.packetsLost || &#x27;0&#x27;, 10);
+            result[obj.mediaType][dirType].jitter = parseInt(obj.googJitterReceived || &#x27;0&#x27;, 10);
+            result[obj.mediaType][dirType].jitterBufferMs = parseInt(obj.googJitterBufferMs || &#x27;0&#x27;, 10);
+
+            if (result[obj.mediaType][dirType].codec) {
+              result[obj.mediaType][dirType].codec.implementation = obj.codecImplementationName || null;
+              if (obj.googCodecName) {
+                result[obj.mediaType][dirType].codec.name = obj.googCodecName;
+              }
+            }
 
             if (dirType === &#x27;sending&#x27;) {
               // NOTE: Chrome sending audio does have it but plugin has..
               result[obj.mediaType].sending.rtt = parseInt(obj.googRtt || &#x27;0&#x27;, 10);
+            }
+
+            if (obj.mediaType === &#x27;video&#x27;) {
+              result.video[dirType].frameWidth = parseInt((dirType === &#x27;receiving&#x27; ?
+                obj.googFrameWidthReceived : obj.googFrameWidthSent) || &#x27;0&#x27;, 10);
+              result.video[dirType].frameHeight = parseInt((dirType === &#x27;receiving&#x27; ?
+                obj.googFrameHeightReceived : obj.googFrameHeightSent) || &#x27;0&#x27;, 10);
+              result.video[dirType].frames = parseInt((dirType === &#x27;receiving&#x27; ?
+                obj.googFrameRateReceived : obj.googFrameRateSent) || &#x27;0&#x27;, 10);
+              result.video[dirType].nacks = parseInt((dirType === &#x27;receiving&#x27; ?
+                obj.googNacksReceived : obj.googNacksSent) || &#x27;0&#x27;, 10);
+              result.video[dirType].plis = parseInt((dirType === &#x27;receiving&#x27; ?
+                obj.googPlisReceived : obj.googPlisSent) || &#x27;0&#x27;, 10);
+              result.video[dirType].firs = parseInt((dirType === &#x27;receiving&#x27; ?
+                obj.googFirsReceived : obj.googFirsSent) || &#x27;0&#x27;, 10);
+
+              if (dirType === &#x27;receiving&#x27;) {
+                result.video[dirType].framesDecoded = parseInt(obj.googFrameRateDecoded || &#x27;0&#x27;, 10);
+                result.video[dirType].framesOutput = parseInt(obj.googFrameRateOutput || &#x27;0&#x27;, 10);
+              } else {
+                result.video[dirType].framesInput = parseInt(obj.googFrameRateInput || &#x27;0&#x27;, 10);
+              }
+            } else {
+              if (dirType === &#x27;receiving&#x27;) {
+                result.audio[dirType].outputLevel = parseFloat(obj.audioOutputLevel || &#x27;0&#x27;, 10);
+              } else {
+                result.audio[dirType].inputLevel = parseFloat(obj.audioInputLevel || &#x27;0&#x27;, 10);
+                result.audio[dirType].echoReturnLoss = parseFloat(obj.googEchoCancellationReturnLoss || &#x27;0&#x27;, 10);
+                result.audio[dirType].echoReturnLossEnhancement = parseFloat(obj.googEchoCancellationReturnLossEnhancement || &#x27;0&#x27;, 10);
+              }
             }
 
             if (!reportedCandidate) {

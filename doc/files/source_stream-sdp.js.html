@@ -596,6 +596,48 @@ Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
 };
 
 /**
+ * Function that retrieves the session description selected codec.
+ * @method _getSDPSelectedCodec
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._getSDPSelectedCodec = function (targetMid, sessionDescription, type) {
+  if (!(sessionDescription &amp;&amp; sessionDescription.sdp)) {
+    return null;
+  }
+
+  var sdpLines = sessionDescription.sdp.split(&#x27;\r\n&#x27;);
+  var selectedCodecInfo = {
+    name: null,
+    implementation: null,
+    payloadType: null
+  };
+
+  for (var i = 0; i &lt; sdpLines.length; i++) {
+    if (sdpLines[i].indexOf(&#x27;m=&#x27; + type) === 0) {
+      var parts = sdpLines[i].split(&#x27; &#x27;);
+
+      if (parts.length &lt; 4) {
+        break;
+      }
+
+      selectedCodecInfo.payloadType = parseInt(parts[3], 10);
+
+    } else if (selectedCodecInfo.payloadType !== null &amp;&amp;
+      sdpLines[i].indexOf(&#x27;a=rtpmap:&#x27; + selectedCodecInfo.payloadType + &#x27; &#x27;) === 0) {
+      selectedCodecInfo.name = (sdpLines[i].split(&#x27; &#x27;)[1] || &#x27;&#x27;).split(&#x27;/&#x27;)[0] || &#x27;&#x27;;
+      break;
+    }
+  }
+
+  log.debug([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+    &#x27;Parsing session description &quot;&#x27; + type + &#x27;&quot; codecs -&gt;&#x27;], selectedCodecInfo);
+
+  return selectedCodecInfo;
+};
+
+/**
  * Function that modifies the session description to remove non-relay ICE candidates.
  * @method _removeSDPFilteredCandidates
  * @private

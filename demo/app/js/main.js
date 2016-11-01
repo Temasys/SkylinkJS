@@ -2,6 +2,13 @@
   API Settings
 *********************************************************/
 var Demo = Demo || {};
+var config = {
+  apiKey: '1635b4a2-4d36-4644-87f3-41103539bdd7',
+  defaultRoom:'brdropturntest',
+  forceTURN: true,
+  forceTURNSSL: true
+};
+
 Demo.FILE_SIZE_LIMIT = 1024 * 1024 * 200;
 Demo.Peers = 0;
 Demo.Files = [];
@@ -625,32 +632,109 @@ Demo.Skylink.on('channelError', function (error) {
 Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats, error) {
   if (state === Demo.Skylink.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS) {
     var statsElm = $('#video' + peerId).find('.connstats');
-    var formatBitrate = function (val) {
-      if (val < 1000) {
-        return val + ' bps';
-      } else if (val < 1000000) {
-        return (val / 1000).toFixed(2) + ' kbps';
+    var formatStatItem = function (type, dir) {
+      var itemStr = '';
+      var itemAddStr = '';
+
+      if (stats[type][dir].bytes < 1000) {
+        itemStr += stats[type][dir].bytes + ' bps';
+      } else if (stats[type][dir].bytes < 1000000) {
+        itemStr += (stats[type][dir].bytes / 1000).toFixed(2) + ' kbps';
       } else {
-        return (val / 1000000).toFixed(2) + ' mbps';
+        itemStr += (stats[type][dir].bytes / 1000000).toFixed(2) + ' mbps';
       }
+
+      // format packet stats
+      itemStr += '<br>Packets - (' + stats[type][dir].packets + ' sent, ' +
+        stats[type][dir].packetsLost + ' lost, ' + stats[type][dir].jitter + ' jitter' +
+        (typeof stats[type][dir].jitterBufferMs === 'number' ? ', ' + stats[type][dir].jitterBufferMs +
+        ' jitter buffer <i>ms</i>' : '') + (dir === 'sending' ? ', ' + stats[type][dir].rtt + ' rtt' : '') +
+        (typeof stats[type][dir].nacks === 'number' ? ', ' + stats[type][dir].nacks + ' nacks' : '') +
+        (typeof stats[type][dir].plis === 'number' ? ', ' + stats[type][dir].plis + ' plis' : '') +
+        (typeof stats[type][dir].firs === 'number' ? ', ' + stats[type][dir].firs + ' firs' : '') + ')';
+
+      // format codec stats
+      if (stats[type][dir].codec) {
+        itemStr += '<br>Codec - (name: ' + stats[type][dir].codec.name + ', payload type: ' +
+          stats[type][dir].codec.payloadType + (stats[type][dir].codec.implementation ?
+          ', impl: ' + stats[type][dir].codec.implementation : '') + ')';
+      }
+
+      // format settings
+      if (type === 'audio') {
+        itemStr += '<br>Settings - (';
+
+        if (typeof stats.audio[dir].inputLevel === 'number') {
+          itemAddStr += 'input level: ' + stats.audio[dir].inputLevel;
+        } else if (typeof stats.audio[dir].outputLevel === 'number') {
+          itemAddStr += 'output level: ' + stats.audio[dir].outputLevel;
+        }
+
+        if (typeof stats.audio[dir].echoReturnLoss === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'echo return loss: ' + stats.audio[dir].echoReturnLoss;
+        }
+
+        if (typeof stats.audio[dir].echoReturnLossEnhancement === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'echo return loss: ' + stats.audio[dir].echoReturnLossEnhancement;
+        }
+
+      } else {
+        itemStr += '<br>Frame - (';
+
+        if (typeof stats.video[dir].frameWidth === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'width: ' + stats.video[dir].frameWidth;
+        }
+
+        if (typeof stats.video[dir].frameHeight === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'height: ' + stats.video[dir].frameHeight;
+        }
+
+        if (typeof stats.video[dir].frames === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + dir + ': ' + stats.video[dir].frames;
+        }
+
+        if (typeof stats.video[dir].framesInput === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'input: ' + stats.video[dir].framesInput;
+        }
+
+        if (typeof stats.video[dir].framesOutput === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'output: ' + stats.video[dir].framesOutput;
+        }
+
+        if (typeof stats.video[dir].framesDropped === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'dropped: ' + stats.video[dir].framesDropped;
+        }
+
+        if (typeof stats.video[dir].framesDecoded === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'decoded: ' + stats.video[dir].framesDecoded;
+        }
+
+        if (typeof stats.video[dir].frameRateMean === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'fps mean: ' + stats.video[dir].frameRateMean.toFixed(2);
+        }
+
+        if (typeof stats.video[dir].frameRateStdDev === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'fps std dev: ' + stats.video[dir].frameRateStdDev.toFixed(2);
+        }
+      }
+
+      itemStr += itemAddStr + ')';
+
+      $(statsElm).find('.' + type + ' .' + (dir === 'sending' ? 'upload' : 'download')).html(itemStr);
+    };
+    var formatCanStatItem = function (type) {
+      $(statsElm).find('.candidate .' + type).html((stats.selectedCandidate[type].ipAddress || '-') + ':' +
+        (stats.selectedCandidate[type].portNumber || '-') + ' - (transport: ' +
+        (stats.selectedCandidate[type].transport || 'N/A') +
+        ', type: ' + (stats.selectedCandidate[type].candidateType || 'N/A') + ')');
     };
 
-    $(statsElm).find('.audio .upload').html(formatBitrate(stats.audio.sending.bytes) + ' - Packets (' +
-      stats.audio.sending.packets + ' sent, ' + stats.audio.sending.packetsLost + ' lost)');
-    $(statsElm).find('.audio .download').html(formatBitrate(stats.audio.receiving.bytes) + ' - Packets (' +
-      stats.audio.receiving.packets + ' received, ' + stats.audio.receiving.packetsLost + ' lost)');
-    $(statsElm).find('.video .upload').html(formatBitrate(stats.video.sending.bytes) + ' - Packets (' +
-      stats.video.sending.packets + ' sent, ' + stats.video.sending.packetsLost + ' lost)');
-    $(statsElm).find('.video .download').html(formatBitrate(stats.video.receiving.bytes) + ' - Packets (' +
-      stats.video.receiving.packets + ' received, ' + stats.video.receiving.packetsLost + ' lost)');
-    $(statsElm).find('.candidate .local').html((stats.selectedCandidate.local.ipAddress || '-') + ':' +
-      (stats.selectedCandidate.local.portNumber || '-') + ' - (transport: ' +
-      (stats.selectedCandidate.local.transport || 'N/A') +
-      ', type: ' + (stats.selectedCandidate.local.candidateType || 'N/A') + ')');
-    $(statsElm).find('.candidate .remote').html((stats.selectedCandidate.remote.ipAddress || '-') + ':' +
-      (stats.selectedCandidate.remote.portNumber || '-') +
-      ' - (transport: ' + (stats.selectedCandidate.remote.transport || 'N/A') +
-      ', type: ' + (stats.selectedCandidate.remote.candidateType || 'N/A') + ')');
+    formatStatItem('audio', 'sending');
+    formatStatItem('audio', 'receiving');
+    formatStatItem('video', 'sending');
+    formatStatItem('video', 'receiving');
+    formatCanStatItem('local');
+    formatCanStatItem('remote');
   }
 });
 
