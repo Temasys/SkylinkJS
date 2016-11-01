@@ -276,7 +276,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
 
 
 
-  if (window.location.protocol === &#x27;https:&#x27; || this._forceTURNSSL) {
+  if (this._forceTURNSSL) {
     if (window.webrtcDetectedBrowser === &#x27;chrome&#x27; ||
       window.webrtcDetectedBrowser === &#x27;safari&#x27; ||
       window.webrtcDetectedBrowser === &#x27;IE&#x27;) {

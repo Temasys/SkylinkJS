@@ -1020,20 +1020,8 @@ Skylink.prototype._offerHandler = function(message) {
   log.log([targetMid, 'RTCSessionDescription', message.type,
     'Session description object created'], offer);
 
-  // Configure it to force TURN connections by removing non-"relay" candidates
-  if (self._forceTURN && !(self._enableIceTrickle && self._peerInformations[targetMid] &&
-      self._peerInformations[targetMid].config.enableIceTrickle)) {
-    if (!self._hasMCU) {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from offer ' +
-        ' as TURN connections is forced']);
-
-      offer.sdp = offer.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
-
-    } else {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Not removing non-"relay"' +
-        '" candidates although TURN connections is forced as MCU is present']);
-    }
-  }
+  offer.sdp = self._handleSDPMCUConnectionCase(targetMid, offer, false);
+  offer.sdp = self._removeSDPFilteredCandidates(targetMid, offer);
 
   // This is always the initial state. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
@@ -1083,71 +1071,55 @@ Skylink.prototype._offerHandler = function(message) {
  */
 Skylink.prototype._candidateHandler = function(message) {
   var targetMid = message.mid;
-  var pc = this._peerConnections[targetMid];
-  log.log([targetMid, null, message.type, 'Received candidate from peer. Candidate config:'], {
-    sdp: message.sdp,
-    target: message.target,
-    candidate: message.candidate,
-    label: message.label
-  });
-  // create ice candidate object
-  var messageCan = message.candidate.split(' ');
-  var canType = messageCan[7];
-  log.log([targetMid, null, message.type, 'Candidate type:'], canType);
-  // if (canType !== 'relay' && canType !== 'srflx') {
-  // trace('Skipping non relay and non srflx candidates.');
-  var index = message.label;
-  var candidate = new window.RTCIceCandidate({
-    sdpMLineIndex: index,
-    candidate: message.candidate,
-    //id: message.id,
-    sdpMid: message.id
-    //label: index
-  });
 
-  if (this._forceTURN && canType !== 'relay') {
-    if (!this._hasMCU) {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring adding of "' + canType +
-        '" candidate as TURN connections is forced'], candidate);
-      return;
-    }
-
-    log.warn([targetMid, 'RTCICECandidate', null, 'Not ignoring adding of "' + canType +
-      '" candidate although TURN connections is forced as MCU is present'], candidate);
+  if (!message.candidate && !message.id) {
+    log.warn([targetMid, 'RTCIceCandidate', null, 'Received invalid ICE candidate message ->'], message);
+    return;
   }
 
-  if (pc) {
-  	if (pc.signalingState === this.PEER_CONNECTION_STATE.CLOSED) {
-  		log.warn([targetMid, null, message.type, 'Peer connection state ' +
-  			'is closed. Not adding candidate'], candidate);
-	    return;
-  	}
-    /*if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
-      log.debug([targetMid, null, null,
-        'Received but not adding Candidate as we are already connected to this peer']);
+  var canId = 'can-' + (new Date()).getTime();
+  var candidateType = message.candidate.split(' ')[7] || '';
+  var candidate = new RTCIceCandidate({
+    sdpMLineIndex: message.label,
+    candidate: message.candidate,
+    sdpMid: message.id
+  });
+
+  log.debug([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Received ICE candidate ->'], candidate);
+
+  this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.RECEIVED,
+    targetMid, canId, candidateType, candidate.candidate, null);
+
+  if (!(this._peerConnections[targetMid] &&
+    this._peerConnections[targetMid].signalingState !== this.PEER_CONNECTION_STATE.CLOSED)) {
+    log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping ICE candidate ' +
+      'as Peer connection does not exists or is closed'], this._peerConnections[targetMid].signalingState);
+    this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.DROPPED,
+      targetMid, canId, candidateType, candidate.candidate,
+      new Error('Failed processing ICE candidate as Peer connection does not exists or is closed.'));
+    return;
+  }
+
+  if (this._filterCandidatesType[candidateType]) {
+    if (!(this._hasMCU && this._forceTURN)) {
+      log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping received ICE candidate as ' +
+        'it matches ICE candidate filtering flag ->'], candidate);
+      this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.DROPPED,
+        targetMid, canId, candidateType, candidate.candidate,
+        new Error('Dropping of processing ICE candidate as it matches ICE candidate filtering flag.'));
       return;
-    }*/
-    // set queue before ice candidate cannot be added before setRemoteDescription.
-    // this will cause a black screen of media stream
-    if ((pc.setOffer === 'local' && pc.setAnswer === 'remote') ||
-      (pc.setAnswer === 'local' && pc.setOffer === 'remote')) {
-      pc.addIceCandidate(candidate, this._onAddIceCandidateSuccess, this._onAddIceCandidateFailure);
-      // NOTE ALEX: not implemented in chrome yet, need to wait
-      // function () { trace('ICE  -  addIceCandidate Succesfull. '); },
-      // function (error) { trace('ICE  - AddIceCandidate Failed: ' + error); }
-      //);
-      log.debug([targetMid, 'RTCIceCandidate', message.type,
-        'Added candidate'], candidate);
-    } else {
-      this._addIceCandidateToQueue(targetMid, candidate);
     }
+
+    log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Not dropping received ICE candidate as ' +
+      'TURN connections are enforced as MCU is present (and act as a TURN itself) so filtering of ICE candidate ' +
+      'flags are not honoured ->'], candidate);
+  }
+
+  if (this._peerConnections[targetMid].remoteDescription && this._peerConnections[targetMid].remoteDescription.sdp &&
+    this._peerConnections[targetMid].localDescription && this._peerConnections[targetMid].localDescription.sdp) {
+    this._addIceCandidate(targetMid, canId, candidate);
   } else {
-    // Added ice candidate to queue because it may be received before sending the offer
-    log.debug([targetMid, 'RTCIceCandidate', message.type,
-      'Not adding candidate as peer connection not present'], candidate);
-    // NOTE ALEX: if the offer was slow, this can happen
-    // we might keep a buffer of candidates to replay after receiving an offer.
-    this._addIceCandidateToQueue(targetMid, candidate);
+    this._addIceCandidateToQueue(targetMid, canId, candidate);
   }
 
   if (!this._gatheredCandidates[targetMid]) {
@@ -1157,7 +1129,7 @@ Skylink.prototype._candidateHandler = function(message) {
     };
   }
 
-  this._gatheredCandidates[targetMid].receiving[canType].push({
+  this._gatheredCandidates[targetMid].receiving[candidateType].push({
     sdpMid: candidate.sdpMid,
     sdpMLineIndex: candidate.sdpMLineIndex,
     candidate: candidate.candidate
@@ -1215,26 +1187,8 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }*/
 
-  // if firefox and peer is mcu, replace the sdp to suit mcu needs
-  if (window.webrtcDetectedType === 'moz' && targetMid === 'MCU') {
-    answer.sdp = answer.sdp.replace(/ generation 0/g, '');
-    answer.sdp = answer.sdp.replace(/ udp /g, ' UDP ');
-  }
-
-  // Configure it to force TURN connections by removing non-"relay" candidates
-  if (self._forceTURN && !(self._enableIceTrickle && self._peerInformations[targetMid] &&
-      self._peerInformations[targetMid].config.enableIceTrickle)) {
-    if (!self._hasMCU) {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from answer ' +
-        ' as TURN connections is forced']);
-
-      answer.sdp = answer.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
-
-    } else {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Not removing non-"relay"' +
-        '" candidates although TURN connections is forced as MCU is present']);
-    }
-  }
+  answer.sdp = self._handleSDPMCUConnectionCase(targetMid, answer, false);
+  answer.sdp = self._removeSDPFilteredCandidates(targetMid, answer);
 
   // This should be the state after offer is received. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {

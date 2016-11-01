@@ -106,6 +106,10 @@ Skylink.prototype._EVENTS = {
   handshakeProgress: [],
 
   /**
+   * <blockquote class="info">
+   *   Learn more about how ICE works in this
+   *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+   * </blockquote>
    * Event triggered when a Peer connection ICE gathering state has changed.
    * @event candidateGenerationState
    * @param {String} state The current Peer connection ICE gathering state.
@@ -117,6 +121,10 @@ Skylink.prototype._EVENTS = {
   candidateGenerationState: [],
 
   /**
+   * <blockquote class="info">
+   *   Learn more about how ICE works in this
+   *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+   * </blockquote>
    * Event triggered when a Peer connection session description exchanging state has changed.
    * @event peerConnectionState
    * @param {String} state The current Peer connection session description exchanging state.
@@ -128,6 +136,10 @@ Skylink.prototype._EVENTS = {
   peerConnectionState: [],
 
   /**
+   * <blockquote class="info">
+   *   Learn more about how ICE works in this
+   *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+   * </blockquote>
    * Event triggered when a Peer connection ICE connection state has changed.
    * @event iceConnectionState
    * @param {String} state The current Peer connection ICE connection state.
@@ -236,6 +248,24 @@ Skylink.prototype._EVENTS = {
    *   value is considered as <code>false</code>.</small>
    * @param {Boolean} peerInfo.settings.audio.stereo The flag if stereo band is configured
    *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for receiving audio data.
+   * @param {Boolean} [peerInfo.settings.audio.usedtx] <blockquote class="info">
+   *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+   *   The flag if DTX (Discontinuous Transmission) is configured when encoding audio codec
+   *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   *   <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>
+   *   <small>When not defined, the default browser configuration is used.</small>
+   * @param {Boolean} [peerInfo.settings.audio.useinbandfec] <blockquote class="info">
+   *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+   *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) is
+   *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   *   <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>
+   *   <small>When not defined, the default browser configuration is used.</small>
+   * @param {Number} [peerInfo.settings.audio.maxplaybackrate] <blockquote class="info">
+   *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+   *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
+   *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
+   *   <small>When not defined, the default browser configuration is used.</small>
    * @param {Array} [peerInfo.settings.audio.optional] The Peer Stream <code>navigator.getUserMedia()</code> API
    *   <code>audio: { optional [..] }</code> property.
    * @param {String} [peerInfo.settings.audio.deviceId] The Peer Stream audio track source ID of the device used.
@@ -623,11 +653,41 @@ Skylink.prototype._EVENTS = {
    * @param {Number} stats.audio.sending.ssrc The Peer connection sending audio streaming RTP packets SSRC.
    * @param {Number} stats.audio.sending.rtt The Peer connection sending audio streaming RTT (Round-trip delay time).
    *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
+   * @param {Number} stats.audio.sending.jitter The Peer connection sending audio streaming RTP packets jitter.
+   *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
+   * @param {Number} [stats.audio.sending.jitterBufferMs] The Peer connection sending audio streaming
+   *   RTP packets jitter buffer in miliseconds.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {JSON} [stats.audio.sending.codec] The Peer connection sending audio streaming selected codec information.
+   *   <small>Defined as <code>null</code> if local session description is not available before parsing.</small>
+   * @param {String} stats.audio.sending.codec.name The Peer connection sending audio streaming selected codec name.
+   * @param {Number} stats.audio.sending.codec.payloadType The Peer connection sending audio streaming selected codec payload type.
+   * @param {String} [stats.audio.sending.codec.implementation] The Peer connection sending audio streaming selected codec implementation.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.audio.sending.inputLevel] The Peer connection sending audio streaming input level.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.audio.sending.echoReturnLoss] The Peer connection sending audio streaming echo return loss.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.audio.sending.echoReturnLossEnhancement] The Peer connection sending audio streaming echo return loss enhancement.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.audio.receiving The Peer connection receiving audio streaming stats.
    * @param {Number} stats.audio.receiving.bytes The Peer connection sending audio streaming bytes.
    * @param {Number} stats.audio.receiving.packets The Peer connection receiving audio streaming packets.
    * @param {Number} stats.audio.receiving.packetsLost The Peer connection receiving audio streaming packets lost.
    * @param {Number} stats.audio.receiving.ssrc The Peer connection receiving audio streaming RTP packets SSRC.
+   * @param {Number} stats.audio.receiving.jitter The Peer connection receiving audio streaming RTP packets jitter.
+   *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
+   * @param {Number} [stats.audio.receiving.jitterBufferMs] The Peer connection receiving audio streaming
+   *   RTP packets jitter buffer in miliseconds.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {JSON} [stats.audio.receiving.codec] The Peer connection receiving audio streaming selected codec information.
+   *   <small>Defined as <code>null</code> if remote session description is not available before parsing.</small>
+   * @param {String} stats.audio.receiving.codec.name The Peer connection receiving audio streaming selected codec name.
+   * @param {Number} stats.audio.receiving.codec.payloadType The Peer connection receiving audio streaming selected codec payload type.
+   * @param {String} [stats.audio.receiving.codec.implementation] The Peer connection receiving audio streaming selected codec implementation.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.audio.receiving.outputLevel] The Peer connection receiving audio streaming output level.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.video The Peer connection video streaming stats.
    * @param {JSON} stats.video.sending The Peer connection sending video streaming stats.
    * @param {Number} stats.video.sending.bytes The Peer connection sending video streaming bytes.
@@ -636,11 +696,65 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} stats.video.sending.ssrc The Peer connection sending video streaming RTP packets SSRC.
    * @param {Number} stats.video.sending.rtt The Peer connection sending video streaming RTT (Round-trip delay time).
    *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
+   * @param {Number} stats.video.sending.jitter The Peer connection sending video streaming RTP packets jitter.
+   *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.jitterBufferMs] The Peer connection sending video streaming
+   *   RTP packets jitter buffer in miliseconds.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {JSON} [stats.video.sending.codec] The Peer connection sending video streaming selected codec information.
+   *   <small>Defined as <code>null</code> if local session description is not available before parsing.</small>
+   * @param {String} stats.video.sending.codec.name The Peer connection sending video streaming selected codec name.
+   * @param {Number} stats.video.sending.codec.payloadType The Peer connection sending video streaming selected codec payload type.
+   * @param {String} [stats.video.sending.codec.implementation] The Peer connection sending video streaming selected codec implementation.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.frames] The Peer connection sending video streaming frames.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.framesInput] The Peer connection sending video streaming frames input.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.framesDropped] The Peer connection sending video streaming frames dropped.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.frameRateMean] The Peer connection sending video streaming fps mean.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.frameRateStdDev] The Peer connection sending video streaming fps standard deviation.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.nacks] The Peer connection sending video streaming nacks.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.plis] The Peer connection sending video streaming plis.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.firs] The Peer connection sending video streaming firs.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.video.receiving The Peer connection receiving video streaming stats.
    * @param {Number} stats.video.receiving.bytes The Peer connection receiving video streaming bytes.
    * @param {Number} stats.video.receiving.packets The Peer connection receiving video streaming packets.
    * @param {Number} stats.video.receiving.packetsLost The Peer connection receiving video streaming packets lost.
    * @param {Number} stats.video.receiving.ssrc The Peer connection receiving video streaming RTP packets SSRC.
+   * @param {Number} stats.video.receiving.jitter The Peer connection receiving video streaming RTP packets jitter.
+   *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.jitterBufferMs] The Peer connection receiving video streaming
+   *   RTP packets jitter buffer in miliseconds.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {JSON} [stats.video.receiving.codec] The Peer connection receiving video streaming selected codec information.
+   *   <small>Defined as <code>null</code> if remote session description is not available before parsing.</small>
+   * @param {String} stats.video.receiving.codec.name The Peer connection receiving video streaming selected codec name.
+   * @param {Number} stats.video.receiving.codec.payloadType The Peer connection receiving video streaming selected codec payload type.
+   * @param {String} [stats.video.receiving.codec.implementation] The Peer connection receiving video streaming selected codec implementation.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.frames] The Peer connection receiving video streaming frames.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.framesOutput] The Peer connection receiving video streaming frames output.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.framesDecoded] The Peer connection receiving video streaming frames decoded.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.frameRateMean] The Peer connection receiving video streaming fps mean.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.frameRateStdDev] The Peer connection receiving video streaming fps standard deviation.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.nacks] The Peer connection receiving video streaming nacks.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.plis] The Peer connection receiving video streaming plis.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.firs] The Peer connection receiving video streaming firs.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.selectedCandidate The Peer connection selected ICE candidate pair stats.
    * @param {JSON} stats.selectedCandidate.local The Peer connection selected local ICE candidate.
    * @param {String} stats.selectedCandidate.local.ipAddress The Peer connection selected
@@ -685,6 +799,15 @@ Skylink.prototype._EVENTS = {
    *   <code>"srflx"</code> ICE candidates received.
    * @param {Array} stats.connection.candidates.receiving.relay The Peer connection list of remote
    *   <code>"relay"</code> ICE candidates received.
+   * @param {JSON} stats.connection.dataChannels The Peer connection list of Datachannel connections.
+   * @param {JSON} stats.connection.dataChannels.#channelName The Peer connection Datachannel connection stats.
+   * @param {String} stats.connection.dataChannels.#channelName.label The Peer connection Datachannel connection ID.
+   * @param {String} stats.connection.dataChannels.#channelName.readyState The Peer connection Datachannel connection readyState.
+   *   [Rel: Skylink.DATA_CHANNEL_STATE]
+   * @param {String} stats.connection.dataChannels.#channelName.type The Peer connection Datachannel connection type.
+   *   [Rel: Skylink.DATA_CHANNEL_TYPE]
+   * @param {String} stats.connection.dataChannels.#channelName.currentTransferId The Peer connection
+   *   Datachannel connection current progressing transfer session ID.
    * @param {Error} error The error object received.
    *   <small>Defined only when <code>state</code> payload is <code>RETRIEVE_ERROR</code>.</small>
    * @for Skylink
@@ -707,7 +830,30 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.15
    */
-  localMediaMuted: []
+  localMediaMuted: [],
+
+  /**
+   * <blockquote class="info">
+   *   Learn more about how ICE works in this
+   *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.<br>
+   *   Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates
+   *   may be received in the session description instead.
+   * </blockquote>
+   * Event triggered when remote ICE candidate processing state has changed for trickle ICE connections.
+   * @event candidateProcessingState
+   * @param {String} state The ICE candidate processing state.
+   *   [Rel: Skylink.CANDIDATE_PROCESSING_STATE]
+   * @param {String} peerId The Peer ID.
+   * @param {String} candidateId The remote ICE candidate session ID.
+   *   <small>Note that this value is not related to WebRTC API but for identification of remote ICE candidate received.</small>
+   * @param {String} candidateType The remote ICE candidate type.
+   * @param {String} candidateSdp The remote ICE candidate connection string.
+   * @param {Error} [error] The error object.
+   *   <small>Defined only when <code>state</code> is <code>DROPPED</code> or <code>PROCESS_ERROR</code>.</small>
+   * @for Skylink
+   * @since 0.6.16
+   */
+  candidateProcessingState: []
 };
 
 /**

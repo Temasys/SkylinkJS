@@ -167,6 +167,14 @@ Skylink.prototype._inRoom = false;
  *   <small>This affects the P2P messaging in <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>,
  *   and data transfers in <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a> and
  *   <a href="#method_sendURLData"><code>sendURLData()</code> method</a>.</small>
+ * @param {JSON} [options.googleXBandwidth] <blockquote class="info">Note that this is an experimental configuration
+ *   and may cause disruptions in connections or connectivity issues when toggled, or may not work depending on
+ *   browser supports. Currently, this only toggles the video codec bandwidth configuration.</blockquote>
+ *   The configuration to set the experimental google video streaming bandwidth sent to Peers.
+ * @param {Number} [options.googleXBandwidth.min] The minimum experimental google video streaming bandwidth sent to Peers.
+ *   <small>This toggles the <code>"x-google-min-bitrate"</code> flag in the session description.</small>
+ * @param {Number} [options.googleXBandwidth.max] The maximum experimental google video streaming bandwidth sent to Peers.
+ *   <small>This toggles the <code>"x-google-max-bitrate"</code> flag in the session description.</small>
  * @param {Boolean} [options.manualGetUserMedia] The flag if <code>joinRoom()</code> should trigger
  *   <a href="#event_mediaAccessRequired"><code>mediaAccessRequired</code> event</a> in which the
  *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> or
@@ -715,19 +723,32 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
       mediaOptions = mediaOptions || {};
 
       self._userData = mediaOptions.userData || self._userData || '';
-      self._streamsBandwidthSettings = {};
+      self._streamsBandwidthSettings = {
+        googleX: {},
+        bAS: {}
+      };
 
       if (mediaOptions.bandwidth) {
         if (typeof mediaOptions.bandwidth.audio === 'number') {
-          self._streamsBandwidthSettings.audio = mediaOptions.bandwidth.audio;
+          self._streamsBandwidthSettings.bAS.audio = mediaOptions.bandwidth.audio;
         }
 
         if (typeof mediaOptions.bandwidth.video === 'number') {
-          self._streamsBandwidthSettings.video = mediaOptions.bandwidth.video;
+          self._streamsBandwidthSettings.bAS.video = mediaOptions.bandwidth.video;
         }
 
         if (typeof mediaOptions.bandwidth.data === 'number') {
-          self._streamsBandwidthSettings.data = mediaOptions.bandwidth.data;
+          self._streamsBandwidthSettings.bAS.data = mediaOptions.bandwidth.data;
+        }
+      }
+
+      if (mediaOptions.googleXBandwidth) {
+        if (typeof mediaOptions.googleXBandwidth.min === 'number') {
+          self._streamsBandwidthSettings.googleX.min = mediaOptions.googleXBandwidth.min;
+        }
+
+        if (typeof mediaOptions.googleXBandwidth.max === 'number') {
+          self._streamsBandwidthSettings.googleX.max = mediaOptions.googleXBandwidth.max;
         }
       }
 

@@ -327,10 +327,14 @@ Skylink.prototype._room = null;
  *   be used when constructing Peer connections to allow TURN connections when required.
  * @param {Boolean} [options.forceTURN=false] The flag if Peer connections should enforce
  *   connections over the TURN server.
- *   <small>This sets <code>options.enableTURNServer</code> value to <code>true</code> and
- *   <code>options.enableSTUNServer</code> value to <code>false</code>.</small>
- *   <small>During Peer connections, it filters out non <code>"relay"</code> ICE candidates to
- *   ensure that TURN connections is enforced.</small>
+ *   <small>This overrides <code>options.enableTURNServer</code> value to <code>true</code> and
+ *   <code>options.enableSTUNServer</code> value to <code>false</code>, <code>options.filterCandidatesType.host</code>
+ *   value to <code>true</code>, <code>options.filterCandidatesType.srflx</code> value to <code>true</code> and
+ *   <code>options.filterCandidatesType.relay</code> value to <code>false</code>.</small>
+ *   <small>Note that currently for MCU enabled Peer connections, the <code>options.filterCandidatesType</code>
+ *   configuration is not honoured as Peers connected with MCU is similar as a forced TURN connection. The flags
+ *   will act as if the value is <code>false</code> and ICE candidates will never be filtered regardless of the
+ *   <code>options.filterCandidatesType</code> configuration.</small>
  * @param {Boolean} [options.usePublicSTUN=true] The flag if publicly available STUN ICE servers should
  *   be used if <code>options.enableSTUNServer</code> is enabled.
  * @param {Boolean} [options.TURNServerTransport] <blockquote class="info">
@@ -342,6 +346,18 @@ Skylink.prototype._room = null;
  *   query parameter in TURN ICE servers when constructing a Peer connections.
  * - When not provided, its value is <code>ANY</code>.
  *   [Rel: Skylink.TURN_TRANSPORT]
+ * @param {Boolean} [options.disableVideoFecCodecs=false] <blockquote class="info">
+ *   Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled,
+ *   and to prevent connectivity issues, these codecs will not be removed for MCU enabled Peer connections.
+ *   </blockquote> The flag if video FEC (Forward Error Correction)
+ *   codecs like ulpfec and red should be removed in sending session descriptions.
+ *   <small>This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.</small>
+ * @param {Boolean} [options.disableComfortNoiseCodec=false] <blockquote class="info">
+ *   Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled.
+ *   </blockquote> The flag if audio
+ *   <a href="https://en.wikipedia.org/wiki/Comfort_noise">Comfort Noise (CN)</a> codec should be removed
+ *   in sending session descriptions.
+ *   <small>This can be useful for debugging purposes to test preferred audio quality and feedback.</small>
  * @param {JSON} [options.credentials] The credentials used for authenticating App Key with
  *   credentials to retrieve the Room session token used for connection in <a href="#method_joinRoom">
  *   <code>joinRoom()</code> method</a>.
@@ -383,7 +399,7 @@ Skylink.prototype._room = null;
  * - When not provided, its value is <code>AUTO</code>.
  *   [Rel: Skylink.AUDIO_CODEC]
  * @param {String} [options.videoCodec] <blockquote class="info">
- *    Note that if the video codec is not supported, the SDK will not configure the local <code>"offer"</code> or
+ *   Note that if the video codec is not supported, the SDK will not configure the local <code>"offer"</code> or
  *   <code>"answer"</code> session description to prefer the codec.</blockquote>
  *   The option to configure the preferred video codec
  *   to use to encode sending video data when available for Peer connection.
@@ -396,7 +412,12 @@ Skylink.prototype._room = null;
  *   Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,
  *   TURN ICE servers using port <code>443</code> will be used instead.</blockquote>
  *   The flag if TURNS protocol should be used when <code>options.enableTURNServer</code> is enabled.
- *   <small>By default, <code>"https:"</code> protocol connections uses TURNS protocol.</small>
+ * @param {JSON} [options.filterCandidatesType] <blockquote class="info">
+ *   Note that this a debugging feature and there might be connectivity issues when toggling these flags.
+ *   </blockquote> The configuration options to filter the type of ICE candidates sent and received.
+ * @param {Boolean} [options.filterCandidatesType.host=false] The flag if local network ICE candidates should be filtered out.
+ * @param {Boolean} [options.filterCandidatesType.srflx=false] The flag if STUN ICE candidates should be filtered out.
+ * @param {Boolean} [options.filterCandidatesType.relay=false] The flag if TURN ICE candidates should be filtered out.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_readyStateChange">
@@ -435,6 +456,9 @@ Skylink.prototype._room = null;
  * @param {Boolean} callback.success.forceTURNSSL The configured value of the <code>options.forceTURNSSL</code>.
  * @param {Boolean} callback.success.forceTURN The configured value of the <code>options.forceTURN</code>.
  * @param {Boolean} callback.success.usePublicSTUN The configured value of the <code>options.usePublicSTUN</code>.
+ * @param {Boolean} callback.success.disableVideoFecCodecs The configured value of the <code>options.disableVideoFecCodecs</code>.
+ * @param {Boolean} callback.success.disableComfortNoiseCodec The configured value of the <code>options.disableComfortNoiseCodec</code>.
+ * @param {JSON} callback.success.filterCandidatesType The configured value of the <code>options.filterCandidatesType</code>.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -529,6 +553,13 @@ Skylink.prototype.init = function(options, callback) {
   var videoCodec = self.VIDEO_CODEC.AUTO;
   var forceTURN = false;
   var usePublicSTUN = true;
+  var disableVideoFecCodecs = false;
+  var disableComfortNoiseCodec = false;
+  var filterCandidatesType = {
+    host: false,
+    srflx: false,
+    relay: false
+  };
 
   log.log('Provided init options:', options);
 
@@ -590,6 +621,21 @@ Skylink.prototype.init = function(options, callback) {
     // set the use public stun option
     usePublicSTUN = (typeof options.usePublicSTUN === 'boolean') ?
       options.usePublicSTUN : usePublicSTUN;
+    // set the use of disabling ulpfec and red codecs
+    disableVideoFecCodecs = (typeof options.disableVideoFecCodecs === 'boolean') ?
+      options.disableVideoFecCodecs : disableVideoFecCodecs;
+    // set the use of disabling CN codecs
+    disableComfortNoiseCodec = (typeof options.disableComfortNoiseCodec === 'boolean') ?
+      options.disableComfortNoiseCodec : disableComfortNoiseCodec;
+    // set the use of filtering ICE candidates
+    if (typeof options.filterCandidatesType === 'object' && options.filterCandidatesType) {
+      filterCandidatesType.host = (typeof options.filterCandidatesType.host === 'boolean') ?
+        options.filterCandidatesType.host : false;
+      filterCandidatesType.srflx = (typeof options.filterCandidatesType.srflx === 'boolean') ?
+        options.filterCandidatesType.srflx : false;
+      filterCandidatesType.relay = (typeof options.filterCandidatesType.relay === 'boolean') ?
+        options.filterCandidatesType.relay : false;
+    }
 
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
@@ -624,6 +670,9 @@ Skylink.prototype.init = function(options, callback) {
     if (forceTURN === true) {
       enableTURNServer = true;
       enableSTUNServer = false;
+      filterCandidatesType.host = true;
+      filterCandidatesType.srflx = true;
+      filterCandidatesType.relay = false;
     }
   }
   // api key path options
@@ -662,6 +711,9 @@ Skylink.prototype.init = function(options, callback) {
   self._selectedVideoCodec = videoCodec;
   self._forceTURN = forceTURN;
   self._usePublicSTUN = usePublicSTUN;
+  self._disableVideoFecCodecs = disableVideoFecCodecs;
+  self._disableComfortNoiseCodec = disableComfortNoiseCodec;
+  self._filterCandidatesType = filterCandidatesType;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -683,7 +735,10 @@ Skylink.prototype.init = function(options, callback) {
     audioCodec: self._selectedAudioCodec,
     videoCodec: self._selectedVideoCodec,
     forceTURN: self._forceTURN,
-    usePublicSTUN: self._usePublicSTUN
+    usePublicSTUN: self._usePublicSTUN,
+    disableVideoFecCodecs: self._disableVideoFecCodecs,
+    disableComfortNoiseCodec: self._disableComfortNoiseCodec,
+    filterCandidatesType: self._filterCandidatesType
   });
   // trigger the readystate
   self._readyState = 0;
@@ -719,7 +774,10 @@ Skylink.prototype.init = function(options, callback) {
             audioCodec: self._selectedAudioCodec,
             videoCodec: self._selectedVideoCodec,
             forceTURN: self._forceTURN,
-            usePublicSTUN: self._usePublicSTUN
+            usePublicSTUN: self._usePublicSTUN,
+            disableVideoFecCodecs: self._disableVideoFecCodecs,
+            disableComfortNoiseCodec: self._disableComfortNoiseCodec,
+            filterCandidatesType: self._filterCandidatesType
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +

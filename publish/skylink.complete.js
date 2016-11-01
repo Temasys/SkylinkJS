@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Mon Oct 31 2016 17:20:16 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Tue Nov 01 2016 23:22:48 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10548,7 +10548,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Mon Oct 31 2016 17:20:16 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Tue Nov 01 2016 23:22:48 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13536,6 +13536,41 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
 };
 
 /**
+ * <blockquote class="info">
+ *   Learn more about how ICE works in this
+ *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+ * </blockquote>
+ * The list of Peer connection remote ICE candidate processing states for trickle ICE connections.
+ * @attribute CANDIDATE_PROCESSING_STATE
+ * @param {String} RECEIVED <small>Value <code>"received"</code></small>
+ *   The value of the state when the remote ICE candidate was received.
+ * @param {String} DROPPED  <small>Value <code>"received"</code></small>
+ *   The value of the state when the remote ICE candidate is dropped.
+ * @param {String} BUFFERED  <small>Value <code>"buffered"</code></small>
+ *   The value of the state when the remote ICE candidate is buffered.
+ * @param {String} PROCESSING  <small>Value <code>"processing"</code></small>
+ *   The value of the state when the remote ICE candidate is being processed.
+ * @param {String} PROCESS_SUCCESS  <small>Value <code>"processSuccess"</code></small>
+ *   The value of the state when the remote ICE candidate has been processed successfully.
+ *   <small>The ICE candidate that is processed will be used to check against the list of
+ *   locally generated ICE candidate to start matching for the suitable pair for the best ICE connection.</small>
+ * @param {String} PROCESS_ERROR  <small>Value <code>"processError"</code></small>
+ *   The value of the state when the remote ICE candidate has failed to be processed.
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype.CANDIDATE_PROCESSING_STATE = {
+  RECEIVED: 'received',
+  DROPPED: 'dropped',
+  BUFFERED: 'buffered',
+  PROCESSING: 'processing',
+  PROCESS_SUCCESS: 'processSuccess',
+  PROCESS_ERROR: 'processError'
+};
+
+/**
  * Stores the list of buffered ICE candidates that is received before
  *   remote session description is received and set.
  * @attribute _peerCandidatesQueue
@@ -13562,6 +13597,20 @@ Skylink.prototype._peerCandidatesQueue = {};
 Skylink.prototype._gatheredCandidates = {};
 
 /**
+ * Stores the flags for ICE candidate filtering.
+ * @attribute _filterCandidatesType
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._filterCandidatesType = {
+  host: false,
+  srflx: false,
+  relay: false
+};
+
+/**
  * Function that handles the Peer connection gathered ICE candidate to be sent.
  * @method _onIceCandidate
  * @private
@@ -13570,22 +13619,37 @@ Skylink.prototype._gatheredCandidates = {};
  */
 Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
   var self = this;
+  var pc = self._peerConnections[targetMid];
+
+  if (!pc) {
+    log.warn([targetMid, 'RTCIceCandidate', null, 'Ignoring of ICE candidate event as ' +
+      'Peer connection does not exists ->'], candidate);
+    return;
+  }
 
   if (candidate.candidate) {
-    var messageCan = candidate.candidate.split(' ');
-    var candidateType = messageCan[7];
-    log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
-      candidateType + ' candidate:'], candidate);
+    if (!pc.gathering) {
+      log.log([targetMid, 'RTCIceCandidate', null, 'ICE gathering has started.']);
 
-    if (self._forceTURN && candidateType !== 'relay') {
-      if (!self._hasMCU) {
-        log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
-          '" candidate as TURN connections is forced'], candidate);
+      pc.gathering = true;
+
+      self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.GATHERING, targetMid);
+    }
+
+    var candidateType = candidate.candidate.split(' ')[7];
+
+    log.debug([targetMid, 'RTCIceCandidate', candidateType, 'Generated ICE candidate ->'], candidate);
+
+    if (self._filterCandidatesType[candidateType]) {
+      if (!(self._hasMCU && self._forceTURN)) {
+        log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate as ' +
+          'it matches ICE candidate filtering flag ->'], candidate);
         return;
       }
 
-      log.warn([targetMid, 'RTCICECandidate', null, 'Not ignoring sending of "' + candidateType +
-        '" candidate although TURN connections is forced as MCU is present'], candidate);
+      log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Not dropping of sending ICE candidate as ' +
+        'TURN connections are enforced as MCU is present (and act as a TURN itself) so filtering of ICE candidate ' +
+        'flags are not honoured ->'], candidate);
     }
 
     if (!self._gatheredCandidates[targetMid]) {
@@ -13603,10 +13667,12 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
 
     if (!(self._enableIceTrickle && self._peerInformations[targetMid] &&
       self._peerInformations[targetMid].config.enableIceTrickle)) {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring sending of "' + candidateType +
-        '" candidate as trickle ICE is disabled'], candidate);
+      log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate as ' +
+        'trickle ICE is disabled ->'], candidate);
       return;
     }
+
+    log.debug([targetMid, 'RTCIceCandidate', candidateType, 'Sending ICE candidate ->'], candidate);
 
     self._sendChannelMessage({
       type: self._SIG_MESSAGE_TYPE.CANDIDATE,
@@ -13619,48 +13685,32 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
     });
 
   } else {
-    log.debug([targetMid, 'RTCIceCandidate', null, 'End of gathering']);
-    self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.COMPLETED,
-      targetMid);
+    log.log([targetMid, 'RTCIceCandidate', null, 'ICE gathering has completed.']);
+
+    pc.gathering = false;
+
+    self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.COMPLETED, targetMid);
+
     // Disable Ice trickle option
-    if (!self._enableIceTrickle) {
+    if (!(self._enableIceTrickle && self._peerInformations[targetMid] &&
+      self._peerInformations[targetMid].config.enableIceTrickle)) {
       var sessionDescription = self._peerConnections[targetMid].localDescription;
 
-      // make checks for firefox session description
-      if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && window.webrtcDetectedBrowser === 'firefox') {
-        sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
+      if (!(sessionDescription && sessionDescription.type && sessionDescription.sdp)) {
+        log.warn([targetMid, 'RTCSessionDescription', null, 'Not sending any session description after ' +
+          'ICE gathering completed as it is not present.']);
+        return;
       }
 
       self._sendChannelMessage({
         type: sessionDescription.type,
-        sdp: sessionDescription.sdp,
+        sdp: self._addSDPMediaStreamTrackIDs(targetMid, sessionDescription),
         mid: self._user.sid,
-        //agent: window.webrtcDetectedBrowser,
         userInfo: self._getUserInfo(),
         target: targetMid,
         rid: self._room.id
       });
     }
-
-    // We should remove this.. this could be due to ICE failures
-    // Adding this fix is bad
-    // Does the restart in the case when the candidates are extremely a lot
-    /*var doACandidateRestart = self._addedCandidates[targetMid].relay.length > 20 &&
-      (window.webrtcDetectedBrowser === 'chrome' || window.webrtcDetectedBrowser === 'opera');
-
-    log.debug([targetMid, 'RTCIceCandidate', null, 'Relay candidates generated length'], self._addedCandidates[targetMid].relay.length);
-
-    if (doACandidateRestart) {
-      setTimeout(function () {
-        if (self._peerConnections[targetMid]) {
-          if(self._peerConnections[targetMid].iceConnectionState !== self.ICE_CONNECTION_STATE.CONNECTED &&
-            self._peerConnections[targetMid].iceConnectionState !== self.ICE_CONNECTION_STATE.COMPLETED) {
-            // restart
-            self._restartPeerConnection(targetMid, true, true, null, false);
-          }
-        }
-      }, self._addedCandidates[targetMid].relay.length * 50);
-    }*/
   }
 };
 
@@ -13672,38 +13722,16 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
-  log.debug([targetMid, null, null, 'Queued candidate to add after ' +
-    'setRemoteDescription'], candidate);
-  this._peerCandidatesQueue[targetMid] =
-    this._peerCandidatesQueue[targetMid] || [];
-  this._peerCandidatesQueue[targetMid].push(candidate);
-};
+Skylink.prototype._addIceCandidateToQueue = function(targetMid, canId, candidate) {
+  var candidateType = candidate.candidate.split(' ')[7];
 
-/**
- * Function that handles when the Peer connection received ICE candidate
- *   has been added or processed successfully.
- * Separated in a function to prevent jshint errors.
- * @method _onAddIceCandidateSuccess
- * @private
- * @for Skylink
- * @since 0.5.9
- */
-Skylink.prototype._onAddIceCandidateSuccess = function () {
-  log.debug([null, 'RTCICECandidate', null, 'Successfully added ICE candidate']);
-};
+  log.debug([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Buffering ICE candidate.']);
 
-/**
- * Function that handles when the Peer connection received ICE candidate
- *   has failed adding or processing.
-  * Separated in a function to prevent jshint errors.
- * @method _onAddIceCandidateFailure
- * @private
- * @for Skylink
- * @since 0.5.9
- */
-Skylink.prototype._onAddIceCandidateFailure = function (error) {
-  log.error([null, 'RTCICECandidate', null, 'Error'], error);
+  this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.BUFFERED,
+    targetMid, canId, candidateType, candidate.candidate, null);
+
+  this._peerCandidatesQueue[targetMid] = this._peerCandidatesQueue[targetMid] || [];
+  this._peerCandidatesQueue[targetMid].push([canId, candidate]);
 };
 
 /**
@@ -13715,19 +13743,61 @@ Skylink.prototype._onAddIceCandidateFailure = function (error) {
  * @since 0.5.2
  */
 Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
-  this._peerCandidatesQueue[targetMid] =
-    this._peerCandidatesQueue[targetMid] || [];
-  if(this._peerCandidatesQueue[targetMid].length > 0) {
-    for (var i = 0; i < this._peerCandidatesQueue[targetMid].length; i++) {
-      var candidate = this._peerCandidatesQueue[targetMid][i];
-      log.debug([targetMid, null, null, 'Added queued candidate'], candidate);
-      this._peerConnections[targetMid].addIceCandidate(candidate,
-        this._onAddIceCandidateSuccess, this._onAddIceCandidateFailure);
-    }
-    delete this._peerCandidatesQueue[targetMid];
-  } else {
-    log.log([targetMid, null, null, 'No queued candidates to add']);
+  this._peerCandidatesQueue[targetMid] = this._peerCandidatesQueue[targetMid] || [];
+
+  for (var i = 0; i < this._peerCandidatesQueue[targetMid].length; i++) {
+    var canArray = this._peerCandidatesQueue[targetMid][i];
+    var candidateType = canArray[1].candidate.split(' ')[7];
+
+    log.debug([targetMid, 'RTCIceCandidate', canArray[0] + ':' + candidateType, 'Adding buffered ICE candidate.']);
+
+    this._addIceCandidate(targetMid, canArray[0], canArray[1]);
   }
+
+  delete this._peerCandidatesQueue[targetMid];
+};
+
+/**
+ * Function that adds the ICE candidate to Peer connection.
+ * @method _addIceCandidate
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
+  var self = this;
+  var candidateType = candidate.candidate.split(' ')[7];
+
+  var onSuccessCbFn = function () {
+    log.log([targetMid, 'RTCIceCandidate', canId + ':' + candidateType,
+      'Added ICE candidate successfully.']);
+    self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.PROCESS_SUCCESS,
+      targetMid, canId, candidateType, candidate.candidate, null);
+  };
+
+  var onErrorCbFn = function (error) {
+    log.error([targetMid, 'RTCIceCandidate', canId + ':' + candidateType,
+      'Failed adding ICE candidate ->'], error);
+    self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.PROCESS_ERROR,
+      targetMid, canId, candidateType, candidate.candidate, error);
+  };
+
+  log.debug([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Adding ICE candidate.']);
+
+  self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.PROCESSING,
+    targetMid, canId, candidateType, candidate.candidate, null);
+
+  if (!(self._peerConnections[targetMid] &&
+    self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
+    log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping ICE candidate ' +
+      'as Peer connection does not exists or is closed']);
+    self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.DROPPED,
+      targetMid, canId, candidateType, candidate.candidate,
+      new Error('Failed processing ICE candidate as Peer connection does not exists or is closed.'));
+    return;
+  }
+
+  self._peerConnections[targetMid].addIceCandidate(candidate, onSuccessCbFn, onErrorCbFn);
 };
 Skylink.prototype.ICE_CONNECTION_STATE = {
   STARTING: 'starting',
@@ -13875,7 +13945,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
 
 
 
-  if (window.location.protocol === 'https:' || this._forceTURNSSL) {
+  if (this._forceTURNSSL) {
     if (window.webrtcDetectedBrowser === 'chrome' ||
       window.webrtcDetectedBrowser === 'safari' ||
       window.webrtcDetectedBrowser === 'IE') {
@@ -14581,7 +14651,8 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
         candidates: clone(self._gatheredCandidates[peerId] || {
           sending: { host: [], srflx: [], relay: [] },
           receiving: { host: [], srflx: [], relay: [] }
-        })
+        }),
+        dataChannels: {}
       },
       audio: {
         sending: {
@@ -14589,13 +14660,23 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           bytes: 0,
           packets: 0,
           packetsLost: 0,
-          rtt: 0
+          rtt: 0,
+          jitter: 0,
+          jitterBufferMs: null,
+          codec: self._getSDPSelectedCodec(peerId, pc.localDescription, 'audio'),
+          inputLevel: null,
+          echoReturnLoss: null,
+          echoReturnLossEnhancement: null
         },
         receiving: {
           ssrc: null,
           bytes: 0,
           packets: 0,
-          packetsLost: 0
+          packetsLost: 0,
+          jitter: 0,
+          jitterBufferMs: null,
+          codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, 'audio'),
+          outputLevel: null
         }
       },
       video: {
@@ -14604,13 +14685,39 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           bytes: 0,
           packets: 0,
           packetsLost: 0,
-          rtt: 0
+          rtt: 0,
+          jitter: 0,
+          jitterBufferMs: null,
+          codec: self._getSDPSelectedCodec(peerId, pc.localDescription, 'video'),
+          frameWidth: null,
+          frameHeight: null,
+          framesInput: null,
+          frames: null,
+          frameRateMean: null,
+          frameRateStdDev: null,
+          framesDropped: null,
+          nacks: null,
+          plis: null,
+          firs: null
         },
         receiving: {
           ssrc: null,
           bytes: 0,
           packets: 0,
-          packetsLost: 0
+          packetsLost: 0,
+          jitter: 0,
+          jitterBufferMs: null,
+          codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, 'video'),
+          frameWidth: null,
+          frameHeight: null,
+          framesDecoded: null,
+          framesOutput: null,
+          frames: null,
+          frameRateMean: null,
+          frameRateStdDev: null,
+          nacks: null,
+          plis: null,
+          firs: null
         }
       },
       selectedCandidate: {
@@ -14618,6 +14725,18 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
         remote: { ipAddress: null, candidateType: null, portNumber: null, transport: null }
       }
     };
+
+    for (var channelProp in self._dataChannels[peerId]) {
+      if (self._dataChannels[peerId].hasOwnProperty(channelProp) && self._dataChannels[peerId][channelProp]) {
+        result.connection.dataChannels[self._dataChannels[peerId][channelProp].channel.label] = {
+          label: self._dataChannels[peerId][channelProp].channel.label,
+          readyState: self._dataChannels[peerId][channelProp].channel.readyState,
+          channelType: channelProp === 'main' ? self.DATA_CHANNEL_TYPE.MESSAGING : self.DATA_CHANNEL_TYPE.DATA,
+          currentTransferId: self._dataChannels[peerId][channelProp].transferId || null
+        };
+      }
+    }
+
     var loopFn = function (obj, fn) {
       for (var prop in obj) {
         if (obj.hasOwnProperty(prop) && obj[prop]) {
@@ -14625,6 +14744,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
         }
       }
     };
+
     var formatCandidateFn = function (candidateDirType, candidate) {
       result.selectedCandidate[candidateDirType].ipAddress = candidate.ipAddress;
       result.selectedCandidate[candidateDirType].candidateType = candidate.candidateType;
@@ -14652,16 +14772,26 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
 
             if (dirType === 'receiving') {
               result[obj.mediaType][dirType].packetsLost = obj.packetsLost || 0;
+              result[obj.mediaType][dirType].jitter = obj.jitter || 0;
+            }
+
+            if (obj.mediaType === 'video') {
+              result.video[dirType].frameRateMean = obj.framerateMean || 0;
+              result.video[dirType].frameRateStdDev = obj.framerateStdDev || 0;
+
+              if (dirType === 'sending') {
+                result.video.sending.framesDropped = obj.framesDropped || 0;
+              }
             }
 
           // Sending RTP packets lost
-          } else if (prop.indexOf('outbound_rtcp') === 0) {
+          } else if (prop.indexOf('inbound_rtcp') === 0 || prop.indexOf('outbound_rtcp') === 0) {
             dirType = prop.indexOf('inbound_rtp') === 0 ? 'receiving' : 'sending';
-
-            result[obj.mediaType][dirType].packetsLost = obj.packetsLost || 0;
 
             if (dirType === 'sending') {
               result[obj.mediaType].sending.rtt = obj.mozRtt || 0;
+              result[obj.mediaType].sending.packetsLost = obj.packetsLost || 0;
+              result[obj.mediaType].sending.jitter = obj.jitter || 0;
             }
 
           // Candidates
@@ -14718,10 +14848,49 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
               obj.packetsReceived : obj.packetsSent) || '0', 10);
             result[obj.mediaType][dirType].ssrc = parseInt(obj.ssrc || '0', 10);
             result[obj.mediaType][dirType].packetsLost = parseInt(obj.packetsLost || '0', 10);
+            result[obj.mediaType][dirType].jitter = parseInt(obj.googJitterReceived || '0', 10);
+            result[obj.mediaType][dirType].jitterBufferMs = parseInt(obj.googJitterBufferMs || '0', 10);
+
+            if (result[obj.mediaType][dirType].codec) {
+              result[obj.mediaType][dirType].codec.implementation = obj.codecImplementationName || null;
+              if (obj.googCodecName) {
+                result[obj.mediaType][dirType].codec.name = obj.googCodecName;
+              }
+            }
 
             if (dirType === 'sending') {
               // NOTE: Chrome sending audio does have it but plugin has..
               result[obj.mediaType].sending.rtt = parseInt(obj.googRtt || '0', 10);
+            }
+
+            if (obj.mediaType === 'video') {
+              result.video[dirType].frameWidth = parseInt((dirType === 'receiving' ?
+                obj.googFrameWidthReceived : obj.googFrameWidthSent) || '0', 10);
+              result.video[dirType].frameHeight = parseInt((dirType === 'receiving' ?
+                obj.googFrameHeightReceived : obj.googFrameHeightSent) || '0', 10);
+              result.video[dirType].frames = parseInt((dirType === 'receiving' ?
+                obj.googFrameRateReceived : obj.googFrameRateSent) || '0', 10);
+              result.video[dirType].nacks = parseInt((dirType === 'receiving' ?
+                obj.googNacksReceived : obj.googNacksSent) || '0', 10);
+              result.video[dirType].plis = parseInt((dirType === 'receiving' ?
+                obj.googPlisReceived : obj.googPlisSent) || '0', 10);
+              result.video[dirType].firs = parseInt((dirType === 'receiving' ?
+                obj.googFirsReceived : obj.googFirsSent) || '0', 10);
+
+              if (dirType === 'receiving') {
+                result.video[dirType].framesDecoded = parseInt(obj.googFrameRateDecoded || '0', 10);
+                result.video[dirType].framesOutput = parseInt(obj.googFrameRateOutput || '0', 10);
+              } else {
+                result.video[dirType].framesInput = parseInt(obj.googFrameRateInput || '0', 10);
+              }
+            } else {
+              if (dirType === 'receiving') {
+                result.audio[dirType].outputLevel = parseFloat(obj.audioOutputLevel || '0', 10);
+              } else {
+                result.audio[dirType].inputLevel = parseFloat(obj.audioInputLevel || '0', 10);
+                result.audio[dirType].echoReturnLoss = parseFloat(obj.googEchoCancellationReturnLoss || '0', 10);
+                result.audio[dirType].echoReturnLossEnhancement = parseFloat(obj.googEchoCancellationReturnLossEnhancement || '0', 10);
+              }
             }
 
             if (!reportedCandidate) {
@@ -15105,16 +15274,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     }, timeout);
   };
   pc.onicecandidate = function(event) {
-    var candidate = event.candidate || event;
-
-    if (candidate.candidate) {
-      pc.gathered = false;
-    } else {
-      pc.gathered = true;
-    }
-
-    log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'], candidate);
-    self._onIceCandidate(targetMid, candidate);
+    self._onIceCandidate(targetMid, event.candidate || event);
   };
   pc.oniceconnectionstatechange = function(evt) {
     checkIceConnectionState(targetMid, pc.iceConnectionState,
@@ -15490,6 +15650,10 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     } else if (this._streams.userMedia) {
       peerInfo.settings = clone(this._streams.userMedia.settings);
     }
+
+    peerInfo.settings.bandwidth = clone(this._streamsBandwidthSettings.bAS);
+    // Uncommented to ensure adherence to the current SM protocol
+    //peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
   }
 
   if (!peerInfo.settings.audio) {
@@ -15842,147 +16006,59 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   var self = this;
   var pc = self._peerConnections[targetMid];
 
-  /*if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && pc.setAnswer) {
-    log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
-      'Ignoring session description. User has already set local answer'], sessionDescription);
-    return;
-  }
-  if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER && pc.setOffer) {
-    log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
-      'Ignoring session description. User has already set local offer'], sessionDescription);
-    return;
-  }*/
-
   // Added checks to ensure that sessionDescription is defined first
   if (!(!!sessionDescription && !!sessionDescription.sdp)) {
-    log.warn([targetMid, 'RTCSessionDescription', null, 'Dropping of setting local unknown sessionDescription ' +
-      'as received sessionDescription is empty ->'], sessionDescription);
+    log.warn([targetMid, 'RTCSessionDescription', null, 'Local session description is undefined ->'], sessionDescription);
     return;
   }
 
   // Added checks to ensure that connection object is defined first
   if (!pc) {
-    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Dropping of setting local "' +
-      sessionDescription.type + '" as connection does not exists']);
-    return;
-  }
-
-  // Added checks to ensure that state is "stable" if setting local "offer"
-  if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &&
-    pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
     log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type,
-      'Dropping of setting local "offer" as signalingState is not "' +
-      self.PEER_CONNECTION_STATE.STABLE + '" ->'], pc.signalingState);
+      'Local session description will not be set as connection does not exists ->'], sessionDescription);
+    return;
+
+  } else if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &&
+    pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
+    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Local session description ' +
+      'will not be set as signaling state is "' + pc.signalingState + '" ->'], sessionDescription);
     return;
 
   // Added checks to ensure that state is "have-remote-offer" if setting local "answer"
   } else if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &&
     pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
-    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type,
-      'Dropping of setting local "answer" as signalingState is not "' +
-      self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER + '" ->'], pc.signalingState);
+    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Local session description ' +
+      'will not be set as signaling state is "' + pc.signalingState + '" ->'], sessionDescription);
     return;
-  }
-
-
-  // NOTE ALEX: handle the pc = 0 case, just to be sure
-  var sdpLines = sessionDescription.sdp.split('\r\n');
-
-  // remove h264 invalid pref
-  sdpLines = self._removeSDPFirefoxH264Pref(sdpLines);
-
-  // Check if stereo was enabled
-  if (self._streams.userMedia && self._streams.userMedia.settings.audio) {
-    if (self._streams.userMedia.settings.stereo) {
-      log.info([targetMid, null, null, 'Enabling OPUS stereo flag']);
-      self._addSDPStereo(sdpLines);
-    }
-  }
-
-  // Set SDP max bitrate
-  if (self._streamsBandwidthSettings) {
-    sdpLines = self._setSDPBitrate(sdpLines, self._streamsBandwidthSettings);
-  }
-
-  // set sdp resolution
-  /*if (self._streamSettings.hasOwnProperty('video')) {
-    sdpLines = self._setSDPVideoResolution(sdpLines, self._streamSettings.video);
-  }*/
-
-  /*log.info([targetMid, null, null, 'Custom bandwidth settings:'], {
-    audio: (self._streamSettings.bandwidth.audio || 'Not set') + ' kB/s',
-    video: (self._streamSettings.bandwidth.video || 'Not set') + ' kB/s',
-    data: (self._streamSettings.bandwidth.data || 'Not set') + ' kB/s'
-  });*/
-
-  /*if (self._streamSettings.video.hasOwnProperty('frameRate') &&
-    self._streamSettings.video.hasOwnProperty('resolution')){
-    log.info([targetMid, null, null, 'Custom resolution settings:'], {
-      frameRate: (self._streamSettings.video.frameRate || 'Not set') + ' fps',
-      width: (self._streamSettings.video.resolution.width || 'Not set') + ' px',
-      height: (self._streamSettings.video.resolution.height || 'Not set') + ' px'
-    });
-  }*/
-
-  // set video codec
-  if (self._selectedVideoCodec !== self.VIDEO_CODEC.AUTO) {
-    sdpLines = self._setSDPVideoCodec(sdpLines);
-  } else {
-    log.log([targetMid, null, null, 'Not setting any video codec']);
-  }
-
-  // set audio codec
-  if (self._selectedAudioCodec !== self.AUDIO_CODEC.AUTO) {
-    sdpLines = self._setSDPAudioCodec(sdpLines);
-  } else {
-    log.log([targetMid, null, null, 'Not setting any audio codec']);
-  }
-
-  sessionDescription.sdp = sdpLines.join('\r\n');
-
-  var removeVP9AptRtxPayload = false;
-  var agent = (self._peerInformations[targetMid] || {}).agent || {};
-
-  if (agent.pluginVersion) {
-    // 0.8.870 supports
-    var parts = agent.pluginVersion.split('.');
-    removeVP9AptRtxPayload = parseInt(parts[0], 10) >= 0 && parseInt(parts[1], 10) >= 8 &&
-      parseInt(parts[2], 10) >= 870;
-  }
-
-  // Remove rtx or apt= lines that prevent connections for browsers without VP8 or VP9 support
-  // See: https://bugs.chromium.org/p/webrtc/issues/detail?id=3962
-  if (['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1 && removeVP9AptRtxPayload) {
-    log.warn([targetMid, null, null, 'Removing apt= and rtx payload lines causing connectivity issues']);
-
-    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=101\r\n/g, '');
-    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=107\r\n/g, '');
-  }
-
-  // NOTE ALEX: opus should not be used for mobile
-  // Set Opus as the preferred codec in SDP if Opus is present.
-  //sessionDescription.sdp = preferOpus(sessionDescription.sdp);
-  // limit bandwidth
-  //sessionDescription.sdp = this._limitBandwidth(sessionDescription.sdp);
-  log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
-    'Updated session description:'], sessionDescription);
 
   // Added checks if there is a current local sessionDescription being processing before processing this one
-  if (pc.processingLocalSDP) {
+  } else if (pc.processingLocalSDP) {
     log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type,
-      'Dropping of setting local ' + sessionDescription.type + ' as there is another ' +
-      'sessionDescription being processed ->'], sessionDescription);
+      'Local session description will not be set as another is being processed ->'], sessionDescription);
     return;
   }
 
   pc.processingLocalSDP = true;
 
+  sessionDescription.sdp = self._setSDPOpusConfig(targetMid, sessionDescription);
+  sessionDescription.sdp = self._setSDPCodec(targetMid, sessionDescription);
+  sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
+  sessionDescription.sdp = self._removeSDPH264VP9AptRtxForOlderPlugin(targetMid, sessionDescription);
+  sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
+  sessionDescription.sdp = self._handleSDPMCUConnectionCase(targetMid, sessionDescription, true);
+  sessionDescription.sdp = self._setSDPBitrate(targetMid, sessionDescription);
+
+  log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
+    'Local session description updated ->'], sessionDescription.sdp);
+
   pc.setLocalDescription(sessionDescription, function() {
-    log.debug([targetMid, sessionDescription.type, 'Local description set']);
+    log.debug([targetMid, 'RTCSessionDescription', sessionDescription.type,
+      'Local session description has been set ->'], sessionDescription);
 
     pc.processingLocalSDP = false;
 
     self._trigger('handshakeProgress', sessionDescription.type, targetMid);
+
     if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
       pc.setAnswer = 'local';
     } else {
@@ -15991,18 +16067,13 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
     if (!self._enableIceTrickle && !pc.gathered) {
       log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
-        'Waiting for Ice gathering to complete to prevent Ice trickle']);
+        'Local session description sending is halted to complete ICE gathering.']);
       return;
-    }
-
-    // make checks for firefox session description
-    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && window.webrtcDetectedBrowser === 'firefox') {
-      sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
     }
 
     self._sendChannelMessage({
       type: sessionDescription.type,
-      sdp: sessionDescription.sdp,
+      sdp: self._addSDPMediaStreamTrackIDs(targetMid, sessionDescription),
       mid: self._user.sid,
       target: targetMid,
       rid: self._room.id,
@@ -16010,12 +16081,11 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     });
 
   }, function(error) {
-    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+    log.error([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Local description failed setting ->'], error);
 
     pc.processingLocalSDP = false;
 
-    log.error([targetMid, 'RTCSessionDescription', sessionDescription.type,
-      'Failed setting local description: '], error);
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   });
 };
 
@@ -16394,6 +16464,14 @@ Skylink.prototype._inRoom = false;
  *   <small>This affects the P2P messaging in <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>,
  *   and data transfers in <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a> and
  *   <a href="#method_sendURLData"><code>sendURLData()</code> method</a>.</small>
+ * @param {JSON} [options.googleXBandwidth] <blockquote class="info">Note that this is an experimental configuration
+ *   and may cause disruptions in connections or connectivity issues when toggled, or may not work depending on
+ *   browser supports. Currently, this only toggles the video codec bandwidth configuration.</blockquote>
+ *   The configuration to set the experimental google video streaming bandwidth sent to Peers.
+ * @param {Number} [options.googleXBandwidth.min] The minimum experimental google video streaming bandwidth sent to Peers.
+ *   <small>This toggles the <code>"x-google-min-bitrate"</code> flag in the session description.</small>
+ * @param {Number} [options.googleXBandwidth.max] The maximum experimental google video streaming bandwidth sent to Peers.
+ *   <small>This toggles the <code>"x-google-max-bitrate"</code> flag in the session description.</small>
  * @param {Boolean} [options.manualGetUserMedia] The flag if <code>joinRoom()</code> should trigger
  *   <a href="#event_mediaAccessRequired"><code>mediaAccessRequired</code> event</a> in which the
  *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> or
@@ -16942,19 +17020,32 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
       mediaOptions = mediaOptions || {};
 
       self._userData = mediaOptions.userData || self._userData || '';
-      self._streamsBandwidthSettings = {};
+      self._streamsBandwidthSettings = {
+        googleX: {},
+        bAS: {}
+      };
 
       if (mediaOptions.bandwidth) {
         if (typeof mediaOptions.bandwidth.audio === 'number') {
-          self._streamsBandwidthSettings.audio = mediaOptions.bandwidth.audio;
+          self._streamsBandwidthSettings.bAS.audio = mediaOptions.bandwidth.audio;
         }
 
         if (typeof mediaOptions.bandwidth.video === 'number') {
-          self._streamsBandwidthSettings.video = mediaOptions.bandwidth.video;
+          self._streamsBandwidthSettings.bAS.video = mediaOptions.bandwidth.video;
         }
 
         if (typeof mediaOptions.bandwidth.data === 'number') {
-          self._streamsBandwidthSettings.data = mediaOptions.bandwidth.data;
+          self._streamsBandwidthSettings.bAS.data = mediaOptions.bandwidth.data;
+        }
+      }
+
+      if (mediaOptions.googleXBandwidth) {
+        if (typeof mediaOptions.googleXBandwidth.min === 'number') {
+          self._streamsBandwidthSettings.googleX.min = mediaOptions.googleXBandwidth.min;
+        }
+
+        if (typeof mediaOptions.googleXBandwidth.max === 'number') {
+          self._streamsBandwidthSettings.googleX.max = mediaOptions.googleXBandwidth.max;
         }
       }
 
@@ -17326,10 +17417,14 @@ Skylink.prototype._room = null;
  *   be used when constructing Peer connections to allow TURN connections when required.
  * @param {Boolean} [options.forceTURN=false] The flag if Peer connections should enforce
  *   connections over the TURN server.
- *   <small>This sets <code>options.enableTURNServer</code> value to <code>true</code> and
- *   <code>options.enableSTUNServer</code> value to <code>false</code>.</small>
- *   <small>During Peer connections, it filters out non <code>"relay"</code> ICE candidates to
- *   ensure that TURN connections is enforced.</small>
+ *   <small>This overrides <code>options.enableTURNServer</code> value to <code>true</code> and
+ *   <code>options.enableSTUNServer</code> value to <code>false</code>, <code>options.filterCandidatesType.host</code>
+ *   value to <code>true</code>, <code>options.filterCandidatesType.srflx</code> value to <code>true</code> and
+ *   <code>options.filterCandidatesType.relay</code> value to <code>false</code>.</small>
+ *   <small>Note that currently for MCU enabled Peer connections, the <code>options.filterCandidatesType</code>
+ *   configuration is not honoured as Peers connected with MCU is similar as a forced TURN connection. The flags
+ *   will act as if the value is <code>false</code> and ICE candidates will never be filtered regardless of the
+ *   <code>options.filterCandidatesType</code> configuration.</small>
  * @param {Boolean} [options.usePublicSTUN=true] The flag if publicly available STUN ICE servers should
  *   be used if <code>options.enableSTUNServer</code> is enabled.
  * @param {Boolean} [options.TURNServerTransport] <blockquote class="info">
@@ -17341,6 +17436,18 @@ Skylink.prototype._room = null;
  *   query parameter in TURN ICE servers when constructing a Peer connections.
  * - When not provided, its value is <code>ANY</code>.
  *   [Rel: Skylink.TURN_TRANSPORT]
+ * @param {Boolean} [options.disableVideoFecCodecs=false] <blockquote class="info">
+ *   Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled,
+ *   and to prevent connectivity issues, these codecs will not be removed for MCU enabled Peer connections.
+ *   </blockquote> The flag if video FEC (Forward Error Correction)
+ *   codecs like ulpfec and red should be removed in sending session descriptions.
+ *   <small>This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.</small>
+ * @param {Boolean} [options.disableComfortNoiseCodec=false] <blockquote class="info">
+ *   Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled.
+ *   </blockquote> The flag if audio
+ *   <a href="https://en.wikipedia.org/wiki/Comfort_noise">Comfort Noise (CN)</a> codec should be removed
+ *   in sending session descriptions.
+ *   <small>This can be useful for debugging purposes to test preferred audio quality and feedback.</small>
  * @param {JSON} [options.credentials] The credentials used for authenticating App Key with
  *   credentials to retrieve the Room session token used for connection in <a href="#method_joinRoom">
  *   <code>joinRoom()</code> method</a>.
@@ -17382,7 +17489,7 @@ Skylink.prototype._room = null;
  * - When not provided, its value is <code>AUTO</code>.
  *   [Rel: Skylink.AUDIO_CODEC]
  * @param {String} [options.videoCodec] <blockquote class="info">
- *    Note that if the video codec is not supported, the SDK will not configure the local <code>"offer"</code> or
+ *   Note that if the video codec is not supported, the SDK will not configure the local <code>"offer"</code> or
  *   <code>"answer"</code> session description to prefer the codec.</blockquote>
  *   The option to configure the preferred video codec
  *   to use to encode sending video data when available for Peer connection.
@@ -17395,7 +17502,12 @@ Skylink.prototype._room = null;
  *   Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,
  *   TURN ICE servers using port <code>443</code> will be used instead.</blockquote>
  *   The flag if TURNS protocol should be used when <code>options.enableTURNServer</code> is enabled.
- *   <small>By default, <code>"https:"</code> protocol connections uses TURNS protocol.</small>
+ * @param {JSON} [options.filterCandidatesType] <blockquote class="info">
+ *   Note that this a debugging feature and there might be connectivity issues when toggling these flags.
+ *   </blockquote> The configuration options to filter the type of ICE candidates sent and received.
+ * @param {Boolean} [options.filterCandidatesType.host=false] The flag if local network ICE candidates should be filtered out.
+ * @param {Boolean} [options.filterCandidatesType.srflx=false] The flag if STUN ICE candidates should be filtered out.
+ * @param {Boolean} [options.filterCandidatesType.relay=false] The flag if TURN ICE candidates should be filtered out.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_readyStateChange">
@@ -17434,6 +17546,9 @@ Skylink.prototype._room = null;
  * @param {Boolean} callback.success.forceTURNSSL The configured value of the <code>options.forceTURNSSL</code>.
  * @param {Boolean} callback.success.forceTURN The configured value of the <code>options.forceTURN</code>.
  * @param {Boolean} callback.success.usePublicSTUN The configured value of the <code>options.usePublicSTUN</code>.
+ * @param {Boolean} callback.success.disableVideoFecCodecs The configured value of the <code>options.disableVideoFecCodecs</code>.
+ * @param {Boolean} callback.success.disableComfortNoiseCodec The configured value of the <code>options.disableComfortNoiseCodec</code>.
+ * @param {JSON} callback.success.filterCandidatesType The configured value of the <code>options.filterCandidatesType</code>.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -17528,6 +17643,13 @@ Skylink.prototype.init = function(options, callback) {
   var videoCodec = self.VIDEO_CODEC.AUTO;
   var forceTURN = false;
   var usePublicSTUN = true;
+  var disableVideoFecCodecs = false;
+  var disableComfortNoiseCodec = false;
+  var filterCandidatesType = {
+    host: false,
+    srflx: false,
+    relay: false
+  };
 
   log.log('Provided init options:', options);
 
@@ -17589,6 +17711,21 @@ Skylink.prototype.init = function(options, callback) {
     // set the use public stun option
     usePublicSTUN = (typeof options.usePublicSTUN === 'boolean') ?
       options.usePublicSTUN : usePublicSTUN;
+    // set the use of disabling ulpfec and red codecs
+    disableVideoFecCodecs = (typeof options.disableVideoFecCodecs === 'boolean') ?
+      options.disableVideoFecCodecs : disableVideoFecCodecs;
+    // set the use of disabling CN codecs
+    disableComfortNoiseCodec = (typeof options.disableComfortNoiseCodec === 'boolean') ?
+      options.disableComfortNoiseCodec : disableComfortNoiseCodec;
+    // set the use of filtering ICE candidates
+    if (typeof options.filterCandidatesType === 'object' && options.filterCandidatesType) {
+      filterCandidatesType.host = (typeof options.filterCandidatesType.host === 'boolean') ?
+        options.filterCandidatesType.host : false;
+      filterCandidatesType.srflx = (typeof options.filterCandidatesType.srflx === 'boolean') ?
+        options.filterCandidatesType.srflx : false;
+      filterCandidatesType.relay = (typeof options.filterCandidatesType.relay === 'boolean') ?
+        options.filterCandidatesType.relay : false;
+    }
 
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
@@ -17623,6 +17760,9 @@ Skylink.prototype.init = function(options, callback) {
     if (forceTURN === true) {
       enableTURNServer = true;
       enableSTUNServer = false;
+      filterCandidatesType.host = true;
+      filterCandidatesType.srflx = true;
+      filterCandidatesType.relay = false;
     }
   }
   // api key path options
@@ -17661,6 +17801,9 @@ Skylink.prototype.init = function(options, callback) {
   self._selectedVideoCodec = videoCodec;
   self._forceTURN = forceTURN;
   self._usePublicSTUN = usePublicSTUN;
+  self._disableVideoFecCodecs = disableVideoFecCodecs;
+  self._disableComfortNoiseCodec = disableComfortNoiseCodec;
+  self._filterCandidatesType = filterCandidatesType;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -17682,7 +17825,10 @@ Skylink.prototype.init = function(options, callback) {
     audioCodec: self._selectedAudioCodec,
     videoCodec: self._selectedVideoCodec,
     forceTURN: self._forceTURN,
-    usePublicSTUN: self._usePublicSTUN
+    usePublicSTUN: self._usePublicSTUN,
+    disableVideoFecCodecs: self._disableVideoFecCodecs,
+    disableComfortNoiseCodec: self._disableComfortNoiseCodec,
+    filterCandidatesType: self._filterCandidatesType
   });
   // trigger the readystate
   self._readyState = 0;
@@ -17718,7 +17864,10 @@ Skylink.prototype.init = function(options, callback) {
             audioCodec: self._selectedAudioCodec,
             videoCodec: self._selectedVideoCodec,
             forceTURN: self._forceTURN,
-            usePublicSTUN: self._usePublicSTUN
+            usePublicSTUN: self._usePublicSTUN,
+            disableVideoFecCodecs: self._disableVideoFecCodecs,
+            disableComfortNoiseCodec: self._disableComfortNoiseCodec,
+            filterCandidatesType: self._filterCandidatesType
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +
@@ -18537,6 +18686,10 @@ Skylink.prototype._EVENTS = {
   handshakeProgress: [],
 
   /**
+   * <blockquote class="info">
+   *   Learn more about how ICE works in this
+   *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+   * </blockquote>
    * Event triggered when a Peer connection ICE gathering state has changed.
    * @event candidateGenerationState
    * @param {String} state The current Peer connection ICE gathering state.
@@ -18548,6 +18701,10 @@ Skylink.prototype._EVENTS = {
   candidateGenerationState: [],
 
   /**
+   * <blockquote class="info">
+   *   Learn more about how ICE works in this
+   *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+   * </blockquote>
    * Event triggered when a Peer connection session description exchanging state has changed.
    * @event peerConnectionState
    * @param {String} state The current Peer connection session description exchanging state.
@@ -18559,6 +18716,10 @@ Skylink.prototype._EVENTS = {
   peerConnectionState: [],
 
   /**
+   * <blockquote class="info">
+   *   Learn more about how ICE works in this
+   *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+   * </blockquote>
    * Event triggered when a Peer connection ICE connection state has changed.
    * @event iceConnectionState
    * @param {String} state The current Peer connection ICE connection state.
@@ -18667,6 +18828,24 @@ Skylink.prototype._EVENTS = {
    *   value is considered as <code>false</code>.</small>
    * @param {Boolean} peerInfo.settings.audio.stereo The flag if stereo band is configured
    *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for receiving audio data.
+   * @param {Boolean} [peerInfo.settings.audio.usedtx] <blockquote class="info">
+   *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+   *   The flag if DTX (Discontinuous Transmission) is configured when encoding audio codec
+   *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   *   <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>
+   *   <small>When not defined, the default browser configuration is used.</small>
+   * @param {Boolean} [peerInfo.settings.audio.useinbandfec] <blockquote class="info">
+   *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+   *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) is
+   *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   *   <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>
+   *   <small>When not defined, the default browser configuration is used.</small>
+   * @param {Number} [peerInfo.settings.audio.maxplaybackrate] <blockquote class="info">
+   *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+   *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
+   *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
+   *   <small>When not defined, the default browser configuration is used.</small>
    * @param {Array} [peerInfo.settings.audio.optional] The Peer Stream <code>navigator.getUserMedia()</code> API
    *   <code>audio: { optional [..] }</code> property.
    * @param {String} [peerInfo.settings.audio.deviceId] The Peer Stream audio track source ID of the device used.
@@ -19054,11 +19233,41 @@ Skylink.prototype._EVENTS = {
    * @param {Number} stats.audio.sending.ssrc The Peer connection sending audio streaming RTP packets SSRC.
    * @param {Number} stats.audio.sending.rtt The Peer connection sending audio streaming RTT (Round-trip delay time).
    *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
+   * @param {Number} stats.audio.sending.jitter The Peer connection sending audio streaming RTP packets jitter.
+   *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
+   * @param {Number} [stats.audio.sending.jitterBufferMs] The Peer connection sending audio streaming
+   *   RTP packets jitter buffer in miliseconds.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {JSON} [stats.audio.sending.codec] The Peer connection sending audio streaming selected codec information.
+   *   <small>Defined as <code>null</code> if local session description is not available before parsing.</small>
+   * @param {String} stats.audio.sending.codec.name The Peer connection sending audio streaming selected codec name.
+   * @param {Number} stats.audio.sending.codec.payloadType The Peer connection sending audio streaming selected codec payload type.
+   * @param {String} [stats.audio.sending.codec.implementation] The Peer connection sending audio streaming selected codec implementation.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.audio.sending.inputLevel] The Peer connection sending audio streaming input level.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.audio.sending.echoReturnLoss] The Peer connection sending audio streaming echo return loss.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.audio.sending.echoReturnLossEnhancement] The Peer connection sending audio streaming echo return loss enhancement.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.audio.receiving The Peer connection receiving audio streaming stats.
    * @param {Number} stats.audio.receiving.bytes The Peer connection sending audio streaming bytes.
    * @param {Number} stats.audio.receiving.packets The Peer connection receiving audio streaming packets.
    * @param {Number} stats.audio.receiving.packetsLost The Peer connection receiving audio streaming packets lost.
    * @param {Number} stats.audio.receiving.ssrc The Peer connection receiving audio streaming RTP packets SSRC.
+   * @param {Number} stats.audio.receiving.jitter The Peer connection receiving audio streaming RTP packets jitter.
+   *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
+   * @param {Number} [stats.audio.receiving.jitterBufferMs] The Peer connection receiving audio streaming
+   *   RTP packets jitter buffer in miliseconds.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {JSON} [stats.audio.receiving.codec] The Peer connection receiving audio streaming selected codec information.
+   *   <small>Defined as <code>null</code> if remote session description is not available before parsing.</small>
+   * @param {String} stats.audio.receiving.codec.name The Peer connection receiving audio streaming selected codec name.
+   * @param {Number} stats.audio.receiving.codec.payloadType The Peer connection receiving audio streaming selected codec payload type.
+   * @param {String} [stats.audio.receiving.codec.implementation] The Peer connection receiving audio streaming selected codec implementation.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.audio.receiving.outputLevel] The Peer connection receiving audio streaming output level.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.video The Peer connection video streaming stats.
    * @param {JSON} stats.video.sending The Peer connection sending video streaming stats.
    * @param {Number} stats.video.sending.bytes The Peer connection sending video streaming bytes.
@@ -19067,11 +19276,65 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} stats.video.sending.ssrc The Peer connection sending video streaming RTP packets SSRC.
    * @param {Number} stats.video.sending.rtt The Peer connection sending video streaming RTT (Round-trip delay time).
    *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
+   * @param {Number} stats.video.sending.jitter The Peer connection sending video streaming RTP packets jitter.
+   *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.jitterBufferMs] The Peer connection sending video streaming
+   *   RTP packets jitter buffer in miliseconds.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {JSON} [stats.video.sending.codec] The Peer connection sending video streaming selected codec information.
+   *   <small>Defined as <code>null</code> if local session description is not available before parsing.</small>
+   * @param {String} stats.video.sending.codec.name The Peer connection sending video streaming selected codec name.
+   * @param {Number} stats.video.sending.codec.payloadType The Peer connection sending video streaming selected codec payload type.
+   * @param {String} [stats.video.sending.codec.implementation] The Peer connection sending video streaming selected codec implementation.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.frames] The Peer connection sending video streaming frames.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.framesInput] The Peer connection sending video streaming frames input.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.framesDropped] The Peer connection sending video streaming frames dropped.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.frameRateMean] The Peer connection sending video streaming fps mean.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.frameRateStdDev] The Peer connection sending video streaming fps standard deviation.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.nacks] The Peer connection sending video streaming nacks.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.plis] The Peer connection sending video streaming plis.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.firs] The Peer connection sending video streaming firs.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.video.receiving The Peer connection receiving video streaming stats.
    * @param {Number} stats.video.receiving.bytes The Peer connection receiving video streaming bytes.
    * @param {Number} stats.video.receiving.packets The Peer connection receiving video streaming packets.
    * @param {Number} stats.video.receiving.packetsLost The Peer connection receiving video streaming packets lost.
    * @param {Number} stats.video.receiving.ssrc The Peer connection receiving video streaming RTP packets SSRC.
+   * @param {Number} stats.video.receiving.jitter The Peer connection receiving video streaming RTP packets jitter.
+   *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.jitterBufferMs] The Peer connection receiving video streaming
+   *   RTP packets jitter buffer in miliseconds.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {JSON} [stats.video.receiving.codec] The Peer connection receiving video streaming selected codec information.
+   *   <small>Defined as <code>null</code> if remote session description is not available before parsing.</small>
+   * @param {String} stats.video.receiving.codec.name The Peer connection receiving video streaming selected codec name.
+   * @param {Number} stats.video.receiving.codec.payloadType The Peer connection receiving video streaming selected codec payload type.
+   * @param {String} [stats.video.receiving.codec.implementation] The Peer connection receiving video streaming selected codec implementation.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.frames] The Peer connection receiving video streaming frames.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.framesOutput] The Peer connection receiving video streaming frames output.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.framesDecoded] The Peer connection receiving video streaming frames decoded.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.frameRateMean] The Peer connection receiving video streaming fps mean.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.frameRateStdDev] The Peer connection receiving video streaming fps standard deviation.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.nacks] The Peer connection receiving video streaming nacks.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.plis] The Peer connection receiving video streaming plis.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.firs] The Peer connection receiving video streaming firs.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.selectedCandidate The Peer connection selected ICE candidate pair stats.
    * @param {JSON} stats.selectedCandidate.local The Peer connection selected local ICE candidate.
    * @param {String} stats.selectedCandidate.local.ipAddress The Peer connection selected
@@ -19116,6 +19379,15 @@ Skylink.prototype._EVENTS = {
    *   <code>"srflx"</code> ICE candidates received.
    * @param {Array} stats.connection.candidates.receiving.relay The Peer connection list of remote
    *   <code>"relay"</code> ICE candidates received.
+   * @param {JSON} stats.connection.dataChannels The Peer connection list of Datachannel connections.
+   * @param {JSON} stats.connection.dataChannels.#channelName The Peer connection Datachannel connection stats.
+   * @param {String} stats.connection.dataChannels.#channelName.label The Peer connection Datachannel connection ID.
+   * @param {String} stats.connection.dataChannels.#channelName.readyState The Peer connection Datachannel connection readyState.
+   *   [Rel: Skylink.DATA_CHANNEL_STATE]
+   * @param {String} stats.connection.dataChannels.#channelName.type The Peer connection Datachannel connection type.
+   *   [Rel: Skylink.DATA_CHANNEL_TYPE]
+   * @param {String} stats.connection.dataChannels.#channelName.currentTransferId The Peer connection
+   *   Datachannel connection current progressing transfer session ID.
    * @param {Error} error The error object received.
    *   <small>Defined only when <code>state</code> payload is <code>RETRIEVE_ERROR</code>.</small>
    * @for Skylink
@@ -19138,7 +19410,30 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.15
    */
-  localMediaMuted: []
+  localMediaMuted: [],
+
+  /**
+   * <blockquote class="info">
+   *   Learn more about how ICE works in this
+   *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.<br>
+   *   Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates
+   *   may be received in the session description instead.
+   * </blockquote>
+   * Event triggered when remote ICE candidate processing state has changed for trickle ICE connections.
+   * @event candidateProcessingState
+   * @param {String} state The ICE candidate processing state.
+   *   [Rel: Skylink.CANDIDATE_PROCESSING_STATE]
+   * @param {String} peerId The Peer ID.
+   * @param {String} candidateId The remote ICE candidate session ID.
+   *   <small>Note that this value is not related to WebRTC API but for identification of remote ICE candidate received.</small>
+   * @param {String} candidateType The remote ICE candidate type.
+   * @param {String} candidateSdp The remote ICE candidate connection string.
+   * @param {Error} [error] The error object.
+   *   <small>Defined only when <code>state</code> is <code>DROPPED</code> or <code>PROCESS_ERROR</code>.</small>
+   * @for Skylink
+   * @since 0.6.16
+   */
+  candidateProcessingState: []
 };
 
 /**
@@ -21034,20 +21329,8 @@ Skylink.prototype._offerHandler = function(message) {
   log.log([targetMid, 'RTCSessionDescription', message.type,
     'Session description object created'], offer);
 
-  // Configure it to force TURN connections by removing non-"relay" candidates
-  if (self._forceTURN && !(self._enableIceTrickle && self._peerInformations[targetMid] &&
-      self._peerInformations[targetMid].config.enableIceTrickle)) {
-    if (!self._hasMCU) {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from offer ' +
-        ' as TURN connections is forced']);
-
-      offer.sdp = offer.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
-
-    } else {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Not removing non-"relay"' +
-        '" candidates although TURN connections is forced as MCU is present']);
-    }
-  }
+  offer.sdp = self._handleSDPMCUConnectionCase(targetMid, offer, false);
+  offer.sdp = self._removeSDPFilteredCandidates(targetMid, offer);
 
   // This is always the initial state. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
@@ -21097,71 +21380,55 @@ Skylink.prototype._offerHandler = function(message) {
  */
 Skylink.prototype._candidateHandler = function(message) {
   var targetMid = message.mid;
-  var pc = this._peerConnections[targetMid];
-  log.log([targetMid, null, message.type, 'Received candidate from peer. Candidate config:'], {
-    sdp: message.sdp,
-    target: message.target,
-    candidate: message.candidate,
-    label: message.label
-  });
-  // create ice candidate object
-  var messageCan = message.candidate.split(' ');
-  var canType = messageCan[7];
-  log.log([targetMid, null, message.type, 'Candidate type:'], canType);
-  // if (canType !== 'relay' && canType !== 'srflx') {
-  // trace('Skipping non relay and non srflx candidates.');
-  var index = message.label;
-  var candidate = new window.RTCIceCandidate({
-    sdpMLineIndex: index,
-    candidate: message.candidate,
-    //id: message.id,
-    sdpMid: message.id
-    //label: index
-  });
 
-  if (this._forceTURN && canType !== 'relay') {
-    if (!this._hasMCU) {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring adding of "' + canType +
-        '" candidate as TURN connections is forced'], candidate);
-      return;
-    }
-
-    log.warn([targetMid, 'RTCICECandidate', null, 'Not ignoring adding of "' + canType +
-      '" candidate although TURN connections is forced as MCU is present'], candidate);
+  if (!message.candidate && !message.id) {
+    log.warn([targetMid, 'RTCIceCandidate', null, 'Received invalid ICE candidate message ->'], message);
+    return;
   }
 
-  if (pc) {
-  	if (pc.signalingState === this.PEER_CONNECTION_STATE.CLOSED) {
-  		log.warn([targetMid, null, message.type, 'Peer connection state ' +
-  			'is closed. Not adding candidate'], candidate);
-	    return;
-  	}
-    /*if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
-      log.debug([targetMid, null, null,
-        'Received but not adding Candidate as we are already connected to this peer']);
+  var canId = 'can-' + (new Date()).getTime();
+  var candidateType = message.candidate.split(' ')[7] || '';
+  var candidate = new RTCIceCandidate({
+    sdpMLineIndex: message.label,
+    candidate: message.candidate,
+    sdpMid: message.id
+  });
+
+  log.debug([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Received ICE candidate ->'], candidate);
+
+  this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.RECEIVED,
+    targetMid, canId, candidateType, candidate.candidate, null);
+
+  if (!(this._peerConnections[targetMid] &&
+    this._peerConnections[targetMid].signalingState !== this.PEER_CONNECTION_STATE.CLOSED)) {
+    log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping ICE candidate ' +
+      'as Peer connection does not exists or is closed'], this._peerConnections[targetMid].signalingState);
+    this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.DROPPED,
+      targetMid, canId, candidateType, candidate.candidate,
+      new Error('Failed processing ICE candidate as Peer connection does not exists or is closed.'));
+    return;
+  }
+
+  if (this._filterCandidatesType[candidateType]) {
+    if (!(this._hasMCU && this._forceTURN)) {
+      log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping received ICE candidate as ' +
+        'it matches ICE candidate filtering flag ->'], candidate);
+      this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.DROPPED,
+        targetMid, canId, candidateType, candidate.candidate,
+        new Error('Dropping of processing ICE candidate as it matches ICE candidate filtering flag.'));
       return;
-    }*/
-    // set queue before ice candidate cannot be added before setRemoteDescription.
-    // this will cause a black screen of media stream
-    if ((pc.setOffer === 'local' && pc.setAnswer === 'remote') ||
-      (pc.setAnswer === 'local' && pc.setOffer === 'remote')) {
-      pc.addIceCandidate(candidate, this._onAddIceCandidateSuccess, this._onAddIceCandidateFailure);
-      // NOTE ALEX: not implemented in chrome yet, need to wait
-      // function () { trace('ICE  -  addIceCandidate Succesfull. '); },
-      // function (error) { trace('ICE  - AddIceCandidate Failed: ' + error); }
-      //);
-      log.debug([targetMid, 'RTCIceCandidate', message.type,
-        'Added candidate'], candidate);
-    } else {
-      this._addIceCandidateToQueue(targetMid, candidate);
     }
+
+    log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Not dropping received ICE candidate as ' +
+      'TURN connections are enforced as MCU is present (and act as a TURN itself) so filtering of ICE candidate ' +
+      'flags are not honoured ->'], candidate);
+  }
+
+  if (this._peerConnections[targetMid].remoteDescription && this._peerConnections[targetMid].remoteDescription.sdp &&
+    this._peerConnections[targetMid].localDescription && this._peerConnections[targetMid].localDescription.sdp) {
+    this._addIceCandidate(targetMid, canId, candidate);
   } else {
-    // Added ice candidate to queue because it may be received before sending the offer
-    log.debug([targetMid, 'RTCIceCandidate', message.type,
-      'Not adding candidate as peer connection not present'], candidate);
-    // NOTE ALEX: if the offer was slow, this can happen
-    // we might keep a buffer of candidates to replay after receiving an offer.
-    this._addIceCandidateToQueue(targetMid, candidate);
+    this._addIceCandidateToQueue(targetMid, canId, candidate);
   }
 
   if (!this._gatheredCandidates[targetMid]) {
@@ -21171,7 +21438,7 @@ Skylink.prototype._candidateHandler = function(message) {
     };
   }
 
-  this._gatheredCandidates[targetMid].receiving[canType].push({
+  this._gatheredCandidates[targetMid].receiving[candidateType].push({
     sdpMid: candidate.sdpMid,
     sdpMLineIndex: candidate.sdpMLineIndex,
     candidate: candidate.candidate
@@ -21229,26 +21496,8 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }*/
 
-  // if firefox and peer is mcu, replace the sdp to suit mcu needs
-  if (window.webrtcDetectedType === 'moz' && targetMid === 'MCU') {
-    answer.sdp = answer.sdp.replace(/ generation 0/g, '');
-    answer.sdp = answer.sdp.replace(/ udp /g, ' UDP ');
-  }
-
-  // Configure it to force TURN connections by removing non-"relay" candidates
-  if (self._forceTURN && !(self._enableIceTrickle && self._peerInformations[targetMid] &&
-      self._peerInformations[targetMid].config.enableIceTrickle)) {
-    if (!self._hasMCU) {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from answer ' +
-        ' as TURN connections is forced']);
-
-      answer.sdp = answer.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
-
-    } else {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Not removing non-"relay"' +
-        '" candidates although TURN connections is forced as MCU is present']);
-    }
-  }
+  answer.sdp = self._handleSDPMCUConnectionCase(targetMid, answer, false);
+  answer.sdp = self._removeSDPFilteredCandidates(targetMid, answer);
 
   // This should be the state after offer is received. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
@@ -21313,6 +21562,8 @@ Skylink.prototype.VIDEO_CODEC = {
  *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/Opus_(audio_format)">OPUS</a> audio codec.
  * @param {String} ISAC <small>Value <code>"ISAC"</code></small>
  *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/Internet_Speech_Audio_Codec">ISAC</a> audio codec.
+ * @param {String} G722 <small>Value <code>"G722"</code></small>
+ *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/G.722">G722</a> audio codec.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -21324,7 +21575,7 @@ Skylink.prototype.AUDIO_CODEC = {
   OPUS: 'opus',
   //ILBC: 'ILBC',
   //G711: 'G711',
-  //G722: 'G722',
+  G722: 'G722'
   //SILK: 'SILK'
 };
 
@@ -21538,7 +21789,10 @@ Skylink.prototype._streamsMutedSettings = {
  * @for Skylink
  * @since 0.6.15
  */
-Skylink.prototype._streamsBandwidthSettings = {};
+Skylink.prototype._streamsBandwidthSettings = {
+  googleX: {},
+  bAS: {}
+};
 
 /**
  * Stores all the Stream stopped callbacks.
@@ -21549,17 +21803,6 @@ Skylink.prototype._streamsBandwidthSettings = {};
  * @since 0.6.15
  */
 Skylink.prototype._streamsStoppedCbs = {};
-
-/**
- * Stores all the Stream mismatch checks.
- * @attribute _streamsMistmatch
- * @param {String} #peerId The Peer's Stream mismatch concatenated by "current::actual".
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._streamsMistmatch = {};
 
 /**
  * Function that retrieves camera Stream.
@@ -21580,6 +21823,24 @@ Skylink.prototype._streamsMistmatch = {};
  * @param {Boolean|JSON} [options.audio=false] The audio configuration options.
  * @param {Boolean} [options.audio.stereo=false] The flag if stereo band should be configured
  *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ * @param {Boolean} [options.audio.usedtx] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec
+ *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Boolean} [options.audio.useinbandfec] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be
+ *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [options.audio.maxplaybackrate] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
+ *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
  *   <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.audioMuted</code>,
  *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.audioMuted</code> value to
@@ -22352,7 +22613,27 @@ Skylink.prototype.disableVideo = function() {
  * </blockquote>
  * Function that retrieves screensharing Stream.
  * @method shareScreen
- * @param {JSON} [enableAudio=false] The flag if audio tracks should be retrieved.
+ * @param {JSON|Boolean} [enableAudio=false] The flag if audio tracks should be retrieved.
+ * @param {Boolean} [enableAudio.stereo=false] The flag if stereo band should be configured
+ *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ * @param {Boolean} [enableAudio.usedtx] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec
+ *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Boolean} [enableAudio.useinbandfec] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be
+ *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [enableAudio.maxplaybackrate] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
+ *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_mediaAccessSuccess">
@@ -22433,14 +22714,20 @@ Skylink.prototype.disableVideo = function() {
  */
 Skylink.prototype.shareScreen = function (enableAudio, callback) {
   var self = this;
+  var enableAudioSettings = {
+    useinbandfec: null,
+    usedtx: null,
+    stereo: true
+  };
 
   if (typeof enableAudio === 'function') {
     callback = enableAudio;
     enableAudio = true;
-  }
 
-  if (typeof enableAudio !== 'boolean') {
-    enableAudio = true;
+  } else if (enableAudio && typeof enableAudio === 'object') {
+    enableAudioSettings.usedtx = typeof enableAudio.usedtx === 'boolean' ? enableAudio.usedtx : null;
+    enableAudioSettings.useinbandfec = typeof enableAudio.useinbandfec === 'boolean' ? enableAudio.useinbandfec : null;
+    enableAudioSettings.stereo = enableAudio.stereo === true;
   }
 
   self._throttle(function (runFn) {
@@ -22456,9 +22743,10 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 
     var settings = {
       settings: {
-        audio: enableAudio,
+        audio: enableAudio === true || (enableAudio && typeof enableAudio === 'object') ? enableAudioSettings : false,
         video: {
-          screenshare: true
+          screenshare: true,
+          exactConstraints: false
         }
       },
       getUserMediaSettings: {
@@ -22752,12 +23040,30 @@ Skylink.prototype._parseStreamSettings = function(options) {
   if (options.audio) {
     settings.settings.audio = {
       stereo: false,
+      useinbandfec: null,
+      usedtx: null,
+      maxplaybackrate: null,
+      deviceId: null,
+      optional: null,
       exactConstraints: !!options.useExactConstraints
     };
     settings.getUserMediaSettings.audio = {};
 
     if (typeof options.audio.stereo === 'boolean') {
       settings.settings.audio.stereo = options.audio.stereo;
+    }
+
+    if (typeof options.audio.useinbandfec === 'boolean') {
+      settings.settings.audio.useinbandfec = options.audio.useinbandfec;
+    }
+
+    if (typeof options.audio.usedtx === 'boolean') {
+      settings.settings.audio.usedtx = options.audio.usedtx;
+    }
+
+    if (typeof options.audio.maxplaybackrate === 'number' &&
+      options.audio.maxplaybackrate >= 8000 && options.audio.maxplaybackrate <= 48000) {
+      settings.settings.audio.maxplaybackrate = options.audio.maxplaybackrate;
     }
 
     if (typeof options.audio.mute === 'boolean') {
@@ -22797,6 +23103,9 @@ Skylink.prototype._parseStreamSettings = function(options) {
     settings.settings.video = {
       resolution: clone(this.VIDEO_RESOLUTION.VGA),
       screenshare: false,
+      deviceId: null,
+      optional: null,
+      frameRate: null,
       exactConstraints: !!options.useExactConstraints
     };
     settings.getUserMediaSettings.video = {};
@@ -23164,436 +23473,595 @@ Skylink.prototype._selectedAudioCodec = 'auto';
 Skylink.prototype._selectedVideoCodec = 'auto';
 
 /**
- * Function that modifies the SessionDescription string to enable OPUS stereo.
- * @method _addSDPStereo
+ * Stores the flag if ulpfec and red codecs should be removed.
+ * @attribute _disableVideoFecCodecs
+ * @type Boolean
+ * @default false
  * @private
  * @for Skylink
- * @since 0.5.10
+ * @since 0.6.16
  */
-Skylink.prototype._addSDPStereo = function(sdpLines) {
-  var opusRtmpLineIndex = 0;
-  var opusLineFound = false;
-  var opusPayload = 0;
-  var fmtpLineFound = false;
-
-  var i, j;
-  var line;
-
-  for (i = 0; i < sdpLines.length; i += 1) {
-    line = sdpLines[i];
-
-    if (line.indexOf('a=rtpmap:') === 0) {
-      var parts = line.split(' ');
-
-      if (parts[1].indexOf('opus/48000/') === 0) {
-        opusLineFound = true;
-        opusPayload = parts[0].split(':')[1];
-        opusRtmpLineIndex = i;
-        break;
-      }
-    }
-  }
-
-  // if found
-  if (opusLineFound) {
-    log.debug([null, 'SDP', null, 'OPUS line is found. Enabling stereo']);
-
-    // loop for fmtp payload
-    for (j = 0; j < sdpLines.length; j += 1) {
-      line = sdpLines[j];
-
-      if (line.indexOf('a=fmtp:' + opusPayload) === 0) {
-        fmtpLineFound = true;
-        sdpLines[j] += '; stereo=1';
-        break;
-      }
-    }
-
-    // if line doesn't exists for an instance firefox
-    if (!fmtpLineFound) {
-      sdpLines.splice(opusRtmpLineIndex, 0, 'a=fmtp:' + opusPayload + ' stereo=1');
-    }
-  }
-
-  return sdpLines;
-};
+Skylink.prototype._disableVideoFecCodecs = false;
 
 /**
- * Function that modifies the SessionDescription string to set the video resolution.
- * This is not even supported in the specs, and we should re-evalute it to be removed.
- * @method _setSDPVideoResolution
+ * Stores the flag if CN (Comfort Noise) codec should be removed.
+ * @attribute _disableComfortNoiseCodec
+ * @type Boolean
+ * @default false
  * @private
  * @for Skylink
- * @since 0.5.10
+ * @since 0.6.16
  */
-Skylink.prototype._setSDPVideoResolution = function(sdpLines){
-  var video = this._streams.userMedia && this._streams.userMedia.settings.video;
-  var frameRate = video.frameRate || 50;
-  var resolution = {
-    width: 320,
-    height: 50
-  }; //video.resolution || {};
+Skylink.prototype._disableComfortNoiseCodec = false;
 
-  var videoLineFound = false;
-  var videoLineIndex = 0;
-  var fmtpPayloads = [];
+/**
+ * Function that modifies the session description to configure settings for OPUS audio codec.
+ * @method _setSDPOpusConfig
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._setSDPOpusConfig = function(targetMid, sessionDescription) {
+  var sdpLines = sessionDescription.sdp.split('\r\n');
+  var payload = null;
+  var appendFmtpLineAtIndex = -1;
+  var userAudioSettings = this.getPeerInfo().settings.audio;
+  var opusSettings = {
+    useinbandfec: null,
+    usedtx: null,
+    maxplaybackrate: null,
+    stereo: false
+  };
 
-  var i, j, k;
-  var line;
+  if (userAudioSettings && typeof userAudioSettings === 'object') {
+    opusSettings.stereo = userAudioSettings.stereo === true;
+    opusSettings.useinbandfec = typeof userAudioSettings.useinbandfec === 'boolean' ? userAudioSettings.useinbandfec : null;
+    opusSettings.usedtx = typeof userAudioSettings.usedtx === 'boolean' ? userAudioSettings.usedtx : null;
+    opusSettings.maxplaybackrate = typeof userAudioSettings.maxplaybackrate === 'number' ? userAudioSettings.maxplaybackrate : null;
+  }
 
-  var sdpLineData = 'max-fr=' + frameRate +
-    '; max-recv-width=320' + //(resolution.width ? resolution.width : 640) +
-    '; max-recv-height=160'; //+ (resolution.height ? resolution.height : 480);
 
-  for (i = 0; i < sdpLines.length; i += 1) {
-    line = sdpLines[i];
-
-    if (line.indexOf('a=video') === 0 || line.indexOf('m=video') === 0) {
-      videoLineFound = true;
-      videoLineIndex = i;
-      fmtpPayloads = line.split(' ');
-      fmtpPayloads.splice(0, 3);
+  // Find OPUS RTPMAP line
+  for (var i = 0; i < sdpLines.length; i++) {
+    if (sdpLines[i].indexOf('a=rtpmap:') === 0 && (sdpLines[i].toLowerCase()).indexOf('opus/48000') > 0) {
+      payload = (sdpLines[i].split(' ')[0] || '').split(':')[1] || null;
+      appendFmtpLineAtIndex = i;
       break;
     }
   }
 
-  if (videoLineFound) {
-    // loop for every video codec
-    // ignore if not vp8 or h264
-    for (j = 0; j < fmtpPayloads.length; j += 1) {
-      var payload = fmtpPayloads[j];
-      var rtpmapLineIndex = 0;
-      var fmtpLineIndex = 0;
-      var fmtpLineFound = false;
-      var ignore = false;
+  if (!payload) {
+    log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Failed to find OPUS payload. Not configuring options.']);
+    return sessionDescription.sdp;
+  }
 
-      for (k = 0; k < sdpLines.length; k += 1) {
-       line = sdpLines[k];
+  // Set OPUS FMTP line
+  for (var j = 0; j < sdpLines.length; j++) {
+    if (sdpLines[j].indexOf('a=fmtp:' + payload) === 0) {
+      var opusConfigs = (sdpLines[j].split('a=fmtp:' + payload)[1] || '').replace(/\s/g, '').split(';');
+      var updatedOpusParams = '';
 
-        if (line.indexOf('a=rtpmap:' + payload) === 0) {
-          // for non h264 or vp8 codec, ignore. these are experimental codecs
-          // that may not exists afterwards
-          if (!(line.indexOf('VP8') > 0 || line.indexOf('H264') > 0)) {
-            ignore = true;
-            break;
+      for (var k = 0; k < opusConfigs.length; k++) {
+        if (!(opusConfigs[k] && opusConfigs[k].indexOf('=') > 0)) {
+          continue;
+        }
+
+        var params = opusConfigs[k].split('=');
+
+        if (['useinbandfec', 'usedtx', 'sprop-stereo', 'stereo', 'maxplaybackrate'].indexOf(params[0]) > -1) {
+          // Get default OPUS useinbandfec
+          if (params[0] === 'useinbandfec' && params[1] === '1' && opusSettings.useinbandfec === null) {
+            log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Received OPUS useinbandfec as true by default.']);
+            opusSettings.useinbandfec = true;
+
+          // Get default OPUS usedtx
+          } else if (params[0] === 'usedtx' && params[1] === '1' && opusSettings.usedtx === null) {
+            log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Received OPUS usedtx as true by default.']);
+            opusSettings.usedtx = true;
+
+          // Get default OPUS maxplaybackrate
+          } else if (params[0] === 'maxplaybackrate' && parseInt(params[1] || '0', 10) > 0 && opusSettings.maxplaybackrate === null) {
+            log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Received OPUS maxplaybackrate as ' + params[1] + ' by default.']);
+            opusSettings.maxplaybackrate = params[1];
           }
-          rtpmapLineIndex = k;
-        }
-
-        if (line.indexOf('a=fmtp:' + payload) === 0) {
-          fmtpLineFound = true;
-          fmtpLineIndex = k;
+        } else {
+          updatedOpusParams += opusConfigs[k] + ';';
         }
       }
 
-      if (ignore) {
-        continue;
+      if (opusSettings.stereo === true) {
+        updatedOpusParams += 'stereo=1;';
       }
 
-      if (fmtpLineFound) {
-        sdpLines[fmtpLineIndex] += ';' + sdpLineData;
-
-      } else {
-        sdpLines.splice(rtpmapLineIndex + 1, 0, 'a=fmtp:' + payload + ' ' + sdpLineData);
+      if (opusSettings.useinbandfec === true) {
+        updatedOpusParams += 'useinbandfec=1;';
       }
+
+      if (opusSettings.usedtx === true) {
+        updatedOpusParams += 'usedtx=1;';
+      }
+
+      if (opusSettings.maxplaybackrate) {
+        updatedOpusParams += 'maxplaybackrate=' + opusSettings.maxplaybackrate + ';';
+      }
+
+      log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Updated OPUS parameters ->'], updatedOpusParams);
+
+      sdpLines[j] = 'a=fmtp:' + payload + ' ' + updatedOpusParams;
+      appendFmtpLineAtIndex = -1;
+      break;
+    }
+  }
+
+  if (appendFmtpLineAtIndex > 0) {
+    var newFmtpLine = 'a=fmtp:' + payload + ' ';
+
+    if (opusSettings.stereo === true) {
+      newFmtpLine += 'stereo=1;';
     }
 
-    log.debug([null, 'SDP', null, 'Setting video resolution (broken)']);
+    if (opusSettings.useinbandfec === true) {
+      newFmtpLine += 'useinbandfec=1;';
+    }
+
+    if (opusSettings.usedtx === true) {
+      newFmtpLine += 'usedtx=1;';
+    }
+
+    if (opusSettings.maxplaybackrate) {
+      newFmtpLine += 'maxplaybackrate=' + opusSettings.maxplaybackrate + ';';
+    }
+
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Created OPUS parameters ->'], newFmtpLine);
+
+    sdpLines.splice(appendFmtpLineAtIndex + 1, 0, newFmtpLine);
   }
-  return sdpLines;
+
+  return sdpLines.join('\r\n');
 };
 
 /**
- * Function that modifies the SessionDescription string to set the sending bandwidth.
+ * Function that modifies the session description to limit the maximum sending bandwidth.
  * Setting this may not necessarily work in Firefox.
  * @method _setSDPBitrate
  * @private
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
-  // Find if user has audioStream
-  var bandwidth = this._streamsBandwidthSettings;
+Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
+  var sdpLines = sessionDescription.sdp.split('\r\n');
+  var parseFn = function (type, bw) {
+    if (!(typeof bw === 'number' && bw > 0)) {
+      log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Not limiting "' + type + '" bandwidth']);
+      return;
+    }
 
-  // Prevent setting of bandwidth audio if not configured
-  if (typeof bandwidth.audio === 'number' && bandwidth.audio > 0) {
-    var hasSetAudio = false;
+    var mLineType = type;
+    var mLineIndex = -1;
 
-    for (var i = 0; i < sdpLines.length; i += 1) {
-      // set the audio bandwidth
-      if (sdpLines[i].indexOf('m=audio') === 0) {
-      //if (sdpLines[i].indexOf('a=audio') === 0 || sdpLines[i].indexOf('m=audio') === 0) {
-        sdpLines.splice(i + 1, 0, window.webrtcDetectedBrowser === 'firefox' ?
-          'b=TIAS:' + (bandwidth.audio * 1024) : 'b=AS:' + bandwidth.audio);
+    if (type === 'data') {
+      mLineType = 'application';
+    }
 
-        log.info([null, 'SDP', null, 'Setting maximum sending audio bandwidth bitrate @(index:' + i + ') -> '], bandwidth.audio);
-        hasSetAudio = true;
-        break;
+    for (var i = 0; i < sdpLines.length; i++) {
+      if (sdpLines[i].indexOf('m=' + mLineType) === 0) {
+        mLineIndex = i;
+      } else if (mLineIndex > 0) {
+        if (sdpLines[i].indexOf('m=') === 0) {
+          log.error([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Failed setting "' +
+            type + '" bandwidth as c-line is missing.']);
+          return;
+        }
+
+        // Follow RFC 4566, that the b-line should follow after c-line.
+        if (sdpLines[i].indexOf('c=') === 0) {
+          log.info([targetMid, 'RTCSessionDesription', sessionDescription.type,
+            'Limiting maximum sending "' + type + '" bandwidth ->'], bw);
+          sdpLines.splice(i + 1, 0, window.webrtcDetectedBrowser === 'firefox' ?
+            'b=TIAS:' + (bw * 1024) : 'b=AS:' + bw);
+          return;
+        }
       }
     }
+  };
 
-    if (!hasSetAudio) {
-      log.warn([null, 'SDP', null, 'Not setting maximum sending audio bandwidth bitrate as m=audio line is not found']);
-    }
-  } else {
-    log.warn([null, 'SDP', null, 'Not setting maximum sending audio bandwidth bitrate and leaving to browser\'s defaults']);
-  }
+  parseFn('audio', this._streamsBandwidthSettings.bAS.audio);
+  parseFn('video', this._streamsBandwidthSettings.bAS.video);
+  parseFn('data', this._streamsBandwidthSettings.bAS.data);
 
-  // Prevent setting of bandwidth video if not configured
-  if (typeof bandwidth.video === 'number' && bandwidth.video > 0) {
-    var hasSetVideo = false;
+  // Sets the experimental google bandwidth
+  if ((typeof this._streamsBandwidthSettings.googleX.min === 'number' && this._streamsBandwidthSettings.googleX.min > 0) ||
+    (typeof this._streamsBandwidthSettings.googleX.max === 'number' && this._streamsBandwidthSettings.googleX.max === 'number')) {
+    var codec = null;
+    var codecFmtpLineFound = false;
+    var mVideoLineIndex = -1;
 
-    for (var j = 0; j < sdpLines.length; j += 1) {
-      // set the video bandwidth
+    for (var j = 0; j < sdpLines.length; j++) {
       if (sdpLines[j].indexOf('m=video') === 0) {
-      //if (sdpLines[j].indexOf('a=video') === 0 || sdpLines[j].indexOf('m=video') === 0) {
-        sdpLines.splice(j + 1, 0, window.webrtcDetectedBrowser === 'firefox' ?
-          'b=TIAS:' + (bandwidth.video * 1024) : 'b=AS:' + bandwidth.video);
+        codec = sdpLines[j].split(' ')[3];
+        mVideoLineIndex = j;
 
-        log.info([null, 'SDP', null, 'Setting maximum sending video bandwidth bitrate @(index:' + j + ') -> '], bandwidth.video);
-        hasSetVideo = true;
-        break;
+      } else if (codec) {
+        if (sdpLines[j].indexOf('m=') === 0) {
+          break;
+        }
+        if (sdpLines[j].indexOf('a=fmtp:' + codec) === 0 && sdpLines[j].indexOf('x-google-') > 0) {
+          sdpLines.splice(j, 1);
+          j--;
+          continue;
+        }
       }
     }
 
-    if (!hasSetVideo) {
-      log.warn([null, 'SDP', null, 'Not setting maximum sending video bandwidth bitrate as m=video line is not found']);
-    }
-  } else {
-    log.warn([null, 'SDP', null, 'Not setting maximum sending video bandwidth bitrate and leaving to browser\'s defaults']);
-  }
+    if (codec && mVideoLineIndex > 0) {
+      var xGoogleParams = '';
 
-  // Prevent setting of bandwidth data if not configured
-  if (typeof bandwidth.data === 'number' && bandwidth.data > 0) {
-    var hasSetData = false;
-
-    for (var k = 0; k < sdpLines.length; k += 1) {
-      // set the data bandwidth
-      if (sdpLines[k].indexOf('m=application') === 0) {
-      //if (sdpLines[k].indexOf('a=application') === 0 || sdpLines[k].indexOf('m=application') === 0) {
-        sdpLines.splice(k + 1, 0, window.webrtcDetectedBrowser === 'firefox' ?
-          'b=TIAS:' + (bandwidth.data * 1024) : 'b=AS:' + bandwidth.data);
-
-        log.info([null, 'SDP', null, 'Setting maximum sending data bandwidth bitrate @(index:' + k + ') -> '], bandwidth.data);
-        hasSetData = true;
-        break;
+      if (typeof this._streamsBandwidthSettings.googleX.min === 'number') {
+        xGoogleParams += 'x-google-min-bitrate=' + this._streamsBandwidthSettings.googleX.min + ';';
       }
-    }
 
-    if (!hasSetData) {
-      log.warn([null, 'SDP', null, 'Not setting maximum sending data bandwidth bitrate as m=application line is not found']);
+      if (typeof this._streamsBandwidthSettings.googleX.max === 'number') {
+        xGoogleParams += 'x-google-max-bitrate=' + this._streamsBandwidthSettings.googleX.max + ';';
+      }
+
+      sdpLines.splice(mVideoLineIndex + (sdpLines[mVideoLineIndex + 1] &&
+        sdpLines[mVideoLineIndex + 1].indexOf('b=AS:') === 0 ? 2 : 1), 0, 'a=fmtp:' + codec + ' ' + xGoogleParams);
     }
-  } else {
-    log.warn([null, 'SDP', null, 'Not setting maximum sending data bandwidth bitrate and leaving to browser\'s defaults']);
   }
 
-  return sdpLines;
+  return sdpLines.join('\r\n');
 };
 
 /**
- * Function that modifies the SessionDescription string to set the preferred sending video codec.
- * @method _setSDPVideoCodec
+ * Function that modifies the session description to set the preferred audio/video codec.
+ * @method _setSDPCodec
  * @private
  * @for Skylink
- * @since 0.5.2
+ * @since 0.6.16
  */
-Skylink.prototype._setSDPVideoCodec = function(sdpLines) {
-  log.log('Setting video codec', this._selectedVideoCodec);
-  var codecFound = false;
-  var payload = 0;
-
-  var i, j;
-  var line;
-
-  for (i = 0; i < sdpLines.length; i += 1) {
-    line = sdpLines[i];
-
-    if (line.indexOf('a=rtpmap:') === 0) {
-      if (line.indexOf(this._selectedVideoCodec) > 0) {
-        codecFound = true;
-        payload = line.split(':')[1].split(' ')[0];
-        break;
-      }
+Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
+  var sdpLines = sessionDescription.sdp.split('\r\n');
+  var parseFn = function (type, codec) {
+    if (codec === 'auto') {
+      log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+        'Not preferring any codec for "' + type + '" streaming. Using browser selection.']);
+      return;
     }
-  }
 
-  if (codecFound) {
-    for (j = 0; j < sdpLines.length; j += 1) {
-      line = sdpLines[j];
+    // Find the codec first
+    for (var i = 0; i < sdpLines.length; i++) {
+      if (sdpLines[i].indexOf('a=rtpmap:') === 0 && (sdpLines[i].toLowerCase()).indexOf(codec.toLowerCase()) > 0) {
+        var payload = sdpLines[i].split(':')[1].split(' ')[0] || null;
 
-      if (line.indexOf('m=video') === 0 || line.indexOf('a=video') === 0) {
-        var parts = line.split(' ');
-        var payloads = line.split(' ');
-        payloads.splice(0, 3);
-
-        var selectedPayloadIndex = payloads.indexOf(payload);
-
-        if (selectedPayloadIndex === -1) {
-          payloads.splice(0, 0, payload);
-        } else {
-          var first = payloads[0];
-          payloads[0] = payload;
-          payloads[selectedPayloadIndex] = first;
+        if (!payload) {
+          log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Not preferring "' +
+            codec + '" for "' + type + '" streaming as payload is not found.']);
+          return;
         }
-        sdpLines[j] = parts[0] + ' ' + parts[1] + ' ' + parts[2] + ' ' + payloads.join(' ');
-        break;
+
+        for (var j = 0; j < sdpLines.length; j++) {
+          if (sdpLines[j].indexOf('m=' + type) === 0) {
+            log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Preferring "' +
+              codec + '" for "' + type + '" streaming.']);
+
+            var parts = sdpLines[j].split(' ');
+
+            if (parts.indexOf(payload) >= 3) {
+              parts.splice(parts.indexOf(payload), 1);
+            }
+
+            // Example: m=audio 9 UDP/TLS/RTP/SAVPF 111
+            parts.splice(3, 0, payload);
+            sdpLines[j] = parts.join(' ');
+            break;
+          }
+        }
       }
     }
-  }
-  return sdpLines;
+  };
+
+  parseFn('audio', this._selectedAudioCodec);
+  parseFn('video', this._selectedVideoCodec);
+
+  return sdpLines.join('\r\n');
 };
 
 /**
- * Function that modifies the SessionDescription string to set the preferred sending audio codec.
- * @method _setSDPAudioCodec
- * @private
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._setSDPAudioCodec = function(sdpLines) {
-  log.log('Setting audio codec', this._selectedAudioCodec);
-  var codecFound = false;
-  var payload = 0;
-
-  var i, j;
-  var line;
-
-  for (i = 0; i < sdpLines.length; i += 1) {
-    line = sdpLines[i];
-
-    if (line.indexOf('a=rtpmap:') === 0) {
-      if (line.indexOf(this._selectedAudioCodec) > 0) {
-        codecFound = true;
-        payload = line.split(':')[1].split(' ')[0];
-      }
-    }
-  }
-
-  if (codecFound) {
-    for (j = 0; j < sdpLines.length; j += 1) {
-      line = sdpLines[j];
-
-      if (line.indexOf('m=audio') === 0 || line.indexOf('a=audio') === 0) {
-        var parts = line.split(' ');
-        var payloads = line.split(' ');
-        payloads.splice(0, 3);
-
-        var selectedPayloadIndex = payloads.indexOf(payload);
-
-        if (selectedPayloadIndex === -1) {
-          payloads.splice(0, 0, payload);
-        } else {
-          var first = payloads[0];
-          payloads[0] = payload;
-          payloads[selectedPayloadIndex] = first;
-        }
-        sdpLines[j] = parts[0] + ' ' + parts[1] + ' ' + parts[2] + ' ' + payloads.join(' ');
-        break;
-      }
-    }
-  }
-  return sdpLines;
-};
-
-/**
- * Function that modifies the SessionDescription string to remove the experimental H264 Firefox flag
- *   that is breaking connections.
- * To evaluate removal of this change once we roll out H264 codec interop.
+ * Function that modifies the session description to remove the previous experimental H264
+ * codec that is apparently breaking connections.
+ * NOTE: We should perhaps not remove it since H264 is supported?
  * @method _removeSDPFirefoxH264Pref
  * @private
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._removeSDPFirefoxH264Pref = function(sdpLines) {
-  var invalidLineIndex = sdpLines.indexOf(
-    'a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1');
-  if (invalidLineIndex > -1) {
-    log.debug([null, 'SDP', null, 'Firefox H264 invalid pref found:'], invalidLineIndex);
-    sdpLines.splice(invalidLineIndex, 1);
-  }
-  return sdpLines;
+Skylink.prototype._removeSDPFirefoxH264Pref = function(targetMid, sessionDescription) {
+  log.info([targetMid, 'RTCSessionDesription', sessionDescription.type,
+    'Removing Firefox experimental H264 flag to ensure interopability reliability']);
+
+  return sessionDescription.sdp.replace(/a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1\r\n/g, '');
 };
 
 /**
- * Function that modifies the SessionDescription string to set with the correct MediaStream ID and
- *   MediaStreamTrack IDs that is not provided from Firefox connection to Chromium connection.
- * @method _addSDPSsrcFirefoxAnswer
+ * Function that modifies the session description to append the MediaStream and MediaStreamTrack IDs that seems
+ * to be missing from Firefox answer session description to Chrome connection causing freezes in re-negotiation.
+ * @method _addSDPMediaStreamTrackIDs
  * @private
  * @for Skylink
- * @since 0.6.6
+ * @since 0.6.16
  */
-Skylink.prototype._addSDPSsrcFirefoxAnswer = function (targetMid, sdp) {
-  var self = this;
-  var agent = self.getPeerInfo(targetMid).agent;
-
-  var pc = self._peerConnections[targetMid];
-
-  if (!pc) {
-    log.error([targetMid, 'RTCSessionDesription', 'answer', 'Peer connection object ' +
-      'not found. Unable to parse answer session description for peer']);
-    return;
+Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescription) {
+  if (!(this._peerConnections[targetMid] && this._peerConnections[targetMid].getLocalStreams().length > 0)) {
+    log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+      'Not enforcing MediaStream IDs as no Streams is sent.']);
+    return sessionDescription.sdp;
   }
 
-  var updatedSdp = sdp;
+  var sdpLines = sessionDescription.sdp.split('\r\n');
+  var agent = ((this._peerInformations[targetMid] || {}).agent || {}).name || '';
+  var localStream = this._peerConnections[targetMid].getLocalStreams()[0];
+  var localStreamId = localStream.id || localStream.label;
 
-  // for this case, this is because firefox uses Unified Plan and Chrome uses
-  // Plan B. we have to remodify this a bit to let the non-ff detect as new mediastream
-  // as chrome/opera/safari detects it as default due to missing ssrc specified as used in plan B.
-  if (window.webrtcDetectedBrowser === 'firefox' && agent.name !== 'firefox' &&
-    //pc.remoteDescription.sdp.indexOf('a=msid-semantic: WMS *') === -1 &&
-    updatedSdp.indexOf('a=msid-semantic:WMS *') > 0) {
-    // start parsing
-    var sdpLines = updatedSdp.split('\r\n');
-    var streamId = '';
-    var replaceSSRCSemantic = -1;
-    var i;
-    var trackId = '';
+  var parseFn = function (type, tracks) {
+    if (tracks.length === 0) {
+      log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+        'Not enforcing "' + type + '" MediaStreamTrack IDs as no Stream "' + type + '" tracks is sent.']);
+      return;
+    }
 
-    var parseTracksSSRC = function (track) {
-      for (i = 0, trackId = ''; i < sdpLines.length; i++) {
-        if (!!trackId) {
-          if (sdpLines[i].indexOf('a=ssrc:') === 0) {
-            var ssrcId = sdpLines[i].split(':')[1].split(' ')[0];
-            sdpLines.splice(i+1, 0, 'a=ssrc:' + ssrcId +  ' msid:' + streamId + ' ' + trackId,
-              'a=ssrc:' + ssrcId + ' mslabel:default',
-              'a=ssrc:' + ssrcId + ' label:' + trackId);
-            break;
-          } else if (sdpLines[i].indexOf('a=mid:') === 0) {
-            break;
-          }
-        } else if (sdpLines[i].indexOf('a=msid:') === 0) {
-          if (i > 0 && sdpLines[i-1].indexOf('a=mid:' + track) === 0) {
-            var parts = sdpLines[i].split(':')[1].split(' ');
+    var trackId = tracks[0].id || tracks[0].label;
+    var ssrcId = null;
+    var hasReachedType = false;
 
-            streamId = parts[0];
-            trackId = parts[1];
-            replaceSSRCSemantic = true;
-          }
-        }
-      }
-    };
-
-    parseTracksSSRC('video');
-    parseTracksSSRC('audio');
-
-    /*if (replaceSSRCSemantic) {
-      for (i = 0; i < sdpLines.length; i++) {
-        if (sdpLines[i].indexOf('a=msid-semantic:WMS ') === 0) {
-          var parts = sdpLines[i].split(' ');
-          parts[parts.length - 1] = streamId;
-          sdpLines[i] = parts.join(' ');
+    // Get SSRC ID
+    for (var i = 0; i < sdpLines.length; i++) {
+      if (sdpLines[i].indexOf('m=' + type) === 0) {
+        if (!hasReachedType) {
+          hasReachedType = true;
+          continue;
+        } else {
           break;
         }
       }
 
-    }*/
-    updatedSdp = sdpLines.join('\r\n');
+      if (hasReachedType && sdpLines[i].indexOf('a=ssrc:') === 0) {
+        ssrcId = (sdpLines[i].split(':')[1] || '').split(' ')[0] || null;
 
-    log.debug([targetMid, 'RTCSessionDesription', 'answer', 'Parsed remote description from firefox'], sdpLines);
+        var msidLine = 'a=ssrc:' + ssrcId + ' msid:' + localStreamId + ' ' + trackId;
+        var mslabelLine = 'a=ssrc:' + ssrcId + ' mslabel:default';
+        var labelLine = 'a=ssrc:' + ssrcId + ' label:' + trackId;
+
+        if (sdpLines.indexOf(msidLine) === -1) {
+          sdpLines.splice(i + 1, 0, msidLine);
+          i++;
+        }
+
+        if (sdpLines.indexOf(mslabelLine) === -1) {
+          sdpLines.splice(i + 1, 0, mslabelLine);
+          i++;
+        }
+
+        if (sdpLines.indexOf(labelLine) === -1) {
+          sdpLines.splice(i + 1, 0, labelLine);
+          i++;
+        }
+        break;
+      }
+    }
+  };
+
+  parseFn('audio', localStream.getAudioTracks());
+  parseFn('video', localStream.getVideoTracks());
+
+  return sdpLines.join('\r\n');
+};
+
+/**
+ * Function that modifies the session description to remove VP9 and H264 apt/rtx lines to prevent plugin connection breaks.
+ * @method _removeSDPH264VP9AptRtxForOlderPlugin
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._removeSDPH264VP9AptRtxForOlderPlugin = function (targetMid, sessionDescription) {
+  var removeVP9AptRtxPayload = false;
+  var agent = (this._peerInformations[targetMid] || {}).agent || {};
+
+  if (agent.pluginVersion) {
+    // 0.8.870 supports
+    var parts = agent.pluginVersion.split('.');
+    removeVP9AptRtxPayload = parseInt(parts[0], 10) >= 0 && parseInt(parts[1], 10) >= 8 &&
+      parseInt(parts[2], 10) >= 870;
   }
 
-  return updatedSdp;
+  // Remove rtx or apt= lines that prevent connections for browsers without VP8 or VP9 support
+  // See: https://bugs.chromium.org/p/webrtc/issues/detail?id=3962
+  if (['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1 && removeVP9AptRtxPayload) {
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type,
+      'Removing VP9/H264 apt= and rtx payload lines causing connectivity issues']);
+
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=101\r\n/g, '');
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=107\r\n/g, '');
+  }
+
+  return sessionDescription.sdp;
 };
+
+/**
+ * Function that modifies the session description to remove codecs.
+ * @method _removeSDPCodecs
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
+  var audioSettings = this.getPeerInfo().settings.audio;
+
+  var parseFn = function (type, codec) {
+    var payloadList = sessionDescription.sdp.match(new RegExp('a=rtpmap:(\\d*)\\ ' + codec + '.*', 'gi'));
+
+    if (!(Array.isArray(payloadList) && payloadList.length > 0)) {
+      log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+        'Not removing "' + codec + '" as it does not exists.']);
+      return;
+    }
+
+    for (var i = 0; i < payloadList.length; i++) {
+      var payload = payloadList[i].split(' ')[0].split(':')[1];
+
+      log.info([targetMid, 'RTCSessionDesription', sessionDescription.type,
+        'Removing "' + codec + '" payload ->'], payload);
+
+      sessionDescription.sdp = sessionDescription.sdp.replace(
+        new RegExp('a=rtpmap:' + payload + '\\ .*\\r\\n', 'g'), '');
+      sessionDescription.sdp = sessionDescription.sdp.replace(
+        new RegExp('a=fmtp:' + payload + '\\ .*\\r\\n', 'g'), '');
+      sessionDescription.sdp = sessionDescription.sdp.replace(
+        new RegExp('a=rtpmap:\\d+ rtx\\/\\d+\\r\\na=fmtp:\\d+ apt=' + payload + '\\r\\n', 'g'), '');
+
+      // Remove the m-line codec
+      var sdpLines = sessionDescription.sdp.split('\r\n');
+
+      for (var j = 0; j < sdpLines.length; j++) {
+        if (sdpLines[j].indexOf('m=' + type) === 0) {
+          var parts = sdpLines[j].split(' ');
+
+          if (parts.indexOf(payload) >= 3) {
+            parts.splice(parts.indexOf(payload), 1);
+          }
+
+          sdpLines[j] = parts.join(' ');
+          break;
+        }
+      }
+
+      sessionDescription.sdp = sdpLines.join('\r\n');
+    }
+  };
+
+  if (this._disableVideoFecCodecs) {
+    if (this._hasMCU) {
+      log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+        'Not removing "ulpfec" or "red" codecs as connected to MCU to prevent connectivity issues.']);
+    } else {
+      parseFn('video', 'red');
+      parseFn('video', 'ulpfec');
+    }
+  }
+
+  if (this._disableComfortNoiseCodec && audioSettings && typeof audioSettings === 'object' && audioSettings.stereo) {
+    parseFn('audio', 'CN');
+  }
+
+  return sessionDescription.sdp;
+};
+
+/**
+ * Function that retrieves the session description selected codec.
+ * @method _getSDPSelectedCodec
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._getSDPSelectedCodec = function (targetMid, sessionDescription, type) {
+  if (!(sessionDescription && sessionDescription.sdp)) {
+    return null;
+  }
+
+  var sdpLines = sessionDescription.sdp.split('\r\n');
+  var selectedCodecInfo = {
+    name: null,
+    implementation: null,
+    payloadType: null
+  };
+
+  for (var i = 0; i < sdpLines.length; i++) {
+    if (sdpLines[i].indexOf('m=' + type) === 0) {
+      var parts = sdpLines[i].split(' ');
+
+      if (parts.length < 4) {
+        break;
+      }
+
+      selectedCodecInfo.payloadType = parseInt(parts[3], 10);
+
+    } else if (selectedCodecInfo.payloadType !== null &&
+      sdpLines[i].indexOf('a=rtpmap:' + selectedCodecInfo.payloadType + ' ') === 0) {
+      selectedCodecInfo.name = (sdpLines[i].split(' ')[1] || '').split('/')[0] || '';
+      break;
+    }
+  }
+
+  log.debug([targetMid, 'RTCSessionDesription', sessionDescription.type,
+    'Parsing session description "' + type + '" codecs ->'], selectedCodecInfo);
+
+  return selectedCodecInfo;
+};
+
+/**
+ * Function that modifies the session description to remove non-relay ICE candidates.
+ * @method _removeSDPFilteredCandidates
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._removeSDPFilteredCandidates = function (targetMid, sessionDescription) {
+  if (this._forceTURN && this._hasMCU) {
+    log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Not filtering ICE candidates as ' +
+      'TURN connections are enforced as MCU is present (and act as a TURN itself) so filtering of ICE candidate ' +
+      'flags are not honoured']);
+    return sessionDescription.sdp;
+  }
+
+  if (this._filterCandidatesType.host) {
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing "host" ICE candidates.']);
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*host.*\r\n/g, '');
+  }
+
+  if (this._filterCandidatesType.srflx) {
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing "srflx" ICE candidates.']);
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*srflx.*\r\n/g, '');
+  }
+
+  if (this._filterCandidatesType.relay) {
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing "relay" ICE candidates.']);
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*relay.*\r\n/g, '');
+  }
+
+  // sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
+
+  return sessionDescription.sdp;
+};
+
+/**
+ * Function that modifies the session description to remove non-relay ICE candidates.
+ * @method _handleSDPMCUConnectionCase
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._handleSDPMCUConnectionCase = function (targetMid, sessionDescription, isLocal) {
+  if (!this._hasMCU) {
+    return sessionDescription.sdp;
+  }
+
+  log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Handling MCU connection case.']);
+
+  if (isLocal) {
+    if (targetMid === 'MCU') {
+      sessionDescription.sdp = sessionDescription.sdp.replace(/a=sendrecv/gi, 'a=sendonly');
+    } else {
+      sessionDescription.sdp = sessionDescription.sdp.replace(/a=sendrecv/gi, 'a=recvonly');
+    }
+  } else if (targetMid === 'MCU' && sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER &&
+    window.webrtcDetectedBrowser === 'firefox') {
+    sessionDescription.sdp = sessionDescription.sdp.replace(/ generation 0/g, '');
+    sessionDescription.sdp = sessionDescription.sdp.replace(/ udp /g, ' UDP ');
+  }
+
+  return sessionDescription.sdp;
+};
+
 this.Skylink = Skylink;
 window.Skylink = Skylink;
 }).call(this);
