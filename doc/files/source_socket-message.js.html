@@ -790,12 +790,19 @@ Skylink.prototype._enterHandler = function(message) {
 
   log.log([targetMid, null, message.type, &#x27;Received Peer\&#x27;s presence -&gt;&#x27;], message.userInfo);
 
+  var agent = {
+    agent: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
+    version: typeof message.version === &#x27;number&#x27; ? message.version : 0,
+    os: message.os || &#x27;&#x27;,
+    pluginVersion: message.temasysPluginVersion || null
+  };
+
   if (!self._peerInformations[targetMid]) {
     isNewPeer = true;
     self._addPeer(targetMid, {
-      agent: message.agent,
-      version: message.version,
-      os: message.os
+      agent: agent.name,
+      version: agent.version,
+      os: agent.os
     }, false, false, message.receiveOnly, message.sessionType === &#x27;screensharing&#x27;);
 
     self._peerInformations[targetMid] = message.userInfo || {};
@@ -804,12 +811,7 @@ Skylink.prototype._enterHandler = function(message) {
       audioMuted: 0,
       videoMuted: 0
     };
-    self._peerInformations[targetMid].agent = {
-      name: message.agent,
-      version: message.version,
-      os: message.os || &#x27;&#x27;,
-      pluginVersion: message.temasysPluginVersion
-    };
+    self._peerInformations[targetMid].agent = agent;
     self._peerInformations[targetMid].config = {
       enableIceTrickle: typeof message.enableIceTrickle === &#x27;boolean&#x27; ? message.enableIceTrickle : true,
       enableDataChannel: typeof message.enableDataChannel === &#x27;boolean&#x27; ? message.enableDataChannel : true,
@@ -890,10 +892,16 @@ Skylink.prototype._restartHandler = function(message){
     self._hasMCU = true;
   }
 
+  var agent = {
+    agent: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
+    version: typeof message.version === &#x27;number&#x27; ? message.version : 0,
+    os: message.os || &#x27;&#x27;,
+    pluginVersion: message.temasysPluginVersion || null
+  };
+
   // Uncomment because we do not need this
   //self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
 
-  message.agent = (!message.agent) ? &#x27;chrome&#x27; : message.agent;
   /*self._enableIceTrickle = (typeof message.enableIceTrickle === &#x27;boolean&#x27;) ?
     message.enableIceTrickle : self._enableIceTrickle;
   self._enableDataChannel = (typeof message.enableDataChannel === &#x27;boolean&#x27;) ?
@@ -906,19 +914,12 @@ Skylink.prototype._restartHandler = function(message){
     audioMuted: 0,
     videoMuted: 0
   };
-  self._peerInformations[targetMid].agent = {
-    name: message.agent,
-    version: message.version,
-    os: message.os || &#x27;&#x27;,
-    pluginVersion: message.temasysPluginVersion
-  };
+  self._peerInformations[targetMid].agent = agent;
   self._peerInformations[targetMid].config = {
     enableIceTrickle: typeof message.enableIceTrickle === &#x27;boolean&#x27; ? message.enableIceTrickle : true,
     enableDataChannel: typeof message.enableDataChannel === &#x27;boolean&#x27; ? message.enableDataChannel : true,
     priorityWeight: message.priorityWeight || 0
   };
-
-  var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
 
   // This variable is not used
   //var peerConnectionStateStable = false;
@@ -987,13 +988,11 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   log.log([targetMid, null, message.type, &#x27;Received Peer\&#x27;s presence -&gt;&#x27;], message.userInfo);
 
-  // We shouldn&#x27;t assume as chrome
-  message.agent = (!message.agent) ? &#x27;unknown&#x27; : message.agent;
-
   var agent = {
-    agent: message.agent,
-    version: message.version,
-    os: message.os
+    agent: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
+    version: typeof message.version === &#x27;number&#x27; ? message.version : 0,
+    os: message.os || &#x27;&#x27;,
+    pluginVersion: message.temasysPluginVersion || null
   };
 
   if (!this._peerInformations[targetMid]) {
@@ -1003,12 +1002,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       audioMuted: 0,
       videoMuted: 0
     };
-    this._peerInformations[targetMid].agent = {
-      name: message.agent,
-      version: message.version,
-      os: message.os || &#x27;&#x27;,
-      pluginVersion: message.temasysPluginVersion
-    };
+    this._peerInformations[targetMid].agent = agent;
     this._peerInformations[targetMid].config = {
       enableIceTrickle: typeof message.enableIceTrickle === &#x27;boolean&#x27; ? message.enableIceTrickle : true,
       enableDataChannel: typeof message.enableDataChannel === &#x27;boolean&#x27; ? message.enableDataChannel : true,

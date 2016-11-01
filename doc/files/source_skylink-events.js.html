@@ -156,7 +156,7 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when attempt to establish socket connection to Signaling server has failed.
    * @event socketError
-   * @param {String} errorCode The socket connection error code.
+   * @param {Number} errorCode The socket connection error code.
    *   [Rel: Skylink.SOCKET_ERROR]
    * @param {Error|String|Number} error The error object.
    * @param {String} type The fallback state of the socket connection attempt.
@@ -169,7 +169,7 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; ready state changes.
    * @event readyStateChange
-   * @param {String} readyState The current &lt;code&gt;init()&lt;/code&gt; ready state.
+   * @param {Number} readyState The current &lt;code&gt;init()&lt;/code&gt; ready state.
    *   [Rel: Skylink.READY_STATE_CHANGE]
    * @param {JSON} [error] The error result.
    *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; is &lt;code&gt;ERROR&lt;/code&gt;.&lt;/small&gt;
@@ -503,6 +503,7 @@ Skylink.prototype._EVENTS = {
    *   &lt;a href=&quot;#method_sendMessage&quot;&gt;&lt;code&gt;sendMessage()&lt;/code&gt; method&lt;/a&gt;.
    * @param {Boolean} message.isDataChannel The flag if message is sent from
    *   &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt;.
+   * @param {String} peerId The Peer ID.
    * @param {JSON} peerInfo The Peer session information.
    *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo&lt;/code&gt; parameter payload received in the
    *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
@@ -546,6 +547,7 @@ Skylink.prototype._EVENTS = {
    * Event triggered when Room locked status has changed.
    * @event roomLock
    * @param {Boolean} isLocked The flag if Room is locked.
+   * @param {String} peerId The Peer ID.
    * @param {JSON} peerInfo The Peer session information.
    *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo&lt;/code&gt; parameter payload received in the
    *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
