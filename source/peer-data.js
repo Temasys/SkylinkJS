@@ -148,10 +148,17 @@ Skylink.prototype.getPeerInfo = function(peerId) {
   if (typeof peerId === 'string' && typeof this._peerInformations[peerId] === 'object') {
     peerInfo = clone(this._peerInformations[peerId]);
     peerInfo.room = clone(this._selectedRoom);
+    peerInfo.settings.googleXBandwidth = {};
 
     if (peerInfo.settings.video && typeof peerInfo.settings.video === 'object' &&
       peerInfo.settings.video.frameRate === -1) {
-      delete peerInfo.settings.video.frameRate;
+      peerInfo.settings.video.frameRate = null;
+    }
+
+    if (peerInfo.settings.audio && typeof peerInfo.settings.audio === 'object') {
+      peerInfo.settings.audio.usedtx = null;
+      peerInfo.settings.audio.maxplaybackrate = null;
+      peerInfo.settings.audio.useinbandfec = null;
     }
 
   } else {
@@ -183,8 +190,7 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     }
 
     peerInfo.settings.bandwidth = clone(this._streamsBandwidthSettings.bAS);
-    // Uncommented to ensure adherence to the current SM protocol
-    //peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
+    peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
   }
 
   if (!peerInfo.settings.audio) {
@@ -208,13 +214,22 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 Skylink.prototype._getUserInfo = function(peerId) {
   var userInfo = clone(this.getPeerInfo());
 
+  // Adhere to SM protocol without breaking the other SDKs.
   if (userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
     typeof userInfo.settings.video.frameRate !== 'number') {
     userInfo.settings.video.frameRate = -1;
   }
 
+  // Adhere to SM protocol. Stop adding new things to the current protocol until things are finalised.
+  if (userInfo.settings.audio && typeof userInfo.settings.audio === 'object') {
+    delete userInfo.settings.audio.usedtx;
+    delete userInfo.settings.audio.maxplaybackrate;
+    delete userInfo.settings.audio.useinbandfec;
+  }
+
   delete userInfo.agent;
   delete userInfo.room;
+  delete userInfo.settings.googleXBandwidth;
 
   return userInfo;
 };

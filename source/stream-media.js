@@ -1526,8 +1526,6 @@ Skylink.prototype._parseStreamSettings = function(options) {
       useinbandfec: null,
       usedtx: null,
       maxplaybackrate: null,
-      deviceId: null,
-      optional: null,
       exactConstraints: !!options.useExactConstraints
     };
     settings.getUserMediaSettings.audio = {};
