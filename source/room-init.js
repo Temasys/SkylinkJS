@@ -582,7 +582,7 @@ Skylink.prototype.init = function(options, callback) {
     region = (typeof options.region === 'string') ?
       options.region : region;
     // set the default room
-    defaultRoom = (typeof options.defaultRoom === 'string') ?
+    defaultRoom = (typeof options.defaultRoom === 'string' && options.defaultRoom) ?
       options.defaultRoom : appKey;
     // set the selected room
     room = defaultRoom;
