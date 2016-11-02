@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Nov 02 2016 16:41:07 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Nov 02 2016 18:17:17 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10548,7 +10548,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Wed Nov 02 2016 16:41:07 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Nov 02 2016 18:17:17 GMT+0800 (SGT) */
 
 (function() {
 
@@ -14236,7 +14236,12 @@ Skylink.prototype._peerConnections = {};
  *   The target Peer ID to refresh connection with.
  * - When provided as an Array, it will refresh all connections with all the Peer IDs provided.
  * - When not provided, it will refresh all the currently connected Peers in the Room.
- * @param {Boolean} [iceRestart=false] The flag if ICE connections should restart when refreshing Peer connections.
+ * @param {Boolean} [iceRestart=false] <blockquote class="info">
+ *   Note that this flag will not be honoured for MCU enabled Peer connections as it is not necessary since for MCU
+ *   "restart" case is to invoke <a href="#method_joinRoom"><code>joinRoom()</code> method</a> again.</blockquote>
+ *   The flag if ICE connections should restart when refreshing Peer connections.
+ *   <small>This is used when ICE connection state is <code>FAILED</code> or <code>DISCONNECTED</code>, which state
+ *   can be retrieved with the <a href="#event_iceConnectionState"><code>iceConnectionState</code> event</a>.</small>
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_peerRestart">
@@ -14316,6 +14321,15 @@ Skylink.prototype._peerConnections = {};
  *       }
  *     });
  *   }
+ *
+ *   // Example 4: Refresh Peer connection when ICE connection has failed or disconnected
+ *   //            and do a ICE connection refresh (only for non-MCU case)
+ *   skylinkDemo.on("iceConnectionState", function (state, peerId) {
+ *      if (!usesMCUKey && [skylinkDemo.ICE_CONNECTION_STATE.FAILED,
+ *        skylinkDemo.ICE_CONNECTION_STATE.DISCONNECTED].indexOf(state) > -1) {
+ *        skylinkDemo.refreshConnection(peerId, true);
+ *      }
+ *   });
  * @for Skylink
  * @since 0.5.5
  */
@@ -15039,7 +15053,6 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
 
 /**
  * Function that re-negotiates a Peer connection.
- * We currently do not implement the ICE restart functionality.
  * Remember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).
  * @method _restartPeerConnection
  * @private
@@ -15110,7 +15123,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       isConnectionRestart: false
     });
 
-    self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
+    self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
 
     if (typeof callback === 'function') {
       log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
@@ -15449,7 +15462,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
     }
 
     if (peerId !== 'MCU') {
-      self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
+      self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true, false);
 
       log.log([peerId, null, null, 'Sending restart message to signaling server']);
 
@@ -15686,6 +15699,7 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       config: {
         enableDataChannel: this._enableDataChannel,
         enableIceTrickle: this._enableIceTrickle,
+        enableIceRestart: this._enableIceRestart,
         priorityWeight: this._peerPriorityWeight
       }
     };
@@ -15812,10 +15826,12 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     return;
   }
 
+  var peerIceRestartSupport = !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart;
+
   var offerConstraints = {
     offerToReceiveAudio: true,
     offerToReceiveVideo: true,
-    iceRestart: iceRestart === true
+    iceRestart: self._enableIceRestart && peerIceRestartSupport ? iceRestart === true : false
   };
 
   // NOTE: Removing ICE restart functionality as of now since Firefox does not support it yet
@@ -15849,7 +15865,7 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
       mandatory: {
         OfferToReceiveAudio: true,
         OfferToReceiveVideo: true,
-        iceRestart: iceRestart === true
+        iceRestart: self._enableIceRestart && peerIceRestartSupport ? iceRestart === true : false
       }
     };
   }
@@ -18957,10 +18973,11 @@ Skylink.prototype._EVENTS = {
    *  <small>Defined only when Peer is using the Temasys Plugin (IE / Safari).</small>
    * @param {String} peerInfo.room The Room Peer is from.
    * @param {JSON} peerInfo.config The Peer connection configuration.
-   * @param {Boolean} peerInfo.config.enableIceTrickle The flag if Peer connections should
-   *   trickle ICE for faster connectivity.
-   * @param {Boolean} peerInfo.config.enableDataChannel The flag if Datachannel connections
-   *   would be enabled for Peer.
+   * @param {Boolean} peerInfo.config.enableIceTrickle The flag if Peer connection has
+   *   trickle ICE enabled or faster connectivity.
+   * @param {Boolean} peerInfo.config.enableDataChannel The flag if Datachannel connections would be enabled for Peer.
+   * @param {Boolean} peerInfo.config.enableIceRestart The flag if Peer connection has ICE connection restart support.
+   *   <small>Note that ICE connection restart support is not honoured for MCU enabled Peer connection.</small>
    * @param {Number} peerInfo.config.priorityWeight The flag if Peer or User should be the offerer.
    *   <small>If User's <code>priorityWeight</code> is higher than Peer's, User is the offerer, else Peer is.
    *   However for the case where the MCU is connected, User will always be the offerer.</small>
@@ -18978,6 +18995,7 @@ Skylink.prototype._EVENTS = {
    *   <small>Object signature matches the <code>peerInfo</code> parameter payload received in the
    *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small>
    * @param {Boolean} isSelfInitiateRestart The flag if User is initiating the Peer connection refresh.
+   * @param {Boolean} isIceRestart The flag if Peer connection ICE connection will restart.
    * @for Skylink
    * @since 0.5.5
    */
@@ -20460,7 +20478,7 @@ Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
  * @since 0.6.16
  */
 Skylink.prototype._enableIceRestart = window.webrtcDetectedBrowser === 'firefox' ?
-  window.webrtcDetectedVersion > 48 : false;
+  window.webrtcDetectedVersion >= 48 : false;
 
 /**
  * Stores the list of socket messaging protocol types.
@@ -21181,6 +21199,7 @@ Skylink.prototype._enterHandler = function(message) {
     self._peerInformations[targetMid].config = {
       enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
       enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
+      enableIceRestart: typeof message.enableIceRestart === 'boolean' ? message.enableIceRestart : false,
       priorityWeight: message.priorityWeight || 0
     };
 
@@ -21242,7 +21261,7 @@ Skylink.prototype._restartHandler = function(message){
 
   // NOTE: for now we ignore, but we should take-note to implement in the near future
   if (self._hasMCU) {
-    self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false);
+    self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false, false);
     return;
   }
 
@@ -21285,6 +21304,7 @@ Skylink.prototype._restartHandler = function(message){
   self._peerInformations[targetMid].config = {
     enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
     enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
+    enableIceRestart: typeof message.enableIceRestart === 'boolean' ? message.enableIceRestart : false,
     priorityWeight: message.priorityWeight || 0
   };
 
@@ -21334,7 +21354,7 @@ Skylink.prototype._restartHandler = function(message){
     });
   }
 
-  self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false);
+  self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false, message.doIceRestart === true);
 
   // following the previous logic to do checker always
   self._startPeerConnectionHealthCheck(targetMid, false);
@@ -21375,6 +21395,7 @@ Skylink.prototype._welcomeHandler = function(message) {
     this._peerInformations[targetMid].config = {
       enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
       enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
+      enableIceRestart: typeof message.enableIceRestart === 'boolean' ? message.enableIceRestart : false,
       priorityWeight: message.priorityWeight || 0
     };
     // disable mcu for incoming peer sent by MCU

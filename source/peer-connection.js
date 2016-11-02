@@ -114,7 +114,12 @@ Skylink.prototype._peerConnections = {};
  *   The target Peer ID to refresh connection with.
  * - When provided as an Array, it will refresh all connections with all the Peer IDs provided.
  * - When not provided, it will refresh all the currently connected Peers in the Room.
- * @param {Boolean} [iceRestart=false] The flag if ICE connections should restart when refreshing Peer connections.
+ * @param {Boolean} [iceRestart=false] <blockquote class="info">
+ *   Note that this flag will not be honoured for MCU enabled Peer connections as it is not necessary since for MCU
+ *   "restart" case is to invoke <a href="#method_joinRoom"><code>joinRoom()</code> method</a> again.</blockquote>
+ *   The flag if ICE connections should restart when refreshing Peer connections.
+ *   <small>This is used when ICE connection state is <code>FAILED</code> or <code>DISCONNECTED</code>, which state
+ *   can be retrieved with the <a href="#event_iceConnectionState"><code>iceConnectionState</code> event</a>.</small>
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_peerRestart">
@@ -194,6 +199,15 @@ Skylink.prototype._peerConnections = {};
  *       }
  *     });
  *   }
+ *
+ *   // Example 4: Refresh Peer connection when ICE connection has failed or disconnected
+ *   //            and do a ICE connection refresh (only for non-MCU case)
+ *   skylinkDemo.on("iceConnectionState", function (state, peerId) {
+ *      if (!usesMCUKey && [skylinkDemo.ICE_CONNECTION_STATE.FAILED,
+ *        skylinkDemo.ICE_CONNECTION_STATE.DISCONNECTED].indexOf(state) > -1) {
+ *        skylinkDemo.refreshConnection(peerId, true);
+ *      }
+ *   });
  * @for Skylink
  * @since 0.5.5
  */
@@ -917,7 +931,6 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
 
 /**
  * Function that re-negotiates a Peer connection.
- * We currently do not implement the ICE restart functionality.
  * Remember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).
  * @method _restartPeerConnection
  * @private
@@ -988,7 +1001,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       isConnectionRestart: false
     });
 
-    self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
+    self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
 
     if (typeof callback === 'function') {
       log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
@@ -1327,7 +1340,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
     }
 
     if (peerId !== 'MCU') {
-      self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
+      self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true, false);
 
       log.log([peerId, null, null, 'Sending restart message to signaling server']);
 

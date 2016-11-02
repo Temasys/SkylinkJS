@@ -111,7 +111,7 @@ Skylink.prototype.SM_PROTOCOL_VERSION = &#x27;0.1.1&#x27;;
  * @since 0.6.16
  */
 Skylink.prototype._enableIceRestart = window.webrtcDetectedBrowser === &#x27;firefox&#x27; ?
-  window.webrtcDetectedVersion &gt; 48 : false;
+  window.webrtcDetectedVersion &gt;= 48 : false;
 
 /**
  * Stores the list of socket messaging protocol types.
@@ -832,6 +832,7 @@ Skylink.prototype._enterHandler = function(message) {
     self._peerInformations[targetMid].config = {
       enableIceTrickle: typeof message.enableIceTrickle === &#x27;boolean&#x27; ? message.enableIceTrickle : true,
       enableDataChannel: typeof message.enableDataChannel === &#x27;boolean&#x27; ? message.enableDataChannel : true,
+      enableIceRestart: typeof message.enableIceRestart === &#x27;boolean&#x27; ? message.enableIceRestart : false,
       priorityWeight: message.priorityWeight || 0
     };
 
@@ -893,7 +894,7 @@ Skylink.prototype._restartHandler = function(message){
 
   // NOTE: for now we ignore, but we should take-note to implement in the near future
   if (self._hasMCU) {
-    self._trigger(&#x27;peerRestart&#x27;, targetMid, self.getPeerInfo(targetMid), false);
+    self._trigger(&#x27;peerRestart&#x27;, targetMid, self.getPeerInfo(targetMid), false, false);
     return;
   }
 
@@ -936,6 +937,7 @@ Skylink.prototype._restartHandler = function(message){
   self._peerInformations[targetMid].config = {
     enableIceTrickle: typeof message.enableIceTrickle === &#x27;boolean&#x27; ? message.enableIceTrickle : true,
     enableDataChannel: typeof message.enableDataChannel === &#x27;boolean&#x27; ? message.enableDataChannel : true,
+    enableIceRestart: typeof message.enableIceRestart === &#x27;boolean&#x27; ? message.enableIceRestart : false,
     priorityWeight: message.priorityWeight || 0
   };
 
@@ -985,7 +987,7 @@ Skylink.prototype._restartHandler = function(message){
     });
   }
 
-  self._trigger(&#x27;peerRestart&#x27;, targetMid, self.getPeerInfo(targetMid), false);
+  self._trigger(&#x27;peerRestart&#x27;, targetMid, self.getPeerInfo(targetMid), false, message.doIceRestart === true);
 
   // following the previous logic to do checker always
   self._startPeerConnectionHealthCheck(targetMid, false);
@@ -1026,6 +1028,7 @@ Skylink.prototype._welcomeHandler = function(message) {
     this._peerInformations[targetMid].config = {
       enableIceTrickle: typeof message.enableIceTrickle === &#x27;boolean&#x27; ? message.enableIceTrickle : true,
       enableDataChannel: typeof message.enableDataChannel === &#x27;boolean&#x27; ? message.enableDataChannel : true,
+      enableIceRestart: typeof message.enableIceRestart === &#x27;boolean&#x27; ? message.enableIceRestart : false,
       priorityWeight: message.priorityWeight || 0
     };
     // disable mcu for incoming peer sent by MCU

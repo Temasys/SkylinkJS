@@ -96,10 +96,12 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     return;
   }
 
+  var peerIceRestartSupport = !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart;
+
   var offerConstraints = {
     offerToReceiveAudio: true,
     offerToReceiveVideo: true,
-    iceRestart: iceRestart === true
+    iceRestart: self._enableIceRestart && peerIceRestartSupport ? iceRestart === true : false
   };
 
   // NOTE: Removing ICE restart functionality as of now since Firefox does not support it yet
@@ -133,7 +135,7 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
       mandatory: {
         OfferToReceiveAudio: true,
         OfferToReceiveVideo: true,
-        iceRestart: iceRestart === true
+        iceRestart: self._enableIceRestart && peerIceRestartSupport ? iceRestart === true : false
       }
     };
   }

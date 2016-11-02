@@ -320,10 +320,11 @@ Skylink.prototype._EVENTS = {
    *  <small>Defined only when Peer is using the Temasys Plugin (IE / Safari).</small>
    * @param {String} peerInfo.room The Room Peer is from.
    * @param {JSON} peerInfo.config The Peer connection configuration.
-   * @param {Boolean} peerInfo.config.enableIceTrickle The flag if Peer connections should
-   *   trickle ICE for faster connectivity.
-   * @param {Boolean} peerInfo.config.enableDataChannel The flag if Datachannel connections
-   *   would be enabled for Peer.
+   * @param {Boolean} peerInfo.config.enableIceTrickle The flag if Peer connection has
+   *   trickle ICE enabled or faster connectivity.
+   * @param {Boolean} peerInfo.config.enableDataChannel The flag if Datachannel connections would be enabled for Peer.
+   * @param {Boolean} peerInfo.config.enableIceRestart The flag if Peer connection has ICE connection restart support.
+   *   <small>Note that ICE connection restart support is not honoured for MCU enabled Peer connection.</small>
    * @param {Number} peerInfo.config.priorityWeight The flag if Peer or User should be the offerer.
    *   <small>If User's <code>priorityWeight</code> is higher than Peer's, User is the offerer, else Peer is.
    *   However for the case where the MCU is connected, User will always be the offerer.</small>
@@ -341,6 +342,7 @@ Skylink.prototype._EVENTS = {
    *   <small>Object signature matches the <code>peerInfo</code> parameter payload received in the
    *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small>
    * @param {Boolean} isSelfInitiateRestart The flag if User is initiating the Peer connection refresh.
+   * @param {Boolean} isIceRestart The flag if Peer connection ICE connection will restart.
    * @for Skylink
    * @since 0.5.5
    */

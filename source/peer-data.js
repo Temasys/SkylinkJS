@@ -179,6 +179,7 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       config: {
         enableDataChannel: this._enableDataChannel,
         enableIceTrickle: this._enableIceTrickle,
+        enableIceRestart: this._enableIceRestart,
         priorityWeight: this._peerPriorityWeight
       }
     };
