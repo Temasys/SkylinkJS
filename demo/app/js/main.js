@@ -2,13 +2,6 @@
   API Settings
 *********************************************************/
 var Demo = Demo || {};
-var config = {
-  apiKey: '1635b4a2-4d36-4644-87f3-41103539bdd7',
-  defaultRoom:'brdropturntest',
-  forceTURN: true,
-  forceTURNSSL: true
-};
-
 Demo.FILE_SIZE_LIMIT = 1024 * 1024 * 200;
 Demo.Peers = 0;
 Demo.Files = [];
