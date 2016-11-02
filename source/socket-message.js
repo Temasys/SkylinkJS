@@ -700,7 +700,7 @@ Skylink.prototype._enterHandler = function(message) {
   log.log([targetMid, null, message.type, 'Received Peer\'s presence ->'], message.userInfo);
 
   var agent = {
-    agent: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
+    name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
     version: typeof message.version === 'number' ? message.version : 0,
     os: message.os || '',
     pluginVersion: message.temasysPluginVersion || null
@@ -802,7 +802,7 @@ Skylink.prototype._restartHandler = function(message){
   }
 
   var agent = {
-    agent: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
+    name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
     version: typeof message.version === 'number' ? message.version : 0,
     os: message.os || '',
     pluginVersion: message.temasysPluginVersion || null
@@ -898,7 +898,7 @@ Skylink.prototype._welcomeHandler = function(message) {
   log.log([targetMid, null, message.type, 'Received Peer\'s presence ->'], message.userInfo);
 
   var agent = {
-    agent: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
+    name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
     version: typeof message.version === 'number' ? message.version : 0,
     os: message.os || '',
     pluginVersion: message.temasysPluginVersion || null
@@ -957,7 +957,11 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   if (beOfferer) {
     log.debug([targetMid, 'RTCPeerConnection', null, 'Starting negotiation'], agent);
-    this._doOffer(targetMid, agent);
+    this._doOffer(targetMid, {
+      agent: agent.name,
+      version: agent.version,
+      os: agent.os
+    });
 
   } else {
     log.debug([targetMid, 'RTCPeerConnection', null, 'Peer has to start the connection. Resending message'], beOfferer);
