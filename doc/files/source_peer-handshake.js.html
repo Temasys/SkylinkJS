@@ -166,7 +166,7 @@ Skylink.prototype._peerPriorityWeight = 0;
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
+Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   var self = this;
   var pc = self._peerConnections[targetMid] || self._addPeer(targetMid, peerBrowser);
 
@@ -189,7 +189,8 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
 
   var offerConstraints = {
     offerToReceiveAudio: true,
-    offerToReceiveVideo: true
+    offerToReceiveVideo: true,
+    iceRestart: iceRestart === true
   };
 
   // NOTE: Removing ICE restart functionality as of now since Firefox does not support it yet
@@ -222,7 +223,8 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
     offerConstraints = {
       mandatory: {
         OfferToReceiveAudio: true,
-        OfferToReceiveVideo: true
+        OfferToReceiveVideo: true,
+        iceRestart: iceRestart === true
       }
     };
   }
@@ -388,7 +390,7 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
         });
 
       } else if (!self._hasMCU) {
-        self._restartPeerConnection(peerId);
+        self._restartPeerConnection(peerId, false);
       }
     } else {
       self._peerConnectionHealth[peerId] = true;

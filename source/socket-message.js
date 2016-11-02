@@ -12,6 +12,17 @@
 Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
 
 /**
+ * Stores the value if ICE restart is supported.
+ * @attribute _enableIceRestart
+ * @type String
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._enableIceRestart = window.webrtcDetectedBrowser === 'firefox' ?
+  window.webrtcDetectedVersion > 48 : false;
+
+/**
  * Stores the list of socket messaging protocol types.
  * See confluence docs for the list based on the current <code>SM_PROTOCOL_VERSION</code>.
  * @attribute _SIG_MESSAGE_TYPE
@@ -381,7 +392,10 @@ Skylink.prototype._approachEventHandler = function(message){
     sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
     target: message.target,
     weight: self._peerPriorityWeight,
-    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+    enableIceTrickle: self._enableIceTrickle,
+    enableDataChannel: self._enableDataChannel,
+    enableIceRestart: self._enableIceRestart
   });
 };
 
@@ -679,7 +693,10 @@ Skylink.prototype._inRoomHandler = function(message) {
     receiveOnly: self._receiveOnly,
     sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
     weight: self._peerPriorityWeight,
-    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+    enableIceTrickle: self._enableIceTrickle,
+    enableDataChannel: self._enableDataChannel,
+    enableIceRestart: self._enableIceRestart
   });
 };
 
@@ -748,6 +765,7 @@ Skylink.prototype._enterHandler = function(message) {
     	!!self._peerConnections[targetMid].receiveOnly : false,
     enableIceTrickle: self._enableIceTrickle,
     enableDataChannel: self._enableDataChannel,
+    enableIceRestart: self._enableIceRestart,
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
@@ -844,7 +862,7 @@ Skylink.prototype._restartHandler = function(message){
   // Make peer with highest weight do the offer
   if (self._peerPriorityWeight > message.weight) {
     log.debug([targetMid, 'RTCPeerConnection', null, 'Restarting negotiation'], agent);
-    self._doOffer(targetMid, {
+    self._doOffer(targetMid, message.doIceRestart === true, {
       agent: agent.name,
       version: agent.version,
       os: agent.os
@@ -864,6 +882,8 @@ Skylink.prototype._restartHandler = function(message){
       weight: self._peerPriorityWeight,
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
+      enableIceRestart: self._enableIceRestart,
+      doIceRestart: message.doIceRestart === true,
       receiveOnly: self._peerConnections[targetMid] && self._peerConnections[targetMid].receiveOnly,
       sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
       temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
@@ -957,7 +977,7 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   if (beOfferer) {
     log.debug([targetMid, 'RTCPeerConnection', null, 'Starting negotiation'], agent);
-    this._doOffer(targetMid, {
+    this._doOffer(targetMid, false, {
       agent: agent.name,
       version: agent.version,
       os: agent.os
@@ -972,6 +992,9 @@ Skylink.prototype._welcomeHandler = function(message) {
       rid: this._room.id,
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion,
+      enableIceRestart: self._enableIceRestart,
+      enableDataChannel: self._enableDataChannel,
+      enableIceTrickle: self._enableIceTrickle,
       os: window.navigator.platform,
       userInfo: this._getUserInfo(),
       target: targetMid,

@@ -1727,6 +1727,13 @@
                     "optional": true
                 },
                 {
+                    "name": "iceRestart",
+                    "description": "The flag if ICE connections should restart when refreshing Peer connections.",
+                    "type": "Boolean",
+                    "optional": true,
+                    "optdefault": "false"
+                },
+                {
                     "name": "callback",
                     "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_peerRestart\">\n  <code>peerRestart</code> event</a> triggering <code>isSelfInitiateRestart</code> parameter payload\n  value as <code>true</code> for all Peers targeted for request success.</small>",
                     "type": "Function",
@@ -1778,7 +1785,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 249,
+            "line": 258,
             "description": "Function that refresh connections.",
             "itemtype": "method",
             "name": "_refreshPeerConnection",
@@ -1789,7 +1796,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 336,
+            "line": 345,
             "description": "Function that retrieves Peer connection bandwidth and ICE connection stats.",
             "itemtype": "method",
             "name": "getConnectionStatus",
@@ -1872,7 +1879,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 857,
+            "line": 866,
             "description": "Function that starts the Peer connection session.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_addPeer",
@@ -1883,7 +1890,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 909,
+            "line": 918,
             "description": "Function that re-negotiates a Peer connection.\nWe currently do not implement the ICE restart functionality.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -1894,7 +1901,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1031,
+            "line": 1042,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -1905,7 +1912,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1092,
+            "line": 1103,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -1916,13 +1923,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1217,
+            "line": 1228,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self._getUserInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1279,
+            "line": 1290,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -2199,7 +2206,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 164,
+            "line": 166,
             "description": "Function that creates the Peer connection answer session description.\nThis comes after receiving and setting the offer session description.",
             "itemtype": "method",
             "name": "_doAnswer",
@@ -2210,7 +2217,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 204,
+            "line": 206,
             "description": "Function that starts the Peer connection health timer.\nTo count as a \"healthy\" successful established Peer connection, the\n  ICE connection state has to be \"connected\" or \"completed\",\n  messaging Datachannel type state has to be \"opened\" (if Datachannel is enabled)\n  and Signaling state has to be \"stable\".\nShould consider dropping of counting messaging Datachannel type being opened as\n  it should not involve the actual Peer connection for media (audio/video) streaming.",
             "itemtype": "method",
             "name": "_startPeerConnectionHealthCheck",
@@ -2221,7 +2228,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 308,
+            "line": 310,
             "description": "Function that stops the Peer connection health timer.\nThis happens when Peer connection has been successfully established or when\n  Peer leaves the Room.",
             "itemtype": "method",
             "name": "_stopPeerConnectionHealthCheck",
@@ -2232,7 +2239,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 333,
+            "line": 335,
             "description": "Function that sets the local session description and sends to Peer.\nIf trickle ICE is disabled, the local session description will be sent after\n  ICE gathering has been completed.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -6434,6 +6441,18 @@
         {
             "file": "source/socket-message.js",
             "line": 14,
+            "description": "Stores the value if ICE restart is supported.",
+            "itemtype": "attribute",
+            "name": "_enableIceRestart",
+            "type": "String",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.16",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/socket-message.js",
+            "line": 25,
             "description": "Stores the list of socket messaging protocol types.\nSee confluence docs for the list based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "attribute",
             "name": "_SIG_MESSAGE_TYPE",
@@ -6446,7 +6465,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 50,
+            "line": 61,
             "description": "Stores the flag if MCU environment is enabled.",
             "itemtype": "attribute",
             "name": "_hasMCU",
@@ -6458,7 +6477,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 60,
+            "line": 71,
             "description": "Stores the list of socket messaging protocol types to queue when sent less than a second interval.",
             "itemtype": "attribute",
             "name": "_groupMessageList",
@@ -6470,7 +6489,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 77,
+            "line": 88,
             "description": "Stores the flag that indicates if MCU is available in the Room.\nIf App Key enables MCU but this is false, this means likely there are problems connecting to the MCU server.",
             "itemtype": "attribute",
             "name": "_hasMCU",
@@ -6482,7 +6501,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 89,
+            "line": 100,
             "description": "Stores the flag that indicates if User should only receive Stream from Peer connections but\n  do not send User's Stream to Peer connections.",
             "itemtype": "attribute",
             "name": "_receiveOnly",
@@ -6494,7 +6513,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 100,
+            "line": 111,
             "description": "Stores the list of Peer messages timestamp.",
             "itemtype": "attribute",
             "name": "_peerMessagesStamps",
@@ -6506,7 +6525,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 110,
+            "line": 121,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that sends a message to Peers via the Signaling socket connection.",
             "itemtype": "method",
             "name": "sendMessage",
@@ -6532,7 +6551,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 220,
+            "line": 231,
             "description": "Function that process and parses the socket message string received from the Signaling.",
             "itemtype": "method",
             "name": "_processSigMessage",
@@ -6543,7 +6562,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 239,
+            "line": 250,
             "description": "Function that handles and processes the socket message received.",
             "itemtype": "method",
             "name": "_processingSingleMessage",
@@ -6554,7 +6573,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 325,
+            "line": 336,
             "description": "Function that handles the \"peerList\" socket message received.\nSee confluence docs for the \"peerList\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_peerListEventHandler",
@@ -6565,7 +6584,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 341,
+            "line": 352,
             "description": "Function that handles the \"introduceError\" socket message received.\nSee confluence docs for the \"introduceError\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_introduceErrorEventHandler",
@@ -6576,7 +6595,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 357,
+            "line": 368,
             "description": "Function that handles the \"approach\" socket message received.\nSee confluence docs for the \"approach\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_approachEventHandler",
@@ -6587,7 +6606,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 388,
+            "line": 402,
             "description": "Function that handles the \"redirect\" socket message received.\nSee confluence docs for the \"redirect\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_redirectHandler",
@@ -6598,7 +6617,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 420,
+            "line": 434,
             "description": "Function that handles the \"updateUserEvent\" socket message received.\nSee confluence docs for the \"updateUserEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
@@ -6609,7 +6628,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 448,
+            "line": 462,
             "description": "Function that handles the \"roomLockEvent\" socket message received.\nSee confluence docs for the \"roomLockEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
@@ -6620,7 +6639,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 464,
+            "line": 478,
             "description": "Function that handles the \"muteAudioEvent\" socket message received.\nSee confluence docs for the \"muteAudioEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -6631,7 +6650,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 494,
+            "line": 508,
             "description": "Function that handles the \"muteVideoEvent\" socket message received.\nSee confluence docs for the \"muteVideoEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -6642,7 +6661,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 525,
+            "line": 539,
             "description": "Function that handles the \"stream\" socket message received.\nSee confluence docs for the \"stream\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_streamEventHandler",
@@ -6653,7 +6672,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 564,
+            "line": 578,
             "description": "Function that handles the \"bye\" socket message received.\nSee confluence docs for the \"bye\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -6664,7 +6683,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 585,
+            "line": 599,
             "description": "Function that handles the \"private\" socket message received.\nSee confluence docs for the \"private\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -6675,7 +6694,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 607,
+            "line": 621,
             "description": "Function that handles the \"public\" socket message received.\nSee confluence docs for the \"public\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -6686,7 +6705,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 629,
+            "line": 643,
             "description": "Function that handles the \"inRoom\" socket message received.\nSee confluence docs for the \"inRoom\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -6697,7 +6716,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 686,
+            "line": 703,
             "description": "Function that handles the \"enter\" socket message received.\nSee confluence docs for the \"enter\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -6708,7 +6727,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 766,
+            "line": 784,
             "description": "Function that handles the \"restart\" socket message received.\nSee confluence docs for the \"restart\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -6719,7 +6738,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 883,
+            "line": 903,
             "description": "Function that handles the \"welcome\" socket message received.\nSee confluence docs for the \"welcome\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -6730,7 +6749,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 985,
+            "line": 1008,
             "description": "Function that handles the \"offer\" socket message received.\nSee confluence docs for the \"offer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -6741,7 +6760,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1067,
+            "line": 1090,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -6752,7 +6771,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1153,
+            "line": 1176,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -7691,7 +7710,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:336"
+            "line": " source/peer-connection.js:345"
         },
         {
             "message": "unknown tag: trigger",
@@ -7787,7 +7806,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:110"
+            "line": " source/socket-message.js:121"
         },
         {
             "message": "unknown tag: trigger",
@@ -7887,7 +7906,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self._getUserInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:1217"
+            "line": " source/peer-connection.js:1228"
         }
     ]
 }

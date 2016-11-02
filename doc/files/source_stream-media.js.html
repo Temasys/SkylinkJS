@@ -807,7 +807,7 @@ Skylink.prototype.sendStream = function(options, callback) {
       }
 
       if (Object.keys(self._peerConnections).length &gt; 0 || self._hasMCU) {
-        self._refreshPeerConnection(Object.keys(self._peerConnections), function (err, success) {
+        self._refreshPeerConnection(Object.keys(self._peerConnections), false, function (err, success) {
           if (err) {
             log.error(&#x27;Failed refreshing connections for sendStream() -&gt;&#x27;, err);
             if (typeof callback === &#x27;function&#x27;) {
@@ -1338,7 +1338,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
         self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
 
         if (Object.keys(self._peerConnections).length &gt; 0 || self._hasMCU) {
-          self._refreshPeerConnection(Object.keys(self._peerConnections), function (err, success) {
+          self._refreshPeerConnection(Object.keys(self._peerConnections), false, function (err, success) {
             if (err) {
               log.error(&#x27;Failed refreshing connections for shareScreen() -&gt;&#x27;, err);
               if (typeof callback === &#x27;function&#x27;) {
@@ -1472,7 +1472,7 @@ Skylink.prototype.stopScreen = function () {
         this._trigger(&#x27;incomingStream&#x27;, this._user.sid, this._streams.userMedia.stream, true, this.getPeerInfo());
         this._trigger(&#x27;peerUpdated&#x27;, this._user.sid, this.getPeerInfo(), true);
       }
-      this._refreshPeerConnection(Object.keys(this._peerConnections));
+      this._refreshPeerConnection(Object.keys(this._peerConnections), false);
     }
   }
 };
