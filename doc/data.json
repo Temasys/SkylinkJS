@@ -2525,7 +2525,7 @@
             "params": [
                 {
                     "name": "room",
-                    "description": "The Room name.\n- When not provided, its value is the <code>options.defaultRoom</code> provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>.\n  <small>Note that if you are using credentials based authentication, you cannot switch the Room\n  that is not the same as the <code>options.defaultRoom</code> defined in the\n  <a href=\"#method_init\"><code>init()</code> method</a>.</small>",
+                    "description": "The Room name.\n- When not provided or is provided as an empty string, its value is the <code>options.defaultRoom</code>\n  provided in the <a href=\"#method_init\"><code>init()</code> method</a>.\n  <small>Note that if you are using credentials based authentication, you cannot switch the Room\n  that is not the same as the <code>options.defaultRoom</code> defined in the\n  <a href=\"#method_init\"><code>init()</code> method</a>.</small>",
                     "type": "String",
                     "optional": true
                 },
@@ -2675,7 +2675,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 522,
+            "line": 524,
             "description": "Function that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -2740,7 +2740,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 650,
+            "line": 652,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -2750,7 +2750,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 679,
+            "line": 681,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -2760,7 +2760,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 708,
+            "line": 710,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -3125,7 +3125,7 @@
                         },
                         {
                             "name": "defaultRoom",
-                            "description": "The default Room to connect to when no <code>room</code> parameter\n   is provided in  <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a>.\n- When not provided, its value is <code>options.appKey</code>.\n  <small>Note that switching Rooms is not available when using <code>options.credentials</code> based authentication.\n  The Room that User will be connected to is the <code>defaultRoom</code> provided.</small>",
+                            "description": "The default Room to connect to when no <code>room</code> parameter\n   is provided in  <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a>.\n- When not provided or is provided as an empty string, its value is <code>options.appKey</code>.\n  <small>Note that switching Rooms is not available when using <code>options.credentials</code> based authentication.\n  The Room that User will be connected to is the <code>defaultRoom</code> provided.</small>",
                             "type": "String",
                             "optional": true
                         },
@@ -7455,7 +7455,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1660,
+            "line": 1662,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -7466,7 +7466,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1795,
+            "line": 1797,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -7477,7 +7477,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1835,
+            "line": 1837,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -7488,7 +7488,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1869,
+            "line": 1871,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -7711,15 +7711,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:522"
+            "line": " source/room-connection.js:524"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:650"
+            "line": " source/room-connection.js:652"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:679"
+            "line": " source/room-connection.js:681"
         },
         {
             "message": "unknown tag: trigger",

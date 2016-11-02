@@ -310,7 +310,7 @@ Skylink.prototype._room = null;
  *   </a> for more information.</small>
  * @param {String} [options.defaultRoom] The default Room to connect to when no <code>room</code> parameter
  *    is provided in  <a href="#method_joinRoom"><code>joinRoom()</code> method</a>.
- * - When not provided, its value is <code>options.appKey</code>.
+ * - When not provided or is provided as an empty string, its value is <code>options.appKey</code>.
  *   <small>Note that switching Rooms is not available when using <code>options.credentials</code> based authentication.
  *   The Room that User will be connected to is the <code>defaultRoom</code> provided.</small>
  * @param {String} [options.roomServer] The Auth server.

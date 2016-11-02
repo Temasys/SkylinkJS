@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Nov 02 2016 14:18:54 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Nov 02 2016 14:24:12 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10548,7 +10548,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Wed Nov 02 2016 14:18:54 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Nov 02 2016 14:24:12 GMT+0800 (SGT) */
 
 (function() {
 
@@ -16462,8 +16462,8 @@ Skylink.prototype._inRoom = false;
  * Function that starts the Room session.
  * @method joinRoom
  * @param {String} [room] The Room name.
- * - When not provided, its value is the <code>options.defaultRoom</code> provided in the
- *   <a href="#method_init"><code>init()</code> method</a>.
+ * - When not provided or is provided as an empty string, its value is the <code>options.defaultRoom</code>
+ *   provided in the <a href="#method_init"><code>init()</code> method</a>.
  *   <small>Note that if you are using credentials based authentication, you cannot switch the Room
  *   that is not the same as the <code>options.defaultRoom</code> defined in the
  *   <a href="#method_init"><code>init()</code> method</a>.</small>
@@ -16742,6 +16742,8 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
 
   // If no room provided, join the default room
   if (!room) {
+    log.info('Connecting to the default room "' + self._defaultRoom + '" as room name is not provided');
+
     room = self._defaultRoom;
   }
 
@@ -17440,7 +17442,7 @@ Skylink.prototype._room = null;
  *   </a> for more information.</small>
  * @param {String} [options.defaultRoom] The default Room to connect to when no <code>room</code> parameter
  *    is provided in  <a href="#method_joinRoom"><code>joinRoom()</code> method</a>.
- * - When not provided, its value is <code>options.appKey</code>.
+ * - When not provided or is provided as an empty string, its value is <code>options.appKey</code>.
  *   <small>Note that switching Rooms is not available when using <code>options.credentials</code> based authentication.
  *   The Room that User will be connected to is the <code>defaultRoom</code> provided.</small>
  * @param {String} [options.roomServer] The Auth server.

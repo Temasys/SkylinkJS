@@ -125,8 +125,8 @@ Skylink.prototype._inRoom = false;
  * Function that starts the Room session.
  * @method joinRoom
  * @param {String} [room] The Room name.
- * - When not provided, its value is the <code>options.defaultRoom</code> provided in the
- *   <a href="#method_init"><code>init()</code> method</a>.
+ * - When not provided or is provided as an empty string, its value is the <code>options.defaultRoom</code>
+ *   provided in the <a href="#method_init"><code>init()</code> method</a>.
  *   <small>Note that if you are using credentials based authentication, you cannot switch the Room
  *   that is not the same as the <code>options.defaultRoom</code> defined in the
  *   <a href="#method_init"><code>init()</code> method</a>.</small>
@@ -405,6 +405,8 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
 
   // If no room provided, join the default room
   if (!room) {
+    log.info('Connecting to the default room "' + self._defaultRoom + '" as room name is not provided');
+
     room = self._defaultRoom;
   }
 

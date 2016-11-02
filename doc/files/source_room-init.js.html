@@ -401,7 +401,7 @@ Skylink.prototype._room = null;
  *   &lt;/a&gt; for more information.&lt;/small&gt;
  * @param {String} [options.defaultRoom] The default Room to connect to when no &lt;code&gt;room&lt;/code&gt; parameter
  *    is provided in  &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt;.
- * - When not provided, its value is &lt;code&gt;options.appKey&lt;/code&gt;.
+ * - When not provided or is provided as an empty string, its value is &lt;code&gt;options.appKey&lt;/code&gt;.
  *   &lt;small&gt;Note that switching Rooms is not available when using &lt;code&gt;options.credentials&lt;/code&gt; based authentication.
  *   The Room that User will be connected to is the &lt;code&gt;defaultRoom&lt;/code&gt; provided.&lt;/small&gt;
  * @param {String} [options.roomServer] The Auth server.
@@ -673,7 +673,7 @@ Skylink.prototype.init = function(options, callback) {
     region = (typeof options.region === &#x27;string&#x27;) ?
       options.region : region;
     // set the default room
-    defaultRoom = (typeof options.defaultRoom === &#x27;string&#x27;) ?
+    defaultRoom = (typeof options.defaultRoom === &#x27;string&#x27; &amp;&amp; options.defaultRoom) ?
       options.defaultRoom : appKey;
     // set the selected room
     room = defaultRoom;
