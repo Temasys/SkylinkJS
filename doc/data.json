@@ -1872,7 +1872,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 851,
+            "line": 857,
             "description": "Function that starts the Peer connection session.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_addPeer",
@@ -1883,7 +1883,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 903,
+            "line": 909,
             "description": "Function that re-negotiates a Peer connection.\nWe currently do not implement the ICE restart functionality.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -1894,7 +1894,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1025,
+            "line": 1031,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -1905,7 +1905,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1086,
+            "line": 1092,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -1916,13 +1916,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1211,
+            "line": 1217,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self._getUserInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1273,
+            "line": 1279,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -5654,12 +5654,12 @@
                                 },
                                 {
                                     "name": "localDescription.type",
-                                    "description": "The Peer connection local session description type.",
+                                    "description": "The Peer connection local session description type.\n  <small>Defined as <code>null</code> when local session description is not available.</small>",
                                     "type": "String"
                                 },
                                 {
                                     "name": "localDescription.sdp",
-                                    "description": "The Peer connection local session description SDP.",
+                                    "description": "The Peer connection local session description SDP.\n  <small>Defined as <code>null</code> when local session description is not available.</small>",
                                     "type": "String"
                                 },
                                 {
@@ -5669,12 +5669,12 @@
                                 },
                                 {
                                     "name": "remoteDescription.type",
-                                    "description": "The Peer connection remote session description type.",
+                                    "description": "The Peer connection remote session description type.\n  <small>Defined as <code>null</code> when remote session description is not available.</small>",
                                     "type": "String"
                                 },
                                 {
                                     "name": "remoteDescription.sdp",
-                                    "description": "The Peer connection remote session description sdp.",
+                                    "description": "The Peer connection remote session description sdp.\n  <small>Defined as <code>null</code> when remote session description is not available.</small>",
                                     "type": "String"
                                 },
                                 {
@@ -5689,18 +5689,83 @@
                                 },
                                 {
                                     "name": "candidates.sending.host",
-                                    "description": "The Peer connection list of local\n  <code>\"host\"</code> ICE candidates sent.",
+                                    "description": "The Peer connection list of local\n  <code>\"host\"</code> (local network) ICE candidates sent.",
                                     "type": "Array"
                                 },
                                 {
+                                    "name": "candidates.sending.host.#index",
+                                    "description": "The Peer connection local\n  <code>\"host\"</code> (local network) ICE candidate sent.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.sending.host.#index.candidate",
+                                    "description": "The Peer connection local\n  <code>\"host\"</code> (local network) ICE candidate connection description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.sending.host.#index.sdpMid",
+                                    "description": "The Peer connection local\n  <code>\"host\"</code> (local network) ICE candidate identifier based on the local session description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.sending.host.#index.sdpMLineIndex",
+                                    "description": "The Peer connection local\n  <code>\"host\"</code> (local network) ICE candidate media description index (starting from <code>0</code>)\n  based on the local session description.",
+                                    "type": "Number"
+                                },
+                                {
                                     "name": "candidates.sending.srflx",
-                                    "description": "The Peer connection list of local\n  <code>\"srflx\"</code> ICE candidates sent.",
+                                    "description": "The Peer connection list of local\n  <code>\"srflx\"</code> (STUN) ICE candidates sent.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "candidates.sending.srflx.#index",
+                                    "description": "The Peer connection local\n  <code>\"srflx\"</code> (STUN) ICE candidate sent.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.sending.srflx.#index.candidate",
+                                    "description": "The Peer connection local\n  <code>\"srflx\"</code> (STUN) ICE candidate connection description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.sending.srflx.#index.sdpMid",
+                                    "description": "The Peer connection local\n  <code>\"srflx\"</code> (STUN) ICE candidate identifier based on the local session description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.sending.srflx.#index.sdpMLineIndex",
+                                    "description": "The Peer connection local\n  <code>\"srflx\"</code> (STUN) ICE candidate media description index (starting from <code>0</code>)\n  based on the local session description.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "candidates.sending.relay",
+                                    "description": "The Peer connection list of local\n  <code>\"relay\"</code> (TURN) candidates sent.",
                                     "type": "Array"
                                 },
                                 {
                                     "name": "candidates.sending.relay",
-                                    "description": "The Peer connection list of local\n  <code>\"relay\"</code> candidates sent.",
+                                    "description": "The Peer connection list of local\n  <code>\"relay\"</code> (TURN) ICE candidates sent.",
                                     "type": "Array"
+                                },
+                                {
+                                    "name": "candidates.sending.relay.#index",
+                                    "description": "The Peer connection local\n  <code>\"relay\"</code> (TURN) ICE candidate sent.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.sending.relay.#index.candidate",
+                                    "description": "The Peer connection local\n  <code>\"relay\"</code> (TURN) ICE candidate connection description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.sending.relay.#index.sdpMid",
+                                    "description": "The Peer connection local\n  <code>\"relay\"</code> (TURN) ICE candidate identifier based on the local session description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.sending.relay.#index.sdpMLineIndex",
+                                    "description": "The Peer connection local\n  <code>\"relay\"</code> (TURN) ICE candidate media description index (starting from <code>0</code>)\n  based on the local session description.",
+                                    "type": "Number"
                                 },
                                 {
                                     "name": "candidates.receiving",
@@ -5709,18 +5774,78 @@
                                 },
                                 {
                                     "name": "candidates.receiving.host",
-                                    "description": "The Peer connection list of remote\n  <code>\"host\"</code> ICE candidates received.",
+                                    "description": "The Peer connection list of remote\n  <code>\"host\"</code> (local network) ICE candidates received.",
                                     "type": "Array"
+                                },
+                                {
+                                    "name": "candidates.receiving.host.#index",
+                                    "description": "The Peer connection remote\n  <code>\"host\"</code> (local network) ICE candidate received.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.receiving.host.#index.candidate",
+                                    "description": "The Peer connection remote\n  <code>\"host\"</code> (local network) ICE candidate connection description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.receiving.host.#index.sdpMid",
+                                    "description": "The Peer connection remote\n  <code>\"host\"</code> (local network) ICE candidate identifier based on the remote session description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.receiving.host.#index.sdpMLineIndex",
+                                    "description": "The Peer connection remote\n  <code>\"host\"</code> (local network) ICE candidate media description index (starting from <code>0</code>)\n  based on the remote session description.",
+                                    "type": "Number"
                                 },
                                 {
                                     "name": "candidates.receiving.srflx",
-                                    "description": "The Peer connection list of remote\n  <code>\"srflx\"</code> ICE candidates received.",
+                                    "description": "The Peer connection list of remote\n  <code>\"srflx\"</code> (STUN) ICE candidates received.",
                                     "type": "Array"
                                 },
                                 {
+                                    "name": "candidates.receiving.srflx.#index",
+                                    "description": "The Peer connection remote\n  <code>\"srflx\"</code> (STUN) ICE candidate received.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.receiving.srflx.#index.candidate",
+                                    "description": "The Peer connection remote\n  <code>\"srflx\"</code> (STUN) ICE candidate connection description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.receiving.srflx.#index.sdpMid",
+                                    "description": "The Peer connection remote\n  <code>\"srflx\"</code> (STUN) ICE candidate identifier based on the remote session description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.receiving.srflx.#index.sdpMLineIndex",
+                                    "description": "The Peer connection remote\n  <code>\"srflx\"</code> (STUN) ICE candidate media description index (starting from <code>0</code>)\n  based on the remote session description.",
+                                    "type": "Number"
+                                },
+                                {
                                     "name": "candidates.receiving.relay",
-                                    "description": "The Peer connection list of remote\n  <code>\"relay\"</code> ICE candidates received.",
+                                    "description": "The Peer connection list of remote\n  <code>\"relay\"</code> (TURN) ICE candidates received.",
                                     "type": "Array"
+                                },
+                                {
+                                    "name": "candidates.receiving.relay.#index",
+                                    "description": "The Peer connection remote\n  <code>\"relay\"</code> (TURN) ICE candidate received.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.receiving.relay.#index.candidate",
+                                    "description": "The Peer connection remote\n  <code>\"relay\"</code> (TURN) ICE candidate connection description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.receiving.relay.#index.sdpMid",
+                                    "description": "The Peer connection remote\n  <code>\"relay\"</code> (TURN) ICE candidate identifier based on the remote session description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.receiving.relay.#index.sdpMLineIndex",
+                                    "description": "The Peer connection remote\n  <code>\"relay\"</code> (TURN) ICE candidate media description index (starting from <code>0</code>)\n  based on the remote session description.",
+                                    "type": "Number"
                                 },
                                 {
                                     "name": "dataChannels",
@@ -5749,7 +5874,7 @@
                                 },
                                 {
                                     "name": "dataChannels.#channelName.currentTransferId",
-                                    "description": "The Peer connection\n  Datachannel connection current progressing transfer session ID.",
+                                    "description": "The Peer connection\n  Datachannel connection current progressing transfer session ID.\n  <small>Defined as <code>null</code> when there is currently no transfer session progressing on the Datachannel connection.</small>",
                                     "type": "String"
                                 }
                             ]
@@ -5767,7 +5892,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 818,
+            "line": 879,
             "description": "Event triggered when <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> changes\nUser Streams audio and video tracks muted status.",
             "itemtype": "event",
             "name": "localMediaMuted",
@@ -5795,7 +5920,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 835,
+            "line": 896,
             "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.<br>\n  Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates\n  may be received in the session description instead.\n</blockquote>\nEvent triggered when remote ICE candidate processing state has changed for trickle ICE connections.",
             "itemtype": "event",
             "name": "candidateProcessingState",
@@ -5837,7 +5962,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 859,
+            "line": 920,
             "description": "Stores the list of <code>once()</code> event handlers.\nThese events are only triggered once.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -5863,7 +5988,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 872,
+            "line": 933,
             "description": "Stores the timestamps data used for throttling.",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -5875,7 +6000,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 887,
+            "line": 948,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -5899,7 +6024,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 911,
+            "line": 972,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -5936,7 +6061,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 969,
+            "line": 1030,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -5961,7 +6086,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1018,
+            "line": 1079,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -5972,7 +6097,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1072,
+            "line": 1133,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -5983,7 +6108,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1098,
+            "line": 1159,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -5994,7 +6119,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1136,
+            "line": 1197,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",
@@ -7733,7 +7858,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self._getUserInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:1211"
+            "line": " source/peer-connection.js:1217"
         }
     ]
 }

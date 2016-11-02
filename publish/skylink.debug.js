@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Tue Nov 01 2016 23:22:48 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Nov 02 2016 11:13:25 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4096,8 +4096,14 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
         iceConnectionState: pc.iceConnectionState,
         iceGatheringState: pc.iceGatheringState,
         signalingState: pc.signalingState,
-        remoteDescription: pc.remoteDescription,
-        localDescription: pc.localDescription,
+        remoteDescription: {
+          type: pc.remoteDescription ? pc.remoteDescription.type || null : null,
+          sdp : pc.remoteDescription ? pc.remoteDescription.sdp || null : null
+        },
+        localDescription: {
+          type: pc.localDescription ? pc.localDescription.type || null : null,
+          sdp : pc.localDescription ? pc.localDescription.sdp || null : null
+        },
         candidates: clone(self._gatheredCandidates[peerId] || {
           sending: { host: [], srflx: [], relay: [] },
           receiving: { host: [], srflx: [], relay: [] }
@@ -8810,25 +8816,85 @@ Skylink.prototype._EVENTS = {
    * @param {String} stats.connection.signalingState The Peer connection signaling state.
    * @param {JSON} stats.connection.localDescription The Peer connection local session description.
    * @param {String} stats.connection.localDescription.type The Peer connection local session description type.
+   *   <small>Defined as <code>null</code> when local session description is not available.</small>
    * @param {String} stats.connection.localDescription.sdp The Peer connection local session description SDP.
+   *   <small>Defined as <code>null</code> when local session description is not available.</small>
    * @param {JSON} stats.connection.remoteDescription The Peer connection remote session description.
    * @param {String} stats.connection.remoteDescription.type The Peer connection remote session description type.
+   *   <small>Defined as <code>null</code> when remote session description is not available.</small>
    * @param {String} stats.connection.remoteDescription.sdp The Peer connection remote session description sdp.
+   *   <small>Defined as <code>null</code> when remote session description is not available.</small>
    * @param {JSON} stats.connection.candidates The Peer connection list of ICE candidates sent or received.
    * @param {JSON} stats.connection.candidates.sending The Peer connection list of local ICE candidates sent.
    * @param {Array} stats.connection.candidates.sending.host The Peer connection list of local
-   *   <code>"host"</code> ICE candidates sent.
+   *   <code>"host"</code> (local network) ICE candidates sent.
+   * @param {JSON} stats.connection.candidates.sending.host.#index The Peer connection local
+   *   <code>"host"</code> (local network) ICE candidate sent.
+   * @param {String} stats.connection.candidates.sending.host.#index.candidate The Peer connection local
+   *   <code>"host"</code> (local network) ICE candidate connection description.
+   * @param {String} stats.connection.candidates.sending.host.#index.sdpMid The Peer connection local
+   *   <code>"host"</code> (local network) ICE candidate identifier based on the local session description.
+   * @param {Number} stats.connection.candidates.sending.host.#index.sdpMLineIndex The Peer connection local
+   *   <code>"host"</code> (local network) ICE candidate media description index (starting from <code>0</code>)
+   *   based on the local session description.
    * @param {Array} stats.connection.candidates.sending.srflx The Peer connection list of local
-   *   <code>"srflx"</code> ICE candidates sent.
+   *   <code>"srflx"</code> (STUN) ICE candidates sent.
+   * @param {JSON} stats.connection.candidates.sending.srflx.#index The Peer connection local
+   *   <code>"srflx"</code> (STUN) ICE candidate sent.
+   * @param {String} stats.connection.candidates.sending.srflx.#index.candidate The Peer connection local
+   *   <code>"srflx"</code> (STUN) ICE candidate connection description.
+   * @param {String} stats.connection.candidates.sending.srflx.#index.sdpMid The Peer connection local
+   *   <code>"srflx"</code> (STUN) ICE candidate identifier based on the local session description.
+   * @param {Number} stats.connection.candidates.sending.srflx.#index.sdpMLineIndex The Peer connection local
+   *   <code>"srflx"</code> (STUN) ICE candidate media description index (starting from <code>0</code>)
+   *   based on the local session description.
    * @param {Array} stats.connection.candidates.sending.relay The Peer connection list of local
-   *   <code>"relay"</code> candidates sent.
+   *   <code>"relay"</code> (TURN) candidates sent.
+   * @param {Array} stats.connection.candidates.sending.relay The Peer connection list of local
+   *   <code>"relay"</code> (TURN) ICE candidates sent.
+   * @param {JSON} stats.connection.candidates.sending.relay.#index The Peer connection local
+   *   <code>"relay"</code> (TURN) ICE candidate sent.
+   * @param {String} stats.connection.candidates.sending.relay.#index.candidate The Peer connection local
+   *   <code>"relay"</code> (TURN) ICE candidate connection description.
+   * @param {String} stats.connection.candidates.sending.relay.#index.sdpMid The Peer connection local
+   *   <code>"relay"</code> (TURN) ICE candidate identifier based on the local session description.
+   * @param {Number} stats.connection.candidates.sending.relay.#index.sdpMLineIndex The Peer connection local
+   *   <code>"relay"</code> (TURN) ICE candidate media description index (starting from <code>0</code>)
+   *   based on the local session description.
    * @param {JSON} stats.connection.candidates.receiving The Peer connection list of remote ICE candidates received.
    * @param {Array} stats.connection.candidates.receiving.host The Peer connection list of remote
-   *   <code>"host"</code> ICE candidates received.
+   *   <code>"host"</code> (local network) ICE candidates received.
+   * @param {JSON} stats.connection.candidates.receiving.host.#index The Peer connection remote
+   *   <code>"host"</code> (local network) ICE candidate received.
+   * @param {String} stats.connection.candidates.receiving.host.#index.candidate The Peer connection remote
+   *   <code>"host"</code> (local network) ICE candidate connection description.
+   * @param {String} stats.connection.candidates.receiving.host.#index.sdpMid The Peer connection remote
+   *   <code>"host"</code> (local network) ICE candidate identifier based on the remote session description.
+   * @param {Number} stats.connection.candidates.receiving.host.#index.sdpMLineIndex The Peer connection remote
+   *   <code>"host"</code> (local network) ICE candidate media description index (starting from <code>0</code>)
+   *   based on the remote session description.
    * @param {Array} stats.connection.candidates.receiving.srflx The Peer connection list of remote
-   *   <code>"srflx"</code> ICE candidates received.
+   *   <code>"srflx"</code> (STUN) ICE candidates received.
+   * @param {JSON} stats.connection.candidates.receiving.srflx.#index The Peer connection remote
+   *   <code>"srflx"</code> (STUN) ICE candidate received.
+   * @param {String} stats.connection.candidates.receiving.srflx.#index.candidate The Peer connection remote
+   *   <code>"srflx"</code> (STUN) ICE candidate connection description.
+   * @param {String} stats.connection.candidates.receiving.srflx.#index.sdpMid The Peer connection remote
+   *   <code>"srflx"</code> (STUN) ICE candidate identifier based on the remote session description.
+   * @param {Number} stats.connection.candidates.receiving.srflx.#index.sdpMLineIndex The Peer connection remote
+   *   <code>"srflx"</code> (STUN) ICE candidate media description index (starting from <code>0</code>)
+   *   based on the remote session description.
    * @param {Array} stats.connection.candidates.receiving.relay The Peer connection list of remote
-   *   <code>"relay"</code> ICE candidates received.
+   *   <code>"relay"</code> (TURN) ICE candidates received.
+   * @param {JSON} stats.connection.candidates.receiving.relay.#index The Peer connection remote
+   *   <code>"relay"</code> (TURN) ICE candidate received.
+   * @param {String} stats.connection.candidates.receiving.relay.#index.candidate The Peer connection remote
+   *   <code>"relay"</code> (TURN) ICE candidate connection description.
+   * @param {String} stats.connection.candidates.receiving.relay.#index.sdpMid The Peer connection remote
+   *   <code>"relay"</code> (TURN) ICE candidate identifier based on the remote session description.
+   * @param {Number} stats.connection.candidates.receiving.relay.#index.sdpMLineIndex The Peer connection remote
+   *   <code>"relay"</code> (TURN) ICE candidate media description index (starting from <code>0</code>)
+   *   based on the remote session description.
    * @param {JSON} stats.connection.dataChannels The Peer connection list of Datachannel connections.
    * @param {JSON} stats.connection.dataChannels.#channelName The Peer connection Datachannel connection stats.
    * @param {String} stats.connection.dataChannels.#channelName.label The Peer connection Datachannel connection ID.
@@ -8838,6 +8904,7 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.DATA_CHANNEL_TYPE]
    * @param {String} stats.connection.dataChannels.#channelName.currentTransferId The Peer connection
    *   Datachannel connection current progressing transfer session ID.
+   *   <small>Defined as <code>null</code> when there is currently no transfer session progressing on the Datachannel connection.</small>
    * @param {Error} error The error object received.
    *   <small>Defined only when <code>state</code> payload is <code>RETRIEVE_ERROR</code>.</small>
    * @for Skylink

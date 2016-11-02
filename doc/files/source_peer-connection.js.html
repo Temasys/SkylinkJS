@@ -634,8 +634,14 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
         iceConnectionState: pc.iceConnectionState,
         iceGatheringState: pc.iceGatheringState,
         signalingState: pc.signalingState,
-        remoteDescription: pc.remoteDescription,
-        localDescription: pc.localDescription,
+        remoteDescription: {
+          type: pc.remoteDescription ? pc.remoteDescription.type || null : null,
+          sdp : pc.remoteDescription ? pc.remoteDescription.sdp || null : null
+        },
+        localDescription: {
+          type: pc.localDescription ? pc.localDescription.type || null : null,
+          sdp : pc.localDescription ? pc.localDescription.sdp || null : null
+        },
         candidates: clone(self._gatheredCandidates[peerId] || {
           sending: { host: [], srflx: [], relay: [] },
           receiving: { host: [], srflx: [], relay: [] }
