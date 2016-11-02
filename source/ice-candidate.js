@@ -219,7 +219,11 @@ Skylink.prototype._addIceCandidateToQueue = function(targetMid, canId, candidate
   log.debug([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Buffering ICE candidate.']);
 
   this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.BUFFERED,
-    targetMid, canId, candidateType, candidate.candidate, null);
+    targetMid, canId, candidateType, {
+    candidate: candidate.candidate,
+    sdpMid: candidate.sdpMid,
+    sdpMLineIndex: candidate.sdpMLineIndex
+  }, null);
 
   this._peerCandidatesQueue[targetMid] = this._peerCandidatesQueue[targetMid] || [];
   this._peerCandidatesQueue[targetMid].push([canId, candidate]);
@@ -263,28 +267,43 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
     log.log([targetMid, 'RTCIceCandidate', canId + ':' + candidateType,
       'Added ICE candidate successfully.']);
     self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.PROCESS_SUCCESS,
-      targetMid, canId, candidateType, candidate.candidate, null);
+      targetMid, canId, candidateType, {
+      candidate: candidate.candidate,
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex
+    }, null);
   };
 
   var onErrorCbFn = function (error) {
     log.error([targetMid, 'RTCIceCandidate', canId + ':' + candidateType,
       'Failed adding ICE candidate ->'], error);
     self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.PROCESS_ERROR,
-      targetMid, canId, candidateType, candidate.candidate, error);
+      targetMid, canId, candidateType, {
+      candidate: candidate.candidate,
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex
+    }, error);
   };
 
   log.debug([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Adding ICE candidate.']);
 
   self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.PROCESSING,
-    targetMid, canId, candidateType, candidate.candidate, null);
+    targetMid, canId, candidateType, {
+      candidate: candidate.candidate,
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex
+    }, null);
 
   if (!(self._peerConnections[targetMid] &&
     self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
     log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping ICE candidate ' +
       'as Peer connection does not exists or is closed']);
     self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.DROPPED,
-      targetMid, canId, candidateType, candidate.candidate,
-      new Error('Failed processing ICE candidate as Peer connection does not exists or is closed.'));
+      targetMid, canId, candidateType, {
+      candidate: candidate.candidate,
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex
+    }, new Error('Failed processing ICE candidate as Peer connection does not exists or is closed.'));
     return;
   }
 

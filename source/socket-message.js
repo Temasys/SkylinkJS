@@ -1092,15 +1092,22 @@ Skylink.prototype._candidateHandler = function(message) {
   log.debug([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Received ICE candidate ->'], candidate);
 
   this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.RECEIVED,
-    targetMid, canId, candidateType, candidate.candidate, null);
+    targetMid, canId, candidateType, {
+    candidate: candidate.candidate,
+    sdpMid: candidate.sdpMid,
+    sdpMLineIndex: candidate.sdpMLineIndex
+  }, null);
 
   if (!(this._peerConnections[targetMid] &&
     this._peerConnections[targetMid].signalingState !== this.PEER_CONNECTION_STATE.CLOSED)) {
     log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping ICE candidate ' +
       'as Peer connection does not exists or is closed'], this._peerConnections[targetMid].signalingState);
     this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.DROPPED,
-      targetMid, canId, candidateType, candidate.candidate,
-      new Error('Failed processing ICE candidate as Peer connection does not exists or is closed.'));
+      targetMid, canId, candidateType, {
+      candidate: candidate.candidate,
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex
+    }, new Error('Failed processing ICE candidate as Peer connection does not exists or is closed.'));
     return;
   }
 
@@ -1109,8 +1116,11 @@ Skylink.prototype._candidateHandler = function(message) {
       log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping received ICE candidate as ' +
         'it matches ICE candidate filtering flag ->'], candidate);
       this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.DROPPED,
-        targetMid, canId, candidateType, candidate.candidate,
-        new Error('Dropping of processing ICE candidate as it matches ICE candidate filtering flag.'));
+        targetMid, canId, candidateType, {
+        candidate: candidate.candidate,
+        sdpMid: candidate.sdpMid,
+        sdpMLineIndex: candidate.sdpMLineIndex
+      }, new Error('Dropping of processing ICE candidate as it matches ICE candidate filtering flag.'));
       return;
     }
 

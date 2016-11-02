@@ -1401,7 +1401,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 228,
+            "line": 232,
             "description": "Function that adds all the Peer connection buffered ICE candidates received.\nThis should be called only after the remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateFromQueue",
@@ -1412,7 +1412,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 251,
+            "line": 255,
             "description": "Function that adds the ICE candidate to Peer connection.",
             "itemtype": "method",
             "name": "_addIceCandidate",
@@ -5694,7 +5694,7 @@
                                 },
                                 {
                                     "name": "candidates.sending.host.#index",
-                                    "description": "The Peer connection local\n  <code>\"host\"</code> (local network) ICE candidate sent.",
+                                    "description": "The Peer connection local\n  <code>\"host\"</code> (local network) ICE candidate.",
                                     "type": "JSON"
                                 },
                                 {
@@ -5719,7 +5719,7 @@
                                 },
                                 {
                                     "name": "candidates.sending.srflx.#index",
-                                    "description": "The Peer connection local\n  <code>\"srflx\"</code> (STUN) ICE candidate sent.",
+                                    "description": "The Peer connection local\n  <code>\"srflx\"</code> (STUN) ICE candidate.",
                                     "type": "JSON"
                                 },
                                 {
@@ -5743,13 +5743,8 @@
                                     "type": "Array"
                                 },
                                 {
-                                    "name": "candidates.sending.relay",
-                                    "description": "The Peer connection list of local\n  <code>\"relay\"</code> (TURN) ICE candidates sent.",
-                                    "type": "Array"
-                                },
-                                {
                                     "name": "candidates.sending.relay.#index",
-                                    "description": "The Peer connection local\n  <code>\"relay\"</code> (TURN) ICE candidate sent.",
+                                    "description": "The Peer connection local\n  <code>\"relay\"</code> (TURN) ICE candidate.",
                                     "type": "JSON"
                                 },
                                 {
@@ -5779,7 +5774,7 @@
                                 },
                                 {
                                     "name": "candidates.receiving.host.#index",
-                                    "description": "The Peer connection remote\n  <code>\"host\"</code> (local network) ICE candidate received.",
+                                    "description": "The Peer connection remote\n  <code>\"host\"</code> (local network) ICE candidate.",
                                     "type": "JSON"
                                 },
                                 {
@@ -5804,7 +5799,7 @@
                                 },
                                 {
                                     "name": "candidates.receiving.srflx.#index",
-                                    "description": "The Peer connection remote\n  <code>\"srflx\"</code> (STUN) ICE candidate received.",
+                                    "description": "The Peer connection remote\n  <code>\"srflx\"</code> (STUN) ICE candidate.",
                                     "type": "JSON"
                                 },
                                 {
@@ -5829,7 +5824,7 @@
                                 },
                                 {
                                     "name": "candidates.receiving.relay.#index",
-                                    "description": "The Peer connection remote\n  <code>\"relay\"</code> (TURN) ICE candidate received.",
+                                    "description": "The Peer connection remote\n  <code>\"relay\"</code> (TURN) ICE candidate.",
                                     "type": "JSON"
                                 },
                                 {
@@ -5892,7 +5887,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 879,
+            "line": 877,
             "description": "Event triggered when <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> changes\nUser Streams audio and video tracks muted status.",
             "itemtype": "event",
             "name": "localMediaMuted",
@@ -5920,8 +5915,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 896,
-            "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.<br>\n  Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates\n  may be received in the session description instead.\n</blockquote>\nEvent triggered when remote ICE candidate processing state has changed for trickle ICE connections.",
+            "line": 894,
+            "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.<br>\n  Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates\n  may be received in the session description instead.\n</blockquote>\nEvent triggered when remote ICE candidate processing state has changed when Peer is using trickle ICE.",
             "itemtype": "event",
             "name": "candidateProcessingState",
             "params": [
@@ -5942,13 +5937,30 @@
                 },
                 {
                     "name": "candidateType",
-                    "description": "The remote ICE candidate type.",
+                    "description": "The remote ICE candidate type.\n  <small>Expected values are <code>\"host\"</code> (local network), <code>\"srflx\"</code> (STUN) and <code>\"relay\" (TURN).</small>",
                     "type": "String"
                 },
                 {
-                    "name": "candidateSdp",
-                    "description": "The remote ICE candidate connection string.",
-                    "type": "String"
+                    "name": "candidate",
+                    "description": "The remote ICE candidate.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "candidate",
+                            "description": "The remote ICE candidate connection description.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "sdpMid",
+                            "description": "The remote ICE candidate identifier based on the remote session description.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "sdpMLineIndex",
+                            "description": "The remote ICE candidate media description index\n  (starting from <code>0</code>) based on the remote session description.",
+                            "type": "Number"
+                        }
+                    ]
                 },
                 {
                     "name": "error",
@@ -5962,7 +5974,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 920,
+            "line": 923,
             "description": "Stores the list of <code>once()</code> event handlers.\nThese events are only triggered once.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -5988,7 +6000,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 933,
+            "line": 936,
             "description": "Stores the timestamps data used for throttling.",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -6000,7 +6012,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 948,
+            "line": 951,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -6024,7 +6036,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 972,
+            "line": 975,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -6061,7 +6073,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1030,
+            "line": 1033,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -6086,7 +6098,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1079,
+            "line": 1082,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -6097,7 +6109,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1133,
+            "line": 1136,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -6108,7 +6120,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1159,
+            "line": 1162,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -6119,7 +6131,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1197,
+            "line": 1200,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",
@@ -6701,7 +6713,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 981,
+            "line": 985,
             "description": "Function that handles the \"offer\" socket message received.\nSee confluence docs for the \"offer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -6712,7 +6724,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1063,
+            "line": 1067,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -6723,7 +6735,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1139,
+            "line": 1153,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",

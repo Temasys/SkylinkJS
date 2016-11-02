@@ -310,7 +310,11 @@ Skylink.prototype._addIceCandidateToQueue = function(targetMid, canId, candidate
   log.debug([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType, &#x27;Buffering ICE candidate.&#x27;]);
 
   this._trigger(&#x27;candidateProcessingState&#x27;, this.CANDIDATE_PROCESSING_STATE.BUFFERED,
-    targetMid, canId, candidateType, candidate.candidate, null);
+    targetMid, canId, candidateType, {
+    candidate: candidate.candidate,
+    sdpMid: candidate.sdpMid,
+    sdpMLineIndex: candidate.sdpMLineIndex
+  }, null);
 
   this._peerCandidatesQueue[targetMid] = this._peerCandidatesQueue[targetMid] || [];
   this._peerCandidatesQueue[targetMid].push([canId, candidate]);
@@ -354,28 +358,43 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
     log.log([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType,
       &#x27;Added ICE candidate successfully.&#x27;]);
     self._trigger(&#x27;candidateProcessingState&#x27;, self.CANDIDATE_PROCESSING_STATE.PROCESS_SUCCESS,
-      targetMid, canId, candidateType, candidate.candidate, null);
+      targetMid, canId, candidateType, {
+      candidate: candidate.candidate,
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex
+    }, null);
   };
 
   var onErrorCbFn = function (error) {
     log.error([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType,
       &#x27;Failed adding ICE candidate -&gt;&#x27;], error);
     self._trigger(&#x27;candidateProcessingState&#x27;, self.CANDIDATE_PROCESSING_STATE.PROCESS_ERROR,
-      targetMid, canId, candidateType, candidate.candidate, error);
+      targetMid, canId, candidateType, {
+      candidate: candidate.candidate,
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex
+    }, error);
   };
 
   log.debug([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType, &#x27;Adding ICE candidate.&#x27;]);
 
   self._trigger(&#x27;candidateProcessingState&#x27;, self.CANDIDATE_PROCESSING_STATE.PROCESSING,
-    targetMid, canId, candidateType, candidate.candidate, null);
+    targetMid, canId, candidateType, {
+      candidate: candidate.candidate,
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex
+    }, null);
 
   if (!(self._peerConnections[targetMid] &amp;&amp;
     self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
     log.warn([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType, &#x27;Dropping ICE candidate &#x27; +
       &#x27;as Peer connection does not exists or is closed&#x27;]);
     self._trigger(&#x27;candidateProcessingState&#x27;, self.CANDIDATE_PROCESSING_STATE.DROPPED,
-      targetMid, canId, candidateType, candidate.candidate,
-      new Error(&#x27;Failed processing ICE candidate as Peer connection does not exists or is closed.&#x27;));
+      targetMid, canId, candidateType, {
+      candidate: candidate.candidate,
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex
+    }, new Error(&#x27;Failed processing ICE candidate as Peer connection does not exists or is closed.&#x27;));
     return;
   }
 

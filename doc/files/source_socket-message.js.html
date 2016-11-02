@@ -791,7 +791,7 @@ Skylink.prototype._enterHandler = function(message) {
   log.log([targetMid, null, message.type, &#x27;Received Peer\&#x27;s presence -&gt;&#x27;], message.userInfo);
 
   var agent = {
-    agent: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
+    name: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
     version: typeof message.version === &#x27;number&#x27; ? message.version : 0,
     os: message.os || &#x27;&#x27;,
     pluginVersion: message.temasysPluginVersion || null
@@ -893,7 +893,7 @@ Skylink.prototype._restartHandler = function(message){
   }
 
   var agent = {
-    agent: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
+    name: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
     version: typeof message.version === &#x27;number&#x27; ? message.version : 0,
     os: message.os || &#x27;&#x27;,
     pluginVersion: message.temasysPluginVersion || null
@@ -989,7 +989,7 @@ Skylink.prototype._welcomeHandler = function(message) {
   log.log([targetMid, null, message.type, &#x27;Received Peer\&#x27;s presence -&gt;&#x27;], message.userInfo);
 
   var agent = {
-    agent: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
+    name: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
     version: typeof message.version === &#x27;number&#x27; ? message.version : 0,
     os: message.os || &#x27;&#x27;,
     pluginVersion: message.temasysPluginVersion || null
@@ -1048,7 +1048,11 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   if (beOfferer) {
     log.debug([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Starting negotiation&#x27;], agent);
-    this._doOffer(targetMid, agent);
+    this._doOffer(targetMid, {
+      agent: agent.name,
+      version: agent.version,
+      os: agent.os
+    });
 
   } else {
     log.debug([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Peer has to start the connection. Resending message&#x27;], beOfferer);
@@ -1179,15 +1183,22 @@ Skylink.prototype._candidateHandler = function(message) {
   log.debug([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType, &#x27;Received ICE candidate -&gt;&#x27;], candidate);
 
   this._trigger(&#x27;candidateProcessingState&#x27;, this.CANDIDATE_PROCESSING_STATE.RECEIVED,
-    targetMid, canId, candidateType, candidate.candidate, null);
+    targetMid, canId, candidateType, {
+    candidate: candidate.candidate,
+    sdpMid: candidate.sdpMid,
+    sdpMLineIndex: candidate.sdpMLineIndex
+  }, null);
 
   if (!(this._peerConnections[targetMid] &amp;&amp;
     this._peerConnections[targetMid].signalingState !== this.PEER_CONNECTION_STATE.CLOSED)) {
     log.warn([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType, &#x27;Dropping ICE candidate &#x27; +
       &#x27;as Peer connection does not exists or is closed&#x27;], this._peerConnections[targetMid].signalingState);
     this._trigger(&#x27;candidateProcessingState&#x27;, this.CANDIDATE_PROCESSING_STATE.DROPPED,
-      targetMid, canId, candidateType, candidate.candidate,
-      new Error(&#x27;Failed processing ICE candidate as Peer connection does not exists or is closed.&#x27;));
+      targetMid, canId, candidateType, {
+      candidate: candidate.candidate,
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex
+    }, new Error(&#x27;Failed processing ICE candidate as Peer connection does not exists or is closed.&#x27;));
     return;
   }
 
@@ -1196,8 +1207,11 @@ Skylink.prototype._candidateHandler = function(message) {
       log.warn([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType, &#x27;Dropping received ICE candidate as &#x27; +
         &#x27;it matches ICE candidate filtering flag -&gt;&#x27;], candidate);
       this._trigger(&#x27;candidateProcessingState&#x27;, this.CANDIDATE_PROCESSING_STATE.DROPPED,
-        targetMid, canId, candidateType, candidate.candidate,
-        new Error(&#x27;Dropping of processing ICE candidate as it matches ICE candidate filtering flag.&#x27;));
+        targetMid, canId, candidateType, {
+        candidate: candidate.candidate,
+        sdpMid: candidate.sdpMid,
+        sdpMLineIndex: candidate.sdpMLineIndex
+      }, new Error(&#x27;Dropping of processing ICE candidate as it matches ICE candidate filtering flag.&#x27;));
       return;
     }
 

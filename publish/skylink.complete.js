@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Nov 02 2016 11:17:24 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Nov 02 2016 11:47:37 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -10548,7 +10548,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Wed Nov 02 2016 11:17:24 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Nov 02 2016 11:47:37 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13728,7 +13728,11 @@ Skylink.prototype._addIceCandidateToQueue = function(targetMid, canId, candidate
   log.debug([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Buffering ICE candidate.']);
 
   this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.BUFFERED,
-    targetMid, canId, candidateType, candidate.candidate, null);
+    targetMid, canId, candidateType, {
+    candidate: candidate.candidate,
+    sdpMid: candidate.sdpMid,
+    sdpMLineIndex: candidate.sdpMLineIndex
+  }, null);
 
   this._peerCandidatesQueue[targetMid] = this._peerCandidatesQueue[targetMid] || [];
   this._peerCandidatesQueue[targetMid].push([canId, candidate]);
@@ -13772,28 +13776,43 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
     log.log([targetMid, 'RTCIceCandidate', canId + ':' + candidateType,
       'Added ICE candidate successfully.']);
     self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.PROCESS_SUCCESS,
-      targetMid, canId, candidateType, candidate.candidate, null);
+      targetMid, canId, candidateType, {
+      candidate: candidate.candidate,
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex
+    }, null);
   };
 
   var onErrorCbFn = function (error) {
     log.error([targetMid, 'RTCIceCandidate', canId + ':' + candidateType,
       'Failed adding ICE candidate ->'], error);
     self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.PROCESS_ERROR,
-      targetMid, canId, candidateType, candidate.candidate, error);
+      targetMid, canId, candidateType, {
+      candidate: candidate.candidate,
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex
+    }, error);
   };
 
   log.debug([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Adding ICE candidate.']);
 
   self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.PROCESSING,
-    targetMid, canId, candidateType, candidate.candidate, null);
+    targetMid, canId, candidateType, {
+      candidate: candidate.candidate,
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex
+    }, null);
 
   if (!(self._peerConnections[targetMid] &&
     self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
     log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping ICE candidate ' +
       'as Peer connection does not exists or is closed']);
     self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.DROPPED,
-      targetMid, canId, candidateType, candidate.candidate,
-      new Error('Failed processing ICE candidate as Peer connection does not exists or is closed.'));
+      targetMid, canId, candidateType, {
+      candidate: candidate.candidate,
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex
+    }, new Error('Failed processing ICE candidate as Peer connection does not exists or is closed.'));
     return;
   }
 
@@ -19379,7 +19398,7 @@ Skylink.prototype._EVENTS = {
    * @param {Array} stats.connection.candidates.sending.host The Peer connection list of local
    *   <code>"host"</code> (local network) ICE candidates sent.
    * @param {JSON} stats.connection.candidates.sending.host.#index The Peer connection local
-   *   <code>"host"</code> (local network) ICE candidate sent.
+   *   <code>"host"</code> (local network) ICE candidate.
    * @param {String} stats.connection.candidates.sending.host.#index.candidate The Peer connection local
    *   <code>"host"</code> (local network) ICE candidate connection description.
    * @param {String} stats.connection.candidates.sending.host.#index.sdpMid The Peer connection local
@@ -19390,7 +19409,7 @@ Skylink.prototype._EVENTS = {
    * @param {Array} stats.connection.candidates.sending.srflx The Peer connection list of local
    *   <code>"srflx"</code> (STUN) ICE candidates sent.
    * @param {JSON} stats.connection.candidates.sending.srflx.#index The Peer connection local
-   *   <code>"srflx"</code> (STUN) ICE candidate sent.
+   *   <code>"srflx"</code> (STUN) ICE candidate.
    * @param {String} stats.connection.candidates.sending.srflx.#index.candidate The Peer connection local
    *   <code>"srflx"</code> (STUN) ICE candidate connection description.
    * @param {String} stats.connection.candidates.sending.srflx.#index.sdpMid The Peer connection local
@@ -19400,10 +19419,8 @@ Skylink.prototype._EVENTS = {
    *   based on the local session description.
    * @param {Array} stats.connection.candidates.sending.relay The Peer connection list of local
    *   <code>"relay"</code> (TURN) candidates sent.
-   * @param {Array} stats.connection.candidates.sending.relay The Peer connection list of local
-   *   <code>"relay"</code> (TURN) ICE candidates sent.
    * @param {JSON} stats.connection.candidates.sending.relay.#index The Peer connection local
-   *   <code>"relay"</code> (TURN) ICE candidate sent.
+   *   <code>"relay"</code> (TURN) ICE candidate.
    * @param {String} stats.connection.candidates.sending.relay.#index.candidate The Peer connection local
    *   <code>"relay"</code> (TURN) ICE candidate connection description.
    * @param {String} stats.connection.candidates.sending.relay.#index.sdpMid The Peer connection local
@@ -19415,7 +19432,7 @@ Skylink.prototype._EVENTS = {
    * @param {Array} stats.connection.candidates.receiving.host The Peer connection list of remote
    *   <code>"host"</code> (local network) ICE candidates received.
    * @param {JSON} stats.connection.candidates.receiving.host.#index The Peer connection remote
-   *   <code>"host"</code> (local network) ICE candidate received.
+   *   <code>"host"</code> (local network) ICE candidate.
    * @param {String} stats.connection.candidates.receiving.host.#index.candidate The Peer connection remote
    *   <code>"host"</code> (local network) ICE candidate connection description.
    * @param {String} stats.connection.candidates.receiving.host.#index.sdpMid The Peer connection remote
@@ -19426,7 +19443,7 @@ Skylink.prototype._EVENTS = {
    * @param {Array} stats.connection.candidates.receiving.srflx The Peer connection list of remote
    *   <code>"srflx"</code> (STUN) ICE candidates received.
    * @param {JSON} stats.connection.candidates.receiving.srflx.#index The Peer connection remote
-   *   <code>"srflx"</code> (STUN) ICE candidate received.
+   *   <code>"srflx"</code> (STUN) ICE candidate.
    * @param {String} stats.connection.candidates.receiving.srflx.#index.candidate The Peer connection remote
    *   <code>"srflx"</code> (STUN) ICE candidate connection description.
    * @param {String} stats.connection.candidates.receiving.srflx.#index.sdpMid The Peer connection remote
@@ -19437,7 +19454,7 @@ Skylink.prototype._EVENTS = {
    * @param {Array} stats.connection.candidates.receiving.relay The Peer connection list of remote
    *   <code>"relay"</code> (TURN) ICE candidates received.
    * @param {JSON} stats.connection.candidates.receiving.relay.#index The Peer connection remote
-   *   <code>"relay"</code> (TURN) ICE candidate received.
+   *   <code>"relay"</code> (TURN) ICE candidate.
    * @param {String} stats.connection.candidates.receiving.relay.#index.candidate The Peer connection remote
    *   <code>"relay"</code> (TURN) ICE candidate connection description.
    * @param {String} stats.connection.candidates.receiving.relay.#index.sdpMid The Peer connection remote
@@ -19486,7 +19503,7 @@ Skylink.prototype._EVENTS = {
    *   Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates
    *   may be received in the session description instead.
    * </blockquote>
-   * Event triggered when remote ICE candidate processing state has changed for trickle ICE connections.
+   * Event triggered when remote ICE candidate processing state has changed when Peer is using trickle ICE.
    * @event candidateProcessingState
    * @param {String} state The ICE candidate processing state.
    *   [Rel: Skylink.CANDIDATE_PROCESSING_STATE]
@@ -19494,7 +19511,12 @@ Skylink.prototype._EVENTS = {
    * @param {String} candidateId The remote ICE candidate session ID.
    *   <small>Note that this value is not related to WebRTC API but for identification of remote ICE candidate received.</small>
    * @param {String} candidateType The remote ICE candidate type.
-   * @param {String} candidateSdp The remote ICE candidate connection string.
+   *   <small>Expected values are <code>"host"</code> (local network), <code>"srflx"</code> (STUN) and <code>"relay" (TURN).</small>
+   * @param {JSON} candidate The remote ICE candidate.
+   * @param {String} candidate.candidate The remote ICE candidate connection description.
+   * @param {String} candidate.sdpMid The remote ICE candidate identifier based on the remote session description.
+   * @param {Number} candidate.sdpMLineIndex The remote ICE candidate media description index
+   *   (starting from <code>0</code>) based on the remote session description.
    * @param {Error} [error] The error object.
    *   <small>Defined only when <code>state</code> is <code>DROPPED</code> or <code>PROCESS_ERROR</code>.</small>
    * @for Skylink
@@ -21468,15 +21490,22 @@ Skylink.prototype._candidateHandler = function(message) {
   log.debug([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Received ICE candidate ->'], candidate);
 
   this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.RECEIVED,
-    targetMid, canId, candidateType, candidate.candidate, null);
+    targetMid, canId, candidateType, {
+    candidate: candidate.candidate,
+    sdpMid: candidate.sdpMid,
+    sdpMLineIndex: candidate.sdpMLineIndex
+  }, null);
 
   if (!(this._peerConnections[targetMid] &&
     this._peerConnections[targetMid].signalingState !== this.PEER_CONNECTION_STATE.CLOSED)) {
     log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping ICE candidate ' +
       'as Peer connection does not exists or is closed'], this._peerConnections[targetMid].signalingState);
     this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.DROPPED,
-      targetMid, canId, candidateType, candidate.candidate,
-      new Error('Failed processing ICE candidate as Peer connection does not exists or is closed.'));
+      targetMid, canId, candidateType, {
+      candidate: candidate.candidate,
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex
+    }, new Error('Failed processing ICE candidate as Peer connection does not exists or is closed.'));
     return;
   }
 
@@ -21485,8 +21514,11 @@ Skylink.prototype._candidateHandler = function(message) {
       log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping received ICE candidate as ' +
         'it matches ICE candidate filtering flag ->'], candidate);
       this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.DROPPED,
-        targetMid, canId, candidateType, candidate.candidate,
-        new Error('Dropping of processing ICE candidate as it matches ICE candidate filtering flag.'));
+        targetMid, canId, candidateType, {
+        candidate: candidate.candidate,
+        sdpMid: candidate.sdpMid,
+        sdpMLineIndex: candidate.sdpMLineIndex
+      }, new Error('Dropping of processing ICE candidate as it matches ICE candidate filtering flag.'));
       return;
     }
 

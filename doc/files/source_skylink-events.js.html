@@ -884,7 +884,7 @@ Skylink.prototype._EVENTS = {
    * @param {Array} stats.connection.candidates.sending.host The Peer connection list of local
    *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network) ICE candidates sent.
    * @param {JSON} stats.connection.candidates.sending.host.#index The Peer connection local
-   *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network) ICE candidate sent.
+   *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network) ICE candidate.
    * @param {String} stats.connection.candidates.sending.host.#index.candidate The Peer connection local
    *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network) ICE candidate connection description.
    * @param {String} stats.connection.candidates.sending.host.#index.sdpMid The Peer connection local
@@ -895,7 +895,7 @@ Skylink.prototype._EVENTS = {
    * @param {Array} stats.connection.candidates.sending.srflx The Peer connection list of local
    *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) ICE candidates sent.
    * @param {JSON} stats.connection.candidates.sending.srflx.#index The Peer connection local
-   *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) ICE candidate sent.
+   *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) ICE candidate.
    * @param {String} stats.connection.candidates.sending.srflx.#index.candidate The Peer connection local
    *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) ICE candidate connection description.
    * @param {String} stats.connection.candidates.sending.srflx.#index.sdpMid The Peer connection local
@@ -905,10 +905,8 @@ Skylink.prototype._EVENTS = {
    *   based on the local session description.
    * @param {Array} stats.connection.candidates.sending.relay The Peer connection list of local
    *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; (TURN) candidates sent.
-   * @param {Array} stats.connection.candidates.sending.relay The Peer connection list of local
-   *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; (TURN) ICE candidates sent.
    * @param {JSON} stats.connection.candidates.sending.relay.#index The Peer connection local
-   *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; (TURN) ICE candidate sent.
+   *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; (TURN) ICE candidate.
    * @param {String} stats.connection.candidates.sending.relay.#index.candidate The Peer connection local
    *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; (TURN) ICE candidate connection description.
    * @param {String} stats.connection.candidates.sending.relay.#index.sdpMid The Peer connection local
@@ -920,7 +918,7 @@ Skylink.prototype._EVENTS = {
    * @param {Array} stats.connection.candidates.receiving.host The Peer connection list of remote
    *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network) ICE candidates received.
    * @param {JSON} stats.connection.candidates.receiving.host.#index The Peer connection remote
-   *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network) ICE candidate received.
+   *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network) ICE candidate.
    * @param {String} stats.connection.candidates.receiving.host.#index.candidate The Peer connection remote
    *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network) ICE candidate connection description.
    * @param {String} stats.connection.candidates.receiving.host.#index.sdpMid The Peer connection remote
@@ -931,7 +929,7 @@ Skylink.prototype._EVENTS = {
    * @param {Array} stats.connection.candidates.receiving.srflx The Peer connection list of remote
    *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) ICE candidates received.
    * @param {JSON} stats.connection.candidates.receiving.srflx.#index The Peer connection remote
-   *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) ICE candidate received.
+   *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) ICE candidate.
    * @param {String} stats.connection.candidates.receiving.srflx.#index.candidate The Peer connection remote
    *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) ICE candidate connection description.
    * @param {String} stats.connection.candidates.receiving.srflx.#index.sdpMid The Peer connection remote
@@ -942,7 +940,7 @@ Skylink.prototype._EVENTS = {
    * @param {Array} stats.connection.candidates.receiving.relay The Peer connection list of remote
    *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; (TURN) ICE candidates received.
    * @param {JSON} stats.connection.candidates.receiving.relay.#index The Peer connection remote
-   *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; (TURN) ICE candidate received.
+   *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; (TURN) ICE candidate.
    * @param {String} stats.connection.candidates.receiving.relay.#index.candidate The Peer connection remote
    *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; (TURN) ICE candidate connection description.
    * @param {String} stats.connection.candidates.receiving.relay.#index.sdpMid The Peer connection remote
@@ -991,7 +989,7 @@ Skylink.prototype._EVENTS = {
    *   Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates
    *   may be received in the session description instead.
    * &lt;/blockquote&gt;
-   * Event triggered when remote ICE candidate processing state has changed for trickle ICE connections.
+   * Event triggered when remote ICE candidate processing state has changed when Peer is using trickle ICE.
    * @event candidateProcessingState
    * @param {String} state The ICE candidate processing state.
    *   [Rel: Skylink.CANDIDATE_PROCESSING_STATE]
@@ -999,7 +997,12 @@ Skylink.prototype._EVENTS = {
    * @param {String} candidateId The remote ICE candidate session ID.
    *   &lt;small&gt;Note that this value is not related to WebRTC API but for identification of remote ICE candidate received.&lt;/small&gt;
    * @param {String} candidateType The remote ICE candidate type.
-   * @param {String} candidateSdp The remote ICE candidate connection string.
+   *   &lt;small&gt;Expected values are &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network), &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) and &lt;code&gt;&quot;relay&quot; (TURN).&lt;/small&gt;
+   * @param {JSON} candidate The remote ICE candidate.
+   * @param {String} candidate.candidate The remote ICE candidate connection description.
+   * @param {String} candidate.sdpMid The remote ICE candidate identifier based on the remote session description.
+   * @param {Number} candidate.sdpMLineIndex The remote ICE candidate media description index
+   *   (starting from &lt;code&gt;0&lt;/code&gt;) based on the remote session description.
    * @param {Error} [error] The error object.
    *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; is &lt;code&gt;DROPPED&lt;/code&gt; or &lt;code&gt;PROCESS_ERROR&lt;/code&gt;.&lt;/small&gt;
    * @for Skylink
