@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Nov 02 2016 12:25:57 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Nov 02 2016 12:28:12 GMT+0800 (SGT) */
 
 (function() {
 
@@ -12621,6 +12621,8 @@ Skylink.prototype._parseStreamSettings = function(options) {
       useinbandfec: null,
       usedtx: null,
       maxplaybackrate: null,
+      deviceId: null,
+      optional: null,
       exactConstraints: !!options.useExactConstraints
     };
     settings.getUserMediaSettings.audio = {};
