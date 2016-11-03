@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Fri Nov 04 2016 02:27:09 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Fri Nov 04 2016 02:31:20 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4632,6 +4632,11 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
  * @since 0.5.5
  */
 Skylink.prototype._removePeer = function(peerId) {
+  if (!this._peerConnections[peerId] && !this._peerInformations[peerId]) {
+    log.debug([peerId, 'RTCPeerConnection', null, 'Dropping the hangup from Peer as not connected to Peer at all.']);
+    return;
+  }
+
   var peerInfo = clone(this.getPeerInfo(peerId)) || {
     userData: '',
     settings: {},

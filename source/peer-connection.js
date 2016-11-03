@@ -1060,6 +1060,11 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
  * @since 0.5.5
  */
 Skylink.prototype._removePeer = function(peerId) {
+  if (!this._peerConnections[peerId] && !this._peerInformations[peerId]) {
+    log.debug([peerId, 'RTCPeerConnection', null, 'Dropping the hangup from Peer as not connected to Peer at all.']);
+    return;
+  }
+
   var peerInfo = clone(this.getPeerInfo(peerId)) || {
     userData: '',
     settings: {},
