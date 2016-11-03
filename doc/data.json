@@ -2104,12 +2104,15 @@
                 "description": "The list of the connected Peers.\n  <small>Each property is the Peer ID with its value as the Peer current session information, which\n  object signature matches the <code>peerInfo</code> parameter payload received in the\n  <a href=\"#event_peerJoined\"><code>peerJoined</code> event</a>.</small>",
                 "type": "JSON"
             },
+            "example": [
+                "\n  // Example 1: Get the list of currently connected Peers in the same Room\n  var peers = skylinkDemo.getPeersInRoom();"
+            ],
             "since": "0.6.16",
             "class": "Skylink"
         },
         {
             "file": "source/peer-data.js",
-            "line": 229,
+            "line": 232,
             "description": "Function that returns the User session information to be sent to Peers.",
             "itemtype": "method",
             "name": "_getUserInfo",

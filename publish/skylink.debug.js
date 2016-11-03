@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Fri Nov 04 2016 01:56:45 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Fri Nov 04 2016 02:03:35 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5182,6 +5182,9 @@ Skylink.prototype.getPeerInfo = function(peerId) {
  *   <small>Each property is the Peer ID with its value as the Peer current session information, which
  *   object signature matches the <code>peerInfo</code> parameter payload received in the
  *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small>
+ * @example
+ *   // Example 1: Get the list of currently connected Peers in the same Room
+ *   var peers = skylinkDemo.getPeersInRoom();
  * @for Skylink
  * @since 0.6.16
  */
