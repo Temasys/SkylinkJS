@@ -20,7 +20,7 @@ Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
  * @since 0.6.16
  */
 Skylink.prototype._enableIceRestart = window.webrtcDetectedBrowser === 'firefox' ?
-  window.webrtcDetectedVersion >= 48 : false;
+  window.webrtcDetectedVersion >= 48 : true;
 
 /**
  * Stores the list of socket messaging protocol types.

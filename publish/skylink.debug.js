@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Thu Nov 03 2016 17:34:51 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Thu Nov 03 2016 19:17:00 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9928,7 +9928,7 @@ Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
  * @since 0.6.16
  */
 Skylink.prototype._enableIceRestart = window.webrtcDetectedBrowser === 'firefox' ?
-  window.webrtcDetectedVersion >= 48 : false;
+  window.webrtcDetectedVersion >= 48 : true;
 
 /**
  * Stores the list of socket messaging protocol types.
