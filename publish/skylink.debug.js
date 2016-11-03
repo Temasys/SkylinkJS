@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Nov 02 2016 18:17:17 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Thu Nov 03 2016 17:34:51 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3801,7 +3801,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, callbac
 
   if (typeof iceRestart === 'boolean') {
     doIceRestart = iceRestart;
-  } else if (typeof iceRestart === 'callback') {
+  } else if (typeof iceRestart === 'function') {
     callback = iceRestart;
   }
 

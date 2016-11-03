@@ -229,7 +229,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, callbac
 
   if (typeof iceRestart === 'boolean') {
     doIceRestart = iceRestart;
-  } else if (typeof iceRestart === 'callback') {
+  } else if (typeof iceRestart === 'function') {
     callback = iceRestart;
   }
 
