@@ -1087,7 +1087,7 @@ Skylink.prototype._removePeer = function(peerId) {
       this._peerConnections[peerId].close();
     }
 
-    if (this._peerConnections[peerId].hasStream) {
+    if (peerId !== 'MCU' && this._peerConnections[peerId].hasStream) {
       this._trigger('streamEnded', peerId, this.getPeerInfo(peerId), false);
     }
 

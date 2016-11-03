@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Fri Nov 04 2016 02:24:28 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Fri Nov 04 2016 02:27:09 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4659,7 +4659,7 @@ Skylink.prototype._removePeer = function(peerId) {
       this._peerConnections[peerId].close();
     }
 
-    if (this._peerConnections[peerId].hasStream) {
+    if (peerId !== 'MCU' && this._peerConnections[peerId].hasStream) {
       this._trigger('streamEnded', peerId, this.getPeerInfo(peerId), false);
     }
 
