@@ -995,6 +995,14 @@ Before using any Skylink functionalities, you will need to authenticate your App
                     </span>
                   </a>
                 
+                  <a href="#method_getPeersInRoom" class="list-group-item code-menu-item method-item ">
+                    &nbsp;&nbsp;getPeersInRoom
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#method_getUserData" class="list-group-item code-menu-item method-item ">
                     &nbsp;&nbsp;getUserData
                     <span class="settings">
@@ -5436,7 +5444,7 @@ See confluence docs for the &quot;enter&quot; expected properties to be received
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l208"><code>source&#x2F;peer-data.js:208</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l229"><code>source&#x2F;peer-data.js:229</code></a>
       </small>
     
 
@@ -11971,6 +11979,104 @@ Function that retrieves the list of Peer IDs from Rooms within the same App spac
     </div>
   
 
+  
+
+  <hr>
+</div>
+            
+              <div id="method_getPeersInRoom" class="code-item method item method-item ">
+  <h3 class="code-item-name"><code>getPeersInRoom</code></h3>
+  
+    <span class="paren">()</span>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      <!---->
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l208"><code>source&#x2F;peer-data.js:208</code></a>
+      </small>
+    
+
+    <small>
+      
+        <i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.16</span>
+      
+
+      
+    </small>
+  </div>
+
+  <div class="code-item-description">
+    <p>Function that gets the list of connected Peers in the Room.</p>
+
+  </div>
+
+  
+
+  
+
+  
+  <div class="code-item-section">
+    <h4>Events Sequence:</h4>
+    <span class="code-item-trigger"><small>There is no event sequence for this method.</small></span>
+  </div>
+  
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Returns:</h4>
+
+      <div class="returns-description">
+        
+          
+            <span class="type"><b>{</b>JSON<b>}</b></span>
+          
+          <p>The list of the connected Peers.
+  <small>Each property is the Peer ID with its value as the Peer current session information, which
+  object signature matches the <code>peerInfo</code> parameter payload received in the
+  <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small></p>
+
+        
+      </div>
+    </div>
   
 
   <hr>

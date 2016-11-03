@@ -2097,6 +2097,19 @@
         {
             "file": "source/peer-data.js",
             "line": 208,
+            "description": "Function that gets the list of connected Peers in the Room.",
+            "itemtype": "method",
+            "name": "getPeersInRoom",
+            "return": {
+                "description": "The list of the connected Peers.\n  <small>Each property is the Peer ID with its value as the Peer current session information, which\n  object signature matches the <code>peerInfo</code> parameter payload received in the\n  <a href=\"#event_peerJoined\"><code>peerJoined</code> event</a>.</small>",
+                "type": "JSON"
+            },
+            "since": "0.6.16",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-data.js",
+            "line": 229,
             "description": "Function that returns the User session information to be sent to Peers.",
             "itemtype": "method",
             "name": "_getUserInfo",

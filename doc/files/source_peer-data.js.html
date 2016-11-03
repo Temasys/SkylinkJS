@@ -297,6 +297,27 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 };
 
 /**
+ * Function that gets the list of connected Peers in the Room.
+ * @method getPeersInRoom
+ * @return {JSON} The list of the connected Peers.
+ *   &lt;small&gt;Each property is the Peer ID with its value as the Peer current session information, which
+ *   object signature matches the &lt;code&gt;peerInfo&lt;/code&gt; parameter payload received in the
+ *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype.getPeersInRoom = function() {
+  var listOfPeersInfo = {};
+  var listOfPeers = Object.keys(this._peerInformations);
+
+  for (var i = 0; i &lt; listOfPeers.length; i++) {
+    listOfPeersInfo[listOfPeers[i]] = this.getPeerInfo(listOfPeers[i]);
+  }
+
+  return listOfPeersInfo;
+};
+
+/**
  * Function that returns the User session information to be sent to Peers.
  * @method _getUserInfo
  * @private
