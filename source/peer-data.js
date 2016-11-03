@@ -161,6 +161,16 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       peerInfo.settings.audio.useinbandfec = null;
     }
 
+    if (peerId === 'MCU') {
+      // MCU will not send any stream
+      peerInfo.settings.audio = false;
+      peerInfo.settings.video = false;
+      peerInfo.settings.mediaStatus = {
+        audioMuted: true,
+        videoMuted: true
+      };
+    }
+
   } else {
     peerInfo = {
       userData: clone(this._userData) || '',

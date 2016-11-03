@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Fri Nov 04 2016 02:03:35 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Fri Nov 04 2016 02:24:28 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Fri Nov 04 2016 02:03:35 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Fri Nov 04 2016 02:24:28 GMT+0800 (SGT) */
 
 (function() {
 
@@ -16662,6 +16662,16 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       peerInfo.settings.audio.usedtx = null;
       peerInfo.settings.audio.maxplaybackrate = null;
       peerInfo.settings.audio.useinbandfec = null;
+    }
+
+    if (peerId === 'MCU') {
+      // MCU will not send any stream
+      peerInfo.settings.audio = false;
+      peerInfo.settings.video = false;
+      peerInfo.settings.mediaStatus = {
+        audioMuted: true,
+        videoMuted: true
+      };
     }
 
   } else {
@@ -22210,6 +22220,25 @@ Skylink.prototype._enterHandler = function(message) {
       priorityWeight: message.priorityWeight || 0
     };
 
+    if (!self._peerInformations[targetMid].settings) {
+      self._peerInformations[targetMid].settings = {
+        audio: false,
+        video: false,
+        userData: ''
+      };
+    }
+
+    if (!self._peerInformations[targetMid].settings.bandwidth) {
+      self._peerInformations[targetMid].bandwidth = {};
+    }
+
+    if (!self._peerInformations[targetMid].settings.mediaStatus) {
+      self._peerInformations[targetMid].mediaStatus = {
+        audioMuted: true,
+        videoMuted: true
+      };
+    }
+
     if (targetMid !== 'MCU') {
       self._trigger('peerJoined', targetMid, message.userInfo, false);
 
@@ -22315,6 +22344,25 @@ Skylink.prototype._restartHandler = function(message){
     priorityWeight: message.priorityWeight || 0
   };
 
+  if (!self._peerInformations[targetMid].settings) {
+    self._peerInformations[targetMid].settings = {
+      audio: false,
+      video: false,
+      userData: ''
+    };
+  }
+
+  if (!self._peerInformations[targetMid].settings.bandwidth) {
+    self._peerInformations[targetMid].bandwidth = {};
+  }
+
+  if (!self._peerInformations[targetMid].settings.mediaStatus) {
+    self._peerInformations[targetMid].mediaStatus = {
+      audioMuted: true,
+      videoMuted: true
+    };
+  }
+
   // This variable is not used
   //var peerConnectionStateStable = false;
 
@@ -22405,6 +22453,26 @@ Skylink.prototype._welcomeHandler = function(message) {
       enableIceRestart: typeof message.enableIceRestart === 'boolean' ? message.enableIceRestart : false,
       priorityWeight: message.priorityWeight || 0
     };
+
+    if (!this._peerInformations[targetMid].settings) {
+      this._peerInformations[targetMid].settings = {
+        audio: false,
+        video: false,
+        userData: ''
+      };
+    }
+
+    if (!this._peerInformations[targetMid].settings.bandwidth) {
+      this._peerInformations[targetMid].bandwidth = {};
+    }
+
+    if (!this._peerInformations[targetMid].settings.mediaStatus) {
+      this._peerInformations[targetMid].mediaStatus = {
+        audioMuted: true,
+        videoMuted: true
+      };
+    }
+
     // disable mcu for incoming peer sent by MCU
     /*if (message.agent === 'MCU') {
       this._enableDataChannel = false;
