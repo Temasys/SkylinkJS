@@ -268,3 +268,62 @@ Skylink.prototype._getUserInfo = function(peerId) {
 
   return userInfo;
 };
+
+/**
+ * Function that parses the Peer session information.
+ * @method _parseUserInfo
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._parseUserInfo = function(message) {
+  var userInfo = {
+    agent: {
+      name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
+      version: typeof message.version === 'number' && message.version ? message.version : 0,
+      os: typeof message.os === 'string' && message.os ? message.os : '',
+      pluginVersion: typeof message.temasysPluginVersion === 'string' && message.temasysPluginVersion ?
+        message.temasysPluginVersion : null
+    },
+    settings: {
+      audio: false,
+      video: false,
+      bandwidth: {}
+    },
+    mediaStatus: {
+      audioMuted: true,
+      videoMuted: true
+    },
+    config: {
+      enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
+      enableIceRestart: typeof message.enableIceRestart === 'boolean' ? message.enableIceRestart : false,
+      enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
+      priorityWeight: typeof message.weight === 'number' ? message.weight : 0
+    },
+    userData: message.userData || ''
+  };
+
+  if (typeof message.userInfo === 'object' && message.userInfo) {
+    if (typeof message.userInfo.settings === 'object' &&message.userInfo.settings) {
+      userInfo.settings = message.userInfo.settings;
+
+      if (!(typeof message.userInfo.settings.bandwidth === 'object' && userInfo.settings.bandwidth)) {
+        userInfo.settings.bandwidth = {};
+      }
+    }
+
+    if (typeof message.userInfo.mediaStatus === 'object' && message.userInfo.mediaStatus) {
+      userInfo.mediaStatus = message.userInfo.mediaStatus;
+
+      if (typeof userInfo.mediaStatus.audioMuted === 'boolean') {
+        userInfo.mediaStatus.audioMuted = false;
+      }
+
+      if (typeof userInfo.mediaStatus.videoMuted === 'boolean') {
+        userInfo.mediaStatus.videoMuted = false;
+      }
+    }
+  }
+
+  return userInfo;
+};
