@@ -156,17 +156,6 @@ Skylink.prototype._usePublicSTUN = true;
 Skylink.prototype._TURNTransport = 'any';
 
 /**
- * Stores the list of Peer connections ICE failures counter.
- * @attribute _ICEConnectionFailures
- * @param {Number} <#peerId> The Peer connection ICE failures counter.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.8
- */
-Skylink.prototype._ICEConnectionFailures = {};
-
-/**
  * Function that filters and configures the ICE servers received from Signaling
  *   based on the <code>init()</code> configuration and returns the updated
  *   list of ICE servers to be used when constructing Peer connection.

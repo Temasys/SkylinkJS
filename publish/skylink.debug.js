@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Fri Nov 04 2016 19:46:25 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Nov 07 2016 16:51:22 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3385,17 +3385,6 @@ Skylink.prototype._usePublicSTUN = true;
 Skylink.prototype._TURNTransport = 'any';
 
 /**
- * Stores the list of Peer connections ICE failures counter.
- * @attribute _ICEConnectionFailures
- * @param {Number} <#peerId> The Peer connection ICE failures counter.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.8
- */
-Skylink.prototype._ICEConnectionFailures = {};
-
-/**
  * Function that filters and configures the ICE servers received from Signaling
  *   based on the <code>init()</code> configuration and returns the updated
  *   list of ICE servers to be used when constructing Peer connection.
@@ -4486,19 +4475,6 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
   if (!receiveOnly) {
     self._addLocalMediaStreams(targetMid);
   }
-  // I'm the callee I need to make an offer
-  /*if (toOffer) {
-    self._doOffer(targetMid, peerBrowser);
-  }*/
-
-  // do a peer connection health check
-  // let MCU handle this case
-  if (!self._hasMCU) {
-    this._startPeerConnectionHealthCheck(targetMid, toOffer);
-  } else {
-    log.warn([targetMid, 'PeerConnectionHealth', null, 'Not setting health timer for MCU connection']);
-    return;
-  }
 };
 
 /**
@@ -4517,10 +4493,6 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       'connection. Unable to restart']);
     return;
   }
-
-  delete self._peerConnectionHealth[peerId];
-
-  self._stopPeerConnectionHealthCheck(peerId);
 
   var pc = self._peerConnections[peerId];
 
@@ -4579,9 +4551,6 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
       callback(null);
     }
-
-    // following the previous logic to do checker always
-    self._startPeerConnectionHealthCheck(peerId, false);
 
   } else {
     // Let's check if the signalingState is stable first.
@@ -4652,8 +4621,6 @@ Skylink.prototype._removePeer = function(peerId) {
     log.log([peerId, null, null, 'MCU has stopped listening and left']);
     this._trigger('serverPeerLeft', peerId, this.SERVER_PEER_TYPE.MCU);
   }
-  // stop any existing peer health timer
-  this._stopPeerConnectionHealthCheck(peerId);
 
   // check if health timer exists
   if (typeof this._peerConnections[peerId] !== 'undefined') {
@@ -4679,9 +4646,6 @@ Skylink.prototype._removePeer = function(peerId) {
     delete this._peerMessagesStamps[peerId];
   }
 
-  if (typeof this._peerConnectionHealth[peerId] !== 'undefined') {
-    delete this._peerConnectionHealth[peerId];
-  }
   // close datachannel connection
   if (this._dataChannels[peerId]) {
     this._closeDataChannel(peerId);
@@ -4781,82 +4745,25 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     self._onIceCandidate(targetMid, event.candidate || event);
   };
   pc.oniceconnectionstatechange = function(evt) {
-    checkIceConnectionState(targetMid, pc.iceConnectionState,
-      function(iceConnectionState) {
-      log.debug([targetMid, 'RTCIceConnectionState', null,
-        'Ice connection state changed ->'], iceConnectionState);
+    checkIceConnectionState(targetMid, pc.iceConnectionState, function(iceConnectionState) {
+      log.debug([targetMid, 'RTCIceConnectionState', null, 'Ice connection state changed ->'], iceConnectionState);
+
       self._trigger('iceConnectionState', iceConnectionState, targetMid);
 
-      // clear all peer connection health check
-      // peer connection is stable. now if there is a waiting check on it
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED &&
-        pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
-        log.debug([targetMid, 'PeerConnectionHealth', null,
-          'Peer connection with user is stable']);
-        self._peerConnectionHealth[targetMid] = true;
-        self._stopPeerConnectionHealthCheck(targetMid);
+      if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._enableIceTrickle) {
+        self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
       }
-
-      if (typeof self._ICEConnectionFailures[targetMid] === 'undefined') {
-        self._ICEConnectionFailures[targetMid] = 0;
-      }
-
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {
-        self._ICEConnectionFailures[targetMid] += 1;
-
-        if (self._enableIceTrickle) {
-          self._trigger('iceConnectionState',
-            self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
-        }
-
-        // refresh when failed. ignore for MCU case since restart is handled by MCU in this case
-        if (!self._hasMCU) {
-          self._restartPeerConnection(targetMid, true);
-        }
-      }
-
-      /**** SJS-53: Revert of commit ******
-      // resend if failed
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {
-        log.debug([targetMid, 'RTCIceConnectionState', null,
-          'Ice connection state failed. Re-negotiating connection']);
-        self._removePeer(targetMid);
-        self._sendChannelMessage({
-          type: self._SIG_MESSAGE_TYPE.WELCOME,
-          mid: self._user.sid,
-          rid: self._room.id,
-          agent: window.webrtcDetectedBrowser,
-          version: window.webrtcDetectedVersion,
-          userInfo: self._getUserInfo(),
-          target: targetMid,
-          restartNego: true,
-          hsPriority: -1
-        });
-      } *****/
     });
   };
   // pc.onremovestream = function () {
   //   self._onRemoteStreamRemoved(targetMid);
   // };
   pc.onsignalingstatechange = function() {
-    log.debug([targetMid, 'RTCSignalingState', null,
-      'Peer connection state changed ->'], pc.signalingState);
+    log.debug([targetMid, 'RTCSignalingState', null, 'Peer connection state changed ->'], pc.signalingState);
     self._trigger('peerConnectionState', pc.signalingState, targetMid);
-
-    // clear all peer connection health check
-    // peer connection is stable. now if there is a waiting check on it
-    if ((pc.iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED ||
-      pc.iceConnectionState === self.ICE_CONNECTION_STATE.CONNECTED) &&
-      pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
-      log.debug([targetMid, 'PeerConnectionHealth', null,
-        'Peer connection with user is stable']);
-      self._peerConnectionHealth[targetMid] = true;
-      self._stopPeerConnectionHealthCheck(targetMid);
-    }
   };
   pc.onicegatheringstatechange = function() {
-    log.log([targetMid, 'RTCIceGatheringState', null,
-      'Ice gathering state changed ->'], pc.iceGatheringState);
+    log.log([targetMid, 'RTCIceGatheringState', null, 'Ice gathering state changed ->'], pc.iceGatheringState);
     self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
   };
 
@@ -5311,31 +5218,6 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
 };
 
 /**
- * Stores the list of Peer connection health timers.
- * This timers sets a timeout which checks and waits if Peer connection is successfully established,
- *   or else it will attempt to re-negotiate with the Peer connection again.
- * @attribute _peerConnectionHealthTimers
- * @param {Object} <#peerId> The Peer connection health timer.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._peerConnectionHealthTimers = {};
-
-/**
- * Stores the list of Peer connection "healthy" flags, which indicates if Peer connection is
- *   successfully established, and when the health timers expires, it will clear the timer
- *   and not attempt to re-negotiate with the Peer connection again.
- * @attribute _peerConnectionHealth
- * @param {Boolean} <#peerId> The flag that indicates if Peer connection has been successfully established.
- * @type JSON
- * @private
- * @since 0.5.5
- */
-Skylink.prototype._peerConnectionHealth = {};
-
-/**
  * Stores the User connection priority weight.
  * If Peer has a higher connection weight, it will do the offer from its Peer connection first.
  * @attribute _peerPriorityWeight
@@ -5480,136 +5362,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
   }, function(error) {
     log.error([targetMid, null, null, 'Failed creating an answer:'], error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-  });//, self._room.connection.sdpConstraints);
-};
-
-/**
- * Function that starts the Peer connection health timer.
- * To count as a "healthy" successful established Peer connection, the
- *   ICE connection state has to be "connected" or "completed",
- *   messaging Datachannel type state has to be "opened" (if Datachannel is enabled)
- *   and Signaling state has to be "stable".
- * Should consider dropping of counting messaging Datachannel type being opened as
- *   it should not involve the actual Peer connection for media (audio/video) streaming.
- * @method _startPeerConnectionHealthCheck
- * @private
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
-  var self = this;
-  var originalBlock = self._hasMCU ? 105000 : (self._enableIceTrickle ? (toOffer ? 12500 : 10000) : 50000);
-
-  // increase timeout for android/ios
-  /*var agent = self.getPeerInfo(peerId).agent;
-  if (['Android', 'iOS'].indexOf(agent.name) > -1) {
-    timer = 105000;
-  }*/
-
-  if (!self._retryCounters[peerId]) {
-    self._retryCounters[peerId] = 0;
-  }
-
-  log.log([peerId, 'PeerConnectionHealth', null,
-    'Initializing check for peer\'s connection health']);
-
-  if (self._peerConnectionHealthTimers[peerId]) {
-    // might be a re-handshake again
-    self._stopPeerConnectionHealthCheck(peerId);
-  }
-
-  self._peerConnectionHealthTimers[peerId] = setTimeout(function () {
-    // re-handshaking should start here.
-    var connectionStable = false;
-    var pc = self._peerConnections[peerId];
-
-    if (pc) {
-      var dc = (self._dataChannels[peerId] || {}).main;
-
-      var dcConnected = pc.hasMainChannel ? dc && dc.readyState === self.DATA_CHANNEL_STATE.OPEN : true;
-      var iceConnected = pc.iceConnectionState === self.ICE_CONNECTION_STATE.CONNECTED ||
-        pc.iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED;
-      var signalingConnected = pc.signalingState === self.PEER_CONNECTION_STATE.STABLE;
-
-      connectionStable = dcConnected && iceConnected && signalingConnected;
-
-      log.debug([peerId, 'PeerConnectionHealth', null, 'Connection status'], {
-        dcConnected: dcConnected,
-        iceConnected: iceConnected,
-        signalingConnected: signalingConnected
-      });
-    }
-
-    log.debug([peerId, 'PeerConnectionHealth', null, 'Require reconnection?'], connectionStable);
-
-    if (!connectionStable) {
-      log.warn([peerId, 'PeerConnectionHealth', null, 'Peer\'s health timer ' +
-      'has expired'], 10000);
-
-      // clear the loop first
-      self._stopPeerConnectionHealthCheck(peerId);
-
-      log.debug([peerId, 'PeerConnectionHealth', null,
-        'Ice connection state time out. Re-negotiating connection']);
-
-      //Maximum increament is 5 minutes
-      if (self._retryCounters[peerId] < 30){
-        //Increase after each consecutive connection failure
-        self._retryCounters[peerId]++;
-      }
-
-      if (!(self._peerConnections[peerId] && self._peerConnections[peerId].localDescription &&
-        self._peerConnections[peerId].localDescription.sdp)) {
-        log.debug([peerId, 'PeerConnectionHealth', null, 'Resending welcome again to Peer']);
-        self._sendChannelMessage({
-          type: self._SIG_MESSAGE_TYPE.WELCOME,
-          mid: self._user.sid,
-          rid: self._room.id,
-          receiveOnly: self._peerConnections[peerId] ? !!self._peerConnections[peerId].receiveOnly : false,
-          enableIceTrickle: self._enableIceTrickle,
-          enableDataChannel: self._enableDataChannel,
-          agent: window.webrtcDetectedBrowser,
-          version: window.webrtcDetectedVersion,
-          os: window.navigator.platform,
-          userInfo: self._getUserInfo(),
-          target: peerId,
-          weight: self._peerPriorityWeight,
-          sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
-          temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
-        });
-
-      } else if (!self._hasMCU) {
-        self._restartPeerConnection(peerId, false);
-      }
-    } else {
-      self._peerConnectionHealth[peerId] = true;
-    }
-  }, originalBlock + ((self._retryCounters[peerId] || 0) * 1000));
-};
-
-/**
- * Function that stops the Peer connection health timer.
- * This happens when Peer connection has been successfully established or when
- *   Peer leaves the Room.
- * @method _stopPeerConnectionHealthCheck
- * @private
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._stopPeerConnectionHealthCheck = function (peerId) {
-  var self = this;
-
-  if (self._peerConnectionHealthTimers[peerId]) {
-    log.debug([peerId, 'PeerConnectionHealth', null,
-      'Stopping peer connection health timer check']);
-
-    clearTimeout(self._peerConnectionHealthTimers[peerId]);
-    delete self._peerConnectionHealthTimers[peerId];
-
-  } else {
-    log.debug([peerId, 'PeerConnectionHealth', null,
-      'Peer connection health does not have a timer check']);
-  }
+  });
 };
 
 /**
@@ -10848,9 +10601,6 @@ Skylink.prototype._restartHandler = function(message){
   }
 
   self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false, message.doIceRestart === true);
-
-  // following the previous logic to do checker always
-  self._startPeerConnectionHealthCheck(targetMid, false);
 };
 
 /**

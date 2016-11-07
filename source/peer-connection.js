@@ -914,19 +914,6 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
   if (!receiveOnly) {
     self._addLocalMediaStreams(targetMid);
   }
-  // I'm the callee I need to make an offer
-  /*if (toOffer) {
-    self._doOffer(targetMid, peerBrowser);
-  }*/
-
-  // do a peer connection health check
-  // let MCU handle this case
-  if (!self._hasMCU) {
-    this._startPeerConnectionHealthCheck(targetMid, toOffer);
-  } else {
-    log.warn([targetMid, 'PeerConnectionHealth', null, 'Not setting health timer for MCU connection']);
-    return;
-  }
 };
 
 /**
@@ -945,10 +932,6 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       'connection. Unable to restart']);
     return;
   }
-
-  delete self._peerConnectionHealth[peerId];
-
-  self._stopPeerConnectionHealthCheck(peerId);
 
   var pc = self._peerConnections[peerId];
 
@@ -1007,9 +990,6 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
       callback(null);
     }
-
-    // following the previous logic to do checker always
-    self._startPeerConnectionHealthCheck(peerId, false);
 
   } else {
     // Let's check if the signalingState is stable first.
@@ -1080,8 +1060,6 @@ Skylink.prototype._removePeer = function(peerId) {
     log.log([peerId, null, null, 'MCU has stopped listening and left']);
     this._trigger('serverPeerLeft', peerId, this.SERVER_PEER_TYPE.MCU);
   }
-  // stop any existing peer health timer
-  this._stopPeerConnectionHealthCheck(peerId);
 
   // check if health timer exists
   if (typeof this._peerConnections[peerId] !== 'undefined') {
@@ -1107,9 +1085,6 @@ Skylink.prototype._removePeer = function(peerId) {
     delete this._peerMessagesStamps[peerId];
   }
 
-  if (typeof this._peerConnectionHealth[peerId] !== 'undefined') {
-    delete this._peerConnectionHealth[peerId];
-  }
   // close datachannel connection
   if (this._dataChannels[peerId]) {
     this._closeDataChannel(peerId);
@@ -1209,82 +1184,25 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     self._onIceCandidate(targetMid, event.candidate || event);
   };
   pc.oniceconnectionstatechange = function(evt) {
-    checkIceConnectionState(targetMid, pc.iceConnectionState,
-      function(iceConnectionState) {
-      log.debug([targetMid, 'RTCIceConnectionState', null,
-        'Ice connection state changed ->'], iceConnectionState);
+    checkIceConnectionState(targetMid, pc.iceConnectionState, function(iceConnectionState) {
+      log.debug([targetMid, 'RTCIceConnectionState', null, 'Ice connection state changed ->'], iceConnectionState);
+
       self._trigger('iceConnectionState', iceConnectionState, targetMid);
 
-      // clear all peer connection health check
-      // peer connection is stable. now if there is a waiting check on it
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED &&
-        pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
-        log.debug([targetMid, 'PeerConnectionHealth', null,
-          'Peer connection with user is stable']);
-        self._peerConnectionHealth[targetMid] = true;
-        self._stopPeerConnectionHealthCheck(targetMid);
+      if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._enableIceTrickle) {
+        self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
       }
-
-      if (typeof self._ICEConnectionFailures[targetMid] === 'undefined') {
-        self._ICEConnectionFailures[targetMid] = 0;
-      }
-
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {
-        self._ICEConnectionFailures[targetMid] += 1;
-
-        if (self._enableIceTrickle) {
-          self._trigger('iceConnectionState',
-            self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
-        }
-
-        // refresh when failed. ignore for MCU case since restart is handled by MCU in this case
-        if (!self._hasMCU) {
-          self._restartPeerConnection(targetMid, true);
-        }
-      }
-
-      /**** SJS-53: Revert of commit ******
-      // resend if failed
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {
-        log.debug([targetMid, 'RTCIceConnectionState', null,
-          'Ice connection state failed. Re-negotiating connection']);
-        self._removePeer(targetMid);
-        self._sendChannelMessage({
-          type: self._SIG_MESSAGE_TYPE.WELCOME,
-          mid: self._user.sid,
-          rid: self._room.id,
-          agent: window.webrtcDetectedBrowser,
-          version: window.webrtcDetectedVersion,
-          userInfo: self._getUserInfo(),
-          target: targetMid,
-          restartNego: true,
-          hsPriority: -1
-        });
-      } *****/
     });
   };
   // pc.onremovestream = function () {
   //   self._onRemoteStreamRemoved(targetMid);
   // };
   pc.onsignalingstatechange = function() {
-    log.debug([targetMid, 'RTCSignalingState', null,
-      'Peer connection state changed ->'], pc.signalingState);
+    log.debug([targetMid, 'RTCSignalingState', null, 'Peer connection state changed ->'], pc.signalingState);
     self._trigger('peerConnectionState', pc.signalingState, targetMid);
-
-    // clear all peer connection health check
-    // peer connection is stable. now if there is a waiting check on it
-    if ((pc.iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED ||
-      pc.iceConnectionState === self.ICE_CONNECTION_STATE.CONNECTED) &&
-      pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
-      log.debug([targetMid, 'PeerConnectionHealth', null,
-        'Peer connection with user is stable']);
-      self._peerConnectionHealth[targetMid] = true;
-      self._stopPeerConnectionHealthCheck(targetMid);
-    }
   };
   pc.onicegatheringstatechange = function() {
-    log.log([targetMid, 'RTCIceGatheringState', null,
-      'Ice gathering state changed ->'], pc.iceGatheringState);
+    log.log([targetMid, 'RTCIceGatheringState', null, 'Ice gathering state changed ->'], pc.iceGatheringState);
     self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
   };
 

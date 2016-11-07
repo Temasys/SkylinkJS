@@ -842,9 +842,6 @@ Skylink.prototype._restartHandler = function(message){
   }
 
   self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false, message.doIceRestart === true);
-
-  // following the previous logic to do checker always
-  self._startPeerConnectionHealthCheck(targetMid, false);
 };
 
 /**
