@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Mon Nov 07 2016 18:05:31 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Nov 07 2016 22:14:40 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5186,24 +5186,17 @@ Skylink.prototype._parseUserInfo = function(message) {
   };
 
   if (typeof message.userInfo === 'object' && message.userInfo) {
-    if (typeof message.userInfo.settings === 'object' &&message.userInfo.settings) {
+    if (typeof message.userInfo.settings === 'object' && message.userInfo.settings) {
       userInfo.settings = message.userInfo.settings;
-
-      if (!(typeof message.userInfo.settings.bandwidth === 'object' && userInfo.settings.bandwidth)) {
-        userInfo.settings.bandwidth = {};
-      }
+      userInfo.settings.bandwidth = typeof message.userInfo.settings.bandwidth === 'object' &&
+        message.userInfo.settings.bandwidth ? message.userInfo.settings.bandwidth === 'object' : {};
     }
 
     if (typeof message.userInfo.mediaStatus === 'object' && message.userInfo.mediaStatus) {
-      userInfo.mediaStatus = message.userInfo.mediaStatus;
-
-      if (typeof userInfo.mediaStatus.audioMuted === 'boolean') {
-        userInfo.mediaStatus.audioMuted = false;
-      }
-
-      if (typeof userInfo.mediaStatus.videoMuted === 'boolean') {
-        userInfo.mediaStatus.videoMuted = false;
-      }
+      userInfo.mediaStatus.audioMuted = typeof message.userInfo.mediaStatus.audioMuted === 'boolean' ?
+        message.userInfo.mediaStatus.audioMuted : true;
+      userInfo.mediaStatus.videoMuted = typeof message.userInfo.mediaStatus.videoMuted === 'boolean' ?
+        message.userInfo.mediaStatus.videoMuted : true;
     }
 
     if (typeof message.userInfo.userData !== 'undefined') {

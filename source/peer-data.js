@@ -280,7 +280,7 @@ Skylink.prototype._parseUserInfo = function(message) {
   var userInfo = {
     agent: {
       name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
-      version: typeof message.version === 'number' && message.version ? message.version : 0,
+      version: typeof message.version === 'number' ? message.version : 0,
       os: typeof message.os === 'string' && message.os ? message.os : '',
       pluginVersion: typeof message.temasysPluginVersion === 'string' && message.temasysPluginVersion ?
         message.temasysPluginVersion : null
@@ -304,24 +304,17 @@ Skylink.prototype._parseUserInfo = function(message) {
   };
 
   if (typeof message.userInfo === 'object' && message.userInfo) {
-    if (typeof message.userInfo.settings === 'object' &&message.userInfo.settings) {
+    if (typeof message.userInfo.settings === 'object' && message.userInfo.settings) {
       userInfo.settings = message.userInfo.settings;
-
-      if (!(typeof message.userInfo.settings.bandwidth === 'object' && userInfo.settings.bandwidth)) {
-        userInfo.settings.bandwidth = {};
-      }
+      userInfo.settings.bandwidth = typeof message.userInfo.settings.bandwidth === 'object' &&
+        message.userInfo.settings.bandwidth ? message.userInfo.settings.bandwidth : {};
     }
 
     if (typeof message.userInfo.mediaStatus === 'object' && message.userInfo.mediaStatus) {
-      userInfo.mediaStatus = message.userInfo.mediaStatus;
-
-      if (typeof userInfo.mediaStatus.audioMuted === 'boolean') {
-        userInfo.mediaStatus.audioMuted = false;
-      }
-
-      if (typeof userInfo.mediaStatus.videoMuted === 'boolean') {
-        userInfo.mediaStatus.videoMuted = false;
-      }
+      userInfo.mediaStatus.audioMuted = typeof message.userInfo.mediaStatus.audioMuted === 'boolean' ?
+        message.userInfo.mediaStatus.audioMuted : true;
+      userInfo.mediaStatus.videoMuted = typeof message.userInfo.mediaStatus.videoMuted === 'boolean' ?
+        message.userInfo.mediaStatus.videoMuted : true;
     }
 
     if (typeof message.userInfo.userData !== 'undefined') {
