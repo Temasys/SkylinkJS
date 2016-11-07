@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Mon Nov 07 2016 16:51:22 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Nov 07 2016 17:33:40 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Mon Nov 07 2016 16:51:22 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Nov 07 2016 17:33:40 GMT+0800 (SGT) */
 
 (function() {
 
@@ -16715,7 +16715,7 @@ Skylink.prototype._parseUserInfo = function(message) {
       enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
       priorityWeight: typeof message.weight === 'number' ? message.weight : 0
     },
-    userData: message.userData || ''
+    userData: ''
   };
 
   if (typeof message.userInfo === 'object' && message.userInfo) {
@@ -16737,6 +16737,10 @@ Skylink.prototype._parseUserInfo = function(message) {
       if (typeof userInfo.mediaStatus.videoMuted === 'boolean') {
         userInfo.mediaStatus.videoMuted = false;
       }
+    }
+
+    if (typeof message.userInfo.userData !== 'undefined') {
+      userInfo.userData = message.userInfo.userData;
     }
   }
 
@@ -21958,7 +21962,7 @@ Skylink.prototype._inRoomHandler = function(message) {
   }
 
   // Make Firefox the answerer always when connecting with other browsers
-  if (window.webrtcDetectedBrowser === 'firefox') {
+  if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion < 48) {
     log.warn('Decreasing weight for Firefox browser connection');
 
     self._peerPriorityWeight -= 100000000000;
@@ -22245,7 +22249,7 @@ Skylink.prototype._offerHandler = function(message) {
 
     self._peerInformations[targetMid].settings = userInfo.settings;
     self._peerInformations[targetMid].mediaStatus = userInfo.mediaStatus;
-    self._peerInformations[targetMid].userData = userInfo.userData;
+    self._peerInformations[targetMid].userData = userInfo.userData || '';
   }
 
   log.log([targetMid, null, message.type, 'Received offer from peer. ' +
@@ -22413,7 +22417,7 @@ Skylink.prototype._answerHandler = function(message) {
 
     self._peerInformations[targetMid].settings = userInfo.settings;
     self._peerInformations[targetMid].mediaStatus = userInfo.mediaStatus;
-    self._peerInformations[targetMid].userData = userInfo.userData;
+    self._peerInformations[targetMid].userData = userInfo.userData || '';
   }
 
   var answer = new window.RTCSessionDescription({

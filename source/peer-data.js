@@ -300,7 +300,7 @@ Skylink.prototype._parseUserInfo = function(message) {
       enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
       priorityWeight: typeof message.weight === 'number' ? message.weight : 0
     },
-    userData: message.userData || ''
+    userData: ''
   };
 
   if (typeof message.userInfo === 'object' && message.userInfo) {
@@ -322,6 +322,10 @@ Skylink.prototype._parseUserInfo = function(message) {
       if (typeof userInfo.mediaStatus.videoMuted === 'boolean') {
         userInfo.mediaStatus.videoMuted = false;
       }
+    }
+
+    if (typeof message.userInfo.userData !== 'undefined') {
+      userInfo.userData = message.userInfo.userData;
     }
   }
 
