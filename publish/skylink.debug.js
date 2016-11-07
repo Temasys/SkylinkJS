@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Mon Nov 07 2016 17:33:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Nov 07 2016 18:05:31 GMT+0800 (SGT) */
 
 (function() {
 
@@ -10429,9 +10429,8 @@ Skylink.prototype._inRoomHandler = function(message) {
   }
 
   // Make Firefox the answerer always when connecting with other browsers
-  if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion < 48) {
+  if (window.webrtcDetectedBrowser === 'firefox') {
     log.warn('Decreasing weight for Firefox browser connection');
-
     self._peerPriorityWeight -= 100000000000;
   }
 
