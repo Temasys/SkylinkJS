@@ -734,6 +734,8 @@ Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats
 //------------- join room ---------------------------
 var displayName = 'name_' + 'user_' + Math.floor((Math.random() * 1000) + 1);
 
+$('#display_user_info').val(displayName);
+
 Demo.Skylink.init(config, function (error, success) {
   if (success) {
     Demo.Skylink.joinRoom({
