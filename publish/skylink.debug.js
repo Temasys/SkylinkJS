@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Mon Nov 07 2016 22:14:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Fri Nov 11 2016 02:45:00 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5162,7 +5162,7 @@ Skylink.prototype._parseUserInfo = function(message) {
   var userInfo = {
     agent: {
       name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
-      version: typeof message.version === 'number' && message.version ? message.version : 0,
+      version: typeof message.version === 'number' ? message.version : 0,
       os: typeof message.os === 'string' && message.os ? message.os : '',
       pluginVersion: typeof message.temasysPluginVersion === 'string' && message.temasysPluginVersion ?
         message.temasysPluginVersion : null
@@ -5189,7 +5189,7 @@ Skylink.prototype._parseUserInfo = function(message) {
     if (typeof message.userInfo.settings === 'object' && message.userInfo.settings) {
       userInfo.settings = message.userInfo.settings;
       userInfo.settings.bandwidth = typeof message.userInfo.settings.bandwidth === 'object' &&
-        message.userInfo.settings.bandwidth ? message.userInfo.settings.bandwidth === 'object' : {};
+        message.userInfo.settings.bandwidth ? message.userInfo.settings.bandwidth : {};
     }
 
     if (typeof message.userInfo.mediaStatus === 'object' && message.userInfo.mediaStatus) {
@@ -6879,6 +6879,8 @@ Skylink.prototype._room = null;
  * @param {Boolean} [options.filterCandidatesType.host=false] The flag if local network ICE candidates should be filtered out.
  * @param {Boolean} [options.filterCandidatesType.srflx=false] The flag if STUN ICE candidates should be filtered out.
  * @param {Boolean} [options.filterCandidatesType.relay=false] The flag if TURN ICE candidates should be filtered out.
+ * @param {Number} [options.shareScreenThrottleInterval=10000] The interval timeout for
+ *   <a href="#method_shareScreen"><code>shareScreen()</code> method</a> throttling in milliseconds.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_readyStateChange">
@@ -6920,6 +6922,7 @@ Skylink.prototype._room = null;
  * @param {Boolean} callback.success.disableVideoFecCodecs The configured value of the <code>options.disableVideoFecCodecs</code>.
  * @param {Boolean} callback.success.disableComfortNoiseCodec The configured value of the <code>options.disableComfortNoiseCodec</code>.
  * @param {JSON} callback.success.filterCandidatesType The configured value of the <code>options.filterCandidatesType</code>.
+ * @param {Number} callback.success.shareScreenThrottleInterval The configured value of the <code>options.shareScreenThrottleInterval</code>.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -7021,6 +7024,7 @@ Skylink.prototype.init = function(options, callback) {
     srflx: false,
     relay: false
   };
+  var shareScreenThrottleInterval = 10000;
 
   log.log('Provided init options:', options);
 
@@ -7082,6 +7086,9 @@ Skylink.prototype.init = function(options, callback) {
     // set the use public stun option
     usePublicSTUN = (typeof options.usePublicSTUN === 'boolean') ?
       options.usePublicSTUN : usePublicSTUN;
+    // set the shareScreen() throttling timeout value
+    shareScreenThrottleInterval = (typeof options.shareScreenThrottleInterval === 'number') ?
+      options.shareScreenThrottleInterval : shareScreenThrottleInterval;
     // set the use of disabling ulpfec and red codecs
     disableVideoFecCodecs = (typeof options.disableVideoFecCodecs === 'boolean') ?
       options.disableVideoFecCodecs : disableVideoFecCodecs;
@@ -7175,6 +7182,7 @@ Skylink.prototype.init = function(options, callback) {
   self._disableVideoFecCodecs = disableVideoFecCodecs;
   self._disableComfortNoiseCodec = disableComfortNoiseCodec;
   self._filterCandidatesType = filterCandidatesType;
+  self._throttlingTimeout.shareScreen = shareScreenThrottleInterval;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -7199,7 +7207,8 @@ Skylink.prototype.init = function(options, callback) {
     usePublicSTUN: self._usePublicSTUN,
     disableVideoFecCodecs: self._disableVideoFecCodecs,
     disableComfortNoiseCodec: self._disableComfortNoiseCodec,
-    filterCandidatesType: self._filterCandidatesType
+    filterCandidatesType: self._filterCandidatesType,
+    shareScreenThrottleInterval: self._throttlingTimeout.shareScreen
   });
   // trigger the readystate
   self._readyState = 0;
@@ -7238,7 +7247,8 @@ Skylink.prototype.init = function(options, callback) {
             usePublicSTUN: self._usePublicSTUN,
             disableVideoFecCodecs: self._disableVideoFecCodecs,
             disableComfortNoiseCodec: self._disableComfortNoiseCodec,
-            filterCandidatesType: self._filterCandidatesType
+            filterCandidatesType: self._filterCandidatesType,
+            shareScreenThrottleInterval: self._throttlingTimeout.shareScreen
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +
@@ -8909,6 +8919,18 @@ Skylink.prototype._timestamp = {
   shareScreen: null,
   restartConnection: null,
   lastRestart: null
+};
+
+/**
+ * Stores the throttling interval timeout.
+ * @attribute _throttlingTimeout
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._throttlingTimeout = {
+  shareScreen: 10000
 };
 
 /**
@@ -12012,7 +12034,7 @@ Skylink.prototype.disableVideo = function() {
 /**
  * <blockquote class="info">
  *   For a better user experience, the functionality is throttled when invoked many times in less
- *   than 10 seconds interval.
+ *   than the milliseconds interval configured in the <a href="#method_init"><code>init()</code> method</a>.
  * </blockquote>
  * Function that retrieves screensharing Stream.
  * @method shareScreen
@@ -12135,7 +12157,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 
   self._throttle(function (runFn) {
     if (!runFn) {
-      var throttleLimitError = 'Unable to run as throttle interval has not reached (10s).';
+      var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._throttlingTimeout.shareScreen + 'ms).';
       log.error(throttleLimitError);
 
       if (typeof callback === 'function') {
@@ -12245,7 +12267,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
     }
-  }, 'shareScreen', 10000);
+  }, 'shareScreen', self._throttlingTimeout.shareScreen);
 };
 
 /**

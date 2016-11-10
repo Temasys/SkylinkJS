@@ -1092,7 +1092,7 @@ Skylink.prototype.disableVideo = function() {
 /**
  * <blockquote class="info">
  *   For a better user experience, the functionality is throttled when invoked many times in less
- *   than 10 seconds interval.
+ *   than the milliseconds interval configured in the <a href="#method_init"><code>init()</code> method</a>.
  * </blockquote>
  * Function that retrieves screensharing Stream.
  * @method shareScreen
@@ -1215,7 +1215,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 
   self._throttle(function (runFn) {
     if (!runFn) {
-      var throttleLimitError = 'Unable to run as throttle interval has not reached (10s).';
+      var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._throttlingTimeout.shareScreen + 'ms).';
       log.error(throttleLimitError);
 
       if (typeof callback === 'function') {
@@ -1325,7 +1325,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
     }
-  }, 'shareScreen', 10000);
+  }, 'shareScreen', self._throttlingTimeout.shareScreen);
 };
 
 /**

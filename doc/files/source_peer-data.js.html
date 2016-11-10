@@ -252,6 +252,16 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       peerInfo.settings.audio.useinbandfec = null;
     }
 
+    if (peerId === &#x27;MCU&#x27;) {
+      // MCU will not send any stream
+      peerInfo.settings.audio = false;
+      peerInfo.settings.video = false;
+      peerInfo.settings.mediaStatus = {
+        audioMuted: true,
+        videoMuted: true
+      };
+    }
+
   } else {
     peerInfo = {
       userData: clone(this._userData) || &#x27;&#x27;,
@@ -346,6 +356,62 @@ Skylink.prototype._getUserInfo = function(peerId) {
   delete userInfo.agent;
   delete userInfo.room;
   delete userInfo.settings.googleXBandwidth;
+
+  return userInfo;
+};
+
+/**
+ * Function that parses the Peer session information.
+ * @method _parseUserInfo
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._parseUserInfo = function(message) {
+  var userInfo = {
+    agent: {
+      name: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
+      version: typeof message.version === &#x27;number&#x27; ? message.version : 0,
+      os: typeof message.os === &#x27;string&#x27; &amp;&amp; message.os ? message.os : &#x27;&#x27;,
+      pluginVersion: typeof message.temasysPluginVersion === &#x27;string&#x27; &amp;&amp; message.temasysPluginVersion ?
+        message.temasysPluginVersion : null
+    },
+    settings: {
+      audio: false,
+      video: false,
+      bandwidth: {}
+    },
+    mediaStatus: {
+      audioMuted: true,
+      videoMuted: true
+    },
+    config: {
+      enableIceTrickle: typeof message.enableIceTrickle === &#x27;boolean&#x27; ? message.enableIceTrickle : true,
+      enableIceRestart: typeof message.enableIceRestart === &#x27;boolean&#x27; ? message.enableIceRestart : false,
+      enableDataChannel: typeof message.enableDataChannel === &#x27;boolean&#x27; ? message.enableDataChannel : true,
+      priorityWeight: typeof message.weight === &#x27;number&#x27; ? message.weight : 0
+    },
+    userData: &#x27;&#x27;
+  };
+
+  if (typeof message.userInfo === &#x27;object&#x27; &amp;&amp; message.userInfo) {
+    if (typeof message.userInfo.settings === &#x27;object&#x27; &amp;&amp; message.userInfo.settings) {
+      userInfo.settings = message.userInfo.settings;
+      userInfo.settings.bandwidth = typeof message.userInfo.settings.bandwidth === &#x27;object&#x27; &amp;&amp;
+        message.userInfo.settings.bandwidth ? message.userInfo.settings.bandwidth : {};
+    }
+
+    if (typeof message.userInfo.mediaStatus === &#x27;object&#x27; &amp;&amp; message.userInfo.mediaStatus) {
+      userInfo.mediaStatus.audioMuted = typeof message.userInfo.mediaStatus.audioMuted === &#x27;boolean&#x27; ?
+        message.userInfo.mediaStatus.audioMuted : true;
+      userInfo.mediaStatus.videoMuted = typeof message.userInfo.mediaStatus.videoMuted === &#x27;boolean&#x27; ?
+        message.userInfo.mediaStatus.videoMuted : true;
+    }
+
+    if (typeof message.userInfo.userData !== &#x27;undefined&#x27;) {
+      userInfo.userData = message.userInfo.userData;
+    }
+  }
 
   return userInfo;
 };

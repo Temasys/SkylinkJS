@@ -1576,25 +1576,6 @@
         {
             "file": "source/ice-connection.js",
             "line": 158,
-            "description": "Stores the list of Peer connections ICE failures counter.",
-            "itemtype": "attribute",
-            "name": "_ICEConnectionFailures",
-            "params": [
-                {
-                    "name": "<#peerId>",
-                    "description": "The Peer connection ICE failures counter.",
-                    "type": "Number"
-                }
-            ],
-            "type": "JSON",
-            "access": "private",
-            "tagname": "",
-            "since": "0.5.8",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/ice-connection.js",
-            "line": 169,
             "description": "Function that filters and configures the ICE servers received from Signaling\n  based on the <code>init()</code> configuration and returns the updated\n  list of ICE servers to be used when constructing Peer connection.",
             "itemtype": "method",
             "name": "_setIceServers",
@@ -1890,7 +1871,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 932,
+            "line": 919,
             "description": "Function that re-negotiates a Peer connection.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -1901,7 +1882,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1055,
+            "line": 1035,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -1912,7 +1893,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1116,
+            "line": 1096,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -1923,13 +1904,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1241,
-            "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self._getUserInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/peer-connection.js",
-            "line": 1303,
+            "line": 1226,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -2096,7 +2071,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 208,
+            "line": 218,
             "description": "Function that gets the list of connected Peers in the Room.",
             "itemtype": "method",
             "name": "getPeersInRoom",
@@ -2112,13 +2087,24 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 232,
+            "line": 242,
             "description": "Function that returns the User session information to be sent to Peers.",
             "itemtype": "method",
             "name": "_getUserInfo",
             "access": "private",
             "tagname": "",
             "since": "0.4.0",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-data.js",
+            "line": 272,
+            "description": "Function that parses the Peer session information.",
+            "itemtype": "method",
+            "name": "_parseUserInfo",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.16",
             "class": "Skylink"
         },
         {
@@ -2162,44 +2148,6 @@
         {
             "file": "source/peer-handshake.js",
             "line": 35,
-            "description": "Stores the list of Peer connection health timers.\nThis timers sets a timeout which checks and waits if Peer connection is successfully established,\n  or else it will attempt to re-negotiate with the Peer connection again.",
-            "itemtype": "attribute",
-            "name": "_peerConnectionHealthTimers",
-            "params": [
-                {
-                    "name": "<#peerId>",
-                    "description": "The Peer connection health timer.",
-                    "type": "Object"
-                }
-            ],
-            "type": "JSON",
-            "access": "private",
-            "tagname": "",
-            "since": "0.5.5",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/peer-handshake.js",
-            "line": 48,
-            "description": "Stores the list of Peer connection \"healthy\" flags, which indicates if Peer connection is\n  successfully established, and when the health timers expires, it will clear the timer\n  and not attempt to re-negotiate with the Peer connection again.",
-            "itemtype": "attribute",
-            "name": "_peerConnectionHealth",
-            "params": [
-                {
-                    "name": "<#peerId>",
-                    "description": "The flag that indicates if Peer connection has been successfully established.",
-                    "type": "Boolean"
-                }
-            ],
-            "type": "JSON",
-            "access": "private",
-            "tagname": "",
-            "since": "0.5.5",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/peer-handshake.js",
-            "line": 60,
             "description": "Stores the User connection priority weight.\nIf Peer has a higher connection weight, it will do the offer from its Peer connection first.",
             "itemtype": "attribute",
             "name": "_peerPriorityWeight",
@@ -2211,7 +2159,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 71,
+            "line": 46,
             "description": "Function that creates the Peer connection offer session description.",
             "itemtype": "method",
             "name": "_doOffer",
@@ -2222,7 +2170,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 168,
+            "line": 143,
             "description": "Function that creates the Peer connection answer session description.\nThis comes after receiving and setting the offer session description.",
             "itemtype": "method",
             "name": "_doAnswer",
@@ -2233,29 +2181,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 208,
-            "description": "Function that starts the Peer connection health timer.\nTo count as a \"healthy\" successful established Peer connection, the\n  ICE connection state has to be \"connected\" or \"completed\",\n  messaging Datachannel type state has to be \"opened\" (if Datachannel is enabled)\n  and Signaling state has to be \"stable\".\nShould consider dropping of counting messaging Datachannel type being opened as\n  it should not involve the actual Peer connection for media (audio/video) streaming.",
-            "itemtype": "method",
-            "name": "_startPeerConnectionHealthCheck",
-            "access": "private",
-            "tagname": "",
-            "since": "0.5.5",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/peer-handshake.js",
-            "line": 312,
-            "description": "Function that stops the Peer connection health timer.\nThis happens when Peer connection has been successfully established or when\n  Peer leaves the Room.",
-            "itemtype": "method",
-            "name": "_stopPeerConnectionHealthCheck",
-            "access": "private",
-            "tagname": "",
-            "since": "0.5.5",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/peer-handshake.js",
-            "line": 337,
+            "line": 183,
             "description": "Function that sets the local session description and sends to Peer.\nIf trickle ICE is disabled, the local session description will be sent after\n  ICE gathering has been completed.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -3311,6 +3237,13 @@
                                     "optdefault": "false"
                                 }
                             ]
+                        },
+                        {
+                            "name": "shareScreenThrottleInterval",
+                            "description": "The interval timeout for\n  <a href=\"#method_shareScreen\"><code>shareScreen()</code> method</a> throttling in milliseconds.",
+                            "type": "Number",
+                            "optional": true,
+                            "optdefault": "10000"
                         }
                     ]
                 },
@@ -3456,6 +3389,11 @@
                                     "name": "filterCandidatesType",
                                     "description": "The configured value of the <code>options.filterCandidatesType</code>.",
                                     "type": "JSON"
+                                },
+                                {
+                                    "name": "shareScreenThrottleInterval",
+                                    "description": "The configured value of the <code>options.shareScreenThrottleInterval</code>.",
+                                    "type": "Number"
                                 }
                             ]
                         }
@@ -3471,7 +3409,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 803,
+            "line": 813,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -3482,7 +3420,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 877,
+            "line": 887,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -3493,7 +3431,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 950,
+            "line": 960,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -3504,7 +3442,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1041,
+            "line": 1051,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -6063,6 +6001,18 @@
         {
             "file": "source/skylink-events.js",
             "line": 963,
+            "description": "Stores the throttling interval timeout.",
+            "itemtype": "attribute",
+            "name": "_throttlingTimeout",
+            "type": "JSON",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.16",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 975,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -6086,7 +6036,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 987,
+            "line": 999,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -6123,7 +6073,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1045,
+            "line": 1057,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -6148,7 +6098,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1094,
+            "line": 1106,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -6159,7 +6109,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1148,
+            "line": 1160,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -6170,7 +6120,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1174,
+            "line": 1186,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -6181,7 +6131,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1212,
+            "line": 1224,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",
@@ -6742,7 +6692,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 703,
+            "line": 702,
             "description": "Function that handles the \"enter\" socket message received.\nSee confluence docs for the \"enter\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -6753,7 +6703,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 785,
+            "line": 771,
             "description": "Function that handles the \"restart\" socket message received.\nSee confluence docs for the \"restart\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -6764,7 +6714,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 905,
+            "line": 846,
             "description": "Function that handles the \"welcome\" socket message received.\nSee confluence docs for the \"welcome\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -6775,7 +6725,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1011,
+            "line": 923,
             "description": "Function that handles the \"offer\" socket message received.\nSee confluence docs for the \"offer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -6786,7 +6736,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1093,
+            "line": 1007,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -6797,7 +6747,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1179,
+            "line": 1093,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -7388,7 +7338,7 @@
         {
             "file": "source/stream-media.js",
             "line": 1092,
-            "description": "<blockquote class=\"info\">\n  For a better user experience, the functionality is throttled when invoked many times in less\n  than 10 seconds interval.\n</blockquote>\nFunction that retrieves screensharing Stream.",
+            "description": "<blockquote class=\"info\">\n  For a better user experience, the functionality is throttled when invoked many times in less\n  than the milliseconds interval configured in the <a href=\"#method_init\"><code>init()</code> method</a>.\n</blockquote>\nFunction that retrieves screensharing Stream.",
             "itemtype": "method",
             "name": "shareScreen",
             "params": [
@@ -7929,10 +7879,6 @@
         {
             "message": "Missing item type\nEmit event for Peers function.",
             "line": " source/data-transfer.js:2111"
-        },
-        {
-            "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self._getUserInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:1241"
         }
     ]
 }

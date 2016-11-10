@@ -961,6 +961,18 @@ Skylink.prototype._timestamp = {
 };
 
 /**
+ * Stores the throttling interval timeout.
+ * @attribute _throttlingTimeout
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._throttlingTimeout = {
+  shareScreen: 10000
+};
+
+/**
  * Function that subscribes a listener to an event.
  * @method on
  * @param {String} eventName The event.

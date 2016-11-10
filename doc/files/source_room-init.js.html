@@ -509,6 +509,8 @@ Skylink.prototype._room = null;
  * @param {Boolean} [options.filterCandidatesType.host=false] The flag if local network ICE candidates should be filtered out.
  * @param {Boolean} [options.filterCandidatesType.srflx=false] The flag if STUN ICE candidates should be filtered out.
  * @param {Boolean} [options.filterCandidatesType.relay=false] The flag if TURN ICE candidates should be filtered out.
+ * @param {Number} [options.shareScreenThrottleInterval=10000] The interval timeout for
+ *   &lt;a href=&quot;#method_shareScreen&quot;&gt;&lt;code&gt;shareScreen()&lt;/code&gt; method&lt;/a&gt; throttling in milliseconds.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_readyStateChange&quot;&gt;
@@ -550,6 +552,7 @@ Skylink.prototype._room = null;
  * @param {Boolean} callback.success.disableVideoFecCodecs The configured value of the &lt;code&gt;options.disableVideoFecCodecs&lt;/code&gt;.
  * @param {Boolean} callback.success.disableComfortNoiseCodec The configured value of the &lt;code&gt;options.disableComfortNoiseCodec&lt;/code&gt;.
  * @param {JSON} callback.success.filterCandidatesType The configured value of the &lt;code&gt;options.filterCandidatesType&lt;/code&gt;.
+ * @param {Number} callback.success.shareScreenThrottleInterval The configured value of the &lt;code&gt;options.shareScreenThrottleInterval&lt;/code&gt;.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -651,6 +654,7 @@ Skylink.prototype.init = function(options, callback) {
     srflx: false,
     relay: false
   };
+  var shareScreenThrottleInterval = 10000;
 
   log.log(&#x27;Provided init options:&#x27;, options);
 
@@ -712,6 +716,9 @@ Skylink.prototype.init = function(options, callback) {
     // set the use public stun option
     usePublicSTUN = (typeof options.usePublicSTUN === &#x27;boolean&#x27;) ?
       options.usePublicSTUN : usePublicSTUN;
+    // set the shareScreen() throttling timeout value
+    shareScreenThrottleInterval = (typeof options.shareScreenThrottleInterval === &#x27;number&#x27;) ?
+      options.shareScreenThrottleInterval : shareScreenThrottleInterval;
     // set the use of disabling ulpfec and red codecs
     disableVideoFecCodecs = (typeof options.disableVideoFecCodecs === &#x27;boolean&#x27;) ?
       options.disableVideoFecCodecs : disableVideoFecCodecs;
@@ -805,6 +812,7 @@ Skylink.prototype.init = function(options, callback) {
   self._disableVideoFecCodecs = disableVideoFecCodecs;
   self._disableComfortNoiseCodec = disableComfortNoiseCodec;
   self._filterCandidatesType = filterCandidatesType;
+  self._throttlingTimeout.shareScreen = shareScreenThrottleInterval;
 
   log.log(&#x27;Init configuration:&#x27;, {
     serverUrl: self._path,
@@ -829,7 +837,8 @@ Skylink.prototype.init = function(options, callback) {
     usePublicSTUN: self._usePublicSTUN,
     disableVideoFecCodecs: self._disableVideoFecCodecs,
     disableComfortNoiseCodec: self._disableComfortNoiseCodec,
-    filterCandidatesType: self._filterCandidatesType
+    filterCandidatesType: self._filterCandidatesType,
+    shareScreenThrottleInterval: self._throttlingTimeout.shareScreen
   });
   // trigger the readystate
   self._readyState = 0;
@@ -868,7 +877,8 @@ Skylink.prototype.init = function(options, callback) {
             usePublicSTUN: self._usePublicSTUN,
             disableVideoFecCodecs: self._disableVideoFecCodecs,
             disableComfortNoiseCodec: self._disableComfortNoiseCodec,
-            filterCandidatesType: self._filterCandidatesType
+            filterCandidatesType: self._filterCandidatesType,
+            shareScreenThrottleInterval: self._throttlingTimeout.shareScreen
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, &#x27;Socket&#x27;, null, &#x27;Firing callback. &#x27; +
