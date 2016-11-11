@@ -193,8 +193,8 @@ Skylink.prototype._peerConnections = {};
  *   For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in
  *   &lt;a href=&quot;http://support.temasys.com.sg/support/discussions/topics/12000005188&quot;&gt;in this article here&lt;/a&gt;.
  *   Note that this functionality should be used when Peer connection stream freezes during a connection.
- *   For a better user experience, the functionality is throttled for MCU enabled Peer connections
- *   when invoked many times in less than 5 seconds interval.
+ *   For a better user experience for only MCU enabled Peer connections, the functionality is throttled when invoked many
+ *   times in less than the milliseconds interval configured in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;.
  * &lt;/blockquote&gt;
  * Function that refreshes Peer connections to update with the current streaming.
  * @method refreshConnection
@@ -352,11 +352,13 @@ Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, callbac
 
   self._throttle(function (runFn) {
     if (!runFn &amp;&amp; self._hasMCU) {
-      emitErrorForPeersFn(&#x27;Unable to run as throttle interval has not reached (5s).&#x27;);
-    } else {
-      self._refreshPeerConnection(listOfPeers, doIceRestart, callback);
+      if (self._throttlingShouldThrowError) {
+        emitErrorForPeersFn(&#x27;Unable to run as throttle interval has not reached (&#x27; + self._throttlingTimeout.refreshConnection + &#x27;ms).&#x27;);
+      }
+      return;
     }
-  }, &#x27;restartConnection&#x27;, 5000);
+    self._refreshPeerConnection(listOfPeers, doIceRestart, callback);
+  }, &#x27;refreshConnection&#x27;, self._throttlingTimeout.refreshConnection);
 
 };
 

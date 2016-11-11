@@ -379,6 +379,10 @@ Skylink.prototype._streamsBandwidthSettings = {
 Skylink.prototype._streamsStoppedCbs = {};
 
 /**
+ * &lt;blockquote class=&quot;info&quot;&gt;
+ *   For a better user experience, the functionality is throttled when invoked many times in less
+ *   than the milliseconds interval configured in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;.
+ * &lt;/blockquote&gt;
  * Function that retrieves camera Stream.
  * @method getUserMedia
  * @param {JSON} [options] The camera Stream configuration options.
@@ -645,42 +649,56 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     return;
   }*/
 
-  if (typeof callback === &#x27;function&#x27;) {
-    var mediaAccessSuccessFn = function (stream) {
-      self.off(&#x27;mediaAccessError&#x27;, mediaAccessErrorFn);
-      callback(null, stream);
-    };
-    var mediaAccessErrorFn = function (error) {
-      self.off(&#x27;mediaAccessSuccess&#x27;, mediaAccessSuccessFn);
-      callback(error, null);
-    };
+  self._throttle(function (runFn) {
+    if (!runFn) {
+      if (self._throttlingShouldThrowError) {
+        var throttleLimitError = &#x27;Unable to run as throttle interval has not reached (&#x27; + self._throttlingTimeout.getUserMedia + &#x27;ms).&#x27;;
+        log.error(throttleLimitError);
 
-    self.once(&#x27;mediaAccessSuccess&#x27;, mediaAccessSuccessFn, function (stream, isScreensharing) {
-      return !isScreensharing;
-    });
-
-    self.once(&#x27;mediaAccessError&#x27;, mediaAccessErrorFn, function (error, isScreensharing) {
-      return !isScreensharing;
-    });
-  }
-
-  // Parse stream settings
-  var settings = self._parseStreamSettings(options);
-
-  navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
-    if (settings.mutedSettings.shouldAudioMuted) {
-      self._streamsMutedSettings.audioMuted = true;
+        if (typeof callback === &#x27;function&#x27;) {
+          callback(new Error(throttleLimitError), null);
+        }
+      }
+      return;
     }
 
-    if (settings.mutedSettings.shouldVideoMuted) {
-      self._streamsMutedSettings.videoMuted = true;
+    if (typeof callback === &#x27;function&#x27;) {
+      var mediaAccessSuccessFn = function (stream) {
+        self.off(&#x27;mediaAccessError&#x27;, mediaAccessErrorFn);
+        callback(null, stream);
+      };
+      var mediaAccessErrorFn = function (error) {
+        self.off(&#x27;mediaAccessSuccess&#x27;, mediaAccessSuccessFn);
+        callback(error, null);
+      };
+
+      self.once(&#x27;mediaAccessSuccess&#x27;, mediaAccessSuccessFn, function (stream, isScreensharing) {
+        return !isScreensharing;
+      });
+
+      self.once(&#x27;mediaAccessError&#x27;, mediaAccessErrorFn, function (error, isScreensharing) {
+        return !isScreensharing;
+      });
     }
 
-    self._onStreamAccessSuccess(stream, settings, false, false);
+    // Parse stream settings
+    var settings = self._parseStreamSettings(options);
 
-  }, function (error) {
-    self._onStreamAccessError(error, settings, false, false);
-  });
+    navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
+      if (settings.mutedSettings.shouldAudioMuted) {
+        self._streamsMutedSettings.audioMuted = true;
+      }
+
+      if (settings.mutedSettings.shouldVideoMuted) {
+        self._streamsMutedSettings.videoMuted = true;
+      }
+
+      self._onStreamAccessSuccess(stream, settings, false, false);
+
+    }, function (error) {
+      self._onStreamAccessError(error, settings, false, false);
+    });
+  }, &#x27;getUserMedia&#x27;, self._throttlingTimeout.getUserMedia);
 };
 
 /**
@@ -1306,11 +1324,13 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 
   self._throttle(function (runFn) {
     if (!runFn) {
-      var throttleLimitError = &#x27;Unable to run as throttle interval has not reached (&#x27; + self._throttlingTimeout.shareScreen + &#x27;ms).&#x27;;
-      log.error(throttleLimitError);
+      if (self._throttlingShouldThrowError) {
+        var throttleLimitError = &#x27;Unable to run as throttle interval has not reached (&#x27; + self._throttlingTimeout.shareScreen + &#x27;ms).&#x27;;
+        log.error(throttleLimitError);
 
-      if (typeof callback === &#x27;function&#x27;) {
-        callback(new Error(throttleLimitError), null);
+        if (typeof callback === &#x27;function&#x27;) {
+          callback(new Error(throttleLimitError), null);
+        }
       }
       return;
     }

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Fri Nov 11 2016 02:45:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Fri Nov 11 2016 22:21:54 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3663,8 +3663,8 @@ Skylink.prototype._peerConnections = {};
  *   For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in
  *   <a href="http://support.temasys.com.sg/support/discussions/topics/12000005188">in this article here</a>.
  *   Note that this functionality should be used when Peer connection stream freezes during a connection.
- *   For a better user experience, the functionality is throttled for MCU enabled Peer connections
- *   when invoked many times in less than 5 seconds interval.
+ *   For a better user experience for only MCU enabled Peer connections, the functionality is throttled when invoked many
+ *   times in less than the milliseconds interval configured in the <a href="#method_init"><code>init()</code> method</a>.
  * </blockquote>
  * Function that refreshes Peer connections to update with the current streaming.
  * @method refreshConnection
@@ -3822,11 +3822,13 @@ Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, callbac
 
   self._throttle(function (runFn) {
     if (!runFn && self._hasMCU) {
-      emitErrorForPeersFn('Unable to run as throttle interval has not reached (5s).');
-    } else {
-      self._refreshPeerConnection(listOfPeers, doIceRestart, callback);
+      if (self._throttlingShouldThrowError) {
+        emitErrorForPeersFn('Unable to run as throttle interval has not reached (' + self._throttlingTimeout.refreshConnection + 'ms).');
+      }
+      return;
     }
-  }, 'restartConnection', 5000);
+    self._refreshPeerConnection(listOfPeers, doIceRestart, callback);
+  }, 'refreshConnection', self._throttlingTimeout.refreshConnection);
 
 };
 
@@ -6879,8 +6881,19 @@ Skylink.prototype._room = null;
  * @param {Boolean} [options.filterCandidatesType.host=false] The flag if local network ICE candidates should be filtered out.
  * @param {Boolean} [options.filterCandidatesType.srflx=false] The flag if STUN ICE candidates should be filtered out.
  * @param {Boolean} [options.filterCandidatesType.relay=false] The flag if TURN ICE candidates should be filtered out.
- * @param {Number} [options.shareScreenThrottleInterval=10000] The interval timeout for
+ * @param {JSON} [options.throttleIntervals] The configuration options to configure the throttling method timeouts.
+ * @param {Number} [options.throttleIntervals.shareScreen=10000] The interval timeout for
  *   <a href="#method_shareScreen"><code>shareScreen()</code> method</a> throttling in milliseconds.
+ * @param {Number} [options.throttleIntervals.getUserMedia=0] The interval timeout for
+ *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> throttling in milliseconds.
+ * @param {Number} [options.throttleIntervals.refreshConnection=5000] <blockquote class="info">
+ *   Note that this throttling is only done for MCU enabled Peer connections.
+ *   </blockquote> The interval timeout for <a href="#method_refreshConnection">
+ *   <code>refreshConnection()</code> method</a> throttling in milliseconds.
+ *   <small>Note that there will be no throttling when <a href="#method_refreshConnection">
+ *   <code>refreshConnection()</code> method</a> is called internally.</small>
+ * @param {Boolean} [options.throttleShouldThrowError] The flag if throttled methods should throw errors when
+ *   method is invoked less than the interval timeout value configured in <code>options.throttleIntervals</code>.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_readyStateChange">
@@ -6922,7 +6935,8 @@ Skylink.prototype._room = null;
  * @param {Boolean} callback.success.disableVideoFecCodecs The configured value of the <code>options.disableVideoFecCodecs</code>.
  * @param {Boolean} callback.success.disableComfortNoiseCodec The configured value of the <code>options.disableComfortNoiseCodec</code>.
  * @param {JSON} callback.success.filterCandidatesType The configured value of the <code>options.filterCandidatesType</code>.
- * @param {Number} callback.success.shareScreenThrottleInterval The configured value of the <code>options.shareScreenThrottleInterval</code>.
+ * @param {Number} callback.success.throttleIntervals The configured value of the <code>options.throttleIntervals</code>.
+ * @param {Number} callback.success.throttleShouldThrowError The configured value of the <code>options.throttleShouldThrowError</code>.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -7024,7 +7038,12 @@ Skylink.prototype.init = function(options, callback) {
     srflx: false,
     relay: false
   };
-  var shareScreenThrottleInterval = 10000;
+  var throttleIntervals = {
+    shareScreen: 10000,
+    refreshConnection: 5000,
+    getUserMedia: 0
+  };
+  var throttleShouldThrowError = false;
 
   log.log('Provided init options:', options);
 
@@ -7086,15 +7105,15 @@ Skylink.prototype.init = function(options, callback) {
     // set the use public stun option
     usePublicSTUN = (typeof options.usePublicSTUN === 'boolean') ?
       options.usePublicSTUN : usePublicSTUN;
-    // set the shareScreen() throttling timeout value
-    shareScreenThrottleInterval = (typeof options.shareScreenThrottleInterval === 'number') ?
-      options.shareScreenThrottleInterval : shareScreenThrottleInterval;
     // set the use of disabling ulpfec and red codecs
     disableVideoFecCodecs = (typeof options.disableVideoFecCodecs === 'boolean') ?
       options.disableVideoFecCodecs : disableVideoFecCodecs;
     // set the use of disabling CN codecs
     disableComfortNoiseCodec = (typeof options.disableComfortNoiseCodec === 'boolean') ?
       options.disableComfortNoiseCodec : disableComfortNoiseCodec;
+    // set the flag if throttling should throw error when called less than the interval timeout configured
+    throttleShouldThrowError = (typeof options.throttleShouldThrowError === 'boolean') ?
+      options.throttleShouldThrowError : throttleShouldThrowError;
     // set the use of filtering ICE candidates
     if (typeof options.filterCandidatesType === 'object' && options.filterCandidatesType) {
       filterCandidatesType.host = (typeof options.filterCandidatesType.host === 'boolean') ?
@@ -7103,6 +7122,15 @@ Skylink.prototype.init = function(options, callback) {
         options.filterCandidatesType.srflx : false;
       filterCandidatesType.relay = (typeof options.filterCandidatesType.relay === 'boolean') ?
         options.filterCandidatesType.relay : false;
+    }
+    // set the use of throttling interval timeouts
+    if (typeof options.throttleIntervals === 'object' && options.throttleIntervals) {
+      throttleIntervals.shareScreen = (typeof options.throttleIntervals.shareScreen === 'number') ?
+        options.throttleIntervals.shareScreen : throttleIntervals.shareScreen;
+      throttleIntervals.refreshConnection = (typeof options.throttleIntervals.refreshConnection === 'number') ?
+        options.throttleIntervals.refreshConnection : throttleIntervals.refreshConnection;
+      throttleIntervals.getUserMedia = (typeof options.throttleIntervals.getUserMedia === 'number') ?
+        options.throttleIntervals.getUserMedia : throttleIntervals.getUserMedia;
     }
 
     // set turn transport option
@@ -7182,7 +7210,8 @@ Skylink.prototype.init = function(options, callback) {
   self._disableVideoFecCodecs = disableVideoFecCodecs;
   self._disableComfortNoiseCodec = disableComfortNoiseCodec;
   self._filterCandidatesType = filterCandidatesType;
-  self._throttlingTimeout.shareScreen = shareScreenThrottleInterval;
+  self._throttlingTimeout = throttleIntervals;
+  self._throttlingShouldThrowError = throttleShouldThrowError;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -7208,7 +7237,8 @@ Skylink.prototype.init = function(options, callback) {
     disableVideoFecCodecs: self._disableVideoFecCodecs,
     disableComfortNoiseCodec: self._disableComfortNoiseCodec,
     filterCandidatesType: self._filterCandidatesType,
-    shareScreenThrottleInterval: self._throttlingTimeout.shareScreen
+    throttleIntervals: self._throttlingTimeout,
+    throttleShouldThrowError: self._throttlingShouldThrowError
   });
   // trigger the readystate
   self._readyState = 0;
@@ -7248,7 +7278,8 @@ Skylink.prototype.init = function(options, callback) {
             disableVideoFecCodecs: self._disableVideoFecCodecs,
             disableComfortNoiseCodec: self._disableComfortNoiseCodec,
             filterCandidatesType: self._filterCandidatesType,
-            shareScreenThrottleInterval: self._throttlingTimeout.shareScreen
+            throttleIntervals: self._throttlingTimeout.shareScreen,
+            throttleShouldThrowError: self._throttlingShouldThrowError
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +
@@ -8917,7 +8948,8 @@ Skylink.prototype._onceEvents = {};
 Skylink.prototype._timestamp = {
   socketMessage: null,
   shareScreen: null,
-  restartConnection: null,
+  refreshConnection: null,
+  getUserMedia: null,
   lastRestart: null
 };
 
@@ -8930,8 +8962,20 @@ Skylink.prototype._timestamp = {
  * @since 0.6.16
  */
 Skylink.prototype._throttlingTimeout = {
-  shareScreen: 10000
+  shareScreen: 10000,
+  refreshConnection: 5000,
+  getUserMedia: 0
 };
+
+/**
+ * Stores the flag if throttling should throw when called less than the interval timeout.
+ * @attribute _throttlingShouldThrowError
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._throttlingShouldThrowError = false;
 
 /**
  * Function that subscribes a listener to an event.
@@ -11230,6 +11274,10 @@ Skylink.prototype._streamsBandwidthSettings = {
 Skylink.prototype._streamsStoppedCbs = {};
 
 /**
+ * <blockquote class="info">
+ *   For a better user experience, the functionality is throttled when invoked many times in less
+ *   than the milliseconds interval configured in the <a href="#method_init"><code>init()</code> method</a>.
+ * </blockquote>
  * Function that retrieves camera Stream.
  * @method getUserMedia
  * @param {JSON} [options] The camera Stream configuration options.
@@ -11496,42 +11544,56 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     return;
   }*/
 
-  if (typeof callback === 'function') {
-    var mediaAccessSuccessFn = function (stream) {
-      self.off('mediaAccessError', mediaAccessErrorFn);
-      callback(null, stream);
-    };
-    var mediaAccessErrorFn = function (error) {
-      self.off('mediaAccessSuccess', mediaAccessSuccessFn);
-      callback(error, null);
-    };
+  self._throttle(function (runFn) {
+    if (!runFn) {
+      if (self._throttlingShouldThrowError) {
+        var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._throttlingTimeout.getUserMedia + 'ms).';
+        log.error(throttleLimitError);
 
-    self.once('mediaAccessSuccess', mediaAccessSuccessFn, function (stream, isScreensharing) {
-      return !isScreensharing;
-    });
-
-    self.once('mediaAccessError', mediaAccessErrorFn, function (error, isScreensharing) {
-      return !isScreensharing;
-    });
-  }
-
-  // Parse stream settings
-  var settings = self._parseStreamSettings(options);
-
-  navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
-    if (settings.mutedSettings.shouldAudioMuted) {
-      self._streamsMutedSettings.audioMuted = true;
+        if (typeof callback === 'function') {
+          callback(new Error(throttleLimitError), null);
+        }
+      }
+      return;
     }
 
-    if (settings.mutedSettings.shouldVideoMuted) {
-      self._streamsMutedSettings.videoMuted = true;
+    if (typeof callback === 'function') {
+      var mediaAccessSuccessFn = function (stream) {
+        self.off('mediaAccessError', mediaAccessErrorFn);
+        callback(null, stream);
+      };
+      var mediaAccessErrorFn = function (error) {
+        self.off('mediaAccessSuccess', mediaAccessSuccessFn);
+        callback(error, null);
+      };
+
+      self.once('mediaAccessSuccess', mediaAccessSuccessFn, function (stream, isScreensharing) {
+        return !isScreensharing;
+      });
+
+      self.once('mediaAccessError', mediaAccessErrorFn, function (error, isScreensharing) {
+        return !isScreensharing;
+      });
     }
 
-    self._onStreamAccessSuccess(stream, settings, false, false);
+    // Parse stream settings
+    var settings = self._parseStreamSettings(options);
 
-  }, function (error) {
-    self._onStreamAccessError(error, settings, false, false);
-  });
+    navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
+      if (settings.mutedSettings.shouldAudioMuted) {
+        self._streamsMutedSettings.audioMuted = true;
+      }
+
+      if (settings.mutedSettings.shouldVideoMuted) {
+        self._streamsMutedSettings.videoMuted = true;
+      }
+
+      self._onStreamAccessSuccess(stream, settings, false, false);
+
+    }, function (error) {
+      self._onStreamAccessError(error, settings, false, false);
+    });
+  }, 'getUserMedia', self._throttlingTimeout.getUserMedia);
 };
 
 /**
@@ -12157,11 +12219,13 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 
   self._throttle(function (runFn) {
     if (!runFn) {
-      var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._throttlingTimeout.shareScreen + 'ms).';
-      log.error(throttleLimitError);
+      if (self._throttlingShouldThrowError) {
+        var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._throttlingTimeout.shareScreen + 'ms).';
+        log.error(throttleLimitError);
 
-      if (typeof callback === 'function') {
-        callback(new Error(throttleLimitError), null);
+        if (typeof callback === 'function') {
+          callback(new Error(throttleLimitError), null);
+        }
       }
       return;
     }

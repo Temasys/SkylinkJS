@@ -956,7 +956,8 @@ Skylink.prototype._onceEvents = {};
 Skylink.prototype._timestamp = {
   socketMessage: null,
   shareScreen: null,
-  restartConnection: null,
+  refreshConnection: null,
+  getUserMedia: null,
   lastRestart: null
 };
 
@@ -969,8 +970,20 @@ Skylink.prototype._timestamp = {
  * @since 0.6.16
  */
 Skylink.prototype._throttlingTimeout = {
-  shareScreen: 10000
+  shareScreen: 10000,
+  refreshConnection: 5000,
+  getUserMedia: 0
 };
+
+/**
+ * Stores the flag if throttling should throw when called less than the interval timeout.
+ * @attribute _throttlingShouldThrowError
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._throttlingShouldThrowError = false;
 
 /**
  * Function that subscribes a listener to an event.

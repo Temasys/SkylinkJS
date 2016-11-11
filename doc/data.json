@@ -1697,7 +1697,7 @@
         {
             "file": "source/peer-connection.js",
             "line": 98,
-            "description": "<blockquote class=\"info\">\n  For MCU enabled Peer connections, the restart functionality may differ, you may learn more about how to workaround\n  it <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002853\">in this article here</a>.\n  For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in\n  <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000005188\">in this article here</a>.\n  Note that this functionality should be used when Peer connection stream freezes during a connection.\n  For a better user experience, the functionality is throttled for MCU enabled Peer connections\n  when invoked many times in less than 5 seconds interval.\n</blockquote>\nFunction that refreshes Peer connections to update with the current streaming.",
+            "description": "<blockquote class=\"info\">\n  For MCU enabled Peer connections, the restart functionality may differ, you may learn more about how to workaround\n  it <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002853\">in this article here</a>.\n  For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in\n  <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000005188\">in this article here</a>.\n  Note that this functionality should be used when Peer connection stream freezes during a connection.\n  For a better user experience for only MCU enabled Peer connections, the functionality is throttled when invoked many\n  times in less than the milliseconds interval configured in the <a href=\"#method_init\"><code>init()</code> method</a>.\n</blockquote>\nFunction that refreshes Peer connections to update with the current streaming.",
             "itemtype": "method",
             "name": "refreshConnection",
             "params": [
@@ -1766,7 +1766,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 272,
+            "line": 274,
             "description": "Function that refresh connections.",
             "itemtype": "method",
             "name": "_refreshPeerConnection",
@@ -1777,7 +1777,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 359,
+            "line": 361,
             "description": "Function that retrieves Peer connection bandwidth and ICE connection stats.",
             "itemtype": "method",
             "name": "getConnectionStatus",
@@ -1860,7 +1860,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 880,
+            "line": 882,
             "description": "Function that starts the Peer connection session.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_addPeer",
@@ -1871,7 +1871,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 919,
+            "line": 921,
             "description": "Function that re-negotiates a Peer connection.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -1882,7 +1882,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1035,
+            "line": 1037,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -1893,7 +1893,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1096,
+            "line": 1098,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -1904,7 +1904,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1226,
+            "line": 1228,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -3239,11 +3239,39 @@
                             ]
                         },
                         {
-                            "name": "shareScreenThrottleInterval",
-                            "description": "The interval timeout for\n  <a href=\"#method_shareScreen\"><code>shareScreen()</code> method</a> throttling in milliseconds.",
-                            "type": "Number",
+                            "name": "throttleIntervals",
+                            "description": "The configuration options to configure the throttling method timeouts.",
+                            "type": "JSON",
                             "optional": true,
-                            "optdefault": "10000"
+                            "props": [
+                                {
+                                    "name": "shareScreen",
+                                    "description": "The interval timeout for\n  <a href=\"#method_shareScreen\"><code>shareScreen()</code> method</a> throttling in milliseconds.",
+                                    "type": "Number",
+                                    "optional": true,
+                                    "optdefault": "10000"
+                                },
+                                {
+                                    "name": "getUserMedia",
+                                    "description": "The interval timeout for\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> method</a> throttling in milliseconds.",
+                                    "type": "Number",
+                                    "optional": true,
+                                    "optdefault": "0"
+                                },
+                                {
+                                    "name": "refreshConnection",
+                                    "description": "<blockquote class=\"info\">\n  Note that this throttling is only done for MCU enabled Peer connections.\n  </blockquote> The interval timeout for <a href=\"#method_refreshConnection\">\n  <code>refreshConnection()</code> method</a> throttling in milliseconds.\n  <small>Note that there will be no throttling when <a href=\"#method_refreshConnection\">\n  <code>refreshConnection()</code> method</a> is called internally.</small>",
+                                    "type": "Number",
+                                    "optional": true,
+                                    "optdefault": "5000"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "throttleShouldThrowError",
+                            "description": "The flag if throttled methods should throw errors when\n  method is invoked less than the interval timeout value configured in <code>options.throttleIntervals</code>.",
+                            "type": "Boolean",
+                            "optional": true
                         }
                     ]
                 },
@@ -3391,8 +3419,13 @@
                                     "type": "JSON"
                                 },
                                 {
-                                    "name": "shareScreenThrottleInterval",
-                                    "description": "The configured value of the <code>options.shareScreenThrottleInterval</code>.",
+                                    "name": "throttleIntervals",
+                                    "description": "The configured value of the <code>options.throttleIntervals</code>.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "throttleShouldThrowError",
+                                    "description": "The configured value of the <code>options.throttleShouldThrowError</code>.",
                                     "type": "Number"
                                 }
                             ]
@@ -3409,7 +3442,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 813,
+            "line": 842,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -3420,7 +3453,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 887,
+            "line": 916,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -3431,7 +3464,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 960,
+            "line": 989,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -3442,7 +3475,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1051,
+            "line": 1080,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -6000,7 +6033,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 963,
+            "line": 964,
             "description": "Stores the throttling interval timeout.",
             "itemtype": "attribute",
             "name": "_throttlingTimeout",
@@ -6012,7 +6045,19 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 975,
+            "line": 978,
+            "description": "Stores the flag if throttling should throw when called less than the interval timeout.",
+            "itemtype": "attribute",
+            "name": "_throttlingShouldThrowError",
+            "type": "JSON",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.16",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 988,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -6036,7 +6081,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 999,
+            "line": 1012,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -6073,7 +6118,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1057,
+            "line": 1070,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -6098,7 +6143,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1106,
+            "line": 1119,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -6109,7 +6154,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1160,
+            "line": 1173,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -6120,7 +6165,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1186,
+            "line": 1199,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -6131,7 +6176,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1224,
+            "line": 1237,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",
@@ -7038,7 +7083,7 @@
         {
             "file": "source/stream-media.js",
             "line": 290,
-            "description": "Function that retrieves camera Stream.",
+            "description": "<blockquote class=\"info\">\n  For a better user experience, the functionality is throttled when invoked many times in less\n  than the milliseconds interval configured in the <a href=\"#method_init\"><code>init()</code> method</a>.\n</blockquote>\nFunction that retrieves camera Stream.",
             "itemtype": "method",
             "name": "getUserMedia",
             "params": [
@@ -7190,7 +7235,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 595,
+            "line": 613,
             "description": "<blockquote class=\"info\">\n  Note that if <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> is available despite having\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> available, the\n  <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> is sent instead of the\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> to Peers.\n</blockquote>\nFunction that sends a new <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>\nto all connected Peers in the Room.",
             "itemtype": "method",
             "name": "sendStream",
@@ -7228,7 +7273,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 807,
+            "line": 825,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopStream",
@@ -7241,7 +7286,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 846,
+            "line": 864,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio or video tracks.",
             "itemtype": "method",
             "name": "muteStream",
@@ -7277,7 +7322,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 984,
+            "line": 1002,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -7292,7 +7337,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1011,
+            "line": 1029,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -7307,7 +7352,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1038,
+            "line": 1056,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -7322,7 +7367,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1065,
+            "line": 1083,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -7337,7 +7382,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1092,
+            "line": 1110,
             "description": "<blockquote class=\"info\">\n  For a better user experience, the functionality is throttled when invoked many times in less\n  than the milliseconds interval configured in the <a href=\"#method_init\"><code>init()</code> method</a>.\n</blockquote>\nFunction that retrieves screensharing Stream.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -7404,7 +7449,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1331,
+            "line": 1351,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -7417,7 +7462,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1389,
+            "line": 1409,
             "description": "Function that handles the muting of Stream audio and video tracks.",
             "itemtype": "method",
             "name": "_muteStreams",
@@ -7428,7 +7473,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1436,
+            "line": 1456,
             "description": "Function that handles stopping the Stream streaming.",
             "itemtype": "method",
             "name": "_stopStreams",
@@ -7439,7 +7484,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1509,
+            "line": 1529,
             "description": "Function that parses the <code>getUserMedia()</code> settings provided.",
             "itemtype": "method",
             "name": "_parseStreamSettings",
@@ -7450,7 +7495,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1662,
+            "line": 1682,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -7461,7 +7506,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1797,
+            "line": 1817,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -7472,7 +7517,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1837,
+            "line": 1857,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -7483,7 +7528,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1871,
+            "line": 1891,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -7686,7 +7731,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:359"
+            "line": " source/peer-connection.js:361"
         },
         {
             "message": "unknown tag: trigger",
@@ -7790,39 +7835,39 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:595"
+            "line": " source/stream-media.js:613"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:807"
+            "line": " source/stream-media.js:825"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:846"
+            "line": " source/stream-media.js:864"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:984"
+            "line": " source/stream-media.js:1002"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1011"
+            "line": " source/stream-media.js:1029"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1038"
+            "line": " source/stream-media.js:1056"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1065"
+            "line": " source/stream-media.js:1083"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1092"
+            "line": " source/stream-media.js:1110"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1331"
+            "line": " source/stream-media.js:1351"
         },
         {
             "message": "Missing item type\nPolyfill for Object.keys() from Mozilla\nFrom https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys",
