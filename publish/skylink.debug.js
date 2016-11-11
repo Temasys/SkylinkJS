@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Fri Nov 11 2016 22:21:54 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Fri Nov 11 2016 22:36:08 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1904,8 +1904,8 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
   }
 
   if (listOfPeers.length === 0) {
-    log.error('Unable to send message as there are no Peers to sent to.', message);
-    return;
+    log.warn('Currently there are no Peers to send P2P message to (unless the message is queued ' +
+      'and there are Peer connected by then).');
   }
 
   if (this._hasMCU) {
@@ -10024,8 +10024,8 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
   }
 
   if (listOfPeers.length === 0) {
-    log.error('Unable to send message as there is no Peers to sent to.', message);
-    return;
+    log.warn('Currently there are no Peers to send message to (unless the message is queued and ' +
+      'there are Peer connected by then).');
   }
 
   if (!isPrivate) {

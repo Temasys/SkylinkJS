@@ -202,8 +202,8 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
   }
 
   if (listOfPeers.length === 0) {
-    log.error('Unable to send message as there is no Peers to sent to.', message);
-    return;
+    log.warn('Currently there are no Peers to send message to (unless the message is queued and ' +
+      'there are Peer connected by then).');
   }
 
   if (!isPrivate) {
