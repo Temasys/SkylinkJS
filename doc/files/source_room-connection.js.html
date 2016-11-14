@@ -593,7 +593,7 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
   self._inRoom = false;
   self._closeChannel();
 
-  if (!isNotInRoom) {
+  if (isNotInRoom) {
     var notInRoomError = &#x27;Unable to leave room as user is not in any room&#x27;;
     log.error([null, &#x27;Room&#x27;, previousRoom, notInRoomError]);
 
