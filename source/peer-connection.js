@@ -262,12 +262,12 @@ Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, callbac
   self._throttle(function (runFn) {
     if (!runFn && self._hasMCU) {
       if (self._throttlingShouldThrowError) {
-        emitErrorForPeersFn('Unable to run as throttle interval has not reached (' + self._throttlingTimeout.refreshConnection + 'ms).');
+        emitErrorForPeersFn('Unable to run as throttle interval has not reached (' + self._throttlingTimeouts.refreshConnection + 'ms).');
       }
       return;
     }
     self._refreshPeerConnection(listOfPeers, doIceRestart, callback);
-  }, 'refreshConnection', self._throttlingTimeout.refreshConnection);
+  }, 'refreshConnection', self._throttlingTimeouts.refreshConnection);
 
 };
 

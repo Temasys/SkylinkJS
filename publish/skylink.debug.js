@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Fri Nov 11 2016 22:36:08 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Nov 14 2016 13:43:10 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3823,12 +3823,12 @@ Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, callbac
   self._throttle(function (runFn) {
     if (!runFn && self._hasMCU) {
       if (self._throttlingShouldThrowError) {
-        emitErrorForPeersFn('Unable to run as throttle interval has not reached (' + self._throttlingTimeout.refreshConnection + 'ms).');
+        emitErrorForPeersFn('Unable to run as throttle interval has not reached (' + self._throttlingTimeouts.refreshConnection + 'ms).');
       }
       return;
     }
     self._refreshPeerConnection(listOfPeers, doIceRestart, callback);
-  }, 'refreshConnection', self._throttlingTimeout.refreshConnection);
+  }, 'refreshConnection', self._throttlingTimeouts.refreshConnection);
 
 };
 
@@ -7210,7 +7210,7 @@ Skylink.prototype.init = function(options, callback) {
   self._disableVideoFecCodecs = disableVideoFecCodecs;
   self._disableComfortNoiseCodec = disableComfortNoiseCodec;
   self._filterCandidatesType = filterCandidatesType;
-  self._throttlingTimeout = throttleIntervals;
+  self._throttlingTimeouts = throttleIntervals;
   self._throttlingShouldThrowError = throttleShouldThrowError;
 
   log.log('Init configuration:', {
@@ -7237,7 +7237,7 @@ Skylink.prototype.init = function(options, callback) {
     disableVideoFecCodecs: self._disableVideoFecCodecs,
     disableComfortNoiseCodec: self._disableComfortNoiseCodec,
     filterCandidatesType: self._filterCandidatesType,
-    throttleIntervals: self._throttlingTimeout,
+    throttleIntervals: self._throttlingTimeouts,
     throttleShouldThrowError: self._throttlingShouldThrowError
   });
   // trigger the readystate
@@ -7278,7 +7278,7 @@ Skylink.prototype.init = function(options, callback) {
             disableVideoFecCodecs: self._disableVideoFecCodecs,
             disableComfortNoiseCodec: self._disableComfortNoiseCodec,
             filterCandidatesType: self._filterCandidatesType,
-            throttleIntervals: self._throttlingTimeout.shareScreen,
+            throttleIntervals: self._throttlingTimeouts,
             throttleShouldThrowError: self._throttlingShouldThrowError
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
@@ -7555,12 +7555,28 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
   }
   var defaultRoom = self._defaultRoom;
   var initOptions = {
-    roomServer: self._roomServer,
-    defaultRoom: room || defaultRoom,
     appKey: self._appKey,
-    region: self._serverRegion,
+    roomServer: self._roomServer,
+    defaultRoom: room,
+    serverRegion: self._serverRegion,
     enableDataChannel: self._enableDataChannel,
-    enableIceTrickle: self._enableIceTrickle
+    enableIceTrickle: self._enableIceTrickle,
+    enableTURNServer: self._enableTURN,
+    enableSTUNServer: self._enableSTUN,
+    TURNServerTransport: self._TURNTransport,
+    audioFallback: self._audioFallback,
+    forceSSL: self._forceSSL,
+    socketTimeout: self._socketTimeout,
+    forceTURNSSL: self._forceTURNSSL,
+    audioCodec: self._selectedAudioCodec,
+    videoCodec: self._selectedVideoCodec,
+    forceTURN: self._forceTURN,
+    usePublicSTUN: self._usePublicSTUN,
+    disableVideoFecCodecs: self._disableVideoFecCodecs,
+    disableComfortNoiseCodec: self._disableComfortNoiseCodec,
+    filterCandidatesType: self._filterCandidatesType,
+    throttleIntervals: self._throttlingTimeouts,
+    throttleShouldThrowError: self._throttlingShouldThrowError
   };
   if (self._roomCredentials) {
     initOptions.credentials = {
@@ -7572,9 +7588,9 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
   self.init(initOptions, function (error, success) {
     self._defaultRoom = defaultRoom;
     if (error) {
-      callback(error);
+      callback(error, null);
     } else {
-      callback(null);
+      callback(null, success);
     }
   });
 };
@@ -8955,13 +8971,13 @@ Skylink.prototype._timestamp = {
 
 /**
  * Stores the throttling interval timeout.
- * @attribute _throttlingTimeout
+ * @attribute _throttlingTimeouts
  * @type JSON
  * @private
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype._throttlingTimeout = {
+Skylink.prototype._throttlingTimeouts = {
   shareScreen: 10000,
   refreshConnection: 5000,
   getUserMedia: 0
@@ -11547,7 +11563,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
   self._throttle(function (runFn) {
     if (!runFn) {
       if (self._throttlingShouldThrowError) {
-        var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._throttlingTimeout.getUserMedia + 'ms).';
+        var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._throttlingTimeouts.getUserMedia + 'ms).';
         log.error(throttleLimitError);
 
         if (typeof callback === 'function') {
@@ -11593,7 +11609,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     }, function (error) {
       self._onStreamAccessError(error, settings, false, false);
     });
-  }, 'getUserMedia', self._throttlingTimeout.getUserMedia);
+  }, 'getUserMedia', self._throttlingTimeouts.getUserMedia);
 };
 
 /**
@@ -12220,7 +12236,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
   self._throttle(function (runFn) {
     if (!runFn) {
       if (self._throttlingShouldThrowError) {
-        var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._throttlingTimeout.shareScreen + 'ms).';
+        var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._throttlingTimeouts.shareScreen + 'ms).';
         log.error(throttleLimitError);
 
         if (typeof callback === 'function') {
@@ -12331,7 +12347,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
     }
-  }, 'shareScreen', self._throttlingTimeout.shareScreen);
+  }, 'shareScreen', self._throttlingTimeouts.shareScreen);
 };
 
 /**

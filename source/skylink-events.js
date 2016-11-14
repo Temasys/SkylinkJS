@@ -963,13 +963,13 @@ Skylink.prototype._timestamp = {
 
 /**
  * Stores the throttling interval timeout.
- * @attribute _throttlingTimeout
+ * @attribute _throttlingTimeouts
  * @type JSON
  * @private
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype._throttlingTimeout = {
+Skylink.prototype._throttlingTimeouts = {
   shareScreen: 10000,
   refreshConnection: 5000,
   getUserMedia: 0

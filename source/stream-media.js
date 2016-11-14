@@ -561,7 +561,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
   self._throttle(function (runFn) {
     if (!runFn) {
       if (self._throttlingShouldThrowError) {
-        var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._throttlingTimeout.getUserMedia + 'ms).';
+        var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._throttlingTimeouts.getUserMedia + 'ms).';
         log.error(throttleLimitError);
 
         if (typeof callback === 'function') {
@@ -607,7 +607,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     }, function (error) {
       self._onStreamAccessError(error, settings, false, false);
     });
-  }, 'getUserMedia', self._throttlingTimeout.getUserMedia);
+  }, 'getUserMedia', self._throttlingTimeouts.getUserMedia);
 };
 
 /**
@@ -1234,7 +1234,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
   self._throttle(function (runFn) {
     if (!runFn) {
       if (self._throttlingShouldThrowError) {
-        var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._throttlingTimeout.shareScreen + 'ms).';
+        var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._throttlingTimeouts.shareScreen + 'ms).';
         log.error(throttleLimitError);
 
         if (typeof callback === 'function') {
@@ -1345,7 +1345,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
     }
-  }, 'shareScreen', self._throttlingTimeout.shareScreen);
+  }, 'shareScreen', self._throttlingTimeouts.shareScreen);
 };
 
 /**
