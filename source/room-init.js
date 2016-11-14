@@ -550,7 +550,7 @@ Skylink.prototype.init = function(options, callback) {
     return;
   }
 
-  var appKey, room, defaultRoom, region;
+  var appKey, room, defaultRoom;
   var startDateTime, duration, credentials;
   var roomServer = self._roomServer;
   // NOTE: Should we get all the default values from the variables
@@ -599,9 +599,6 @@ Skylink.prototype.init = function(options, callback) {
     roomServer = (roomServer.lastIndexOf('/') ===
       (roomServer.length - 1)) ? roomServer.substring(0,
       roomServer.length - 1) : roomServer;
-    // set the region
-    region = (typeof options.region === 'string') ?
-      options.region : region;
     // set the default room
     defaultRoom = (typeof options.defaultRoom === 'string' && options.defaultRoom) ?
       options.defaultRoom : appKey;
@@ -713,7 +710,6 @@ Skylink.prototype.init = function(options, callback) {
   self._roomServer = roomServer;
   self._defaultRoom = defaultRoom;
   self._selectedRoom = room;
-  self._serverRegion = region || null;
   self._path = roomServer + '/api/' + appKey + '/' + room;
   // set credentials if there is
   if (credentials && startDateTime && duration) {
@@ -726,10 +722,6 @@ Skylink.prototype.init = function(options, callback) {
 
   self._path += ((credentials) ? '&' : '?') + 'rand=' + (new Date()).toISOString();
 
-  // check if there is a other query parameters or not
-  if (region) {
-    self._path += '&rg=' + region;
-  }
   // skylink functionality options
   self._enableIceTrickle = enableIceTrickle;
   self._enableDataChannel = enableDataChannel;
@@ -757,7 +749,6 @@ Skylink.prototype.init = function(options, callback) {
     roomServer: self._roomServer,
     defaultRoom: self._defaultRoom,
     selectedRoom: self._selectedRoom,
-    serverRegion: self._serverRegion,
     enableDataChannel: self._enableDataChannel,
     enableIceTrickle: self._enableIceTrickle,
     enableTURNServer: self._enableTURN,
@@ -798,7 +789,6 @@ Skylink.prototype.init = function(options, callback) {
             roomServer: self._roomServer,
             defaultRoom: self._defaultRoom,
             selectedRoom: self._selectedRoom,
-            serverRegion: self._serverRegion,
             enableDataChannel: self._enableDataChannel,
             enableIceTrickle: self._enableIceTrickle,
             enableTURNServer: self._enableTURN,
@@ -1095,7 +1085,6 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     appKey: self._appKey,
     roomServer: self._roomServer,
     defaultRoom: room,
-    serverRegion: self._serverRegion,
     enableDataChannel: self._enableDataChannel,
     enableIceTrickle: self._enableIceTrickle,
     enableTURNServer: self._enableTURN,
