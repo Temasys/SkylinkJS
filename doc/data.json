@@ -1904,7 +1904,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1228,
+            "line": 1240,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -2580,8 +2580,9 @@
                                 },
                                 {
                                     "name": "errorCode",
-                                    "description": "The current <a href=\"#method_init\"><code>init()</code> method</a> ready state.\n  [Rel: Skylink.READY_STATE_CHANGE]",
-                                    "type": "Number"
+                                    "description": "The current <a href=\"#method_init\"><code>init()</code> method</a> ready state.\n  <small>Defined as <code>null</code> when no <a href=\"#method_init\"><code>init()</code> method</a>\n  has not been called due to invalid configuration.</small>\n  [Rel: Skylink.READY_STATE_CHANGE]",
+                                    "type": "Number",
+                                    "optional": true
                                 },
                                 {
                                     "name": "room",
@@ -2624,8 +2625,8 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 524,
-            "description": "Function that stops Room session.",
+            "line": 420,
+            "description": "<blockquote class=\"info\">\n  Note that this method will close any existing socket channel connection despite not being in the Room.\n</blockquote>\nFunction that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
             "params": [
@@ -2683,13 +2684,13 @@
                     ]
                 }
             ],
-            "trigger": "<ol class=\"desc-seq\">\n  <li>Checks if User is in Room. <ol><li>If User is not in a Room: <ol><li><b>ABORT</b> and return error.</li>\n  </ol></li><li>Else: <ol><li>If parameter <code>stopMediaOptions.userMedia</code> value is <code>true</code>: <ol>\n  <li>Invoke <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>. \n  <small>Regardless of request errors, <code>leaveRoom()</code> will still proceed.</small></li></ol></li>\n  <li>If parameter <code>stopMediaOptions.screenshare</code> value is <code>true</code>: <ol>\n  <li>Invoke <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>.\n  <small>Regardless of request errors, <code>leaveRoom()</code> will still proceed.</small></li></ol></li>\n  <li><a href=\"#event_peerLeft\"><code>peerLeft</code> event</a> triggers for User and all connected Peers in Room.</li>\n  <li>If MCU is enabled for the App Key provided in <a href=\"#method_init\"><code>init()</code> method</a>\n  and connected: <ol><li><a href=\"#event_serverPeerLeft\"><code>serverPeerLeft</code> event</a>\n  triggers parameter payload <code>serverPeerType</code> as <code>MCU</code>.</li></ol></li>\n  <li><a href=\"#event_channelClose\"><code>channelClose</code> event</a> triggers.</li></ol></li></ol></li></ol>",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>If Socket connection is opened: <ol><li><a href=\"#event_channelClose\"><code>channelClose</code> event</a> triggers.</li></ol></li>\n  <li>Checks if User is in Room. <ol><li>If User is not in a Room: <ol><li><b>ABORT</b> and return error.</li>\n  </ol></li><li>Else: <ol><li>If parameter <code>stopMediaOptions.userMedia</code> value is <code>true</code>: <ol>\n  <li>Invoke <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>. \n  <small>Regardless of request errors, <code>leaveRoom()</code> will still proceed.</small></li></ol></li>\n  <li>If parameter <code>stopMediaOptions.screenshare</code> value is <code>true</code>: <ol>\n  <li>Invoke <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>.\n  <small>Regardless of request errors, <code>leaveRoom()</code> will still proceed.</small></li></ol></li>\n  <li><a href=\"#event_peerLeft\"><code>peerLeft</code> event</a> triggers for User and all connected Peers in Room.</li>\n  <li>If MCU is enabled for the App Key provided in <a href=\"#method_init\"><code>init()</code> method</a>\n  and connected: <ol><li><a href=\"#event_serverPeerLeft\"><code>serverPeerLeft</code> event</a>\n  triggers parameter payload <code>serverPeerType</code> as <code>MCU</code>.</li></ol></li></ol></li></ol></li></ol>",
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/room-connection.js",
-            "line": 652,
+            "line": 536,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -2699,7 +2700,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 681,
+            "line": 565,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -2709,7 +2710,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 710,
+            "line": 594,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -3442,7 +3443,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 842,
+            "line": 832,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -3453,7 +3454,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 916,
+            "line": 906,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -3464,7 +3465,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 989,
+            "line": 979,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -3475,7 +3476,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1080,
+            "line": 1070,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -6036,7 +6037,7 @@
             "line": 964,
             "description": "Stores the throttling interval timeout.",
             "itemtype": "attribute",
-            "name": "_throttlingTimeout",
+            "name": "_throttlingTimeouts",
             "type": "JSON",
             "access": "private",
             "tagname": "",
@@ -7698,6 +7699,12 @@
             "tagname": "",
             "since": "0.6.16",
             "class": "Skylink"
+        },
+        {
+            "file": "source/stream-sdp.js",
+            "line": 613,
+            "description": "+ * Function that modifies the session description to handle Chrome bundle bug.\n+ * See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280\n+ * @method _handleSDPChromeBundleBug\n+ * @private\n+ * @for Skylink\n+ * @since 0.6.16",
+            "class": "Skylink"
         }
     ],
     "warnings": [
@@ -7751,15 +7758,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:524"
+            "line": " source/room-connection.js:420"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:652"
+            "line": " source/room-connection.js:536"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:681"
+            "line": " source/room-connection.js:565"
         },
         {
             "message": "unknown tag: trigger",
@@ -7924,6 +7931,10 @@
         {
             "message": "Missing item type\nEmit event for Peers function.",
             "line": " source/data-transfer.js:2111"
+        },
+        {
+            "message": "Missing item type\n+ * Function that modifies the session description to handle Chrome bundle bug.\n+ * See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280\n+ * @method _handleSDPChromeBundleBug\n+ * @private\n+ * @for Skylink\n+ * @since 0.6.16",
+            "line": " source/stream-sdp.js:613"
         }
     ]
 }

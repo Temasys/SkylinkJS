@@ -641,7 +641,7 @@ Skylink.prototype.init = function(options, callback) {
     return;
   }
 
-  var appKey, room, defaultRoom, region;
+  var appKey, room, defaultRoom;
   var startDateTime, duration, credentials;
   var roomServer = self._roomServer;
   // NOTE: Should we get all the default values from the variables
@@ -690,9 +690,6 @@ Skylink.prototype.init = function(options, callback) {
     roomServer = (roomServer.lastIndexOf(&#x27;/&#x27;) ===
       (roomServer.length - 1)) ? roomServer.substring(0,
       roomServer.length - 1) : roomServer;
-    // set the region
-    region = (typeof options.region === &#x27;string&#x27;) ?
-      options.region : region;
     // set the default room
     defaultRoom = (typeof options.defaultRoom === &#x27;string&#x27; &amp;&amp; options.defaultRoom) ?
       options.defaultRoom : appKey;
@@ -804,7 +801,6 @@ Skylink.prototype.init = function(options, callback) {
   self._roomServer = roomServer;
   self._defaultRoom = defaultRoom;
   self._selectedRoom = room;
-  self._serverRegion = region || null;
   self._path = roomServer + &#x27;/api/&#x27; + appKey + &#x27;/&#x27; + room;
   // set credentials if there is
   if (credentials &amp;&amp; startDateTime &amp;&amp; duration) {
@@ -817,10 +813,6 @@ Skylink.prototype.init = function(options, callback) {
 
   self._path += ((credentials) ? &#x27;&amp;&#x27; : &#x27;?&#x27;) + &#x27;rand=&#x27; + (new Date()).toISOString();
 
-  // check if there is a other query parameters or not
-  if (region) {
-    self._path += &#x27;&amp;rg=&#x27; + region;
-  }
   // skylink functionality options
   self._enableIceTrickle = enableIceTrickle;
   self._enableDataChannel = enableDataChannel;
@@ -838,7 +830,7 @@ Skylink.prototype.init = function(options, callback) {
   self._disableVideoFecCodecs = disableVideoFecCodecs;
   self._disableComfortNoiseCodec = disableComfortNoiseCodec;
   self._filterCandidatesType = filterCandidatesType;
-  self._throttlingTimeout = throttleIntervals;
+  self._throttlingTimeouts = throttleIntervals;
   self._throttlingShouldThrowError = throttleShouldThrowError;
 
   log.log(&#x27;Init configuration:&#x27;, {
@@ -848,7 +840,6 @@ Skylink.prototype.init = function(options, callback) {
     roomServer: self._roomServer,
     defaultRoom: self._defaultRoom,
     selectedRoom: self._selectedRoom,
-    serverRegion: self._serverRegion,
     enableDataChannel: self._enableDataChannel,
     enableIceTrickle: self._enableIceTrickle,
     enableTURNServer: self._enableTURN,
@@ -865,7 +856,7 @@ Skylink.prototype.init = function(options, callback) {
     disableVideoFecCodecs: self._disableVideoFecCodecs,
     disableComfortNoiseCodec: self._disableComfortNoiseCodec,
     filterCandidatesType: self._filterCandidatesType,
-    throttleIntervals: self._throttlingTimeout,
+    throttleIntervals: self._throttlingTimeouts,
     throttleShouldThrowError: self._throttlingShouldThrowError
   });
   // trigger the readystate
@@ -889,7 +880,6 @@ Skylink.prototype.init = function(options, callback) {
             roomServer: self._roomServer,
             defaultRoom: self._defaultRoom,
             selectedRoom: self._selectedRoom,
-            serverRegion: self._serverRegion,
             enableDataChannel: self._enableDataChannel,
             enableIceTrickle: self._enableIceTrickle,
             enableTURNServer: self._enableTURN,
@@ -906,7 +896,7 @@ Skylink.prototype.init = function(options, callback) {
             disableVideoFecCodecs: self._disableVideoFecCodecs,
             disableComfortNoiseCodec: self._disableComfortNoiseCodec,
             filterCandidatesType: self._filterCandidatesType,
-            throttleIntervals: self._throttlingTimeout.shareScreen,
+            throttleIntervals: self._throttlingTimeouts,
             throttleShouldThrowError: self._throttlingShouldThrowError
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
@@ -1183,12 +1173,27 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
   }
   var defaultRoom = self._defaultRoom;
   var initOptions = {
-    roomServer: self._roomServer,
-    defaultRoom: room || defaultRoom,
     appKey: self._appKey,
-    region: self._serverRegion,
+    roomServer: self._roomServer,
+    defaultRoom: room,
     enableDataChannel: self._enableDataChannel,
-    enableIceTrickle: self._enableIceTrickle
+    enableIceTrickle: self._enableIceTrickle,
+    enableTURNServer: self._enableTURN,
+    enableSTUNServer: self._enableSTUN,
+    TURNServerTransport: self._TURNTransport,
+    audioFallback: self._audioFallback,
+    forceSSL: self._forceSSL,
+    socketTimeout: self._socketTimeout,
+    forceTURNSSL: self._forceTURNSSL,
+    audioCodec: self._selectedAudioCodec,
+    videoCodec: self._selectedVideoCodec,
+    forceTURN: self._forceTURN,
+    usePublicSTUN: self._usePublicSTUN,
+    disableVideoFecCodecs: self._disableVideoFecCodecs,
+    disableComfortNoiseCodec: self._disableComfortNoiseCodec,
+    filterCandidatesType: self._filterCandidatesType,
+    throttleIntervals: self._throttlingTimeouts,
+    throttleShouldThrowError: self._throttlingShouldThrowError
   };
   if (self._roomCredentials) {
     initOptions.credentials = {
@@ -1200,9 +1205,9 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
   self.init(initOptions, function (error, success) {
     self._defaultRoom = defaultRoom;
     if (error) {
-      callback(error);
+      callback(error, null);
     } else {
-      callback(null);
+      callback(null, success);
     }
   });
 };

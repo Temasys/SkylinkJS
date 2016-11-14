@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Mon Nov 14 2016 21:29:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Nov 14 2016 21:38:58 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Mon Nov 14 2016 21:29:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Nov 14 2016 21:38:58 GMT+0800 (SGT) */
 
 (function() {
 
@@ -17632,6 +17632,9 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
 };
 
 /**
+ * <blockquote class="info">
+ *   Note that this method will close any existing socket channel connection despite not being in the Room.
+ * </blockquote>
  * Function that stops Room session.
  * @method leaveRoom
  * @param {Boolean|JSON} [stopMediaOptions=true] The flag if <code>leaveRoom()</code>
@@ -17658,6 +17661,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
  * @param {String} callback.success.peerId The User's Room session Peer ID.
  * @param {String} callback.success.previousRoom The Room name.
  * @trigger <ol class="desc-seq">
+ *   <li>If Socket connection is opened: <ol><li><a href="#event_channelClose"><code>channelClose</code> event</a> triggers.</li></ol></li>
  *   <li>Checks if User is in Room. <ol><li>If User is not in a Room: <ol><li><b>ABORT</b> and return error.</li>
  *   </ol></li><li>Else: <ol><li>If parameter <code>stopMediaOptions.userMedia</code> value is <code>true</code>: <ol>
  *   <li>Invoke <a href="#method_stopStream"><code>stopStream()</code> method</a>. 
@@ -17668,8 +17672,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
  *   <li><a href="#event_peerLeft"><code>peerLeft</code> event</a> triggers for User and all connected Peers in Room.</li>
  *   <li>If MCU is enabled for the App Key provided in <a href="#method_init"><code>init()</code> method</a>
  *   and connected: <ol><li><a href="#event_serverPeerLeft"><code>serverPeerLeft</code> event</a>
- *   triggers parameter payload <code>serverPeerType</code> as <code>MCU</code>.</li></ol></li>
- *   <li><a href="#event_channelClose"><code>channelClose</code> event</a> triggers.</li></ol></li></ol></li></ol>
+ *   triggers parameter payload <code>serverPeerType</code> as <code>MCU</code>.</li></ol></li></ol></li></ol></li></ol>
  * @for Skylink
  * @since 0.5.5
  */
@@ -17680,6 +17683,7 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
   var previousRoom = self._selectedRoom;
   var previousUserPeerId = self._user ? self._user.sid : null;
   var peersThatLeft = [];
+  var isNotInRoom = !self._inRoom;
 
   if (typeof stopMediaOptions === 'boolean') {
     if (stopMediaOptions === false) {
@@ -17691,16 +17695,6 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
     stopScreenshare = stopMediaOptions.screenshare !== false;
   } else if (typeof stopMediaOptions === 'function') {
     callback = stopMediaOptions;
-  }
-
-  if (!self._inRoom) {
-    var notInRoomError = 'Unable to leave room as user is not in any room';
-    log.error([null, 'Room', previousRoom, notInRoomError]);
-
-    if (typeof callback === 'function') {
-      callback(new Error(notInRoomError), null);
-    }
-    return;
   }
 
   for (var infoPeerId in self._peerInformations) {
@@ -17721,6 +17715,17 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
 
   self._inRoom = false;
   self._closeChannel();
+
+  if (!isNotInRoom) {
+    var notInRoomError = 'Unable to leave room as user is not in any room';
+    log.error([null, 'Room', previousRoom, notInRoomError]);
+
+    if (typeof callback === 'function') {
+      callback(new Error(notInRoomError), null);
+    }
+    return;
+  }
+
   self._stopStreams({
     userMedia: stopUserMedia,
     screenshare: stopScreenshare

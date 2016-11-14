@@ -652,7 +652,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
   self._throttle(function (runFn) {
     if (!runFn) {
       if (self._throttlingShouldThrowError) {
-        var throttleLimitError = &#x27;Unable to run as throttle interval has not reached (&#x27; + self._throttlingTimeout.getUserMedia + &#x27;ms).&#x27;;
+        var throttleLimitError = &#x27;Unable to run as throttle interval has not reached (&#x27; + self._throttlingTimeouts.getUserMedia + &#x27;ms).&#x27;;
         log.error(throttleLimitError);
 
         if (typeof callback === &#x27;function&#x27;) {
@@ -698,7 +698,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     }, function (error) {
       self._onStreamAccessError(error, settings, false, false);
     });
-  }, &#x27;getUserMedia&#x27;, self._throttlingTimeout.getUserMedia);
+  }, &#x27;getUserMedia&#x27;, self._throttlingTimeouts.getUserMedia);
 };
 
 /**
@@ -1325,7 +1325,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
   self._throttle(function (runFn) {
     if (!runFn) {
       if (self._throttlingShouldThrowError) {
-        var throttleLimitError = &#x27;Unable to run as throttle interval has not reached (&#x27; + self._throttlingTimeout.shareScreen + &#x27;ms).&#x27;;
+        var throttleLimitError = &#x27;Unable to run as throttle interval has not reached (&#x27; + self._throttlingTimeouts.shareScreen + &#x27;ms).&#x27;;
         log.error(throttleLimitError);
 
         if (typeof callback === &#x27;function&#x27;) {
@@ -1436,7 +1436,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
     }
-  }, &#x27;shareScreen&#x27;, self._throttlingTimeout.shareScreen);
+  }, &#x27;shareScreen&#x27;, self._throttlingTimeouts.shareScreen);
 };
 
 /**

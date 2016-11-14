@@ -1214,8 +1214,8 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
   }
 
   if (listOfPeers.length === 0) {
-    log.error(&#x27;Unable to send message as there are no Peers to sent to.&#x27;, message);
-    return;
+    log.warn(&#x27;Currently there are no Peers to send P2P message to (unless the message is queued &#x27; +
+      &#x27;and there are Peer connected by then).&#x27;);
   }
 
   if (this._hasMCU) {

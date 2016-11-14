@@ -1841,8 +1841,8 @@ Before using any Skylink functionalities, you will need to authenticate your App
                     </span>
                   </a>
                 
-                  <a href="#attr__throttlingTimeout" class="list-group-item code-menu-item  private-attr-item ">
-                    &nbsp;&nbsp;_throttlingTimeout
+                  <a href="#attr__throttlingTimeouts" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_throttlingTimeouts
                     <span class="settings">
                       
                       
@@ -5677,7 +5677,7 @@ See confluence docs for the &quot;enter&quot; expected properties to be received
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l1080"><code>source&#x2F;room-init.js:1080</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l1070"><code>source&#x2F;room-init.js:1070</code></a>
       </small>
     
 
@@ -5930,7 +5930,7 @@ See confluence docs for the &quot;introduceError&quot; expected properties to be
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l989"><code>source&#x2F;room-init.js:989</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l979"><code>source&#x2F;room-init.js:979</code></a>
       </small>
     
 
@@ -6935,7 +6935,7 @@ This starts creating the socket connection and called at first not when requirin
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l916"><code>source&#x2F;room-init.js:916</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l906"><code>source&#x2F;room-init.js:906</code></a>
       </small>
     
 
@@ -8359,7 +8359,7 @@ NOTE: We should perhaps not remove it since H264 is supported?</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l842"><code>source&#x2F;room-init.js:842</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l832"><code>source&#x2F;room-init.js:832</code></a>
       </small>
     
 
@@ -8527,7 +8527,7 @@ See confluence docs for the &quot;restart&quot; expected properties to be receiv
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l1228"><code>source&#x2F;peer-connection.js:1228</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l1240"><code>source&#x2F;peer-connection.js:1240</code></a>
       </small>
     
 
@@ -10054,7 +10054,7 @@ See confluence docs for the &quot;updateUserEvent&quot; expected properties to b
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l710"><code>source&#x2F;room-connection.js:710</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l594"><code>source&#x2F;room-connection.js:594</code></a>
       </small>
     
 
@@ -14643,12 +14643,14 @@ that is not the same as the <code>options.defaultRoom</code> defined in the
                             <code class="param-name">errorCode</code>
                             <span class="type"><b>{</b>Number<b>}</b></span>
 
-                            
+                            <span class="label">Optional</span>
                             
 
                             <div class="param-description">
                               
                               The current <a href="#method_init"><code>init()</code> method</a> ready state.
+  <small>Defined as <code>null</code> when no <a href="#method_init"><code>init()</code> method</a>
+  has not been called due to invalid configuration.</small>
   [Rel: Skylink.READY_STATE_CHANGE]
                             </div>
                           </li>
@@ -14804,7 +14806,7 @@ that is not the same as the <code>options.defaultRoom</code> defined in the
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l524"><code>source&#x2F;room-connection.js:524</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l420"><code>source&#x2F;room-connection.js:420</code></a>
       </small>
     
 
@@ -14818,7 +14820,10 @@ that is not the same as the <code>options.defaultRoom</code> defined in the
   </div>
 
   <div class="code-item-description">
-    <p>Function that stops Room session.</p>
+    <p><blockquote class="info">
+  Note that this method will close any existing socket channel connection despite not being in the Room.
+</blockquote>
+Function that stops Room session.</p>
 
   </div>
 
@@ -14830,6 +14835,7 @@ that is not the same as the <code>options.defaultRoom</code> defined in the
   <div class="code-item-section">
     <h4>Events Sequence:</h4>
     <span class="code-item-trigger"><ol class="desc-seq">
+  <li>If Socket connection is opened: <ol><li><a href="#event_channelClose"><code>channelClose</code> event</a> triggers.</li></ol></li>
   <li>Checks if User is in Room. <ol><li>If User is not in a Room: <ol><li><b>ABORT</b> and return error.</li>
   </ol></li><li>Else: <ol><li>If parameter <code>stopMediaOptions.userMedia</code> value is <code>true</code>: <ol>
   <li>Invoke <a href="#method_stopStream"><code>stopStream()</code> method</a>. 
@@ -14840,8 +14846,7 @@ that is not the same as the <code>options.defaultRoom</code> defined in the
   <li><a href="#event_peerLeft"><code>peerLeft</code> event</a> triggers for User and all connected Peers in Room.</li>
   <li>If MCU is enabled for the App Key provided in <a href="#method_init"><code>init()</code> method</a>
   and connected: <ol><li><a href="#event_serverPeerLeft"><code>serverPeerLeft</code> event</a>
-  triggers parameter payload <code>serverPeerType</code> as <code>MCU</code>.</li></ol></li>
-  <li><a href="#event_channelClose"><code>channelClose</code> event</a> triggers.</li></ol></li></ol></li></ol></span>
+  triggers parameter payload <code>serverPeerType</code> as <code>MCU</code>.</li></ol></li></ol></li></ol></li></ol></span>
   </div>
   
 
@@ -15056,7 +15061,7 @@ and <code>stopMediaOptions.screenshare</code> to its boolean value.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l652"><code>source&#x2F;room-connection.js:652</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l536"><code>source&#x2F;room-connection.js:536</code></a>
       </small>
     
 
@@ -18879,7 +18884,7 @@ Function that stops <a href="#method_getUserMedia"><code>getUserMedia()</code> S
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l681"><code>source&#x2F;room-connection.js:681</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l565"><code>source&#x2F;room-connection.js:565</code></a>
       </small>
     
 
@@ -25698,9 +25703,9 @@ Should re-evaluate this sometime.</p>
   <hr>
 </div>
             
-              <div id="attr__throttlingTimeout" class="code-item attr item private-attr-item ">
-  <a name="config__throttlingTimeout"></a> 
-  <h3 class="code-item-name"><code>_throttlingTimeout</code></h3>
+              <div id="attr__throttlingTimeouts" class="code-item attr item private-attr-item ">
+  <a name="config__throttlingTimeouts"></a> 
+  <h3 class="code-item-name"><code>_throttlingTimeouts</code></h3>
   <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>JSON<b>}</b></span>
 
   <div class="code-item-properties">

@@ -353,12 +353,12 @@ Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, callbac
   self._throttle(function (runFn) {
     if (!runFn &amp;&amp; self._hasMCU) {
       if (self._throttlingShouldThrowError) {
-        emitErrorForPeersFn(&#x27;Unable to run as throttle interval has not reached (&#x27; + self._throttlingTimeout.refreshConnection + &#x27;ms).&#x27;);
+        emitErrorForPeersFn(&#x27;Unable to run as throttle interval has not reached (&#x27; + self._throttlingTimeouts.refreshConnection + &#x27;ms).&#x27;);
       }
       return;
     }
     self._refreshPeerConnection(listOfPeers, doIceRestart, callback);
-  }, &#x27;refreshConnection&#x27;, self._throttlingTimeout.refreshConnection);
+  }, &#x27;refreshConnection&#x27;, self._throttlingTimeouts.refreshConnection);
 
 };
 
@@ -1255,8 +1255,20 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     var stream = event.stream || event;
 
     if (targetMid === &#x27;MCU&#x27;) {
-      log.debug([targetMid, &#x27;MediaStream&#x27;, stream.id, &#x27;Ignoring received remote stream from MCU -&gt;&#x27;], stream);
+      log.warn([targetMid, &#x27;MediaStream&#x27;, stream.id, &#x27;Ignoring received remote stream from MCU -&gt;&#x27;], stream);
       return;
+    }
+
+    // Fixes for the dirty-hack for Chrome offer to Firefox (inactive)
+    // See: ESS-680
+    if (!self._hasMCU &amp;&amp; window.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp;
+      pc.getRemoteStreams().length &gt; 1 &amp;&amp; pc.remoteDescription &amp;&amp; pc.remoteDescription.sdp) {
+      var recvStreamId = stream.id || stream.label;
+
+      if (pc.remoteDescription.sdp.indexOf(&#x27; msid:&#x27; + recvStreamId + &#x27; &#x27;) === -1) {
+        log.warn([targetMid, &#x27;MediaStream&#x27;, stream.id, &#x27;Ignoring received empty remote stream -&gt;&#x27;], stream);
+       return;
+      }
     }
 
     pc.hasStream = true;
