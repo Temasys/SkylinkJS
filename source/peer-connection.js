@@ -1164,8 +1164,20 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     var stream = event.stream || event;
 
     if (targetMid === 'MCU') {
-      log.debug([targetMid, 'MediaStream', stream.id, 'Ignoring received remote stream from MCU ->'], stream);
+      log.warn([targetMid, 'MediaStream', stream.id, 'Ignoring received remote stream from MCU ->'], stream);
       return;
+    }
+
+    // Fixes for the dirty-hack for Chrome offer to Firefox (inactive)
+    // See: ESS-680
+    if (!self._hasMCU && window.webrtcDetectedBrowser === 'firefox' &&
+      pc.getRemoteStreams().length > 1 && pc.remoteDescription && pc.remoteDescription.sdp) {
+      var recvStreamId = stream.id || stream.label;
+
+      if (pc.remoteDescription.sdp.indexOf(' msid:' + recvStreamId + ' ') === -1) {
+        log.warn([targetMid, 'MediaStream', stream.id, 'Ignoring received empty remote stream ->'], stream);
+       return;
+      }
     }
 
     pc.hasStream = true;

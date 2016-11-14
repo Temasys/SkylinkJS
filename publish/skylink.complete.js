@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Mon Nov 14 2016 14:39:48 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Nov 14 2016 20:17:18 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Mon Nov 14 2016 14:39:48 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Nov 14 2016 20:17:18 GMT+0800 (SGT) */
 
 (function() {
 
@@ -16258,8 +16258,20 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     var stream = event.stream || event;
 
     if (targetMid === 'MCU') {
-      log.debug([targetMid, 'MediaStream', stream.id, 'Ignoring received remote stream from MCU ->'], stream);
+      log.warn([targetMid, 'MediaStream', stream.id, 'Ignoring received remote stream from MCU ->'], stream);
       return;
+    }
+
+    // Fixes for the dirty-hack for Chrome offer to Firefox (inactive)
+    // See: ESS-680
+    if (!self._hasMCU && window.webrtcDetectedBrowser === 'firefox' &&
+      pc.getRemoteStreams().length > 1 && pc.remoteDescription && pc.remoteDescription.sdp) {
+      var recvStreamId = stream.id || stream.label;
+
+      if (pc.remoteDescription.sdp.indexOf(' msid:' + recvStreamId + ' ') === -1) {
+        log.warn([targetMid, 'MediaStream', stream.id, 'Ignoring received empty remote stream ->'], stream);
+       return;
+      }
     }
 
     pc.hasStream = true;
@@ -16951,6 +16963,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
   sessionDescription.sdp = self._handleSDPMCUConnectionCase(targetMid, sessionDescription, true);
   sessionDescription.sdp = self._setSDPBitrate(targetMid, sessionDescription);
+  sessionDescription.sdp = self._handleSDPChromeBundleBug(targetMid, sessionDescription);
 
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
     'Local session description updated ->'], sessionDescription.sdp);
@@ -25089,6 +25102,24 @@ Skylink.prototype._handleSDPMCUConnectionCase = function (targetMid, sessionDesc
   return sessionDescription.sdp;
 };
 
+/**
+ + * Function that modifies the session description to handle Chrome bundle bug.
+ + * See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
+ + * @method _handleSDPChromeBundleBug
+ + * @private
+ + * @for Skylink
+ + * @since 0.6.16
+ + */
+Skylink.prototype._handleSDPChromeBundleBug = function(targetMid, sessionDescription) {
+  var agent = ((this._peerInformations[targetMid] || {}).agent || {}).name || '';
+
+  if (window.webrtcDetectedBrowser !== 'firefox' && agent === 'firefox' &&
+    sessionDescription.type === this.HANDSHAKE_PROGRESS.OFFER) {
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=recvonly/g, 'a=sendrecv');
+  }
+
+  return sessionDescription.sdp;
+};
 this.Skylink = Skylink;
 window.Skylink = Skylink;
 }).call(this);

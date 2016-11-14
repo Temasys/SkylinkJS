@@ -609,3 +609,22 @@ Skylink.prototype._handleSDPMCUConnectionCase = function (targetMid, sessionDesc
 
   return sessionDescription.sdp;
 };
+
+/**
+ + * Function that modifies the session description to handle Chrome bundle bug.
+ + * See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
+ + * @method _handleSDPChromeBundleBug
+ + * @private
+ + * @for Skylink
+ + * @since 0.6.16
+ + */
+Skylink.prototype._handleSDPChromeBundleBug = function(targetMid, sessionDescription) {
+  var agent = ((this._peerInformations[targetMid] || {}).agent || {}).name || '';
+
+  if (window.webrtcDetectedBrowser !== 'firefox' && agent === 'firefox' &&
+    sessionDescription.type === this.HANDSHAKE_PROGRESS.OFFER) {
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=recvonly/g, 'a=sendrecv');
+  }
+
+  return sessionDescription.sdp;
+};

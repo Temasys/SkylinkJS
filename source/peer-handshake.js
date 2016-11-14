@@ -234,6 +234,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
   sessionDescription.sdp = self._handleSDPMCUConnectionCase(targetMid, sessionDescription, true);
   sessionDescription.sdp = self._setSDPBitrate(targetMid, sessionDescription);
+  sessionDescription.sdp = self._handleSDPChromeBundleBug(targetMid, sessionDescription);
 
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
     'Local session description updated ->'], sessionDescription.sdp);
