@@ -651,11 +651,11 @@ Skylink.prototype.init = function(options, callback) {
     // set the use of filtering ICE candidates
     if (typeof options.filterCandidatesType === 'object' && options.filterCandidatesType) {
       filterCandidatesType.host = (typeof options.filterCandidatesType.host === 'boolean') ?
-        options.filterCandidatesType.host : false;
+        options.filterCandidatesType.host : filterCandidatesType.host;
       filterCandidatesType.srflx = (typeof options.filterCandidatesType.srflx === 'boolean') ?
-        options.filterCandidatesType.srflx : false;
+        options.filterCandidatesType.srflx : filterCandidatesType.srflx;
       filterCandidatesType.relay = (typeof options.filterCandidatesType.relay === 'boolean') ?
-        options.filterCandidatesType.relay : false;
+        options.filterCandidatesType.relay : filterCandidatesType.relay;
     }
     // set the use of throttling interval timeouts
     if (typeof options.throttleIntervals === 'object' && options.throttleIntervals) {
