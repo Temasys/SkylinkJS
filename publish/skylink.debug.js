@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Mon Nov 14 2016 21:47:24 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Tue Nov 15 2016 16:03:55 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4972,16 +4972,21 @@ Skylink.prototype._userData = '';
  */
 Skylink.prototype.setUserData = function(userData) {
   var self = this;
+  var updatedUserData = '';
 
-  this._userData = userData || '';
+  if (!(typeof userData === 'undefined' || userData === null)) {
+    updatedUserData = userData;
+  }
+
+  this._userData = updatedUserData;
 
   if (self._inRoom) {
-    log.log('Updated userData -> ', userData);
+    log.log('Updated userData -> ', updatedUserData);
     self._sendChannelMessage({
       type: self._SIG_MESSAGE_TYPE.UPDATE_USER,
       mid: self._user.sid,
       rid: self._room.id,
-      userData: self._userData,
+      userData: updatedUserData,
       stamp: (new Date()).getTime()
     });
     self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
@@ -5007,15 +5012,12 @@ Skylink.prototype.setUserData = function(userData) {
  * @since 0.5.10
  */
 Skylink.prototype.getUserData = function(peerId) {
-  if (peerId && peerId !== this._user.sid) {
-    // peer info
-    var peerInfo = this._peerInformations[peerId];
-
-    if (typeof peerInfo === 'object') {
-      return peerInfo.userData;
+  if (peerId && this._peerInformations[peerId]) {
+    var userData = this._peerInformations[peerId].userData;
+    if (!(userData !== null && typeof userData === 'undefined')) {
+      userData = '';
     }
-
-    return null;
+    return userData;
   }
   return this._userData;
 };
@@ -5046,6 +5048,24 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     peerInfo.room = clone(this._selectedRoom);
     peerInfo.settings.googleXBandwidth = {};
 
+    if (!(typeof peerInfo.settings.video === 'boolean' || (peerInfo.settings.video &&
+      typeof peerInfo.settings.video === 'object'))) {
+      peerInfo.settings.video = false;
+    }
+
+    if (!(typeof peerInfo.settings.audio === 'boolean' || (peerInfo.settings.audio &&
+      typeof peerInfo.settings.audio === 'object'))) {
+      peerInfo.settings.audio = false;
+    }
+
+    if (typeof peerInfo.mediaStatus.audioMuted !== 'boolean') {
+      peerInfo.mediaStatus.audioMuted = true;
+    }
+
+    if (typeof peerInfo.mediaStatus.videoMuted !== 'boolean') {
+      peerInfo.mediaStatus.videoMuted = true;
+    }
+
     if (peerInfo.settings.video && typeof peerInfo.settings.video === 'object' &&
       peerInfo.settings.video.frameRate === -1) {
       peerInfo.settings.video.frameRate = null;
@@ -5057,19 +5077,13 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       peerInfo.settings.audio.useinbandfec = null;
     }
 
-    if (peerId === 'MCU') {
-      // MCU will not send any stream
-      peerInfo.settings.audio = false;
-      peerInfo.settings.video = false;
-      peerInfo.settings.mediaStatus = {
-        audioMuted: true,
-        videoMuted: true
-      };
+    if (!(peerInfo.userData !== null && typeof peerInfo.userData !== 'undefined')) {
+      peerInfo.userData = '';
     }
 
   } else {
     peerInfo = {
-      userData: clone(this._userData) || '',
+      userData: clone(this._userData),
       settings: {
         audio: false,
         video: false
@@ -5089,6 +5103,10 @@ Skylink.prototype.getPeerInfo = function(peerId) {
         priorityWeight: this._peerPriorityWeight
       }
     };
+
+    if (!(peerInfo.userData !== null && typeof peerInfo.userData !== 'undefined')) {
+      peerInfo.userData = '';
+    }
 
     if (this._streams.screenshare) {
       peerInfo.settings = clone(this._streams.screenshare.settings);
@@ -5165,61 +5183,6 @@ Skylink.prototype._getUserInfo = function(peerId) {
   return userInfo;
 };
 
-/**
- * Function that parses the Peer session information.
- * @method _parseUserInfo
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._parseUserInfo = function(message) {
-  var userInfo = {
-    agent: {
-      name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
-      version: typeof message.version === 'number' ? message.version : 0,
-      os: typeof message.os === 'string' && message.os ? message.os : '',
-      pluginVersion: typeof message.temasysPluginVersion === 'string' && message.temasysPluginVersion ?
-        message.temasysPluginVersion : null
-    },
-    settings: {
-      audio: false,
-      video: false,
-      bandwidth: {}
-    },
-    mediaStatus: {
-      audioMuted: true,
-      videoMuted: true
-    },
-    config: {
-      enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
-      enableIceRestart: typeof message.enableIceRestart === 'boolean' ? message.enableIceRestart : false,
-      enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
-      priorityWeight: typeof message.weight === 'number' ? message.weight : 0
-    },
-    userData: ''
-  };
-
-  if (typeof message.userInfo === 'object' && message.userInfo) {
-    if (typeof message.userInfo.settings === 'object' && message.userInfo.settings) {
-      userInfo.settings = message.userInfo.settings;
-      userInfo.settings.bandwidth = typeof message.userInfo.settings.bandwidth === 'object' &&
-        message.userInfo.settings.bandwidth ? message.userInfo.settings.bandwidth : {};
-    }
-
-    if (typeof message.userInfo.mediaStatus === 'object' && message.userInfo.mediaStatus) {
-      userInfo.mediaStatus.audioMuted = typeof message.userInfo.mediaStatus.audioMuted === 'boolean' ?
-        message.userInfo.mediaStatus.audioMuted : true;
-      userInfo.mediaStatus.videoMuted = typeof message.userInfo.mediaStatus.videoMuted === 'boolean' ?
-        message.userInfo.mediaStatus.videoMuted : true;
-    }
-
-    if (typeof message.userInfo.userData !== 'undefined') {
-      userInfo.userData = message.userInfo.userData;
-    }
-  }
-
-  return userInfo;
-};
 Skylink.prototype.HANDSHAKE_PROGRESS = {
   ENTER: 'enter',
   WELCOME: 'welcome',
@@ -10435,8 +10398,23 @@ Skylink.prototype._inRoomHandler = function(message) {
 Skylink.prototype._enterHandler = function(message) {
   var self = this;
   var targetMid = message.mid;
-  var userInfo = self._parseUserInfo(message);
   var isNewPeer = false;
+  var userInfo = message.userInfo || {};
+  userInfo.settings = userInfo.settings || {};
+  userInfo.mediaStatus = userInfo.mediaStatus || {};
+  userInfo.config = {
+    enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
+    enableIceRestart: typeof message.enableIceRestart === 'boolean' ? message.enableIceRestart : false,
+    enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
+    priorityWeight: typeof message.weight === 'number' ? message.weight : 0
+  };
+  userInfo.agent = {
+    name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
+    version: typeof message.version === 'number' ? message.version : 0,
+    os: typeof message.os === 'string' && message.os ? message.os : '',
+    pluginVersion: typeof message.temasysPluginVersion === 'string' && message.temasysPluginVersion ?
+      message.temasysPluginVersion : null
+  };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "enter" received ->'], message);
 
@@ -10504,7 +10482,22 @@ Skylink.prototype._enterHandler = function(message) {
 Skylink.prototype._restartHandler = function(message){
   var self = this;
   var targetMid = message.mid;
-  var userInfo = self._parseUserInfo(message);
+  var userInfo = message.userInfo || {};
+  userInfo.settings = userInfo.settings || {};
+  userInfo.mediaStatus = userInfo.mediaStatus || {};
+  userInfo.config = {
+    enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
+    enableIceRestart: typeof message.enableIceRestart === 'boolean' ? message.enableIceRestart : false,
+    enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
+    priorityWeight: typeof message.weight === 'number' ? message.weight : 0
+  };
+  userInfo.agent = {
+    name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
+    version: typeof message.version === 'number' ? message.version : 0,
+    os: typeof message.os === 'string' && message.os ? message.os : '',
+    pluginVersion: typeof message.temasysPluginVersion === 'string' && message.temasysPluginVersion ?
+      message.temasysPluginVersion : null
+  };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "restart" received ->'], message);
 
@@ -10579,8 +10572,23 @@ Skylink.prototype._restartHandler = function(message){
 Skylink.prototype._welcomeHandler = function(message) {
   var self = this;
   var targetMid = message.mid;
-  var userInfo = self._parseUserInfo(message);
   var isNewPeer = false;
+  var userInfo = message.userInfo || {};
+  userInfo.settings = userInfo.settings || {};
+  userInfo.mediaStatus = userInfo.mediaStatus || {};
+  userInfo.config = {
+    enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
+    enableIceRestart: typeof message.enableIceRestart === 'boolean' ? message.enableIceRestart : false,
+    enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
+    priorityWeight: typeof message.weight === 'number' ? message.weight : 0
+  };
+  userInfo.agent = {
+    name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
+    version: typeof message.version === 'number' ? message.version : 0,
+    os: typeof message.os === 'string' && message.os ? message.os : '',
+    pluginVersion: typeof message.temasysPluginVersion === 'string' && message.temasysPluginVersion ?
+      message.temasysPluginVersion : null
+  };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "welcome" received ->'], message);
 
@@ -10672,11 +10680,11 @@ Skylink.prototype._offerHandler = function(message) {
 
   // Add-on by Web SDK fixes
   if (message.userInfo && typeof message.userInfo === 'object') {
-    var userInfo = self._parseUserInfo(message);
-
-    self._peerInformations[targetMid].settings = userInfo.settings;
-    self._peerInformations[targetMid].mediaStatus = userInfo.mediaStatus;
-    self._peerInformations[targetMid].userData = userInfo.userData || '';
+    var userInfo = message.userInfo || {};
+ 
+    self._peerInformations[targetMid].settings = userInfo.settings || {};
+    self._peerInformations[targetMid].mediaStatus = userInfo.mediaStatus || {};
+    self._peerInformations[targetMid].userData = userInfo.userData;
   }
 
   log.log([targetMid, null, message.type, 'Received offer from peer. ' +
@@ -10840,11 +10848,11 @@ Skylink.prototype._answerHandler = function(message) {
 
   // Add-on by Web SDK fixes
   if (message.userInfo && typeof message.userInfo === 'object') {
-    var userInfo = self._parseUserInfo(message);
-
-    self._peerInformations[targetMid].settings = userInfo.settings;
-    self._peerInformations[targetMid].mediaStatus = userInfo.mediaStatus;
-    self._peerInformations[targetMid].userData = userInfo.userData || '';
+    var userInfo = message.userInfo || {};
+ 
+    self._peerInformations[targetMid].settings = userInfo.settings || {};
+    self._peerInformations[targetMid].mediaStatus = userInfo.mediaStatus || {};
+    self._peerInformations[targetMid].userData = userInfo.userData;
   }
 
   var answer = new window.RTCSessionDescription({
