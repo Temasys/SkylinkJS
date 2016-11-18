@@ -2023,7 +2023,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 97,
+            "line": 102,
             "description": "Function that returns the User / Peer current custom data.",
             "itemtype": "method",
             "name": "getUserData",
@@ -2047,7 +2047,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 127,
+            "line": 129,
             "description": "Function that returns the User / Peer current session information.",
             "itemtype": "method",
             "name": "getPeerInfo",
@@ -2071,7 +2071,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 218,
+            "line": 236,
             "description": "Function that gets the list of connected Peers in the Room.",
             "itemtype": "method",
             "name": "getPeersInRoom",
@@ -2087,24 +2087,13 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 242,
+            "line": 260,
             "description": "Function that returns the User session information to be sent to Peers.",
             "itemtype": "method",
             "name": "_getUserInfo",
             "access": "private",
             "tagname": "",
             "since": "0.4.0",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/peer-data.js",
-            "line": 272,
-            "description": "Function that parses the Peer session information.",
-            "itemtype": "method",
-            "name": "_parseUserInfo",
-            "access": "private",
-            "tagname": "",
-            "since": "0.6.16",
             "class": "Skylink"
         },
         {
@@ -3516,6 +3505,11 @@
                     "name": "ERROR",
                     "description": "<small>Value <code>0</code></small>\n  The value of the log level that displays only <code>console</code> <code>error</code> logs.",
                     "type": "Number"
+                },
+                {
+                    "name": "NONE",
+                    "description": "<small>Value <code>-1</code></small>\n  The value of the log level that displays no logs.",
+                    "type": "Number"
                 }
             ],
             "type": "JSON",
@@ -3525,7 +3519,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 31,
+            "line": 34,
             "description": "Stores the log message starting header string.\nE.g. \"<header> - <the log message>\".",
             "itemtype": "attribute",
             "name": "_LOG_KEY",
@@ -3538,7 +3532,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 44,
+            "line": 47,
             "description": "Stores the list of available SDK log levels.",
             "itemtype": "attribute",
             "name": "_LOG_LEVELS",
@@ -3551,7 +3545,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 55,
+            "line": 58,
             "description": "Stores the current SDK log level.\nDefault is ERROR (<code>0</code>).",
             "itemtype": "attribute",
             "name": "_logLevel",
@@ -3565,7 +3559,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 68,
+            "line": 71,
             "description": "Stores the flag if debugging mode is enabled.\nThis manipulates the SkylinkLogs interface.",
             "itemtype": "attribute",
             "name": "_enableDebugMode",
@@ -3579,7 +3573,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 81,
+            "line": 84,
             "description": "Stores the flag if logs should be stored in SkylinkLogs interface.",
             "itemtype": "attribute",
             "name": "_enableDebugStack",
@@ -3593,7 +3587,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 93,
+            "line": 96,
             "description": "Stores the flag if logs should trace if available.\nThis uses the <code>console.trace</code> API.",
             "itemtype": "attribute",
             "name": "_enableDebugTrace",
@@ -3607,7 +3601,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 106,
+            "line": 109,
             "description": "Stores the logs used for SkylinkLogs object.",
             "itemtype": "attribute",
             "name": "_storedLogs",
@@ -3620,7 +3614,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 117,
+            "line": 120,
             "description": "Function that gets the stored logs.",
             "itemtype": "method",
             "name": "_getStoredLogsFn",
@@ -3632,7 +3626,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 138,
+            "line": 141,
             "description": "Function that clears the stored logs.",
             "itemtype": "method",
             "name": "_clearAllStoredLogsFn",
@@ -3644,7 +3638,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 150,
+            "line": 153,
             "description": "Function that prints in the Web Console interface the stored logs.",
             "itemtype": "method",
             "name": "_printAllStoredLogsFn",
@@ -3656,7 +3650,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 174,
+            "line": 177,
             "description": "<blockquote class=\"info\">\n  To utilise and enable the <code>SkylinkLogs</code> API functionalities, the\n  <a href=\"#method_setDebugMode\"><code>setDebugMode()</code> method</a>\n  <code>options.storeLogs</code> parameter has to be enabled.\n</blockquote>\nThe object interface to manage the SDK <a href=\"https://developer.mozilla.org/en/docs/Web/API/console\">\nJavascript Web Console</a> logs.",
             "itemtype": "property",
             "name": "SkylinkLogs",
@@ -3667,7 +3661,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 189,
+            "line": 192,
             "description": "Function that gets the current stored SDK <code>console</code> logs.",
             "itemtype": "property",
             "name": "SkylinkLogs.getLogs",
@@ -3694,7 +3688,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 216,
+            "line": 219,
             "description": "Function that clears all the current stored SDK <code>console</code> logs.",
             "itemtype": "property",
             "name": "SkylinkLogs.clearAllLogs",
@@ -3709,7 +3703,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 230,
+            "line": 233,
             "description": "Function that prints all the current stored SDK <code>console</code> logs into the\n<a href=\"https://developer.mozilla.org/en/docs/Web/API/console\">Javascript Web Console</a>.",
             "itemtype": "property",
             "name": "SkylinkLogs.printAllLogs",
@@ -3724,7 +3718,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 246,
+            "line": 249,
             "description": "Function that handles the logs received and prints in the Web Console interface according to the log level set.",
             "itemtype": "method",
             "name": "_logFn",
@@ -3737,7 +3731,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 315,
+            "line": 318,
             "description": "Stores the logging functions.",
             "itemtype": "attribute",
             "name": "log",
@@ -3777,7 +3771,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 351,
+            "line": 354,
             "description": "Function that configures the level of <code>console</code> API logs to be printed in the\n<a href=\"https://developer.mozilla.org/en/docs/Web/API/console\">Javascript Web Console</a>.",
             "itemtype": "method",
             "name": "setLogLevel",
@@ -3797,7 +3791,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 391,
+            "line": 394,
             "description": "Function that configures the debugging mode of the SDK.",
             "itemtype": "method",
             "name": "setDebugMode",
@@ -6749,7 +6743,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 771,
+            "line": 786,
             "description": "Function that handles the \"restart\" socket message received.\nSee confluence docs for the \"restart\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -6760,7 +6754,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 846,
+            "line": 876,
             "description": "Function that handles the \"welcome\" socket message received.\nSee confluence docs for the \"welcome\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -6771,7 +6765,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 923,
+            "line": 968,
             "description": "Function that handles the \"offer\" socket message received.\nSee confluence docs for the \"offer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -6782,7 +6776,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1007,
+            "line": 1052,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -6793,7 +6787,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1093,
+            "line": 1138,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -7774,63 +7768,63 @@
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:31"
+            "line": " source/skylink-debug.js:34"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:44"
+            "line": " source/skylink-debug.js:47"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:55"
+            "line": " source/skylink-debug.js:58"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:68"
+            "line": " source/skylink-debug.js:71"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:81"
+            "line": " source/skylink-debug.js:84"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:93"
+            "line": " source/skylink-debug.js:96"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:106"
+            "line": " source/skylink-debug.js:109"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:117"
+            "line": " source/skylink-debug.js:120"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:138"
+            "line": " source/skylink-debug.js:141"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:150"
+            "line": " source/skylink-debug.js:153"
         },
         {
             "message": "unknown tag: triggerforprophacknone",
-            "line": " source/skylink-debug.js:189"
+            "line": " source/skylink-debug.js:192"
         },
         {
             "message": "unknown tag: triggerforprophacknone",
-            "line": " source/skylink-debug.js:216"
+            "line": " source/skylink-debug.js:219"
         },
         {
             "message": "unknown tag: triggerforprophacknone",
-            "line": " source/skylink-debug.js:230"
+            "line": " source/skylink-debug.js:233"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:246"
+            "line": " source/skylink-debug.js:249"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:315"
+            "line": " source/skylink-debug.js:318"
         },
         {
             "message": "unknown tag: trigger",

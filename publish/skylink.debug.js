@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Nov 16 2016 16:44:24 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Fri Nov 18 2016 14:01:48 GMT+0800 (SGT) */
 
 (function() {
 
@@ -7454,7 +7454,8 @@ Skylink.prototype.LOG_LEVEL = {
   LOG: 3,
   INFO: 2,
   WARN: 1,
-  ERROR: 0
+  ERROR: 0,
+  NONE: -1
 };
 
 /**

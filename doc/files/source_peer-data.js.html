@@ -167,16 +167,21 @@ Skylink.prototype._userData = &#x27;&#x27;;
  */
 Skylink.prototype.setUserData = function(userData) {
   var self = this;
+  var updatedUserData = &#x27;&#x27;;
 
-  this._userData = userData || &#x27;&#x27;;
+  if (!(typeof userData === &#x27;undefined&#x27; || userData === null)) {
+    updatedUserData = userData;
+  }
+
+  this._userData = updatedUserData;
 
   if (self._inRoom) {
-    log.log(&#x27;Updated userData -&gt; &#x27;, userData);
+    log.log(&#x27;Updated userData -&gt; &#x27;, updatedUserData);
     self._sendChannelMessage({
       type: self._SIG_MESSAGE_TYPE.UPDATE_USER,
       mid: self._user.sid,
       rid: self._room.id,
-      userData: self._userData,
+      userData: updatedUserData,
       stamp: (new Date()).getTime()
     });
     self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
@@ -202,15 +207,12 @@ Skylink.prototype.setUserData = function(userData) {
  * @since 0.5.10
  */
 Skylink.prototype.getUserData = function(peerId) {
-  if (peerId &amp;&amp; peerId !== this._user.sid) {
-    // peer info
-    var peerInfo = this._peerInformations[peerId];
-
-    if (typeof peerInfo === &#x27;object&#x27;) {
-      return peerInfo.userData;
+  if (peerId &amp;&amp; this._peerInformations[peerId]) {
+    var userData = this._peerInformations[peerId].userData;
+    if (!(userData !== null &amp;&amp; typeof userData === &#x27;undefined&#x27;)) {
+      userData = &#x27;&#x27;;
     }
-
-    return null;
+    return userData;
   }
   return this._userData;
 };
@@ -241,6 +243,24 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     peerInfo.room = clone(this._selectedRoom);
     peerInfo.settings.googleXBandwidth = {};
 
+    if (!(typeof peerInfo.settings.video === &#x27;boolean&#x27; || (peerInfo.settings.video &amp;&amp;
+      typeof peerInfo.settings.video === &#x27;object&#x27;))) {
+      peerInfo.settings.video = false;
+    }
+
+    if (!(typeof peerInfo.settings.audio === &#x27;boolean&#x27; || (peerInfo.settings.audio &amp;&amp;
+      typeof peerInfo.settings.audio === &#x27;object&#x27;))) {
+      peerInfo.settings.audio = false;
+    }
+
+    if (typeof peerInfo.mediaStatus.audioMuted !== &#x27;boolean&#x27;) {
+      peerInfo.mediaStatus.audioMuted = true;
+    }
+
+    if (typeof peerInfo.mediaStatus.videoMuted !== &#x27;boolean&#x27;) {
+      peerInfo.mediaStatus.videoMuted = true;
+    }
+
     if (peerInfo.settings.video &amp;&amp; typeof peerInfo.settings.video === &#x27;object&#x27; &amp;&amp;
       peerInfo.settings.video.frameRate === -1) {
       peerInfo.settings.video.frameRate = null;
@@ -252,19 +272,13 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       peerInfo.settings.audio.useinbandfec = null;
     }
 
-    if (peerId === &#x27;MCU&#x27;) {
-      // MCU will not send any stream
-      peerInfo.settings.audio = false;
-      peerInfo.settings.video = false;
-      peerInfo.settings.mediaStatus = {
-        audioMuted: true,
-        videoMuted: true
-      };
+    if (!(peerInfo.userData !== null &amp;&amp; typeof peerInfo.userData !== &#x27;undefined&#x27;)) {
+      peerInfo.userData = &#x27;&#x27;;
     }
 
   } else {
     peerInfo = {
-      userData: clone(this._userData) || &#x27;&#x27;,
+      userData: clone(this._userData),
       settings: {
         audio: false,
         video: false
@@ -284,6 +298,10 @@ Skylink.prototype.getPeerInfo = function(peerId) {
         priorityWeight: this._peerPriorityWeight
       }
     };
+
+    if (!(peerInfo.userData !== null &amp;&amp; typeof peerInfo.userData !== &#x27;undefined&#x27;)) {
+      peerInfo.userData = &#x27;&#x27;;
+    }
 
     if (this._streams.screenshare) {
       peerInfo.settings = clone(this._streams.screenshare.settings);
@@ -360,61 +378,6 @@ Skylink.prototype._getUserInfo = function(peerId) {
   return userInfo;
 };
 
-/**
- * Function that parses the Peer session information.
- * @method _parseUserInfo
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._parseUserInfo = function(message) {
-  var userInfo = {
-    agent: {
-      name: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
-      version: typeof message.version === &#x27;number&#x27; ? message.version : 0,
-      os: typeof message.os === &#x27;string&#x27; &amp;&amp; message.os ? message.os : &#x27;&#x27;,
-      pluginVersion: typeof message.temasysPluginVersion === &#x27;string&#x27; &amp;&amp; message.temasysPluginVersion ?
-        message.temasysPluginVersion : null
-    },
-    settings: {
-      audio: false,
-      video: false,
-      bandwidth: {}
-    },
-    mediaStatus: {
-      audioMuted: true,
-      videoMuted: true
-    },
-    config: {
-      enableIceTrickle: typeof message.enableIceTrickle === &#x27;boolean&#x27; ? message.enableIceTrickle : true,
-      enableIceRestart: typeof message.enableIceRestart === &#x27;boolean&#x27; ? message.enableIceRestart : false,
-      enableDataChannel: typeof message.enableDataChannel === &#x27;boolean&#x27; ? message.enableDataChannel : true,
-      priorityWeight: typeof message.weight === &#x27;number&#x27; ? message.weight : 0
-    },
-    userData: &#x27;&#x27;
-  };
-
-  if (typeof message.userInfo === &#x27;object&#x27; &amp;&amp; message.userInfo) {
-    if (typeof message.userInfo.settings === &#x27;object&#x27; &amp;&amp; message.userInfo.settings) {
-      userInfo.settings = message.userInfo.settings;
-      userInfo.settings.bandwidth = typeof message.userInfo.settings.bandwidth === &#x27;object&#x27; &amp;&amp;
-        message.userInfo.settings.bandwidth ? message.userInfo.settings.bandwidth : {};
-    }
-
-    if (typeof message.userInfo.mediaStatus === &#x27;object&#x27; &amp;&amp; message.userInfo.mediaStatus) {
-      userInfo.mediaStatus.audioMuted = typeof message.userInfo.mediaStatus.audioMuted === &#x27;boolean&#x27; ?
-        message.userInfo.mediaStatus.audioMuted : true;
-      userInfo.mediaStatus.videoMuted = typeof message.userInfo.mediaStatus.videoMuted === &#x27;boolean&#x27; ?
-        message.userInfo.mediaStatus.videoMuted : true;
-    }
-
-    if (typeof message.userInfo.userData !== &#x27;undefined&#x27;) {
-      userInfo.userData = message.userInfo.userData;
-    }
-  }
-
-  return userInfo;
-};
     </pre>
 </div>
 

@@ -802,8 +802,23 @@ Skylink.prototype._inRoomHandler = function(message) {
 Skylink.prototype._enterHandler = function(message) {
   var self = this;
   var targetMid = message.mid;
-  var userInfo = self._parseUserInfo(message);
   var isNewPeer = false;
+  var userInfo = message.userInfo || {};
+  userInfo.settings = userInfo.settings || {};
+  userInfo.mediaStatus = userInfo.mediaStatus || {};
+  userInfo.config = {
+    enableIceTrickle: typeof message.enableIceTrickle === &#x27;boolean&#x27; ? message.enableIceTrickle : true,
+    enableIceRestart: typeof message.enableIceRestart === &#x27;boolean&#x27; ? message.enableIceRestart : false,
+    enableDataChannel: typeof message.enableDataChannel === &#x27;boolean&#x27; ? message.enableDataChannel : true,
+    priorityWeight: typeof message.weight === &#x27;number&#x27; ? message.weight : 0
+  };
+  userInfo.agent = {
+    name: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
+    version: typeof message.version === &#x27;number&#x27; ? message.version : 0,
+    os: typeof message.os === &#x27;string&#x27; &amp;&amp; message.os ? message.os : &#x27;&#x27;,
+    pluginVersion: typeof message.temasysPluginVersion === &#x27;string&#x27; &amp;&amp; message.temasysPluginVersion ?
+      message.temasysPluginVersion : null
+  };
 
   log.log([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Peer &quot;enter&quot; received -&gt;&#x27;], message);
 
@@ -871,7 +886,22 @@ Skylink.prototype._enterHandler = function(message) {
 Skylink.prototype._restartHandler = function(message){
   var self = this;
   var targetMid = message.mid;
-  var userInfo = self._parseUserInfo(message);
+  var userInfo = message.userInfo || {};
+  userInfo.settings = userInfo.settings || {};
+  userInfo.mediaStatus = userInfo.mediaStatus || {};
+  userInfo.config = {
+    enableIceTrickle: typeof message.enableIceTrickle === &#x27;boolean&#x27; ? message.enableIceTrickle : true,
+    enableIceRestart: typeof message.enableIceRestart === &#x27;boolean&#x27; ? message.enableIceRestart : false,
+    enableDataChannel: typeof message.enableDataChannel === &#x27;boolean&#x27; ? message.enableDataChannel : true,
+    priorityWeight: typeof message.weight === &#x27;number&#x27; ? message.weight : 0
+  };
+  userInfo.agent = {
+    name: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
+    version: typeof message.version === &#x27;number&#x27; ? message.version : 0,
+    os: typeof message.os === &#x27;string&#x27; &amp;&amp; message.os ? message.os : &#x27;&#x27;,
+    pluginVersion: typeof message.temasysPluginVersion === &#x27;string&#x27; &amp;&amp; message.temasysPluginVersion ?
+      message.temasysPluginVersion : null
+  };
 
   log.log([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Peer &quot;restart&quot; received -&gt;&#x27;], message);
 
@@ -946,8 +976,23 @@ Skylink.prototype._restartHandler = function(message){
 Skylink.prototype._welcomeHandler = function(message) {
   var self = this;
   var targetMid = message.mid;
-  var userInfo = self._parseUserInfo(message);
   var isNewPeer = false;
+  var userInfo = message.userInfo || {};
+  userInfo.settings = userInfo.settings || {};
+  userInfo.mediaStatus = userInfo.mediaStatus || {};
+  userInfo.config = {
+    enableIceTrickle: typeof message.enableIceTrickle === &#x27;boolean&#x27; ? message.enableIceTrickle : true,
+    enableIceRestart: typeof message.enableIceRestart === &#x27;boolean&#x27; ? message.enableIceRestart : false,
+    enableDataChannel: typeof message.enableDataChannel === &#x27;boolean&#x27; ? message.enableDataChannel : true,
+    priorityWeight: typeof message.weight === &#x27;number&#x27; ? message.weight : 0
+  };
+  userInfo.agent = {
+    name: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
+    version: typeof message.version === &#x27;number&#x27; ? message.version : 0,
+    os: typeof message.os === &#x27;string&#x27; &amp;&amp; message.os ? message.os : &#x27;&#x27;,
+    pluginVersion: typeof message.temasysPluginVersion === &#x27;string&#x27; &amp;&amp; message.temasysPluginVersion ?
+      message.temasysPluginVersion : null
+  };
 
   log.log([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Peer &quot;welcome&quot; received -&gt;&#x27;], message);
 
@@ -1039,11 +1084,11 @@ Skylink.prototype._offerHandler = function(message) {
 
   // Add-on by Web SDK fixes
   if (message.userInfo &amp;&amp; typeof message.userInfo === &#x27;object&#x27;) {
-    var userInfo = self._parseUserInfo(message);
-
-    self._peerInformations[targetMid].settings = userInfo.settings;
-    self._peerInformations[targetMid].mediaStatus = userInfo.mediaStatus;
-    self._peerInformations[targetMid].userData = userInfo.userData || &#x27;&#x27;;
+    var userInfo = message.userInfo || {};
+ 
+    self._peerInformations[targetMid].settings = userInfo.settings || {};
+    self._peerInformations[targetMid].mediaStatus = userInfo.mediaStatus || {};
+    self._peerInformations[targetMid].userData = userInfo.userData;
   }
 
   log.log([targetMid, null, message.type, &#x27;Received offer from peer. &#x27; +
@@ -1207,11 +1252,11 @@ Skylink.prototype._answerHandler = function(message) {
 
   // Add-on by Web SDK fixes
   if (message.userInfo &amp;&amp; typeof message.userInfo === &#x27;object&#x27;) {
-    var userInfo = self._parseUserInfo(message);
-
-    self._peerInformations[targetMid].settings = userInfo.settings;
-    self._peerInformations[targetMid].mediaStatus = userInfo.mediaStatus;
-    self._peerInformations[targetMid].userData = userInfo.userData || &#x27;&#x27;;
+    var userInfo = message.userInfo || {};
+ 
+    self._peerInformations[targetMid].settings = userInfo.settings || {};
+    self._peerInformations[targetMid].mediaStatus = userInfo.mediaStatus || {};
+    self._peerInformations[targetMid].userData = userInfo.userData;
   }
 
   var answer = new window.RTCSessionDescription({

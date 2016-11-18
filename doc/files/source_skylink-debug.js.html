@@ -106,6 +106,8 @@
  *   and &lt;code&gt;error&lt;/code&gt; logs.
  * @param {Number} ERROR &lt;small&gt;Value &lt;code&gt;0&lt;/code&gt;&lt;/small&gt;
  *   The value of the log level that displays only &lt;code&gt;console&lt;/code&gt; &lt;code&gt;error&lt;/code&gt; logs.
+ * @param {Number} NONE &lt;small&gt;Value &lt;code&gt;-1&lt;/code&gt;&lt;/small&gt;
+ *   The value of the log level that displays no logs.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -116,7 +118,8 @@ Skylink.prototype.LOG_LEVEL = {
   LOG: 3,
   INFO: 2,
   WARN: 1,
-  ERROR: 0
+  ERROR: 0,
+  NONE: -1
 };
 
 /**
