@@ -780,9 +780,11 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
             result[obj.mediaType][dirType].jitterBufferMs = parseInt(obj.googJitterBufferMs || '0', 10);
 
             if (result[obj.mediaType][dirType].codec) {
-              result[obj.mediaType][dirType].codec.implementation = obj.codecImplementationName || null;
-              if (obj.googCodecName) {
+              if (obj.googCodecName && obj.googCodecName !== 'unknown') {
                 result[obj.mediaType][dirType].codec.name = obj.googCodecName;
+              }
+              if (obj.codecImplementationName && obj.codecImplementationName !== 'unknown') {
+                result[obj.mediaType][dirType].codec.implementation = obj.codecImplementationName;
               }
             }
 

@@ -650,7 +650,10 @@ Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats
       if (stats[type][dir].codec) {
         itemStr += '<br>Codec - (name: ' + stats[type][dir].codec.name + ', payload type: ' +
           stats[type][dir].codec.payloadType + (stats[type][dir].codec.implementation ?
-          ', impl: ' + stats[type][dir].codec.implementation : '') + ')';
+          ', impl: ' + stats[type][dir].codec.implementation : '') + (stats[type][dir].codec.clockRate ?
+          ', clockrate: ' + stats[type][dir].codec.clockRate : '') + (stats[type][dir].codec.channels ?
+          ', channels: ' + stats[type][dir].codec.channels : '') + (stats[type][dir].codec.params ?
+          ', params: <small>' + stats[type][dir].codec.params  + '</small>' : '') + ')';
       }
 
       // format settings

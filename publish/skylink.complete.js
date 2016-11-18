@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Fri Nov 18 2016 14:01:48 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Fri Nov 18 2016 17:58:26 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Fri Nov 18 2016 14:01:48 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Fri Nov 18 2016 17:58:26 GMT+0800 (SGT) */
 
 (function() {
 
@@ -15874,9 +15874,11 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
             result[obj.mediaType][dirType].jitterBufferMs = parseInt(obj.googJitterBufferMs || '0', 10);
 
             if (result[obj.mediaType][dirType].codec) {
-              result[obj.mediaType][dirType].codec.implementation = obj.codecImplementationName || null;
-              if (obj.googCodecName) {
+              if (obj.googCodecName && obj.googCodecName !== 'unknown') {
                 result[obj.mediaType][dirType].codec.name = obj.googCodecName;
+              }
+              if (obj.codecImplementationName && obj.codecImplementationName !== 'unknown') {
+                result[obj.mediaType][dirType].codec.implementation = obj.codecImplementationName;
               }
             }
 
@@ -20067,6 +20069,13 @@ Skylink.prototype._EVENTS = {
    * @param {Number} stats.audio.sending.codec.payloadType The Peer connection sending audio streaming selected codec payload type.
    * @param {String} [stats.audio.sending.codec.implementation] The Peer connection sending audio streaming selected codec implementation.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.audio.sending.codec.channels] The Peer connection sending audio streaming selected codec channels (2 for stereo).
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing,
+   *   and this is usually present in <code>stats.audio</code> property.</small>
+   * @param {Number} [stats.audio.sending.codec.clockRate] The Peer connection sending audio streaming selected codec media sampling rate.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {String} [stats.audio.sending.codec.params] The Peer connection sending audio streaming selected codec parameters.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.audio.sending.inputLevel] The Peer connection sending audio streaming input level.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.audio.sending.echoReturnLoss] The Peer connection sending audio streaming echo return loss.
@@ -20089,6 +20098,13 @@ Skylink.prototype._EVENTS = {
    * @param {Number} stats.audio.receiving.codec.payloadType The Peer connection receiving audio streaming selected codec payload type.
    * @param {String} [stats.audio.receiving.codec.implementation] The Peer connection receiving audio streaming selected codec implementation.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.audio.receiving.codec.channels] The Peer connection receiving audio streaming selected codec channels (2 for stereo).
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing,
+   *   and this is usually present in <code>stats.audio</code> property.</small>
+   * @param {Number} [stats.audio.receiving.codec.clockRate] The Peer connection receiving audio streaming selected codec media sampling rate.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {String} [stats.audio.receiving.codec.params] The Peer connection receiving audio streaming selected codec parameters.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.audio.receiving.outputLevel] The Peer connection receiving audio streaming output level.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.video The Peer connection video streaming stats.
@@ -20109,6 +20125,13 @@ Skylink.prototype._EVENTS = {
    * @param {String} stats.video.sending.codec.name The Peer connection sending video streaming selected codec name.
    * @param {Number} stats.video.sending.codec.payloadType The Peer connection sending video streaming selected codec payload type.
    * @param {String} [stats.video.sending.codec.implementation] The Peer connection sending video streaming selected codec implementation.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.codec.channels] The Peer connection sending video streaming selected codec channels (2 for stereo).
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing,
+   *   and this is usually present in <code>stats.audio</code> property.</small>
+   * @param {Number} [stats.video.sending.codec.clockRate] The Peer connection sending video streaming selected codec media sampling rate.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {String} [stats.video.sending.codec.params] The Peer connection sending video streaming selected codec parameters.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.video.sending.frames] The Peer connection sending video streaming frames.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
@@ -20141,6 +20164,13 @@ Skylink.prototype._EVENTS = {
    * @param {String} stats.video.receiving.codec.name The Peer connection receiving video streaming selected codec name.
    * @param {Number} stats.video.receiving.codec.payloadType The Peer connection receiving video streaming selected codec payload type.
    * @param {String} [stats.video.receiving.codec.implementation] The Peer connection receiving video streaming selected codec implementation.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.codec.channels] The Peer connection receiving video streaming selected codec channels (2 for stereo).
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing,
+   *   and this is usually present in <code>stats.audio</code> property.</small>
+   * @param {Number} [stats.video.receiving.codec.clockRate] The Peer connection receiving video streaming selected codec media sampling rate.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {String} [stats.video.receiving.codec.params] The Peer connection receiving video streaming selected codec parameters.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.video.receiving.frames] The Peer connection receiving video streaming frames.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
@@ -24905,7 +24935,10 @@ Skylink.prototype._getSDPSelectedCodec = function (targetMid, sessionDescription
   var selectedCodecInfo = {
     name: null,
     implementation: null,
-    payloadType: null
+    clockRate: null,
+    channels: null,
+    payloadType: null,
+    params: null
   };
 
   for (var i = 0; i < sdpLines.length; i++) {
@@ -24918,10 +24951,20 @@ Skylink.prototype._getSDPSelectedCodec = function (targetMid, sessionDescription
 
       selectedCodecInfo.payloadType = parseInt(parts[3], 10);
 
-    } else if (selectedCodecInfo.payloadType !== null &&
-      sdpLines[i].indexOf('a=rtpmap:' + selectedCodecInfo.payloadType + ' ') === 0) {
-      selectedCodecInfo.name = (sdpLines[i].split(' ')[1] || '').split('/')[0] || '';
-      break;
+    } else if (selectedCodecInfo.payloadType !== null) {
+      if (sdpLines[i].indexOf('m=') === 0) {
+        break;
+      }
+
+      if (sdpLines[i].indexOf('a=rtpmap:' + selectedCodecInfo.payloadType + ' ') === 0) {
+        var params = (sdpLines[i].split(' ')[1] || '').split('/');
+        selectedCodecInfo.name = params[0] || '';
+        selectedCodecInfo.clockRate = params[1] ? parseInt(params[1], 10) : null;
+        selectedCodecInfo.channels = params[2] ? parseInt(params[2], 10) : null;
+
+      } else if (sdpLines[i].indexOf('a=fmtp:' + selectedCodecInfo.payloadType + ' ') === 0) {
+        selectedCodecInfo.params = sdpLines[i].split('a=fmtp:' + selectedCodecInfo.payloadType + ' ')[1] || null;
+      }
     }
   }
 

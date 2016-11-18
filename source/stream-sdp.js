@@ -520,7 +520,10 @@ Skylink.prototype._getSDPSelectedCodec = function (targetMid, sessionDescription
   var selectedCodecInfo = {
     name: null,
     implementation: null,
-    payloadType: null
+    clockRate: null,
+    channels: null,
+    payloadType: null,
+    params: null
   };
 
   for (var i = 0; i < sdpLines.length; i++) {
@@ -533,10 +536,20 @@ Skylink.prototype._getSDPSelectedCodec = function (targetMid, sessionDescription
 
       selectedCodecInfo.payloadType = parseInt(parts[3], 10);
 
-    } else if (selectedCodecInfo.payloadType !== null &&
-      sdpLines[i].indexOf('a=rtpmap:' + selectedCodecInfo.payloadType + ' ') === 0) {
-      selectedCodecInfo.name = (sdpLines[i].split(' ')[1] || '').split('/')[0] || '';
-      break;
+    } else if (selectedCodecInfo.payloadType !== null) {
+      if (sdpLines[i].indexOf('m=') === 0) {
+        break;
+      }
+
+      if (sdpLines[i].indexOf('a=rtpmap:' + selectedCodecInfo.payloadType + ' ') === 0) {
+        var params = (sdpLines[i].split(' ')[1] || '').split('/');
+        selectedCodecInfo.name = params[0] || '';
+        selectedCodecInfo.clockRate = params[1] ? parseInt(params[1], 10) : null;
+        selectedCodecInfo.channels = params[2] ? parseInt(params[2], 10) : null;
+
+      } else if (sdpLines[i].indexOf('a=fmtp:' + selectedCodecInfo.payloadType + ' ') === 0) {
+        selectedCodecInfo.params = sdpLines[i].split('a=fmtp:' + selectedCodecInfo.payloadType + ' ')[1] || null;
+      }
     }
   }
 

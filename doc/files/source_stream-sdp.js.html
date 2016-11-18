@@ -611,7 +611,10 @@ Skylink.prototype._getSDPSelectedCodec = function (targetMid, sessionDescription
   var selectedCodecInfo = {
     name: null,
     implementation: null,
-    payloadType: null
+    clockRate: null,
+    channels: null,
+    payloadType: null,
+    params: null
   };
 
   for (var i = 0; i &lt; sdpLines.length; i++) {
@@ -624,10 +627,20 @@ Skylink.prototype._getSDPSelectedCodec = function (targetMid, sessionDescription
 
       selectedCodecInfo.payloadType = parseInt(parts[3], 10);
 
-    } else if (selectedCodecInfo.payloadType !== null &amp;&amp;
-      sdpLines[i].indexOf(&#x27;a=rtpmap:&#x27; + selectedCodecInfo.payloadType + &#x27; &#x27;) === 0) {
-      selectedCodecInfo.name = (sdpLines[i].split(&#x27; &#x27;)[1] || &#x27;&#x27;).split(&#x27;/&#x27;)[0] || &#x27;&#x27;;
-      break;
+    } else if (selectedCodecInfo.payloadType !== null) {
+      if (sdpLines[i].indexOf(&#x27;m=&#x27;) === 0) {
+        break;
+      }
+
+      if (sdpLines[i].indexOf(&#x27;a=rtpmap:&#x27; + selectedCodecInfo.payloadType + &#x27; &#x27;) === 0) {
+        var params = (sdpLines[i].split(&#x27; &#x27;)[1] || &#x27;&#x27;).split(&#x27;/&#x27;);
+        selectedCodecInfo.name = params[0] || &#x27;&#x27;;
+        selectedCodecInfo.clockRate = params[1] ? parseInt(params[1], 10) : null;
+        selectedCodecInfo.channels = params[2] ? parseInt(params[2], 10) : null;
+
+      } else if (sdpLines[i].indexOf(&#x27;a=fmtp:&#x27; + selectedCodecInfo.payloadType + &#x27; &#x27;) === 0) {
+        selectedCodecInfo.params = sdpLines[i].split(&#x27;a=fmtp:&#x27; + selectedCodecInfo.payloadType + &#x27; &#x27;)[1] || null;
+      }
     }
   }
 

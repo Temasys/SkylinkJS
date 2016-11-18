@@ -1860,7 +1860,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 882,
+            "line": 884,
             "description": "Function that starts the Peer connection session.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_addPeer",
@@ -1871,7 +1871,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 921,
+            "line": 923,
             "description": "Function that re-negotiates a Peer connection.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -1882,7 +1882,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1037,
+            "line": 1039,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -1893,7 +1893,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1098,
+            "line": 1100,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -1904,7 +1904,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1240,
+            "line": 1242,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -5279,6 +5279,24 @@
                                     "optional": true
                                 },
                                 {
+                                    "name": "sending.codec.channels",
+                                    "description": "The Peer connection sending audio streaming selected codec channels (2 for stereo).\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing,\n  and this is usually present in <code>stats.audio</code> property.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.codec.clockRate",
+                                    "description": "The Peer connection sending audio streaming selected codec media sampling rate.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.codec.params",
+                                    "description": "The Peer connection sending audio streaming selected codec parameters.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
                                     "name": "sending.inputLevel",
                                     "description": "The Peer connection sending audio streaming input level.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
                                     "type": "Number",
@@ -5355,6 +5373,24 @@
                                     "optional": true
                                 },
                                 {
+                                    "name": "receiving.codec.channels",
+                                    "description": "The Peer connection receiving audio streaming selected codec channels (2 for stereo).\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing,\n  and this is usually present in <code>stats.audio</code> property.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.codec.clockRate",
+                                    "description": "The Peer connection receiving audio streaming selected codec media sampling rate.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.codec.params",
+                                    "description": "The Peer connection receiving audio streaming selected codec parameters.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
                                     "name": "receiving.outputLevel",
                                     "description": "The Peer connection receiving audio streaming output level.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
                                     "type": "Number",
@@ -5427,6 +5463,24 @@
                                 {
                                     "name": "sending.codec.implementation",
                                     "description": "The Peer connection sending video streaming selected codec implementation.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.codec.channels",
+                                    "description": "The Peer connection sending video streaming selected codec channels (2 for stereo).\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing,\n  and this is usually present in <code>stats.audio</code> property.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.codec.clockRate",
+                                    "description": "The Peer connection sending video streaming selected codec media sampling rate.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.codec.params",
+                                    "description": "The Peer connection sending video streaming selected codec parameters.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
                                     "type": "String",
                                     "optional": true
                                 },
@@ -5533,6 +5587,24 @@
                                 {
                                     "name": "receiving.codec.implementation",
                                     "description": "The Peer connection receiving video streaming selected codec implementation.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.codec.channels",
+                                    "description": "The Peer connection receiving video streaming selected codec channels (2 for stereo).\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing,\n  and this is usually present in <code>stats.audio</code> property.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.codec.clockRate",
+                                    "description": "The Peer connection receiving video streaming selected codec media sampling rate.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.codec.params",
+                                    "description": "The Peer connection receiving video streaming selected codec parameters.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
                                     "type": "String",
                                     "optional": true
                                 },
@@ -5903,7 +5975,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 889,
+            "line": 917,
             "description": "Event triggered when <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> changes\nUser Streams audio and video tracks muted status.",
             "itemtype": "event",
             "name": "localMediaMuted",
@@ -5931,7 +6003,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 906,
+            "line": 934,
             "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.<br>\n  Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates\n  may be received in the session description instead.\n</blockquote>\nEvent triggered when remote ICE candidate processing state has changed when Peer is using trickle ICE.",
             "itemtype": "event",
             "name": "candidateProcessingState",
@@ -5990,7 +6062,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 935,
+            "line": 963,
             "description": "Stores the list of <code>once()</code> event handlers.\nThese events are only triggered once.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -6016,7 +6088,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 948,
+            "line": 976,
             "description": "Stores the timestamps data used for throttling.",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -6028,7 +6100,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 964,
+            "line": 992,
             "description": "Stores the throttling interval timeout.",
             "itemtype": "attribute",
             "name": "_throttlingTimeouts",
@@ -6040,7 +6112,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 978,
+            "line": 1006,
             "description": "Stores the flag if throttling should throw when called less than the interval timeout.",
             "itemtype": "attribute",
             "name": "_throttlingShouldThrowError",
@@ -6052,7 +6124,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 988,
+            "line": 1016,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -6076,7 +6148,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1012,
+            "line": 1040,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -6113,7 +6185,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1070,
+            "line": 1098,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -6138,7 +6210,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1119,
+            "line": 1147,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -6149,7 +6221,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1173,
+            "line": 1201,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -6160,7 +6232,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1199,
+            "line": 1227,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -6171,7 +6243,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1237,
+            "line": 1265,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",
@@ -7674,7 +7746,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 549,
+            "line": 562,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
             "name": "_removeSDPFilteredCandidates",
@@ -7685,7 +7757,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 584,
+            "line": 597,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
             "name": "_handleSDPMCUConnectionCase",
@@ -7696,7 +7768,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 613,
+            "line": 626,
             "description": "+ * Function that modifies the session description to handle Chrome bundle bug.\n+ * See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280\n+ * @method _handleSDPChromeBundleBug\n+ * @private\n+ * @for Skylink\n+ * @since 0.6.16",
             "class": "Skylink"
         }
@@ -7928,7 +8000,7 @@
         },
         {
             "message": "Missing item type\n+ * Function that modifies the session description to handle Chrome bundle bug.\n+ * See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280\n+ * @method _handleSDPChromeBundleBug\n+ * @private\n+ * @for Skylink\n+ * @since 0.6.16",
-            "line": " source/stream-sdp.js:613"
+            "line": " source/stream-sdp.js:626"
         }
     ]
 }
