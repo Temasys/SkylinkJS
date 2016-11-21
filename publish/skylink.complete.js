@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Fri Nov 18 2016 17:58:26 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Nov 21 2016 15:35:14 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Fri Nov 18 2016 17:58:26 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Mon Nov 21 2016 15:35:14 GMT+0800 (SGT) */
 
 (function() {
 
@@ -16929,6 +16929,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   sessionDescription.sdp = self._handleSDPMCUConnectionCase(targetMid, sessionDescription, true);
   sessionDescription.sdp = self._setSDPBitrate(targetMid, sessionDescription);
   sessionDescription.sdp = self._handleSDPChromeBundleBug(targetMid, sessionDescription);
+  sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
 
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
     'Local session description updated ->'], sessionDescription.sdp);
@@ -18216,6 +18217,10 @@ Skylink.prototype._room = null;
  *   <a href="https://en.wikipedia.org/wiki/Comfort_noise">Comfort Noise (CN)</a> codec should be removed
  *   in sending session descriptions.
  *   <small>This can be useful for debugging purposes to test preferred audio quality and feedback.</small>
+ * @param {Boolean} [options.disableREMB=false] <blockquote class="info">
+ *   Note that this is mainly used for debugging purposes and that it is an experimental flag, so
+ *   it may cause disruptions in connections or connectivity issues when toggled. </blockquote>
+ *   The flag if video REMB feedback packets should be disabled in sending session descriptions.
  * @param {JSON} [options.credentials] The credentials used for authenticating App Key with
  *   credentials to retrieve the Room session token used for connection in <a href="#method_joinRoom">
  *   <code>joinRoom()</code> method</a>.
@@ -18329,6 +18334,7 @@ Skylink.prototype._room = null;
  * @param {Boolean} callback.success.usePublicSTUN The configured value of the <code>options.usePublicSTUN</code>.
  * @param {Boolean} callback.success.disableVideoFecCodecs The configured value of the <code>options.disableVideoFecCodecs</code>.
  * @param {Boolean} callback.success.disableComfortNoiseCodec The configured value of the <code>options.disableComfortNoiseCodec</code>.
+ * @param {Boolean} callback.success.disableREMB The configured value of the <code>options.disableREMB</code>.
  * @param {JSON} callback.success.filterCandidatesType The configured value of the <code>options.filterCandidatesType</code>.
  * @param {Number} callback.success.throttleIntervals The configured value of the <code>options.throttleIntervals</code>.
  * @param {Number} callback.success.throttleShouldThrowError The configured value of the <code>options.throttleShouldThrowError</code>.
@@ -18428,6 +18434,7 @@ Skylink.prototype.init = function(options, callback) {
   var usePublicSTUN = true;
   var disableVideoFecCodecs = false;
   var disableComfortNoiseCodec = false;
+  var disableREMB = false;
   var filterCandidatesType = {
     host: false,
     srflx: false,
@@ -18503,6 +18510,9 @@ Skylink.prototype.init = function(options, callback) {
     // set the use of disabling CN codecs
     disableComfortNoiseCodec = (typeof options.disableComfortNoiseCodec === 'boolean') ?
       options.disableComfortNoiseCodec : disableComfortNoiseCodec;
+    // set the use of disabling REMB packets
+    disableREMB = (typeof options.disableREMB === 'boolean') ?
+      options.disableREMB : disableREMB;
     // set the flag if throttling should throw error when called less than the interval timeout configured
     throttleShouldThrowError = (typeof options.throttleShouldThrowError === 'boolean') ?
       options.throttleShouldThrowError : throttleShouldThrowError;
@@ -18599,6 +18609,7 @@ Skylink.prototype.init = function(options, callback) {
   self._filterCandidatesType = filterCandidatesType;
   self._throttlingTimeouts = throttleIntervals;
   self._throttlingShouldThrowError = throttleShouldThrowError;
+  self._disableREMB = disableREMB;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -18622,6 +18633,7 @@ Skylink.prototype.init = function(options, callback) {
     usePublicSTUN: self._usePublicSTUN,
     disableVideoFecCodecs: self._disableVideoFecCodecs,
     disableComfortNoiseCodec: self._disableComfortNoiseCodec,
+    disableREMB: self._disableREMB,
     filterCandidatesType: self._filterCandidatesType,
     throttleIntervals: self._throttlingTimeouts,
     throttleShouldThrowError: self._throttlingShouldThrowError
@@ -18662,6 +18674,7 @@ Skylink.prototype.init = function(options, callback) {
             usePublicSTUN: self._usePublicSTUN,
             disableVideoFecCodecs: self._disableVideoFecCodecs,
             disableComfortNoiseCodec: self._disableComfortNoiseCodec,
+            disableREMB: self._disableREMB,
             filterCandidatesType: self._filterCandidatesType,
             throttleIntervals: self._throttlingTimeouts,
             throttleShouldThrowError: self._throttlingShouldThrowError
@@ -18958,6 +18971,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     usePublicSTUN: self._usePublicSTUN,
     disableVideoFecCodecs: self._disableVideoFecCodecs,
     disableComfortNoiseCodec: self._disableComfortNoiseCodec,
+    disableREMB: self._disableREMB,
     filterCandidatesType: self._filterCandidatesType,
     throttleIntervals: self._throttlingTimeouts,
     throttleShouldThrowError: self._throttlingShouldThrowError
@@ -24458,6 +24472,17 @@ Skylink.prototype._disableVideoFecCodecs = false;
 Skylink.prototype._disableComfortNoiseCodec = false;
 
 /**
+ * Stores the flag if REMB feedback packets should be removed.
+ * @attribute _disableREMB
+ * @type Boolean
+ * @default false
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._disableREMB = false;
+
+/**
  * Function that modifies the session description to configure settings for OPUS audio codec.
  * @method _setSDPOpusConfig
  * @private
@@ -24920,6 +24945,22 @@ Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
 };
 
 /**
+ * Function that modifies the session description to remove REMB packets fb.
+ * @method _removeSDPREMBPackets
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._removeSDPREMBPackets = function (targetMid, sessionDescription) {
+  if (!this._disableREMB) {
+    return sessionDescription.sdp;
+  }
+
+  log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing REMB packets.']);
+  return sessionDescription.sdp.replace(/a=rtcp-fb:\d+ goog-remb\r\n/g, '');
+};
+
+/**
  * Function that retrieves the session description selected codec.
  * @method _getSDPSelectedCodec
  * @private
@@ -25039,13 +25080,13 @@ Skylink.prototype._handleSDPMCUConnectionCase = function (targetMid, sessionDesc
 };
 
 /**
- + * Function that modifies the session description to handle Chrome bundle bug.
- + * See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
- + * @method _handleSDPChromeBundleBug
- + * @private
- + * @for Skylink
- + * @since 0.6.16
- + */
+ * Function that modifies the session description to handle Chrome bundle bug.
+ * See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
+ * @method _handleSDPChromeBundleBug
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
 Skylink.prototype._handleSDPChromeBundleBug = function(targetMid, sessionDescription) {
   var agent = ((this._peerInformations[targetMid] || {}).agent || {}).name || '';
 

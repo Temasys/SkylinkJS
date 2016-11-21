@@ -449,6 +449,10 @@ Skylink.prototype._room = null;
  *   &lt;a href=&quot;https://en.wikipedia.org/wiki/Comfort_noise&quot;&gt;Comfort Noise (CN)&lt;/a&gt; codec should be removed
  *   in sending session descriptions.
  *   &lt;small&gt;This can be useful for debugging purposes to test preferred audio quality and feedback.&lt;/small&gt;
+ * @param {Boolean} [options.disableREMB=false] &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that this is mainly used for debugging purposes and that it is an experimental flag, so
+ *   it may cause disruptions in connections or connectivity issues when toggled. &lt;/blockquote&gt;
+ *   The flag if video REMB feedback packets should be disabled in sending session descriptions.
  * @param {JSON} [options.credentials] The credentials used for authenticating App Key with
  *   credentials to retrieve the Room session token used for connection in &lt;a href=&quot;#method_joinRoom&quot;&gt;
  *   &lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt;.
@@ -562,6 +566,7 @@ Skylink.prototype._room = null;
  * @param {Boolean} callback.success.usePublicSTUN The configured value of the &lt;code&gt;options.usePublicSTUN&lt;/code&gt;.
  * @param {Boolean} callback.success.disableVideoFecCodecs The configured value of the &lt;code&gt;options.disableVideoFecCodecs&lt;/code&gt;.
  * @param {Boolean} callback.success.disableComfortNoiseCodec The configured value of the &lt;code&gt;options.disableComfortNoiseCodec&lt;/code&gt;.
+ * @param {Boolean} callback.success.disableREMB The configured value of the &lt;code&gt;options.disableREMB&lt;/code&gt;.
  * @param {JSON} callback.success.filterCandidatesType The configured value of the &lt;code&gt;options.filterCandidatesType&lt;/code&gt;.
  * @param {Number} callback.success.throttleIntervals The configured value of the &lt;code&gt;options.throttleIntervals&lt;/code&gt;.
  * @param {Number} callback.success.throttleShouldThrowError The configured value of the &lt;code&gt;options.throttleShouldThrowError&lt;/code&gt;.
@@ -661,6 +666,7 @@ Skylink.prototype.init = function(options, callback) {
   var usePublicSTUN = true;
   var disableVideoFecCodecs = false;
   var disableComfortNoiseCodec = false;
+  var disableREMB = false;
   var filterCandidatesType = {
     host: false,
     srflx: false,
@@ -736,6 +742,9 @@ Skylink.prototype.init = function(options, callback) {
     // set the use of disabling CN codecs
     disableComfortNoiseCodec = (typeof options.disableComfortNoiseCodec === &#x27;boolean&#x27;) ?
       options.disableComfortNoiseCodec : disableComfortNoiseCodec;
+    // set the use of disabling REMB packets
+    disableREMB = (typeof options.disableREMB === &#x27;boolean&#x27;) ?
+      options.disableREMB : disableREMB;
     // set the flag if throttling should throw error when called less than the interval timeout configured
     throttleShouldThrowError = (typeof options.throttleShouldThrowError === &#x27;boolean&#x27;) ?
       options.throttleShouldThrowError : throttleShouldThrowError;
@@ -832,6 +841,7 @@ Skylink.prototype.init = function(options, callback) {
   self._filterCandidatesType = filterCandidatesType;
   self._throttlingTimeouts = throttleIntervals;
   self._throttlingShouldThrowError = throttleShouldThrowError;
+  self._disableREMB = disableREMB;
 
   log.log(&#x27;Init configuration:&#x27;, {
     serverUrl: self._path,
@@ -855,6 +865,7 @@ Skylink.prototype.init = function(options, callback) {
     usePublicSTUN: self._usePublicSTUN,
     disableVideoFecCodecs: self._disableVideoFecCodecs,
     disableComfortNoiseCodec: self._disableComfortNoiseCodec,
+    disableREMB: self._disableREMB,
     filterCandidatesType: self._filterCandidatesType,
     throttleIntervals: self._throttlingTimeouts,
     throttleShouldThrowError: self._throttlingShouldThrowError
@@ -895,6 +906,7 @@ Skylink.prototype.init = function(options, callback) {
             usePublicSTUN: self._usePublicSTUN,
             disableVideoFecCodecs: self._disableVideoFecCodecs,
             disableComfortNoiseCodec: self._disableComfortNoiseCodec,
+            disableREMB: self._disableREMB,
             filterCandidatesType: self._filterCandidatesType,
             throttleIntervals: self._throttlingTimeouts,
             throttleShouldThrowError: self._throttlingShouldThrowError
@@ -1191,6 +1203,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     usePublicSTUN: self._usePublicSTUN,
     disableVideoFecCodecs: self._disableVideoFecCodecs,
     disableComfortNoiseCodec: self._disableComfortNoiseCodec,
+    disableREMB: self._disableREMB,
     filterCandidatesType: self._filterCandidatesType,
     throttleIntervals: self._throttlingTimeouts,
     throttleShouldThrowError: self._throttlingShouldThrowError

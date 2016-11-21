@@ -3137,6 +3137,13 @@
                             "optdefault": "false"
                         },
                         {
+                            "name": "disableREMB",
+                            "description": "<blockquote class=\"info\">\n  Note that this is mainly used for debugging purposes and that it is an experimental flag, so\n  it may cause disruptions in connections or connectivity issues when toggled. </blockquote>\n  The flag if video REMB feedback packets should be disabled in sending session descriptions.",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "false"
+                        },
+                        {
                             "name": "credentials",
                             "description": "The credentials used for authenticating App Key with\n  credentials to retrieve the Room session token used for connection in <a href=\"#method_joinRoom\">\n  <code>joinRoom()</code> method</a>.\n  <small>Note that switching of Rooms is not allowed when using credentials based authentication, unless\n  <code>init()</code> is invoked again with a different set of credentials followed by invoking\n  the <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a>.</small>",
                             "type": "JSON",
@@ -3404,6 +3411,11 @@
                                     "type": "Boolean"
                                 },
                                 {
+                                    "name": "disableREMB",
+                                    "description": "The configured value of the <code>options.disableREMB</code>.",
+                                    "type": "Boolean"
+                                },
+                                {
                                     "name": "filterCandidatesType",
                                     "description": "The configured value of the <code>options.filterCandidatesType</code>.",
                                     "type": "JSON"
@@ -3432,7 +3444,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 832,
+            "line": 844,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -3443,7 +3455,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 906,
+            "line": 918,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -3454,7 +3466,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 979,
+            "line": 991,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -3465,7 +3477,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1070,
+            "line": 1082,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -7659,6 +7671,19 @@
         {
             "file": "source/stream-sdp.js",
             "line": 45,
+            "description": "Stores the flag if REMB feedback packets should be removed.",
+            "itemtype": "attribute",
+            "name": "_disableREMB",
+            "type": "Boolean",
+            "default": "false",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.16",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/stream-sdp.js",
+            "line": 56,
             "description": "Function that modifies the session description to configure settings for OPUS audio codec.",
             "itemtype": "method",
             "name": "_setSDPOpusConfig",
@@ -7669,7 +7694,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 171,
+            "line": 182,
             "description": "Function that modifies the session description to limit the maximum sending bandwidth.\nSetting this may not necessarily work in Firefox.",
             "itemtype": "method",
             "name": "_setSDPBitrate",
@@ -7680,7 +7705,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 263,
+            "line": 274,
             "description": "Function that modifies the session description to set the preferred audio/video codec.",
             "itemtype": "method",
             "name": "_setSDPCodec",
@@ -7691,7 +7716,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 317,
+            "line": 328,
             "description": "Function that modifies the session description to remove the previous experimental H264\ncodec that is apparently breaking connections.\nNOTE: We should perhaps not remove it since H264 is supported?",
             "itemtype": "method",
             "name": "_removeSDPFirefoxH264Pref",
@@ -7702,7 +7727,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 333,
+            "line": 344,
             "description": "Function that modifies the session description to append the MediaStream and MediaStreamTrack IDs that seems\nto be missing from Firefox answer session description to Chrome connection causing freezes in re-negotiation.",
             "itemtype": "method",
             "name": "_addSDPMediaStreamTrackIDs",
@@ -7713,7 +7738,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 407,
+            "line": 418,
             "description": "Function that modifies the session description to remove VP9 and H264 apt/rtx lines to prevent plugin connection breaks.",
             "itemtype": "method",
             "name": "_removeSDPH264VP9AptRtxForOlderPlugin",
@@ -7724,7 +7749,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 438,
+            "line": 449,
             "description": "Function that modifies the session description to remove codecs.",
             "itemtype": "method",
             "name": "_removeSDPCodecs",
@@ -7735,7 +7760,18 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 507,
+            "line": 518,
+            "description": "Function that modifies the session description to remove REMB packets fb.",
+            "itemtype": "method",
+            "name": "_removeSDPREMBPackets",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.16",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/stream-sdp.js",
+            "line": 534,
             "description": "Function that retrieves the session description selected codec.",
             "itemtype": "method",
             "name": "_getSDPSelectedCodec",
@@ -7746,7 +7782,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 562,
+            "line": 589,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
             "name": "_removeSDPFilteredCandidates",
@@ -7757,7 +7793,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 597,
+            "line": 624,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
             "name": "_handleSDPMCUConnectionCase",
@@ -7768,8 +7804,13 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 626,
-            "description": "+ * Function that modifies the session description to handle Chrome bundle bug.\n+ * See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280\n+ * @method _handleSDPChromeBundleBug\n+ * @private\n+ * @for Skylink\n+ * @since 0.6.16",
+            "line": 653,
+            "description": "Function that modifies the session description to handle Chrome bundle bug.\nSee: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280",
+            "itemtype": "method",
+            "name": "_handleSDPChromeBundleBug",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.16",
             "class": "Skylink"
         }
     ],
@@ -7997,10 +8038,6 @@
         {
             "message": "Missing item type\nEmit event for Peers function.",
             "line": " source/data-transfer.js:2111"
-        },
-        {
-            "message": "Missing item type\n+ * Function that modifies the session description to handle Chrome bundle bug.\n+ * See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280\n+ * @method _handleSDPChromeBundleBug\n+ * @private\n+ * @for Skylink\n+ * @since 0.6.16",
-            "line": " source/stream-sdp.js:626"
         }
     ]
 }

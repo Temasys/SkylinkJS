@@ -43,6 +43,17 @@ Skylink.prototype._disableVideoFecCodecs = false;
 Skylink.prototype._disableComfortNoiseCodec = false;
 
 /**
+ * Stores the flag if REMB feedback packets should be removed.
+ * @attribute _disableREMB
+ * @type Boolean
+ * @default false
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._disableREMB = false;
+
+/**
  * Function that modifies the session description to configure settings for OPUS audio codec.
  * @method _setSDPOpusConfig
  * @private
@@ -505,6 +516,22 @@ Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
 };
 
 /**
+ * Function that modifies the session description to remove REMB packets fb.
+ * @method _removeSDPREMBPackets
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._removeSDPREMBPackets = function (targetMid, sessionDescription) {
+  if (!this._disableREMB) {
+    return sessionDescription.sdp;
+  }
+
+  log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing REMB packets.']);
+  return sessionDescription.sdp.replace(/a=rtcp-fb:\d+ goog-remb\r\n/g, '');
+};
+
+/**
  * Function that retrieves the session description selected codec.
  * @method _getSDPSelectedCodec
  * @private
@@ -624,13 +651,13 @@ Skylink.prototype._handleSDPMCUConnectionCase = function (targetMid, sessionDesc
 };
 
 /**
- + * Function that modifies the session description to handle Chrome bundle bug.
- + * See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
- + * @method _handleSDPChromeBundleBug
- + * @private
- + * @for Skylink
- + * @since 0.6.16
- + */
+ * Function that modifies the session description to handle Chrome bundle bug.
+ * See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
+ * @method _handleSDPChromeBundleBug
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
 Skylink.prototype._handleSDPChromeBundleBug = function(targetMid, sessionDescription) {
   var agent = ((this._peerInformations[targetMid] || {}).agent || {}).name || '';
 
