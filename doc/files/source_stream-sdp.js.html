@@ -294,7 +294,7 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
         mLineIndex = i;
       } else if (mLineIndex &gt; 0) {
         if (sdpLines[i].indexOf(&#x27;m=&#x27;) === 0) {
-          return;
+          break;
         }
 
         if (sdpLines[i].indexOf(&#x27;c=&#x27;) === 0) {

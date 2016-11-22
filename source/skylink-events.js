@@ -249,22 +249,19 @@ Skylink.prototype._EVENTS = {
    * @param {Boolean} peerInfo.settings.audio.stereo The flag if stereo band is configured
    *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for receiving audio data.
    * @param {Boolean} [peerInfo.settings.audio.usedtx] <blockquote class="info">
-   *   Note that this feature might not work depending on the browser support and implementation, and it's only defined
-   *   for User's end and cannot be viewed from Peer's end (when <code>isSelf</code> value is <code>false</code>).</blockquote>
+   *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
    *   The flag if DTX (Discontinuous Transmission) is configured when encoding audio codec
    *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
    *   <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>
    *   <small>When not defined, the default browser configuration is used.</small>
    * @param {Boolean} [peerInfo.settings.audio.useinbandfec] <blockquote class="info">
-   *   Note that this feature might not work depending on the browser support and implementation, and it's only defined
-   *   for User's end and cannot be viewed from Peer's end (when <code>isSelf</code> value is <code>false</code>).</blockquote>
+   *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
    *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) is
    *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
    *   <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>
    *   <small>When not defined, the default browser configuration is used.</small>
    * @param {Number} [peerInfo.settings.audio.maxplaybackrate] <blockquote class="info">
-   *   Note that this feature might not work depending on the browser support and implementation, and it's only defined
-   *   for User's end and cannot be viewed from Peer's end (when <code>isSelf</code> value is <code>false</code>).</blockquote>
+   *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
    *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
    *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
    *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
@@ -284,10 +281,16 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.VIDEO_RESOLUTION]
    * @param {Number|JSON} peerInfo.settings.video.resolution.width The Peer Stream video resolution width or
    *   video resolution width settings.
+   *   <small>When defined as a JSON object, it is the user set resolution width settings with (<code>"min"</code> or
+   *   <code>"max"</code> or <code>"ideal"</code> or <code>"exact"</code> etc configurations).</small>
    * @param {Number|JSON} peerInfo.settings.video.resolution.height The Peer Stream video resolution height or
    *   video resolution height settings.
+   *   <small>When defined as a JSON object, it is the user set resolution height settings with (<code>"min"</code> or
+   *   <code>"max"</code> or <code>"ideal"</code> or <code>"exact"</code> etc configurations).</small>
    * @param {Number|JSON} [peerInfo.settings.video.frameRate] The Peer Stream video
    *   <a href="https://en.wikipedia.org/wiki/Frame_rate">frameRate</a> per second (fps) or video frameRate settings.
+   *   <small>When defined as a JSON object, it is the user set frameRate settings with (<code>"min"</code> or
+   *   <code>"max"</code> or <code>"ideal"</code> or <code>"exact"</code> etc configurations).</small>
    * @param {Boolean} peerInfo.settings.video.screenshare The flag if Peer Stream is a screensharing Stream.
    * @param {Array} [peerInfo.settings.video.optional] The Peer Stream <code>navigator.getUserMedia()</code> API
    *   <code>video: { optional [..] }</code> property.

@@ -267,9 +267,12 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     }
 
     if (peerInfo.settings.audio &amp;&amp; typeof peerInfo.settings.audio === &#x27;object&#x27;) {
-      peerInfo.settings.audio.usedtx = null;
-      peerInfo.settings.audio.maxplaybackrate = null;
-      peerInfo.settings.audio.useinbandfec = null;
+      peerInfo.settings.audio.usedtx = typeof peerInfo.settings.audio.usedtx === &#x27;boolean&#x27; ?
+        peerInfo.settings.audio.usedtx : null;
+      peerInfo.settings.audio.maxplaybackrate = typeof peerInfo.settings.audio.maxplaybackrate === &#x27;number&#x27; ?
+        peerInfo.settings.audio.maxplaybackrate : null;
+      peerInfo.settings.audio.useinbandfec = typeof peerInfo.settings.audio.useinbandfec === &#x27;boolean&#x27; ?
+        peerInfo.settings.audio.useinbandfec : null;
     }
 
     if (!(peerInfo.userData !== null &amp;&amp; typeof peerInfo.userData !== &#x27;undefined&#x27;)) {
@@ -360,15 +363,9 @@ Skylink.prototype._getUserInfo = function(peerId) {
 
   // Adhere to SM protocol without breaking the other SDKs.
   if (userInfo.settings.video &amp;&amp; typeof userInfo.settings.video === &#x27;object&#x27; &amp;&amp;
-    typeof userInfo.settings.video.frameRate !== &#x27;number&#x27;) {
+    !((userInfo.settings.video.frameRate &amp;&amp; typeof userInfo.settings.video.frameRate === &#x27;object&#x27;) ||
+    typeof userInfo.settings.video.frameRate === &#x27;number&#x27;)) {
     userInfo.settings.video.frameRate = -1;
-  }
-
-  // Adhere to SM protocol. Stop adding new things to the current protocol until things are finalised.
-  if (userInfo.settings.audio &amp;&amp; typeof userInfo.settings.audio === &#x27;object&#x27;) {
-    delete userInfo.settings.audio.usedtx;
-    delete userInfo.settings.audio.maxplaybackrate;
-    delete userInfo.settings.audio.useinbandfec;
   }
 
   delete userInfo.agent;

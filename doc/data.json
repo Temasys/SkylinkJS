@@ -2071,7 +2071,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 236,
+            "line": 239,
             "description": "Function that gets the list of connected Peers in the Room.",
             "itemtype": "method",
             "name": "getPeersInRoom",
@@ -2087,7 +2087,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 260,
+            "line": 263,
             "description": "Function that returns the User session information to be sent to Peers.",
             "itemtype": "method",
             "name": "_getUserInfo",
@@ -4308,19 +4308,19 @@
                                 },
                                 {
                                     "name": "audio.usedtx",
-                                    "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation, and it's only defined\n  for User's end and cannot be viewed from Peer's end (when <code>isSelf</code> value is <code>false</code>).</blockquote>\n  The flag if DTX (Discontinuous Transmission) is configured when encoding audio codec\n  is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>\n  <small>When not defined, the default browser configuration is used.</small>",
+                                    "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation.</blockquote>\n  The flag if DTX (Discontinuous Transmission) is configured when encoding audio codec\n  is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>\n  <small>When not defined, the default browser configuration is used.</small>",
                                     "type": "Boolean",
                                     "optional": true
                                 },
                                 {
                                     "name": "audio.useinbandfec",
-                                    "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation, and it's only defined\n  for User's end and cannot be viewed from Peer's end (when <code>isSelf</code> value is <code>false</code>).</blockquote>\n  The flag if capability to take advantage of in-band FEC (Forward Error Correction) is\n  configured when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>\n  <small>When not defined, the default browser configuration is used.</small>",
+                                    "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation.</blockquote>\n  The flag if capability to take advantage of in-band FEC (Forward Error Correction) is\n  configured when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>\n  <small>When not defined, the default browser configuration is used.</small>",
                                     "type": "Boolean",
                                     "optional": true
                                 },
                                 {
                                     "name": "audio.maxplaybackrate",
-                                    "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation, and it's only defined\n  for User's end and cannot be viewed from Peer's end (when <code>isSelf</code> value is <code>false</code>).</blockquote>\n  The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is\n  <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This value must be between <code>8000</code> to <code>48000</code>.</small>\n  <small>When not defined, the default browser configuration is used.</small>",
+                                    "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation.</blockquote>\n  The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is\n  <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This value must be between <code>8000</code> to <code>48000</code>.</small>\n  <small>When not defined, the default browser configuration is used.</small>",
                                     "type": "Number",
                                     "optional": true
                                 },
@@ -4358,17 +4358,17 @@
                                 },
                                 {
                                     "name": "video.resolution.width",
-                                    "description": "The Peer Stream video resolution width or\n  video resolution width settings.",
+                                    "description": "The Peer Stream video resolution width or\n  video resolution width settings.\n  <small>When defined as a JSON object, it is the user set resolution width settings with (<code>\"min\"</code> or\n  <code>\"max\"</code> or <code>\"ideal\"</code> or <code>\"exact\"</code> etc configurations).</small>",
                                     "type": "Number|JSON"
                                 },
                                 {
                                     "name": "video.resolution.height",
-                                    "description": "The Peer Stream video resolution height or\n  video resolution height settings.",
+                                    "description": "The Peer Stream video resolution height or\n  video resolution height settings.\n  <small>When defined as a JSON object, it is the user set resolution height settings with (<code>\"min\"</code> or\n  <code>\"max\"</code> or <code>\"ideal\"</code> or <code>\"exact\"</code> etc configurations).</small>",
                                     "type": "Number|JSON"
                                 },
                                 {
                                     "name": "video.frameRate",
-                                    "description": "The Peer Stream video\n  <a href=\"https://en.wikipedia.org/wiki/Frame_rate\">frameRate</a> per second (fps) or video frameRate settings.",
+                                    "description": "The Peer Stream video\n  <a href=\"https://en.wikipedia.org/wiki/Frame_rate\">frameRate</a> per second (fps) or video frameRate settings.\n  <small>When defined as a JSON object, it is the user set frameRate settings with (<code>\"min\"</code> or\n  <code>\"max\"</code> or <code>\"ideal\"</code> or <code>\"exact\"</code> etc configurations).</small>",
                                     "type": "Number|JSON",
                                     "optional": true
                                 },
@@ -4527,7 +4527,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 340,
+            "line": 343,
             "description": "Event triggered when a Peer connection has been refreshed.",
             "itemtype": "event",
             "name": "peerRestart",
@@ -4558,7 +4558,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 354,
+            "line": 357,
             "description": "Event triggered when a Peer session information has been updated.",
             "itemtype": "event",
             "name": "peerUpdated",
@@ -4584,7 +4584,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 367,
+            "line": 370,
             "description": "Event triggered when a Peer leaves the room.",
             "itemtype": "event",
             "name": "peerLeft",
@@ -4610,7 +4610,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 380,
+            "line": 383,
             "description": "Event triggered when Room session has ended abruptly due to network disconnections.",
             "itemtype": "event",
             "name": "sessionDisconnect",
@@ -4631,7 +4631,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 392,
+            "line": 395,
             "description": "Event triggered when receiving Peer Stream.",
             "itemtype": "event",
             "name": "incomingStream",
@@ -4662,7 +4662,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 407,
+            "line": 410,
             "description": "Event triggered when receiving message from Peer.",
             "itemtype": "event",
             "name": "incomingMessage",
@@ -4727,7 +4727,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 438,
+            "line": 441,
             "description": "Event triggered when receiving completed data transfer from Peer.",
             "itemtype": "event",
             "name": "incomingData",
@@ -4763,7 +4763,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 454,
+            "line": 457,
             "description": "Event triggered when receiving upload data transfer from Peer.",
             "itemtype": "event",
             "name": "incomingDataRequest",
@@ -4794,7 +4794,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 468,
+            "line": 471,
             "description": "Event triggered when Room locked status has changed.",
             "itemtype": "event",
             "name": "roomLock",
@@ -4825,7 +4825,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 482,
+            "line": 485,
             "description": "Event triggered when a Datachannel connection state has changed.",
             "itemtype": "event",
             "name": "dataChannelState",
@@ -4867,7 +4867,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 501,
+            "line": 504,
             "description": "Event triggered when a data transfer state has changed.",
             "itemtype": "event",
             "name": "dataTransferState",
@@ -4975,7 +4975,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 549,
+            "line": 552,
             "description": "Event triggered when Signaling server reaction state has changed.",
             "itemtype": "event",
             "name": "systemAction",
@@ -5001,7 +5001,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 562,
+            "line": 565,
             "description": "Event triggered when a server Peer joins the room.",
             "itemtype": "event",
             "name": "serverPeerJoined",
@@ -5022,7 +5022,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 573,
+            "line": 576,
             "description": "Event triggered when a server Peer leaves the room.",
             "itemtype": "event",
             "name": "serverPeerLeft",
@@ -5043,7 +5043,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 584,
+            "line": 587,
             "description": "Event triggered when a server Peer connection has been refreshed.",
             "itemtype": "event",
             "name": "serverPeerRestart",
@@ -5064,7 +5064,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 595,
+            "line": 598,
             "description": "Event triggered when Peer Stream streaming has stopped.",
             "itemtype": "event",
             "name": "streamEnded",
@@ -5100,7 +5100,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 610,
+            "line": 613,
             "description": "Event triggered when Peer Stream audio or video tracks has been muted / unmuted.",
             "itemtype": "event",
             "name": "streamMuted",
@@ -5131,7 +5131,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 624,
+            "line": 627,
             "description": "Event triggered when <a href=\"#method_getPeers\"><code>getPeers()</code> method</a> retrieval state changes.",
             "itemtype": "event",
             "name": "getPeersStateChange",
@@ -5164,7 +5164,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 637,
+            "line": 640,
             "description": "Event triggered when <a href=\"#method_introducePeer\"><code>introducePeer()</code> method</a>\nintroduction request state changes.",
             "itemtype": "event",
             "name": "introduceStateChange",
@@ -5201,7 +5201,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 653,
+            "line": 656,
             "description": "Event triggered when <a href=\"#method_getConnectionStatus\"><code>getConnectionStatus()</code> method</a>\nretrieval state changes.",
             "itemtype": "event",
             "name": "getConnectionStatusStateChange",
@@ -5992,7 +5992,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 920,
+            "line": 923,
             "description": "Event triggered when <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> changes\nUser Streams audio and video tracks muted status.",
             "itemtype": "event",
             "name": "localMediaMuted",
@@ -6020,7 +6020,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 937,
+            "line": 940,
             "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.<br>\n  Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates\n  may be received in the session description instead.\n</blockquote>\nEvent triggered when remote ICE candidate processing state has changed when Peer is using trickle ICE.",
             "itemtype": "event",
             "name": "candidateProcessingState",
@@ -6079,7 +6079,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 966,
+            "line": 969,
             "description": "Stores the list of <code>once()</code> event handlers.\nThese events are only triggered once.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -6105,7 +6105,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 979,
+            "line": 982,
             "description": "Stores the timestamps data used for throttling.",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -6117,7 +6117,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 995,
+            "line": 998,
             "description": "Stores the throttling interval timeout.",
             "itemtype": "attribute",
             "name": "_throttlingTimeouts",
@@ -6129,7 +6129,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1009,
+            "line": 1012,
             "description": "Stores the flag if throttling should throw when called less than the interval timeout.",
             "itemtype": "attribute",
             "name": "_throttlingShouldThrowError",
@@ -6141,7 +6141,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1019,
+            "line": 1022,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -6165,7 +6165,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1043,
+            "line": 1046,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -6202,7 +6202,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1101,
+            "line": 1104,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -6227,7 +6227,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1150,
+            "line": 1153,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -6238,7 +6238,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1204,
+            "line": 1207,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -6249,7 +6249,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1230,
+            "line": 1233,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -6260,7 +6260,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1268,
+            "line": 1271,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",

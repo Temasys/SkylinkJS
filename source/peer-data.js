@@ -176,9 +176,12 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     }
 
     if (peerInfo.settings.audio && typeof peerInfo.settings.audio === 'object') {
-      peerInfo.settings.audio.usedtx = null;
-      peerInfo.settings.audio.maxplaybackrate = null;
-      peerInfo.settings.audio.useinbandfec = null;
+      peerInfo.settings.audio.usedtx = typeof peerInfo.settings.audio.usedtx === 'boolean' ?
+        peerInfo.settings.audio.usedtx : null;
+      peerInfo.settings.audio.maxplaybackrate = typeof peerInfo.settings.audio.maxplaybackrate === 'number' ?
+        peerInfo.settings.audio.maxplaybackrate : null;
+      peerInfo.settings.audio.useinbandfec = typeof peerInfo.settings.audio.useinbandfec === 'boolean' ?
+        peerInfo.settings.audio.useinbandfec : null;
     }
 
     if (!(peerInfo.userData !== null && typeof peerInfo.userData !== 'undefined')) {
@@ -272,13 +275,6 @@ Skylink.prototype._getUserInfo = function(peerId) {
     !((userInfo.settings.video.frameRate && typeof userInfo.settings.video.frameRate === 'object') ||
     typeof userInfo.settings.video.frameRate === 'number')) {
     userInfo.settings.video.frameRate = -1;
-  }
-
-  // Adhere to SM protocol. Stop adding new things to the current protocol until things are finalised.
-  if (userInfo.settings.audio && typeof userInfo.settings.audio === 'object') {
-    delete userInfo.settings.audio.usedtx;
-    delete userInfo.settings.audio.maxplaybackrate;
-    delete userInfo.settings.audio.useinbandfec;
   }
 
   delete userInfo.agent;

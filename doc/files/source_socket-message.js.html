@@ -1093,9 +1093,9 @@ Skylink.prototype._offerHandler = function(message) {
 
   log.log([targetMid, null, message.type, &#x27;Received offer from peer. &#x27; +
     &#x27;Session description:&#x27;], message.sdp);
-  var offer = new window.RTCSessionDescription({
+  var offer = new RTCSessionDescription({
     type: message.type,
-    sdp: message.sdp
+    sdp: self._hasMCU ? message.sdp.split(&#x27;\n&#x27;).join(&#x27;\r\n&#x27;) : message.sdp
   });
   log.log([targetMid, &#x27;RTCSessionDescription&#x27;, message.type,
     &#x27;Session description object created&#x27;], offer);
@@ -1260,9 +1260,9 @@ Skylink.prototype._answerHandler = function(message) {
     self._peerInformations[targetMid].userData = userInfo.userData;
   }
 
-  var answer = new window.RTCSessionDescription({
+  var answer = new RTCSessionDescription({
     type: message.type,
-    sdp: message.sdp
+    sdp: self._hasMCU ? message.sdp.split(&#x27;\n&#x27;).join(&#x27;\r\n&#x27;) : message.sdp
   });
 
   log.log([targetMid, &#x27;RTCSessionDescription&#x27;, message.type,
