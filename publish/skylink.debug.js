@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Nov 23 2016 02:49:18 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Nov 23 2016 03:22:12 GMT+0800 (SGT) */
 
 (function() {
 
@@ -10738,9 +10738,9 @@ Skylink.prototype._offerHandler = function(message) {
 
   log.log([targetMid, null, message.type, 'Received offer from peer. ' +
     'Session description:'], message.sdp);
-  var offer = new window.RTCSessionDescription({
+  var offer = new RTCSessionDescription({
     type: message.type,
-    sdp: message.sdp
+    sdp: self._hasMCU ? message.sdp.split('\n').join('\r\n') : message.sdp
   });
   log.log([targetMid, 'RTCSessionDescription', message.type,
     'Session description object created'], offer);
@@ -10905,9 +10905,9 @@ Skylink.prototype._answerHandler = function(message) {
     self._peerInformations[targetMid].userData = userInfo.userData;
   }
 
-  var answer = new window.RTCSessionDescription({
+  var answer = new RTCSessionDescription({
     type: message.type,
-    sdp: message.sdp
+    sdp: self._hasMCU ? message.sdp.split('\n').join('\r\n') : message.sdp
   });
 
   log.log([targetMid, 'RTCSessionDescription', message.type,
@@ -13163,7 +13163,7 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
         mLineIndex = i;
       } else if (mLineIndex > 0) {
         if (sdpLines[i].indexOf('m=') === 0) {
-          return;
+          break;
         }
 
         if (sdpLines[i].indexOf('c=') === 0) {

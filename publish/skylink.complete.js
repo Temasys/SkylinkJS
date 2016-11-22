@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Nov 23 2016 02:49:18 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Nov 23 2016 03:22:12 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Wed Nov 23 2016 02:49:18 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Nov 23 2016 03:22:12 GMT+0800 (SGT) */
 
 (function() {
 
@@ -22271,9 +22271,9 @@ Skylink.prototype._offerHandler = function(message) {
 
   log.log([targetMid, null, message.type, 'Received offer from peer. ' +
     'Session description:'], message.sdp);
-  var offer = new window.RTCSessionDescription({
+  var offer = new RTCSessionDescription({
     type: message.type,
-    sdp: message.sdp
+    sdp: self._hasMCU ? message.sdp.split('\n').join('\r\n') : message.sdp
   });
   log.log([targetMid, 'RTCSessionDescription', message.type,
     'Session description object created'], offer);
@@ -22438,9 +22438,9 @@ Skylink.prototype._answerHandler = function(message) {
     self._peerInformations[targetMid].userData = userInfo.userData;
   }
 
-  var answer = new window.RTCSessionDescription({
+  var answer = new RTCSessionDescription({
     type: message.type,
-    sdp: message.sdp
+    sdp: self._hasMCU ? message.sdp.split('\n').join('\r\n') : message.sdp
   });
 
   log.log([targetMid, 'RTCSessionDescription', message.type,
@@ -24696,7 +24696,7 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
         mLineIndex = i;
       } else if (mLineIndex > 0) {
         if (sdpLines[i].indexOf('m=') === 0) {
-          return;
+          break;
         }
 
         if (sdpLines[i].indexOf('c=') === 0) {
