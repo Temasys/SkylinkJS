@@ -269,7 +269,8 @@ Skylink.prototype._getUserInfo = function(peerId) {
 
   // Adhere to SM protocol without breaking the other SDKs.
   if (userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
-    typeof userInfo.settings.video.frameRate !== 'number') {
+    !((userInfo.settings.video.frameRate && typeof userInfo.settings.video.frameRate === 'object') ||
+    typeof userInfo.settings.video.frameRate === 'number')) {
     userInfo.settings.video.frameRate = -1;
   }
 

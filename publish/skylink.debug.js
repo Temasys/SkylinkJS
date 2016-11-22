@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Nov 23 2016 02:45:56 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Nov 23 2016 02:49:18 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5167,7 +5167,8 @@ Skylink.prototype._getUserInfo = function(peerId) {
 
   // Adhere to SM protocol without breaking the other SDKs.
   if (userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
-    typeof userInfo.settings.video.frameRate !== 'number') {
+    !((userInfo.settings.video.frameRate && typeof userInfo.settings.video.frameRate === 'object') ||
+    typeof userInfo.settings.video.frameRate === 'number')) {
     userInfo.settings.video.frameRate = -1;
   }
 
