@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Mon Nov 21 2016 15:35:14 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Tue Nov 22 2016 16:04:59 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13086,13 +13086,9 @@ Skylink.prototype._setSDPOpusConfig = function(targetMid, sessionDescription) {
 Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
   var sdpLines = sessionDescription.sdp.split('\r\n');
   var parseFn = function (type, bw) {
-    if (!(typeof bw === 'number' && bw > 0)) {
-      log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Not limiting "' + type + '" bandwidth']);
-      return;
-    }
-
     var mLineType = type;
     var mLineIndex = -1;
+    var cLineIndex = -1;
 
     if (type === 'data') {
       mLineType = 'application';
@@ -13103,18 +13099,28 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
         mLineIndex = i;
       } else if (mLineIndex > 0) {
         if (sdpLines[i].indexOf('m=') === 0) {
-          log.error([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Failed setting "' +
-            type + '" bandwidth as c-line is missing.']);
-          return;
+          if (!(typeof bw === 'number' && bw > 0)) {
+            log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Not limiting "' + type + '" bandwidth']);
+            return;
+          }
+
+          if (cLineIndex === -1) {
+            log.error([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Failed setting "' +
+              type + '" bandwidth as c-line is missing.']);
+            return;
+          }
+
+          // Follow RFC 4566, that the b-line should follow after c-line.
+          log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Limiting maximum sending "' + type + '" bandwidth ->'], bw);
+          sdpLines.splice(i + 1, 0, window.webrtcDetectedBrowser === 'firefox' ? 'b=TIAS:' + (bw * 1024) : 'b=AS:' + bw);
         }
 
-        // Follow RFC 4566, that the b-line should follow after c-line.
         if (sdpLines[i].indexOf('c=') === 0) {
-          log.info([targetMid, 'RTCSessionDesription', sessionDescription.type,
-            'Limiting maximum sending "' + type + '" bandwidth ->'], bw);
-          sdpLines.splice(i + 1, 0, window.webrtcDetectedBrowser === 'firefox' ?
-            'b=TIAS:' + (bw * 1024) : 'b=AS:' + bw);
-          return;
+          cLineIndex = i;
+        // Remove previous b:AS settings
+        } else if (sdpLines[i].indexOf('b=AS:') === 0 || sdpLines[i].indexOf('b:TIAS:') === 0) {
+          sdpLines.splice(i, 1);
+          i--;
         }
       }
     }
@@ -13125,30 +13131,30 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
   parseFn('data', this._streamsBandwidthSettings.bAS.data);
 
   // Sets the experimental google bandwidth
-  if ((typeof this._streamsBandwidthSettings.googleX.min === 'number' && this._streamsBandwidthSettings.googleX.min > 0) ||
-    (typeof this._streamsBandwidthSettings.googleX.max === 'number' && this._streamsBandwidthSettings.googleX.max === 'number')) {
+  if ((typeof this._streamsBandwidthSettings.googleX.min === 'number') || (typeof this._streamsBandwidthSettings.googleX.max === 'number')) {
     var codec = null;
-    var codecFmtpLineFound = false;
-    var mVideoLineIndex = -1;
+    var codecRtpMapLineIndex = -1;
+    var codecFmtpLineIndex = -1;
 
     for (var j = 0; j < sdpLines.length; j++) {
       if (sdpLines[j].indexOf('m=video') === 0) {
         codec = sdpLines[j].split(' ')[3];
-        mVideoLineIndex = j;
-
       } else if (codec) {
         if (sdpLines[j].indexOf('m=') === 0) {
           break;
         }
-        if (sdpLines[j].indexOf('a=fmtp:' + codec) === 0 && sdpLines[j].indexOf('x-google-') > 0) {
-          sdpLines.splice(j, 1);
-          j--;
-          continue;
+
+        if (sdpLines[j].indexOf('a=rtpmap:' + codec + ' ') === 0) {
+          codecRtpMapLineIndex = j;
+        } else if (sdpLines[j].indexOf('a=fmtp:' + codec + ' ') === 0) {
+          sdpLines[j] = sdpLines[j].replace(/x-google-(min|max)-bitrate=[0-9]*[;]*/gi, '');
+          codecFmtpLineIndex = j;
+          break;
         }
       }
     }
 
-    if (codec && mVideoLineIndex > 0) {
+    if (codecRtpMapLineIndex > -1) {
       var xGoogleParams = '';
 
       if (typeof this._streamsBandwidthSettings.googleX.min === 'number') {
@@ -13159,8 +13165,11 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
         xGoogleParams += 'x-google-max-bitrate=' + this._streamsBandwidthSettings.googleX.max + ';';
       }
 
-      sdpLines.splice(mVideoLineIndex + (sdpLines[mVideoLineIndex + 1] &&
-        sdpLines[mVideoLineIndex + 1].indexOf('b=AS:') === 0 ? 2 : 1), 0, 'a=fmtp:' + codec + ' ' + xGoogleParams);
+      if (codecFmtpLineIndex > -1) {
+        sdpLines[codecFmtpLineIndex] += (!sdpLines[codecFmtpLineIndex].split(' ')[1] ? ';' : '') + xGoogleParams;
+      } else {
+        sdpLines.splice(codecRtpMapLineIndex + 1, 0, 'a=fmtp:' + codec + ' ' + xGoogleParams);
+      }
     }
   }
 
