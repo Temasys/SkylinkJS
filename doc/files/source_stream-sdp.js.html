@@ -281,13 +281,9 @@ Skylink.prototype._setSDPOpusConfig = function(targetMid, sessionDescription) {
 Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
   var sdpLines = sessionDescription.sdp.split(&#x27;\r\n&#x27;);
   var parseFn = function (type, bw) {
-    if (!(typeof bw === &#x27;number&#x27; &amp;&amp; bw &gt; 0)) {
-      log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Not limiting &quot;&#x27; + type + &#x27;&quot; bandwidth&#x27;]);
-      return;
-    }
-
     var mLineType = type;
     var mLineIndex = -1;
+    var cLineIndex = -1;
 
     if (type === &#x27;data&#x27;) {
       mLineType = &#x27;application&#x27;;
@@ -298,21 +294,33 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
         mLineIndex = i;
       } else if (mLineIndex &gt; 0) {
         if (sdpLines[i].indexOf(&#x27;m=&#x27;) === 0) {
-          log.error([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Failed setting &quot;&#x27; +
-            type + &#x27;&quot; bandwidth as c-line is missing.&#x27;]);
           return;
         }
 
-        // Follow RFC 4566, that the b-line should follow after c-line.
         if (sdpLines[i].indexOf(&#x27;c=&#x27;) === 0) {
-          log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
-            &#x27;Limiting maximum sending &quot;&#x27; + type + &#x27;&quot; bandwidth -&gt;&#x27;], bw);
-          sdpLines.splice(i + 1, 0, window.webrtcDetectedBrowser === &#x27;firefox&#x27; ?
-            &#x27;b=TIAS:&#x27; + (bw * 1024) : &#x27;b=AS:&#x27; + bw);
-          return;
+          cLineIndex = i;
+        // Remove previous b:AS settings
+        } else if (sdpLines[i].indexOf(&#x27;b=AS:&#x27;) === 0 || sdpLines[i].indexOf(&#x27;b:TIAS:&#x27;) === 0) {
+          sdpLines.splice(i, 1);
+          i--;
         }
       }
     }
+
+    if (!(typeof bw === &#x27;number&#x27; &amp;&amp; bw &gt; 0)) {
+      log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Not limiting &quot;&#x27; + type + &#x27;&quot; bandwidth&#x27;]);
+      return;
+    }
+
+    if (cLineIndex === -1) {
+      log.error([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Failed setting &quot;&#x27; +
+        type + &#x27;&quot; bandwidth as c-line is missing.&#x27;]);
+      return;
+    }
+
+    // Follow RFC 4566, that the b-line should follow after c-line.
+    log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Limiting maximum sending &quot;&#x27; + type + &#x27;&quot; bandwidth -&gt;&#x27;], bw);
+    sdpLines.splice(cLineIndex + 1, 0, window.webrtcDetectedBrowser === &#x27;firefox&#x27; ? &#x27;b=TIAS:&#x27; + (bw * 1024) : &#x27;b=AS:&#x27; + bw);
   };
 
   parseFn(&#x27;audio&#x27;, this._streamsBandwidthSettings.bAS.audio);
@@ -320,30 +328,30 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
   parseFn(&#x27;data&#x27;, this._streamsBandwidthSettings.bAS.data);
 
   // Sets the experimental google bandwidth
-  if ((typeof this._streamsBandwidthSettings.googleX.min === &#x27;number&#x27; &amp;&amp; this._streamsBandwidthSettings.googleX.min &gt; 0) ||
-    (typeof this._streamsBandwidthSettings.googleX.max === &#x27;number&#x27; &amp;&amp; this._streamsBandwidthSettings.googleX.max === &#x27;number&#x27;)) {
+  if ((typeof this._streamsBandwidthSettings.googleX.min === &#x27;number&#x27;) || (typeof this._streamsBandwidthSettings.googleX.max === &#x27;number&#x27;)) {
     var codec = null;
-    var codecFmtpLineFound = false;
-    var mVideoLineIndex = -1;
+    var codecRtpMapLineIndex = -1;
+    var codecFmtpLineIndex = -1;
 
     for (var j = 0; j &lt; sdpLines.length; j++) {
       if (sdpLines[j].indexOf(&#x27;m=video&#x27;) === 0) {
         codec = sdpLines[j].split(&#x27; &#x27;)[3];
-        mVideoLineIndex = j;
-
       } else if (codec) {
         if (sdpLines[j].indexOf(&#x27;m=&#x27;) === 0) {
           break;
         }
-        if (sdpLines[j].indexOf(&#x27;a=fmtp:&#x27; + codec) === 0 &amp;&amp; sdpLines[j].indexOf(&#x27;x-google-&#x27;) &gt; 0) {
-          sdpLines.splice(j, 1);
-          j--;
-          continue;
+
+        if (sdpLines[j].indexOf(&#x27;a=rtpmap:&#x27; + codec + &#x27; &#x27;) === 0) {
+          codecRtpMapLineIndex = j;
+        } else if (sdpLines[j].indexOf(&#x27;a=fmtp:&#x27; + codec + &#x27; &#x27;) === 0) {
+          sdpLines[j] = sdpLines[j].replace(/x-google-(min|max)-bitrate=[0-9]*[;]*/gi, &#x27;&#x27;);
+          codecFmtpLineIndex = j;
+          break;
         }
       }
     }
 
-    if (codec &amp;&amp; mVideoLineIndex &gt; 0) {
+    if (codecRtpMapLineIndex &gt; -1) {
       var xGoogleParams = &#x27;&#x27;;
 
       if (typeof this._streamsBandwidthSettings.googleX.min === &#x27;number&#x27;) {
@@ -354,8 +362,11 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
         xGoogleParams += &#x27;x-google-max-bitrate=&#x27; + this._streamsBandwidthSettings.googleX.max + &#x27;;&#x27;;
       }
 
-      sdpLines.splice(mVideoLineIndex + (sdpLines[mVideoLineIndex + 1] &amp;&amp;
-        sdpLines[mVideoLineIndex + 1].indexOf(&#x27;b=AS:&#x27;) === 0 ? 2 : 1), 0, &#x27;a=fmtp:&#x27; + codec + &#x27; &#x27; + xGoogleParams);
+      if (codecFmtpLineIndex &gt; -1) {
+        sdpLines[codecFmtpLineIndex] += (!sdpLines[codecFmtpLineIndex].split(&#x27; &#x27;)[1] ? &#x27;;&#x27; : &#x27;&#x27;) + xGoogleParams;
+      } else {
+        sdpLines.splice(codecRtpMapLineIndex + 1, 0, &#x27;a=fmtp:&#x27; + codec + &#x27; &#x27; + xGoogleParams);
+      }
     }
   }
 

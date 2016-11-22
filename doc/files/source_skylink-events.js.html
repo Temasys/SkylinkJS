@@ -360,6 +360,7 @@ Skylink.prototype._EVENTS = {
    *   &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
    *   &lt;small&gt;This value must be between &lt;code&gt;8000&lt;/code&gt; to &lt;code&gt;48000&lt;/code&gt;.&lt;/small&gt;
    *   &lt;small&gt;When not defined, the default browser configuration is used.&lt;/small&gt;
+   * @param {Boolean} peerInfo.settings.audio.echoCancellation The flag if echo cancellation is enabled for audio tracks.
    * @param {Array} [peerInfo.settings.audio.optional] The Peer Stream &lt;code&gt;navigator.getUserMedia()&lt;/code&gt; API
    *   &lt;code&gt;audio: { optional [..] }&lt;/code&gt; property.
    * @param {String} [peerInfo.settings.audio.deviceId] The Peer Stream audio track source ID of the device used.
@@ -372,10 +373,12 @@ Skylink.prototype._EVENTS = {
    *   value is considered as &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;
    * @param {JSON} peerInfo.settings.video.resolution The Peer Stream video resolution.
    *   [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} peerInfo.settings.video.resolution.width The Peer Stream video resolution width.
-   * @param {Number} peerInfo.settings.video.resolution.height The Peer Stream video resolution height.
-   * @param {Number} [peerInfo.settings.video.frameRate] The Peer Stream video
-   *   &lt;a href=&quot;https://en.wikipedia.org/wiki/Frame_rate&quot;&gt;frameRate&lt;/a&gt; per second (fps).
+   * @param {Number|JSON} peerInfo.settings.video.resolution.width The Peer Stream video resolution width or
+   *   video resolution width settings.
+   * @param {Number|JSON} peerInfo.settings.video.resolution.height The Peer Stream video resolution height or
+   *   video resolution height settings.
+   * @param {Number|JSON} [peerInfo.settings.video.frameRate] The Peer Stream video
+   *   &lt;a href=&quot;https://en.wikipedia.org/wiki/Frame_rate&quot;&gt;frameRate&lt;/a&gt; per second (fps) or video frameRate settings.
    * @param {Boolean} peerInfo.settings.video.screenshare The flag if Peer Stream is a screensharing Stream.
    * @param {Array} [peerInfo.settings.video.optional] The Peer Stream &lt;code&gt;navigator.getUserMedia()&lt;/code&gt; API
    *   &lt;code&gt;video: { optional [..] }&lt;/code&gt; property.

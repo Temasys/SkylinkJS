@@ -203,20 +203,7 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
         mLineIndex = i;
       } else if (mLineIndex > 0) {
         if (sdpLines[i].indexOf('m=') === 0) {
-          if (!(typeof bw === 'number' && bw > 0)) {
-            log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Not limiting "' + type + '" bandwidth']);
-            return;
-          }
-
-          if (cLineIndex === -1) {
-            log.error([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Failed setting "' +
-              type + '" bandwidth as c-line is missing.']);
-            return;
-          }
-
-          // Follow RFC 4566, that the b-line should follow after c-line.
-          log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Limiting maximum sending "' + type + '" bandwidth ->'], bw);
-          sdpLines.splice(i + 1, 0, window.webrtcDetectedBrowser === 'firefox' ? 'b=TIAS:' + (bw * 1024) : 'b=AS:' + bw);
+          return;
         }
 
         if (sdpLines[i].indexOf('c=') === 0) {
@@ -228,6 +215,21 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
         }
       }
     }
+
+    if (!(typeof bw === 'number' && bw > 0)) {
+      log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Not limiting "' + type + '" bandwidth']);
+      return;
+    }
+
+    if (cLineIndex === -1) {
+      log.error([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Failed setting "' +
+        type + '" bandwidth as c-line is missing.']);
+      return;
+    }
+
+    // Follow RFC 4566, that the b-line should follow after c-line.
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Limiting maximum sending "' + type + '" bandwidth ->'], bw);
+    sdpLines.splice(cLineIndex + 1, 0, window.webrtcDetectedBrowser === 'firefox' ? 'b=TIAS:' + (bw * 1024) : 'b=AS:' + bw);
   };
 
   parseFn('audio', this._streamsBandwidthSettings.bAS.audio);

@@ -269,6 +269,7 @@ Skylink.prototype._EVENTS = {
    *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
    *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
    *   <small>When not defined, the default browser configuration is used.</small>
+   * @param {Boolean} peerInfo.settings.audio.echoCancellation The flag if echo cancellation is enabled for audio tracks.
    * @param {Array} [peerInfo.settings.audio.optional] The Peer Stream <code>navigator.getUserMedia()</code> API
    *   <code>audio: { optional [..] }</code> property.
    * @param {String} [peerInfo.settings.audio.deviceId] The Peer Stream audio track source ID of the device used.
@@ -281,10 +282,12 @@ Skylink.prototype._EVENTS = {
    *   value is considered as <code>false</code>.</small>
    * @param {JSON} peerInfo.settings.video.resolution The Peer Stream video resolution.
    *   [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} peerInfo.settings.video.resolution.width The Peer Stream video resolution width.
-   * @param {Number} peerInfo.settings.video.resolution.height The Peer Stream video resolution height.
-   * @param {Number} [peerInfo.settings.video.frameRate] The Peer Stream video
-   *   <a href="https://en.wikipedia.org/wiki/Frame_rate">frameRate</a> per second (fps).
+   * @param {Number|JSON} peerInfo.settings.video.resolution.width The Peer Stream video resolution width or
+   *   video resolution width settings.
+   * @param {Number|JSON} peerInfo.settings.video.resolution.height The Peer Stream video resolution height or
+   *   video resolution height settings.
+   * @param {Number|JSON} [peerInfo.settings.video.frameRate] The Peer Stream video
+   *   <a href="https://en.wikipedia.org/wiki/Frame_rate">frameRate</a> per second (fps) or video frameRate settings.
    * @param {Boolean} peerInfo.settings.video.screenshare The flag if Peer Stream is a screensharing Stream.
    * @param {Array} [peerInfo.settings.video.optional] The Peer Stream <code>navigator.getUserMedia()</code> API
    *   <code>video: { optional [..] }</code> property.

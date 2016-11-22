@@ -994,7 +994,7 @@ Skylink.prototype._offerHandler = function(message) {
   // Add-on by Web SDK fixes
   if (message.userInfo && typeof message.userInfo === 'object') {
     var userInfo = message.userInfo || {};
- 
+
     self._peerInformations[targetMid].settings = userInfo.settings || {};
     self._peerInformations[targetMid].mediaStatus = userInfo.mediaStatus || {};
     self._peerInformations[targetMid].userData = userInfo.userData;
@@ -1011,6 +1011,7 @@ Skylink.prototype._offerHandler = function(message) {
 
   offer.sdp = self._handleSDPMCUConnectionCase(targetMid, offer, false);
   offer.sdp = self._removeSDPFilteredCandidates(targetMid, offer);
+  offer.sdp = self._setSDPBitrate(targetMid, offer);
 
   // This is always the initial state. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
@@ -1162,7 +1163,7 @@ Skylink.prototype._answerHandler = function(message) {
   // Add-on by Web SDK fixes
   if (message.userInfo && typeof message.userInfo === 'object') {
     var userInfo = message.userInfo || {};
- 
+
     self._peerInformations[targetMid].settings = userInfo.settings || {};
     self._peerInformations[targetMid].mediaStatus = userInfo.mediaStatus || {};
     self._peerInformations[targetMid].userData = userInfo.userData;
@@ -1190,6 +1191,7 @@ Skylink.prototype._answerHandler = function(message) {
 
   answer.sdp = self._handleSDPMCUConnectionCase(targetMid, answer, false);
   answer.sdp = self._removeSDPFilteredCandidates(targetMid, answer);
+  answer.sdp = self._setSDPBitrate(targetMid, answer);
 
   // This should be the state after offer is received. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
