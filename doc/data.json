@@ -1891,7 +1891,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 997,
+            "line": 1035,
             "description": "Function that starts the Peer connection session.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_addPeer",
@@ -1902,7 +1902,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1036,
+            "line": 1074,
             "description": "Function that re-negotiates a Peer connection.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -1913,7 +1913,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1152,
+            "line": 1190,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -1924,7 +1924,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1213,
+            "line": 1251,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -1935,7 +1935,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1355,
+            "line": 1393,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -1946,7 +1946,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1464,
+            "line": 1502,
             "description": "Function that handles the stats tabulation.",
             "itemtype": "method",
             "name": "_parseConnectionStats",
@@ -5281,17 +5281,32 @@
                                 },
                                 {
                                     "name": "sending.bytes",
-                                    "description": "The Peer connection sending audio streaming bytes.\n  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>",
+                                    "description": "The Peer connection current sending audio streaming bytes.\n  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.totalBytes",
+                                    "description": "The Peer connection total sending audio streaming bytes.\n  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>",
                                     "type": "Number"
                                 },
                                 {
                                     "name": "sending.packets",
-                                    "description": "The Peer connection sending audio streaming packets.",
+                                    "description": "The Peer connection current sending audio streaming packets.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.totalPackets",
+                                    "description": "The Peer connection total sending audio streaming packets.",
                                     "type": "Number"
                                 },
                                 {
                                     "name": "sending.packetsLost",
-                                    "description": "The Peer connection sending audio streaming packets lost.",
+                                    "description": "The Peer connection current sending audio streaming packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.totalPacketsLost",
+                                    "description": "The Peer connection total sending audio streaming packets lost.",
                                     "type": "Number"
                                 },
                                 {
@@ -5363,13 +5378,13 @@
                                 },
                                 {
                                     "name": "sending.echoReturnLoss",
-                                    "description": "The Peer connection sending audio streaming echo return loss.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "description": "The Peer connection sending audio streaming echo return loss in db (decibels).\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
                                     "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "sending.echoReturnLossEnhancement",
-                                    "description": "The Peer connection sending audio streaming echo return loss enhancement.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "description": "The Peer connection sending audio streaming echo return loss enhancement db (decibels).\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
                                     "type": "Number",
                                     "optional": true
                                 },
@@ -5380,17 +5395,32 @@
                                 },
                                 {
                                     "name": "receiving.bytes",
-                                    "description": "The Peer connection sending audio streaming bytes.\n  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>",
+                                    "description": "The Peer connection current sending audio streaming bytes.\n  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.totalBytes",
+                                    "description": "The Peer connection total sending audio streaming bytes.\n  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>",
                                     "type": "Number"
                                 },
                                 {
                                     "name": "receiving.packets",
-                                    "description": "The Peer connection receiving audio streaming packets.",
+                                    "description": "The Peer connection current receiving audio streaming packets.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.totalPackets",
+                                    "description": "The Peer connection total receiving audio streaming packets.",
                                     "type": "Number"
                                 },
                                 {
                                     "name": "receiving.packetsLost",
-                                    "description": "The Peer connection receiving audio streaming packets lost.",
+                                    "description": "The Peer connection current receiving audio streaming packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.totalPacketsLost",
+                                    "description": "The Peer connection total receiving audio streaming packets lost.",
                                     "type": "Number"
                                 },
                                 {
@@ -5469,17 +5499,32 @@
                                 },
                                 {
                                     "name": "sending.bytes",
-                                    "description": "The Peer connection sending video streaming bytes.\n  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>",
+                                    "description": "The Peer connection current sending video streaming bytes.\n  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.totalBytes",
+                                    "description": "The Peer connection total sending video streaming bytes.\n  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>",
                                     "type": "Number"
                                 },
                                 {
                                     "name": "sending.packets",
-                                    "description": "The Peer connection sending video streaming packets.",
+                                    "description": "The Peer connection current sending video streaming packets.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.totalPackets",
+                                    "description": "The Peer connection total sending video streaming packets.",
                                     "type": "Number"
                                 },
                                 {
                                     "name": "sending.packetsLost",
-                                    "description": "The Peer connection sending video streaming packets lost.",
+                                    "description": "The Peer connection current sending video streaming packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.totalPacketsLost",
+                                    "description": "The Peer connection total sending video streaming packets lost.",
                                     "type": "Number"
                                 },
                                 {
@@ -5575,19 +5620,37 @@
                                 },
                                 {
                                     "name": "sending.nacks",
-                                    "description": "The Peer connection sending video streaming nacks.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "description": "The Peer connection current sending video streaming nacks.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.totalNacks",
+                                    "description": "The Peer connection total sending video streaming nacks.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
                                     "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "sending.plis",
-                                    "description": "The Peer connection sending video streaming plis.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "description": "The Peer connection current sending video streaming plis.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.totalPlis",
+                                    "description": "The Peer connection total sending video streaming plis.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
                                     "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "sending.firs",
-                                    "description": "The Peer connection sending video streaming firs.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "description": "The Peer connection current sending video streaming firs.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.totalFirs",
+                                    "description": "The Peer connection total sending video streaming firs.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
                                     "type": "Number",
                                     "optional": true
                                 },
@@ -5598,17 +5661,32 @@
                                 },
                                 {
                                     "name": "receiving.bytes",
-                                    "description": "The Peer connection receiving video streaming bytes.\n  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>",
+                                    "description": "The Peer connection current receiving video streaming bytes.\n  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.totalBytes",
+                                    "description": "The Peer connection total receiving video streaming bytes.\n  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>",
                                     "type": "Number"
                                 },
                                 {
                                     "name": "receiving.packets",
-                                    "description": "The Peer connection receiving video streaming packets.",
+                                    "description": "The Peer connection current receiving video streaming packets.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.totalPackets",
+                                    "description": "The Peer connection total receiving video streaming packets.",
                                     "type": "Number"
                                 },
                                 {
                                     "name": "receiving.packetsLost",
-                                    "description": "The Peer connection receiving video streaming packets lost.",
+                                    "description": "The Peer connection current receiving video streaming packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.totalPacketsLost",
+                                    "description": "The Peer connection total receiving video streaming packets lost.",
                                     "type": "Number"
                                 },
                                 {
@@ -5704,19 +5782,37 @@
                                 },
                                 {
                                     "name": "receiving.nacks",
-                                    "description": "The Peer connection receiving video streaming nacks.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "description": "The Peer connection current receiving video streaming nacks.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.totalNacks",
+                                    "description": "The Peer connection total receiving video streaming nacks.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
                                     "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "receiving.plis",
-                                    "description": "The Peer connection receiving video streaming plis.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "description": "The Peer connection current receiving video streaming plis.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.totalPlis",
+                                    "description": "The Peer connection totally receiving video streaming plis.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
                                     "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "receiving.firs",
-                                    "description": "The Peer connection receiving video streaming firs.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "description": "The Peer connection current receiving video streaming firs.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.totalFirs",
+                                    "description": "The Peer connection total receiving video streaming firs.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
                                     "type": "Number",
                                     "optional": true
                                 }
@@ -6039,7 +6135,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 932,
+            "line": 960,
             "description": "Event triggered when <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> changes\nUser Streams audio and video tracks muted status.",
             "itemtype": "event",
             "name": "localMediaMuted",
@@ -6067,7 +6163,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 949,
+            "line": 977,
             "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.<br>\n  Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates\n  may be received in the session description instead.\n</blockquote>\nEvent triggered when remote ICE candidate processing state has changed when Peer is using trickle ICE.",
             "itemtype": "event",
             "name": "candidateProcessingState",
@@ -6126,7 +6222,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 978,
+            "line": 1006,
             "description": "Stores the list of <code>once()</code> event handlers.\nThese events are only triggered once.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -6152,7 +6248,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 991,
+            "line": 1019,
             "description": "Stores the timestamps data used for throttling.",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -6164,7 +6260,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1007,
+            "line": 1035,
             "description": "Stores the throttling interval timeout.",
             "itemtype": "attribute",
             "name": "_throttlingTimeouts",
@@ -6176,7 +6272,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1021,
+            "line": 1049,
             "description": "Stores the flag if throttling should throw when called less than the interval timeout.",
             "itemtype": "attribute",
             "name": "_throttlingShouldThrowError",
@@ -6188,7 +6284,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1031,
+            "line": 1059,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -6212,7 +6308,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1055,
+            "line": 1083,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -6249,7 +6345,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1113,
+            "line": 1141,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -6274,7 +6370,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1162,
+            "line": 1190,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -6285,7 +6381,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1216,
+            "line": 1244,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -6296,7 +6392,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1242,
+            "line": 1270,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -6307,7 +6403,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1280,
+            "line": 1308,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",

@@ -665,10 +665,14 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} stats.raw The Peer connection raw stats before parsing.
    * @param {JSON} stats.audio The Peer connection audio streaming stats.
    * @param {JSON} stats.audio.sending The Peer connection sending audio streaming stats.
-   * @param {Number} stats.audio.sending.bytes The Peer connection sending audio streaming bytes.
+   * @param {Number} stats.audio.sending.bytes The Peer connection current sending audio streaming bytes.
    *   <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
-   * @param {Number} stats.audio.sending.packets The Peer connection sending audio streaming packets.
-   * @param {Number} stats.audio.sending.packetsLost The Peer connection sending audio streaming packets lost.
+   * @param {Number} stats.audio.sending.totalBytes The Peer connection total sending audio streaming bytes.
+   *   <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
+   * @param {Number} stats.audio.sending.packets The Peer connection current sending audio streaming packets.
+   * @param {Number} stats.audio.sending.totalPackets The Peer connection total sending audio streaming packets.
+   * @param {Number} stats.audio.sending.packetsLost The Peer connection current sending audio streaming packets lost.
+   * @param {Number} stats.audio.sending.totalPacketsLost The Peer connection total sending audio streaming packets lost.
    * @param {Number} stats.audio.sending.ssrc The Peer connection sending audio streaming RTP packets SSRC.
    * @param {Number} stats.audio.sending.rtt The Peer connection sending audio streaming RTT (Round-trip delay time).
    *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
@@ -692,15 +696,20 @@ Skylink.prototype._EVENTS = {
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.audio.sending.inputLevel] The Peer connection sending audio streaming input level.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
-   * @param {Number} [stats.audio.sending.echoReturnLoss] The Peer connection sending audio streaming echo return loss.
+   * @param {Number} [stats.audio.sending.echoReturnLoss] The Peer connection sending audio streaming echo return loss in db (decibels).
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
-   * @param {Number} [stats.audio.sending.echoReturnLossEnhancement] The Peer connection sending audio streaming echo return loss enhancement.
+   * @param {Number} [stats.audio.sending.echoReturnLossEnhancement] The Peer connection sending audio streaming
+   *   echo return loss enhancement db (decibels).
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.audio.receiving The Peer connection receiving audio streaming stats.
-   * @param {Number} stats.audio.receiving.bytes The Peer connection sending audio streaming bytes.
+   * @param {Number} stats.audio.receiving.bytes The Peer connection current sending audio streaming bytes.
    *   <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
-   * @param {Number} stats.audio.receiving.packets The Peer connection receiving audio streaming packets.
-   * @param {Number} stats.audio.receiving.packetsLost The Peer connection receiving audio streaming packets lost.
+   * @param {Number} stats.audio.receiving.totalBytes The Peer connection total sending audio streaming bytes.
+   *   <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
+   * @param {Number} stats.audio.receiving.packets The Peer connection current receiving audio streaming packets.
+   * @param {Number} stats.audio.receiving.totalPackets The Peer connection total receiving audio streaming packets.
+   * @param {Number} stats.audio.receiving.packetsLost The Peer connection current receiving audio streaming packets lost.
+   * @param {Number} stats.audio.receiving.totalPacketsLost The Peer connection total receiving audio streaming packets lost.
    * @param {Number} stats.audio.receiving.ssrc The Peer connection receiving audio streaming RTP packets SSRC.
    * @param {Number} stats.audio.receiving.jitter The Peer connection receiving audio streaming RTP packets jitter.
    *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
@@ -724,10 +733,14 @@ Skylink.prototype._EVENTS = {
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.video The Peer connection video streaming stats.
    * @param {JSON} stats.video.sending The Peer connection sending video streaming stats.
-   * @param {Number} stats.video.sending.bytes The Peer connection sending video streaming bytes.
+   * @param {Number} stats.video.sending.bytes The Peer connection current sending video streaming bytes.
    *   <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
-   * @param {Number} stats.video.sending.packets The Peer connection sending video streaming packets.
-   * @param {Number} stats.video.sending.packetsLost The Peer connection sending video streaming packets lost.
+   * @param {Number} stats.video.sending.totalBytes The Peer connection total sending video streaming bytes.
+   *   <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
+   * @param {Number} stats.video.sending.packets The Peer connection current sending video streaming packets.
+   * @param {Number} stats.video.sending.totalPackets The Peer connection total sending video streaming packets.
+   * @param {Number} stats.video.sending.packetsLost The Peer connection current sending video streaming packets lost.
+   * @param {Number} stats.video.sending.totalPacketsLost The Peer connection total sending video streaming packets lost.
    * @param {JSON} stats.video.sending.ssrc The Peer connection sending video streaming RTP packets SSRC.
    * @param {Number} stats.video.sending.rtt The Peer connection sending video streaming RTT (Round-trip delay time).
    *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
@@ -759,17 +772,27 @@ Skylink.prototype._EVENTS = {
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.video.sending.frameRateStdDev] The Peer connection sending video streaming fps standard deviation.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
-   * @param {Number} [stats.video.sending.nacks] The Peer connection sending video streaming nacks.
+   * @param {Number} [stats.video.sending.nacks] The Peer connection current sending video streaming nacks.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
-   * @param {Number} [stats.video.sending.plis] The Peer connection sending video streaming plis.
+   * @param {Number} [stats.video.sending.totalNacks] The Peer connection total sending video streaming nacks.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
-   * @param {Number} [stats.video.sending.firs] The Peer connection sending video streaming firs.
+   * @param {Number} [stats.video.sending.plis] The Peer connection current sending video streaming plis.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.totalPlis] The Peer connection total sending video streaming plis.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.firs] The Peer connection current sending video streaming firs.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.totalFirs] The Peer connection total sending video streaming firs.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.video.receiving The Peer connection receiving video streaming stats.
-   * @param {Number} stats.video.receiving.bytes The Peer connection receiving video streaming bytes.
+   * @param {Number} stats.video.receiving.bytes The Peer connection current receiving video streaming bytes.
    *   <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
-   * @param {Number} stats.video.receiving.packets The Peer connection receiving video streaming packets.
-   * @param {Number} stats.video.receiving.packetsLost The Peer connection receiving video streaming packets lost.
+   * @param {Number} stats.video.receiving.totalBytes The Peer connection total receiving video streaming bytes.
+   *   <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
+   * @param {Number} stats.video.receiving.packets The Peer connection current receiving video streaming packets.
+   * @param {Number} stats.video.receiving.totalPackets The Peer connection total receiving video streaming packets.
+   * @param {Number} stats.video.receiving.packetsLost The Peer connection current receiving video streaming packets lost.
+   * @param {Number} stats.video.receiving.totalPacketsLost The Peer connection total receiving video streaming packets lost.
    * @param {Number} stats.video.receiving.ssrc The Peer connection receiving video streaming RTP packets SSRC.
    * @param {Number} stats.video.receiving.e2eDelay The Peer connection receiving video streaming e2e delay.
    *   <small>Defined as <code>null</code> if it's not present in original raw stats before parsing, and that
@@ -804,11 +827,17 @@ Skylink.prototype._EVENTS = {
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.video.receiving.frameRateStdDev] The Peer connection receiving video streaming fps standard deviation.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
-   * @param {Number} [stats.video.receiving.nacks] The Peer connection receiving video streaming nacks.
+   * @param {Number} [stats.video.receiving.nacks] The Peer connection current receiving video streaming nacks.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
-   * @param {Number} [stats.video.receiving.plis] The Peer connection receiving video streaming plis.
+   * @param {Number} [stats.video.receiving.totalNacks] The Peer connection total receiving video streaming nacks.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
-   * @param {Number} [stats.video.receiving.firs] The Peer connection receiving video streaming firs.
+   * @param {Number} [stats.video.receiving.plis] The Peer connection current receiving video streaming plis.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.totalPlis] The Peer connection totally receiving video streaming plis.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.firs] The Peer connection current receiving video streaming firs.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.totalFirs] The Peer connection total receiving video streaming firs.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.selectedCandidate The Peer connection selected ICE candidate pair stats.
    * @param {JSON} stats.selectedCandidate.local The Peer connection selected local ICE candidate.

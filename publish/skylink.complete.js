@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Nov 23 2016 17:58:34 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Nov 23 2016 19:07:19 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Wed Nov 23 2016 17:58:34 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Nov 23 2016 19:07:19 GMT+0800 (SGT) */
 
 (function() {
 
@@ -15714,7 +15714,10 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           codec: self._getSDPSelectedCodec(peerId, pc.localDescription, 'audio'),
           inputLevel: null,
           echoReturnLoss: null,
-          echoReturnLossEnhancement: null
+          echoReturnLossEnhancement: null,
+          totalBytes: 0,
+          totalPackets: 0,
+          totalPacketsLost: 0
         },
         receiving: {
           ssrc: null,
@@ -15724,7 +15727,10 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           jitter: 0,
           jitterBufferMs: null,
           codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, 'audio'),
-          outputLevel: null
+          outputLevel: null,
+          totalBytes: 0,
+          totalPackets: 0,
+          totalPacketsLost: 0
         }
       },
       video: {
@@ -15746,7 +15752,13 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           framesDropped: null,
           nacks: null,
           plis: null,
-          firs: null
+          firs: null,
+          totalBytes: 0,
+          totalPackets: 0,
+          totalPacketsLost: 0,
+          totalNacks: 0,
+          totalPlis: 0,
+          totalFirs: 0
         },
         receiving: {
           ssrc: null,
@@ -15766,7 +15778,13 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           nacks: null,
           plis: null,
           firs: null,
-          e2eDelay: null
+          e2eDelay: null,
+          totalBytes: 0,
+          totalPackets: 0,
+          totalPacketsLost: 0,
+          totalNacks: 0,
+          totalPlis: 0,
+          totalFirs: 0
         }
       },
       selectedCandidate: {
@@ -15821,13 +15839,18 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
 
             result[obj.mediaType][dirType].bytes = self._parseConnectionStats(self._peerStats[peerId][prop],
               obj, dirType === 'receiving' ? 'bytesReceived' : 'bytesSent');
+            result[obj.mediaType][dirType].totalBytes = parseInt(
+              (dirType === 'receiving' ? obj.bytesReceived : obj.bytesSent) || '0', 10);
             result[obj.mediaType][dirType].packets = self._parseConnectionStats(self._peerStats[peerId][prop],
               obj, dirType === 'receiving' ? 'packetsReceived' : 'packetsSent');
+            result[obj.mediaType][dirType].totalPackets = parseInt(
+              (dirType === 'receiving' ? obj.packetsReceived : obj.packetsSent) || '0', 10);
             result[obj.mediaType][dirType].ssrc = obj.ssrc;
 
             if (dirType === 'receiving') {
               result[obj.mediaType][dirType].packetsLost = self._parseConnectionStats(self._peerStats[peerId][prop],
                 obj, 'packetsLost');
+              result[obj.mediaType][dirType].totalPacketsLost = parseInt(obj.packetsLost || '0', 10);
               result[obj.mediaType][dirType].jitter = obj.jitter || 0;
             }
 
@@ -15854,6 +15877,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
               result[obj.mediaType].sending.rtt = obj.mozRtt || 0;
               result[obj.mediaType].sending.packetsLost = self._parseConnectionStats(self._peerStats[peerId][prop],
                 obj, 'packetsLost');
+              result[obj.mediaType].sending.totalPacketsLost = parseInt(obj.packetsLost || '0', 10);
               result[obj.mediaType].sending.jitter = obj.jitter || 0;
             }
 
@@ -15884,9 +15908,14 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
 
                     result[track.kind][dirType].bytes = self._parseConnectionStats(self._peerStats[peerId][prop], streamObj,
                       dirType === 'sending' ? 'bytesSent' : 'bytesReceived');
+                    result[track.kind][dirType].totalBytes = parseInt(
+                      (dirType === 'sending' ? streamObj.bytesSent : streamObj.bytesReceived) || '0', 10);
                     result[track.kind][dirType].packets = self._parseConnectionStats(self._peerStats[peerId][prop], streamObj,
                       dirType === 'sending' ? 'packetsSent' : 'packetsReceived');
+                    result[track.kind][dirType].totalPackets = parseInt(
+                      (dirType === 'sending' ? streamObj.packetsSent : streamObj.packetsReceived) || '0', 10);
                     result[track.kind][dirType].packetsLost = self._parseConnectionStats(self._peerStats[peerId][prop], streamObj, 'packetsLost');
+                    result[track.kind][dirType].totalPacketsLost = parseInt(streamObj.packetsLost || '0', 10);
                     result[track.kind][dirType].ssrc = parseInt(streamObj.ssrc || '0', 10);
 
                     if (dirType === 'sending') {
@@ -15974,10 +16003,15 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
             result[obj.mediaType][dirType].ssrc = parseInt(obj.ssrc || '0', 10);
             result[obj.mediaType][dirType].bytes = self._parseConnectionStats(self._peerStats[peerId][prop],
               obj, dirType === 'receiving' ? 'bytesReceived' : 'bytesSent');
+            result[obj.mediaType][dirType].totalBytes = parseInt((dirType === 'receiving' ? obj.bytesReceived :
+              obj.bytesSent) || '0', 10);
             result[obj.mediaType][dirType].packets = self._parseConnectionStats(self._peerStats[peerId][prop],
               obj, dirType === 'receiving' ? 'packetsReceived' : 'packetsSent');
+            result[obj.mediaType][dirType].totalPackets = parseInt((dirType === 'receiving' ? obj.packetsReceived :
+              obj.packetsSent) || '0', 10);
             result[obj.mediaType][dirType].packetsLost = self._parseConnectionStats(self._peerStats[peerId][prop],
               obj, 'packetsLost');
+            result[obj.mediaType][dirType].totalPacketsLost = parseInt(obj.packetsLost || '0', 10);
             result[obj.mediaType][dirType].jitter = parseFloat(obj.googJitterReceived || '0', 10);
             result[obj.mediaType][dirType].googJitterBufferMs = parseFloat(obj.googJitterBufferMs || '0', 10);
 
@@ -16005,10 +16039,16 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
 
               result.video[dirType].nacks = self._parseConnectionStats(self._peerStats[peerId][prop],
                 obj, dirType === 'receiving' ? 'googNacksReceived' : 'googNacksSent');
+              result[obj.mediaType][dirType].totalNacks = parseInt((dirType === 'receiving' ? obj.googNacksReceived :
+                obj.googNacksSent) || '0', 10);
               result.video[dirType].plis = self._parseConnectionStats(self._peerStats[peerId][prop],
                 obj, dirType === 'receiving' ? 'googPlisReceived' : 'googPlisSent');
+              result[obj.mediaType][dirType].totalPlis = parseInt((dirType === 'receiving' ? obj.googPlisReceived :
+                obj.googPlisSent) || '0', 10);
               result.video[dirType].firs = self._parseConnectionStats(self._peerStats[peerId][prop],
                 obj, dirType === 'receiving' ? 'googFirsReceived' : 'googFirsSent');
+              result[obj.mediaType][dirType].totalFirs = parseInt((dirType === 'receiving' ? obj.googFirsReceived :
+                obj.googFirsSent) || '0', 10);
 
               if (dirType === 'receiving') {
                 result.video[dirType].framesDecoded = parseInt(obj.googFrameRateDecoded || '0', 10);
@@ -16018,12 +16058,10 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
               }
             } else {
               if (dirType === 'receiving') {
-                result.audio[dirType].outputLevel = self._parseConnectionStats(self._peerStats[peerId][prop],
-                  obj, 'audioOutputLevel');
+                result.audio[dirType].outputLevel = parseFloat(obj.audioOutputLevel || '0', 10);
 
               } else {
-                result.audio[dirType].inputLevel = self._parseConnectionStats(self._peerStats[peerId][prop],
-                  obj, 'audioInputLevel');
+                result.audio[dirType].inputLevel = parseFloat(obj.audioInputLevel || '0', 10);
                 result.audio[dirType].echoReturnLoss = parseFloat(obj.googEchoCancellationReturnLoss || '0', 10);
                 result.audio[dirType].echoReturnLossEnhancement = parseFloat(obj.googEchoCancellationReturnLossEnhancement || '0', 10);
               }
@@ -20207,10 +20245,14 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} stats.raw The Peer connection raw stats before parsing.
    * @param {JSON} stats.audio The Peer connection audio streaming stats.
    * @param {JSON} stats.audio.sending The Peer connection sending audio streaming stats.
-   * @param {Number} stats.audio.sending.bytes The Peer connection sending audio streaming bytes.
+   * @param {Number} stats.audio.sending.bytes The Peer connection current sending audio streaming bytes.
    *   <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
-   * @param {Number} stats.audio.sending.packets The Peer connection sending audio streaming packets.
-   * @param {Number} stats.audio.sending.packetsLost The Peer connection sending audio streaming packets lost.
+   * @param {Number} stats.audio.sending.totalBytes The Peer connection total sending audio streaming bytes.
+   *   <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
+   * @param {Number} stats.audio.sending.packets The Peer connection current sending audio streaming packets.
+   * @param {Number} stats.audio.sending.totalPackets The Peer connection total sending audio streaming packets.
+   * @param {Number} stats.audio.sending.packetsLost The Peer connection current sending audio streaming packets lost.
+   * @param {Number} stats.audio.sending.totalPacketsLost The Peer connection total sending audio streaming packets lost.
    * @param {Number} stats.audio.sending.ssrc The Peer connection sending audio streaming RTP packets SSRC.
    * @param {Number} stats.audio.sending.rtt The Peer connection sending audio streaming RTT (Round-trip delay time).
    *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
@@ -20234,15 +20276,20 @@ Skylink.prototype._EVENTS = {
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.audio.sending.inputLevel] The Peer connection sending audio streaming input level.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
-   * @param {Number} [stats.audio.sending.echoReturnLoss] The Peer connection sending audio streaming echo return loss.
+   * @param {Number} [stats.audio.sending.echoReturnLoss] The Peer connection sending audio streaming echo return loss in db (decibels).
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
-   * @param {Number} [stats.audio.sending.echoReturnLossEnhancement] The Peer connection sending audio streaming echo return loss enhancement.
+   * @param {Number} [stats.audio.sending.echoReturnLossEnhancement] The Peer connection sending audio streaming
+   *   echo return loss enhancement db (decibels).
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.audio.receiving The Peer connection receiving audio streaming stats.
-   * @param {Number} stats.audio.receiving.bytes The Peer connection sending audio streaming bytes.
+   * @param {Number} stats.audio.receiving.bytes The Peer connection current sending audio streaming bytes.
    *   <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
-   * @param {Number} stats.audio.receiving.packets The Peer connection receiving audio streaming packets.
-   * @param {Number} stats.audio.receiving.packetsLost The Peer connection receiving audio streaming packets lost.
+   * @param {Number} stats.audio.receiving.totalBytes The Peer connection total sending audio streaming bytes.
+   *   <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
+   * @param {Number} stats.audio.receiving.packets The Peer connection current receiving audio streaming packets.
+   * @param {Number} stats.audio.receiving.totalPackets The Peer connection total receiving audio streaming packets.
+   * @param {Number} stats.audio.receiving.packetsLost The Peer connection current receiving audio streaming packets lost.
+   * @param {Number} stats.audio.receiving.totalPacketsLost The Peer connection total receiving audio streaming packets lost.
    * @param {Number} stats.audio.receiving.ssrc The Peer connection receiving audio streaming RTP packets SSRC.
    * @param {Number} stats.audio.receiving.jitter The Peer connection receiving audio streaming RTP packets jitter.
    *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
@@ -20266,10 +20313,14 @@ Skylink.prototype._EVENTS = {
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.video The Peer connection video streaming stats.
    * @param {JSON} stats.video.sending The Peer connection sending video streaming stats.
-   * @param {Number} stats.video.sending.bytes The Peer connection sending video streaming bytes.
+   * @param {Number} stats.video.sending.bytes The Peer connection current sending video streaming bytes.
    *   <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
-   * @param {Number} stats.video.sending.packets The Peer connection sending video streaming packets.
-   * @param {Number} stats.video.sending.packetsLost The Peer connection sending video streaming packets lost.
+   * @param {Number} stats.video.sending.totalBytes The Peer connection total sending video streaming bytes.
+   *   <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
+   * @param {Number} stats.video.sending.packets The Peer connection current sending video streaming packets.
+   * @param {Number} stats.video.sending.totalPackets The Peer connection total sending video streaming packets.
+   * @param {Number} stats.video.sending.packetsLost The Peer connection current sending video streaming packets lost.
+   * @param {Number} stats.video.sending.totalPacketsLost The Peer connection total sending video streaming packets lost.
    * @param {JSON} stats.video.sending.ssrc The Peer connection sending video streaming RTP packets SSRC.
    * @param {Number} stats.video.sending.rtt The Peer connection sending video streaming RTT (Round-trip delay time).
    *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
@@ -20301,17 +20352,27 @@ Skylink.prototype._EVENTS = {
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.video.sending.frameRateStdDev] The Peer connection sending video streaming fps standard deviation.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
-   * @param {Number} [stats.video.sending.nacks] The Peer connection sending video streaming nacks.
+   * @param {Number} [stats.video.sending.nacks] The Peer connection current sending video streaming nacks.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
-   * @param {Number} [stats.video.sending.plis] The Peer connection sending video streaming plis.
+   * @param {Number} [stats.video.sending.totalNacks] The Peer connection total sending video streaming nacks.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
-   * @param {Number} [stats.video.sending.firs] The Peer connection sending video streaming firs.
+   * @param {Number} [stats.video.sending.plis] The Peer connection current sending video streaming plis.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.totalPlis] The Peer connection total sending video streaming plis.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.firs] The Peer connection current sending video streaming firs.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.totalFirs] The Peer connection total sending video streaming firs.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.video.receiving The Peer connection receiving video streaming stats.
-   * @param {Number} stats.video.receiving.bytes The Peer connection receiving video streaming bytes.
+   * @param {Number} stats.video.receiving.bytes The Peer connection current receiving video streaming bytes.
    *   <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
-   * @param {Number} stats.video.receiving.packets The Peer connection receiving video streaming packets.
-   * @param {Number} stats.video.receiving.packetsLost The Peer connection receiving video streaming packets lost.
+   * @param {Number} stats.video.receiving.totalBytes The Peer connection total receiving video streaming bytes.
+   *   <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
+   * @param {Number} stats.video.receiving.packets The Peer connection current receiving video streaming packets.
+   * @param {Number} stats.video.receiving.totalPackets The Peer connection total receiving video streaming packets.
+   * @param {Number} stats.video.receiving.packetsLost The Peer connection current receiving video streaming packets lost.
+   * @param {Number} stats.video.receiving.totalPacketsLost The Peer connection total receiving video streaming packets lost.
    * @param {Number} stats.video.receiving.ssrc The Peer connection receiving video streaming RTP packets SSRC.
    * @param {Number} stats.video.receiving.e2eDelay The Peer connection receiving video streaming e2e delay.
    *   <small>Defined as <code>null</code> if it's not present in original raw stats before parsing, and that
@@ -20346,11 +20407,17 @@ Skylink.prototype._EVENTS = {
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.video.receiving.frameRateStdDev] The Peer connection receiving video streaming fps standard deviation.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
-   * @param {Number} [stats.video.receiving.nacks] The Peer connection receiving video streaming nacks.
+   * @param {Number} [stats.video.receiving.nacks] The Peer connection current receiving video streaming nacks.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
-   * @param {Number} [stats.video.receiving.plis] The Peer connection receiving video streaming plis.
+   * @param {Number} [stats.video.receiving.totalNacks] The Peer connection total receiving video streaming nacks.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
-   * @param {Number} [stats.video.receiving.firs] The Peer connection receiving video streaming firs.
+   * @param {Number} [stats.video.receiving.plis] The Peer connection current receiving video streaming plis.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.totalPlis] The Peer connection totally receiving video streaming plis.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.firs] The Peer connection current receiving video streaming firs.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.totalFirs] The Peer connection total receiving video streaming firs.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.selectedCandidate The Peer connection selected ICE candidate pair stats.
    * @param {JSON} stats.selectedCandidate.local The Peer connection selected local ICE candidate.
