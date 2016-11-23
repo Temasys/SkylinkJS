@@ -1121,7 +1121,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       mid: self._user.sid,
       rid: self._room.id,
       agent: window.webrtcDetectedBrowser,
-      version: window.webrtcDetectedVersion,
+      version: (window.webrtcDetectedVersion || 0).toString(),
       os: window.navigator.platform,
       userInfo: self._getUserInfo(),
       target: peerId,
@@ -1131,12 +1131,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       enableDataChannel: self._enableDataChannel,
       enableIceRestart: self._enableIceRestart,
       doIceRestart: doIceRestart === true,
-      sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
       temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
-      // Deprecated but comply to protocol
-      lastRestart: (new Date()).getTime(),
-      explicit: true,
-      isConnectionRestart: false
+      SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+      DTProtocolVersion: self.DT_PROTOCOL_VERSION
     });
 
     self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
@@ -1439,7 +1436,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         mid: self._user.sid,
         rid: self._room.id,
         agent: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
+        version: (window.webrtcDetectedVersion || 0).toString(),
         os: window.navigator.platform,
         userInfo: self._getUserInfo(),
         target: peerId, //'MCU',
@@ -1449,12 +1446,9 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         enableDataChannel: self._enableDataChannel,
         enableIceRestart: self._enableIceRestart,
         doIceRestart: false,
-        sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
         temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
-        // Deprecated but comply to protocol
-        lastRestart: (new Date()).getTime(),
-        explicit: true,
-        isConnectionRestart: false
+        SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+        DTProtocolVersion: self.DT_PROTOCOL_VERSION
       });
     }
   }

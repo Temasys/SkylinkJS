@@ -319,7 +319,8 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerInfo.agent.name The Peer agent name.
    *   <small>Data may be accessing browser or non-Web SDK name.</small>
    * @param {Number} peerInfo.agent.version The Peer agent version.
-   *   <small>Data may be accessing browser or non-Web SDK version.</small>
+   *   <small>Data may be accessing browser or non-Web SDK version. If the original value is <code>"0.9.6.1"</code>,
+   *   it will be interpreted as <code>0.90601</code> where <code>0</code> helps to seperate the minor dots.</small>
    * @param {String} [peerInfo.agent.os] The Peer platform name.
    *  <small>Data may be accessing OS platform version from Web SDK.</small>
    * @param {String} [peerInfo.agent.pluginVersion] The Peer Temasys Plugin version.
@@ -799,7 +800,7 @@ Skylink.prototype._EVENTS = {
    *   it finds any existing audio, video or object (plugin) DOM elements that has set with the
    *   Peer remote stream object to parse current time. Note that <code>document.getElementsByTagName</code> function
    *   and DOM <code>.currentTime</code> has to be supported inorder for data to be parsed correctly.</small>
-   * @param {Number} stats.video.receiving.jitter The Peer connection receiving video streaming RTP packets jitter in seconds.
+   * @param {Number} stats.video.receiving.jitter The Peer connection receiving video streaming RTP packets jitter in seconds.g
    *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
    * @param {Number} [stats.video.receiving.jitterBufferMs] The Peer connection receiving video streaming
    *   RTP packets jitter buffer in miliseconds.

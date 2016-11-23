@@ -1759,8 +1759,8 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
         mid: self._user.sid,
         rid: self._room.id,
         cid: self._key,
-        sessionType: !!isScreenSharing ? 'screensharing' : 'stream',
         streamId: streamId,
+        settings: settings.settings,
         status: 'ended'
       });
 

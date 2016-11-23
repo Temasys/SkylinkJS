@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Wed Nov 23 2016 23:11:54 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Wed Nov 23 2016 23:41:13 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4683,7 +4683,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       mid: self._user.sid,
       rid: self._room.id,
       agent: window.webrtcDetectedBrowser,
-      version: window.webrtcDetectedVersion,
+      version: (window.webrtcDetectedVersion || 0).toString(),
       os: window.navigator.platform,
       userInfo: self._getUserInfo(),
       target: peerId,
@@ -4693,12 +4693,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       enableDataChannel: self._enableDataChannel,
       enableIceRestart: self._enableIceRestart,
       doIceRestart: doIceRestart === true,
-      sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
       temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
-      // Deprecated but comply to protocol
-      lastRestart: (new Date()).getTime(),
-      explicit: true,
-      isConnectionRestart: false
+      SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+      DTProtocolVersion: self.DT_PROTOCOL_VERSION
     });
 
     self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
@@ -5001,7 +4998,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         mid: self._user.sid,
         rid: self._room.id,
         agent: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
+        version: (window.webrtcDetectedVersion || 0).toString(),
         os: window.navigator.platform,
         userInfo: self._getUserInfo(),
         target: peerId, //'MCU',
@@ -5011,12 +5008,9 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         enableDataChannel: self._enableDataChannel,
         enableIceRestart: self._enableIceRestart,
         doIceRestart: false,
-        sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
         temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
-        // Deprecated but comply to protocol
-        lastRestart: (new Date()).getTime(),
-        explicit: true,
-        isConnectionRestart: false
+        SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+        DTProtocolVersion: self.DT_PROTOCOL_VERSION
       });
     }
   }
@@ -8366,7 +8360,8 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerInfo.agent.name The Peer agent name.
    *   <small>Data may be accessing browser or non-Web SDK name.</small>
    * @param {Number} peerInfo.agent.version The Peer agent version.
-   *   <small>Data may be accessing browser or non-Web SDK version.</small>
+   *   <small>Data may be accessing browser or non-Web SDK version. If the original value is <code>"0.9.6.1"</code>,
+   *   it will be interpreted as <code>0.90601</code> where <code>0</code> helps to seperate the minor dots.</small>
    * @param {String} [peerInfo.agent.os] The Peer platform name.
    *  <small>Data may be accessing OS platform version from Web SDK.</small>
    * @param {String} [peerInfo.agent.pluginVersion] The Peer Temasys Plugin version.
@@ -8846,7 +8841,7 @@ Skylink.prototype._EVENTS = {
    *   it finds any existing audio, video or object (plugin) DOM elements that has set with the
    *   Peer remote stream object to parse current time. Note that <code>document.getElementsByTagName</code> function
    *   and DOM <code>.currentTime</code> has to be supported inorder for data to be parsed correctly.</small>
-   * @param {Number} stats.video.receiving.jitter The Peer connection receiving video streaming RTP packets jitter in seconds.
+   * @param {Number} stats.video.receiving.jitter The Peer connection receiving video streaming RTP packets jitter in seconds.g
    *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
    * @param {Number} [stats.video.receiving.jitterBufferMs] The Peer connection receiving video streaming
    *   RTP packets jitter buffer in miliseconds.
@@ -10028,7 +10023,6 @@ Skylink.prototype._hasMCU = false;
 Skylink.prototype._groupMessageList = [
   Skylink.prototype._SIG_MESSAGE_TYPE.STREAM,
   Skylink.prototype._SIG_MESSAGE_TYPE.UPDATE_USER,
-  Skylink.prototype._SIG_MESSAGE_TYPE.ROOM_LOCK,
   Skylink.prototype._SIG_MESSAGE_TYPE.MUTE_AUDIO,
   Skylink.prototype._SIG_MESSAGE_TYPE.MUTE_VIDEO,
   Skylink.prototype._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
@@ -10334,17 +10328,18 @@ Skylink.prototype._approachEventHandler = function(message){
     mid: self._user.sid,
     rid: self._room.id,
     agent: window.webrtcDetectedBrowser,
-    version: window.webrtcDetectedVersion,
+    version: (window.webrtcDetectedVersion || 0).toString(),
     os: window.navigator.platform,
     userInfo: self._getUserInfo(),
     receiveOnly: self._receiveOnly,
-    sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
     target: message.target,
     weight: self._peerPriorityWeight,
     temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
     enableIceTrickle: self._enableIceTrickle,
     enableDataChannel: self._enableDataChannel,
-    enableIceRestart: self._enableIceRestart
+    enableIceRestart: self._enableIceRestart,
+    SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+    DTProtocolVersion: self.DT_PROTOCOL_VERSION
   });
 };
 
@@ -10499,25 +10494,29 @@ Skylink.prototype._streamEventHandler = function(message) {
   log.log([targetMid, null, message.type, 'Peer\'s stream status:'], message.status);
 
   if (this._peerInformations[targetMid]) {
+    var currentPeerInfo = clone(this.getPeerInfo(targetMid));
+    var hasScreenshare = false;
+
+    if (message.settings && typeof message.settings === 'object') {
+      currentPeerInfo.settings.audio = message.settings.audio;
+      currentPeerInfo.settings.video = message.settings.video;
+      hasScreenshare = currentPeerInfo.settings.video && typeof currentPeerInfo.settings.video === 'object' &&
+        !!currentPeerInfo.settings.video.screenshare;
+    }
 
   	if (message.status === 'ended') {
-  		this._trigger('streamEnded', targetMid, this.getPeerInfo(targetMid),
-        false, message.sessionType === 'screensharing', message.streamId);
+  		this._trigger('streamEnded', targetMid, currentPeerInfo, hasScreenshare, message.streamId);
       this._trigger('peerUpdated', targetMid, this.getPeerInfo(targetMid), false);
 
       if (this._peerConnections[targetMid]) {
         this._peerConnections[targetMid].hasStream = false;
-        if (message.sessionType === 'screensharing') {
+        if (hasScreenshare) {
           this._peerConnections[targetMid].hasScreen = false;
         }
       } else {
         log.log([targetMid, null, message.type, 'Peer connection not found']);
       }
-  	} else if (message.status === 'check') {
-      if (!message.streamId || this._hasMCU) {
-        return;
-      }
-    }
+  	}
 
   } else {
     log.log([targetMid, null, message.type, 'Peer does not have any user information']);
@@ -10635,16 +10634,17 @@ Skylink.prototype._inRoomHandler = function(message) {
     mid: self._user.sid,
     rid: self._room.id,
     agent: window.webrtcDetectedBrowser,
-    version: window.webrtcDetectedVersion,
+    version: (window.webrtcDetectedVersion || 0).toString(),
     os: window.navigator.platform,
     userInfo: self._getUserInfo(),
     receiveOnly: self._receiveOnly,
-    sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
     weight: self._peerPriorityWeight,
     temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
     enableIceTrickle: self._enableIceTrickle,
     enableDataChannel: self._enableDataChannel,
-    enableIceRestart: self._enableIceRestart
+    enableIceRestart: self._enableIceRestart,
+    SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+    DTProtocolVersion: self.DT_PROTOCOL_VERSION
   });
 };
 
@@ -10672,7 +10672,22 @@ Skylink.prototype._enterHandler = function(message) {
   };
   userInfo.agent = {
     name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
-    version: typeof message.version === 'number' ? message.version : 0,
+    version: (function () {
+      if (typeof message.version !== 'string') {
+        return 0;
+      }
+      // E.g. 0.9.6, replace minor "." with 0
+      if (message.version.indexOf('.') > -1) {
+        parts = message.version.split('.');
+        if (parts.length > 2) {
+          var majorVer = parts[0] || '0';
+          parts.splice(0, 1);
+          return parseFloat(majorVer + '.' + parts.join('0'), 10);
+        }
+        return parseFloat(message.version || '0', 10);
+      }
+      return parseInt(message.version || '0', 10);
+    })(),
     os: typeof message.os === 'string' && message.os ? message.os : '',
     pluginVersion: typeof message.temasysPluginVersion === 'string' && message.temasysPluginVersion ?
       message.temasysPluginVersion : null
@@ -10689,11 +10704,15 @@ Skylink.prototype._enterHandler = function(message) {
       audioMuted: 0,
       videoMuted: 0
     };
+
+    var hasScreenshare = userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
+      !!userInfo.settings.video.screenshare;
+
     self._addPeer(targetMid, {
       agent: userInfo.agent.name,
       version: userInfo.agent.version,
       os: userInfo.agent.os
-    }, false, false, message.receiveOnly, message.sessionType === 'screensharing');
+    }, false, false, message.receiveOnly, hasScreenshare);
 
     if (targetMid === 'MCU') {
       log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
@@ -10712,19 +10731,19 @@ Skylink.prototype._enterHandler = function(message) {
     type: self._SIG_MESSAGE_TYPE.WELCOME,
     mid: self._user.sid,
     rid: self._room.id,
-    receiveOnly: self._peerConnections[targetMid] ?
-      !!self._peerConnections[targetMid].receiveOnly : false,
+    receiveOnly: self._peerConnections[targetMid] ? !!self._peerConnections[targetMid].receiveOnly : false,
     enableIceTrickle: self._enableIceTrickle,
     enableDataChannel: self._enableDataChannel,
     enableIceRestart: self._enableIceRestart,
     agent: window.webrtcDetectedBrowser,
-    version: window.webrtcDetectedVersion,
+    version: (window.webrtcDetectedVersion || 0).toString(),
     os: window.navigator.platform,
     userInfo: self._getUserInfo(),
     target: targetMid,
     weight: self._peerPriorityWeight,
-    sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
-    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+    SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+    DTProtocolVersion: self.DT_PROTOCOL_VERSION
   });
 
   if (isNewPeer) {
@@ -10755,7 +10774,22 @@ Skylink.prototype._restartHandler = function(message){
   };
   userInfo.agent = {
     name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
-    version: typeof message.version === 'number' ? message.version : 0,
+    version: (function () {
+      if (typeof message.version !== 'string') {
+        return 0;
+      }
+      // E.g. 0.9.6, replace minor "." with 0
+      if (message.version.indexOf('.') > -1) {
+        parts = message.version.split('.');
+        if (parts.length > 2) {
+          var majorVer = parts[0] || '0';
+          parts.splice(0, 1);
+          return parseFloat(majorVer + '.' + parts.join('0'), 10);
+        }
+        return parseFloat(message.version || '0', 10);
+      }
+      return parseInt(message.version || '0', 10);
+    })(),
     os: typeof message.os === 'string' && message.os ? message.os : '',
     pluginVersion: typeof message.temasysPluginVersion === 'string' && message.temasysPluginVersion ?
       message.temasysPluginVersion : null
@@ -10800,7 +10834,7 @@ Skylink.prototype._restartHandler = function(message){
       mid: self._user.sid,
       rid: self._room.id,
       agent: window.webrtcDetectedBrowser,
-      version: window.webrtcDetectedVersion,
+      version: (window.webrtcDetectedVersion || 0).toString(),
       os: window.navigator.platform,
       userInfo: self._getUserInfo(),
       target: targetMid,
@@ -10810,12 +10844,9 @@ Skylink.prototype._restartHandler = function(message){
       enableIceRestart: self._enableIceRestart,
       doIceRestart: message.doIceRestart === true,
       receiveOnly: self._peerConnections[targetMid] && self._peerConnections[targetMid].receiveOnly,
-      sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
       temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
-      // Deprecated but comply to protocol
-      lastRestart: (new Date()).getTime(),
-      explicit: true,
-      isConnectionRestart: false
+      SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+      DTProtocolVersion: self.DT_PROTOCOL_VERSION
     });
   }
 
@@ -10846,7 +10877,22 @@ Skylink.prototype._welcomeHandler = function(message) {
   };
   userInfo.agent = {
     name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
-    version: typeof message.version === 'number' ? message.version : 0,
+    version: (function () {
+      if (typeof message.version !== 'string') {
+        return 0;
+      }
+      // E.g. 0.9.6, replace minor "." with 0
+      if (message.version.indexOf('.') > -1) {
+        parts = message.version.split('.');
+        if (parts.length > 2) {
+          var majorVer = parts[0] || '0';
+          parts.splice(0, 1);
+          return parseFloat(majorVer + '.' + parts.join('0'), 10);
+        }
+        return parseFloat(message.version || '0', 10);
+      }
+      return parseInt(message.version || '0', 10);
+    })(),
     os: typeof message.os === 'string' && message.os ? message.os : '',
     pluginVersion: typeof message.temasysPluginVersion === 'string' && message.temasysPluginVersion ?
       message.temasysPluginVersion : null
@@ -10863,11 +10909,15 @@ Skylink.prototype._welcomeHandler = function(message) {
       audioMuted: 0,
       videoMuted: 0
     };
+
+    var hasScreenshare = userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
+      !!userInfo.settings.video.screenshare;
+
     self._addPeer(targetMid, {
       agent: userInfo.agent.name,
       version: userInfo.agent.version,
       os: userInfo.agent.os
-    }, false, false, message.receiveOnly, message.sessionType === 'screensharing');
+    }, false, false, message.receiveOnly, hasScreenshare);
 
     if (targetMid === 'MCU') {
       log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
@@ -10900,7 +10950,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       mid: self._user.sid,
       rid: self._room.id,
       agent: window.webrtcDetectedBrowser,
-      version: window.webrtcDetectedVersion,
+      version: (window.webrtcDetectedVersion || 0).toString(),
       enableIceRestart: self._enableIceRestart,
       enableDataChannel: self._enableDataChannel,
       enableIceTrickle: self._enableIceTrickle,
@@ -10908,8 +10958,9 @@ Skylink.prototype._welcomeHandler = function(message) {
       userInfo: self._getUserInfo(),
       target: targetMid,
       weight: self._peerPriorityWeight,
-      sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
-      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+      SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+      DTProtocolVersion: self.DT_PROTOCOL_VERSION
     });
   }
 };
@@ -12919,8 +12970,8 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
         mid: self._user.sid,
         rid: self._room.id,
         cid: self._key,
-        sessionType: !!isScreenSharing ? 'screensharing' : 'stream',
         streamId: streamId,
+        settings: settings.settings,
         status: 'ended'
       });
 
