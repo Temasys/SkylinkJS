@@ -746,7 +746,11 @@ Skylink.prototype._enterHandler = function(message) {
     })(),
     os: typeof message.os === 'string' && message.os ? message.os : '',
     pluginVersion: typeof message.temasysPluginVersion === 'string' && message.temasysPluginVersion ?
-      message.temasysPluginVersion : null
+      message.temasysPluginVersion : null,
+    SMProtocolVersion: message.SMProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
+      message.SMProtocolVersion : '0.1.1',
+    DTProtocolVersion: message.DTProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
+      message.SMProtocolVersion : '0.1.0'
   };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "enter" received ->'], message);
@@ -848,7 +852,11 @@ Skylink.prototype._restartHandler = function(message){
     })(),
     os: typeof message.os === 'string' && message.os ? message.os : '',
     pluginVersion: typeof message.temasysPluginVersion === 'string' && message.temasysPluginVersion ?
-      message.temasysPluginVersion : null
+      message.temasysPluginVersion : null,
+    SMProtocolVersion: message.SMProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
+      message.SMProtocolVersion : '0.1.1',
+    DTProtocolVersion: message.DTProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
+      message.SMProtocolVersion : '0.1.0'
   };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "restart" received ->'], message);
@@ -951,7 +959,11 @@ Skylink.prototype._welcomeHandler = function(message) {
     })(),
     os: typeof message.os === 'string' && message.os ? message.os : '',
     pluginVersion: typeof message.temasysPluginVersion === 'string' && message.temasysPluginVersion ?
-      message.temasysPluginVersion : null
+      message.temasysPluginVersion : null,
+    SMProtocolVersion: message.SMProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
+      message.SMProtocolVersion : '0.1.1',
+    DTProtocolVersion: message.DTProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
+      message.SMProtocolVersion : '0.1.0'
   };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "welcome" received ->'], message);

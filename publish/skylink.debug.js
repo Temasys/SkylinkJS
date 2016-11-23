@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Wed Nov 23 2016 23:51:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Wed Nov 23 2016 23:59:17 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4655,7 +4655,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // prevent restarts for other SDK clients
-  /*if (self._SUPPORTED_WEB_AGENTS.indexOf(agent.name) === -1) {
+  if ((agent.SMProtocolVersion || '') > '0.1.1') {
     var notSupportedError = new Error('Failed restarting with other agents connecting from other SDKs as ' +
       're-negotiation is not supported by other SDKs');
 
@@ -4667,7 +4667,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       callback(notSupportedError);
     }
     return;
-  }*/
+  }
 
   // This is when the state is stable and re-handshaking is possible
   // This could be due to previous connection handshaking that is already done
@@ -10698,7 +10698,11 @@ Skylink.prototype._enterHandler = function(message) {
     })(),
     os: typeof message.os === 'string' && message.os ? message.os : '',
     pluginVersion: typeof message.temasysPluginVersion === 'string' && message.temasysPluginVersion ?
-      message.temasysPluginVersion : null
+      message.temasysPluginVersion : null,
+    SMProtocolVersion: message.SMProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
+      message.SMProtocolVersion : '0.1.1',
+    DTProtocolVersion: message.DTProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
+      message.SMProtocolVersion : '0.1.0'
   };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "enter" received ->'], message);
@@ -10800,7 +10804,11 @@ Skylink.prototype._restartHandler = function(message){
     })(),
     os: typeof message.os === 'string' && message.os ? message.os : '',
     pluginVersion: typeof message.temasysPluginVersion === 'string' && message.temasysPluginVersion ?
-      message.temasysPluginVersion : null
+      message.temasysPluginVersion : null,
+    SMProtocolVersion: message.SMProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
+      message.SMProtocolVersion : '0.1.1',
+    DTProtocolVersion: message.DTProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
+      message.SMProtocolVersion : '0.1.0'
   };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "restart" received ->'], message);
@@ -10903,7 +10911,11 @@ Skylink.prototype._welcomeHandler = function(message) {
     })(),
     os: typeof message.os === 'string' && message.os ? message.os : '',
     pluginVersion: typeof message.temasysPluginVersion === 'string' && message.temasysPluginVersion ?
-      message.temasysPluginVersion : null
+      message.temasysPluginVersion : null,
+    SMProtocolVersion: message.SMProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
+      message.SMProtocolVersion : '0.1.1',
+    DTProtocolVersion: message.DTProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
+      message.SMProtocolVersion : '0.1.0'
   };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "welcome" received ->'], message);

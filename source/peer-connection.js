@@ -1093,7 +1093,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // prevent restarts for other SDK clients
-  /*if (self._SUPPORTED_WEB_AGENTS.indexOf(agent.name) === -1) {
+  if ((agent.SMProtocolVersion || '') > '0.1.1') {
     var notSupportedError = new Error('Failed restarting with other agents connecting from other SDKs as ' +
       're-negotiation is not supported by other SDKs');
 
@@ -1105,7 +1105,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       callback(notSupportedError);
     }
     return;
-  }*/
+  }
 
   // This is when the state is stable and re-handshaking is possible
   // This could be due to previous connection handshaking that is already done
