@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "SkylinkJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.15",
+        "version": "0.6.16",
         "url": "https://temasys.github.io/"
     },
     "files": {
@@ -5321,7 +5321,7 @@
                                 },
                                 {
                                     "name": "sending.jitter",
-                                    "description": "The Peer connection sending audio streaming RTP packets jitter.\n  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>",
+                                    "description": "The Peer connection sending audio streaming RTP packets jitter in seconds.\n  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>",
                                     "type": "Number"
                                 },
                                 {
@@ -5384,7 +5384,7 @@
                                 },
                                 {
                                     "name": "sending.echoReturnLossEnhancement",
-                                    "description": "The Peer connection sending audio streaming echo return loss enhancement db (decibels).\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "description": "The Peer connection sending audio streaming\n  echo return loss enhancement db (decibels).\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
                                     "type": "Number",
                                     "optional": true
                                 },
@@ -5430,7 +5430,7 @@
                                 },
                                 {
                                     "name": "receiving.jitter",
-                                    "description": "The Peer connection receiving audio streaming RTP packets jitter.\n  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>",
+                                    "description": "The Peer connection receiving audio streaming RTP packets jitter in seconds.\n  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>",
                                     "type": "Number"
                                 },
                                 {
@@ -5539,7 +5539,7 @@
                                 },
                                 {
                                     "name": "sending.jitter",
-                                    "description": "The Peer connection sending video streaming RTP packets jitter.\n  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>",
+                                    "description": "The Peer connection sending video streaming RTP packets jitter in seconds.\n  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>",
                                     "type": "Number"
                                 },
                                 {
@@ -5701,7 +5701,7 @@
                                 },
                                 {
                                     "name": "receiving.jitter",
-                                    "description": "The Peer connection receiving video streaming RTP packets jitter.\n  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>",
+                                    "description": "The Peer connection receiving video streaming RTP packets jitter in seconds.\n  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>",
                                     "type": "Number"
                                 },
                                 {
@@ -6135,7 +6135,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 960,
+            "line": 961,
             "description": "Event triggered when <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> changes\nUser Streams audio and video tracks muted status.",
             "itemtype": "event",
             "name": "localMediaMuted",
@@ -6163,7 +6163,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 977,
+            "line": 978,
             "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.<br>\n  Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates\n  may be received in the session description instead.\n</blockquote>\nEvent triggered when remote ICE candidate processing state has changed when Peer is using trickle ICE.",
             "itemtype": "event",
             "name": "candidateProcessingState",
@@ -6222,7 +6222,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1006,
+            "line": 1007,
             "description": "Stores the list of <code>once()</code> event handlers.\nThese events are only triggered once.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -6248,7 +6248,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1019,
+            "line": 1020,
             "description": "Stores the timestamps data used for throttling.",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -6260,7 +6260,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1035,
+            "line": 1036,
             "description": "Stores the throttling interval timeout.",
             "itemtype": "attribute",
             "name": "_throttlingTimeouts",
@@ -6272,7 +6272,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1049,
+            "line": 1050,
             "description": "Stores the flag if throttling should throw when called less than the interval timeout.",
             "itemtype": "attribute",
             "name": "_throttlingShouldThrowError",
@@ -6284,7 +6284,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1059,
+            "line": 1060,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -6308,7 +6308,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1083,
+            "line": 1084,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -6345,7 +6345,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1141,
+            "line": 1142,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -6370,7 +6370,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1190,
+            "line": 1191,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -6381,7 +6381,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1244,
+            "line": 1245,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -6392,7 +6392,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1270,
+            "line": 1271,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -6403,7 +6403,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1308,
+            "line": 1309,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",

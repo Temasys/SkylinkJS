@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.15</title>
+    <title>SkylinkJS 0.6.16</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.15</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.16</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -767,7 +767,7 @@ Skylink.prototype._EVENTS = {
    * @param {Number} stats.audio.sending.ssrc The Peer connection sending audio streaming RTP packets SSRC.
    * @param {Number} stats.audio.sending.rtt The Peer connection sending audio streaming RTT (Round-trip delay time).
    *   &lt;small&gt;Defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing.&lt;/small&gt;
-   * @param {Number} stats.audio.sending.jitter The Peer connection sending audio streaming RTP packets jitter.
+   * @param {Number} stats.audio.sending.jitter The Peer connection sending audio streaming RTP packets jitter in seconds.
    *   &lt;small&gt;Defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing.&lt;/small&gt;
    * @param {Number} [stats.audio.sending.jitterBufferMs] The Peer connection sending audio streaming
    *   RTP packets jitter buffer in miliseconds.
@@ -789,7 +789,8 @@ Skylink.prototype._EVENTS = {
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
    * @param {Number} [stats.audio.sending.echoReturnLoss] The Peer connection sending audio streaming echo return loss in db (decibels).
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
-   * @param {Number} [stats.audio.sending.echoReturnLossEnhancement] The Peer connection sending audio streaming echo return loss enhancement db (decibels).
+   * @param {Number} [stats.audio.sending.echoReturnLossEnhancement] The Peer connection sending audio streaming
+   *   echo return loss enhancement db (decibels).
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
    * @param {JSON} stats.audio.receiving The Peer connection receiving audio streaming stats.
    * @param {Number} stats.audio.receiving.bytes The Peer connection current sending audio streaming bytes.
@@ -801,7 +802,7 @@ Skylink.prototype._EVENTS = {
    * @param {Number} stats.audio.receiving.packetsLost The Peer connection current receiving audio streaming packets lost.
    * @param {Number} stats.audio.receiving.totalPacketsLost The Peer connection total receiving audio streaming packets lost.
    * @param {Number} stats.audio.receiving.ssrc The Peer connection receiving audio streaming RTP packets SSRC.
-   * @param {Number} stats.audio.receiving.jitter The Peer connection receiving audio streaming RTP packets jitter.
+   * @param {Number} stats.audio.receiving.jitter The Peer connection receiving audio streaming RTP packets jitter in seconds.
    *   &lt;small&gt;Defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing.&lt;/small&gt;
    * @param {Number} [stats.audio.receiving.jitterBufferMs] The Peer connection receiving audio streaming
    *   RTP packets jitter buffer in miliseconds.
@@ -834,7 +835,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} stats.video.sending.ssrc The Peer connection sending video streaming RTP packets SSRC.
    * @param {Number} stats.video.sending.rtt The Peer connection sending video streaming RTT (Round-trip delay time).
    *   &lt;small&gt;Defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing.&lt;/small&gt;
-   * @param {Number} stats.video.sending.jitter The Peer connection sending video streaming RTP packets jitter.
+   * @param {Number} stats.video.sending.jitter The Peer connection sending video streaming RTP packets jitter in seconds.
    *   &lt;small&gt;Defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing.&lt;/small&gt;
    * @param {Number} [stats.video.sending.jitterBufferMs] The Peer connection sending video streaming
    *   RTP packets jitter buffer in miliseconds.
@@ -889,7 +890,7 @@ Skylink.prototype._EVENTS = {
    *   it finds any existing audio, video or object (plugin) DOM elements that has set with the
    *   Peer remote stream object to parse current time. Note that &lt;code&gt;document.getElementsByTagName&lt;/code&gt; function
    *   and DOM &lt;code&gt;.currentTime&lt;/code&gt; has to be supported inorder for data to be parsed correctly.&lt;/small&gt;
-   * @param {Number} stats.video.receiving.jitter The Peer connection receiving video streaming RTP packets jitter.
+   * @param {Number} stats.video.receiving.jitter The Peer connection receiving video streaming RTP packets jitter in seconds.
    *   &lt;small&gt;Defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing.&lt;/small&gt;
    * @param {Number} [stats.video.receiving.jitterBufferMs] The Peer connection receiving video streaming
    *   RTP packets jitter buffer in miliseconds.
