@@ -1775,39 +1775,22 @@ Skylink.prototype._parseStreamSettings = function(options) {
           }
         }
 
-        if (typeof settings.settings.video.resolution.width === &#x27;object&#x27; || options.useExactConstraints) {
-          settings.getUserMediaSettings.video.width = typeof settings.settings.video.resolution.width === &#x27;object&#x27; ?
-            settings.settings.video.resolution.width : { exact: settings.settings.video.resolution.width };
+        settings.getUserMediaSettings.video.width = typeof settings.settings.video.resolution.width === &#x27;object&#x27; ?
+          settings.settings.video.resolution.width : (options.useExactConstraints ?
+          { exact: settings.settings.video.resolution.width } : { max: settings.settings.video.resolution.width });
 
-        } else {
-          settings.getUserMediaSettings.video.mandatory = settings.getUserMediaSettings.video.mandatory || {};
-          settings.getUserMediaSettings.video.mandatory.maxWidth = settings.settings.video.resolution.width;
-        }
-
-        if (typeof settings.settings.video.resolution.height === &#x27;object&#x27; || options.useExactConstraints) {
-          settings.getUserMediaSettings.video.height = typeof settings.settings.video.resolution.height === &#x27;object&#x27; ?
-            settings.settings.video.resolution.height : { exact: settings.settings.video.resolution.height };
-
-        } else {
-          settings.getUserMediaSettings.video.mandatory = settings.getUserMediaSettings.video.mandatory || {};
-          settings.getUserMediaSettings.video.mandatory.maxHeight = settings.settings.video.resolution.height;
-        }
+        settings.getUserMediaSettings.video.height = typeof settings.settings.video.resolution.height === &#x27;object&#x27; ?
+          settings.settings.video.resolution.height : (options.useExactConstraints ?
+          { exact: settings.settings.video.resolution.height } : { max: settings.settings.video.resolution.height });
 
         if ((options.video.frameRate &amp;&amp; typeof options.video.frameRate === &#x27;object&#x27;) || typeof object.video.frameRate === &#x27;number&#x27;) {
-          if (typeof options.video.frameRate === &#x27;object&#x27;) {
+          //
+          if (!(typeof options.video.frameRate === &#x27;number&#x27; &amp;&amp; !options.useExactConstraints &amp;&amp;
+            [&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1)) {
             settings.settings.video.frameRate = options.video.frameRate;
-            settings.getUserMediaSettings.video.frameRate = options.video.frameRate;
-
-          } else if ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) === -1) {
-            settings.settings.video.frameRate = options.video.frameRate;
-
-            if (options.useExactConstraints) {
-              settings.getUserMediaSettings.video.frameRate = { exact: options.video.frameRate };
-
-            } else {
-              settings.getUserMediaSettings.video.mandatory = settings.getUserMediaSettings.video.mandatory || {};
-              settings.getUserMediaSettings.video.mandatory.maxFrameRate = options.video.frameRate;
-            }
+            settings.getUserMediaSettings.video.frameRate = typeof settings.settings.video.frameRate === &#x27;object&#x27; ?
+              settings.settings.video.frameRate : (options.useExactConstraints ?
+              { exact: settings.settings.video.frameRate } : { max: settings.settings.video.frameRate });
           }
         }
       } else if (options.useExactConstraints) {

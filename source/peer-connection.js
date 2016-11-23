@@ -96,6 +96,17 @@ Skylink.prototype._retryCounters = {};
 Skylink.prototype._peerConnections = {};
 
 /**
+ * Stores the list of the Peer connections stats.
+ * @attribute _peerStats
+ * @param {Object} <#peerId> The Peer connection stats.
+ * @type JSON
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._peerStats = {};
+
+/**
  * <blockquote class="info">
  *   For MCU enabled Peer connections, the restart functionality may differ, you may learn more about how to workaround
  *   it <a href="http://support.temasys.com.sg/support/discussions/topics/12000002853">in this article here</a>.
@@ -561,6 +572,10 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
   var statsFn = function (peerId) {
     log.debug([peerId, 'RTCStatsReport', null, 'Retrieivng connection status']);
 
+    if (!self._peerStats[peerId]) {
+      self._peerStats[peerId] = {};
+    }
+
     var pc = self._peerConnections[peerId];
     var result = {
       raw: null,
@@ -594,7 +609,8 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           codec: self._getSDPSelectedCodec(peerId, pc.localDescription, 'audio'),
           inputLevel: null,
           echoReturnLoss: null,
-          echoReturnLossEnhancement: null
+          echoReturnLossEnhancement: null,
+          e2eDelay: null
         },
         receiving: {
           ssrc: null,
@@ -604,7 +620,8 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           jitter: 0,
           jitterBufferMs: null,
           codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, 'audio'),
-          outputLevel: null
+          outputLevel: null,
+          e2eDelay: null
         }
       },
       video: {
@@ -626,7 +643,8 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           framesDropped: null,
           nacks: null,
           plis: null,
-          firs: null
+          firs: null,
+          e2eDelay: null
         },
         receiving: {
           ssrc: null,
@@ -645,7 +663,8 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           frameRateStdDev: null,
           nacks: null,
           plis: null,
-          firs: null
+          firs: null,
+          e2eDelay: null
         }
       },
       selectedCandidate: {
@@ -694,12 +713,19 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           if (prop.indexOf('inbound_rtp') === 0 || prop.indexOf('outbound_rtp') === 0) {
             dirType = prop.indexOf('inbound_rtp') === 0 ? 'receiving' : 'sending';
 
-            result[obj.mediaType][dirType].bytes = dirType === 'sending' ? obj.bytesSent : obj.bytesReceived;
-            result[obj.mediaType][dirType].packets = dirType === 'sending' ? obj.packetsSent : obj.packetsReceived;
+            if (!self._peerStats[peerId][prop]) {
+              self._peerStats[peerId][prop] = obj;
+            }
+
+            result[obj.mediaType][dirType].bytes = self._parseConnectionStats(self._peerStats[peerId][prop],
+              obj, dirType === 'receiving' ? 'bytesReceived' : 'bytesSent');
+            result[obj.mediaType][dirType].packets = self._parseConnectionStats(self._peerStats[peerId][prop],
+              obj, dirType === 'receiving' ? 'packetsReceived' : 'packetsSent');
             result[obj.mediaType][dirType].ssrc = obj.ssrc;
 
             if (dirType === 'receiving') {
-              result[obj.mediaType][dirType].packetsLost = obj.packetsLost || 0;
+              result[obj.mediaType][dirType].packetsLost = self._parseConnectionStats(self._peerStats[peerId][prop],
+                obj, 'packetsLost');
               result[obj.mediaType][dirType].jitter = obj.jitter || 0;
             }
 
@@ -712,15 +738,24 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
               }
             }
 
+            self._peerStats[peerId][prop] = obj;
+
           // Sending RTP packets lost
           } else if (prop.indexOf('inbound_rtcp') === 0 || prop.indexOf('outbound_rtcp') === 0) {
             dirType = prop.indexOf('inbound_rtp') === 0 ? 'receiving' : 'sending';
 
+            if (!self._peerStats[peerId][prop]) {
+              self._peerStats[peerId][prop] = obj;
+            }
+
             if (dirType === 'sending') {
               result[obj.mediaType].sending.rtt = obj.mozRtt || 0;
-              result[obj.mediaType].sending.packetsLost = obj.packetsLost || 0;
+              result[obj.mediaType].sending.packetsLost = self._parseConnectionStats(self._peerStats[peerId][prop],
+                obj, 'packetsLost');
               result[obj.mediaType].sending.jitter = obj.jitter || 0;
             }
+
+            self._peerStats[peerId][prop] = obj;
 
           // Candidates
           } else if (obj.nominated && obj.selected) {
@@ -741,14 +776,22 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
                     ['outboundrtp', 'inboundrtp'].indexOf(streamObj.type) > -1) {
                     var dirType = streamObj.type === 'outboundrtp' ? 'sending' : 'receiving';
 
-                    result[track.kind][dirType].bytes = dirType === 'sending' ? streamObj.bytesSent : streamObj.bytesReceived;
-                    result[track.kind][dirType].packets = dirType === 'sending' ? streamObj.packetsSent : streamObj.packetsReceived;
-                    result[track.kind][dirType].packetsLost = streamObj.packetsLost || 0;
+                    if (!self._peerStats[peerId][prop]) {
+                      self._peerStats[peerId][prop] = streamObj;
+                    }
+
+                    result[track.kind][dirType].bytes = self._parseConnectionStats(self._peerStats[peerId][prop], streamObj,
+                      dirType === 'sending' ? 'bytesSent' : 'bytesReceived');
+                    result[track.kind][dirType].packets = self._parseConnectionStats(self._peerStats[peerId][prop], streamObj,
+                      dirType === 'sending' ? 'packetsSent' : 'packetsReceived');
+                    result[track.kind][dirType].packetsLost = self._parseConnectionStats(self._peerStats[peerId][prop], streamObj, 'packetsLost');
                     result[track.kind][dirType].ssrc = parseInt(streamObj.ssrc || '0', 10);
 
                     if (dirType === 'sending') {
                       result[track.kind].sending.rtt = obj.roundTripTime || 0;
                     }
+
+                    self._peerStats[peerId][prop] = streamObj;
                   }
                 });
               }
@@ -769,15 +812,20 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
                 obj.hasOwnProperty('audioInputLevel') ? 'audio' : 'video';
             }
 
+            if (!self._peerStats[peerId][prop]) {
+              self._peerStats[peerId][prop] = obj;
+            }
+
             // Receiving/Sending RTP packets
-            result[obj.mediaType][dirType].bytes = parseInt((dirType === 'receiving' ?
-              obj.bytesReceived : obj.bytesSent) || '0', 10);
-            result[obj.mediaType][dirType].packets = parseInt((dirType === 'receiving' ?
-              obj.packetsReceived : obj.packetsSent) || '0', 10);
             result[obj.mediaType][dirType].ssrc = parseInt(obj.ssrc || '0', 10);
-            result[obj.mediaType][dirType].packetsLost = parseInt(obj.packetsLost || '0', 10);
-            result[obj.mediaType][dirType].jitter = parseInt(obj.googJitterReceived || '0', 10);
-            result[obj.mediaType][dirType].jitterBufferMs = parseInt(obj.googJitterBufferMs || '0', 10);
+            result[obj.mediaType][dirType].bytes = self._parseConnectionStats(self._peerStats[peerId][prop],
+              obj, dirType === 'receiving' ? 'bytesReceived' : 'bytesSent');
+            result[obj.mediaType][dirType].packets = self._parseConnectionStats(self._peerStats[peerId][prop],
+              obj, dirType === 'receiving' ? 'packetsReceived' : 'packetsSent');
+            result[obj.mediaType][dirType].packetsLost = self._parseConnectionStats(self._peerStats[peerId][prop],
+              obj, 'packetsLost');
+            result[obj.mediaType][dirType].jitter = parseFloat(obj.googJitterReceived || '0', 10);
+            result[obj.mediaType][dirType].googJitterBufferMs = parseFloat(obj.googJitterBufferMs || '0', 10);
 
             if (result[obj.mediaType][dirType].codec) {
               if (obj.googCodecName && obj.googCodecName !== 'unknown') {
@@ -790,7 +838,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
 
             if (dirType === 'sending') {
               // NOTE: Chrome sending audio does have it but plugin has..
-              result[obj.mediaType].sending.rtt = parseInt(obj.googRtt || '0', 10);
+              result[obj.mediaType].sending.rtt = parseFloat(obj.googRtt || '0', 10);
             }
 
             if (obj.mediaType === 'video') {
@@ -800,12 +848,13 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
                 obj.googFrameHeightReceived : obj.googFrameHeightSent) || '0', 10);
               result.video[dirType].frames = parseInt((dirType === 'receiving' ?
                 obj.googFrameRateReceived : obj.googFrameRateSent) || '0', 10);
-              result.video[dirType].nacks = parseInt((dirType === 'receiving' ?
-                obj.googNacksReceived : obj.googNacksSent) || '0', 10);
-              result.video[dirType].plis = parseInt((dirType === 'receiving' ?
-                obj.googPlisReceived : obj.googPlisSent) || '0', 10);
-              result.video[dirType].firs = parseInt((dirType === 'receiving' ?
-                obj.googFirsReceived : obj.googFirsSent) || '0', 10);
+
+              result.video[dirType].nacks = self._parseConnectionStats(self._peerStats[peerId][prop],
+                obj, dirType === 'receiving' ? 'googNacksReceived' : 'googNacksSent');
+              result.video[dirType].plis = self._parseConnectionStats(self._peerStats[peerId][prop],
+                obj, dirType === 'receiving' ? 'googPlisReceived' : 'googPlisSent');
+              result.video[dirType].firs = self._parseConnectionStats(self._peerStats[peerId][prop],
+                obj, dirType === 'receiving' ? 'googFirsReceived' : 'googFirsSent');
 
               if (dirType === 'receiving') {
                 result.video[dirType].framesDecoded = parseInt(obj.googFrameRateDecoded || '0', 10);
@@ -815,13 +864,18 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
               }
             } else {
               if (dirType === 'receiving') {
-                result.audio[dirType].outputLevel = parseFloat(obj.audioOutputLevel || '0', 10);
+                result.audio[dirType].outputLevel = self._parseConnectionStats(self._peerStats[peerId][prop],
+                  obj, 'audioOutputLevel');
+
               } else {
-                result.audio[dirType].inputLevel = parseFloat(obj.audioInputLevel || '0', 10);
+                result.audio[dirType].inputLevel = self._parseConnectionStats(self._peerStats[peerId][prop],
+                  obj, 'audioInputLevel');
                 result.audio[dirType].echoReturnLoss = parseFloat(obj.googEchoCancellationReturnLoss || '0', 10);
                 result.audio[dirType].echoReturnLossEnhancement = parseFloat(obj.googEchoCancellationReturnLossEnhancement || '0', 10);
               }
             }
+
+            self._peerStats[peerId][prop] = obj;
 
             if (!reportedCandidate) {
               loopFn(stats, function (canObj, canProp) {
@@ -1347,3 +1401,25 @@ Skylink.prototype._restartMCUConnection = function(callback) {
     }
   });
 };
+
+/**
+ * Function that handles the stats tabulation.
+ * @method _parseConnectionStats
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._parseConnectionStats = function(prevStats, stats, prop) {
+  var nTime = stats.timestamp;
+  var oTime = prevStats.timestamp;
+  var nVal = parseFloat(stats[prop] || '0', 10);
+  var oVal = parseFloat(prevStats[prop] || '0', 10);
+
+  if ((new Date(nTime).getTime()) === (new Date(oTime).getTime())) {
+    return nVal;
+  }
+
+  return parseFloat(((nVal - oVal) / (nTime - oTime) * 1000).toFixed(3) || '0', 10);
+};
+
+

@@ -666,6 +666,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} stats.audio The Peer connection audio streaming stats.
    * @param {JSON} stats.audio.sending The Peer connection sending audio streaming stats.
    * @param {Number} stats.audio.sending.bytes The Peer connection sending audio streaming bytes.
+   *   <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
    * @param {Number} stats.audio.sending.packets The Peer connection sending audio streaming packets.
    * @param {Number} stats.audio.sending.packetsLost The Peer connection sending audio streaming packets lost.
    * @param {Number} stats.audio.sending.ssrc The Peer connection sending audio streaming RTP packets SSRC.
@@ -697,6 +698,7 @@ Skylink.prototype._EVENTS = {
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.audio.receiving The Peer connection receiving audio streaming stats.
    * @param {Number} stats.audio.receiving.bytes The Peer connection sending audio streaming bytes.
+   *   <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
    * @param {Number} stats.audio.receiving.packets The Peer connection receiving audio streaming packets.
    * @param {Number} stats.audio.receiving.packetsLost The Peer connection receiving audio streaming packets lost.
    * @param {Number} stats.audio.receiving.ssrc The Peer connection receiving audio streaming RTP packets SSRC.
@@ -723,6 +725,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} stats.video The Peer connection video streaming stats.
    * @param {JSON} stats.video.sending The Peer connection sending video streaming stats.
    * @param {Number} stats.video.sending.bytes The Peer connection sending video streaming bytes.
+   *   <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
    * @param {Number} stats.video.sending.packets The Peer connection sending video streaming packets.
    * @param {Number} stats.video.sending.packetsLost The Peer connection sending video streaming packets lost.
    * @param {JSON} stats.video.sending.ssrc The Peer connection sending video streaming RTP packets SSRC.
@@ -764,6 +767,7 @@ Skylink.prototype._EVENTS = {
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.video.receiving The Peer connection receiving video streaming stats.
    * @param {Number} stats.video.receiving.bytes The Peer connection receiving video streaming bytes.
+   *   <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
    * @param {Number} stats.video.receiving.packets The Peer connection receiving video streaming packets.
    * @param {Number} stats.video.receiving.packetsLost The Peer connection receiving video streaming packets lost.
    * @param {Number} stats.video.receiving.ssrc The Peer connection receiving video streaming RTP packets SSRC.
