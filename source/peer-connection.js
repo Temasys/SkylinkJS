@@ -107,6 +107,16 @@ Skylink.prototype._peerConnections = {};
 Skylink.prototype._peerStats = {};
 
 /**
+ * The flag if User is using plugin.
+ * @attribute _isUsingPlugin
+ * @type Boolean
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._isUsingPlugin = false;
+
+/**
  * <blockquote class="info">
  *   For MCU enabled Peer connections, the restart functionality may differ, you may learn more about how to workaround
  *   it <a href="http://support.temasys.com.sg/support/discussions/topics/12000002853">in this article here</a>.
@@ -609,8 +619,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           codec: self._getSDPSelectedCodec(peerId, pc.localDescription, 'audio'),
           inputLevel: null,
           echoReturnLoss: null,
-          echoReturnLossEnhancement: null,
-          e2eDelay: null
+          echoReturnLossEnhancement: null
         },
         receiving: {
           ssrc: null,
@@ -620,8 +629,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           jitter: 0,
           jitterBufferMs: null,
           codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, 'audio'),
-          outputLevel: null,
-          e2eDelay: null
+          outputLevel: null
         }
       },
       video: {
@@ -643,8 +651,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           framesDropped: null,
           nacks: null,
           plis: null,
-          firs: null,
-          e2eDelay: null
+          firs: null
         },
         receiving: {
           ssrc: null,
@@ -814,6 +821,58 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
 
             if (!self._peerStats[peerId][prop]) {
               self._peerStats[peerId][prop] = obj;
+            }
+
+            try {
+              if (obj.mediaType === 'video' && dirType === 'receiving') {
+                var captureStartNtpTimeMs = parseInt(obj.googCaptureStartNtpTimeMs || '0', 10);
+
+                if (captureStartNtpTimeMs > 0 && pc.getRemoteStreams().length > 0 && document &&
+                  typeof document.getElementsByTagName === 'function') {
+                  var streamId = pc.getRemoteStreams()[0].id || pc.getRemoteStreams()[0].label;
+                  var elements = [];
+
+                  if (self._isUsingPlugin) {
+                    elements = document.getElementsByTagName('object');
+                  } else {
+                    elements = document.getElementsByTagName('video');
+
+                    if (elements.length === 0) {
+                      elements = document.getElementsByTagName('audio');
+                    }
+                  }
+
+                  for (var e = 0; e < elements.length; e++) {
+                    var videoElmStreamId = null;
+
+                    if (self._isUsingPlugin) {
+                      if (!(elements[e].children && typeof elements[e].children === 'object' &&
+                        typeof elements[e].children.length === 'number' && elements[e].children.length > 0)) {
+                        break;
+                      }
+
+                      for (var ec = 0; ec < elements[e].children.length; ec++) {
+                        if (elements[e].children[ec].name === 'streamId') {
+                          videoElmStreamId = elements[e].children[ec].value || null;
+                          break;
+                        }
+                      }
+
+                    } else {
+                      videoElmStreamId = elements[e].srcObject ? elements[e].srcObject.id ||
+                        elements[e].srcObject.label : null;
+                    }
+
+                    if (videoElmStreamId && videoElmStreamId === streamId) {
+                      result[obj.mediaType][dirType].e2eDelay = ((new Date()).getTime() + 2208988800000) -
+                        captureStartNtpTimeMs - elements[e].currentTime * 1000;
+                      break;
+                    }
+                  }
+                }
+              }
+            } catch (error) {
+              log.warn([peerId, 'RTCStatsReport', null, 'Failed retrieving e2e delay ->'], error);
             }
 
             // Receiving/Sending RTP packets

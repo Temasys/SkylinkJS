@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.15 - Wed Nov 23 2016 14:11:12 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Nov 23 2016 17:58:34 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.15 - Wed Nov 23 2016 14:11:12 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.15 - Wed Nov 23 2016 17:58:34 GMT+0800 (SGT) */
 
 (function() {
 
@@ -12247,10 +12247,11 @@ Skylink.prototype._blobToBase64 = function(data, callback) {
  * @since 0.1.0
  */
 Skylink.prototype._blobToArrayBuffer = function(data, callback) {
+  var self = this;
   var fileReader = new FileReader();
   fileReader.onload = function() {
     // Load Blob as dataurl base64 string
-    if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1) {
+    if (self._isUsingPlugin) {
       callback(new Int8Array(fileReader.result));
     } else {
       callback(fileReader.result);
@@ -15201,6 +15202,16 @@ Skylink.prototype._peerConnections = {};
 Skylink.prototype._peerStats = {};
 
 /**
+ * The flag if User is using plugin.
+ * @attribute _isUsingPlugin
+ * @type Boolean
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._isUsingPlugin = false;
+
+/**
  * <blockquote class="info">
  *   For MCU enabled Peer connections, the restart functionality may differ, you may learn more about how to workaround
  *   it <a href="http://support.temasys.com.sg/support/discussions/topics/12000002853">in this article here</a>.
@@ -15703,8 +15714,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           codec: self._getSDPSelectedCodec(peerId, pc.localDescription, 'audio'),
           inputLevel: null,
           echoReturnLoss: null,
-          echoReturnLossEnhancement: null,
-          e2eDelay: null
+          echoReturnLossEnhancement: null
         },
         receiving: {
           ssrc: null,
@@ -15714,8 +15724,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           jitter: 0,
           jitterBufferMs: null,
           codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, 'audio'),
-          outputLevel: null,
-          e2eDelay: null
+          outputLevel: null
         }
       },
       video: {
@@ -15737,8 +15746,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           framesDropped: null,
           nacks: null,
           plis: null,
-          firs: null,
-          e2eDelay: null
+          firs: null
         },
         receiving: {
           ssrc: null,
@@ -15908,6 +15916,58 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
 
             if (!self._peerStats[peerId][prop]) {
               self._peerStats[peerId][prop] = obj;
+            }
+
+            try {
+              if (obj.mediaType === 'video' && dirType === 'receiving') {
+                var captureStartNtpTimeMs = parseInt(obj.googCaptureStartNtpTimeMs || '0', 10);
+
+                if (captureStartNtpTimeMs > 0 && pc.getRemoteStreams().length > 0 && document &&
+                  typeof document.getElementsByTagName === 'function') {
+                  var streamId = pc.getRemoteStreams()[0].id || pc.getRemoteStreams()[0].label;
+                  var elements = [];
+
+                  if (self._isUsingPlugin) {
+                    elements = document.getElementsByTagName('object');
+                  } else {
+                    elements = document.getElementsByTagName('video');
+
+                    if (elements.length === 0) {
+                      elements = document.getElementsByTagName('audio');
+                    }
+                  }
+
+                  for (var e = 0; e < elements.length; e++) {
+                    var videoElmStreamId = null;
+
+                    if (self._isUsingPlugin) {
+                      if (!(elements[e].children && typeof elements[e].children === 'object' &&
+                        typeof elements[e].children.length === 'number' && elements[e].children.length > 0)) {
+                        break;
+                      }
+
+                      for (var ec = 0; ec < elements[e].children.length; ec++) {
+                        if (elements[e].children[ec].name === 'streamId') {
+                          videoElmStreamId = elements[e].children[ec].value || null;
+                          break;
+                        }
+                      }
+
+                    } else {
+                      videoElmStreamId = elements[e].srcObject ? elements[e].srcObject.id ||
+                        elements[e].srcObject.label : null;
+                    }
+
+                    if (videoElmStreamId && videoElmStreamId === streamId) {
+                      result[obj.mediaType][dirType].e2eDelay = ((new Date()).getTime() + 2208988800000) -
+                        captureStartNtpTimeMs - elements[e].currentTime * 1000;
+                      break;
+                    }
+                  }
+                }
+              }
+            } catch (error) {
+              log.warn([peerId, 'RTCStatsReport', null, 'Failed retrieving e2e delay ->'], error);
             }
 
             // Receiving/Sending RTP packets
@@ -18979,6 +19039,8 @@ Skylink.prototype._loadInfo = function() {
     return;
   }
   adapter.webRTCReady(function () {
+    self._isUsingPlugin = !!adapter.WebRTCPlugin.plugin && !!adapter.WebRTCPlugin.plugin.VERSION;
+
     if (!window.RTCPeerConnection) {
       log.error('WebRTC not supported. Please upgrade your browser');
       self._readyState = -1;
@@ -20251,6 +20313,11 @@ Skylink.prototype._EVENTS = {
    * @param {Number} stats.video.receiving.packets The Peer connection receiving video streaming packets.
    * @param {Number} stats.video.receiving.packetsLost The Peer connection receiving video streaming packets lost.
    * @param {Number} stats.video.receiving.ssrc The Peer connection receiving video streaming RTP packets SSRC.
+   * @param {Number} stats.video.receiving.e2eDelay The Peer connection receiving video streaming e2e delay.
+   *   <small>Defined as <code>null</code> if it's not present in original raw stats before parsing, and that
+   *   it finds any existing audio, video or object (plugin) DOM elements that has set with the
+   *   Peer remote stream object to parse current time. Note that <code>document.getElementsByTagName</code> function
+   *   and DOM <code>.currentTime</code> has to be supported inorder for data to be parsed correctly.</small>
    * @param {Number} stats.video.receiving.jitter The Peer connection receiving video streaming RTP packets jitter.
    *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
    * @param {Number} [stats.video.receiving.jitterBufferMs] The Peer connection receiving video streaming
@@ -22861,7 +22928,7 @@ Skylink.prototype._streamsStoppedCbs = {};
  *   Note that by enabling this flag, exact values will be requested when retrieving camera Stream,
  *   but it does not prevent constraints related errors. By default when not enabled,
  *   expected mandatory maximum values (or optional values for source ID) will requested to prevent constraints related
- *   errors, with an exception for <code>options.video.frameRate</code> option in Safari and IE (plugin-enabled) browsers,
+ *   errors, with an exception for <code>options.video.frameRate</code> option in Safari and IE (any plugin-enabled) browsers,
  *   where the expected maximum value will not be requested due to the lack of support.</blockquote>
  *   The flag if <code>getUserMedia()</code> should request for camera Stream to match exact requested values of
  *   <code>options.audio.deviceId</code> and <code>options.video.deviceId</code>, <code>options.video.resolution</code>
@@ -24253,8 +24320,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
 
         if ((options.video.frameRate && typeof options.video.frameRate === 'object') || typeof object.video.frameRate === 'number') {
           //
-          if (!(typeof options.video.frameRate === 'number' && !options.useExactConstraints &&
-            ['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1)) {
+          if (!(typeof options.video.frameRate === 'number' && !options.useExactConstraints && self._isUsingPlugin)) {
             settings.settings.video.frameRate = options.video.frameRate;
             settings.getUserMediaSettings.video.frameRate = typeof settings.settings.video.frameRate === 'object' ?
               settings.settings.video.frameRate : (options.useExactConstraints ?

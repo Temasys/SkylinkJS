@@ -550,7 +550,7 @@
         },
         {
             "file": "source/data-process.js",
-            "line": 148,
+            "line": 149,
             "description": "Function that chunks Blob object based on the data chunk size provided.\nIf provided Blob object size is lesser than or equals to the chunk size, it should return an array\n  of length of <code>1</code>.",
             "itemtype": "method",
             "name": "_chunkBlobData",
@@ -561,7 +561,7 @@
         },
         {
             "file": "source/data-process.js",
-            "line": 180,
+            "line": 181,
             "description": "Function that chunks large string into string chunks based on the data chunk size provided.\nIf provided string length is lesser than or equals to the chunk size, it should return an array\n  of length of <code>1</code>.",
             "itemtype": "method",
             "name": "_chunkDataURL",
@@ -1716,6 +1716,18 @@
         {
             "file": "source/peer-connection.js",
             "line": 109,
+            "description": "The flag if User is using plugin.",
+            "itemtype": "attribute",
+            "name": "_isUsingPlugin",
+            "type": "Boolean",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.16",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-connection.js",
+            "line": 119,
             "description": "<blockquote class=\"info\">\n  For MCU enabled Peer connections, the restart functionality may differ, you may learn more about how to workaround\n  it <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002853\">in this article here</a>.\n  For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in\n  <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000005188\">in this article here</a>.\n  Note that this functionality should be used when Peer connection stream freezes during a connection.\n  For a better user experience for only MCU enabled Peer connections, the functionality is throttled when invoked many\n  times in less than the milliseconds interval configured in the <a href=\"#method_init\"><code>init()</code> method</a>.\n</blockquote>\nFunction that refreshes Peer connections to update with the current streaming.",
             "itemtype": "method",
             "name": "refreshConnection",
@@ -1785,7 +1797,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 285,
+            "line": 295,
             "description": "Function that refresh connections.",
             "itemtype": "method",
             "name": "_refreshPeerConnection",
@@ -1796,7 +1808,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 372,
+            "line": 382,
             "description": "Function that retrieves Peer connection bandwidth and ICE connection stats.",
             "itemtype": "method",
             "name": "getConnectionStatus",
@@ -1879,7 +1891,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 938,
+            "line": 997,
             "description": "Function that starts the Peer connection session.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_addPeer",
@@ -1890,7 +1902,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 977,
+            "line": 1036,
             "description": "Function that re-negotiates a Peer connection.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -1901,7 +1913,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1093,
+            "line": 1152,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -1912,7 +1924,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1154,
+            "line": 1213,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -1923,7 +1935,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1296,
+            "line": 1355,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -1934,7 +1946,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1405,
+            "line": 1464,
             "description": "Function that handles the stats tabulation.",
             "itemtype": "method",
             "name": "_parseConnectionStats",
@@ -3507,7 +3519,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1082,
+            "line": 1084,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -5605,6 +5617,11 @@
                                     "type": "Number"
                                 },
                                 {
+                                    "name": "receiving.e2eDelay",
+                                    "description": "The Peer connection receiving video streaming e2e delay.\n  <small>Defined as <code>null</code> if it's not present in original raw stats before parsing, and that\n  it finds any existing audio, video or object (plugin) DOM elements that has set with the\n  Peer remote stream object to parse current time. Note that <code>document.getElementsByTagName</code> function\n  and DOM <code>.currentTime</code> has to be supported inorder for data to be parsed correctly.</small>",
+                                    "type": "Number"
+                                },
+                                {
                                     "name": "receiving.jitter",
                                     "description": "The Peer connection receiving video streaming RTP packets jitter.\n  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>",
                                     "type": "Number"
@@ -6022,7 +6039,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 927,
+            "line": 932,
             "description": "Event triggered when <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> changes\nUser Streams audio and video tracks muted status.",
             "itemtype": "event",
             "name": "localMediaMuted",
@@ -6050,7 +6067,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 944,
+            "line": 949,
             "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.<br>\n  Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates\n  may be received in the session description instead.\n</blockquote>\nEvent triggered when remote ICE candidate processing state has changed when Peer is using trickle ICE.",
             "itemtype": "event",
             "name": "candidateProcessingState",
@@ -6109,7 +6126,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 973,
+            "line": 978,
             "description": "Stores the list of <code>once()</code> event handlers.\nThese events are only triggered once.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -6135,7 +6152,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 986,
+            "line": 991,
             "description": "Stores the timestamps data used for throttling.",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -6147,7 +6164,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1002,
+            "line": 1007,
             "description": "Stores the throttling interval timeout.",
             "itemtype": "attribute",
             "name": "_throttlingTimeouts",
@@ -6159,7 +6176,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1016,
+            "line": 1021,
             "description": "Stores the flag if throttling should throw when called less than the interval timeout.",
             "itemtype": "attribute",
             "name": "_throttlingShouldThrowError",
@@ -6171,7 +6188,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1026,
+            "line": 1031,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -6195,7 +6212,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1050,
+            "line": 1055,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -6232,7 +6249,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1108,
+            "line": 1113,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -6257,7 +6274,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1157,
+            "line": 1162,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -6268,7 +6285,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1211,
+            "line": 1216,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -6279,7 +6296,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1237,
+            "line": 1242,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -6290,7 +6307,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1275,
+            "line": 1280,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",
@@ -7209,7 +7226,7 @@
                     "props": [
                         {
                             "name": "useExactConstraints",
-                            "description": "<blockquote class=\"info\">\n  Note that by enabling this flag, exact values will be requested when retrieving camera Stream,\n  but it does not prevent constraints related errors. By default when not enabled,\n  expected mandatory maximum values (or optional values for source ID) will requested to prevent constraints related\n  errors, with an exception for <code>options.video.frameRate</code> option in Safari and IE (plugin-enabled) browsers,\n  where the expected maximum value will not be requested due to the lack of support.</blockquote>\n  The flag if <code>getUserMedia()</code> should request for camera Stream to match exact requested values of\n  <code>options.audio.deviceId</code> and <code>options.video.deviceId</code>, <code>options.video.resolution</code>\n  and <code>options.video.frameRate</code> when provided.",
+                            "description": "<blockquote class=\"info\">\n  Note that by enabling this flag, exact values will be requested when retrieving camera Stream,\n  but it does not prevent constraints related errors. By default when not enabled,\n  expected mandatory maximum values (or optional values for source ID) will requested to prevent constraints related\n  errors, with an exception for <code>options.video.frameRate</code> option in Safari and IE (any plugin-enabled) browsers,\n  where the expected maximum value will not be requested due to the lack of support.</blockquote>\n  The flag if <code>getUserMedia()</code> should request for camera Stream to match exact requested values of\n  <code>options.audio.deviceId</code> and <code>options.video.deviceId</code>, <code>options.video.resolution</code>\n  and <code>options.video.frameRate</code> when provided.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
@@ -7623,7 +7640,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1723,
+            "line": 1722,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -7634,7 +7651,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1858,
+            "line": 1857,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -7645,7 +7662,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1898,
+            "line": 1897,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -7656,7 +7673,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1932,
+            "line": 1931,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -7890,11 +7907,11 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:109"
+            "line": " source/peer-connection.js:119"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:372"
+            "line": " source/peer-connection.js:382"
         },
         {
             "message": "unknown tag: trigger",

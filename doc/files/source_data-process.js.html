@@ -224,10 +224,11 @@ Skylink.prototype._blobToBase64 = function(data, callback) {
  * @since 0.1.0
  */
 Skylink.prototype._blobToArrayBuffer = function(data, callback) {
+  var self = this;
   var fileReader = new FileReader();
   fileReader.onload = function() {
     // Load Blob as dataurl base64 string
-    if ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1) {
+    if (self._isUsingPlugin) {
       callback(new Int8Array(fileReader.result));
     } else {
       callback(fileReader.result);

@@ -1047,6 +1047,8 @@ Skylink.prototype._loadInfo = function() {
     return;
   }
   adapter.webRTCReady(function () {
+    self._isUsingPlugin = !!adapter.WebRTCPlugin.plugin && !!adapter.WebRTCPlugin.plugin.VERSION;
+
     if (!window.RTCPeerConnection) {
       log.error('WebRTC not supported. Please upgrade your browser');
       self._readyState = -1;

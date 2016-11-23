@@ -393,7 +393,7 @@ Skylink.prototype._streamsStoppedCbs = {};
  *   Note that by enabling this flag, exact values will be requested when retrieving camera Stream,
  *   but it does not prevent constraints related errors. By default when not enabled,
  *   expected mandatory maximum values (or optional values for source ID) will requested to prevent constraints related
- *   errors, with an exception for &lt;code&gt;options.video.frameRate&lt;/code&gt; option in Safari and IE (plugin-enabled) browsers,
+ *   errors, with an exception for &lt;code&gt;options.video.frameRate&lt;/code&gt; option in Safari and IE (any plugin-enabled) browsers,
  *   where the expected maximum value will not be requested due to the lack of support.&lt;/blockquote&gt;
  *   The flag if &lt;code&gt;getUserMedia()&lt;/code&gt; should request for camera Stream to match exact requested values of
  *   &lt;code&gt;options.audio.deviceId&lt;/code&gt; and &lt;code&gt;options.video.deviceId&lt;/code&gt;, &lt;code&gt;options.video.resolution&lt;/code&gt;
@@ -1785,8 +1785,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
 
         if ((options.video.frameRate &amp;&amp; typeof options.video.frameRate === &#x27;object&#x27;) || typeof object.video.frameRate === &#x27;number&#x27;) {
           //
-          if (!(typeof options.video.frameRate === &#x27;number&#x27; &amp;&amp; !options.useExactConstraints &amp;&amp;
-            [&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1)) {
+          if (!(typeof options.video.frameRate === &#x27;number&#x27; &amp;&amp; !options.useExactConstraints &amp;&amp; self._isUsingPlugin)) {
             settings.settings.video.frameRate = options.video.frameRate;
             settings.getUserMediaSettings.video.frameRate = typeof settings.settings.video.frameRate === &#x27;object&#x27; ?
               settings.settings.video.frameRate : (options.useExactConstraints ?

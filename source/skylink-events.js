@@ -771,6 +771,11 @@ Skylink.prototype._EVENTS = {
    * @param {Number} stats.video.receiving.packets The Peer connection receiving video streaming packets.
    * @param {Number} stats.video.receiving.packetsLost The Peer connection receiving video streaming packets lost.
    * @param {Number} stats.video.receiving.ssrc The Peer connection receiving video streaming RTP packets SSRC.
+   * @param {Number} stats.video.receiving.e2eDelay The Peer connection receiving video streaming e2e delay.
+   *   <small>Defined as <code>null</code> if it's not present in original raw stats before parsing, and that
+   *   it finds any existing audio, video or object (plugin) DOM elements that has set with the
+   *   Peer remote stream object to parse current time. Note that <code>document.getElementsByTagName</code> function
+   *   and DOM <code>.currentTime</code> has to be supported inorder for data to be parsed correctly.</small>
    * @param {Number} stats.video.receiving.jitter The Peer connection receiving video streaming RTP packets jitter.
    *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
    * @param {Number} [stats.video.receiving.jitterBufferMs] The Peer connection receiving video streaming
