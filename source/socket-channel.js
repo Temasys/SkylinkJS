@@ -170,7 +170,7 @@ Skylink.prototype._socket = null;
  * @for Skylink
  * @since 0.5.4
  */
-Skylink.prototype._socketTimeout = 0;
+Skylink.prototype._socketTimeout = 20000;
 
 /**
  * Stores the flag that indicates if XDomainRequest is used for IE 8/9.
@@ -390,11 +390,11 @@ Skylink.prototype._createSocket = function (type) {
   var options = {
     forceNew: true,
     //'sync disconnect on unload' : true,
-    reconnection: false
+    reconnection: false,
+    timeout: self._socketTimeout
   };
 
   var ports = self._socketPorts[self._signalingServerProtocol];
-
   var connectionType = null;
 
   // just beginning

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Wed Nov 23 2016 19:13:45 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Wed Nov 23 2016 23:11:54 GMT+0800 (SGT) */
 
 (function() {
 
@@ -7064,7 +7064,7 @@ Skylink.prototype.init = function(options, callback) {
   var TURNTransport = self.TURN_TRANSPORT.ANY;
   var audioFallback = false;
   var forceSSL = false;
-  var socketTimeout = 0;
+  var socketTimeout = 20000;
   var forceTURNSSL = false;
   var audioCodec = self.AUDIO_CODEC.AUTO;
   var videoCodec = self.VIDEO_CODEC.AUTO;
@@ -9518,7 +9518,7 @@ Skylink.prototype._socket = null;
  * @for Skylink
  * @since 0.5.4
  */
-Skylink.prototype._socketTimeout = 0;
+Skylink.prototype._socketTimeout = 20000;
 
 /**
  * Stores the flag that indicates if XDomainRequest is used for IE 8/9.
@@ -9738,11 +9738,11 @@ Skylink.prototype._createSocket = function (type) {
   var options = {
     forceNew: true,
     //'sync disconnect on unload' : true,
-    reconnection: false
+    reconnection: false,
+    timeout: self._socketTimeout
   };
 
   var ports = self._socketPorts[self._signalingServerProtocol];
-
   var connectionType = null;
 
   // just beginning

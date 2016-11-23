@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Wed Nov 23 2016 19:13:45 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Wed Nov 23 2016 23:11:54 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.16 - Wed Nov 23 2016 19:13:45 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Wed Nov 23 2016 23:11:54 GMT+0800 (SGT) */
 
 (function() {
 
@@ -18597,7 +18597,7 @@ Skylink.prototype.init = function(options, callback) {
   var TURNTransport = self.TURN_TRANSPORT.ANY;
   var audioFallback = false;
   var forceSSL = false;
-  var socketTimeout = 0;
+  var socketTimeout = 20000;
   var forceTURNSSL = false;
   var audioCodec = self.AUDIO_CODEC.AUTO;
   var videoCodec = self.VIDEO_CODEC.AUTO;
@@ -21051,7 +21051,7 @@ Skylink.prototype._socket = null;
  * @for Skylink
  * @since 0.5.4
  */
-Skylink.prototype._socketTimeout = 0;
+Skylink.prototype._socketTimeout = 20000;
 
 /**
  * Stores the flag that indicates if XDomainRequest is used for IE 8/9.
@@ -21271,11 +21271,11 @@ Skylink.prototype._createSocket = function (type) {
   var options = {
     forceNew: true,
     //'sync disconnect on unload' : true,
-    reconnection: false
+    reconnection: false,
+    timeout: self._socketTimeout
   };
 
   var ports = self._socketPorts[self._signalingServerProtocol];
-
   var connectionType = null;
 
   // just beginning
