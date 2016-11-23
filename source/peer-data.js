@@ -170,6 +170,11 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       peerInfo.mediaStatus.videoMuted = true;
     }
 
+    if (peerInfo.settings.maxBandwidth) {
+      peerInfo.settings.bandwidth = clone(peerInfo.settings.maxBandwidth);
+      delete peerInfo.settings.maxBandwidth;
+    }
+
     if (peerInfo.settings.video && typeof peerInfo.settings.video === 'object' &&
       peerInfo.settings.video.frameRate === -1) {
       peerInfo.settings.video.frameRate = null;
@@ -277,9 +282,12 @@ Skylink.prototype._getUserInfo = function(peerId) {
     userInfo.settings.video.frameRate = -1;
   }
 
+  if (userInfo.settings.bandwidth) {
+    userInfo.settings.maxBandwidth = clone(userInfo.settings.bandwidth);
+    delete userInfo.settings.bandwidth;
+  }
+
   delete userInfo.agent;
   delete userInfo.room;
-  delete userInfo.settings.googleXBandwidth;
-
   return userInfo;
 };
