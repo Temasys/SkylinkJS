@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Wed Nov 23 2016 23:59:17 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Fri Nov 25 2016 00:22:02 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.16 - Wed Nov 23 2016 23:59:17 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Fri Nov 25 2016 00:22:02 GMT+0800 (SGT) */
 
 (function() {
 
@@ -16188,7 +16188,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // prevent restarts for other SDK clients
-  if ((agent.SMProtocolVersion || '') > '0.1.1') {
+  if ((agent.SMProtocolVersion || '') >= '0.1.2') {
     var notSupportedError = new Error('Failed restarting with other agents connecting from other SDKs as ' +
       're-negotiation is not supported by other SDKs');
 
@@ -16875,10 +16875,25 @@ Skylink.prototype._getUserInfo = function(peerId) {
   var userInfo = clone(this.getPeerInfo());
 
   // Adhere to SM protocol without breaking the other SDKs.
-  if (userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
-    !((userInfo.settings.video.frameRate && typeof userInfo.settings.video.frameRate === 'object') ||
-    typeof userInfo.settings.video.frameRate === 'number')) {
-    userInfo.settings.video.frameRate = -1;
+  if (userInfo.settings.video && typeof userInfo.settings.video === 'object') {
+    userInfo.settings.video.customSettings = {};
+
+    if (userInfo.settings.video.frameRate && typeof userInfo.settings.video.frameRate === 'object') {
+      userInfo.settings.video.customSettings.frameRate = clone(userInfo.settings.video.frameRate);
+      userInfo.settings.video.frameRate = -1;
+    }
+
+    if (userInfo.settings.video.resolution && typeof userInfo.settings.video.resolution === 'object') {
+      if (userInfo.settings.video.resolution.width && typeof userInfo.settings.video.resolution.width === 'object') {
+        userInfo.settings.video.customSettings.width = clone(userInfo.settings.video.width);
+        userInfo.settings.video.resolution.width = -1;
+      }
+
+      if (userInfo.settings.video.resolution.height && typeof userInfo.settings.video.resolution.height === 'object') {
+        userInfo.settings.video.customSettings.height = clone(userInfo.settings.video.height);
+        userInfo.settings.video.resolution.height = -1;
+      }
+    }
   }
 
   if (userInfo.settings.bandwidth) {
@@ -23997,8 +24012,6 @@ Skylink.prototype.disableVideo = function() {
 Skylink.prototype.shareScreen = function (enableAudio, callback) {
   var self = this;
   var enableAudioSettings = {
-    useinbandfec: null,
-    usedtx: null,
     stereo: true
   };
 
@@ -24329,11 +24342,6 @@ Skylink.prototype._parseStreamSettings = function(options) {
     } else {
       settings.settings.audio = {
         stereo: false,
-        useinbandfec: null,
-        usedtx: null,
-        maxplaybackrate: null,
-        deviceId: null,
-        optional: null,
         exactConstraints: !!options.useExactConstraints,
         echoCancellation: false
       };
@@ -24402,9 +24410,6 @@ Skylink.prototype._parseStreamSettings = function(options) {
       settings.settings.video = {
         resolution: clone(this.VIDEO_RESOLUTION.VGA),
         screenshare: false,
-        deviceId: null,
-        optional: null,
-        frameRate: null,
         exactConstraints: !!options.useExactConstraints
       };
       settings.getUserMediaSettings.video = {};

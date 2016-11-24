@@ -1233,8 +1233,6 @@ Skylink.prototype.disableVideo = function() {
 Skylink.prototype.shareScreen = function (enableAudio, callback) {
   var self = this;
   var enableAudioSettings = {
-    useinbandfec: null,
-    usedtx: null,
     stereo: true
   };
 
@@ -1565,11 +1563,6 @@ Skylink.prototype._parseStreamSettings = function(options) {
     } else {
       settings.settings.audio = {
         stereo: false,
-        useinbandfec: null,
-        usedtx: null,
-        maxplaybackrate: null,
-        deviceId: null,
-        optional: null,
         exactConstraints: !!options.useExactConstraints,
         echoCancellation: false
       };
@@ -1638,9 +1631,6 @@ Skylink.prototype._parseStreamSettings = function(options) {
       settings.settings.video = {
         resolution: clone(this.VIDEO_RESOLUTION.VGA),
         screenshare: false,
-        deviceId: null,
-        optional: null,
-        frameRate: null,
         exactConstraints: !!options.useExactConstraints
       };
       settings.getUserMediaSettings.video = {};

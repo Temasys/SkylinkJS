@@ -276,10 +276,25 @@ Skylink.prototype._getUserInfo = function(peerId) {
   var userInfo = clone(this.getPeerInfo());
 
   // Adhere to SM protocol without breaking the other SDKs.
-  if (userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
-    !((userInfo.settings.video.frameRate && typeof userInfo.settings.video.frameRate === 'object') ||
-    typeof userInfo.settings.video.frameRate === 'number')) {
-    userInfo.settings.video.frameRate = -1;
+  if (userInfo.settings.video && typeof userInfo.settings.video === 'object') {
+    userInfo.settings.video.customSettings = {};
+
+    if (userInfo.settings.video.frameRate && typeof userInfo.settings.video.frameRate === 'object') {
+      userInfo.settings.video.customSettings.frameRate = clone(userInfo.settings.video.frameRate);
+      userInfo.settings.video.frameRate = -1;
+    }
+
+    if (userInfo.settings.video.resolution && typeof userInfo.settings.video.resolution === 'object') {
+      if (userInfo.settings.video.resolution.width && typeof userInfo.settings.video.resolution.width === 'object') {
+        userInfo.settings.video.customSettings.width = clone(userInfo.settings.video.width);
+        userInfo.settings.video.resolution.width = -1;
+      }
+
+      if (userInfo.settings.video.resolution.height && typeof userInfo.settings.video.resolution.height === 'object') {
+        userInfo.settings.video.customSettings.height = clone(userInfo.settings.video.height);
+        userInfo.settings.video.resolution.height = -1;
+      }
+    }
   }
 
   if (userInfo.settings.bandwidth) {

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Wed Nov 23 2016 23:59:17 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Fri Nov 25 2016 00:22:02 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4655,7 +4655,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // prevent restarts for other SDK clients
-  if ((agent.SMProtocolVersion || '') > '0.1.1') {
+  if ((agent.SMProtocolVersion || '') >= '0.1.2') {
     var notSupportedError = new Error('Failed restarting with other agents connecting from other SDKs as ' +
       're-negotiation is not supported by other SDKs');
 
@@ -5342,10 +5342,25 @@ Skylink.prototype._getUserInfo = function(peerId) {
   var userInfo = clone(this.getPeerInfo());
 
   // Adhere to SM protocol without breaking the other SDKs.
-  if (userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
-    !((userInfo.settings.video.frameRate && typeof userInfo.settings.video.frameRate === 'object') ||
-    typeof userInfo.settings.video.frameRate === 'number')) {
-    userInfo.settings.video.frameRate = -1;
+  if (userInfo.settings.video && typeof userInfo.settings.video === 'object') {
+    userInfo.settings.video.customSettings = {};
+
+    if (userInfo.settings.video.frameRate && typeof userInfo.settings.video.frameRate === 'object') {
+      userInfo.settings.video.customSettings.frameRate = clone(userInfo.settings.video.frameRate);
+      userInfo.settings.video.frameRate = -1;
+    }
+
+    if (userInfo.settings.video.resolution && typeof userInfo.settings.video.resolution === 'object') {
+      if (userInfo.settings.video.resolution.width && typeof userInfo.settings.video.resolution.width === 'object') {
+        userInfo.settings.video.customSettings.width = clone(userInfo.settings.video.width);
+        userInfo.settings.video.resolution.width = -1;
+      }
+
+      if (userInfo.settings.video.resolution.height && typeof userInfo.settings.video.resolution.height === 'object') {
+        userInfo.settings.video.customSettings.height = clone(userInfo.settings.video.height);
+        userInfo.settings.video.resolution.height = -1;
+      }
+    }
   }
 
   if (userInfo.settings.bandwidth) {
@@ -12464,8 +12479,6 @@ Skylink.prototype.disableVideo = function() {
 Skylink.prototype.shareScreen = function (enableAudio, callback) {
   var self = this;
   var enableAudioSettings = {
-    useinbandfec: null,
-    usedtx: null,
     stereo: true
   };
 
@@ -12796,11 +12809,6 @@ Skylink.prototype._parseStreamSettings = function(options) {
     } else {
       settings.settings.audio = {
         stereo: false,
-        useinbandfec: null,
-        usedtx: null,
-        maxplaybackrate: null,
-        deviceId: null,
-        optional: null,
         exactConstraints: !!options.useExactConstraints,
         echoCancellation: false
       };
@@ -12869,9 +12877,6 @@ Skylink.prototype._parseStreamSettings = function(options) {
       settings.settings.video = {
         resolution: clone(this.VIDEO_RESOLUTION.VGA),
         screenshare: false,
-        deviceId: null,
-        optional: null,
-        frameRate: null,
         exactConstraints: !!options.useExactConstraints
       };
       settings.getUserMediaSettings.video = {};
