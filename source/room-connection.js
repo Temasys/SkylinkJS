@@ -92,36 +92,6 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
 };
 
 /**
- * Stores the current Room name that User is connected to.
- * @attribute _selectedRoom
- * @type String
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._selectedRoom = null;
-
-/**
- * Stores the flag that indicates if Room is locked.
- * @attribute _roomLocked
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._roomLocked = false;
-
-/**
- * Stores the flag that indicates if User is connected to the Room.
- * @attribute _inRoom
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.4.0
- */
-Skylink.prototype._inRoom = false;
-
-/**
  * Function that starts the Room session.
  * @method joinRoom
  * @param {String} [room] The Room name.

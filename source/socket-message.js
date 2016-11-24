@@ -12,17 +12,6 @@
 Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.2';
 
 /**
- * Stores the value if ICE restart is supported.
- * @attribute _enableIceRestart
- * @type String
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._enableIceRestart = window.webrtcDetectedBrowser === 'firefox' ?
-  window.webrtcDetectedVersion >= 48 : true;
-
-/**
  * Stores the list of socket messaging protocol types.
  * See confluence docs for the list based on the current <code>SM_PROTOCOL_VERSION</code>.
  * @attribute _SIG_MESSAGE_TYPE
@@ -59,16 +48,6 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
 };
 
 /**
- * Stores the flag if MCU environment is enabled.
- * @attribute _hasMCU
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._hasMCU = false;
-
-/**
  * Stores the list of socket messaging protocol types to queue when sent less than a second interval.
  * @attribute _groupMessageList
  * @type Array
@@ -83,39 +62,6 @@ Skylink.prototype._groupMessageList = [
   Skylink.prototype._SIG_MESSAGE_TYPE.MUTE_VIDEO,
   Skylink.prototype._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
 ];
-
-/**
- * Stores the flag that indicates if MCU is available in the Room.
- * If App Key enables MCU but this is false, this means likely there are problems connecting to the MCU server.
- * @attribute _hasMCU
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._hasMCU = false;
-
-
-/**
- * Stores the flag that indicates if User should only receive Stream from Peer connections but
- *   do not send User's Stream to Peer connections.
- * @attribute _receiveOnly
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype._receiveOnly = false;
-
-/**
- * Stores the list of Peer messages timestamp.
- * @attribute _peerMessagesStamps
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.15
- */
-Skylink.prototype._peerMessagesStamps = {};
 
 /**
  * <blockquote class="info">

@@ -1,3 +1,4 @@
-this.Skylink = Skylink;
-window.Skylink = Skylink;
+  this.Skylink = Skylink;
+  window.Skylink = Skylink;
+
 }).call(this);

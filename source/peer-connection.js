@@ -74,49 +74,6 @@ Skylink.prototype.SERVER_PEER_TYPE = {
 };
 
 /**
- * Stores the global number of Peer connection retries that would increase the wait-for-response timeout
- *   for the Peer connection health timer.
- * @attribute _retryCounters
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype._retryCounters = {};
-
-/**
- * Stores the list of the Peer connections.
- * @attribute _peerConnections
- * @param {Object} <#peerId> The Peer connection.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype._peerConnections = {};
-
-/**
- * Stores the list of the Peer connections stats.
- * @attribute _peerStats
- * @param {Object} <#peerId> The Peer connection stats.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._peerStats = {};
-
-/**
- * The flag if User is using plugin.
- * @attribute _isUsingPlugin
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._isUsingPlugin = false;
-
-/**
  * <blockquote class="info">
  *   For MCU enabled Peer connections, the restart functionality may differ, you may learn more about how to workaround
  *   it <a href="http://support.temasys.com.sg/support/discussions/topics/12000002853">in this article here</a>.

@@ -52,42 +52,6 @@ Skylink.prototype.INTRODUCE_STATE = {
 };
 
 /**
- * Stores the flag that indicates if "autoIntroduce" is enabled.
- * If enabled, the Peers connecting the same Room will receive each others "enter" message ping.
- * @attribute _autoIntroduce
- * @type Boolean
- * @default true
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._autoIntroduce = true;
-
-/**
- * Stores the flag that indicates if "isPrivileged" is enabled.
- * If enabled, the User has Privileged features which has the ability to retrieve the list of
- *   Peers in the same App space with <code>getPeers()</code> method
- *   and introduce Peers to each other with <code>introducePeer</code> method.
- * @attribute isPrivileged
- * @type Boolean
- * @default false
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._isPrivileged = false;
-
-/**
- * Stores the list of Peers retrieved from the Signaling from <code>getPeers()</code> method.
- * @attribute _peerList
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._peerList = null;
-
-/**
  * <blockquote class="info">
  *   Note that this feature requires <code>"isPrivileged"</code> flag to be enabled for the App Key
  *   provided in the <a href="#method_init"><code>init()</code> method</a>, as only Users connecting using

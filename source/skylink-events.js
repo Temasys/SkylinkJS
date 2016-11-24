@@ -1,14 +1,4 @@
-/**
- * Stores the list of <code>on()</code> event handlers.
- * @attribute _EVENTS
- * @param {Array} <#event> The list of event handlers associated with the event.
- * @param {Function} <#event>.<#index> The event handler function.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._EVENTS = {
+var _eventsDocs = {
   /**
    * Event triggered when socket connection to Signaling server has opened.
    * @event channelOpen
@@ -1004,59 +994,6 @@ Skylink.prototype._EVENTS = {
    */
   candidateProcessingState: []
 };
-
-/**
- * Stores the list of <code>once()</code> event handlers.
- * These events are only triggered once.
- * @attribute _onceEvents
- * @param {Array} <#event> The list of event handlers associated with the event.
- * @param {Array} <#event>.<#index> The array of event handler function and its condition function.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._onceEvents = {};
-
-/**
- * Stores the timestamps data used for throttling.
- * @attribute _timestamp
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.8
- */
-Skylink.prototype._timestamp = {
-  socketMessage: null,
-  shareScreen: null,
-  refreshConnection: null,
-  getUserMedia: null,
-  lastRestart: null
-};
-
-/**
- * Stores the throttling interval timeout.
- * @attribute _throttlingTimeouts
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._throttlingTimeouts = {
-  shareScreen: 10000,
-  refreshConnection: 5000,
-  getUserMedia: 0
-};
-
-/**
- * Stores the flag if throttling should throw when called less than the interval timeout.
- * @attribute _throttlingShouldThrowError
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._throttlingShouldThrowError = false;
 
 /**
  * Function that subscribes a listener to an event.

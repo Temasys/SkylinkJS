@@ -91,30 +91,6 @@ Skylink.prototype.DATA_CHANNEL_MESSAGE_ERROR = {
 };
 
 /**
- * Stores the flag if Peers should have any Datachannel connections.
- * @attribute _enableDataChannel
- * @default true
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._enableDataChannel = true;
-
-/**
- * Stores the list of Peer Datachannel connections.
- * @attribute _dataChannels
- * @param {JSON} #peerId The list of Datachannels associated with Peer ID.
- * @param {RTCDataChannel} #peerId.#channelLabel The Datachannel connection.
- *   The property name <code>"main"</code> is reserved for messaging Datachannel type.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.2.0
- */
-Skylink.prototype._dataChannels = {};
-
-/**
  * Function that starts a Datachannel connection with Peer.
  * @method _createDataChannel
  * @private

@@ -1,4 +1,14 @@
 /**
+ * Contains the current version of Skylink Web SDK.
+ * @attribute VERSION
+ * @type String
+ * @readOnly
+ * @for Skylink
+ * @since 0.1.0
+ */
+Skylink.prototype.VERSION = '@@version';
+
+/**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
  * @attribute READY_STATE_CHANGE
  * @param {Number} INIT      <small>Value <code>0</code></small>
@@ -125,54 +135,6 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
 };
 
 /**
- * Stores the flag if HTTPS connections should be enforced when connecting to
- *   the API or Signaling server if App is accessing from HTTP domain.
- * HTTPS connections are enforced if App is accessing from HTTPS domains.
- * @attribute _forceSSL
- * @type Boolean
- * @default false
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._forceSSL = false;
-
-/**
- * Stores the flag if TURNS connections should be enforced when connecting to
- *   the TURN server if App is accessing from HTTP domain.
- * TURNS connections are enforced if App is accessing from HTTPS domains.
- * @attribute _forceTURNSSL
- * @type Boolean
- * @default false
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._forceTURNSSL = false;
-
-/**
- * Stores the flag if TURN connections should be enforced when connecting to Peers.
- * This filters all non "relay" ICE candidates to enforce connections via the TURN server.
- * @attribute _forceTURN
- * @type Boolean
- * @default false
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._forceTURN = false;
-
-/**
- * Stores the construct API REST path to obtain Room credentials.
- * @attribute _path
- * @type String
- * @private
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype._path = null;
-
-/**
  * Spoofs the REGIONAL_SERVER to prevent errors on deployed apps except the fact this no longer works.
  * Automatic regional selection has already been implemented hence REGIONAL_SERVER is no longer useful.
  * @attribute REGIONAL_SERVER
@@ -188,110 +150,23 @@ Skylink.prototype.REGIONAL_SERVER = {
 };
 
 /**
- * Stores the API server url.
- * @attribute _roomServer
- * @type String
- * @private
+ * Function that generates an <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">UUID</a> (Unique ID).
+ * @method generateUUID
+ * @return {String} Returns a generated UUID (Unique ID).
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.9
  */
-Skylink.prototype._roomServer = '//api.temasys.com.sg';
-
-/**
- * Stores the App Key configured in <code>init()</code>.
- * @attribute _appKey
- * @type String
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._appKey = null;
-
-/**
- * Stores the default Room name to connect to when <code>joinRoom()</code> does not provide a Room name.
- * @attribute _defaultRoom
- * @type String
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._defaultRoom = null;
-
-/**
- * Stores the <code>init()</code> credentials starting DateTime stamp in ISO 8601.
- * @attribute _roomStart
- * @type String
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._roomStart = null;
-
-/**
- * Stores the <code>init()</code> credentials duration counted in hours.
- * @attribute _roomDuration
- * @type Number
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._roomDuration = null;
-
-/**
- * Stores the <code>init()</code> generated credentials string.
- * @attribute _roomCredentials
- * @type String
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._roomCredentials = null;
-
-/**
- * Stores the current <code>init()</code> readyState.
- * @attribute _readyState
- * @type Number
- * @private
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype._readyState = 0;
-
-/**
- * Stores the "cid" used for <code>joinRoom()</code>.
- * @attribute _key
- * @type String
- * @private
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype._key = null;
-
-/**
- * Stores the "apiOwner" used for <code>joinRoom()</code>.
- * @attribute _appKeyOwner
- * @type String
- * @private
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._appKeyOwner = null;
-
-/**
- * Stores the Room credentials information for <code>joinRoom()</code>.
- * @attribute _room
- * @param {String} id The "rid" for <code>joinRoom()</code>.
- * @param {String} token The "roomCred" for <code>joinRoom()</code>.
- * @param {String} startDateTime The "start" for <code>joinRoom()</code>.
- * @param {String} duration The "len" for <code>joinRoom()</code>.
- * @param {String} connection The RTCPeerConnection constraints and configuration. This is not used in the SDK
- *   except for the "mediaConstraints" property that sets the default <code>getUserMedia()</code> settings.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._room = null;
+/* jshint ignore:start */
+Skylink.prototype.generateUUID = function() {
+  var d = new Date().getTime();
+  var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = (d + Math.random() * 16) % 16 | 0;
+    d = Math.floor(d / 16);
+    return (c === 'x' ? r : (r && 0x7 | 0x8)).toString(16);
+  });
+  return uuid;
+};
+/* jshint ignore:end */
 
 /**
  * Function that authenticates and initialises App Key used for Room connections.
@@ -1135,8 +1010,4 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     }
   });
 };
-
-
-
-
 

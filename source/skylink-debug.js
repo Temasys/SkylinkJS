@@ -43,7 +43,6 @@ Skylink.prototype.LOG_LEVEL = {
  */
 var _LOG_KEY = 'SkylinkJS';
 
-
 /**
  * Stores the list of available SDK log levels.
  * @attribute _LOG_LEVELS

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Fri Nov 25 2016 00:22:02 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Fri Nov 25 2016 10:43:41 GMT+0800 (SGT) */
 
 (function() {
 
@@ -127,7 +127,7 @@ var clone = function (obj) {
       return copy(obj);
     }
   }
-  
+
   return copy(obj);
 };
 
@@ -210,35 +210,822 @@ function Skylink() {
   if (!(this instanceof Skylink)) {
     return new Skylink();
   }
+
+  /**
+   * Stores the flag if Peers should have any Datachannel connections.
+   * @attribute _enableDataChannel
+   * @default true
+   * @type Boolean
+   * @private
+   * @for Skylink
+   * @since 0.3.0
+   */
+  this._enableDataChannel = true;
+
+  /**
+   * Stores the list of Peer Datachannel connections.
+   * @attribute _dataChannels
+   * @param {JSON} #peerId The list of Datachannels associated with Peer ID.
+   * @param {RTCDataChannel} #peerId.#channelLabel The Datachannel connection.
+   *   The property name <code>"main"</code> is reserved for messaging Datachannel type.
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.2.0
+   */
+  this._dataChannels = {};
+
+  /**
+   * Stores the list of data transfers from / to Peers.
+   * @attribute _dataTransfers
+   * @param {JSON} #transferId The data transfer session.
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._dataTransfers = {};
+
+  /**
+   * Stores the list of buffered ICE candidates that is received before
+   *   remote session description is received and set.
+   * @attribute _peerCandidatesQueue
+   * @param {Array} <#peerId> The list of the Peer connection buffered ICE candidates received.
+   * @param {Object} <#peerId>.<#index> The Peer connection buffered ICE candidate received.
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.5.1
+   */
+  this._peerCandidatesQueue = {};
+
+  /**
+   * Stores the list of Peer connection ICE candidates.
+   * @attribute _gatheredCandidates
+   * @param {JSON} <#peerId> The list of the Peer connection ICE candidates.
+   * @param {JSON} <#peerId>.sending The list of the Peer connection ICE candidates sent.
+   * @param {JSON} <#peerId>.receiving The list of the Peer connection ICE candidates received.
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.14
+   */
+  this._gatheredCandidates = {};
+
+  /**
+   * Stores the flags for ICE candidate filtering.
+   * @attribute _filterCandidatesType
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._filterCandidatesType = {
+    host: false,
+    srflx: false,
+    relay: false
+  };
+
+  /**
+   * Stores the flag that indicates if Peer connections should trickle ICE.
+   * @attribute _enableIceTrickle
+   * @type Boolean
+   * @default true
+   * @private
+   * @for Skylink
+   * @since 0.3.0
+   */
+  this._enableIceTrickle = true;
+
+  /**
+   * Stores the flag that indicates if STUN ICE servers should be used when constructing Peer connection.
+   * @attribute _enableSTUN
+   * @type Boolean
+   * @default true
+   * @private
+   * @for Skylink
+   * @since 0.5.4
+   */
+  this._enableSTUN = true;
+
+  /**
+   * Stores the flag that indicates if TURN ICE servers should be used when constructing Peer connection.
+   * @attribute _enableTURN
+   * @type Boolean
+   * @default true
+   * @private
+   * @for Skylink
+   * @since 0.5.4
+   */
+  this._enableTURN = true;
+
+  /**
+   * Stores the flag that indicates if public STUN ICE servers should be used when constructing Peer connection.
+   * @attribute _usePublicSTUN
+   * @type Boolean
+   * @default true
+   * @private
+   * @for Skylink
+   * @since 0.6.1
+   */
+  this._usePublicSTUN = true;
+
+  /**
+   * Stores the global number of Peer connection retries that would increase the wait-for-response timeout
+   *   for the Peer connection health timer.
+   * @attribute _retryCounters
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.5.10
+   */
+  this._retryCounters = {};
+
+  /**
+   * Stores the list of the Peer connections.
+   * @attribute _peerConnections
+   * @param {Object} <#peerId> The Peer connection.
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.1.0
+   */
+  this._peerConnections = {};
+
+  /**
+   * Stores the list of the Peer connections stats.
+   * @attribute _peerStats
+   * @param {Object} <#peerId> The Peer connection stats.
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._peerStats = {};
+
+  /**
+   * The flag if User is using plugin.
+   * @attribute _isUsingPlugin
+   * @type Boolean
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._isUsingPlugin = false;
+
+  /**
+   * Stores the option for the TURN protocols to use.
+   * This should configure the TURN ICE servers urls <code>?transport=protocol</code> flag.
+   * @attribute _TURNTransport
+   * @type String
+   * @default "any"
+   * @private
+   * @required
+   * @for Skylink
+   * @since 0.5.4
+   */
+  this._TURNTransport = 'any';
+
+  /**
+   * Stores the list of Peers session information.
+   * @attribute _peerInformations
+   * @param {JSON} <#peerId> The Peer session information.
+   * @param {JSON|String} <#peerId>.userData The Peer custom data.
+   * @param {JSON} <#peerId>.settings The Peer streaming information.
+   * @param {JSON} <#peerId>.mediaStatus The Peer streaming muted status.
+   * @param {JSON} <#peerId>.agent The Peer agent information.
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.3.0
+   */
+  this._peerInformations = {};
+
+  /**
+   * Stores the Signaling user credentials from the API response required for connecting to the Signaling server.
+   * @attribute _user
+   * @param {String} uid The API result "username".
+   * @param {String} token The API result "userCred".
+   * @param {String} timeStamp The API result "timeStamp".
+   * @param {String} sid The Signaling server receive user Peer ID.
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.5.6
+   */
+  this._user = null;
+
+  /**
+   * Stores the User custom data.
+   * By default, if no custom user data is set, it is an empty string <code>""</code>.
+   * @attribute _userData
+   * @type JSON|String
+   * @default ""
+   * @private
+   * @for Skylink
+   * @since 0.5.6
+   */
+  this._userData = '';
+
+  /**
+   * Stores the User connection priority weight.
+   * If Peer has a higher connection weight, it will do the offer from its Peer connection first.
+   * @attribute _peerPriorityWeight
+   * @type Number
+   * @private
+   * @for Skylink
+   * @since 0.5.0
+   */
+  this._peerPriorityWeight = 0;
+
+  /**
+   * Stores the flag that indicates if "autoIntroduce" is enabled.
+   * If enabled, the Peers connecting the same Room will receive each others "enter" message ping.
+   * @attribute _autoIntroduce
+   * @type Boolean
+   * @default true
+   * @private
+   * @for Skylink
+   * @since 0.6.1
+   */
+  this._autoIntroduce = true;
+
+  /**
+   * Stores the flag that indicates if "isPrivileged" is enabled.
+   * If enabled, the User has Privileged features which has the ability to retrieve the list of
+   *   Peers in the same App space with <code>getPeers()</code> method
+   *   and introduce Peers to each other with <code>introducePeer</code> method.
+   * @attribute isPrivileged
+   * @type Boolean
+   * @default false
+   * @private
+   * @for Skylink
+   * @since 0.6.1
+   */
+  this._isPrivileged = false;
+
+  /**
+   * Stores the list of Peers retrieved from the Signaling from <code>getPeers()</code> method.
+   * @attribute _peerList
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.1
+   */
+  this._peerList = null;
+
+  /**
+   * Stores the current Room name that User is connected to.
+   * @attribute _selectedRoom
+   * @type String
+   * @private
+   * @for Skylink
+   * @since 0.3.0
+   */
+  this._selectedRoom = null;
+
+  /**
+   * Stores the flag that indicates if Room is locked.
+   * @attribute _roomLocked
+   * @type Boolean
+   * @private
+   * @for Skylink
+   * @since 0.5.2
+   */
+  this._roomLocked = false;
+
+  /**
+   * Stores the flag that indicates if User is connected to the Room.
+   * @attribute _inRoom
+   * @type Boolean
+   * @private
+   * @for Skylink
+   * @since 0.4.0
+   */
+  this._inRoom = false;
+
+  /**
+   * Stores the list of <code>on()</code> event handlers.
+   * @attribute _EVENTS
+   * @param {Array} <#event> The list of event handlers associated with the event.
+   * @param {Function} <#event>.<#index> The event handler function.
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.5.2
+   */
+  this._EVENTS = {};
+
+  /**
+   * Stores the list of <code>once()</code> event handlers.
+   * These events are only triggered once.
+   * @attribute _onceEvents
+   * @param {Array} <#event> The list of event handlers associated with the event.
+   * @param {Array} <#event>.<#index> The array of event handler function and its condition function.
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.5.4
+   */
+  this._onceEvents = {};
+
+  /**
+   * Stores the timestamps data used for throttling.
+   * @attribute _timestamp
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.5.8
+   */
+  this._timestamp = {
+    socketMessage: null,
+    shareScreen: null,
+    refreshConnection: null,
+    getUserMedia: null,
+    lastRestart: null
+  };
+
+  /**
+   * Stores the throttling interval timeout.
+   * @attribute _throttlingTimeouts
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._throttlingTimeouts = {
+    shareScreen: 10000,
+    refreshConnection: 5000,
+    getUserMedia: 0
+  };
+
+  /**
+   * Stores the flag if throttling should throw when called less than the interval timeout.
+   * @attribute _throttlingShouldThrowError
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._throttlingShouldThrowError = false;
+
+  /**
+   * Stores the current socket connection information.
+   * @attribute _socketSession
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.13
+   */
+  this._socketSession = {};
+
+  /**
+   * Stores the queued socket messages.
+   * This is to prevent too many sent over less than a second interval that might cause dropped messages
+   *   or jams to the Signaling connection.
+   * @attribute _socketMessageQueue
+   * @type Array
+   * @private
+   * @for Skylink
+   * @since 0.5.8
+   */
+  this._socketMessageQueue = [];
+
+  /**
+   * Stores the <code>setTimeout</code> to sent queued socket messages.
+   * @attribute _socketMessageTimeout
+   * @type Object
+   * @private
+   * @for Skylink
+   * @since 0.5.8
+   */
+  this._socketMessageTimeout = null;
+
+  /**
+   * Stores the list of socket ports to use to connect to the Signaling.
+   * These ports are defined by default which is commonly used currently by the Signaling.
+   * Should re-evaluate this sometime.
+   * @attribute _socketPorts
+   * @param {Array} http: The list of HTTP socket ports.
+   * @param {Array} https: The list of HTTPS socket ports.
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.5.8
+   */
+  this._socketPorts = {
+    'http:': [80, 3000],
+    'https:': [443, 3443]
+  };
+
+  /**
+   * Stores the flag that indicates if socket connection to the Signaling has opened.
+   * @attribute _channelOpen
+   * @type Boolean
+   * @private
+   * @for Skylink
+   * @since 0.5.2
+   */
+  this._channelOpen = false;
+
+  /**
+   * Stores the Signaling server url.
+   * @attribute _signalingServer
+   * @type String
+   * @private
+   * @for Skylink
+   * @since 0.5.2
+   */
+  this._signalingServer = null;
+
+  /**
+   * Stores the Signaling server protocol.
+   * @attribute _signalingServerProtocol
+   * @type String
+   * @private
+   * @for Skylink
+   * @since 0.5.4
+   */
+  this._signalingServerProtocol = window.location.protocol;
+
+  /**
+   * Stores the Signaling server port.
+   * @attribute _signalingServerPort
+   * @type Number
+   * @private
+   * @for Skylink
+   * @since 0.5.4
+   */
+  this._signalingServerPort = null;
+
+  /**
+   * Stores the Signaling socket connection object.
+   * @attribute _socket
+   * @type io
+   * @private
+   * @for Skylink
+   * @since 0.1.0
+   */
+  this._socket = null;
+
+  /**
+   * Stores the socket connection timeout when establishing connection to the Signaling.
+   * @attribute _socketTimeout
+   * @type Number
+   * @private
+   * @for Skylink
+   * @since 0.5.4
+   */
+  this._socketTimeout = 20000;
+
+  /**
+   * Stores the flag that indicates if XDomainRequest is used for IE 8/9.
+   * @attribute _socketUseXDR
+   * @type Boolean
+   * @private
+   * @for Skylink
+   * @since 0.5.4
+   */
+  this._socketUseXDR = false;
+
+  /**
+   * Stores the value if ICE restart is supported.
+   * @attribute _enableIceRestart
+   * @type String
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._enableIceRestart = window.webrtcDetectedBrowser === 'firefox' ?
+    window.webrtcDetectedVersion >= 48 : true;
+
+  /**
+   * Stores the flag if MCU environment is enabled.
+   * @attribute _hasMCU
+   * @type Boolean
+   * @private
+   * @for Skylink
+   * @since 0.5.4
+   */
+  this._hasMCU = false;
+
+  /**
+   * Stores the flag that indicates if User should only receive Stream from Peer connections but
+   *   do not send User's Stream to Peer connections.
+   * @attribute _receiveOnly
+   * @type Boolean
+   * @private
+   * @for Skylink
+   * @since 0.5.10
+   */
+  this._receiveOnly = false;
+
+  /**
+   * Stores the flag if HTTPS connections should be enforced when connecting to
+   *   the API or Signaling server if App is accessing from HTTP domain.
+   * HTTPS connections are enforced if App is accessing from HTTPS domains.
+   * @attribute _forceSSL
+   * @type Boolean
+   * @default false
+   * @private
+   * @for Skylink
+   * @since 0.5.4
+   */
+  this._forceSSL = false;
+
+  /**
+   * Stores the flag if TURNS connections should be enforced when connecting to
+   *   the TURN server if App is accessing from HTTP domain.
+   * TURNS connections are enforced if App is accessing from HTTPS domains.
+   * @attribute _forceTURNSSL
+   * @type Boolean
+   * @default false
+   * @private
+   * @for Skylink
+   * @since 0.6.1
+   */
+  this._forceTURNSSL = false;
+
+  /**
+   * Stores the flag if TURN connections should be enforced when connecting to Peers.
+   * This filters all non "relay" ICE candidates to enforce connections via the TURN server.
+   * @attribute _forceTURN
+   * @type Boolean
+   * @default false
+   * @private
+   * @for Skylink
+   * @since 0.6.1
+   */
+  this._forceTURN = false;
+
+  /**
+   * Stores the construct API REST path to obtain Room credentials.
+   * @attribute _path
+   * @type String
+   * @private
+   * @for Skylink
+   * @since 0.1.0
+   */
+  this._path = null;
+
+  /**
+   * Stores the API server url.
+   * @attribute _roomServer
+   * @type String
+   * @private
+   * @for Skylink
+   * @since 0.5.2
+   */
+  this._roomServer = '//api.temasys.com.sg';
+
+  /**
+   * Stores the App Key configured in <code>init()</code>.
+   * @attribute _appKey
+   * @type String
+   * @private
+   * @for Skylink
+   * @since 0.3.0
+   */
+  this._appKey = null;
+
+  /**
+   * Stores the default Room name to connect to when <code>joinRoom()</code> does not provide a Room name.
+   * @attribute _defaultRoom
+   * @type String
+   * @private
+   * @for Skylink
+   * @since 0.3.0
+   */
+  this._defaultRoom = null;
+
+  /**
+   * Stores the <code>init()</code> credentials starting DateTime stamp in ISO 8601.
+   * @attribute _roomStart
+   * @type String
+   * @private
+   * @for Skylink
+   * @since 0.3.0
+   */
+  this._roomStart = null;
+
+  /**
+   * Stores the <code>init()</code> credentials duration counted in hours.
+   * @attribute _roomDuration
+   * @type Number
+   * @private
+   * @for Skylink
+   * @since 0.3.0
+   */
+  this._roomDuration = null;
+
+  /**
+   * Stores the <code>init()</code> generated credentials string.
+   * @attribute _roomCredentials
+   * @type String
+   * @private
+   * @for Skylink
+   * @since 0.3.0
+   */
+  this._roomCredentials = null;
+
+  /**
+   * Stores the current <code>init()</code> readyState.
+   * @attribute _readyState
+   * @type Number
+   * @private
+   * @for Skylink
+   * @since 0.1.0
+   */
+  this._readyState = 0;
+
+  /**
+   * Stores the "cid" used for <code>joinRoom()</code>.
+   * @attribute _key
+   * @type String
+   * @private
+   * @for Skylink
+   * @since 0.1.0
+   */
+  this._key = null;
+
+  /**
+   * Stores the "apiOwner" used for <code>joinRoom()</code>.
+   * @attribute _appKeyOwner
+   * @type String
+   * @private
+   * @for Skylink
+   * @since 0.5.2
+   */
+  this._appKeyOwner = null;
+
+  /**
+   * Stores the Room credentials information for <code>joinRoom()</code>.
+   * @attribute _room
+   * @param {String} id The "rid" for <code>joinRoom()</code>.
+   * @param {String} token The "roomCred" for <code>joinRoom()</code>.
+   * @param {String} startDateTime The "start" for <code>joinRoom()</code>.
+   * @param {String} duration The "len" for <code>joinRoom()</code>.
+   * @param {String} connection The RTCPeerConnection constraints and configuration. This is not used in the SDK
+   *   except for the "mediaConstraints" property that sets the default <code>getUserMedia()</code> settings.
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.5.2
+   */
+  this._room = null;
+
+  /**
+   * Stores the list of Peer messages timestamp.
+   * @attribute _peerMessagesStamps
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.15
+   */
+  this._peerMessagesStamps = {};
+
+  /**
+   * Stores the flag that indicates if <code>getUserMedia()</code> should fallback to retrieve
+   *   audio only Stream after retrieval of audio and video Stream had failed.
+   * @attribute _audioFallback
+   * @type Boolean
+   * @default false
+   * @private
+   * @for Skylink
+   * @since 0.5.4
+   */
+  this._audioFallback = false;
+
+  /**
+   * Stores the Streams.
+   * @attribute _streams
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.15
+   */
+  this._streams = {
+    userMedia: null,
+    screenshare: null
+  };
+
+  /**
+   * Stores the default camera Stream settings.
+   * @attribute _streamsDefaultSettings
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.15
+   */
+  this._streamsDefaultSettings = {
+    userMedia: {
+      audio: {
+        stereo: false
+      },
+      video: {
+        resolution: {
+          width: 640,
+          height: 480
+        },
+        frameRate: 50
+      }
+    },
+    screenshare: {
+      video: true
+    }
+  };
+
+  /**
+   * Stores all the Stream required muted settings.
+   * @attribute _streamsMutedSettings
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.15
+   */
+  this._streamsMutedSettings = {
+    audioMuted: false,
+    videoMuted: false
+  };
+
+  /**
+   * Stores all the Stream sending maximum bandwidth settings.
+   * @attribute _streamsBandwidthSettings
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.15
+   */
+  this._streamsBandwidthSettings = {
+    googleX: {},
+    bAS: {}
+  };
+
+  /**
+   * Stores all the Stream stopped callbacks.
+   * @attribute _streamsStoppedCbs
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.15
+   */
+  this._streamsStoppedCbs = {};
+
+  /**
+   * Stores the preferred sending Peer connection streaming audio codec.
+   * @attribute _selectedAudioCodec
+   * @type String
+   * @default "auto"
+   * @private
+   * @for Skylink
+   * @since 0.5.10
+   */
+  this._selectedAudioCodec = 'auto';
+
+  /**
+   * Stores the preferred sending Peer connection streaming video codec.
+   * @attribute _selectedVideoCodec
+   * @type String
+   * @default "auto"
+   * @private
+   * @for Skylink
+   * @since 0.5.10
+   */
+  this._selectedVideoCodec = 'auto';
+
+  /**
+   * Stores the flag if ulpfec and red codecs should be removed.
+   * @attribute _disableVideoFecCodecs
+   * @type Boolean
+   * @default false
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._disableVideoFecCodecs = false;
+
+  /**
+   * Stores the flag if CN (Comfort Noise) codec should be removed.
+   * @attribute _disableComfortNoiseCodec
+   * @type Boolean
+   * @default false
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._disableComfortNoiseCodec = false;
+
+  /**
+   * Stores the flag if REMB feedback packets should be removed.
+   * @attribute _disableREMB
+   * @type Boolean
+   * @default false
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._disableREMB = false;
 }
-
-/**
- * Contains the current version of Skylink Web SDK.
- * @attribute VERSION
- * @type String
- * @readOnly
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype.VERSION = '0.6.16';
-
-/**
- * Function that generates an <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">UUID</a> (Unique ID).
- * @method generateUUID
- * @return {String} Returns a generated UUID (Unique ID).
- * @for Skylink
- * @since 0.5.9
- */
-Skylink.prototype.generateUUID = function() {
-  var d = new Date().getTime();
-  var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = (d + Math.random() * 16) % 16 | 0;
-    d = Math.floor(d / 16);
-    return (c == 'x' ? r : (r & 0x7 | 0x8)).toString(16);
-  });
-  return uuid;
-};
-
 Skylink.prototype.DATA_CHANNEL_STATE = {
   CONNECTING: 'connecting',
   OPEN: 'open',
@@ -299,30 +1086,6 @@ Skylink.prototype.DATA_CHANNEL_MESSAGE_ERROR = {
   MESSAGE: 'message',
   TRANSFER: 'transfer'
 };
-
-/**
- * Stores the flag if Peers should have any Datachannel connections.
- * @attribute _enableDataChannel
- * @default true
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._enableDataChannel = true;
-
-/**
- * Stores the list of Peer Datachannel connections.
- * @attribute _dataChannels
- * @param {JSON} #peerId The list of Datachannels associated with Peer ID.
- * @param {RTCDataChannel} #peerId.#channelLabel The Datachannel connection.
- *   The property name <code>"main"</code> is reserved for messaging Datachannel type.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.2.0
- */
-Skylink.prototype._dataChannels = {};
 
 /**
  * Function that starts a Datachannel connection with Peer.
@@ -921,17 +1684,6 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
  * @since 0.6.16
  */
 Skylink.prototype._SUPPORTED_WEB_AGENTS = ['chrome', 'firefox', 'safari', 'IE', 'edge' ,'opera', 'bowser', 'blink'];
-
-/**
- * Stores the list of data transfers from / to Peers.
- * @attribute _dataTransfers
- * @param {JSON} #transferId The data transfer session.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._dataTransfers = {};
 
 /**
  * <blockquote class="info">
@@ -3022,46 +3774,6 @@ Skylink.prototype.CANDIDATE_PROCESSING_STATE = {
 };
 
 /**
- * Stores the list of buffered ICE candidates that is received before
- *   remote session description is received and set.
- * @attribute _peerCandidatesQueue
- * @param {Array} <#peerId> The list of the Peer connection buffered ICE candidates received.
- * @param {Object} <#peerId>.<#index> The Peer connection buffered ICE candidate received.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.1
- */
-Skylink.prototype._peerCandidatesQueue = {};
-
-/**
- * Stores the list of Peer connection ICE candidates.
- * @attribute _gatheredCandidates
- * @param {JSON} <#peerId> The list of the Peer connection ICE candidates.
- * @param {JSON} <#peerId>.sending The list of the Peer connection ICE candidates sent.
- * @param {JSON} <#peerId>.receiving The list of the Peer connection ICE candidates received.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.14
- */
-Skylink.prototype._gatheredCandidates = {};
-
-/**
- * Stores the flags for ICE candidate filtering.
- * @attribute _filterCandidatesType
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._filterCandidatesType = {
-  host: false,
-  srflx: false,
-  relay: false
-};
-
-/**
  * Function that handles the Peer connection gathered ICE candidate to be sent.
  * @method _onIceCandidate
  * @private
@@ -3329,63 +4041,6 @@ Skylink.prototype.TURN_TRANSPORT = {
 };
 
 /**
- * Stores the flag that indicates if Peer connections should trickle ICE.
- * @attribute _enableIceTrickle
- * @type Boolean
- * @default true
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._enableIceTrickle = true;
-
-/**
- * Stores the flag that indicates if STUN ICE servers should be used when constructing Peer connection.
- * @attribute _enableSTUN
- * @type Boolean
- * @default true
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._enableSTUN = true;
-
-/**
- * Stores the flag that indicates if TURN ICE servers should be used when constructing Peer connection.
- * @attribute _enableTURN
- * @type Boolean
- * @default true
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._enableTURN = true;
-
-/**
- * Stores the flag that indicates if public STUN ICE servers should be used when constructing Peer connection.
- * @attribute _usePublicSTUN
- * @type Boolean
- * @default true
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._usePublicSTUN = true;
-
-/**
- * Stores the option for the TURN protocols to use.
- * This should configure the TURN ICE servers urls <code>?transport=protocol</code> flag.
- * @attribute _TURNTransport
- * @type String
- * @default "any"
- * @private
- * @required
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._TURNTransport = 'any';
-
-/**
  * Function that filters and configures the ICE servers received from Signaling
  *   based on the <code>init()</code> configuration and returns the updated
  *   list of ICE servers to be used when constructing Peer connection.
@@ -3634,49 +4289,6 @@ Skylink.prototype.SERVER_PEER_TYPE = {
   MCU: 'mcu'
   //SIP: 'sip'
 };
-
-/**
- * Stores the global number of Peer connection retries that would increase the wait-for-response timeout
- *   for the Peer connection health timer.
- * @attribute _retryCounters
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype._retryCounters = {};
-
-/**
- * Stores the list of the Peer connections.
- * @attribute _peerConnections
- * @param {Object} <#peerId> The Peer connection.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype._peerConnections = {};
-
-/**
- * Stores the list of the Peer connections stats.
- * @attribute _peerStats
- * @param {Object} <#peerId> The Peer connection stats.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._peerStats = {};
-
-/**
- * The flag if User is using plugin.
- * @attribute _isUsingPlugin
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._isUsingPlugin = false;
 
 /**
  * <blockquote class="info">
@@ -5077,69 +5689,6 @@ Skylink.prototype._parseConnectionStats = function(prevStats, stats, prop) {
 
 
 
-Skylink.prototype._peerInformations = {};
-
-/**
- * Stores the Signaling user credentials from the API response required for connecting to the Signaling server.
- * @attribute _user
- * @param {String} uid The API result "username".
- * @param {String} token The API result "userCred".
- * @param {String} timeStamp The API result "timeStamp".
- * @param {String} sid The Signaling server receive user Peer ID.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._user = null;
-
-/**
- * Stores the User custom data.
- * By default, if no custom user data is set, it is an empty string <code>""</code>.
- * @attribute _userData
- * @type JSON|String
- * @default ""
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._userData = '';
-
-/**
- * Function that overwrites the User current custom data.
- * @method setUserData
- * @param {JSON|String} userData The updated custom data.
- * @trigger <ol class="desc-seq">
- *   <li>Updates User custom data. <ol>
- *   <li>If User is in Room: <ol>
- *   <li><a href="#event_peerUpdated"><code>peerUpdated</code> event</a> triggers with parameter payload
- *   <code>isSelf</code> value as <code>true</code>.</li></ol></li></ol></li></ol>
- * @example
- *   // Example 1: Set/Update User custom data before joinRoom()
- *   var userData = "beforejoin";
- *
- *   skylinkDemo.setUserData(userData);
- *
- *   skylinkDemo.joinRoom(function (error, success) {
- *      if (error) return;
- *      if (success.peerInfo.userData === userData) {
- *        console.log("User data is sent");
- *      }
- *   });
- *
- *   // Example 2: Update User custom data after joinRoom()
- *   var userData = "afterjoin";
- *
- *   skylinkDemo.joinRoom(function (error, success) {
- *     if (error) return;
- *     skylinkDemo.setUserData(userData);
- *     if (skylinkDemo.getPeerInfo().userData === userData) {
- *       console.log("User data is updated and sent");
- *     }
- *   });
- * @for Skylink
- * @since 0.5.5
- */
 Skylink.prototype.setUserData = function(userData) {
   var self = this;
   var updatedUserData = '';
@@ -5380,17 +5929,6 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
   ANSWER: 'answer',
   ERROR: 'error'
 };
-
-/**
- * Stores the User connection priority weight.
- * If Peer has a higher connection weight, it will do the offer from its Peer connection first.
- * @attribute _peerPriorityWeight
- * @type Number
- * @private
- * @for Skylink
- * @since 0.5.0
- */
-Skylink.prototype._peerPriorityWeight = 0;
 
 /**
  * Function that creates the Peer connection offer session description.
@@ -5659,42 +6197,6 @@ Skylink.prototype.INTRODUCE_STATE = {
 };
 
 /**
- * Stores the flag that indicates if "autoIntroduce" is enabled.
- * If enabled, the Peers connecting the same Room will receive each others "enter" message ping.
- * @attribute _autoIntroduce
- * @type Boolean
- * @default true
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._autoIntroduce = true;
-
-/**
- * Stores the flag that indicates if "isPrivileged" is enabled.
- * If enabled, the User has Privileged features which has the ability to retrieve the list of
- *   Peers in the same App space with <code>getPeers()</code> method
- *   and introduce Peers to each other with <code>introducePeer</code> method.
- * @attribute isPrivileged
- * @type Boolean
- * @default false
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._isPrivileged = false;
-
-/**
- * Stores the list of Peers retrieved from the Signaling from <code>getPeers()</code> method.
- * @attribute _peerList
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._peerList = null;
-
-/**
  * <blockquote class="info">
  *   Note that this feature requires <code>"isPrivileged"</code> flag to be enabled for the App Key
  *   provided in the <a href="#method_init"><code>init()</code> method</a>, as only Users connecting using
@@ -5925,36 +6427,6 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
   SERVER_ERROR: 'serverError',
   KEY_ERROR: 'keyFailed'
 };
-
-/**
- * Stores the current Room name that User is connected to.
- * @attribute _selectedRoom
- * @type String
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._selectedRoom = null;
-
-/**
- * Stores the flag that indicates if Room is locked.
- * @attribute _roomLocked
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._roomLocked = false;
-
-/**
- * Stores the flag that indicates if User is connected to the Room.
- * @attribute _inRoom
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.4.0
- */
-Skylink.prototype._inRoom = false;
 
 /**
  * Function that starts the Room session.
@@ -6533,6 +7005,29 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 
 };
 
+Skylink.prototype.VERSION = '0.6.16';
+
+/**
+ * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
+ * @attribute READY_STATE_CHANGE
+ * @param {Number} INIT      <small>Value <code>0</code></small>
+ *   The value of the state when <code>init()</code> has just started.
+ * @param {Number} LOADING   <small>Value <code>1</code></small>
+ *   The value of the state when <code>init()</code> is authenticating App Key provided
+ *   (and with credentials if provided as well) with the Auth server.
+ * @param {Number} COMPLETED <small>Value <code>2</code></small>
+ *   The value of the state when <code>init()</code> has successfully authenticated with the Auth server.
+ *   Room session token is generated for joining the <code>defaultRoom</code> provided in <code>init()</code>.
+ *   <small>Room session token has to be generated each time User switches to a different Room
+ *   in <a href="#method_joinRoom"><code>joinRoom()</code> method</a>.</small>
+ * @param {Number} ERROR     <small>Value <code>-1</code></small>
+ *   The value of the state when <code>init()</code> has failed authenticating with the Auth server.
+ *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.1.0
+ */
 Skylink.prototype.READY_STATE_CHANGE = {
   INIT: 0,
   LOADING: 1,
@@ -6639,54 +7134,6 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
 };
 
 /**
- * Stores the flag if HTTPS connections should be enforced when connecting to
- *   the API or Signaling server if App is accessing from HTTP domain.
- * HTTPS connections are enforced if App is accessing from HTTPS domains.
- * @attribute _forceSSL
- * @type Boolean
- * @default false
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._forceSSL = false;
-
-/**
- * Stores the flag if TURNS connections should be enforced when connecting to
- *   the TURN server if App is accessing from HTTP domain.
- * TURNS connections are enforced if App is accessing from HTTPS domains.
- * @attribute _forceTURNSSL
- * @type Boolean
- * @default false
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._forceTURNSSL = false;
-
-/**
- * Stores the flag if TURN connections should be enforced when connecting to Peers.
- * This filters all non "relay" ICE candidates to enforce connections via the TURN server.
- * @attribute _forceTURN
- * @type Boolean
- * @default false
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._forceTURN = false;
-
-/**
- * Stores the construct API REST path to obtain Room credentials.
- * @attribute _path
- * @type String
- * @private
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype._path = null;
-
-/**
  * Spoofs the REGIONAL_SERVER to prevent errors on deployed apps except the fact this no longer works.
  * Automatic regional selection has already been implemented hence REGIONAL_SERVER is no longer useful.
  * @attribute REGIONAL_SERVER
@@ -6702,110 +7149,23 @@ Skylink.prototype.REGIONAL_SERVER = {
 };
 
 /**
- * Stores the API server url.
- * @attribute _roomServer
- * @type String
- * @private
+ * Function that generates an <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">UUID</a> (Unique ID).
+ * @method generateUUID
+ * @return {String} Returns a generated UUID (Unique ID).
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.9
  */
-Skylink.prototype._roomServer = '//api.temasys.com.sg';
-
-/**
- * Stores the App Key configured in <code>init()</code>.
- * @attribute _appKey
- * @type String
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._appKey = null;
-
-/**
- * Stores the default Room name to connect to when <code>joinRoom()</code> does not provide a Room name.
- * @attribute _defaultRoom
- * @type String
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._defaultRoom = null;
-
-/**
- * Stores the <code>init()</code> credentials starting DateTime stamp in ISO 8601.
- * @attribute _roomStart
- * @type String
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._roomStart = null;
-
-/**
- * Stores the <code>init()</code> credentials duration counted in hours.
- * @attribute _roomDuration
- * @type Number
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._roomDuration = null;
-
-/**
- * Stores the <code>init()</code> generated credentials string.
- * @attribute _roomCredentials
- * @type String
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._roomCredentials = null;
-
-/**
- * Stores the current <code>init()</code> readyState.
- * @attribute _readyState
- * @type Number
- * @private
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype._readyState = 0;
-
-/**
- * Stores the "cid" used for <code>joinRoom()</code>.
- * @attribute _key
- * @type String
- * @private
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype._key = null;
-
-/**
- * Stores the "apiOwner" used for <code>joinRoom()</code>.
- * @attribute _appKeyOwner
- * @type String
- * @private
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._appKeyOwner = null;
-
-/**
- * Stores the Room credentials information for <code>joinRoom()</code>.
- * @attribute _room
- * @param {String} id The "rid" for <code>joinRoom()</code>.
- * @param {String} token The "roomCred" for <code>joinRoom()</code>.
- * @param {String} startDateTime The "start" for <code>joinRoom()</code>.
- * @param {String} duration The "len" for <code>joinRoom()</code>.
- * @param {String} connection The RTCPeerConnection constraints and configuration. This is not used in the SDK
- *   except for the "mediaConstraints" property that sets the default <code>getUserMedia()</code> settings.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._room = null;
+/* jshint ignore:start */
+Skylink.prototype.generateUUID = function() {
+  var d = new Date().getTime();
+  var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = (d + Math.random() * 16) % 16 | 0;
+    d = Math.floor(d / 16);
+    return (c === 'x' ? r : (r && 0x7 | 0x8)).toString(16);
+  });
+  return uuid;
+};
+/* jshint ignore:end */
 
 /**
  * Function that authenticates and initialises App Key used for Room connections.
@@ -7651,10 +8011,6 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
 };
 
 
-
-
-
-
 Skylink.prototype.LOG_LEVEL = {
   DEBUG: 4,
   LOG: 3,
@@ -7675,7 +8031,6 @@ Skylink.prototype.LOG_LEVEL = {
  * @since 0.5.4
  */
 var _LOG_KEY = 'SkylinkJS';
-
 
 /**
  * Stores the list of available SDK log levels.
@@ -8072,7 +8427,7 @@ Skylink.prototype.setDebugMode = function(isDebugMode) {
   _enableDebugTrace = true;
   _enableDebugStack = true;
 };
-Skylink.prototype._EVENTS = {
+var _eventsDocs = {
   /**
    * Event triggered when socket connection to Signaling server has opened.
    * @event channelOpen
@@ -9070,59 +9425,6 @@ Skylink.prototype._EVENTS = {
 };
 
 /**
- * Stores the list of <code>once()</code> event handlers.
- * These events are only triggered once.
- * @attribute _onceEvents
- * @param {Array} <#event> The list of event handlers associated with the event.
- * @param {Array} <#event>.<#index> The array of event handler function and its condition function.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._onceEvents = {};
-
-/**
- * Stores the timestamps data used for throttling.
- * @attribute _timestamp
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.8
- */
-Skylink.prototype._timestamp = {
-  socketMessage: null,
-  shareScreen: null,
-  refreshConnection: null,
-  getUserMedia: null,
-  lastRestart: null
-};
-
-/**
- * Stores the throttling interval timeout.
- * @attribute _throttlingTimeouts
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._throttlingTimeouts = {
-  shareScreen: 10000,
-  refreshConnection: 5000,
-  getUserMedia: 0
-};
-
-/**
- * Stores the flag if throttling should throw when called less than the interval timeout.
- * @attribute _throttlingShouldThrowError
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._throttlingShouldThrowError = false;
-
-/**
  * Function that subscribes a listener to an event.
  * @method on
  * @param {String} eventName The event.
@@ -9428,125 +9730,6 @@ Skylink.prototype.SOCKET_FALLBACK = {
   LONG_POLLING: 'fallbackLongPollingNonSSL',
   LONG_POLLING_SSL: 'fallbackLongPollingSSL'
 };
-
-/**
- * Stores the current socket connection information.
- * @attribute _socketSession
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.13
- */
-Skylink.prototype._socketSession = {};
-
-/**
- * Stores the queued socket messages.
- * This is to prevent too many sent over less than a second interval that might cause dropped messages
- *   or jams to the Signaling connection.
- * @attribute _socketMessageQueue
- * @type Array
- * @private
- * @for Skylink
- * @since 0.5.8
- */
-Skylink.prototype._socketMessageQueue = [];
-
-/**
- * Stores the <code>setTimeout</code> to sent queued socket messages.
- * @attribute _socketMessageTimeout
- * @type Object
- * @private
- * @for Skylink
- * @since 0.5.8
- */
-Skylink.prototype._socketMessageTimeout = null;
-
-/**
- * Stores the list of socket ports to use to connect to the Signaling.
- * These ports are defined by default which is commonly used currently by the Signaling.
- * Should re-evaluate this sometime.
- * @attribute _socketPorts
- * @param {Array} http: The list of HTTP socket ports.
- * @param {Array} https: The list of HTTPS socket ports.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.8
- */
-Skylink.prototype._socketPorts = {
-  'http:': [80, 3000],
-  'https:': [443, 3443]
-};
-
-/**
- * Stores the flag that indicates if socket connection to the Signaling has opened.
- * @attribute _channelOpen
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._channelOpen = false;
-
-/**
- * Stores the Signaling server url.
- * @attribute _signalingServer
- * @type String
- * @private
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._signalingServer = null;
-
-/**
- * Stores the Signaling server protocol.
- * @attribute _signalingServerProtocol
- * @type String
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._signalingServerProtocol = window.location.protocol;
-
-/**
- * Stores the Signaling server port.
- * @attribute _signalingServerPort
- * @type Number
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._signalingServerPort = null;
-
-/**
- * Stores the Signaling socket connection object.
- * @attribute _socket
- * @type io
- * @private
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype._socket = null;
-
-/**
- * Stores the socket connection timeout when establishing connection to the Signaling.
- * @attribute _socketTimeout
- * @type Number
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._socketTimeout = 20000;
-
-/**
- * Stores the flag that indicates if XDomainRequest is used for IE 8/9.
- * @attribute _socketUseXDR
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._socketUseXDR = false;
 
 /**
  * Function that sends a socket message over the socket connection to the Signaling.
@@ -9979,17 +10162,6 @@ Skylink.prototype._closeChannel = function() {
 Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.2';
 
 /**
- * Stores the value if ICE restart is supported.
- * @attribute _enableIceRestart
- * @type String
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._enableIceRestart = window.webrtcDetectedBrowser === 'firefox' ?
-  window.webrtcDetectedVersion >= 48 : true;
-
-/**
  * Stores the list of socket messaging protocol types.
  * See confluence docs for the list based on the current <code>SM_PROTOCOL_VERSION</code>.
  * @attribute _SIG_MESSAGE_TYPE
@@ -10026,16 +10198,6 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
 };
 
 /**
- * Stores the flag if MCU environment is enabled.
- * @attribute _hasMCU
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._hasMCU = false;
-
-/**
  * Stores the list of socket messaging protocol types to queue when sent less than a second interval.
  * @attribute _groupMessageList
  * @type Array
@@ -10050,39 +10212,6 @@ Skylink.prototype._groupMessageList = [
   Skylink.prototype._SIG_MESSAGE_TYPE.MUTE_VIDEO,
   Skylink.prototype._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
 ];
-
-/**
- * Stores the flag that indicates if MCU is available in the Room.
- * If App Key enables MCU but this is false, this means likely there are problems connecting to the MCU server.
- * @attribute _hasMCU
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._hasMCU = false;
-
-
-/**
- * Stores the flag that indicates if User should only receive Stream from Peer connections but
- *   do not send User's Stream to Peer connections.
- * @attribute _receiveOnly
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype._receiveOnly = false;
-
-/**
- * Stores the list of Peer messages timestamp.
- * @attribute _peerMessagesStamps
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.15
- */
-Skylink.prototype._peerMessagesStamps = {};
 
 /**
  * <blockquote class="info">
@@ -11445,93 +11574,6 @@ Skylink.prototype.MEDIA_ACCESS_FALLBACK_STATE = {
   FALLBACKED: 1,
   ERROR: -1
 };
-
-/**
- * Stores the flag that indicates if <code>getUserMedia()</code> should fallback to retrieve
- *   audio only Stream after retrieval of audio and video Stream had failed.
- * @attribute _audioFallback
- * @type Boolean
- * @default false
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._audioFallback = false;
-
-/**
- * Stores the Streams.
- * @attribute _streams
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.15
- */
-Skylink.prototype._streams = {
-  userMedia: null,
-  screenshare: null
-};
-
-/**
- * Stores the default camera Stream settings.
- * @attribute _streamsDefaultSettings
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.15
- */
-Skylink.prototype._streamsDefaultSettings = {
-  userMedia: {
-    audio: {
-      stereo: false
-    },
-    video: {
-      resolution: {
-        width: 640,
-        height: 480
-      },
-      frameRate: 50
-    }
-  },
-  screenshare: {
-    video: true
-  }
-};
-
-/**
- * Stores all the Stream required muted settings.
- * @attribute _streamsMutedSettings
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.15
- */
-Skylink.prototype._streamsMutedSettings = {
-  audioMuted: false,
-  videoMuted: false
-};
-
-/**
- * Stores all the Stream sending maximum bandwidth settings.
- * @attribute _streamsBandwidthSettings
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.15
- */
-Skylink.prototype._streamsBandwidthSettings = {
-  googleX: {},
-  bAS: {}
-};
-
-/**
- * Stores all the Stream stopped callbacks.
- * @attribute _streamsStoppedCbs
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.15
- */
-Skylink.prototype._streamsStoppedCbs = {};
 
 /**
  * <blockquote class="info">
@@ -13238,59 +13280,6 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
     }
   }
 };
-Skylink.prototype._selectedAudioCodec = 'auto';
-
-/**
- * Stores the preferred sending Peer connection streaming video codec.
- * @attribute _selectedVideoCodec
- * @type String
- * @default "auto"
- * @private
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype._selectedVideoCodec = 'auto';
-
-/**
- * Stores the flag if ulpfec and red codecs should be removed.
- * @attribute _disableVideoFecCodecs
- * @type Boolean
- * @default false
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._disableVideoFecCodecs = false;
-
-/**
- * Stores the flag if CN (Comfort Noise) codec should be removed.
- * @attribute _disableComfortNoiseCodec
- * @type Boolean
- * @default false
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._disableComfortNoiseCodec = false;
-
-/**
- * Stores the flag if REMB feedback packets should be removed.
- * @attribute _disableREMB
- * @type Boolean
- * @default false
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._disableREMB = false;
-
-/**
- * Function that modifies the session description to configure settings for OPUS audio codec.
- * @method _setSDPOpusConfig
- * @private
- * @for Skylink
- * @since 0.6.16
- */
 Skylink.prototype._setSDPOpusConfig = function(targetMid, sessionDescription) {
   var sdpLines = sessionDescription.sdp.split('\r\n');
   var payload = null;
@@ -13910,6 +13899,7 @@ Skylink.prototype._handleSDPChromeBundleBug = function(targetMid, sessionDescrip
 
   return sessionDescription.sdp;
 };
-this.Skylink = Skylink;
-window.Skylink = Skylink;
+  this.Skylink = Skylink;
+  window.Skylink = Skylink;
+
 }).call(this);

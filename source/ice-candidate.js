@@ -62,46 +62,6 @@ Skylink.prototype.CANDIDATE_PROCESSING_STATE = {
 };
 
 /**
- * Stores the list of buffered ICE candidates that is received before
- *   remote session description is received and set.
- * @attribute _peerCandidatesQueue
- * @param {Array} <#peerId> The list of the Peer connection buffered ICE candidates received.
- * @param {Object} <#peerId>.<#index> The Peer connection buffered ICE candidate received.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.1
- */
-Skylink.prototype._peerCandidatesQueue = {};
-
-/**
- * Stores the list of Peer connection ICE candidates.
- * @attribute _gatheredCandidates
- * @param {JSON} <#peerId> The list of the Peer connection ICE candidates.
- * @param {JSON} <#peerId>.sending The list of the Peer connection ICE candidates sent.
- * @param {JSON} <#peerId>.receiving The list of the Peer connection ICE candidates received.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.14
- */
-Skylink.prototype._gatheredCandidates = {};
-
-/**
- * Stores the flags for ICE candidate filtering.
- * @attribute _filterCandidatesType
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._filterCandidatesType = {
-  host: false,
-  srflx: false,
-  relay: false
-};
-
-/**
  * Function that handles the Peer connection gathered ICE candidate to be sent.
  * @method _onIceCandidate
  * @private

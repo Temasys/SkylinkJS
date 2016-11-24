@@ -141,17 +141,6 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
 Skylink.prototype._SUPPORTED_WEB_AGENTS = ['chrome', 'firefox', 'safari', 'IE', 'edge' ,'opera', 'bowser', 'blink'];
 
 /**
- * Stores the list of data transfers from / to Peers.
- * @attribute _dataTransfers
- * @param {JSON} #transferId The data transfer session.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._dataTransfers = {};
-
-/**
  * <blockquote class="info">
  *   Note that Android, iOS and C++ SDKs do not support simultaneous data transfers.
  * </blockquote>

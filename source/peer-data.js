@@ -1,45 +1,4 @@
 /**
- * Stores the list of Peers session information.
- * @attribute _peerInformations
- * @param {JSON} <#peerId> The Peer session information.
- * @param {JSON|String} <#peerId>.userData The Peer custom data.
- * @param {JSON} <#peerId>.settings The Peer streaming information.
- * @param {JSON} <#peerId>.mediaStatus The Peer streaming muted status.
- * @param {JSON} <#peerId>.agent The Peer agent information.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._peerInformations = {};
-
-/**
- * Stores the Signaling user credentials from the API response required for connecting to the Signaling server.
- * @attribute _user
- * @param {String} uid The API result "username".
- * @param {String} token The API result "userCred".
- * @param {String} timeStamp The API result "timeStamp".
- * @param {String} sid The Signaling server receive user Peer ID.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._user = null;
-
-/**
- * Stores the User custom data.
- * By default, if no custom user data is set, it is an empty string <code>""</code>.
- * @attribute _userData
- * @type JSON|String
- * @default ""
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._userData = '';
-
-/**
  * Function that overwrites the User current custom data.
  * @method setUserData
  * @param {JSON|String} userData The updated custom data.
