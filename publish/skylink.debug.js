@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Fri Nov 25 2016 11:03:08 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Fri Nov 25 2016 23:09:11 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -6458,7 +6458,8 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @param {JSON} [options.bandwidth] <blockquote class="info">Note that this is currently not supported
  *   with Firefox browsers versions 48 and below as noted in an existing
  *   <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21">bugzilla ticket here</a>.</blockquote>
- *   The configuration to set the maximum streaming bandwidth sent to Peers.
+ *   The configuration to set the maximum streaming bandwidth to send to / receive from Peers.
+ *   <small>Note that Peers may override the "receive from" maximum streaming bandwidth depending on the Peers configuration.</small>
  * @param {Number} [options.bandwidth.audio] The maximum audio streaming bandwidth sent to Peers in kbps.
  *   <small>Recommended values are <code>50</code> to <code>200</code>. <code>50</code> is sufficient enough for
  *   an audio call. The higher you go if you want clearer audio and to be able to hear music streaming.</small>
@@ -6474,6 +6475,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   and may cause disruptions in connections or connectivity issues when toggled, or may not work depending on
  *   browser supports. Currently, this only toggles the video codec bandwidth configuration.</blockquote>
  *   The configuration to set the experimental google video streaming bandwidth sent to Peers.
+ *   <small>Note that Peers may override the "receive from" streaming bandwidth depending on the Peers configuration.</small>
  * @param {Number} [options.googleXBandwidth.min] The minimum experimental google video streaming bandwidth sent to Peers.
  *   <small>This toggles the <code>"x-google-min-bitrate"</code> flag in the session description.</small>
  * @param {Number} [options.googleXBandwidth.max] The maximum experimental google video streaming bandwidth sent to Peers.
@@ -7269,15 +7271,17 @@ Skylink.prototype.generateUUID = function() {
  *   Note that if the audio codec is not supported, the SDK will not configure the local <code>"offer"</code> or
  *   <code>"answer"</code> session description to prefer the codec.</blockquote>
  *   The option to configure the preferred audio codec
- *   to use to encode sending audio data when available for Peer connection.
+ *   to use to decode receiving audio data when available for Peer connection.
  * - When not provided, its value is <code>AUTO</code>.
+ *   <small>Note that Peers may override the receiving audio codec depending on the Peers configuration.</small>
  *   [Rel: Skylink.AUDIO_CODEC]
  * @param {String} [options.videoCodec] <blockquote class="info">
  *   Note that if the video codec is not supported, the SDK will not configure the local <code>"offer"</code> or
  *   <code>"answer"</code> session description to prefer the codec.</blockquote>
  *   The option to configure the preferred video codec
- *   to use to encode sending video data when available for Peer connection.
+ *   to use to decode receiving video data when available for Peer connection.
  * - When not provided, its value is <code>AUTO</code>.
+ *   <small>Note that Peers may override the receiving video codec depending on the Peers configuration.</small>
  *   [Rel: Skylink.VIDEO_CODEC]
  * @param {Number} [options.socketTimeout=20000] The timeout for each attempts for socket connection
  *   with the Signaling server to indicate that connection has timed out and has failed to establish.
@@ -11172,6 +11176,9 @@ Skylink.prototype._offerHandler = function(message) {
   offer.sdp = self._handleSDPMCUConnectionCase(targetMid, offer, false);
   offer.sdp = self._removeSDPFilteredCandidates(targetMid, offer);
   offer.sdp = self._setSDPBitrate(targetMid, offer);
+  offer.sdp = self._setSDPOpusConfig(targetMid, offer);
+  offer.sdp = self._removeSDPCodecs(targetMid, offer);
+  offer.sdp = self._removeSDPREMBPackets(targetMid, offer);
 
   // This is always the initial state. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
@@ -11352,6 +11359,9 @@ Skylink.prototype._answerHandler = function(message) {
   answer.sdp = self._handleSDPMCUConnectionCase(targetMid, answer, false);
   answer.sdp = self._removeSDPFilteredCandidates(targetMid, answer);
   answer.sdp = self._setSDPBitrate(targetMid, answer);
+  answer.sdp = self._setSDPOpusConfig(targetMid, answer);
+  answer.sdp = self._removeSDPCodecs(targetMid, answer);
+  answer.sdp = self._removeSDPREMBPackets(targetMid, answer);
 
   // This should be the state after offer is received. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
@@ -11593,25 +11603,29 @@ Skylink.prototype.MEDIA_ACCESS_FALLBACK_STATE = {
  *   and <code>options.video.frameRate</code> when provided.
  * @param {Boolean|JSON} [options.audio=false] The audio configuration options.
  * @param {Boolean} [options.audio.stereo=false] The flag if stereo band should be configured
- *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
+ *   <small>Note that Peers may override the "receiving" <code>stereo</code> config depending on the Peers configuration.</small>
  * @param {Boolean} [options.audio.usedtx] <blockquote class="info">
  *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
  *   The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec
- *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
  *   <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
+ *   <small>Note that Peers may override the "receiving" <code>usedtx</code> config depending on the Peers configuration.</small>
  * @param {Boolean} [options.audio.useinbandfec] <blockquote class="info">
  *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
  *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be
- *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
  *   <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
+ *   <small>Note that Peers may override the "receiving" <code>useinbandfec</code> config depending on the Peers configuration.</small>
  * @param {Number} [options.audio.maxplaybackrate] <blockquote class="info">
  *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
  *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
- *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
  *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
+ *   <small>Note that Peers may override the "receiving" <code>maxplaybackrate</code> config depending on the Peers configuration.</small>
  * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
  *   <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.audioMuted</code>,
  *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.audioMuted</code> value to

@@ -124,17 +124,6 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
 };
 
 /**
- * Stores the User connection priority weight.
- * If Peer has a higher connection weight, it will do the offer from its Peer connection first.
- * @attribute _peerPriorityWeight
- * @type Number
- * @private
- * @for Skylink
- * @since 0.5.0
- */
-Skylink.prototype._peerPriorityWeight = 0;
-
-/**
  * Function that creates the Peer connection offer session description.
  * @method _doOffer
  * @private

@@ -190,63 +190,6 @@ Skylink.prototype.TURN_TRANSPORT = {
 };
 
 /**
- * Stores the flag that indicates if Peer connections should trickle ICE.
- * @attribute _enableIceTrickle
- * @type Boolean
- * @default true
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._enableIceTrickle = true;
-
-/**
- * Stores the flag that indicates if STUN ICE servers should be used when constructing Peer connection.
- * @attribute _enableSTUN
- * @type Boolean
- * @default true
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._enableSTUN = true;
-
-/**
- * Stores the flag that indicates if TURN ICE servers should be used when constructing Peer connection.
- * @attribute _enableTURN
- * @type Boolean
- * @default true
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._enableTURN = true;
-
-/**
- * Stores the flag that indicates if public STUN ICE servers should be used when constructing Peer connection.
- * @attribute _usePublicSTUN
- * @type Boolean
- * @default true
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._usePublicSTUN = true;
-
-/**
- * Stores the option for the TURN protocols to use.
- * This should configure the TURN ICE servers urls &lt;code&gt;?transport=protocol&lt;/code&gt; flag.
- * @attribute _TURNTransport
- * @type String
- * @default &quot;any&quot;
- * @private
- * @required
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._TURNTransport = &#x27;any&#x27;;
-
-/**
  * Function that filters and configures the ICE servers received from Signaling
  *   based on the &lt;code&gt;init()&lt;/code&gt; configuration and returns the updated
  *   list of ICE servers to be used when constructing Peer connection.

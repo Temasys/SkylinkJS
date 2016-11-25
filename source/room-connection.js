@@ -125,7 +125,8 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @param {JSON} [options.bandwidth] <blockquote class="info">Note that this is currently not supported
  *   with Firefox browsers versions 48 and below as noted in an existing
  *   <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21">bugzilla ticket here</a>.</blockquote>
- *   The configuration to set the maximum streaming bandwidth sent to Peers.
+ *   The configuration to set the maximum streaming bandwidth to send to / receive from Peers.
+ *   <small>Note that Peers may override the "receive from" maximum streaming bandwidth depending on the Peers configuration.</small>
  * @param {Number} [options.bandwidth.audio] The maximum audio streaming bandwidth sent to Peers in kbps.
  *   <small>Recommended values are <code>50</code> to <code>200</code>. <code>50</code> is sufficient enough for
  *   an audio call. The higher you go if you want clearer audio and to be able to hear music streaming.</small>
@@ -141,6 +142,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   and may cause disruptions in connections or connectivity issues when toggled, or may not work depending on
  *   browser supports. Currently, this only toggles the video codec bandwidth configuration.</blockquote>
  *   The configuration to set the experimental google video streaming bandwidth sent to Peers.
+ *   <small>Note that Peers may override the "receive from" streaming bandwidth depending on the Peers configuration.</small>
  * @param {Number} [options.googleXBandwidth.min] The minimum experimental google video streaming bandwidth sent to Peers.
  *   <small>This toggles the <code>"x-google-min-bitrate"</code> flag in the session description.</small>
  * @param {Number} [options.googleXBandwidth.max] The maximum experimental google video streaming bandwidth sent to Peers.
