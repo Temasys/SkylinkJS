@@ -1288,17 +1288,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 
     pc.hasStream = true;
 
-    var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
-    var timeout = 0;
-
-    // NOTE: Add timeouts to the firefox stream received because it seems to have some sort of black stream rendering at first
-    // This may not be advisable but that it seems to work after 1500s. (tried with ICE established but it does not work and getStats)
-    if (agent.name === 'firefox' && window.webrtcDetectedBrowser !== 'firefox') {
-      timeout = 1500;
-    }
-    setTimeout(function () {
-      self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
-    }, timeout);
+    self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
   };
   pc.onicecandidate = function(event) {
     self._onIceCandidate(targetMid, event.candidate || event);
