@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Fri Nov 25 2016 23:09:11 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Fri Nov 25 2016 23:20:46 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -10756,20 +10756,10 @@ Skylink.prototype._inRoomHandler = function(message) {
   self._room.connection.peerConfig = self._setIceServers(message.pc_config);
   self._inRoom = true;
   self._user.sid = message.sid;
-  self._peerPriorityWeight = (new Date()).getTime();
+  self._peerPriorityWeight = message.tieBreaker;
 
   self._trigger('peerJoined', self._user.sid, self.getPeerInfo(), true);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
-
-  if (typeof message.tieBreaker === 'number') {
-    self._peerPriorityWeight = message.tieBreaker;
-  }
-
-  // Make Firefox the answerer always when connecting with other browsers
-  if (window.webrtcDetectedBrowser === 'firefox') {
-    log.warn('Decreasing weight for Firefox browser connection');
-    self._peerPriorityWeight -= 100000000000;
-  }
 
   if (self._streams.screenshare && self._streams.screenshare.stream) {
     self._trigger('incomingStream', self._user.sid, self._streams.screenshare.stream, true, self.getPeerInfo());
