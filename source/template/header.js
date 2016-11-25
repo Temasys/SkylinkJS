@@ -1,4 +1,4 @@
-(function() {
+(function(refThis) {
 
 'use strict';
 
@@ -205,10 +205,6 @@ var clone = function (obj) {
  * @since 0.5.0
  */
 function Skylink() {
-  if (!(this instanceof Skylink)) {
-    return new Skylink();
-  }
-
   /**
    * Stores the flag if Peers should have any Datachannel connections.
    * @attribute _enableDataChannel

@@ -1,6 +1,6 @@
-/*! skylinkjs - v0.6.16 - Fri Nov 25 2016 10:43:41 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Fri Nov 25 2016 11:03:08 GMT+0800 (SGT) */
 
-(function() {
+(function(refThis) {
 
 'use strict';
 
@@ -207,10 +207,6 @@ var clone = function (obj) {
  * @since 0.5.0
  */
 function Skylink() {
-  if (!(this instanceof Skylink)) {
-    return new Skylink();
-  }
-
   /**
    * Stores the flag if Peers should have any Datachannel connections.
    * @attribute _enableDataChannel
@@ -13899,7 +13895,20 @@ Skylink.prototype._handleSDPChromeBundleBug = function(targetMid, sessionDescrip
 
   return sessionDescription.sdp;
 };
-  this.Skylink = Skylink;
-  window.Skylink = Skylink;
 
-}).call(this);
+  if(typeof exports !== 'undefined') {
+    // Prevent breaking code
+    module.exports = {
+      Skylink: Skylink
+    };
+  }
+
+  if (refThis) {
+    refThis.Skylink = Skylink;
+  }
+
+  if (window) {
+    window.Skylink = Skylink;
+  }
+
+})(this);
