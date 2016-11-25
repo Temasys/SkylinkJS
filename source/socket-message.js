@@ -685,8 +685,8 @@ Skylink.prototype._enterHandler = function(message) {
       message.temasysPluginVersion : null,
     SMProtocolVersion: message.SMProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
       message.SMProtocolVersion : '0.1.1',
-    DTProtocolVersion: message.DTProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
-      message.SMProtocolVersion : '0.1.0'
+    DTProtocolVersion: message.DTProtocolVersion && typeof message.DTProtocolVersion === 'string' ?
+      message.DTProtocolVersion : '0.1.0'
   };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "enter" received ->'], message);
@@ -791,8 +791,8 @@ Skylink.prototype._restartHandler = function(message){
       message.temasysPluginVersion : null,
     SMProtocolVersion: message.SMProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
       message.SMProtocolVersion : '0.1.1',
-    DTProtocolVersion: message.DTProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
-      message.SMProtocolVersion : '0.1.0'
+    DTProtocolVersion: message.DTProtocolVersion && typeof message.DTProtocolVersion === 'string' ?
+      message.DTProtocolVersion : '0.1.0'
   };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "restart" received ->'], message);
@@ -898,8 +898,8 @@ Skylink.prototype._welcomeHandler = function(message) {
       message.temasysPluginVersion : null,
     SMProtocolVersion: message.SMProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
       message.SMProtocolVersion : '0.1.1',
-    DTProtocolVersion: message.DTProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
-      message.SMProtocolVersion : '0.1.0'
+    DTProtocolVersion: message.DTProtocolVersion && typeof message.DTProtocolVersion === 'string' ?
+      message.DTProtocolVersion : '0.1.0'
   };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "welcome" received ->'], message);

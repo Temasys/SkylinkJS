@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Fri Nov 25 2016 23:20:46 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Fri Nov 25 2016 23:37:29 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -5259,11 +5259,10 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
   }
 
   var pc = self._peerConnections[peerId];
-
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // prevent restarts for other SDK clients
-  if ((agent.SMProtocolVersion || '') >= '0.1.2') {
+  if ((agent.SMProtocolVersion || '') < '0.1.2') {
     var notSupportedError = new Error('Failed restarting with other agents connecting from other SDKs as ' +
       're-negotiation is not supported by other SDKs');
 
@@ -5761,16 +5760,19 @@ Skylink.prototype.getPeerInfo = function(peerId) {
   if (typeof peerId === 'string' && typeof this._peerInformations[peerId] === 'object') {
     peerInfo = clone(this._peerInformations[peerId]);
     peerInfo.room = clone(this._selectedRoom);
-    peerInfo.settings.googleXBandwidth = {};
+    peerInfo.settings.bandwidth = peerInfo.settings.bandwidth || {};
+    peerInfo.settings.googleXBandwidth = peerInfo.settings.googleXBandwidth || {};
 
     if (!(typeof peerInfo.settings.video === 'boolean' || (peerInfo.settings.video &&
       typeof peerInfo.settings.video === 'object'))) {
       peerInfo.settings.video = false;
+      peerInfo.mediaStatus.audioMuted = true;
     }
 
     if (!(typeof peerInfo.settings.audio === 'boolean' || (peerInfo.settings.audio &&
       typeof peerInfo.settings.audio === 'object'))) {
       peerInfo.settings.audio = false;
+      peerInfo.mediaStatus.audioMuted = true;
     }
 
     if (typeof peerInfo.mediaStatus.audioMuted !== 'boolean') {
@@ -5787,17 +5789,25 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     }
 
     if (peerInfo.settings.video && typeof peerInfo.settings.video === 'object' &&
-      peerInfo.settings.video.frameRate === -1) {
-      peerInfo.settings.video.frameRate = null;
+      peerInfo.settings.video.customSettings && typeof peerInfo.settings.video.customSettings === 'object') {
+      if (peerInfo.settings.video.customSettings.frameRate) {
+        peerInfo.settings.video.frameRate = clone(peerInfo.settings.video.customSettings.frameRate);
+      }
+      if (peerInfo.settings.video.customSettings.width) {
+        peerInfo.settings.video.resolution = peerInfo.settings.video.resolution || {};
+        peerInfo.settings.video.resolution.width = clone(peerInfo.settings.video.customSettings.width);
+      }
+      if (peerInfo.settings.video.customSettings.height) {
+        peerInfo.settings.video.resolution = peerInfo.settings.video.resolution || {};
+        peerInfo.settings.video.resolution.height = clone(peerInfo.settings.video.customSettings.height);
+      }
+      if (peerInfo.settings.video.customSettings.facingMode) {
+        peerInfo.settings.video.facingMode = clone(peerInfo.settings.video.customSettings.facingMode);
+      }
     }
 
     if (peerInfo.settings.audio && typeof peerInfo.settings.audio === 'object') {
-      peerInfo.settings.audio.usedtx = typeof peerInfo.settings.audio.usedtx === 'boolean' ?
-        peerInfo.settings.audio.usedtx : null;
-      peerInfo.settings.audio.maxplaybackrate = typeof peerInfo.settings.audio.maxplaybackrate === 'number' ?
-        peerInfo.settings.audio.maxplaybackrate : null;
-      peerInfo.settings.audio.useinbandfec = typeof peerInfo.settings.audio.useinbandfec === 'boolean' ?
-        peerInfo.settings.audio.useinbandfec : null;
+      peerInfo.settings.audio.stereo = peerInfo.settings.audio.stereo === true;
     }
 
     if (!(peerInfo.userData !== null && typeof peerInfo.userData !== 'undefined')) {
@@ -5816,7 +5826,9 @@ Skylink.prototype.getPeerInfo = function(peerId) {
         name: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion,
         os: window.navigator.platform,
-        pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+        pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+        SMProtocolVersion: this.SMProtocolVersion,
+        DTProtocolVersion: this.DTProtocolVersion
       },
       room: clone(this._selectedRoom),
       config: {
@@ -8696,7 +8708,7 @@ var _eventsDocs = {
    *   <small>When defined as <code>true</code>, the <code>peerInfo.settings.video.screenshare</code> value is
    *   considered as <code>false</code>  and the <code>peerInfo.settings.video.exactConstraints</code>
    *   value is considered as <code>false</code>.</small>
-   * @param {JSON} peerInfo.settings.video.resolution The Peer Stream video resolution.
+   * @param {JSON} [peerInfo.settings.video.resolution] The Peer Stream video resolution.
    *   [Rel: Skylink.VIDEO_RESOLUTION]
    * @param {Number|JSON} peerInfo.settings.video.resolution.width The Peer Stream video resolution width or
    *   video resolution width settings.
@@ -10835,8 +10847,8 @@ Skylink.prototype._enterHandler = function(message) {
       message.temasysPluginVersion : null,
     SMProtocolVersion: message.SMProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
       message.SMProtocolVersion : '0.1.1',
-    DTProtocolVersion: message.DTProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
-      message.SMProtocolVersion : '0.1.0'
+    DTProtocolVersion: message.DTProtocolVersion && typeof message.DTProtocolVersion === 'string' ?
+      message.DTProtocolVersion : '0.1.0'
   };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "enter" received ->'], message);
@@ -10941,8 +10953,8 @@ Skylink.prototype._restartHandler = function(message){
       message.temasysPluginVersion : null,
     SMProtocolVersion: message.SMProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
       message.SMProtocolVersion : '0.1.1',
-    DTProtocolVersion: message.DTProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
-      message.SMProtocolVersion : '0.1.0'
+    DTProtocolVersion: message.DTProtocolVersion && typeof message.DTProtocolVersion === 'string' ?
+      message.DTProtocolVersion : '0.1.0'
   };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "restart" received ->'], message);
@@ -11048,8 +11060,8 @@ Skylink.prototype._welcomeHandler = function(message) {
       message.temasysPluginVersion : null,
     SMProtocolVersion: message.SMProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
       message.SMProtocolVersion : '0.1.1',
-    DTProtocolVersion: message.DTProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
-      message.SMProtocolVersion : '0.1.0'
+    DTProtocolVersion: message.DTProtocolVersion && typeof message.DTProtocolVersion === 'string' ?
+      message.DTProtocolVersion : '0.1.0'
   };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "welcome" received ->'], message);

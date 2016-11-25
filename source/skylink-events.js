@@ -267,7 +267,7 @@ var _eventsDocs = {
    *   <small>When defined as <code>true</code>, the <code>peerInfo.settings.video.screenshare</code> value is
    *   considered as <code>false</code>  and the <code>peerInfo.settings.video.exactConstraints</code>
    *   value is considered as <code>false</code>.</small>
-   * @param {JSON} peerInfo.settings.video.resolution The Peer Stream video resolution.
+   * @param {JSON} [peerInfo.settings.video.resolution] The Peer Stream video resolution.
    *   [Rel: Skylink.VIDEO_RESOLUTION]
    * @param {Number|JSON} peerInfo.settings.video.resolution.width The Peer Stream video resolution width or
    *   video resolution width settings.
