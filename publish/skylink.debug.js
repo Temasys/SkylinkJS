@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Fri Nov 25 2016 11:03:08 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Fri Nov 25 2016 22:32:02 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -1021,6 +1021,19 @@ function Skylink() {
    * @since 0.6.16
    */
   this._disableREMB = false;
+
+  /**
+   * Stores the session description direction flags.
+   * @attribute _sdpDirections
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._sdpDirections = {
+    audio: { send: true, receive: true },
+    video: { send: true, receive: true }
+  };
 }
 Skylink.prototype.DATA_CHANNEL_STATE = {
   CONNECTING: 'connecting',
@@ -6115,9 +6128,8 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPH264VP9AptRtxForOlderPlugin(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
-  sessionDescription.sdp = self._handleSDPMCUConnectionCase(targetMid, sessionDescription, true);
+  sessionDescription.sdp = self._handleSDPDirectionCase(targetMid, sessionDescription, false);
   sessionDescription.sdp = self._setSDPBitrate(targetMid, sessionDescription);
-  sessionDescription.sdp = self._handleSDPChromeBundleBug(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
 
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
@@ -6485,6 +6497,15 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   must be retrieved as a requirement before Room session may begin.
  *   <small>This ignores the <code>options.audio</code> and <code>options.video</code> configuration.</small>
  *   <small>After 30 seconds without any Stream retrieved, this results in the `callback(error, ..)` result.</small>
+ * @param {JSON} [options.sdpDirections] The configuration to set the session description direction to enable or disable
+ *   uploading and downloading audio or video media streaming.
+ *   <small>Note that, this configuration does not prevent RTCP packets from being sent and received.</small>
+ * @param {JSON} [options.sdpDirections.audio] The configuration to set the session description direction for audio streaming.
+ * @param {Boolean} [options.sdpDirections.audio.send=true] The flag if uploading audio streaming should be enabled when available.
+ * @param {Boolean} [options.sdpDirections.audio.receive=true] The flag if downloading audio streaming should be enabled when available.
+ * @param {JSON} [options.sdpDirections.video] The configuration to set the session description direction for video streaming.
+ * @param {Boolean} [options.sdpDirections.video.send=true] The flag if uploading video streaming should be enabled when available.
+ * @param {Boolean} [options.sdpDirections.video.receive=true] The flag if downloading video streaming should be enabled when available.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_peerJoined">
@@ -6917,6 +6938,11 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
         bAS: {}
       };
 
+      self._sdpDirections = {
+        audio: { send: true, receive: true },
+        video: { send: true, receive: true }
+      };
+
       if (mediaOptions.bandwidth) {
         if (typeof mediaOptions.bandwidth.audio === 'number') {
           self._streamsBandwidthSettings.bAS.audio = mediaOptions.bandwidth.audio;
@@ -6938,6 +6964,22 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 
         if (typeof mediaOptions.googleXBandwidth.max === 'number') {
           self._streamsBandwidthSettings.googleX.max = mediaOptions.googleXBandwidth.max;
+        }
+      }
+
+      if (mediaOptions.sdpDirections) {
+        if (mediaOptions.sdpDirections.audio) {
+          self._sdpDirections.audio.receive = typeof mediaOptions.sdpDirections.audio.receive === 'boolean' ?
+            mediaOptions.sdpDirections.audio.receive : true;
+          self._sdpDirections.audio.send = typeof mediaOptions.sdpDirections.audio.send === 'boolean' ?
+            mediaOptions.sdpDirections.audio.send : true;
+        }
+
+        if (mediaOptions.sdpDirections.video) {
+          self._sdpDirections.video.receive = typeof mediaOptions.sdpDirections.video.receive === 'boolean' ?
+            mediaOptions.sdpDirections.video.receive : true;
+          self._sdpDirections.video.send = typeof mediaOptions.sdpDirections.video.send === 'boolean' ?
+            mediaOptions.sdpDirections.video.send : true;
         }
       }
 
@@ -11161,7 +11203,8 @@ Skylink.prototype._offerHandler = function(message) {
   }
 
   log.log([targetMid, null, message.type, 'Received offer from peer. ' +
-    'Session description:'], message.sdp);
+    'Session description:'], clone(message));
+
   var offer = new RTCSessionDescription({
     type: message.type,
     sdp: self._hasMCU ? message.sdp.split('\n').join('\r\n') : message.sdp
@@ -11169,9 +11212,10 @@ Skylink.prototype._offerHandler = function(message) {
   log.log([targetMid, 'RTCSessionDescription', message.type,
     'Session description object created'], offer);
 
-  offer.sdp = self._handleSDPMCUConnectionCase(targetMid, offer, false);
   offer.sdp = self._removeSDPFilteredCandidates(targetMid, offer);
   offer.sdp = self._setSDPBitrate(targetMid, offer);
+
+  log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote offer ->'], offer.sdp);
 
   // This is always the initial state. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
@@ -11310,7 +11354,7 @@ Skylink.prototype._answerHandler = function(message) {
   var targetMid = message.mid;
 
   log.log([targetMid, null, message.type,
-    'Received answer from peer. Session description:'], message.sdp);
+    'Received answer from peer. Session description:'], clone(message));
 
   var pc = self._peerConnections[targetMid];
 
@@ -11349,9 +11393,11 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }*/
 
-  answer.sdp = self._handleSDPMCUConnectionCase(targetMid, answer, false);
   answer.sdp = self._removeSDPFilteredCandidates(targetMid, answer);
   answer.sdp = self._setSDPBitrate(targetMid, answer);
+
+  log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote answer ->'], answer.sdp);
+
 
   // This should be the state after offer is received. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
@@ -13821,6 +13867,13 @@ Skylink.prototype._getSDPSelectedCodec = function (targetMid, sessionDescription
  * @since 0.6.16
  */
 Skylink.prototype._removeSDPFilteredCandidates = function (targetMid, sessionDescription) {
+  // Handle Firefox MCU Peer ICE candidates
+  if (targetMid === 'MCU' && sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER &&
+    window.webrtcDetectedBrowser === 'firefox') {
+    sessionDescription.sdp = sessionDescription.sdp.replace(/ generation 0/g, '');
+    sessionDescription.sdp = sessionDescription.sdp.replace(/ udp /g, ' UDP ');
+  }
+
   if (this._forceTURN && this._hasMCU) {
     log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Not filtering ICE candidates as ' +
       'TURN connections are enforced as MCU is present (and act as a TURN itself) so filtering of ICE candidate ' +
@@ -13850,51 +13903,51 @@ Skylink.prototype._removeSDPFilteredCandidates = function (targetMid, sessionDes
 
 /**
  * Function that modifies the session description to remove non-relay ICE candidates.
- * @method _handleSDPMCUConnectionCase
+ * @method _handleSDPDirectionCase
  * @private
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype._handleSDPMCUConnectionCase = function (targetMid, sessionDescription, isLocal) {
-  if (!this._hasMCU) {
-    return sessionDescription.sdp;
-  }
-
+Skylink.prototype._handleSDPDirectionCase = function (targetMid, sessionDescription) {
   log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Handling MCU connection case.']);
 
-  if (isLocal) {
-    if (targetMid === 'MCU') {
-      sessionDescription.sdp = sessionDescription.sdp.replace(/a=sendrecv/gi, 'a=sendonly');
-    } else {
-      sessionDescription.sdp = sessionDescription.sdp.replace(/a=sendrecv/gi, 'a=recvonly');
+  var sdpLines = sessionDescription.sdp.split('\r\n');
+  var mediaType = '';
+
+  for (var i = 0; i < sdpLines.length; i++) {
+    if (sdpLines[i].indexOf('m=') === 0) {
+      mediaType = (sdpLines[i].split('m=')[1] || '').split(' ')[0] || '';
+
+    } else if (mediaType && ['a=sendrecv', 'a=sendonly', 'a=recvonly'].indexOf(sdpLines[i]) > -1) {
+      if (this._hasMCU) {
+        sdpLines[i] = targetMid === 'MCU' ? 'a=sendonly' : 'a=recvonly';
+      }
+
+      if (this._sdpDirections[mediaType].send && !this._sdpDirections[mediaType].receive) {
+        sdpLines[i] = sdpLines[i].indexOf('send') > -1 ? 'a=sendonly' : 'a=inactive';
+      } else if (!this._sdpDirections[mediaType].send && this._sdpDirections[mediaType].receive) {
+        sdpLines[i] = sdpLines[i].indexOf('recv') > -1 ? 'a=recvonly' : 'a=inactive';
+      } else if (!this._sdpDirections[mediaType].send && !this._sdpDirections[mediaType].receive) {
+        sdpLines[i] = 'a=inactive';
+      }
+
+      // MCU currently does not support a=inactive flag
+      if (!this._hasMCU) {
+        var agent = ((this._peerInformations[targetMid] || {}).agent || {}).name || '';
+        // Handle Chrome bundle bug. - See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
+        if (window.webrtcDetectedBrowser !== 'firefox' && agent === 'firefox' &&
+          sessionDescription.type === this.HANDSHAKE_PROGRESS.OFFER && sdpLines[i] === 'a=recvonly') {
+          log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Overriding any original settings ' +
+            'to receive only to send and receive to resolve chrome BUNDLE errors.']);
+          sdpLines[i] = 'a=sendrecv';
+        }
+      }
     }
-  } else if (targetMid === 'MCU' && sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER &&
-    window.webrtcDetectedBrowser === 'firefox') {
-    sessionDescription.sdp = sessionDescription.sdp.replace(/ generation 0/g, '');
-    sessionDescription.sdp = sessionDescription.sdp.replace(/ udp /g, ' UDP ');
   }
 
-  return sessionDescription.sdp;
+  return sdpLines.join('\r\n');
 };
 
-/**
- * Function that modifies the session description to handle Chrome bundle bug.
- * See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
- * @method _handleSDPChromeBundleBug
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._handleSDPChromeBundleBug = function(targetMid, sessionDescription) {
-  var agent = ((this._peerInformations[targetMid] || {}).agent || {}).name || '';
-
-  if (window.webrtcDetectedBrowser !== 'firefox' && agent === 'firefox' &&
-    sessionDescription.type === this.HANDSHAKE_PROGRESS.OFFER) {
-    sessionDescription.sdp = sessionDescription.sdp.replace(/a=recvonly/g, 'a=sendrecv');
-  }
-
-  return sessionDescription.sdp;
-};
 
   if(typeof exports !== 'undefined') {
     // Prevent breaking code

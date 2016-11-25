@@ -221,9 +221,8 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPH264VP9AptRtxForOlderPlugin(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
-  sessionDescription.sdp = self._handleSDPMCUConnectionCase(targetMid, sessionDescription, true);
+  sessionDescription.sdp = self._handleSDPDirectionCase(targetMid, sessionDescription, false);
   sessionDescription.sdp = self._setSDPBitrate(targetMid, sessionDescription);
-  sessionDescription.sdp = self._handleSDPChromeBundleBug(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
 
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,

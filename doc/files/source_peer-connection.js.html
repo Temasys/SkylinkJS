@@ -165,49 +165,6 @@ Skylink.prototype.SERVER_PEER_TYPE = {
 };
 
 /**
- * Stores the global number of Peer connection retries that would increase the wait-for-response timeout
- *   for the Peer connection health timer.
- * @attribute _retryCounters
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype._retryCounters = {};
-
-/**
- * Stores the list of the Peer connections.
- * @attribute _peerConnections
- * @param {Object} &lt;#peerId&gt; The Peer connection.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype._peerConnections = {};
-
-/**
- * Stores the list of the Peer connections stats.
- * @attribute _peerStats
- * @param {Object} &lt;#peerId&gt; The Peer connection stats.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._peerStats = {};
-
-/**
- * The flag if User is using plugin.
- * @attribute _isUsingPlugin
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._isUsingPlugin = false;
-
-/**
  * &lt;blockquote class=&quot;info&quot;&gt;
  *   For MCU enabled Peer connections, the restart functionality may differ, you may learn more about how to workaround
  *   it &lt;a href=&quot;http://support.temasys.com.sg/support/discussions/topics/12000002853&quot;&gt;in this article here&lt;/a&gt;.
@@ -1184,7 +1141,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // prevent restarts for other SDK clients
-  /*if (self._SUPPORTED_WEB_AGENTS.indexOf(agent.name) === -1) {
+  if ((agent.SMProtocolVersion || &#x27;&#x27;) &gt;= &#x27;0.1.2&#x27;) {
     var notSupportedError = new Error(&#x27;Failed restarting with other agents connecting from other SDKs as &#x27; +
       &#x27;re-negotiation is not supported by other SDKs&#x27;);
 
@@ -1196,7 +1153,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       callback(notSupportedError);
     }
     return;
-  }*/
+  }
 
   // This is when the state is stable and re-handshaking is possible
   // This could be due to previous connection handshaking that is already done

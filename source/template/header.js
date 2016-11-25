@@ -1019,4 +1019,17 @@ function Skylink() {
    * @since 0.6.16
    */
   this._disableREMB = false;
+
+  /**
+   * Stores the session description direction flags.
+   * @attribute _sdpDirections
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._sdpDirections = {
+    audio: { send: true, receive: true },
+    video: { send: true, receive: true }
+  };
 }

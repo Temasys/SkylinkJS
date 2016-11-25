@@ -1015,7 +1015,8 @@ Skylink.prototype._offerHandler = function(message) {
   }
 
   log.log([targetMid, null, message.type, 'Received offer from peer. ' +
-    'Session description:'], message.sdp);
+    'Session description:'], clone(message));
+
   var offer = new RTCSessionDescription({
     type: message.type,
     sdp: self._hasMCU ? message.sdp.split('\n').join('\r\n') : message.sdp
@@ -1023,9 +1024,10 @@ Skylink.prototype._offerHandler = function(message) {
   log.log([targetMid, 'RTCSessionDescription', message.type,
     'Session description object created'], offer);
 
-  offer.sdp = self._handleSDPMCUConnectionCase(targetMid, offer, false);
   offer.sdp = self._removeSDPFilteredCandidates(targetMid, offer);
   offer.sdp = self._setSDPBitrate(targetMid, offer);
+
+  log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote offer ->'], offer.sdp);
 
   // This is always the initial state. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
@@ -1164,7 +1166,7 @@ Skylink.prototype._answerHandler = function(message) {
   var targetMid = message.mid;
 
   log.log([targetMid, null, message.type,
-    'Received answer from peer. Session description:'], message.sdp);
+    'Received answer from peer. Session description:'], clone(message));
 
   var pc = self._peerConnections[targetMid];
 
@@ -1203,9 +1205,11 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }*/
 
-  answer.sdp = self._handleSDPMCUConnectionCase(targetMid, answer, false);
   answer.sdp = self._removeSDPFilteredCandidates(targetMid, answer);
   answer.sdp = self._setSDPBitrate(targetMid, answer);
+
+  log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote answer ->'], answer.sdp);
+
 
   // This should be the state after offer is received. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {

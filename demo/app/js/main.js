@@ -740,7 +740,11 @@ Demo.Skylink.init(config, function (error, success) {
     Demo.Skylink.joinRoom({
       userData: displayName,
       audio: { stereo: true },
-      video: true
+      video: true,
+      sdpDirections: {
+        audio: { receive: !(window.location.search === '?sendonly') },
+        video: { receive: !(window.location.search === '?sendonly') }
+      }
     });
   }
 });

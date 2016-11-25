@@ -183,36 +183,6 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
 };
 
 /**
- * Stores the current Room name that User is connected to.
- * @attribute _selectedRoom
- * @type String
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._selectedRoom = null;
-
-/**
- * Stores the flag that indicates if Room is locked.
- * @attribute _roomLocked
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._roomLocked = false;
-
-/**
- * Stores the flag that indicates if User is connected to the Room.
- * @attribute _inRoom
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.4.0
- */
-Skylink.prototype._inRoom = false;
-
-/**
  * Function that starts the Room session.
  * @method joinRoom
  * @param {String} [room] The Room name.
@@ -273,6 +243,15 @@ Skylink.prototype._inRoom = false;
  *   must be retrieved as a requirement before Room session may begin.
  *   &lt;small&gt;This ignores the &lt;code&gt;options.audio&lt;/code&gt; and &lt;code&gt;options.video&lt;/code&gt; configuration.&lt;/small&gt;
  *   &lt;small&gt;After 30 seconds without any Stream retrieved, this results in the &#x60;callback(error, ..)&#x60; result.&lt;/small&gt;
+ * @param {JSON} [options.sdpDirections] The configuration to set the session description direction to enable or disable
+ *   uploading and downloading audio or video media streaming.
+ *   &lt;small&gt;Note that, this configuration does not prevent RTCP packets from being sent and received.&lt;/small&gt;
+ * @param {JSON} [options.sdpDirections.audio] The configuration to set the session description direction for audio streaming.
+ * @param {Boolean} [options.sdpDirections.audio.send=true] The flag if uploading audio streaming should be enabled when available.
+ * @param {Boolean} [options.sdpDirections.audio.receive=true] The flag if downloading audio streaming should be enabled when available.
+ * @param {JSON} [options.sdpDirections.video] The configuration to set the session description direction for video streaming.
+ * @param {Boolean} [options.sdpDirections.video.send=true] The flag if uploading video streaming should be enabled when available.
+ * @param {Boolean} [options.sdpDirections.video.receive=true] The flag if downloading video streaming should be enabled when available.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_peerJoined&quot;&gt;
@@ -705,6 +684,11 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
         bAS: {}
       };
 
+      self._sdpDirections = {
+        audio: { send: true, receive: true },
+        video: { send: true, receive: true }
+      };
+
       if (mediaOptions.bandwidth) {
         if (typeof mediaOptions.bandwidth.audio === &#x27;number&#x27;) {
           self._streamsBandwidthSettings.bAS.audio = mediaOptions.bandwidth.audio;
@@ -726,6 +710,22 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 
         if (typeof mediaOptions.googleXBandwidth.max === &#x27;number&#x27;) {
           self._streamsBandwidthSettings.googleX.max = mediaOptions.googleXBandwidth.max;
+        }
+      }
+
+      if (mediaOptions.sdpDirections) {
+        if (mediaOptions.sdpDirections.audio) {
+          self._sdpDirections.audio.receive = typeof mediaOptions.sdpDirections.audio.receive === &#x27;boolean&#x27; ?
+            mediaOptions.sdpDirections.audio.receive : true;
+          self._sdpDirections.audio.send = typeof mediaOptions.sdpDirections.audio.send === &#x27;boolean&#x27; ?
+            mediaOptions.sdpDirections.audio.send : true;
+        }
+
+        if (mediaOptions.sdpDirections.video) {
+          self._sdpDirections.video.receive = typeof mediaOptions.sdpDirections.video.receive === &#x27;boolean&#x27; ?
+            mediaOptions.sdpDirections.video.receive : true;
+          self._sdpDirections.video.send = typeof mediaOptions.sdpDirections.video.send === &#x27;boolean&#x27; ?
+            mediaOptions.sdpDirections.video.send : true;
         }
       }
 

@@ -550,6 +550,13 @@ Skylink.prototype._getSDPSelectedCodec = function (targetMid, sessionDescription
  * @since 0.6.16
  */
 Skylink.prototype._removeSDPFilteredCandidates = function (targetMid, sessionDescription) {
+  // Handle Firefox MCU Peer ICE candidates
+  if (targetMid === 'MCU' && sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER &&
+    window.webrtcDetectedBrowser === 'firefox') {
+    sessionDescription.sdp = sessionDescription.sdp.replace(/ generation 0/g, '');
+    sessionDescription.sdp = sessionDescription.sdp.replace(/ udp /g, ' UDP ');
+  }
+
   if (this._forceTURN && this._hasMCU) {
     log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Not filtering ICE candidates as ' +
       'TURN connections are enforced as MCU is present (and act as a TURN itself) so filtering of ICE candidate ' +
@@ -579,48 +586,47 @@ Skylink.prototype._removeSDPFilteredCandidates = function (targetMid, sessionDes
 
 /**
  * Function that modifies the session description to remove non-relay ICE candidates.
- * @method _handleSDPMCUConnectionCase
+ * @method _handleSDPDirectionCase
  * @private
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype._handleSDPMCUConnectionCase = function (targetMid, sessionDescription, isLocal) {
-  if (!this._hasMCU) {
-    return sessionDescription.sdp;
-  }
-
+Skylink.prototype._handleSDPDirectionCase = function (targetMid, sessionDescription) {
   log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Handling MCU connection case.']);
 
-  if (isLocal) {
-    if (targetMid === 'MCU') {
-      sessionDescription.sdp = sessionDescription.sdp.replace(/a=sendrecv/gi, 'a=sendonly');
-    } else {
-      sessionDescription.sdp = sessionDescription.sdp.replace(/a=sendrecv/gi, 'a=recvonly');
+  var sdpLines = sessionDescription.sdp.split('\r\n');
+  var mediaType = '';
+
+  for (var i = 0; i < sdpLines.length; i++) {
+    if (sdpLines[i].indexOf('m=') === 0) {
+      mediaType = (sdpLines[i].split('m=')[1] || '').split(' ')[0] || '';
+
+    } else if (mediaType && ['a=sendrecv', 'a=sendonly', 'a=recvonly'].indexOf(sdpLines[i]) > -1) {
+      if (this._hasMCU) {
+        sdpLines[i] = targetMid === 'MCU' ? 'a=sendonly' : 'a=recvonly';
+      }
+
+      if (this._sdpDirections[mediaType].send && !this._sdpDirections[mediaType].receive) {
+        sdpLines[i] = sdpLines[i].indexOf('send') > -1 ? 'a=sendonly' : 'a=inactive';
+      } else if (!this._sdpDirections[mediaType].send && this._sdpDirections[mediaType].receive) {
+        sdpLines[i] = sdpLines[i].indexOf('recv') > -1 ? 'a=recvonly' : 'a=inactive';
+      } else if (!this._sdpDirections[mediaType].send && !this._sdpDirections[mediaType].receive) {
+        sdpLines[i] = 'a=inactive';
+      }
+
+      // MCU currently does not support a=inactive flag
+      if (!this._hasMCU) {
+        var agent = ((this._peerInformations[targetMid] || {}).agent || {}).name || '';
+        // Handle Chrome bundle bug. - See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
+        if (window.webrtcDetectedBrowser !== 'firefox' && agent === 'firefox' &&
+          sessionDescription.type === this.HANDSHAKE_PROGRESS.OFFER && sdpLines[i] === 'a=recvonly') {
+          log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Overriding any original settings ' +
+            'to receive only to send and receive to resolve chrome BUNDLE errors.']);
+          sdpLines[i] = 'a=sendrecv';
+        }
+      }
     }
-  } else if (targetMid === 'MCU' && sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER &&
-    window.webrtcDetectedBrowser === 'firefox') {
-    sessionDescription.sdp = sessionDescription.sdp.replace(/ generation 0/g, '');
-    sessionDescription.sdp = sessionDescription.sdp.replace(/ udp /g, ' UDP ');
   }
 
-  return sessionDescription.sdp;
-};
-
-/**
- * Function that modifies the session description to handle Chrome bundle bug.
- * See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
- * @method _handleSDPChromeBundleBug
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._handleSDPChromeBundleBug = function(targetMid, sessionDescription) {
-  var agent = ((this._peerInformations[targetMid] || {}).agent || {}).name || '';
-
-  if (window.webrtcDetectedBrowser !== 'firefox' && agent === 'firefox' &&
-    sessionDescription.type === this.HANDSHAKE_PROGRESS.OFFER) {
-    sessionDescription.sdp = sessionDescription.sdp.replace(/a=recvonly/g, 'a=sendrecv');
-  }
-
-  return sessionDescription.sdp;
+  return sdpLines.join('\r\n');
 };

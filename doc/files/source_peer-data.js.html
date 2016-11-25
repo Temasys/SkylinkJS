@@ -90,47 +90,6 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * Stores the list of Peers session information.
- * @attribute _peerInformations
- * @param {JSON} &lt;#peerId&gt; The Peer session information.
- * @param {JSON|String} &lt;#peerId&gt;.userData The Peer custom data.
- * @param {JSON} &lt;#peerId&gt;.settings The Peer streaming information.
- * @param {JSON} &lt;#peerId&gt;.mediaStatus The Peer streaming muted status.
- * @param {JSON} &lt;#peerId&gt;.agent The Peer agent information.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._peerInformations = {};
-
-/**
- * Stores the Signaling user credentials from the API response required for connecting to the Signaling server.
- * @attribute _user
- * @param {String} uid The API result &quot;username&quot;.
- * @param {String} token The API result &quot;userCred&quot;.
- * @param {String} timeStamp The API result &quot;timeStamp&quot;.
- * @param {String} sid The Signaling server receive user Peer ID.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._user = null;
-
-/**
- * Stores the User custom data.
- * By default, if no custom user data is set, it is an empty string &lt;code&gt;&quot;&quot;&lt;/code&gt;.
- * @attribute _userData
- * @type JSON|String
- * @default &quot;&quot;
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._userData = &#x27;&#x27;;
-
-/**
  * Function that overwrites the User current custom data.
  * @method setUserData
  * @param {JSON|String} userData The updated custom data.
@@ -261,6 +220,11 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       peerInfo.mediaStatus.videoMuted = true;
     }
 
+    if (peerInfo.settings.maxBandwidth) {
+      peerInfo.settings.bandwidth = clone(peerInfo.settings.maxBandwidth);
+      delete peerInfo.settings.maxBandwidth;
+    }
+
     if (peerInfo.settings.video &amp;&amp; typeof peerInfo.settings.video === &#x27;object&#x27; &amp;&amp;
       peerInfo.settings.video.frameRate === -1) {
       peerInfo.settings.video.frameRate = null;
@@ -362,16 +326,34 @@ Skylink.prototype._getUserInfo = function(peerId) {
   var userInfo = clone(this.getPeerInfo());
 
   // Adhere to SM protocol without breaking the other SDKs.
-  if (userInfo.settings.video &amp;&amp; typeof userInfo.settings.video === &#x27;object&#x27; &amp;&amp;
-    !((userInfo.settings.video.frameRate &amp;&amp; typeof userInfo.settings.video.frameRate === &#x27;object&#x27;) ||
-    typeof userInfo.settings.video.frameRate === &#x27;number&#x27;)) {
-    userInfo.settings.video.frameRate = -1;
+  if (userInfo.settings.video &amp;&amp; typeof userInfo.settings.video === &#x27;object&#x27;) {
+    userInfo.settings.video.customSettings = {};
+
+    if (userInfo.settings.video.frameRate &amp;&amp; typeof userInfo.settings.video.frameRate === &#x27;object&#x27;) {
+      userInfo.settings.video.customSettings.frameRate = clone(userInfo.settings.video.frameRate);
+      userInfo.settings.video.frameRate = -1;
+    }
+
+    if (userInfo.settings.video.resolution &amp;&amp; typeof userInfo.settings.video.resolution === &#x27;object&#x27;) {
+      if (userInfo.settings.video.resolution.width &amp;&amp; typeof userInfo.settings.video.resolution.width === &#x27;object&#x27;) {
+        userInfo.settings.video.customSettings.width = clone(userInfo.settings.video.width);
+        userInfo.settings.video.resolution.width = -1;
+      }
+
+      if (userInfo.settings.video.resolution.height &amp;&amp; typeof userInfo.settings.video.resolution.height === &#x27;object&#x27;) {
+        userInfo.settings.video.customSettings.height = clone(userInfo.settings.video.height);
+        userInfo.settings.video.resolution.height = -1;
+      }
+    }
+  }
+
+  if (userInfo.settings.bandwidth) {
+    userInfo.settings.maxBandwidth = clone(userInfo.settings.bandwidth);
+    delete userInfo.settings.bandwidth;
   }
 
   delete userInfo.agent;
   delete userInfo.room;
-  delete userInfo.settings.googleXBandwidth;
-
   return userInfo;
 };
 

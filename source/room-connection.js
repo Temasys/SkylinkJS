@@ -152,6 +152,15 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   must be retrieved as a requirement before Room session may begin.
  *   <small>This ignores the <code>options.audio</code> and <code>options.video</code> configuration.</small>
  *   <small>After 30 seconds without any Stream retrieved, this results in the `callback(error, ..)` result.</small>
+ * @param {JSON} [options.sdpDirections] The configuration to set the session description direction to enable or disable
+ *   uploading and downloading audio or video media streaming.
+ *   <small>Note that, this configuration does not prevent RTCP packets from being sent and received.</small>
+ * @param {JSON} [options.sdpDirections.audio] The configuration to set the session description direction for audio streaming.
+ * @param {Boolean} [options.sdpDirections.audio.send=true] The flag if uploading audio streaming should be enabled when available.
+ * @param {Boolean} [options.sdpDirections.audio.receive=true] The flag if downloading audio streaming should be enabled when available.
+ * @param {JSON} [options.sdpDirections.video] The configuration to set the session description direction for video streaming.
+ * @param {Boolean} [options.sdpDirections.video.send=true] The flag if uploading video streaming should be enabled when available.
+ * @param {Boolean} [options.sdpDirections.video.receive=true] The flag if downloading video streaming should be enabled when available.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_peerJoined">
@@ -584,6 +593,11 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
         bAS: {}
       };
 
+      self._sdpDirections = {
+        audio: { send: true, receive: true },
+        video: { send: true, receive: true }
+      };
+
       if (mediaOptions.bandwidth) {
         if (typeof mediaOptions.bandwidth.audio === 'number') {
           self._streamsBandwidthSettings.bAS.audio = mediaOptions.bandwidth.audio;
@@ -605,6 +619,22 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 
         if (typeof mediaOptions.googleXBandwidth.max === 'number') {
           self._streamsBandwidthSettings.googleX.max = mediaOptions.googleXBandwidth.max;
+        }
+      }
+
+      if (mediaOptions.sdpDirections) {
+        if (mediaOptions.sdpDirections.audio) {
+          self._sdpDirections.audio.receive = typeof mediaOptions.sdpDirections.audio.receive === 'boolean' ?
+            mediaOptions.sdpDirections.audio.receive : true;
+          self._sdpDirections.audio.send = typeof mediaOptions.sdpDirections.audio.send === 'boolean' ?
+            mediaOptions.sdpDirections.audio.send : true;
+        }
+
+        if (mediaOptions.sdpDirections.video) {
+          self._sdpDirections.video.receive = typeof mediaOptions.sdpDirections.video.receive === 'boolean' ?
+            mediaOptions.sdpDirections.video.receive : true;
+          self._sdpDirections.video.send = typeof mediaOptions.sdpDirections.video.send === 'boolean' ?
+            mediaOptions.sdpDirections.video.send : true;
         }
       }
 
