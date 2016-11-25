@@ -248,9 +248,11 @@ Demo.Skylink.on('peerRestart', function (peerId, peerInfo, isSelf){
     }
   }
 });
+
 //---------------------------------------------------
 Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf){
   if (isSelf) {
+    _peerId = peerId;
     $('#display_user_id').html(peerId);
     $('#isAudioMuted').css('color',
       (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
@@ -265,7 +267,6 @@ Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf){
       $('#file_list_panel').show();
     }
   } else {
-    _peerId = peerId;
     Demo.Methods.displayChatMessage('System', 'Peer ' + peerId + ' joined the room');
     var newListEntry = '<tr id="user' + peerId + '" class="badQuality">' +
       '<td><span class="name">' + peerInfo.userData + '</span><br>' +
@@ -318,20 +319,14 @@ Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf){
 
     peerElm.appendChild(peerVideo);
 
-    if (!isSelf) {
-      $(peerElm).append('<div class="connstats-wrapper"><button class="toggle-connstats" data="' + peerId +
-        '">See Stats</button><div class="row connstats">' +
-        '<div class="agent row"><b class="col-md-12">Agent</b><p class="col-md-6">Name: <span class="upload">' +
-          peerInfo.agent.name + (peerInfo.agent.os ? ' (' + peerInfo.agent.os + ')' : '') + '</span></p>' +
-          '<p class="col-md-6">Version: <span class="download">' + peerInfo.agent.version +
-          (peerInfo.agent.pluginVersion ? ' (Plugin Ver: ' + peerInfo.agent.pluginVersion + ')' : '') + '</span></p></div>' +
-        '<div class="audio row"><b class="col-md-12">Audio</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
-          '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
-        '<div class="video row"><b class="col-md-12">Video</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
-          '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
-        '<div class="candidate row"><b class="col-md-12">Selected Candidate</b><p class="col-md-6">Local: <span class="local"></span></p>' +
-          '<p class="col-md-6">Remote: <span class="remote"></span></p></div></div></div>');
-    }
+    $(peerElm).append('<div class="connstats-wrapper"><button class="toggle-connstats" data="' + (isSelf ? 'MCU' : peerId) +
+      '">See ' + (isSelf ? 'MCU ' : '') + 'Stats</button><div class="row connstats">' +
+      '<div class="audio row"><b class="col-md-12">Audio</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
+        '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
+      '<div class="video row"><b class="col-md-12">Video</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
+        '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
+      '<div class="candidate row"><b class="col-md-12">Selected Candidate</b><p class="col-md-6">Local: <span class="local"></span></p>' +
+        '<p class="col-md-6">Remote: <span class="remote"></span></p></div></div></div>');
   }
 });
 //---------------------------------------------------
@@ -503,7 +498,7 @@ Demo.Skylink.on('iceConnectionState', function (state, peerId) {
     case Demo.Skylink.ICE_CONNECTION_STATE.CONNECTED:
     case Demo.Skylink.ICE_CONNECTION_STATE.COMPLETED:
       color = 'green';
-      $('#video' + peerId + ' .connstats-wrapper').show();
+      $('#video' + (peerId === 'MCU' ? _peerId : peerId) + ' .connstats-wrapper').show();
       Demo.ShowStats[peerId] = true;
       break;
     default:
@@ -624,17 +619,18 @@ Demo.Skylink.on('channelError', function (error) {
 
 Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats, error) {
   if (state === Demo.Skylink.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS) {
-    var statsElm = $('#video' + peerId).find('.connstats');
+    var statsElm = $('#video' + (peerId === 'MCU' ? _peerId : peerId)).find('.connstats');
     var formatStatItem = function (type, dir) {
       var itemStr = '';
       var itemAddStr = '';
+      var bits = stats[type][dir].bytes * 8; // Convert to bits
 
-      if (stats[type][dir].bytes < 1000) {
-        itemStr += stats[type][dir].bytes + ' bps';
-      } else if (stats[type][dir].bytes < 1000000) {
-        itemStr += (stats[type][dir].bytes / 1000).toFixed(2) + ' kbps';
+      if (bits < 1000) {
+        itemStr += bits + ' bps';
+      } else if (bits < 1000000) {
+        itemStr += (bits / 1000).toFixed(2) + ' kbps';
       } else {
-        itemStr += (stats[type][dir].bytes / 1000000).toFixed(2) + ' mbps';
+        itemStr += (bits / 1000000).toFixed(2) + ' mbps';
       }
 
       // format packet stats
@@ -910,9 +906,11 @@ $(document).ready(function () {
   $('#peer_video_list').on('click', '.toggle-connstats', function () {
     $(this).parent().find('.connstats').slideToggle();
     $(this).attr('toggled', $(this).attr('toggled') ? '' : 'true');
-    $(this).html($(this).attr('toggled') ? 'Hide Stats' : 'Show Stats');
 
     var peerId = $(this).attr('data');
+
+    $(this).html($(this).attr('toggled') ? 'Hide ' + (peerId === 'MCU' ? ' MCU ' : '') + 'Stats' :
+      'Show ' + (peerId === 'MCU' ? ' MCU ' : '') + 'Stats');
 
     if ($(this).attr('toggled')) {
       Demo.Stats[peerId] = true;
