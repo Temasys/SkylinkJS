@@ -995,25 +995,20 @@ $(document).ready(function() {
       $(this).html($(this).attr('toggled') ? 'Hide Stats' : 'Show Stats');
     });
 
-    window.selectTargetPeer = function(dom) {
-      var peerId = $(dom).attr('target');
-      var panelDom = $('#selected_users_panel');
+  window.selectTargetPeer = function(dom) {
+    var peerId = $(dom).attr('target');
+    var panelDom = $('#selected_users_panel');
 
-      if (!dom.checked) {
-        $('#' + peerId + '-selected-user').remove();
+    if (!dom.checked) {
+      $('#' + peerId + '-selected-user').remove();
 
-        var index = selectedPeers.indexOf(peerId);
+      var index = selectedPeers.indexOf(peerId);
 
-        if (index > -1) {
-          selectedPeers.splice(index, 1);
-        }
+      if (index > -1) {
+        selectedPeers.splice(index, 1);
+      }
 
-        if ($(panelDom).find('.selected-users em').length === 0) {
-          $(panelDom).find('.all').show();
-        }
-      } else {
-        $(panelDom).find('.selected-users').append('<em id="' +
-          peerId + '-selected-user">Peer ' + peerId + '</em>');
+      if ($(panelDom).find('.selected-users em').length === 0) {
         $(panelDom).find('.all').show();
       } else {
         $(panelDom).find('.all').hide();
@@ -1038,5 +1033,7 @@ $(document).ready(function() {
     $('.select-user').each(function () {
       $(this)[0].checked = false
     });
+    $('#selected_users_panel .all').show();
+    selectedPeers = [];
   });
 });
