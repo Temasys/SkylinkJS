@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Fri Nov 25 2016 23:43:02 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Mon Nov 28 2016 14:40:56 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -10817,12 +10817,12 @@ Skylink.prototype._enterHandler = function(message) {
   userInfo.agent = {
     name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
     version: (function () {
-      if (typeof message.version !== 'string') {
+      if (!(message.version && typeof message.version === 'string')) {
         return 0;
       }
       // E.g. 0.9.6, replace minor "." with 0
       if (message.version.indexOf('.') > -1) {
-        parts = message.version.split('.');
+        var parts = message.version.split('.');
         if (parts.length > 2) {
           var majorVer = parts[0] || '0';
           parts.splice(0, 1);
@@ -10923,12 +10923,12 @@ Skylink.prototype._restartHandler = function(message){
   userInfo.agent = {
     name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
     version: (function () {
-      if (typeof message.version !== 'string') {
+      if (!(message.version && typeof message.version === 'string')) {
         return 0;
       }
       // E.g. 0.9.6, replace minor "." with 0
       if (message.version.indexOf('.') > -1) {
-        parts = message.version.split('.');
+        var parts = message.version.split('.');
         if (parts.length > 2) {
           var majorVer = parts[0] || '0';
           parts.splice(0, 1);
@@ -11030,12 +11030,12 @@ Skylink.prototype._welcomeHandler = function(message) {
   userInfo.agent = {
     name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
     version: (function () {
-      if (typeof message.version !== 'string') {
+      if (!(message.version && typeof message.version === 'string')) {
         return 0;
       }
       // E.g. 0.9.6, replace minor "." with 0
       if (message.version.indexOf('.') > -1) {
-        parts = message.version.split('.');
+        var parts = message.version.split('.');
         if (parts.length > 2) {
           var majorVer = parts[0] || '0';
           parts.splice(0, 1);
