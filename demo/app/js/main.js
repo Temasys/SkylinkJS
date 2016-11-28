@@ -21,18 +21,6 @@ Demo.Skylink.setLogLevel(Demo.Skylink.LOG_LEVEL.DEBUG);
 Demo.Methods.displayFileItemHTML = function(content) {
   return '<p>' + content.name + '<small style="float:right;color:#aaa;">' + content.size + ' B</small></p>' +
     ((content.isUpload) ? ('<table id="' + content.transferId + '" class="table upload-table">' +
-<<<<<<< HEAD
-      '<thead><tr><th colspan="2"><span class="glyphicon glyphicon-saved">' +
-      '</span> Upload Status</th></tr></thead>' +
-      '<tbody></tbody></table>') : ('<div class="progress progress-striped">' +
-      '<div id="' + content.transferId + '" class="progress-bar ' +
-      '" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"' +
-      ' style="width: 0%"><span>Downloading...</span></div></div>')) +
-    '<p><a id="' + content.transferId + '_btn" class="btn btn-default" ' +
-    'href="' + content.data + '" style="display: ' + ((content.data.length > 1) ?
-      'block' : 'none') + ';" download="' + content.name +
-    '"><span class="glyphicon glyphicon-cloud-download"></span> <b>Download file</b></a></p>';
-=======
     '<thead><tr><th colspan="2"><span class="glyphicon glyphicon-saved">' +
     '</span> Upload Status</th></tr></thead>' +
     '<tbody></tbody></table>') : ('<div class="progress progress-striped">' +
@@ -46,7 +34,6 @@ Demo.Methods.displayFileItemHTML = function(content) {
     '<a class="btn btn-default cancel c-' + content.peerId + '" style="margin-top: 15px; border-color: #d9534f; color: #d9534f;" ' +
     'onclick="cancelTransfer(\'' + content.peerId + '\', \'' + content.transferId + '\')">' +
     '<span class="glyphicon glyphicon-remove"></span> Cancel Transfer</a></p>' : '');
->>>>>>> 0.6.x-development
 };
 
 Demo.Methods.displayChatItemHTML = function(peerId, timestamp, content, isPrivate) {
@@ -131,15 +118,8 @@ Demo.Skylink.on('incomingDataRequest', function(transferId, peerId, transferInfo
     Demo.Skylink.acceptDataTransfer(peerId, transferId, true);
   }
 })
-<<<<<<< HEAD
-Demo.Skylink.on('dataTransferState', function(state, transferId, peerId, transferInfo, error) {
-  transferInfo = transferInfo || {};
-
-  if (transferInfo.dataType !== 'blob') {
-=======
 Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transferInfo, error){
   if (transferInfo.dataType !== Demo.Skylink.DATA_TRANSFER_SESSION_TYPE.BLOB) {
->>>>>>> 0.6.x-development
     return;
   }
 
@@ -150,70 +130,6 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
   transferInfo.peerId = peerId;
 
   switch (state) {
-<<<<<<< HEAD
-    case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_REQUEST:
-      var result = confirm('Accept file "' + transferInfo.name +
-        '" from ' + peerId + '?\n\n[size: ' + transferInfo.size + ']');
-      Demo.Skylink.acceptDataTransfer(peerId, transferId, result);
-      break;
-    case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_STARTED:
-      var displayName = Demo.Skylink.getUserData();
-      transferInfo.transferId = transferId;
-      transferInfo.isUpload = true;
-      transferInfo.data = URL.createObjectURL(transferInfo.data);
-      Demo.Methods.displayChatMessage(displayName, transferInfo);
-      Demo.Methods.displayChatMessage(displayName, 'File sent: ' + transferInfo.name);
-      break;
-    case Demo.Skylink.DATA_TRANSFER_STATE.DOWNLOAD_STARTED:
-      var displayName = Demo.Skylink.getPeerInfo(transferInfo.senderPeerId).userData;
-      transferInfo.transferId = transferId;
-      transferInfo.data = '#';
-      transferInfo.isUpload = false;
-      Demo.Methods.displayChatMessage(displayName, transferInfo);
-      Demo.Methods.displayChatMessage(displayName, 'File sent: ' + transferInfo.name);
-      break;
-    case Demo.Skylink.DATA_TRANSFER_STATE.UPLOADING:
-      var displayName = Demo.Skylink.getPeerInfo(peerId).userData;
-      if ($('#' + transferId).find('.' + peerId).width() < 1) {
-        $('#' + transferId).append('<tr><td>' + displayName +
-          '</td><td class="' + peerId + '">' + transferInfo.percentage + '%</td></tr>');
-      } else {
-        $('#' + transferId).find('.' + peerId).html(transferInfo.percentage + '%');
-      }
-      break;
-    case Demo.Skylink.DATA_TRANSFER_STATE.DOWNLOADING:
-      $('#' + transferId).attr('aria-valuenow', transferInfo.percentage);
-      $('#' + transferId).css('width', transferInfo.percentage + '%');
-      $('#' + transferId).find('span').html(transferInfo.percentage + ' %');
-      break;
-    case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_COMPLETED:
-      var displayName = Demo.Skylink.getPeerInfo(peerId).userData;
-      Demo.Methods.displayChatMessage(displayName, 'File received: ' + transferInfo.name);
-      $('#' + transferId).find('.' + peerId).html('&#10003;');
-      break;
-    case Demo.Skylink.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED:
-      // If completed, display download button
-      var displayName = Demo.Skylink.getPeerInfo(peerId).userData;
-      $('#' + transferId).parent().remove();
-      $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
-      $('#' + transferId + '_btn').css('display', 'block');
-      Demo.Methods.displayChatMessage(displayName, 'File received: ' + transferInfo.name);
-      break;
-    case Demo.Skylink.DATA_TRANSFER_STATE.REJECTED:
-      alert('User "' + peerId + '" has rejected your file');
-      break;
-    case Demo.Skylink.DATA_TRANSFER_STATE.ERROR:
-      alert(error.transferType + ' failed. Reason: \n' +
-        error.message);
-      $('#' + transferId).parent().removeClass('progress-bar-info');
-      $('#' + transferId).parent().addClass('progress-bar-danger');
-      break;
-    case Demo.Skylink.DATA_TRANSFER_STATE.CANCEL:
-      alert(error.transferType + ' canceled. Reason: \n' +
-        error.message);
-      $('#' + transferId).parent().removeClass('progress-bar-info');
-      $('#' + transferId).parent().addClass('progress-bar-danger');
-=======
   case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_REQUEST :
     var result = confirm('Accept file "' + transferInfo.name +
       '" from ' + peerId + '?\n\n[size: ' + transferInfo.size + ']');
@@ -319,7 +235,6 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
     $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
     $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('cursor', 'not-allowed');
     Demo.TransfersDone[transferId][peerId] = true;
->>>>>>> 0.6.x-development
   }
 });
 //---------------------------------------------------
@@ -646,11 +561,7 @@ Demo.Skylink.on('peerConnectionState', function(state, peerId) {
   $('#user' + peerId + ' .6').css('color', color);
 });
 //---------------------------------------------------
-<<<<<<< HEAD
-Demo.Skylink.on('dataChannelState', function(state, peerId, error, channelName, channelType) {
-=======
 Demo.Skylink.on('dataChannelState', function (state, peerId, error, channelName, channelType, messageType) {
->>>>>>> 0.6.x-development
   if (channelType !== Demo.Skylink.DATA_CHANNEL_TYPE.MESSAGING) {
     return;
   }
@@ -767,14 +678,6 @@ Demo.Skylink.on('recordingState', function(state, recordingId, url, error) {
 
 Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats, error) {
   if (state === Demo.Skylink.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS) {
-<<<<<<< HEAD
-    var statsElm = $('#video' + peerId).find('.connstats');
-    var formatBitrate = function(val) {
-      if (val < 1000) {
-        return val + ' bps';
-      } else if (val < 1000000) {
-        return (val / 1000).toFixed(2) + ' kbps';
-=======
     var statsElm = $('#video' + (peerId === 'MCU' ? _peerId : peerId)).find('.connstats');
     var formatStatItem = function (type, dir) {
       var itemStr = '';
@@ -785,7 +688,6 @@ Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats
         itemStr += bits + ' bps';
       } else if (bits < 1000000) {
         itemStr += (bits / 1000).toFixed(2) + ' kbps';
->>>>>>> 0.6.x-development
       } else {
         itemStr += (bits / 1000000).toFixed(2) + ' mbps';
       }
@@ -890,13 +792,9 @@ Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats
 //------------- join room ---------------------------
 var displayName = 'name_' + 'user_' + Math.floor((Math.random() * 1000) + 1);
 
-<<<<<<< HEAD
-Demo.Skylink.init(config, function(error, success) {
-=======
 $('#display_user_info').val(displayName);
 
 Demo.Skylink.init(config, function (error, success) {
->>>>>>> 0.6.x-development
   if (success) {
     Demo.Skylink.joinRoom({
       userData: displayName,
@@ -1015,14 +913,6 @@ $(document).ready(function() {
     Demo.Skylink.unlockRoom();
   });
   //---------------------------------------------------
-<<<<<<< HEAD
-  $('#enable_audio_btn').click(function() {
-    Demo.Skylink.enableAudio();
-  });
-  //---------------------------------------------------
-  $('#disable_audio_btn').click(function() {
-    Demo.Skylink.disableAudio();
-=======
   $('#enable_audio_btn').click(function () {
     Demo.Skylink.muteStream({
       audioMuted: false,
@@ -1035,21 +925,12 @@ $(document).ready(function() {
       audioMuted: true,
       videoMuted: Demo.Skylink.getPeerInfo().mediaStatus.videoMuted
     });
->>>>>>> 0.6.x-development
   });
   //---------------------------------------------------
   $('#stop_stream_btn').click(function() {
     Demo.Skylink.stopStream();
   });
   //---------------------------------------------------
-<<<<<<< HEAD
-  $('#enable_video_btn').click(function() {
-    Demo.Skylink.enableVideo();
-  });
-  //---------------------------------------------------
-  $('#disable_video_btn').click(function() {
-    Demo.Skylink.disableVideo();
-=======
   $('#enable_video_btn').click(function () {
     Demo.Skylink.muteStream({
       videoMuted: false,
@@ -1062,7 +943,6 @@ $(document).ready(function() {
       videoMuted: true,
       audioMuted: Demo.Skylink.getPeerInfo().mediaStatus.audioMuted
     });
->>>>>>> 0.6.x-development
   });
   //---------------------------------------------------
   $('#leave_room_btn').click(function() {
@@ -1135,19 +1015,6 @@ $(document).ready(function() {
         $(panelDom).find('.selected-users').append('<em id="' +
           peerId + '-selected-user">Peer ' + peerId + '</em>');
         $(panelDom).find('.all').show();
-<<<<<<< HEAD
-        selectedPeers.push(peerId);
-      }
-    };
-
-    $('#clear-selected-users').click(function() {
-      $('#selected_users_panel .selected-users').html('');
-      $('.select-user').each(function() {
-        $(this)[0].checked = false
-      });
-      $('#selected_users_panel .all').show();
-      selectedPeers = [];
-=======
       } else {
         $(panelDom).find('.all').hide();
       }
@@ -1170,7 +1037,6 @@ $(document).ready(function() {
     $('#selected_users_panel .selected-users').html('');
     $('.select-user').each(function () {
       $(this)[0].checked = false
->>>>>>> 0.6.x-development
     });
   });
 });
