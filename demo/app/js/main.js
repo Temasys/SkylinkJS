@@ -994,6 +994,7 @@ $(document).ready(function() {
       $(this).attr('toggled', $(this).attr('toggled') ? '' : 'true');
       $(this).html($(this).attr('toggled') ? 'Hide Stats' : 'Show Stats');
     });
+  });
 
   window.selectTargetPeer = function(dom) {
     var peerId = $(dom).attr('target');
