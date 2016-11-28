@@ -152,15 +152,31 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   must be retrieved as a requirement before Room session may begin.
  *   <small>This ignores the <code>options.audio</code> and <code>options.video</code> configuration.</small>
  *   <small>After 30 seconds without any Stream retrieved, this results in the `callback(error, ..)` result.</small>
- * @param {JSON} [options.sdpDirections] The configuration to set the session description direction to enable or disable
- *   uploading and downloading audio or video media streaming.
- *   <small>Note that, this configuration does not prevent RTCP packets from being sent and received.</small>
- * @param {JSON} [options.sdpDirections.audio] The configuration to set the session description direction for audio streaming.
- * @param {Boolean} [options.sdpDirections.audio.send=true] The flag if uploading audio streaming should be enabled when available.
- * @param {Boolean} [options.sdpDirections.audio.receive=true] The flag if downloading audio streaming should be enabled when available.
- * @param {JSON} [options.sdpDirections.video] The configuration to set the session description direction for video streaming.
- * @param {Boolean} [options.sdpDirections.video.send=true] The flag if uploading video streaming should be enabled when available.
- * @param {Boolean} [options.sdpDirections.video.receive=true] The flag if downloading video streaming should be enabled when available.
+ * @param {JSON} [options.sdpSettings] <blockquote class="info">Note that this is an EXTREMELY experimental configuration
+ *   and may cause disruptions in connections or connectivity issues when toggled. It is never recommended to toggle
+ *   these configuration unless required.</blockquote>
+ *   The configuration to set the session description settings.
+ * @param {JSON} [options.sdpSettings.connection] The configuration to set the session description connection settings.
+ *   <small>Note that this configuration may disable the media streaming and these settings will be enabled for
+ *   MCU server Peer connection regardless of the flags configured.</small>
+ * @param {Boolean} [options.sdpSettings.connection.audio=true] The configuration to enable audio session description connection.
+ * @param {Boolean} [options.sdpSettings.connection.video=true] The configuration to enable video session description connection.
+ * @param {Boolean} [options.sdpSettings.connection.data=true] The configuration to enable Datachannel session description connection.
+ * @param {JSON} [options.sdpSettings.direction] The configuration to set the session description connection direction
+ *   to enable or disable uploading and downloading audio or video media streaming.
+ *   <small>Note that this configuration does not prevent RTCP packets from being sent and received.</small>
+ * @param {JSON} [options.sdpSettings.direction.audio] The configuration to set the session description
+ *   connection direction for audio streaming.
+ * @param {Boolean} [options.sdpSettings.direction.audio.send=true] The flag if uploading audio streaming
+ *   should be enabled when available.
+ * @param {Boolean} [options.sdpSettings.direction.audio.receive=true] The flag if downloading audio
+ *   streaming should be enabled when available.
+ * @param {JSON} [options.sdpSettings.direction.video] The configuration to set the session description
+ *   connection direction for video streaming.
+ * @param {Boolean} [options.sdpSettings.direction.video.send=true] The flag if uploading video streaming
+ *   should be enabled when available.
+ * @param {Boolean} [options.sdpSettings.direction.video.receive=true] The flag if downloading video streaming
+ *   should be enabled when available.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_peerJoined">
@@ -593,9 +609,16 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
         bAS: {}
       };
 
-      self._sdpDirections = {
-        audio: { send: true, receive: true },
-        video: { send: true, receive: true }
+      self._sdpSettings = {
+        connection: {
+          audio: true,
+          video: true,
+          data: true
+        },
+        direction: {
+          audio: { send: true, receive: true },
+          video: { send: true, receive: true }
+        }
       };
 
       if (mediaOptions.bandwidth) {
@@ -622,19 +645,29 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
         }
       }
 
-      if (mediaOptions.sdpDirections) {
-        if (mediaOptions.sdpDirections.audio) {
-          self._sdpDirections.audio.receive = typeof mediaOptions.sdpDirections.audio.receive === 'boolean' ?
-            mediaOptions.sdpDirections.audio.receive : true;
-          self._sdpDirections.audio.send = typeof mediaOptions.sdpDirections.audio.send === 'boolean' ?
-            mediaOptions.sdpDirections.audio.send : true;
-        }
+      if (mediaOptions.sdpSettings) {
+        if (mediaOptions.sdpSettings.direction) {
+          if (mediaOptions.sdpSettings.direction.audio) {
+            self._sdpSettings.direction.audio.receive = typeof mediaOptions.sdpSettings.direction.audio.receive === 'boolean' ?
+              mediaOptions.sdpSettings.direction.audio.receive : true;
+            self._sdpSettings.direction.audio.send = typeof mediaOptions.sdpSettings.direction.audio.send === 'boolean' ?
+              mediaOptions.sdpSettings.direction.audio.send : true;
+          }
 
-        if (mediaOptions.sdpDirections.video) {
-          self._sdpDirections.video.receive = typeof mediaOptions.sdpDirections.video.receive === 'boolean' ?
-            mediaOptions.sdpDirections.video.receive : true;
-          self._sdpDirections.video.send = typeof mediaOptions.sdpDirections.video.send === 'boolean' ?
-            mediaOptions.sdpDirections.video.send : true;
+          if (mediaOptions.sdpSettings.direction.video) {
+            self._sdpSettings.direction.video.receive = typeof mediaOptions.sdpSettings.direction.video.receive === 'boolean' ?
+              mediaOptions.sdpSettings.direction.video.receive : true;
+            self._sdpSettings.direction.video.send = typeof mediaOptions.sdpSettings.direction.video.send === 'boolean' ?
+              mediaOptions.sdpSettings.direction.video.send : true;
+          }
+        }
+        if (mediaOptions.sdpSettings.connection) {
+          self._sdpSettings.connection.audio = typeof mediaOptions.sdpSettings.connection.audio === 'boolean' ?
+            mediaOptions.sdpSettings.connection.audio : true;
+          self._sdpSettings.connection.video = typeof mediaOptions.sdpSettings.connection.video === 'boolean' ?
+            mediaOptions.sdpSettings.connection.video : true;
+          self._sdpSettings.connection.data = typeof mediaOptions.sdpSettings.connection.data === 'boolean' ?
+            mediaOptions.sdpSettings.connection.data : true;
         }
       }
 

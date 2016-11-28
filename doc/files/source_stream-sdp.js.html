@@ -676,44 +676,51 @@ Skylink.prototype._removeSDPFilteredCandidates = function (targetMid, sessionDes
 };
 
 /**
- * Function that modifies the session description to remove non-relay ICE candidates.
- * @method _handleSDPDirectionCase
+ * Function that modifies the session description to handle the connection settings.
+ * This is experimental and never recommended to end-users.
+ * @method _handleSDPConnectionSettings
  * @private
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype._handleSDPDirectionCase = function (targetMid, sessionDescription) {
-  log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Handling MCU connection case.&#x27;]);
-
+Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDescription) {
+  var self = this;
   var sdpLines = sessionDescription.sdp.split(&#x27;\r\n&#x27;);
   var mediaType = &#x27;&#x27;;
+  var isMediaAllowed
 
   for (var i = 0; i &lt; sdpLines.length; i++) {
     if (sdpLines[i].indexOf(&#x27;m=&#x27;) === 0) {
       mediaType = (sdpLines[i].split(&#x27;m=&#x27;)[1] || &#x27;&#x27;).split(&#x27; &#x27;)[0] || &#x27;&#x27;;
+    }
 
-    } else if (mediaType &amp;&amp; [&#x27;a=sendrecv&#x27;, &#x27;a=sendonly&#x27;, &#x27;a=recvonly&#x27;].indexOf(sdpLines[i]) &gt; -1) {
-      if (this._hasMCU) {
-        sdpLines[i] = targetMid === &#x27;MCU&#x27; ? &#x27;a=sendonly&#x27; : &#x27;a=recvonly&#x27;;
-      }
+    if (mediaType) {
+      if (!self._sdpSettings.connection[mediaType === &#x27;application&#x27; ? &#x27;data&#x27; : mediaType] &amp;&amp; targetMid !== &#x27;MCU&#x27;) {
+        sdpLines.splice(i, 1);
+        i--;
+      } else if (mediaType &amp;&amp; [&#x27;a=sendrecv&#x27;, &#x27;a=sendonly&#x27;, &#x27;a=recvonly&#x27;].indexOf(sdpLines[i]) &gt; -1) {
+        if (self._hasMCU) {
+          sdpLines[i] = targetMid === &#x27;MCU&#x27; ? &#x27;a=sendonly&#x27; : &#x27;a=recvonly&#x27;;
+        }
 
-      if (this._sdpDirections[mediaType].send &amp;&amp; !this._sdpDirections[mediaType].receive) {
-        sdpLines[i] = sdpLines[i].indexOf(&#x27;send&#x27;) &gt; -1 ? &#x27;a=sendonly&#x27; : &#x27;a=inactive&#x27;;
-      } else if (!this._sdpDirections[mediaType].send &amp;&amp; this._sdpDirections[mediaType].receive) {
-        sdpLines[i] = sdpLines[i].indexOf(&#x27;recv&#x27;) &gt; -1 ? &#x27;a=recvonly&#x27; : &#x27;a=inactive&#x27;;
-      } else if (!this._sdpDirections[mediaType].send &amp;&amp; !this._sdpDirections[mediaType].receive) {
-        sdpLines[i] = &#x27;a=inactive&#x27;;
-      }
+        if (self._sdpSettings.direction[mediaType].send &amp;&amp; !self._sdpSettings.direction[mediaType].receive) {
+          sdpLines[i] = sdpLines[i].indexOf(&#x27;send&#x27;) &gt; -1 ? &#x27;a=sendonly&#x27; : &#x27;a=inactive&#x27;;
+        } else if (!self._sdpSettings.direction[mediaType].send &amp;&amp; self._sdpSettings.direction[mediaType].receive) {
+          sdpLines[i] = sdpLines[i].indexOf(&#x27;recv&#x27;) &gt; -1 ? &#x27;a=recvonly&#x27; : &#x27;a=inactive&#x27;;
+        } else if (!self._sdpSettings.direction[mediaType].send &amp;&amp; !self._sdpSettings.direction[mediaType].receive) {
+          sdpLines[i] = &#x27;a=inactive&#x27;;
+        }
 
-      // MCU currently does not support a=inactive flag
-      if (!this._hasMCU) {
-        var agent = ((this._peerInformations[targetMid] || {}).agent || {}).name || &#x27;&#x27;;
-        // Handle Chrome bundle bug. - See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
-        if (window.webrtcDetectedBrowser !== &#x27;firefox&#x27; &amp;&amp; agent === &#x27;firefox&#x27; &amp;&amp;
-          sessionDescription.type === this.HANDSHAKE_PROGRESS.OFFER &amp;&amp; sdpLines[i] === &#x27;a=recvonly&#x27;) {
-          log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Overriding any original settings &#x27; +
-            &#x27;to receive only to send and receive to resolve chrome BUNDLE errors.&#x27;]);
-          sdpLines[i] = &#x27;a=sendrecv&#x27;;
+        // MCU currently does not support a=inactive flag
+        if (!self._hasMCU) {
+          var agent = ((self._peerInformations[targetMid] || {}).agent || {}).name || &#x27;&#x27;;
+          // Handle Chrome bundle bug. - See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
+          if (window.webrtcDetectedBrowser !== &#x27;firefox&#x27; &amp;&amp; agent === &#x27;firefox&#x27; &amp;&amp;
+            sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &amp;&amp; sdpLines[i] === &#x27;a=recvonly&#x27;) {
+            log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Overriding any original settings &#x27; +
+              &#x27;to receive only to send and receive to resolve chrome BUNDLE errors.&#x27;]);
+            sdpLines[i] = &#x27;a=sendrecv&#x27;;
+          }
         }
       }
     }

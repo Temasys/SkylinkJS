@@ -1264,9 +1264,9 @@
         {
             "file": "source/template/header.js",
             "line": 1023,
-            "description": "Stores the session description direction flags.",
+            "description": "Stores the session description settings.",
             "itemtype": "attribute",
-            "name": "_sdpDirections",
+            "name": "_sdpSettings",
             "type": "JSON",
             "access": "private",
             "tagname": "",
@@ -3196,47 +3196,80 @@
                             "optional": true
                         },
                         {
-                            "name": "sdpDirections",
-                            "description": "The configuration to set the session description direction to enable or disable\n  uploading and downloading audio or video media streaming.\n  <small>Note that, this configuration does not prevent RTCP packets from being sent and received.</small>",
+                            "name": "sdpSettings",
+                            "description": "<blockquote class=\"info\">Note that this is an EXTREMELY experimental configuration\n  and may cause disruptions in connections or connectivity issues when toggled. It is never recommended to toggle\n  these configuration unless required.</blockquote>\n  The configuration to set the session description settings.",
                             "type": "JSON",
                             "optional": true,
                             "props": [
                                 {
-                                    "name": "audio",
-                                    "description": "The configuration to set the session description direction for audio streaming.",
+                                    "name": "connection",
+                                    "description": "The configuration to set the session description connection settings.\n  <small>Note that this configuration may disable the media streaming and these settings will be enabled for\n  MCU server Peer connection regardless of the flags configured.</small>",
                                     "type": "JSON",
                                     "optional": true
                                 },
                                 {
-                                    "name": "audio.send",
-                                    "description": "The flag if uploading audio streaming should be enabled when available.",
+                                    "name": "connection.audio",
+                                    "description": "The configuration to enable audio session description connection.",
                                     "type": "Boolean",
                                     "optional": true,
                                     "optdefault": "true"
                                 },
                                 {
-                                    "name": "audio.receive",
-                                    "description": "The flag if downloading audio streaming should be enabled when available.",
+                                    "name": "connection.video",
+                                    "description": "The configuration to enable video session description connection.",
                                     "type": "Boolean",
                                     "optional": true,
                                     "optdefault": "true"
                                 },
                                 {
-                                    "name": "video",
-                                    "description": "The configuration to set the session description direction for video streaming.",
+                                    "name": "connection.data",
+                                    "description": "The configuration to enable Datachannel session description connection.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "true"
+                                },
+                                {
+                                    "name": "direction",
+                                    "description": "The configuration to set the session description connection direction\n  to enable or disable uploading and downloading audio or video media streaming.\n  <small>Note that this configuration does not prevent RTCP packets from being sent and received.</small>",
                                     "type": "JSON",
                                     "optional": true
                                 },
                                 {
-                                    "name": "video.send",
-                                    "description": "The flag if uploading video streaming should be enabled when available.",
+                                    "name": "direction.audio",
+                                    "description": "The configuration to set the session description\n  connection direction for audio streaming.",
+                                    "type": "JSON",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "direction.audio.send",
+                                    "description": "The flag if uploading audio streaming\n  should be enabled when available.",
                                     "type": "Boolean",
                                     "optional": true,
                                     "optdefault": "true"
                                 },
                                 {
-                                    "name": "video.receive",
-                                    "description": "The flag if downloading video streaming should be enabled when available.",
+                                    "name": "direction.audio.receive",
+                                    "description": "The flag if downloading audio\n  streaming should be enabled when available.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "true"
+                                },
+                                {
+                                    "name": "direction.video",
+                                    "description": "The configuration to set the session description\n  connection direction for video streaming.",
+                                    "type": "JSON",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "direction.video.send",
+                                    "description": "The flag if uploading video streaming\n  should be enabled when available.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "true"
+                                },
+                                {
+                                    "name": "direction.video.receive",
+                                    "description": "The flag if downloading video streaming\n  should be enabled when available.",
                                     "type": "Boolean",
                                     "optional": true,
                                     "optdefault": "true"
@@ -3308,7 +3341,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 399,
+            "line": 415,
             "description": "<blockquote class=\"info\">\n  Note that this method will close any existing socket channel connection despite not being in the Room.\n</blockquote>\nFunction that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -3373,7 +3406,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 515,
+            "line": 531,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -3383,7 +3416,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 544,
+            "line": 560,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -3393,7 +3426,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 573,
+            "line": 589,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -8004,9 +8037,9 @@
         {
             "file": "source/stream-sdp.js",
             "line": 587,
-            "description": "Function that modifies the session description to remove non-relay ICE candidates.",
+            "description": "Function that modifies the session description to handle the connection settings.\nThis is experimental and never recommended to end-users.",
             "itemtype": "method",
-            "name": "_handleSDPDirectionCase",
+            "name": "_handleSDPConnectionSettings",
             "access": "private",
             "tagname": "",
             "since": "0.6.16",
@@ -8064,15 +8097,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:399"
+            "line": " source/room-connection.js:415"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:515"
+            "line": " source/room-connection.js:531"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:544"
+            "line": " source/room-connection.js:560"
         },
         {
             "message": "unknown tag: trigger",

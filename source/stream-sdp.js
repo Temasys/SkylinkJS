@@ -585,44 +585,51 @@ Skylink.prototype._removeSDPFilteredCandidates = function (targetMid, sessionDes
 };
 
 /**
- * Function that modifies the session description to remove non-relay ICE candidates.
- * @method _handleSDPDirectionCase
+ * Function that modifies the session description to handle the connection settings.
+ * This is experimental and never recommended to end-users.
+ * @method _handleSDPConnectionSettings
  * @private
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype._handleSDPDirectionCase = function (targetMid, sessionDescription) {
-  log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Handling MCU connection case.']);
-
+Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDescription) {
+  var self = this;
   var sdpLines = sessionDescription.sdp.split('\r\n');
   var mediaType = '';
+  var isMediaAllowed
 
   for (var i = 0; i < sdpLines.length; i++) {
     if (sdpLines[i].indexOf('m=') === 0) {
       mediaType = (sdpLines[i].split('m=')[1] || '').split(' ')[0] || '';
+    }
 
-    } else if (mediaType && ['a=sendrecv', 'a=sendonly', 'a=recvonly'].indexOf(sdpLines[i]) > -1) {
-      if (this._hasMCU) {
-        sdpLines[i] = targetMid === 'MCU' ? 'a=sendonly' : 'a=recvonly';
-      }
+    if (mediaType) {
+      if (!self._sdpSettings.connection[mediaType === 'application' ? 'data' : mediaType] && targetMid !== 'MCU') {
+        sdpLines.splice(i, 1);
+        i--;
+      } else if (mediaType && ['a=sendrecv', 'a=sendonly', 'a=recvonly'].indexOf(sdpLines[i]) > -1) {
+        if (self._hasMCU) {
+          sdpLines[i] = targetMid === 'MCU' ? 'a=sendonly' : 'a=recvonly';
+        }
 
-      if (this._sdpDirections[mediaType].send && !this._sdpDirections[mediaType].receive) {
-        sdpLines[i] = sdpLines[i].indexOf('send') > -1 ? 'a=sendonly' : 'a=inactive';
-      } else if (!this._sdpDirections[mediaType].send && this._sdpDirections[mediaType].receive) {
-        sdpLines[i] = sdpLines[i].indexOf('recv') > -1 ? 'a=recvonly' : 'a=inactive';
-      } else if (!this._sdpDirections[mediaType].send && !this._sdpDirections[mediaType].receive) {
-        sdpLines[i] = 'a=inactive';
-      }
+        if (self._sdpSettings.direction[mediaType].send && !self._sdpSettings.direction[mediaType].receive) {
+          sdpLines[i] = sdpLines[i].indexOf('send') > -1 ? 'a=sendonly' : 'a=inactive';
+        } else if (!self._sdpSettings.direction[mediaType].send && self._sdpSettings.direction[mediaType].receive) {
+          sdpLines[i] = sdpLines[i].indexOf('recv') > -1 ? 'a=recvonly' : 'a=inactive';
+        } else if (!self._sdpSettings.direction[mediaType].send && !self._sdpSettings.direction[mediaType].receive) {
+          sdpLines[i] = 'a=inactive';
+        }
 
-      // MCU currently does not support a=inactive flag
-      if (!this._hasMCU) {
-        var agent = ((this._peerInformations[targetMid] || {}).agent || {}).name || '';
-        // Handle Chrome bundle bug. - See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
-        if (window.webrtcDetectedBrowser !== 'firefox' && agent === 'firefox' &&
-          sessionDescription.type === this.HANDSHAKE_PROGRESS.OFFER && sdpLines[i] === 'a=recvonly') {
-          log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Overriding any original settings ' +
-            'to receive only to send and receive to resolve chrome BUNDLE errors.']);
-          sdpLines[i] = 'a=sendrecv';
+        // MCU currently does not support a=inactive flag
+        if (!self._hasMCU) {
+          var agent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
+          // Handle Chrome bundle bug. - See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
+          if (window.webrtcDetectedBrowser !== 'firefox' && agent === 'firefox' &&
+            sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER && sdpLines[i] === 'a=recvonly') {
+            log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Overriding any original settings ' +
+              'to receive only to send and receive to resolve chrome BUNDLE errors.']);
+            sdpLines[i] = 'a=sendrecv';
+          }
         }
       }
     }

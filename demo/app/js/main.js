@@ -741,9 +741,15 @@ Demo.Skylink.init(config, function (error, success) {
       userData: displayName,
       audio: { stereo: true },
       video: true,
-      sdpDirections: {
-        audio: { receive: !(window.location.search === '?sendonly') },
-        video: { receive: !(window.location.search === '?sendonly') }
+      sdpSettings: {
+        connection: {
+          audio: !(window.location.search === '?sendonly'),
+          video: !(window.location.search === '?sendonly')
+        }/*,
+        direction: {
+          audio: { receive: !(window.location.search === '?sendonly') },
+          video: { receive: !(window.location.search === '?sendonly') }
+        }*/
       }
     });
   }

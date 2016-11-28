@@ -451,8 +451,8 @@ Before using any Skylink functionalities, you will need to authenticate your App
                     </span>
                   </a>
                 
-                  <a href="#method__handleSDPDirectionCase" class="list-group-item code-menu-item  private-method-item ">
-                    &nbsp;&nbsp;_handleSDPDirectionCase
+                  <a href="#method__handleSDPConnectionSettings" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_handleSDPConnectionSettings
                     <span class="settings">
                       
                       
@@ -1689,8 +1689,8 @@ Before using any Skylink functionalities, you will need to authenticate your App
                     </span>
                   </a>
                 
-                  <a href="#attr__sdpDirections" class="list-group-item code-menu-item  private-attr-item ">
-                    &nbsp;&nbsp;_sdpDirections
+                  <a href="#attr__sdpSettings" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_sdpSettings
                     <span class="settings">
                       
                       
@@ -5579,8 +5579,8 @@ See confluence docs for the &quot;enter&quot; expected properties to be received
   <hr>
 </div>
             
-              <div id="method__handleSDPDirectionCase" class="code-item method item private-method-item ">
-  <h3 class="code-item-name"><code>_handleSDPDirectionCase</code></h3>
+              <div id="method__handleSDPConnectionSettings" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_handleSDPConnectionSettings</code></h3>
   
     <span class="paren">()</span>
   
@@ -5640,7 +5640,8 @@ See confluence docs for the &quot;enter&quot; expected properties to be received
   </div>
 
   <div class="code-item-description">
-    <p>Function that modifies the session description to remove non-relay ICE candidates.</p>
+    <p>Function that modifies the session description to handle the connection settings.
+This is experimental and never recommended to end-users.</p>
 
   </div>
 
@@ -10169,7 +10170,7 @@ See confluence docs for the &quot;updateUserEvent&quot; expected properties to b
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l573"><code>source&#x2F;room-connection.js:573</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l589"><code>source&#x2F;room-connection.js:589</code></a>
       </small>
     
 
@@ -14761,7 +14762,7 @@ that is not the same as the <code>options.defaultRoom</code> defined in the
                   </li>
                 
                   <li class="param">
-                    <code class="param-name">sdpDirections</code>
+                    <code class="param-name">sdpSettings</code>
                     <span class="type"><b>{</b>JSON<b>}</b></span>
 
                     <span class="label">Optional</span>
@@ -14769,9 +14770,10 @@ that is not the same as the <code>options.defaultRoom</code> defined in the
 
                     <div class="param-description">
                       
-                      <p>The configuration to set the session description direction to enable or disable
-  uploading and downloading audio or video media streaming.
-  <small>Note that, this configuration does not prevent RTCP packets from being sent and received.</small></p>
+                      <p><blockquote class="info">Note that this is an EXTREMELY experimental configuration
+  and may cause disruptions in connections or connectivity issues when toggled. It is never recommended to toggle
+  these configuration unless required.</blockquote>
+  The configuration to set the session description settings.</p>
 
                     </div>
 
@@ -14779,7 +14781,7 @@ that is not the same as the <code>options.defaultRoom</code> defined in the
                       <ul class="params-list">
                         
                           <li class="param">
-                            <code class="param-name">audio</code>
+                            <code class="param-name">connection</code>
                             <span class="type"><b>{</b>JSON<b>}</b></span>
 
                             <span class="label">Optional</span>
@@ -14787,12 +14789,14 @@ that is not the same as the <code>options.defaultRoom</code> defined in the
 
                             <div class="param-description">
                               
-                              The configuration to set the session description direction for audio streaming.
+                              The configuration to set the session description connection settings.
+  <small>Note that this configuration may disable the media streaming and these settings will be enabled for
+  MCU server Peer connection regardless of the flags configured.</small>
                             </div>
                           </li>
                         
                           <li class="param">
-                            <code class="param-name">audio.send</code>
+                            <code class="param-name">connection.audio</code>
                             <span class="type"><b>{</b>Boolean<b>}</b></span>
 
                             <span class="label">Optional</span>
@@ -14800,12 +14804,12 @@ that is not the same as the <code>options.defaultRoom</code> defined in the
 
                             <div class="param-description">
                               <small class="default"><span>DEFAULT: </span><code>true</code></small>
-                              The flag if uploading audio streaming should be enabled when available.
+                              The configuration to enable audio session description connection.
                             </div>
                           </li>
                         
                           <li class="param">
-                            <code class="param-name">audio.receive</code>
+                            <code class="param-name">connection.video</code>
                             <span class="type"><b>{</b>Boolean<b>}</b></span>
 
                             <span class="label">Optional</span>
@@ -14813,12 +14817,25 @@ that is not the same as the <code>options.defaultRoom</code> defined in the
 
                             <div class="param-description">
                               <small class="default"><span>DEFAULT: </span><code>true</code></small>
-                              The flag if downloading audio streaming should be enabled when available.
+                              The configuration to enable video session description connection.
                             </div>
                           </li>
                         
                           <li class="param">
-                            <code class="param-name">video</code>
+                            <code class="param-name">connection.data</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span><code>true</code></small>
+                              The configuration to enable Datachannel session description connection.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">direction</code>
                             <span class="type"><b>{</b>JSON<b>}</b></span>
 
                             <span class="label">Optional</span>
@@ -14826,12 +14843,28 @@ that is not the same as the <code>options.defaultRoom</code> defined in the
 
                             <div class="param-description">
                               
-                              The configuration to set the session description direction for video streaming.
+                              The configuration to set the session description connection direction
+  to enable or disable uploading and downloading audio or video media streaming.
+  <small>Note that this configuration does not prevent RTCP packets from being sent and received.</small>
                             </div>
                           </li>
                         
                           <li class="param">
-                            <code class="param-name">video.send</code>
+                            <code class="param-name">direction.audio</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              
+                              The configuration to set the session description
+  connection direction for audio streaming.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">direction.audio.send</code>
                             <span class="type"><b>{</b>Boolean<b>}</b></span>
 
                             <span class="label">Optional</span>
@@ -14839,12 +14872,13 @@ that is not the same as the <code>options.defaultRoom</code> defined in the
 
                             <div class="param-description">
                               <small class="default"><span>DEFAULT: </span><code>true</code></small>
-                              The flag if uploading video streaming should be enabled when available.
+                              The flag if uploading audio streaming
+  should be enabled when available.
                             </div>
                           </li>
                         
                           <li class="param">
-                            <code class="param-name">video.receive</code>
+                            <code class="param-name">direction.audio.receive</code>
                             <span class="type"><b>{</b>Boolean<b>}</b></span>
 
                             <span class="label">Optional</span>
@@ -14852,7 +14886,50 @@ that is not the same as the <code>options.defaultRoom</code> defined in the
 
                             <div class="param-description">
                               <small class="default"><span>DEFAULT: </span><code>true</code></small>
-                              The flag if downloading video streaming should be enabled when available.
+                              The flag if downloading audio
+  streaming should be enabled when available.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">direction.video</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              
+                              The configuration to set the session description
+  connection direction for video streaming.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">direction.video.send</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span><code>true</code></small>
+                              The flag if uploading video streaming
+  should be enabled when available.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">direction.video.receive</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span><code>true</code></small>
+                              The flag if downloading video streaming
+  should be enabled when available.
                             </div>
                           </li>
                         
@@ -15081,7 +15158,7 @@ that is not the same as the <code>options.defaultRoom</code> defined in the
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l399"><code>source&#x2F;room-connection.js:399</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l415"><code>source&#x2F;room-connection.js:415</code></a>
       </small>
     
 
@@ -15336,7 +15413,7 @@ and <code>stopMediaOptions.screenshare</code> to its boolean value.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l515"><code>source&#x2F;room-connection.js:515</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l531"><code>source&#x2F;room-connection.js:531</code></a>
       </small>
     
 
@@ -19175,7 +19252,7 @@ Function that stops <a href="#method_getUserMedia"><code>getUserMedia()</code> S
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l544"><code>source&#x2F;room-connection.js:544</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l560"><code>source&#x2F;room-connection.js:560</code></a>
       </small>
     
 
@@ -24482,9 +24559,9 @@ If Peer has a higher connection weight, it will do the offer from its Peer conne
   <hr>
 </div>
             
-              <div id="attr__sdpDirections" class="code-item attr item private-attr-item ">
-  <a name="config__sdpDirections"></a> 
-  <h3 class="code-item-name"><code>_sdpDirections</code></h3>
+              <div id="attr__sdpSettings" class="code-item attr item private-attr-item ">
+  <a name="config__sdpSettings"></a> 
+  <h3 class="code-item-name"><code>_sdpSettings</code></h3>
   <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>JSON<b>}</b></span>
 
   <div class="code-item-properties">
@@ -24540,7 +24617,7 @@ If Peer has a higher connection weight, it will do the offer from its Peer conne
   </div>
 
   <div class="code-item-description">
-    <p>Stores the session description direction flags.</p>
+    <p>Stores the session description settings.</p>
 
   </div>
 
