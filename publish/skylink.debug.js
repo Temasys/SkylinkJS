@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Mon Nov 28 2016 17:47:50 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Mon Nov 28 2016 19:22:44 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -9414,7 +9414,7 @@ var _eventsDocs = {
    * @param {String} candidateId The remote ICE candidate session ID.
    *   <small>Note that this value is not related to WebRTC API but for identification of remote ICE candidate received.</small>
    * @param {String} candidateType The remote ICE candidate type.
-   *   <small>Expected values are <code>"host"</code> (local network), <code>"srflx"</code> (STUN) and <code>"relay" (TURN).</small>
+   *   <small>Expected values are <code>"host"</code> (local network), <code>"srflx"</code> (STUN) and <code>"relay"</code> (TURN).</small>
    * @param {JSON} candidate The remote ICE candidate.
    * @param {String} candidate.candidate The remote ICE candidate connection description.
    * @param {String} candidate.sdpMid The remote ICE candidate identifier based on the remote session description.

@@ -981,7 +981,7 @@ var _eventsDocs = {
    * @param {String} candidateId The remote ICE candidate session ID.
    *   <small>Note that this value is not related to WebRTC API but for identification of remote ICE candidate received.</small>
    * @param {String} candidateType The remote ICE candidate type.
-   *   <small>Expected values are <code>"host"</code> (local network), <code>"srflx"</code> (STUN) and <code>"relay" (TURN).</small>
+   *   <small>Expected values are <code>"host"</code> (local network), <code>"srflx"</code> (STUN) and <code>"relay"</code> (TURN).</small>
    * @param {JSON} candidate The remote ICE candidate.
    * @param {String} candidate.candidate The remote ICE candidate connection description.
    * @param {String} candidate.sdpMid The remote ICE candidate identifier based on the remote session description.

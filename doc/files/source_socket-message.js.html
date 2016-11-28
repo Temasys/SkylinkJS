@@ -697,20 +697,10 @@ Skylink.prototype._inRoomHandler = function(message) {
   self._room.connection.peerConfig = self._setIceServers(message.pc_config);
   self._inRoom = true;
   self._user.sid = message.sid;
-  self._peerPriorityWeight = (new Date()).getTime();
+  self._peerPriorityWeight = message.tieBreaker;
 
   self._trigger(&#x27;peerJoined&#x27;, self._user.sid, self.getPeerInfo(), true);
   self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
-
-  if (typeof message.tieBreaker === &#x27;number&#x27;) {
-    self._peerPriorityWeight = message.tieBreaker;
-  }
-
-  // Make Firefox the answerer always when connecting with other browsers
-  if (window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
-    log.warn(&#x27;Decreasing weight for Firefox browser connection&#x27;);
-    self._peerPriorityWeight -= 100000000000;
-  }
 
   if (self._streams.screenshare &amp;&amp; self._streams.screenshare.stream) {
     self._trigger(&#x27;incomingStream&#x27;, self._user.sid, self._streams.screenshare.stream, true, self.getPeerInfo());
@@ -766,12 +756,12 @@ Skylink.prototype._enterHandler = function(message) {
   userInfo.agent = {
     name: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
     version: (function () {
-      if (typeof message.version !== &#x27;string&#x27;) {
+      if (!(message.version &amp;&amp; typeof message.version === &#x27;string&#x27;)) {
         return 0;
       }
       // E.g. 0.9.6, replace minor &quot;.&quot; with 0
       if (message.version.indexOf(&#x27;.&#x27;) &gt; -1) {
-        parts = message.version.split(&#x27;.&#x27;);
+        var parts = message.version.split(&#x27;.&#x27;);
         if (parts.length &gt; 2) {
           var majorVer = parts[0] || &#x27;0&#x27;;
           parts.splice(0, 1);
@@ -786,8 +776,8 @@ Skylink.prototype._enterHandler = function(message) {
       message.temasysPluginVersion : null,
     SMProtocolVersion: message.SMProtocolVersion &amp;&amp; typeof message.SMProtocolVersion === &#x27;string&#x27; ?
       message.SMProtocolVersion : &#x27;0.1.1&#x27;,
-    DTProtocolVersion: message.DTProtocolVersion &amp;&amp; typeof message.SMProtocolVersion === &#x27;string&#x27; ?
-      message.SMProtocolVersion : &#x27;0.1.0&#x27;
+    DTProtocolVersion: message.DTProtocolVersion &amp;&amp; typeof message.DTProtocolVersion === &#x27;string&#x27; ?
+      message.DTProtocolVersion : &#x27;0.1.0&#x27;
   };
 
   log.log([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Peer &quot;enter&quot; received -&gt;&#x27;], message);
@@ -872,12 +862,12 @@ Skylink.prototype._restartHandler = function(message){
   userInfo.agent = {
     name: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
     version: (function () {
-      if (typeof message.version !== &#x27;string&#x27;) {
+      if (!(message.version &amp;&amp; typeof message.version === &#x27;string&#x27;)) {
         return 0;
       }
       // E.g. 0.9.6, replace minor &quot;.&quot; with 0
       if (message.version.indexOf(&#x27;.&#x27;) &gt; -1) {
-        parts = message.version.split(&#x27;.&#x27;);
+        var parts = message.version.split(&#x27;.&#x27;);
         if (parts.length &gt; 2) {
           var majorVer = parts[0] || &#x27;0&#x27;;
           parts.splice(0, 1);
@@ -892,8 +882,8 @@ Skylink.prototype._restartHandler = function(message){
       message.temasysPluginVersion : null,
     SMProtocolVersion: message.SMProtocolVersion &amp;&amp; typeof message.SMProtocolVersion === &#x27;string&#x27; ?
       message.SMProtocolVersion : &#x27;0.1.1&#x27;,
-    DTProtocolVersion: message.DTProtocolVersion &amp;&amp; typeof message.SMProtocolVersion === &#x27;string&#x27; ?
-      message.SMProtocolVersion : &#x27;0.1.0&#x27;
+    DTProtocolVersion: message.DTProtocolVersion &amp;&amp; typeof message.DTProtocolVersion === &#x27;string&#x27; ?
+      message.DTProtocolVersion : &#x27;0.1.0&#x27;
   };
 
   log.log([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Peer &quot;restart&quot; received -&gt;&#x27;], message);
@@ -979,12 +969,12 @@ Skylink.prototype._welcomeHandler = function(message) {
   userInfo.agent = {
     name: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
     version: (function () {
-      if (typeof message.version !== &#x27;string&#x27;) {
+      if (!(message.version &amp;&amp; typeof message.version === &#x27;string&#x27;)) {
         return 0;
       }
       // E.g. 0.9.6, replace minor &quot;.&quot; with 0
       if (message.version.indexOf(&#x27;.&#x27;) &gt; -1) {
-        parts = message.version.split(&#x27;.&#x27;);
+        var parts = message.version.split(&#x27;.&#x27;);
         if (parts.length &gt; 2) {
           var majorVer = parts[0] || &#x27;0&#x27;;
           parts.splice(0, 1);
@@ -999,8 +989,8 @@ Skylink.prototype._welcomeHandler = function(message) {
       message.temasysPluginVersion : null,
     SMProtocolVersion: message.SMProtocolVersion &amp;&amp; typeof message.SMProtocolVersion === &#x27;string&#x27; ?
       message.SMProtocolVersion : &#x27;0.1.1&#x27;,
-    DTProtocolVersion: message.DTProtocolVersion &amp;&amp; typeof message.SMProtocolVersion === &#x27;string&#x27; ?
-      message.SMProtocolVersion : &#x27;0.1.0&#x27;
+    DTProtocolVersion: message.DTProtocolVersion &amp;&amp; typeof message.DTProtocolVersion === &#x27;string&#x27; ?
+      message.DTProtocolVersion : &#x27;0.1.0&#x27;
   };
 
   log.log([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Peer &quot;welcome&quot; received -&gt;&#x27;], message);

@@ -358,7 +358,7 @@ var _eventsDocs = {
    *   &lt;small&gt;When defined as &lt;code&gt;true&lt;/code&gt;, the &lt;code&gt;peerInfo.settings.video.screenshare&lt;/code&gt; value is
    *   considered as &lt;code&gt;false&lt;/code&gt;  and the &lt;code&gt;peerInfo.settings.video.exactConstraints&lt;/code&gt;
    *   value is considered as &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;
-   * @param {JSON} peerInfo.settings.video.resolution The Peer Stream video resolution.
+   * @param {JSON} [peerInfo.settings.video.resolution] The Peer Stream video resolution.
    *   [Rel: Skylink.VIDEO_RESOLUTION]
    * @param {Number|JSON} peerInfo.settings.video.resolution.width The Peer Stream video resolution width or
    *   video resolution width settings.
@@ -1072,7 +1072,7 @@ var _eventsDocs = {
    * @param {String} candidateId The remote ICE candidate session ID.
    *   &lt;small&gt;Note that this value is not related to WebRTC API but for identification of remote ICE candidate received.&lt;/small&gt;
    * @param {String} candidateType The remote ICE candidate type.
-   *   &lt;small&gt;Expected values are &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network), &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) and &lt;code&gt;&quot;relay&quot; (TURN).&lt;/small&gt;
+   *   &lt;small&gt;Expected values are &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network), &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) and &lt;code&gt;&quot;relay&quot;&lt;/code&gt; (TURN).&lt;/small&gt;
    * @param {JSON} candidate The remote ICE candidate.
    * @param {String} candidate.candidate The remote ICE candidate connection description.
    * @param {String} candidate.sdpMid The remote ICE candidate identifier based on the remote session description.
