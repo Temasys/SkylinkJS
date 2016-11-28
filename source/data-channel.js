@@ -341,13 +341,13 @@ Skylink.prototype._closeDataChannel = function(peerId, channelName) {
   }
 
   var closeFn = function (channelProp) {
-    var channelName = self._dataChannels[peerId][channelProp].channelName;
+    var channelName1 = self._dataChannels[peerId][channelProp].channelName;
     var channelType = self._dataChannels[peerId][channelProp].channelType;
 
     if (self._dataChannels[peerId][channelProp].readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
-      log.debug([peerId, 'RTCDataChannel', channelName, 'Closing Datachannel']);
+      log.debug([peerId, 'RTCDataChannel', channelName1, 'Closing Datachannel']);
 
-      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSING, peerId, null, channelName, channelType, null);
+      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSING, peerId, null, channelName1, channelType, null);
 
       self._dataChannels[peerId][channelProp].channel.close();
 

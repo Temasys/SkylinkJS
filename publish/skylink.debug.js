@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Mon Nov 28 2016 14:40:56 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Mon Nov 28 2016 17:47:50 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -1334,13 +1334,13 @@ Skylink.prototype._closeDataChannel = function(peerId, channelName) {
   }
 
   var closeFn = function (channelProp) {
-    var channelName = self._dataChannels[peerId][channelProp].channelName;
+    var channelName1 = self._dataChannels[peerId][channelProp].channelName;
     var channelType = self._dataChannels[peerId][channelProp].channelType;
 
     if (self._dataChannels[peerId][channelProp].readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
-      log.debug([peerId, 'RTCDataChannel', channelName, 'Closing Datachannel']);
+      log.debug([peerId, 'RTCDataChannel', channelName1, 'Closing Datachannel']);
 
-      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSING, peerId, null, channelName, channelType, null);
+      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSING, peerId, null, channelName1, channelType, null);
 
       self._dataChannels[peerId][channelProp].channel.close();
 
@@ -1679,7 +1679,7 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype._SUPPORTED_WEB_AGENTS = ['chrome', 'firefox', 'safari', 'IE', 'edge' ,'opera', 'bowser', 'blink'];
+Skylink.prototype._SUPPORTED_WEB_AGENTS = ['chrome', 'firefox', 'safari', 'IE', 'edge' ,'opera', 'bowser', 'blink', 'cpp'];
 
 /**
  * <blockquote class="info">
@@ -2339,7 +2339,8 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
   if (accept) {
     log.debug([peerId, 'RTCDataChannel', transferId, 'Accepted data transfer and starting ...']);
 
-    var dataChannelStateCbFn = function (state, evtPeerId, error) {
+    var dataChannelStateCbFn = function (state, evtPeerId, error, cN, cT) {
+      console.info(evtPeerId, error, cN, cT);
       self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR, transferId, peerId,
         self._getTransferInfo(transferId, peerId, true, false, false), {
         transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD,
@@ -2714,7 +2715,8 @@ Skylink.prototype._startDataTransfer = function(chunks, transferInfo, listOfPeer
     for (var p = 0; p < listOfPeers.length; p++) {
       var agentName = (((self._peerInformations[listOfPeers[p]]) || {}).agent || {}).name || '';
 
-      if (self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1) {
+      // C++ SDK does not support binary file transfer for now
+      if (self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1 || agentName === 'cpp') {
         self._dataTransfers[transferId].enforceBSPeers.push(listOfPeers[p]);
       }
     }
@@ -3044,9 +3046,9 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
       return;
     }
 
-    if (evtPeerId === peerId) {
-      if (state === self.DATA_CHANNEL_STATE.OPEN && channelName === transferId &&
-        channelType === self.DATA_CHANNEL_TYPE.DATA) {
+    if (evtPeerId === peerId && (channelType === self.DATA_CHANNEL_TYPE.DATA ? channelName === transferId : true)) {
+      if (state === self.DATA_CHANNEL_STATE.OPEN && channelType === self.DATA_CHANNEL_TYPE.DATA &&
+        channelName === transferId) {
         sendWRQFn();
         return false;
       }
