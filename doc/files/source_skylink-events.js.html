@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.15</title>
+    <title>SkylinkJS 0.6.16</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.15</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.16</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -89,17 +89,7 @@
 
 <div class="file">
     <pre class="code prettyprint linenums">
-/**
- * Stores the list of &lt;code&gt;on()&lt;/code&gt; event handlers.
- * @attribute _EVENTS
- * @param {Array} &lt;#event&gt; The list of event handlers associated with the event.
- * @param {Function} &lt;#event&gt;.&lt;#index&gt; The event handler function.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._EVENTS = {
+var _eventsDocs = {
   /**
    * Event triggered when socket connection to Signaling server has opened.
    * @event channelOpen
@@ -156,7 +146,7 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when attempt to establish socket connection to Signaling server has failed.
    * @event socketError
-   * @param {String} errorCode The socket connection error code.
+   * @param {Number} errorCode The socket connection error code.
    *   [Rel: Skylink.SOCKET_ERROR]
    * @param {Error|String|Number} error The error object.
    * @param {String} type The fallback state of the socket connection attempt.
@@ -169,7 +159,7 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; ready state changes.
    * @event readyStateChange
-   * @param {String} readyState The current &lt;code&gt;init()&lt;/code&gt; ready state.
+   * @param {Number} readyState The current &lt;code&gt;init()&lt;/code&gt; ready state.
    *   [Rel: Skylink.READY_STATE_CHANGE]
    * @param {JSON} [error] The error result.
    *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; is &lt;code&gt;ERROR&lt;/code&gt;.&lt;/small&gt;
@@ -197,6 +187,10 @@ Skylink.prototype._EVENTS = {
   handshakeProgress: [],
 
   /**
+   * &lt;blockquote class=&quot;info&quot;&gt;
+   *   Learn more about how ICE works in this
+   *   &lt;a href=&quot;https://temasys.com.sg/ice-what-is-this-sorcery/&quot;&gt;article here&lt;/a&gt;.
+   * &lt;/blockquote&gt;
    * Event triggered when a Peer connection ICE gathering state has changed.
    * @event candidateGenerationState
    * @param {String} state The current Peer connection ICE gathering state.
@@ -208,6 +202,10 @@ Skylink.prototype._EVENTS = {
   candidateGenerationState: [],
 
   /**
+   * &lt;blockquote class=&quot;info&quot;&gt;
+   *   Learn more about how ICE works in this
+   *   &lt;a href=&quot;https://temasys.com.sg/ice-what-is-this-sorcery/&quot;&gt;article here&lt;/a&gt;.
+   * &lt;/blockquote&gt;
    * Event triggered when a Peer connection session description exchanging state has changed.
    * @event peerConnectionState
    * @param {String} state The current Peer connection session description exchanging state.
@@ -219,6 +217,10 @@ Skylink.prototype._EVENTS = {
   peerConnectionState: [],
 
   /**
+   * &lt;blockquote class=&quot;info&quot;&gt;
+   *   Learn more about how ICE works in this
+   *   &lt;a href=&quot;https://temasys.com.sg/ice-what-is-this-sorcery/&quot;&gt;article here&lt;/a&gt;.
+   * &lt;/blockquote&gt;
    * Event triggered when a Peer connection ICE connection state has changed.
    * @event iceConnectionState
    * @param {String} state The current Peer connection ICE connection state.
@@ -322,8 +324,30 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.settings The Peer sending Stream settings.
    * @param {Boolean|JSON} peerInfo.settings.audio The Peer Stream audio settings.
    *   &lt;small&gt;When defined as &lt;code&gt;false&lt;/code&gt;, it means there is no audio being sent from Peer.&lt;/small&gt;
+   *   &lt;small&gt;When defined as &lt;code&gt;true&lt;/code&gt;, the &lt;code&gt;peerInfo.settings.audio.stereo&lt;/code&gt; value is
+   *   considered as &lt;code&gt;false&lt;/code&gt; and the &lt;code&gt;peerInfo.settings.audio.exactConstraints&lt;/code&gt;
+   *   value is considered as &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;
    * @param {Boolean} peerInfo.settings.audio.stereo The flag if stereo band is configured
    *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for receiving audio data.
+   * @param {Boolean} [peerInfo.settings.audio.usedtx] &lt;blockquote class=&quot;info&quot;&gt;
+   *   Note that this feature might not work depending on the browser support and implementation.&lt;/blockquote&gt;
+   *   The flag if DTX (Discontinuous Transmission) is configured when encoding audio codec
+   *   is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+   *   &lt;small&gt;This might help to reduce bandwidth it reduces the bitrate during silence or background noise.&lt;/small&gt;
+   *   &lt;small&gt;When not defined, the default browser configuration is used.&lt;/small&gt;
+   * @param {Boolean} [peerInfo.settings.audio.useinbandfec] &lt;blockquote class=&quot;info&quot;&gt;
+   *   Note that this feature might not work depending on the browser support and implementation.&lt;/blockquote&gt;
+   *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) is
+   *   configured when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+   *   &lt;small&gt;This might help to reduce the harm of packet loss by encoding information about the previous packet.&lt;/small&gt;
+   *   &lt;small&gt;When not defined, the default browser configuration is used.&lt;/small&gt;
+   * @param {Number} [peerInfo.settings.audio.maxplaybackrate] &lt;blockquote class=&quot;info&quot;&gt;
+   *   Note that this feature might not work depending on the browser support and implementation.&lt;/blockquote&gt;
+   *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
+   *   &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+   *   &lt;small&gt;This value must be between &lt;code&gt;8000&lt;/code&gt; to &lt;code&gt;48000&lt;/code&gt;.&lt;/small&gt;
+   *   &lt;small&gt;When not defined, the default browser configuration is used.&lt;/small&gt;
+   * @param {Boolean} peerInfo.settings.audio.echoCancellation The flag if echo cancellation is enabled for audio tracks.
    * @param {Array} [peerInfo.settings.audio.optional] The Peer Stream &lt;code&gt;navigator.getUserMedia()&lt;/code&gt; API
    *   &lt;code&gt;audio: { optional [..] }&lt;/code&gt; property.
    * @param {String} [peerInfo.settings.audio.deviceId] The Peer Stream audio track source ID of the device used.
@@ -331,12 +355,23 @@ Skylink.prototype._EVENTS = {
    *   requested values of &lt;code&gt;peerInfo.settings.audio.deviceId&lt;/code&gt; when provided.
    * @param {Boolean|JSON} peerInfo.settings.video The Peer Stream video settings.
    *   &lt;small&gt;When defined as &lt;code&gt;false&lt;/code&gt;, it means there is no video being sent from Peer.&lt;/small&gt;
-   * @param {JSON} peerInfo.settings.video.resolution The Peer Stream video resolution.
+   *   &lt;small&gt;When defined as &lt;code&gt;true&lt;/code&gt;, the &lt;code&gt;peerInfo.settings.video.screenshare&lt;/code&gt; value is
+   *   considered as &lt;code&gt;false&lt;/code&gt;  and the &lt;code&gt;peerInfo.settings.video.exactConstraints&lt;/code&gt;
+   *   value is considered as &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;
+   * @param {JSON} [peerInfo.settings.video.resolution] The Peer Stream video resolution.
    *   [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} peerInfo.settings.video.resolution.width The Peer Stream video resolution width.
-   * @param {Number} peerInfo.settings.video.resolution.height The Peer Stream video resolution height.
-   * @param {Number} [peerInfo.settings.video.frameRate] The Peer Stream video
-   *   &lt;a href=&quot;https://en.wikipedia.org/wiki/Frame_rate&quot;&gt;frameRate&lt;/a&gt; per second (fps).
+   * @param {Number|JSON} peerInfo.settings.video.resolution.width The Peer Stream video resolution width or
+   *   video resolution width settings.
+   *   &lt;small&gt;When defined as a JSON object, it is the user set resolution width settings with (&lt;code&gt;&quot;min&quot;&lt;/code&gt; or
+   *   &lt;code&gt;&quot;max&quot;&lt;/code&gt; or &lt;code&gt;&quot;ideal&quot;&lt;/code&gt; or &lt;code&gt;&quot;exact&quot;&lt;/code&gt; etc configurations).&lt;/small&gt;
+   * @param {Number|JSON} peerInfo.settings.video.resolution.height The Peer Stream video resolution height or
+   *   video resolution height settings.
+   *   &lt;small&gt;When defined as a JSON object, it is the user set resolution height settings with (&lt;code&gt;&quot;min&quot;&lt;/code&gt; or
+   *   &lt;code&gt;&quot;max&quot;&lt;/code&gt; or &lt;code&gt;&quot;ideal&quot;&lt;/code&gt; or &lt;code&gt;&quot;exact&quot;&lt;/code&gt; etc configurations).&lt;/small&gt;
+   * @param {Number|JSON} [peerInfo.settings.video.frameRate] The Peer Stream video
+   *   &lt;a href=&quot;https://en.wikipedia.org/wiki/Frame_rate&quot;&gt;frameRate&lt;/a&gt; per second (fps) or video frameRate settings.
+   *   &lt;small&gt;When defined as a JSON object, it is the user set frameRate settings with (&lt;code&gt;&quot;min&quot;&lt;/code&gt; or
+   *   &lt;code&gt;&quot;max&quot;&lt;/code&gt; or &lt;code&gt;&quot;ideal&quot;&lt;/code&gt; or &lt;code&gt;&quot;exact&quot;&lt;/code&gt; etc configurations).&lt;/small&gt;
    * @param {Boolean} peerInfo.settings.video.screenshare The flag if Peer Stream is a screensharing Stream.
    * @param {Array} [peerInfo.settings.video.optional] The Peer Stream &lt;code&gt;navigator.getUserMedia()&lt;/code&gt; API
    *   &lt;code&gt;video: { optional [..] }&lt;/code&gt; property.
@@ -349,6 +384,13 @@ Skylink.prototype._EVENTS = {
    * @param {Number} [peerInfo.settings.bandwidth.audio] The maximum audio streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.video] The maximum video streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.data] The maximum data streaming bandwidth sent from Peer.
+   * @param {JSON} peerInfo.settings.googleXBandwidth &lt;blockquote class=&quot;info&quot;&gt;
+   *   Note that this feature might not work depending on the browser support and implementation,
+   *   and its properties and values are only defined for User&#x27;s end and cannot be viewed
+   *   from Peer&#x27;s end (when &lt;code&gt;isSelf&lt;/code&gt; value is &lt;code&gt;false&lt;/code&gt;).&lt;/blockquote&gt;
+   *   The experimental google video streaming bandwidth sent to Peers.
+   * @param {Number} [peerInfo.settings.googleXBandwidth.min] The minimum experimental google video streaming bandwidth sent to Peers.
+   * @param {Number} [peerInfo.settings.googleXBandwidth.max] The maximum experimental google video streaming bandwidth sent to Peers.
    * @param {JSON} peerInfo.mediaStatus The Peer Stream muted settings.
    * @param {Boolean} peerInfo.mediaStatus.audioMuted The flag if Peer Stream audio tracks is muted or not.
    *   &lt;small&gt;If Peer &lt;code&gt;peerInfo.settings.audio&lt;/code&gt; is false, this will be defined as &lt;code&gt;true&lt;/code&gt;.&lt;/small&gt;
@@ -358,12 +400,22 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerInfo.agent.name The Peer agent name.
    *   &lt;small&gt;Data may be accessing browser or non-Web SDK name.&lt;/small&gt;
    * @param {Number} peerInfo.agent.version The Peer agent version.
-   *   &lt;small&gt;Data may be accessing browser or non-Web SDK version.&lt;/small&gt;
+   *   &lt;small&gt;Data may be accessing browser or non-Web SDK version. If the original value is &lt;code&gt;&quot;0.9.6.1&quot;&lt;/code&gt;,
+   *   it will be interpreted as &lt;code&gt;0.90601&lt;/code&gt; where &lt;code&gt;0&lt;/code&gt; helps to seperate the minor dots.&lt;/small&gt;
    * @param {String} [peerInfo.agent.os] The Peer platform name.
    *  &lt;small&gt;Data may be accessing OS platform version from Web SDK.&lt;/small&gt;
    * @param {String} [peerInfo.agent.pluginVersion] The Peer Temasys Plugin version.
    *  &lt;small&gt;Defined only when Peer is using the Temasys Plugin (IE / Safari).&lt;/small&gt;
    * @param {String} peerInfo.room The Room Peer is from.
+   * @param {JSON} peerInfo.config The Peer connection configuration.
+   * @param {Boolean} peerInfo.config.enableIceTrickle The flag if Peer connection has
+   *   trickle ICE enabled or faster connectivity.
+   * @param {Boolean} peerInfo.config.enableDataChannel The flag if Datachannel connections would be enabled for Peer.
+   * @param {Boolean} peerInfo.config.enableIceRestart The flag if Peer connection has ICE connection restart support.
+   *   &lt;small&gt;Note that ICE connection restart support is not honoured for MCU enabled Peer connection.&lt;/small&gt;
+   * @param {Number} peerInfo.config.priorityWeight The flag if Peer or User should be the offerer.
+   *   &lt;small&gt;If User&#x27;s &lt;code&gt;priorityWeight&lt;/code&gt; is higher than Peer&#x27;s, User is the offerer, else Peer is.
+   *   However for the case where the MCU is connected, User will always be the offerer.&lt;/small&gt;
    * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
    * @since 0.5.2
@@ -378,6 +430,7 @@ Skylink.prototype._EVENTS = {
    *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo&lt;/code&gt; parameter payload received in the
    *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
    * @param {Boolean} isSelfInitiateRestart The flag if User is initiating the Peer connection refresh.
+   * @param {Boolean} isIceRestart The flag if Peer connection ICE connection will restart.
    * @for Skylink
    * @since 0.5.5
    */
@@ -442,15 +495,22 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} message The message result.
    * @param {JSON|String} message.content The message object.
    * @param {String} message.senderPeerId The sender Peer ID.
-   * @param {String|Array} [message.targetPeerId=null] The value of the &lt;code&gt;targetPeerId&lt;/code&gt;
+   * @param {String|Array} [message.targetPeerId] The value of the &lt;code&gt;targetPeerId&lt;/code&gt;
    *   defined in &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt; or
    *   &lt;a href=&quot;#method_sendMessage&quot;&gt;&lt;code&gt;sendMessage()&lt;/code&gt; method&lt;/a&gt;.
+   *   &lt;small&gt;Defined as User&#x27;s Peer ID when &lt;code&gt;isSelf&lt;/code&gt; payload value is &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when provided &lt;code&gt;targetPeerId&lt;/code&gt; in
+   *   &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt; or
+   *   &lt;a href=&quot;#method_sendMessage&quot;&gt;&lt;code&gt;sendMessage()&lt;/code&gt; method&lt;/a&gt; is not defined.&lt;/small&gt;
+   * @param {Array} [message.listOfPeers] The list of Peers that the message has been sent to.
+   *  &lt;small&gt;Defined only when &lt;code&gt;isSelf&lt;/code&gt; payload value is &lt;code&gt;true&lt;/code&gt;.&lt;/small&gt;
    * @param {Boolean} message.isPrivate The flag if message is targeted or not, basing
    *   off the &lt;code&gt;targetPeerId&lt;/code&gt; parameter being defined in
    *   &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt; or
    *   &lt;a href=&quot;#method_sendMessage&quot;&gt;&lt;code&gt;sendMessage()&lt;/code&gt; method&lt;/a&gt;.
    * @param {Boolean} message.isDataChannel The flag if message is sent from
    *   &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt;.
+   * @param {String} peerId The Peer ID.
    * @param {JSON} peerInfo The Peer session information.
    *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo&lt;/code&gt; parameter payload received in the
    *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
@@ -494,6 +554,7 @@ Skylink.prototype._EVENTS = {
    * Event triggered when Room locked status has changed.
    * @event roomLock
    * @param {Boolean} isLocked The flag if Room is locked.
+   * @param {String} peerId The Peer ID.
    * @param {JSON} peerInfo The Peer session information.
    *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo&lt;/code&gt; parameter payload received in the
    *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
@@ -510,10 +571,13 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.DATA_CHANNEL_STATE]
    * @param {String} peerId The Peer ID.
    * @param {Error} [error] The error object.
-   *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; payload is &lt;code&gt;ERROR&lt;/code&gt;.&lt;/small&gt;
-   * @param {String} channelName The DataChannel ID.
-   * @param {String} channelType The DataChannel type.
+   *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; payload is &lt;code&gt;ERROR&lt;/code&gt; or &lt;code&gt;SEND_MESSAGE_ERROR&lt;/code&gt;.&lt;/small&gt;
+   * @param {String} channelName The Datachannel ID.
+   * @param {String} channelType The Datachannel type.
    *   [Rel: Skylink.DATA_CHANNEL_TYPE]
+   * @param {String} messageType The Datachannel sending Datachannel message error type.
+   *   &lt;small&gt;Defined only when &lt;cod&gt;state&lt;/code&gt; payload is &lt;code&gt;SEND_MESSAGE_ERROR&lt;/code&gt;.&lt;/small&gt;
+   *   [Rel: Skylink.DATA_CHANNEL_MESSAGE_ERROR]
    * @for Skylink
    * @since 0.1.0
    */
@@ -531,16 +595,34 @@ Skylink.prototype._EVENTS = {
    *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; payload is &lt;code&gt;UPLOAD_STARTED&lt;/code&gt; or
    *   &lt;code&gt;DOWNLOAD_COMPLETED&lt;/code&gt;.&lt;/small&gt;
    * @param {String} transferInfo.name The data transfer name.
-   * @param {Number} transferInfo.size The data transfer data object original size.
+   * @param {Number} transferInfo.size The data transfer data object size.
    * @param {String} transferInfo.dataType The data transfer session type.
    *   [Rel: Skylink.DATA_TRANSFER_SESSION_TYPE]
+   * @param {String} transferInfo.chunkType The data transfer type of data chunk being used to send to Peer for transfers.
+   *   &lt;small&gt;For &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt; data transfers, the
+   *   initial data chunks value may change depending on the currently received data chunk type or the
+   *   agent supported sending type of data chunks.&lt;/small&gt;
+   *   &lt;small&gt;For &lt;a href=&quot;#method_sendURLData&quot;&gt;&lt;code&gt;sendURLData()&lt;/code&gt; method&lt;/a&gt; data transfers, it is
+   *   &lt;code&gt;STRING&lt;/code&gt; always.&lt;/small&gt;
+   *   [Rel: Skylink.DATA_TRANSFER_DATA_TYPE]
+   * @param {String} [transferInfo.mimeType] The data transfer data object MIME type.
+   *   &lt;small&gt;Defined only when &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt;
+   *   data object sent MIME type information is defined.&lt;/small&gt;
+   * @param {Number} transferInfo.chunkSize The data transfer data chunk size.
+   * @param {Number} transferInfo.percentage The data transfer percentage of completion progress.
    * @param {Number} transferInfo.timeout The flag if message is targeted or not, basing
    *   off the &lt;code&gt;targetPeerId&lt;/code&gt; parameter being defined in
    *   &lt;a href=&quot;#method_sendURLData&quot;&gt;&lt;code&gt;sendURLData()&lt;/code&gt; method&lt;/a&gt; or
    *   &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt;.
-   * @param {Boolean} transferInfo.isPrivate The flag if data transfer
+   * @param {Boolean} transferInfo.isPrivate The flag if message is targeted or not, basing
+   *   off the &lt;code&gt;targetPeerId&lt;/code&gt; parameter being defined in
+   *   &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt; or
+   *   &lt;a href=&quot;#method_sendURLData&quot;&gt;&lt;code&gt;sendURLData()&lt;/code&gt; method&lt;/a&gt;.
+   * @param {String} transferInfo.direction The data transfer direction.
+   *   [Rel: Skylink.DATA_TRANSFER_TYPE]
    * @param {JSON} [error] The error result.
-   *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; payload is &lt;code&gt;ERROR&lt;/code&gt; or &lt;code&gt;CANCEL&lt;/code&gt;.&lt;/small&gt;
+   *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; payload is &lt;code&gt;ERROR&lt;/code&gt;, &lt;code&gt;CANCEL&lt;/code&gt;,
+   *   &lt;code&gt;REJECTED&lt;/code&gt; or &lt;code&gt;USER_REJECTED&lt;/code&gt;.&lt;/small&gt;
    * @param {Error|String} error.message The error object.
    * @param {String} error.transferType The data transfer direction from where the error occurred.
    *   [Rel: Skylink.DATA_TRANSFER_TYPE]
@@ -686,30 +768,180 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} stats.raw The Peer connection raw stats before parsing.
    * @param {JSON} stats.audio The Peer connection audio streaming stats.
    * @param {JSON} stats.audio.sending The Peer connection sending audio streaming stats.
-   * @param {Number} stats.audio.sending.bytes The Peer connection sending audio streaming bytes.
-   * @param {Number} stats.audio.sending.packets The Peer connection sending audio streaming packets.
-   * @param {Number} stats.audio.sending.packetsLost The Peer connection sending audio streaming packets lost.
+   * @param {Number} stats.audio.sending.bytes The Peer connection current sending audio streaming bytes.
+   *   &lt;small&gt;Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.&lt;/small&gt;
+   * @param {Number} stats.audio.sending.totalBytes The Peer connection total sending audio streaming bytes.
+   *   &lt;small&gt;Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.&lt;/small&gt;
+   * @param {Number} stats.audio.sending.packets The Peer connection current sending audio streaming packets.
+   * @param {Number} stats.audio.sending.totalPackets The Peer connection total sending audio streaming packets.
+   * @param {Number} stats.audio.sending.packetsLost The Peer connection current sending audio streaming packets lost.
+   * @param {Number} stats.audio.sending.totalPacketsLost The Peer connection total sending audio streaming packets lost.
    * @param {Number} stats.audio.sending.ssrc The Peer connection sending audio streaming RTP packets SSRC.
    * @param {Number} stats.audio.sending.rtt The Peer connection sending audio streaming RTT (Round-trip delay time).
    *   &lt;small&gt;Defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} stats.audio.sending.jitter The Peer connection sending audio streaming RTP packets jitter in seconds.
+   *   &lt;small&gt;Defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.audio.sending.jitterBufferMs] The Peer connection sending audio streaming
+   *   RTP packets jitter buffer in miliseconds.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {JSON} [stats.audio.sending.codec] The Peer connection sending audio streaming selected codec information.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if local session description is not available before parsing.&lt;/small&gt;
+   * @param {String} stats.audio.sending.codec.name The Peer connection sending audio streaming selected codec name.
+   * @param {Number} stats.audio.sending.codec.payloadType The Peer connection sending audio streaming selected codec payload type.
+   * @param {String} [stats.audio.sending.codec.implementation] The Peer connection sending audio streaming selected codec implementation.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.audio.sending.codec.channels] The Peer connection sending audio streaming selected codec channels (2 for stereo).
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing,
+   *   and this is usually present in &lt;code&gt;stats.audio&lt;/code&gt; property.&lt;/small&gt;
+   * @param {Number} [stats.audio.sending.codec.clockRate] The Peer connection sending audio streaming selected codec media sampling rate.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.audio.sending.codec.params] The Peer connection sending audio streaming selected codec parameters.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.audio.sending.inputLevel] The Peer connection sending audio streaming input level.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.audio.sending.echoReturnLoss] The Peer connection sending audio streaming echo return loss in db (decibels).
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.audio.sending.echoReturnLossEnhancement] The Peer connection sending audio streaming
+   *   echo return loss enhancement db (decibels).
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
    * @param {JSON} stats.audio.receiving The Peer connection receiving audio streaming stats.
-   * @param {Number} stats.audio.receiving.bytes The Peer connection sending audio streaming bytes.
-   * @param {Number} stats.audio.receiving.packets The Peer connection receiving audio streaming packets.
-   * @param {Number} stats.audio.receiving.packetsLost The Peer connection receiving audio streaming packets lost.
+   * @param {Number} stats.audio.receiving.bytes The Peer connection current sending audio streaming bytes.
+   *   &lt;small&gt;Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.&lt;/small&gt;
+   * @param {Number} stats.audio.receiving.totalBytes The Peer connection total sending audio streaming bytes.
+   *   &lt;small&gt;Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.&lt;/small&gt;
+   * @param {Number} stats.audio.receiving.packets The Peer connection current receiving audio streaming packets.
+   * @param {Number} stats.audio.receiving.totalPackets The Peer connection total receiving audio streaming packets.
+   * @param {Number} stats.audio.receiving.packetsLost The Peer connection current receiving audio streaming packets lost.
+   * @param {Number} stats.audio.receiving.totalPacketsLost The Peer connection total receiving audio streaming packets lost.
    * @param {Number} stats.audio.receiving.ssrc The Peer connection receiving audio streaming RTP packets SSRC.
+   * @param {Number} stats.audio.receiving.jitter The Peer connection receiving audio streaming RTP packets jitter in seconds.
+   *   &lt;small&gt;Defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.audio.receiving.jitterBufferMs] The Peer connection receiving audio streaming
+   *   RTP packets jitter buffer in miliseconds.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {JSON} [stats.audio.receiving.codec] The Peer connection receiving audio streaming selected codec information.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if remote session description is not available before parsing.&lt;/small&gt;
+   * @param {String} stats.audio.receiving.codec.name The Peer connection receiving audio streaming selected codec name.
+   * @param {Number} stats.audio.receiving.codec.payloadType The Peer connection receiving audio streaming selected codec payload type.
+   * @param {String} [stats.audio.receiving.codec.implementation] The Peer connection receiving audio streaming selected codec implementation.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.audio.receiving.codec.channels] The Peer connection receiving audio streaming selected codec channels (2 for stereo).
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing,
+   *   and this is usually present in &lt;code&gt;stats.audio&lt;/code&gt; property.&lt;/small&gt;
+   * @param {Number} [stats.audio.receiving.codec.clockRate] The Peer connection receiving audio streaming selected codec media sampling rate.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.audio.receiving.codec.params] The Peer connection receiving audio streaming selected codec parameters.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.audio.receiving.outputLevel] The Peer connection receiving audio streaming output level.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
    * @param {JSON} stats.video The Peer connection video streaming stats.
    * @param {JSON} stats.video.sending The Peer connection sending video streaming stats.
-   * @param {Number} stats.video.sending.bytes The Peer connection sending video streaming bytes.
-   * @param {Number} stats.video.sending.packets The Peer connection sending video streaming packets.
-   * @param {Number} stats.video.sending.packetsLost The Peer connection sending video streaming packets lost.
+   * @param {Number} stats.video.sending.bytes The Peer connection current sending video streaming bytes.
+   *   &lt;small&gt;Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.&lt;/small&gt;
+   * @param {Number} stats.video.sending.totalBytes The Peer connection total sending video streaming bytes.
+   *   &lt;small&gt;Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.&lt;/small&gt;
+   * @param {Number} stats.video.sending.packets The Peer connection current sending video streaming packets.
+   * @param {Number} stats.video.sending.totalPackets The Peer connection total sending video streaming packets.
+   * @param {Number} stats.video.sending.packetsLost The Peer connection current sending video streaming packets lost.
+   * @param {Number} stats.video.sending.totalPacketsLost The Peer connection total sending video streaming packets lost.
    * @param {JSON} stats.video.sending.ssrc The Peer connection sending video streaming RTP packets SSRC.
    * @param {Number} stats.video.sending.rtt The Peer connection sending video streaming RTT (Round-trip delay time).
    *   &lt;small&gt;Defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} stats.video.sending.jitter The Peer connection sending video streaming RTP packets jitter in seconds.
+   *   &lt;small&gt;Defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.sending.jitterBufferMs] The Peer connection sending video streaming
+   *   RTP packets jitter buffer in miliseconds.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {JSON} [stats.video.sending.codec] The Peer connection sending video streaming selected codec information.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if local session description is not available before parsing.&lt;/small&gt;
+   * @param {String} stats.video.sending.codec.name The Peer connection sending video streaming selected codec name.
+   * @param {Number} stats.video.sending.codec.payloadType The Peer connection sending video streaming selected codec payload type.
+   * @param {String} [stats.video.sending.codec.implementation] The Peer connection sending video streaming selected codec implementation.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.sending.codec.channels] The Peer connection sending video streaming selected codec channels (2 for stereo).
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing,
+   *   and this is usually present in &lt;code&gt;stats.audio&lt;/code&gt; property.&lt;/small&gt;
+   * @param {Number} [stats.video.sending.codec.clockRate] The Peer connection sending video streaming selected codec media sampling rate.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.video.sending.codec.params] The Peer connection sending video streaming selected codec parameters.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.sending.frames] The Peer connection sending video streaming frames.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.sending.framesInput] The Peer connection sending video streaming frames input.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.sending.framesDropped] The Peer connection sending video streaming frames dropped.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.sending.frameRateMean] The Peer connection sending video streaming fps mean.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.sending.frameRateStdDev] The Peer connection sending video streaming fps standard deviation.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.sending.nacks] The Peer connection current sending video streaming nacks.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.sending.totalNacks] The Peer connection total sending video streaming nacks.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.sending.plis] The Peer connection current sending video streaming plis.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.sending.totalPlis] The Peer connection total sending video streaming plis.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.sending.firs] The Peer connection current sending video streaming firs.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.sending.totalFirs] The Peer connection total sending video streaming firs.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
    * @param {JSON} stats.video.receiving The Peer connection receiving video streaming stats.
-   * @param {Number} stats.video.receiving.bytes The Peer connection receiving video streaming bytes.
-   * @param {Number} stats.video.receiving.packets The Peer connection receiving video streaming packets.
-   * @param {Number} stats.video.receiving.packetsLost The Peer connection receiving video streaming packets lost.
+   * @param {Number} stats.video.receiving.bytes The Peer connection current receiving video streaming bytes.
+   *   &lt;small&gt;Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.&lt;/small&gt;
+   * @param {Number} stats.video.receiving.totalBytes The Peer connection total receiving video streaming bytes.
+   *   &lt;small&gt;Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.&lt;/small&gt;
+   * @param {Number} stats.video.receiving.packets The Peer connection current receiving video streaming packets.
+   * @param {Number} stats.video.receiving.totalPackets The Peer connection total receiving video streaming packets.
+   * @param {Number} stats.video.receiving.packetsLost The Peer connection current receiving video streaming packets lost.
+   * @param {Number} stats.video.receiving.totalPacketsLost The Peer connection total receiving video streaming packets lost.
    * @param {Number} stats.video.receiving.ssrc The Peer connection receiving video streaming RTP packets SSRC.
+   * @param {Number} stats.video.receiving.e2eDelay The Peer connection receiving video streaming e2e delay.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing, and that
+   *   it finds any existing audio, video or object (plugin) DOM elements that has set with the
+   *   Peer remote stream object to parse current time. Note that &lt;code&gt;document.getElementsByTagName&lt;/code&gt; function
+   *   and DOM &lt;code&gt;.currentTime&lt;/code&gt; has to be supported inorder for data to be parsed correctly.&lt;/small&gt;
+   * @param {Number} stats.video.receiving.jitter The Peer connection receiving video streaming RTP packets jitter in seconds.g
+   *   &lt;small&gt;Defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.receiving.jitterBufferMs] The Peer connection receiving video streaming
+   *   RTP packets jitter buffer in miliseconds.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {JSON} [stats.video.receiving.codec] The Peer connection receiving video streaming selected codec information.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if remote session description is not available before parsing.&lt;/small&gt;
+   * @param {String} stats.video.receiving.codec.name The Peer connection receiving video streaming selected codec name.
+   * @param {Number} stats.video.receiving.codec.payloadType The Peer connection receiving video streaming selected codec payload type.
+   * @param {String} [stats.video.receiving.codec.implementation] The Peer connection receiving video streaming selected codec implementation.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.receiving.codec.channels] The Peer connection receiving video streaming selected codec channels (2 for stereo).
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing,
+   *   and this is usually present in &lt;code&gt;stats.audio&lt;/code&gt; property.&lt;/small&gt;
+   * @param {Number} [stats.video.receiving.codec.clockRate] The Peer connection receiving video streaming selected codec media sampling rate.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.video.receiving.codec.params] The Peer connection receiving video streaming selected codec parameters.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.receiving.frames] The Peer connection receiving video streaming frames.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.receiving.framesOutput] The Peer connection receiving video streaming frames output.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.receiving.framesDecoded] The Peer connection receiving video streaming frames decoded.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.receiving.frameRateMean] The Peer connection receiving video streaming fps mean.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.receiving.frameRateStdDev] The Peer connection receiving video streaming fps standard deviation.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.receiving.nacks] The Peer connection current receiving video streaming nacks.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.receiving.totalNacks] The Peer connection total receiving video streaming nacks.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.receiving.plis] The Peer connection current receiving video streaming plis.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.receiving.totalPlis] The Peer connection totally receiving video streaming plis.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.receiving.firs] The Peer connection current receiving video streaming firs.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.receiving.totalFirs] The Peer connection total receiving video streaming firs.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
    * @param {JSON} stats.selectedCandidate The Peer connection selected ICE candidate pair stats.
    * @param {JSON} stats.selectedCandidate.local The Peer connection selected local ICE candidate.
    * @param {String} stats.selectedCandidate.local.ipAddress The Peer connection selected
@@ -735,25 +967,93 @@ Skylink.prototype._EVENTS = {
    * @param {String} stats.connection.signalingState The Peer connection signaling state.
    * @param {JSON} stats.connection.localDescription The Peer connection local session description.
    * @param {String} stats.connection.localDescription.type The Peer connection local session description type.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when local session description is not available.&lt;/small&gt;
    * @param {String} stats.connection.localDescription.sdp The Peer connection local session description SDP.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when local session description is not available.&lt;/small&gt;
    * @param {JSON} stats.connection.remoteDescription The Peer connection remote session description.
    * @param {String} stats.connection.remoteDescription.type The Peer connection remote session description type.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when remote session description is not available.&lt;/small&gt;
    * @param {String} stats.connection.remoteDescription.sdp The Peer connection remote session description sdp.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when remote session description is not available.&lt;/small&gt;
    * @param {JSON} stats.connection.candidates The Peer connection list of ICE candidates sent or received.
    * @param {JSON} stats.connection.candidates.sending The Peer connection list of local ICE candidates sent.
    * @param {Array} stats.connection.candidates.sending.host The Peer connection list of local
-   *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; ICE candidates sent.
+   *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network) ICE candidates sent.
+   * @param {JSON} stats.connection.candidates.sending.host.#index The Peer connection local
+   *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network) ICE candidate.
+   * @param {String} stats.connection.candidates.sending.host.#index.candidate The Peer connection local
+   *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network) ICE candidate connection description.
+   * @param {String} stats.connection.candidates.sending.host.#index.sdpMid The Peer connection local
+   *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network) ICE candidate identifier based on the local session description.
+   * @param {Number} stats.connection.candidates.sending.host.#index.sdpMLineIndex The Peer connection local
+   *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network) ICE candidate media description index (starting from &lt;code&gt;0&lt;/code&gt;)
+   *   based on the local session description.
    * @param {Array} stats.connection.candidates.sending.srflx The Peer connection list of local
-   *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; ICE candidates sent.
+   *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) ICE candidates sent.
+   * @param {JSON} stats.connection.candidates.sending.srflx.#index The Peer connection local
+   *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) ICE candidate.
+   * @param {String} stats.connection.candidates.sending.srflx.#index.candidate The Peer connection local
+   *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) ICE candidate connection description.
+   * @param {String} stats.connection.candidates.sending.srflx.#index.sdpMid The Peer connection local
+   *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) ICE candidate identifier based on the local session description.
+   * @param {Number} stats.connection.candidates.sending.srflx.#index.sdpMLineIndex The Peer connection local
+   *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) ICE candidate media description index (starting from &lt;code&gt;0&lt;/code&gt;)
+   *   based on the local session description.
    * @param {Array} stats.connection.candidates.sending.relay The Peer connection list of local
-   *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; candidates sent.
+   *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; (TURN) candidates sent.
+   * @param {JSON} stats.connection.candidates.sending.relay.#index The Peer connection local
+   *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; (TURN) ICE candidate.
+   * @param {String} stats.connection.candidates.sending.relay.#index.candidate The Peer connection local
+   *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; (TURN) ICE candidate connection description.
+   * @param {String} stats.connection.candidates.sending.relay.#index.sdpMid The Peer connection local
+   *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; (TURN) ICE candidate identifier based on the local session description.
+   * @param {Number} stats.connection.candidates.sending.relay.#index.sdpMLineIndex The Peer connection local
+   *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; (TURN) ICE candidate media description index (starting from &lt;code&gt;0&lt;/code&gt;)
+   *   based on the local session description.
    * @param {JSON} stats.connection.candidates.receiving The Peer connection list of remote ICE candidates received.
    * @param {Array} stats.connection.candidates.receiving.host The Peer connection list of remote
-   *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; ICE candidates received.
+   *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network) ICE candidates received.
+   * @param {JSON} stats.connection.candidates.receiving.host.#index The Peer connection remote
+   *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network) ICE candidate.
+   * @param {String} stats.connection.candidates.receiving.host.#index.candidate The Peer connection remote
+   *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network) ICE candidate connection description.
+   * @param {String} stats.connection.candidates.receiving.host.#index.sdpMid The Peer connection remote
+   *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network) ICE candidate identifier based on the remote session description.
+   * @param {Number} stats.connection.candidates.receiving.host.#index.sdpMLineIndex The Peer connection remote
+   *   &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network) ICE candidate media description index (starting from &lt;code&gt;0&lt;/code&gt;)
+   *   based on the remote session description.
    * @param {Array} stats.connection.candidates.receiving.srflx The Peer connection list of remote
-   *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; ICE candidates received.
+   *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) ICE candidates received.
+   * @param {JSON} stats.connection.candidates.receiving.srflx.#index The Peer connection remote
+   *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) ICE candidate.
+   * @param {String} stats.connection.candidates.receiving.srflx.#index.candidate The Peer connection remote
+   *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) ICE candidate connection description.
+   * @param {String} stats.connection.candidates.receiving.srflx.#index.sdpMid The Peer connection remote
+   *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) ICE candidate identifier based on the remote session description.
+   * @param {Number} stats.connection.candidates.receiving.srflx.#index.sdpMLineIndex The Peer connection remote
+   *   &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) ICE candidate media description index (starting from &lt;code&gt;0&lt;/code&gt;)
+   *   based on the remote session description.
    * @param {Array} stats.connection.candidates.receiving.relay The Peer connection list of remote
-   *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; ICE candidates received.
+   *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; (TURN) ICE candidates received.
+   * @param {JSON} stats.connection.candidates.receiving.relay.#index The Peer connection remote
+   *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; (TURN) ICE candidate.
+   * @param {String} stats.connection.candidates.receiving.relay.#index.candidate The Peer connection remote
+   *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; (TURN) ICE candidate connection description.
+   * @param {String} stats.connection.candidates.receiving.relay.#index.sdpMid The Peer connection remote
+   *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; (TURN) ICE candidate identifier based on the remote session description.
+   * @param {Number} stats.connection.candidates.receiving.relay.#index.sdpMLineIndex The Peer connection remote
+   *   &lt;code&gt;&quot;relay&quot;&lt;/code&gt; (TURN) ICE candidate media description index (starting from &lt;code&gt;0&lt;/code&gt;)
+   *   based on the remote session description.
+   * @param {JSON} stats.connection.dataChannels The Peer connection list of Datachannel connections.
+   * @param {JSON} stats.connection.dataChannels.#channelName The Peer connection Datachannel connection stats.
+   * @param {String} stats.connection.dataChannels.#channelName.label The Peer connection Datachannel connection ID.
+   * @param {String} stats.connection.dataChannels.#channelName.readyState The Peer connection Datachannel connection readyState.
+   *   [Rel: Skylink.DATA_CHANNEL_STATE]
+   * @param {String} stats.connection.dataChannels.#channelName.type The Peer connection Datachannel connection type.
+   *   [Rel: Skylink.DATA_CHANNEL_TYPE]
+   * @param {String} stats.connection.dataChannels.#channelName.currentTransferId The Peer connection
+   *   Datachannel connection current progressing transfer session ID.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there is currently no transfer session progressing on the Datachannel connection.&lt;/small&gt;
    * @param {Error} error The error object received.
    *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; payload is &lt;code&gt;RETRIEVE_ERROR&lt;/code&gt;.&lt;/small&gt;
    * @for Skylink
@@ -776,33 +1076,35 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.15
    */
-  localMediaMuted: []
-};
+  localMediaMuted: [],
 
-/**
- * Stores the list of &lt;code&gt;once()&lt;/code&gt; event handlers.
- * These events are only triggered once.
- * @attribute _onceEvents
- * @param {Array} &lt;#event&gt; The list of event handlers associated with the event.
- * @param {Array} &lt;#event&gt;.&lt;#index&gt; The array of event handler function and its condition function.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._onceEvents = {};
-
-/**
- * Stores the timestamps data used for throttling.
- * @attribute _timestamp
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.8
- */
-Skylink.prototype._timestamp = {
-  now: Date.now() || function() { return +new Date(); },
-  screen: false
+  /**
+   * &lt;blockquote class=&quot;info&quot;&gt;
+   *   Learn more about how ICE works in this
+   *   &lt;a href=&quot;https://temasys.com.sg/ice-what-is-this-sorcery/&quot;&gt;article here&lt;/a&gt;.&lt;br&gt;
+   *   Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates
+   *   may be received in the session description instead.
+   * &lt;/blockquote&gt;
+   * Event triggered when remote ICE candidate processing state has changed when Peer is using trickle ICE.
+   * @event candidateProcessingState
+   * @param {String} state The ICE candidate processing state.
+   *   [Rel: Skylink.CANDIDATE_PROCESSING_STATE]
+   * @param {String} peerId The Peer ID.
+   * @param {String} candidateId The remote ICE candidate session ID.
+   *   &lt;small&gt;Note that this value is not related to WebRTC API but for identification of remote ICE candidate received.&lt;/small&gt;
+   * @param {String} candidateType The remote ICE candidate type.
+   *   &lt;small&gt;Expected values are &lt;code&gt;&quot;host&quot;&lt;/code&gt; (local network), &lt;code&gt;&quot;srflx&quot;&lt;/code&gt; (STUN) and &lt;code&gt;&quot;relay&quot; (TURN).&lt;/small&gt;
+   * @param {JSON} candidate The remote ICE candidate.
+   * @param {String} candidate.candidate The remote ICE candidate connection description.
+   * @param {String} candidate.sdpMid The remote ICE candidate identifier based on the remote session description.
+   * @param {Number} candidate.sdpMLineIndex The remote ICE candidate media description index
+   *   (starting from &lt;code&gt;0&lt;/code&gt;) based on the remote session description.
+   * @param {Error} [error] The error object.
+   *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; is &lt;code&gt;DROPPED&lt;/code&gt; or &lt;code&gt;PROCESS_ERROR&lt;/code&gt;.&lt;/small&gt;
+   * @for Skylink
+   * @since 0.6.16
+   */
+  candidateProcessingState: []
 };
 
 /**
@@ -972,7 +1274,7 @@ Skylink.prototype._trigger = function(eventName) {
         if(once[j][0].apply(this, args) === false) {
           break;
         }
-        if (!once[j][2]) {
+        if (once[j] &amp;&amp; !once[j][2]) {
           log.log([null, &#x27;Event&#x27;, eventName, &#x27;Removing event after firing once&#x27;]);
           once.splice(j, 1);
           //After removing current element, the next element should be element of the same index
@@ -1062,20 +1364,16 @@ Skylink.prototype._wait = function(callback, condition, intervalTime, fireAlways
  * @for Skylink
  * @since 0.5.8
  */
-Skylink.prototype._throttle = function(func, wait){
+Skylink.prototype._throttle = function(func, prop, wait){
   var self = this;
-  return function () {
-      if (!self._timestamp.func){
-        //First time run, need to force timestamp to skip condition
-        self._timestamp.func = self._timestamp.now - wait;
-      }
-      var now = Date.now();
-      if (now - self._timestamp.func &lt; wait) {
-          return;
-      }
-      func.apply(self, arguments);
-      self._timestamp.func = now;
-  };
+  var now = (new Date()).getTime();
+
+  if (!(self._timestamp[prop] &amp;&amp; ((now - self._timestamp[prop]) &lt; wait))) {
+    func(true);
+    self._timestamp[prop] = now;
+  } else {
+    func(false);
+  }
 };
     </pre>
 </div>

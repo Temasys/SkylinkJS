@@ -99,74 +99,6 @@ Skylink.prototype.TURN_TRANSPORT = {
 };
 
 /**
- * Stores the flag that indicates if Peer connections should trickle ICE.
- * @attribute _enableIceTrickle
- * @type Boolean
- * @default true
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._enableIceTrickle = true;
-
-/**
- * Stores the flag that indicates if STUN ICE servers should be used when constructing Peer connection.
- * @attribute _enableSTUN
- * @type Boolean
- * @default true
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._enableSTUN = true;
-
-/**
- * Stores the flag that indicates if TURN ICE servers should be used when constructing Peer connection.
- * @attribute _enableTURN
- * @type Boolean
- * @default true
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._enableTURN = true;
-
-/**
- * Stores the flag that indicates if public STUN ICE servers should be used when constructing Peer connection.
- * @attribute _usePublicSTUN
- * @type Boolean
- * @default true
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._usePublicSTUN = true;
-
-/**
- * Stores the option for the TURN protocols to use.
- * This should configure the TURN ICE servers urls <code>?transport=protocol</code> flag.
- * @attribute _TURNTransport
- * @type String
- * @default "any"
- * @private
- * @required
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._TURNTransport = 'any';
-
-/**
- * Stores the list of Peer connections ICE failures counter.
- * @attribute _ICEConnectionFailures
- * @param {Number} <#peerId> The Peer connection ICE failures counter.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.8
- */
-Skylink.prototype._ICEConnectionFailures = {};
-
-/**
  * Function that filters and configures the ICE servers received from Signaling
  *   based on the <code>init()</code> configuration and returns the updated
  *   list of ICE servers to be used when constructing Peer connection.
@@ -185,7 +117,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
 
 
 
-  if (window.location.protocol === 'https:' || this._forceTURNSSL) {
+  if (this._forceTURNSSL) {
     if (window.webrtcDetectedBrowser === 'chrome' ||
       window.webrtcDetectedBrowser === 'safari' ||
       window.webrtcDetectedBrowser === 'IE') {

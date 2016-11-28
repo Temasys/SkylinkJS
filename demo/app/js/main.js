@@ -10,6 +10,7 @@ Demo.Stats = {};
 Demo.Methods = {};
 Demo.Skylink = new Skylink();
 Demo.ShowStats = {};
+Demo.TransfersDone = {};
 
 var _peerId = null;
 
@@ -20,6 +21,7 @@ Demo.Skylink.setLogLevel(Demo.Skylink.LOG_LEVEL.DEBUG);
 Demo.Methods.displayFileItemHTML = function(content) {
   return '<p>' + content.name + '<small style="float:right;color:#aaa;">' + content.size + ' B</small></p>' +
     ((content.isUpload) ? ('<table id="' + content.transferId + '" class="table upload-table">' +
+<<<<<<< HEAD
       '<thead><tr><th colspan="2"><span class="glyphicon glyphicon-saved">' +
       '</span> Upload Status</th></tr></thead>' +
       '<tbody></tbody></table>') : ('<div class="progress progress-striped">' +
@@ -30,6 +32,21 @@ Demo.Methods.displayFileItemHTML = function(content) {
     'href="' + content.data + '" style="display: ' + ((content.data.length > 1) ?
       'block' : 'none') + ';" download="' + content.name +
     '"><span class="glyphicon glyphicon-cloud-download"></span> <b>Download file</b></a></p>';
+=======
+    '<thead><tr><th colspan="2"><span class="glyphicon glyphicon-saved">' +
+    '</span> Upload Status</th></tr></thead>' +
+    '<tbody></tbody></table>') : ('<div class="progress progress-striped">' +
+    '<div id="' + content.transferId + '" class="progress-bar ' +
+    '" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"' +
+    ' style="width: 0%"><span>Downloading...</span></div></div>')) +
+    '<p><a id="'  + content.transferId + '_btn" class="btn btn-default" ' +
+    'href="#" style="display: block;" download="' + content.name +
+    '"><span class="glyphicon glyphicon-cloud-download"></span> <b>Download file</b></a>' +
+    (content.direction === Demo.Skylink.DATA_TRANSFER_TYPE.DOWNLOAD ?
+    '<a class="btn btn-default cancel c-' + content.peerId + '" style="margin-top: 15px; border-color: #d9534f; color: #d9534f;" ' +
+    'onclick="cancelTransfer(\'' + content.peerId + '\', \'' + content.transferId + '\')">' +
+    '<span class="glyphicon glyphicon-remove"></span> Cancel Transfer</a></p>' : '');
+>>>>>>> 0.6.x-development
 };
 
 Demo.Methods.displayChatItemHTML = function(peerId, timestamp, content, isPrivate) {
@@ -47,13 +64,14 @@ Demo.Methods.displayChatItemHTML = function(peerId, timestamp, content, isPrivat
   else
     Seconds = timestamp.getSeconds();
 
-  return '<div class="chat-item list-group-item active">' +
+  return '<div ' + (typeof isPrivate === 'string' ? 'id="file-' + isPrivate + '"' : '') +
+    ' class="chat-item list-group-item active">' +
     '<p class="list-group-item-heading">' + '<b>' + peerId + '</b>' +
     '<em title="' + timestamp.toString() + '">' + Hours +
     ':' + Minutes + ':' + Seconds +
     '</em></p>' + '<p class="list-group-item-text">' +
-    (isPrivate ? '<i>[pvt msg] ' : '') + content +
-    (isPrivate ? '</i>' : '') + '</p></div>';
+    (isPrivate === true ? '<i>[pvt msg] ' : '') + content +
+    (isPrivate === true ? '</i>' : '') + '</p></div>';
 };
 
 Demo.Methods.displayRecordingSessionHTML = function(recordingId) {
@@ -113,14 +131,26 @@ Demo.Skylink.on('incomingDataRequest', function(transferId, peerId, transferInfo
     Demo.Skylink.acceptDataTransfer(peerId, transferId, true);
   }
 })
+<<<<<<< HEAD
 Demo.Skylink.on('dataTransferState', function(state, transferId, peerId, transferInfo, error) {
   transferInfo = transferInfo || {};
 
   if (transferInfo.dataType !== 'blob') {
+=======
+Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transferInfo, error){
+  if (transferInfo.dataType !== Demo.Skylink.DATA_TRANSFER_SESSION_TYPE.BLOB) {
+>>>>>>> 0.6.x-development
     return;
   }
 
+  if (!Demo.TransfersDone[transferId]) {
+    Demo.TransfersDone[transferId] = {};
+  }
+
+  transferInfo.peerId = peerId;
+
   switch (state) {
+<<<<<<< HEAD
     case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_REQUEST:
       var result = confirm('Accept file "' + transferInfo.name +
         '" from ' + peerId + '?\n\n[size: ' + transferInfo.size + ']');
@@ -183,6 +213,113 @@ Demo.Skylink.on('dataTransferState', function(state, transferId, peerId, transfe
         error.message);
       $('#' + transferId).parent().removeClass('progress-bar-info');
       $('#' + transferId).parent().addClass('progress-bar-danger');
+=======
+  case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_REQUEST :
+    var result = confirm('Accept file "' + transferInfo.name +
+      '" from ' + peerId + '?\n\n[size: ' + transferInfo.size + ']');
+    Demo.Skylink.acceptDataTransfer(peerId, transferId, result);
+    break;
+  case Demo.Skylink.DATA_TRANSFER_STATE.USER_UPLOAD_REQUEST :
+  case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_STARTED :
+    if (document.getElementById('file-' + transferId) &&
+      $('#' + transferId + ' .' + peerId).length === 0) {
+      $('#' + transferId + ' .' + peerId).append('<tbody class="' + peerId + '"></tbody>');
+      return;
+    }
+    var displayName = Demo.Skylink.getUserData();
+    transferInfo.transferId = transferId;
+    transferInfo.isUpload = true;
+    Demo.Methods.displayChatMessage(displayName, transferInfo, transferId);
+    Demo.Methods.displayChatMessage(displayName, 'File sent: ' + transferInfo.name);
+    break;
+  case Demo.Skylink.DATA_TRANSFER_STATE.DOWNLOAD_STARTED :
+    if (document.getElementById('file-' + transferId) &&
+      $('#' + transferId + ' .' + peerId).length === 0) {
+      $('#' + transferId + ' .' + peerId).append('<tbody class="' + peerId + '"></tbody>');
+      if (transferInfo.data) {
+        $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
+      }
+      return;
+    }
+    var displayName = Demo.Skylink.getPeerInfo(transferInfo.senderPeerId).userData;
+    transferInfo.transferId = transferId;
+    transferInfo.isUpload = false;
+    Demo.Methods.displayChatMessage(displayName, transferInfo, transferId);
+    Demo.Methods.displayChatMessage(displayName, 'File sent: ' + transferInfo.name);
+
+    if (transferInfo.data) {
+      $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
+    }
+    break;
+  case Demo.Skylink.DATA_TRANSFER_STATE.UPLOADING :
+    var displayName = Demo.Skylink.getPeerInfo(peerId).userData;
+    if ($('#' + transferId).find('.' + peerId).width() < 1) {
+      $('#' + transferId).append('<tr><td>' + displayName + '<a class="c-' + peerId + ' cancel" ' +
+        'style="color: #d9534f;" onclick="cancelTransfer(\'' + peerId + '\', \'' + transferId + '\');">' +
+        '<span class="glyphicon glyphicon-remove"></span></a>' +
+        '</td><td class="' + peerId + '">' + transferInfo.percentage + '%</td></tr>');
+    } else {
+      $('#' + transferId).find('.' + peerId).html(transferInfo.percentage + '%');
+    }
+    break;
+  case Demo.Skylink.DATA_TRANSFER_STATE.DOWNLOADING :
+    $('#' + transferId).attr('aria-valuenow', transferInfo.percentage);
+    $('#' + transferId).css('width', transferInfo.percentage + '%');
+    $('#' + transferId).find('span').html(transferInfo.percentage + ' %');
+    break;
+  case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_COMPLETED :
+    if ($('#' + transferId).find('.' + peerId).width() < 1) {
+      $('#' + transferId).append('<tr><td>' + displayName + '<a class="c-' + peerId + ' cancel" ' +
+        'style="color: #d9534f;" onclick="cancelTransfer(\'' + peerId + '\', \'' + transferId + '\');">' +
+        '<span class="glyphicon glyphicon-remove"></span></a>' +
+        '</td><td class="' + peerId + '">0%</td></tr>');
+    }
+    var displayName = Demo.Skylink.getPeerInfo(peerId).userData;
+    Demo.Methods.displayChatMessage(displayName, 'File received: ' + transferInfo.name);
+    $('#' + transferId).find('.' + peerId).html('&#10003;');
+    $('#' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
+    $('#' + transferId + ' .c-' + peerId + '.cancel').css('cursor', 'not-allowed');
+    Demo.TransfersDone[transferId][peerId] = true;
+    break;
+  case Demo.Skylink.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED :
+    // If completed, display download button
+    var displayName = Demo.Skylink.getPeerInfo(peerId).userData;
+    $('#' + transferId).parent().remove();
+    $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
+    $('#' + transferId + '_btn').css('display', 'block');
+    Demo.Methods.displayChatMessage(displayName, 'File received: ' + transferInfo.name);
+    $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
+    $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('cursor', 'not-allowed');
+    Demo.TransfersDone[transferId][peerId] = true;
+    break;
+  case Demo.Skylink.DATA_TRANSFER_STATE.REJECTED :
+    alert('User "' + peerId + '" has rejected your file');
+    $('#' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
+    $('#' + transferId + ' .c-' + peerId + '.cancel').css('cursor', 'not-allowed');
+    Demo.TransfersDone[transferId][peerId] = true;
+    break;
+  case Demo.Skylink.DATA_TRANSFER_STATE.ERROR :
+    alert(error.transferType + ' failed. Reason: \n' +
+      error.message);
+    $('#' + transferId).parent().removeClass('progress-bar-info');
+    $('#' + transferId).parent().addClass('progress-bar-danger');
+    $('#' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
+    $('#' + transferId + ' .c-' + peerId + '.cancel').css('cursor', 'not-allowed');
+    $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
+    $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('cursor', 'not-allowed');
+    Demo.TransfersDone[transferId][peerId] = true;
+    break;
+  case Demo.Skylink.DATA_TRANSFER_STATE.CANCEL :
+    alert(error.transferType + ' canceled. Reason: \n' +
+      error.message);
+    $('#' + transferId).parent().removeClass('progress-bar-info');
+    $('#' + transferId).parent().addClass('progress-bar-danger');
+    $('#' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
+    $('#' + transferId + ' .c-' + peerId + '.cancel').css('cursor', 'not-allowed');
+    $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
+    $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('cursor', 'not-allowed');
+    Demo.TransfersDone[transferId][peerId] = true;
+>>>>>>> 0.6.x-development
   }
 });
 //---------------------------------------------------
@@ -208,7 +345,9 @@ Demo.Skylink.on('peerRestart', function(peerId, peerInfo, isSelf) {
 
   if ($('#video' + peerId).length > 0) {
     if (!peerInfo.settings.video && !peerInfo.settings.audio) {
-      $('#video' + peerId + ' .video-obj').hide();
+      //$('#video' + peerId + ' .video-obj').hide();
+      $('#video' + peerId + ' .video-obj').replaceWith(
+        '<video class="video-obj" autoplay="true" ' + (isSelf ? 'muted="true"' : '') + ' poster="img/no_profile.jpg"></video>');
       if (Demo.Streams[peerId]) {
         delete Demo.Streams[peerId];
       }
@@ -220,9 +359,11 @@ Demo.Skylink.on('peerRestart', function(peerId, peerInfo, isSelf) {
     }
   }
 });
+
 //---------------------------------------------------
 Demo.Skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
   if (isSelf) {
+    _peerId = peerId;
     $('#display_user_id').html(peerId);
     $('#isAudioMuted').css('color',
       (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
@@ -237,7 +378,6 @@ Demo.Skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
       $('#file_list_panel').show();
     }
   } else {
-    _peerId = peerId;
     Demo.Methods.displayChatMessage('System', 'Peer ' + peerId + ' joined the room');
     var newListEntry = '<tr id="user' + peerId + '" class="badQuality">' +
       '<td><span class="name">' + peerInfo.userData + '</span><br>' +
@@ -265,6 +405,39 @@ Demo.Skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
       (peerInfo.mediaStatus.videoMuted) ? 'red' : 'green');
     $('#user' + peerId + ' .audio').css('color',
       (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
+  }
+
+  if ($('#video' + peerId).length === 0) {
+    var peerElm = document.createElement('div');
+    peerElm.id = 'video' + peerId;
+    peerElm.className = 'col-md-6 peervideo';
+
+    peerVideo = document.createElement('video');
+    peerVideo.className = 'video-obj';
+    if (!peerInfo.settings.audio && !peerInfo.settings.video) {
+      peerVideo.poster = 'img/no_profile.jpg';
+    }
+    if (window.webrtcDetectedBrowser !== 'IE') {
+      peerVideo.autoplay = 'autoplay';
+    }
+
+    // mutes user's video
+    if (isSelf && window.webrtcDetectedBrowser !== 'IE') {
+      peerVideo.muted = 'muted';
+    }
+
+    $('#peer_video_list').append(peerElm);
+
+    peerElm.appendChild(peerVideo);
+
+    $(peerElm).append('<div class="connstats-wrapper"><button class="toggle-connstats" data="' + (isSelf ? 'MCU' : peerId) +
+      '">See ' + (isSelf ? 'MCU ' : '') + 'Stats</button><div class="row connstats">' +
+      '<div class="audio row"><b class="col-md-12">Audio</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
+        '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
+      '<div class="video row"><b class="col-md-12">Video</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
+        '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
+      '<div class="candidate row"><b class="col-md-12">Selected Candidate</b><p class="col-md-6">Local: <span class="local"></span></p>' +
+        '<p class="col-md-6">Remote: <span class="remote"></span></p></div></div></div>');
   }
 });
 //---------------------------------------------------
@@ -316,7 +489,7 @@ Demo.Skylink.on('incomingStream', function(peerId, stream, isSelf, peerInfo) {
 
   attachMediaStream(peerVideo, stream);
   Demo.Streams[peerId] = stream;
-  $(peerVideo).show();
+  //$(peerVideo).show();
 
   if (isSelf) {
     $('#isAudioMuted').css('color',
@@ -437,7 +610,7 @@ Demo.Skylink.on('iceConnectionState', function(state, peerId) {
     case Demo.Skylink.ICE_CONNECTION_STATE.CONNECTED:
     case Demo.Skylink.ICE_CONNECTION_STATE.COMPLETED:
       color = 'green';
-      $('#video' + peerId + ' .connstats-wrapper').show();
+      $('#video' + (peerId === 'MCU' ? _peerId : peerId) + ' .connstats-wrapper').show();
       Demo.ShowStats[peerId] = true;
       break;
     default:
@@ -473,8 +646,16 @@ Demo.Skylink.on('peerConnectionState', function(state, peerId) {
   $('#user' + peerId + ' .6').css('color', color);
 });
 //---------------------------------------------------
+<<<<<<< HEAD
 Demo.Skylink.on('dataChannelState', function(state, peerId, error, channelName, channelType) {
+=======
+Demo.Skylink.on('dataChannelState', function (state, peerId, error, channelName, channelType, messageType) {
+>>>>>>> 0.6.x-development
   if (channelType !== Demo.Skylink.DATA_CHANNEL_TYPE.MESSAGING) {
+    return;
+  }
+
+  if (state === Demo.Skylink.DATA_CHANNEL_STATE.SEND_MESSAGE_ERROR) {
     return;
   }
 
@@ -509,7 +690,9 @@ Demo.Skylink.on('peerUpdated', function(peerId, peerInfo, isSelf) {
 
   if ($('#video' + peerId).length > 0) {
     if (!peerInfo.settings.video && !peerInfo.settings.audio) {
-      $('#video' + peerId + ' .video-obj').hide();
+      //$('#video' + peerId + ' .video-obj').hide();
+      $('#video' + peerId + ' .video-obj').replaceWith(
+        '<video class="video-obj" autoplay="true" ' + (isSelf ? 'muted="true"' : '') + ' poster="img/no_profile.jpg"></video>');
       if (Demo.Streams[peerId]) {
         delete Demo.Streams[peerId];
       }
@@ -584,38 +767,136 @@ Demo.Skylink.on('recordingState', function(state, recordingId, url, error) {
 
 Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats, error) {
   if (state === Demo.Skylink.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS) {
+<<<<<<< HEAD
     var statsElm = $('#video' + peerId).find('.connstats');
     var formatBitrate = function(val) {
       if (val < 1000) {
         return val + ' bps';
       } else if (val < 1000000) {
         return (val / 1000).toFixed(2) + ' kbps';
+=======
+    var statsElm = $('#video' + (peerId === 'MCU' ? _peerId : peerId)).find('.connstats');
+    var formatStatItem = function (type, dir) {
+      var itemStr = '';
+      var itemAddStr = '';
+      var bits = stats[type][dir].bytes * 8; // Convert to bits
+
+      if (bits < 1000) {
+        itemStr += bits + ' bps';
+      } else if (bits < 1000000) {
+        itemStr += (bits / 1000).toFixed(2) + ' kbps';
+>>>>>>> 0.6.x-development
       } else {
-        return (val / 1000000).toFixed(2) + ' mbps';
+        itemStr += (bits / 1000000).toFixed(2) + ' mbps';
       }
+
+      // format packet stats
+      itemStr += '<br>Packets - (' + stats[type][dir].packets + ' sent, ' +
+        stats[type][dir].packetsLost + ' lost, ' + stats[type][dir].jitter + ' jitter' +
+        (typeof stats[type][dir].jitterBufferMs === 'number' ? ', ' + stats[type][dir].jitterBufferMs +
+        ' jitter buffer <i>ms</i>' : '') + (dir === 'sending' ? ', ' + stats[type][dir].rtt + ' rtt' : '') +
+        (typeof stats[type][dir].nacks === 'number' ? ', ' + stats[type][dir].nacks + ' nacks' : '') +
+        (typeof stats[type][dir].plis === 'number' ? ', ' + stats[type][dir].plis + ' plis' : '') +
+        (typeof stats[type][dir].firs === 'number' ? ', ' + stats[type][dir].firs + ' firs' : '') + ')';
+
+      // format codec stats
+      if (stats[type][dir].codec) {
+        itemStr += '<br>Codec - (name: ' + stats[type][dir].codec.name + ', payload type: ' +
+          stats[type][dir].codec.payloadType + (stats[type][dir].codec.implementation ?
+          ', impl: ' + stats[type][dir].codec.implementation : '') + (stats[type][dir].codec.clockRate ?
+          ', clockrate: ' + stats[type][dir].codec.clockRate : '') + (stats[type][dir].codec.channels ?
+          ', channels: ' + stats[type][dir].codec.channels : '') + (stats[type][dir].codec.params ?
+          ', params: <small>' + stats[type][dir].codec.params  + '</small>' : '') + ')';
+      }
+
+      // format settings
+      if (type === 'audio') {
+        itemStr += '<br>Settings - (';
+
+        if (typeof stats.audio[dir].inputLevel === 'number') {
+          itemAddStr += 'input level: ' + stats.audio[dir].inputLevel;
+        } else if (typeof stats.audio[dir].outputLevel === 'number') {
+          itemAddStr += 'output level: ' + stats.audio[dir].outputLevel;
+        }
+
+        if (typeof stats.audio[dir].echoReturnLoss === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'echo return loss: ' + stats.audio[dir].echoReturnLoss;
+        }
+
+        if (typeof stats.audio[dir].echoReturnLossEnhancement === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'echo return loss: ' + stats.audio[dir].echoReturnLossEnhancement;
+        }
+
+      } else {
+        itemStr += '<br>Frame - (';
+
+        if (typeof stats.video[dir].frameWidth === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'width: ' + stats.video[dir].frameWidth;
+        }
+
+        if (typeof stats.video[dir].frameHeight === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'height: ' + stats.video[dir].frameHeight;
+        }
+
+        if (typeof stats.video[dir].frames === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + dir + ': ' + stats.video[dir].frames;
+        }
+
+        if (typeof stats.video[dir].framesInput === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'input: ' + stats.video[dir].framesInput;
+        }
+
+        if (typeof stats.video[dir].framesOutput === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'output: ' + stats.video[dir].framesOutput;
+        }
+
+        if (typeof stats.video[dir].framesDropped === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'dropped: ' + stats.video[dir].framesDropped;
+        }
+
+        if (typeof stats.video[dir].framesDecoded === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'decoded: ' + stats.video[dir].framesDecoded;
+        }
+
+        if (typeof stats.video[dir].frameRateMean === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'fps mean: ' + stats.video[dir].frameRateMean.toFixed(2);
+        }
+
+        if (typeof stats.video[dir].frameRateStdDev === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'fps std dev: ' + stats.video[dir].frameRateStdDev.toFixed(2);
+        }
+      }
+
+      itemStr += itemAddStr + ')';
+
+      $(statsElm).find('.' + type + ' .' + (dir === 'sending' ? 'upload' : 'download')).html(itemStr);
+    };
+    var formatCanStatItem = function (type) {
+      $(statsElm).find('.candidate .' + type).html((stats.selectedCandidate[type].ipAddress || '-') + ':' +
+        (stats.selectedCandidate[type].portNumber || '-') + ' - (transport: ' +
+        (stats.selectedCandidate[type].transport || 'N/A') +
+        ', type: ' + (stats.selectedCandidate[type].candidateType || 'N/A') + ')');
     };
 
-    $(statsElm).find('.audio .upload').html(formatBitrate(stats.audio.sending.bytes) + ' - Packets (' +
-      stats.audio.sending.packets + ' sent, ' + stats.audio.sending.packetsLost + ' lost)');
-    $(statsElm).find('.audio .download').html(formatBitrate(stats.audio.receiving.bytes) + ' - Packets (' +
-      stats.audio.receiving.packets + ' received, ' + stats.audio.receiving.packetsLost + ' lost)');
-    $(statsElm).find('.video .upload').html(formatBitrate(stats.video.sending.bytes) + ' - Packets (' +
-      stats.video.sending.packets + ' sent, ' + stats.video.sending.packetsLost + ' lost)');
-    $(statsElm).find('.video .download').html(formatBitrate(stats.video.receiving.bytes) + ' - Packets (' +
-      stats.video.receiving.packets + ' received, ' + stats.video.receiving.packetsLost + ' lost)');
-    $(statsElm).find('.candidate .local').html(stats.selectedCandidate.local.ipAddress + ':' +
-      stats.selectedCandidate.local.portNumber + ' - (transport: ' + stats.selectedCandidate.local.transport +
-      ', type: ' + stats.selectedCandidate.local.candidateType + ')');
-    $(statsElm).find('.candidate .remote').html(stats.selectedCandidate.remote.ipAddress + ':' +
-      stats.selectedCandidate.remote.portNumber + ' - (transport: ' + stats.selectedCandidate.remote.transport +
-      ', type: ' + stats.selectedCandidate.remote.candidateType + ')');
+    formatStatItem('audio', 'sending');
+    formatStatItem('audio', 'receiving');
+    formatStatItem('video', 'sending');
+    formatStatItem('video', 'receiving');
+    formatCanStatItem('local');
+    formatCanStatItem('remote');
   }
 });
 
 //------------- join room ---------------------------
 var displayName = 'name_' + 'user_' + Math.floor((Math.random() * 1000) + 1);
 
+<<<<<<< HEAD
 Demo.Skylink.init(config, function(error, success) {
+=======
+$('#display_user_info').val(displayName);
+
+Demo.Skylink.init(config, function (error, success) {
+>>>>>>> 0.6.x-development
   if (success) {
     Demo.Skylink.joinRoom({
       userData: displayName,
@@ -674,9 +955,9 @@ $(document).ready(function() {
       var file = Demo.Files[i];
       if (file.size <= Demo.FILE_SIZE_LIMIT) {
         if (selectedPeers.length > 0) {
-          Demo.Skylink.sendBlobData(file, selectedPeers);
+          Demo.Skylink.sendBlobData(file, selectedPeers, true);
         } else {
-          Demo.Skylink.sendBlobData(file);
+          Demo.Skylink.sendBlobData(file, true);
         }
         $('#file_input').val('');
       } else {
@@ -734,24 +1015,54 @@ $(document).ready(function() {
     Demo.Skylink.unlockRoom();
   });
   //---------------------------------------------------
+<<<<<<< HEAD
   $('#enable_audio_btn').click(function() {
     Demo.Skylink.enableAudio();
   });
   //---------------------------------------------------
   $('#disable_audio_btn').click(function() {
     Demo.Skylink.disableAudio();
+=======
+  $('#enable_audio_btn').click(function () {
+    Demo.Skylink.muteStream({
+      audioMuted: false,
+      videoMuted: Demo.Skylink.getPeerInfo().mediaStatus.videoMuted
+    });
+  });
+  //---------------------------------------------------
+  $('#disable_audio_btn').click(function () {
+    Demo.Skylink.muteStream({
+      audioMuted: true,
+      videoMuted: Demo.Skylink.getPeerInfo().mediaStatus.videoMuted
+    });
+>>>>>>> 0.6.x-development
   });
   //---------------------------------------------------
   $('#stop_stream_btn').click(function() {
     Demo.Skylink.stopStream();
   });
   //---------------------------------------------------
+<<<<<<< HEAD
   $('#enable_video_btn').click(function() {
     Demo.Skylink.enableVideo();
   });
   //---------------------------------------------------
   $('#disable_video_btn').click(function() {
     Demo.Skylink.disableVideo();
+=======
+  $('#enable_video_btn').click(function () {
+    Demo.Skylink.muteStream({
+      videoMuted: false,
+      audioMuted: Demo.Skylink.getPeerInfo().mediaStatus.audioMuted
+    });
+  });
+  //---------------------------------------------------
+  $('#disable_video_btn').click(function () {
+    Demo.Skylink.muteStream({
+      videoMuted: true,
+      audioMuted: Demo.Skylink.getPeerInfo().mediaStatus.audioMuted
+    });
+>>>>>>> 0.6.x-development
   });
   //---------------------------------------------------
   $('#leave_room_btn').click(function() {
@@ -766,7 +1077,7 @@ $(document).ready(function() {
     }
   });
   $('#share_screen_btn').click(function () {
-    Demo.Skylink.shareScreen();
+    Demo.Skylink.shareScreen(true);
   });
   $('#stop_screen_btn').click(function() {
     Demo.Skylink.stopScreen();
@@ -777,9 +1088,11 @@ $(document).ready(function() {
   $('#peer_video_list').on('click', '.toggle-connstats', function () {
     $(this).parent().find('.connstats').slideToggle();
     $(this).attr('toggled', $(this).attr('toggled') ? '' : 'true');
-    $(this).html($(this).attr('toggled') ? 'Hide Stats' : 'Show Stats');
 
     var peerId = $(this).attr('data');
+
+    $(this).html($(this).attr('toggled') ? 'Hide ' + (peerId === 'MCU' ? ' MCU ' : '') + 'Stats' :
+      'Show ' + (peerId === 'MCU' ? ' MCU ' : '') + 'Stats');
 
     if ($(this).attr('toggled')) {
       Demo.Stats[peerId] = true;
@@ -822,6 +1135,7 @@ $(document).ready(function() {
         $(panelDom).find('.selected-users').append('<em id="' +
           peerId + '-selected-user">Peer ' + peerId + '</em>');
         $(panelDom).find('.all').show();
+<<<<<<< HEAD
         selectedPeers.push(peerId);
       }
     };
@@ -833,6 +1147,30 @@ $(document).ready(function() {
       });
       $('#selected_users_panel .all').show();
       selectedPeers = [];
+=======
+      } else {
+        $(panelDom).find('.all').hide();
+      }
+    } else {
+      $(panelDom).find('.selected-users').append('<em id="' +
+        peerId + '-selected-user">Peer ' + peerId + '</em>');
+      $(panelDom).find('.all').hide();
+      selectedPeers.push(peerId);
+    }
+  };
+
+  window.cancelTransfer = function (peerId, transferId) {
+    if (Demo.TransfersDone[transferId][peerId]) {
+      return;
+    }
+    Demo.Skylink.cancelDataTransfer(peerId, transferId);
+  };
+
+  $('#clear-selected-users').click(function () {
+    $('#selected_users_panel .selected-users').html('');
+    $('.select-user').each(function () {
+      $(this)[0].checked = false
+>>>>>>> 0.6.x-development
     });
   });
 });

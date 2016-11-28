@@ -91,6 +91,8 @@ npm install grunt-cli -g
 
 # 4. Install Browserify and Testling to run test scripts :
 
+> **Note** that currently the test scripts are outdated and may not work as we are evaluating to upgrade the test scripts in the future.
+
 npm install browserify -g
 npm install testling -g
 

@@ -9,7 +9,7 @@
  * @for Skylink
  * @since 0.6.0
  */
-Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
+Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.2';
 
 /**
  * Stores the list of socket messaging protocol types.
@@ -51,16 +51,6 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
 };
 
 /**
- * Stores the flag if MCU environment is enabled.
- * @attribute _hasMCU
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._hasMCU = false;
-
-/**
  * Stores the list of socket messaging protocol types to queue when sent less than a second interval.
  * @attribute _groupMessageList
  * @type Array
@@ -71,44 +61,10 @@ Skylink.prototype._hasMCU = false;
 Skylink.prototype._groupMessageList = [
   Skylink.prototype._SIG_MESSAGE_TYPE.STREAM,
   Skylink.prototype._SIG_MESSAGE_TYPE.UPDATE_USER,
-  Skylink.prototype._SIG_MESSAGE_TYPE.ROOM_LOCK,
   Skylink.prototype._SIG_MESSAGE_TYPE.MUTE_AUDIO,
   Skylink.prototype._SIG_MESSAGE_TYPE.MUTE_VIDEO,
   Skylink.prototype._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
 ];
-
-/**
- * Stores the flag that indicates if MCU is available in the Room.
- * If App Key enables MCU but this is false, this means likely there are problems connecting to the MCU server.
- * @attribute _hasMCU
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._hasMCU = false;
-
-
-/**
- * Stores the flag that indicates if User should only receive Stream from Peer connections but
- *   do not send User's Stream to Peer connections.
- * @attribute _receiveOnly
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype._receiveOnly = false;
-
-/**
- * Stores the list of Peer messages timestamp.
- * @attribute _peerMessagesStamps
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.15
- */
-Skylink.prototype._peerMessagesStamps = {};
 
 /**
  * <blockquote class="info">
@@ -151,49 +107,36 @@ Skylink.prototype._peerMessagesStamps = {};
  * @since 0.4.0
  */
 Skylink.prototype.sendMessage = function(message, targetPeerId) {
-  var params = {
-    cid: this._key,
-    data: message,
-    mid: this._user.sid,
-    rid: this._room.id,
-    type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
-  };
-
-  var listOfPeers = Object.keys(this._peerConnections);
+  var listOfPeers = Object.keys(this._peerInformations);
   var isPrivate = false;
-  var i;
 
-  if(Array.isArray(targetPeerId)) {
+  if (Array.isArray(targetPeerId)) {
     listOfPeers = targetPeerId;
     isPrivate = true;
-
-  } else if (typeof targetPeerId === 'string') {
+  } else if (targetPeerId && typeof targetPeerId === 'string') {
     listOfPeers = [targetPeerId];
     isPrivate = true;
   }
 
-  if (!isPrivate) {
-    log.log([null, 'Socket', null, 'Broadcasting message to peers']);
-
-    this._sendChannelMessage({
-      cid: this._key,
-      data: message,
-      mid: this._user.sid,
-      rid: this._room.id,
-      type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
-    });
+  if (!this._inRoom || !this._socket || !this._user) {
+    log.error('Unable to send message as User is not in Room. ->', message);
+    return;
   }
 
-  for (i = 0; i < listOfPeers.length; i++) {
+  // Loop out unwanted Peers
+  for (var i = 0; i < listOfPeers.length; i++) {
     var peerId = listOfPeers[i];
 
-    // Ignore MCU peer
-    if (peerId === 'MCU') {
-      continue;
-    }
-
-    if (isPrivate) {
-      log.log([peerId, 'Socket', null, 'Sending message to peer']);
+    if (!this._peerInformations[peerId]) {
+      log.error([peerId, 'Socket', null, 'Dropping of sending message to Peer as ' +
+        'Peer session does not exists']);
+      listOfPeers.splice(i, 1);
+      i--;
+    } else if (peerId === 'MCU') {
+      listOfPeers.splice(i, 1);
+      i--;
+    } else if (isPrivate) {
+      log.debug([peerId, 'Socket', null, 'Sending private message to Peer']);
 
       this._sendChannelMessage({
         cid: this._key,
@@ -206,13 +149,31 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
     }
   }
 
-  this._trigger('incomingMessage', {
-    content: message,
-    isPrivate: isPrivate,
-    targetPeerId: targetPeerId,
-    isDataChannel: false,
-    senderPeerId: this._user.sid
-  }, this._user.sid, this.getPeerInfo(), true);
+  if (listOfPeers.length === 0) {
+    log.warn('Currently there are no Peers to send message to (unless the message is queued and ' +
+      'there are Peer connected by then).');
+  }
+
+  if (!isPrivate) {
+    log.debug([null, 'Socket', null, 'Broadcasting message to Peers']);
+
+    this._sendChannelMessage({
+      cid: this._key,
+      data: message,
+      mid: this._user.sid,
+      rid: this._room.id,
+      type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
+    });
+  } else {
+    this._trigger('incomingMessage', {
+      content: message,
+      isPrivate: isPrivate,
+      targetPeerId: targetPeerId || null,
+      listOfPeers: listOfPeers,
+      isDataChannel: false,
+      senderPeerId: this._user.sid
+    }, this._user.sid, this.getPeerInfo(), true);
+  }
 };
 
 /**
@@ -587,14 +548,18 @@ Skylink.prototype._approachEventHandler = function(message){
     mid: self._user.sid,
     rid: self._room.id,
     agent: window.webrtcDetectedBrowser,
-    version: window.webrtcDetectedVersion,
+    version: (window.webrtcDetectedVersion || 0).toString(),
     os: window.navigator.platform,
     userInfo: self._getUserInfo(),
     receiveOnly: self._receiveOnly,
-    sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
     target: message.target,
     weight: self._peerPriorityWeight,
-    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+    enableIceTrickle: self._enableIceTrickle,
+    enableDataChannel: self._enableDataChannel,
+    enableIceRestart: self._enableIceRestart,
+    SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+    DTProtocolVersion: self.DT_PROTOCOL_VERSION
   });
 };
 
@@ -749,53 +714,29 @@ Skylink.prototype._streamEventHandler = function(message) {
   log.log([targetMid, null, message.type, 'Peer\'s stream status:'], message.status);
 
   if (this._peerInformations[targetMid]) {
+    var currentPeerInfo = clone(this.getPeerInfo(targetMid));
+    var hasScreenshare = false;
+
+    if (message.settings && typeof message.settings === 'object') {
+      currentPeerInfo.settings.audio = message.settings.audio;
+      currentPeerInfo.settings.video = message.settings.video;
+      hasScreenshare = currentPeerInfo.settings.video && typeof currentPeerInfo.settings.video === 'object' &&
+        !!currentPeerInfo.settings.video.screenshare;
+    }
 
   	if (message.status === 'ended') {
-  		this._trigger('streamEnded', targetMid, this.getPeerInfo(targetMid),
-        false, message.sessionType === 'screensharing', message.streamId);
+  		this._trigger('streamEnded', targetMid, currentPeerInfo, hasScreenshare, message.streamId);
       this._trigger('peerUpdated', targetMid, this.getPeerInfo(targetMid), false);
 
       if (this._peerConnections[targetMid]) {
         this._peerConnections[targetMid].hasStream = false;
-        if (message.sessionType === 'screensharing') {
+        if (hasScreenshare) {
           this._peerConnections[targetMid].hasScreen = false;
         }
       } else {
         log.log([targetMid, null, message.type, 'Peer connection not found']);
       }
-  	} else if (message.status === 'check') {
-      if (!message.streamId || this._hasMCU) {
-        return;
-      }
-
-      // Prevent restarts unless its stable
-      if (this._peerConnections[targetMid] && this._peerConnections[targetMid].signalingState ===
-        this.PEER_CONNECTION_STATE.STABLE) {
-        var streams = this._peerConnections[targetMid].getRemoteStreams();
-        if (streams.length > 0 && message.streamId !== (streams[0].id || streams[0].label)) {
-          this._sendChannelMessage({
-            type: this._SIG_MESSAGE_TYPE.RESTART,
-            mid: this._user.sid,
-            rid: this._room.id,
-            agent: window.webrtcDetectedBrowser,
-            version: window.webrtcDetectedVersion,
-            os: window.navigator.platform,
-            userInfo: this._getUserInfo(),
-            target: targetMid,
-            weight: this._peerPriorityWeight,
-            enableIceTrickle: this._enableIceTrickle,
-            enableDataChannel: this._enableDataChannel,
-            receiveOnly: this._peerConnections[targetMid] && this._peerConnections[targetMid].receiveOnly,
-            sessionType: !!this._streams.screenshare ? 'screensharing' : 'stream',
-            // SkylinkJS parameters (copy the parameters from received message parameters)
-            isConnectionRestart: !!message.isConnectionRestart,
-            lastRestart: message.lastRestart,
-            explicit: !!message.explicit,
-            temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
-          });
-        }
-      }
-    }
+  	}
 
   } else {
     log.log([targetMid, null, message.type, 'Peer does not have any user information']);
@@ -969,21 +910,10 @@ Skylink.prototype._inRoomHandler = function(message) {
   self._room.connection.peerConfig = self._setIceServers(message.pc_config);
   self._inRoom = true;
   self._user.sid = message.sid;
-  self._peerPriorityWeight = (new Date()).getTime();
+  self._peerPriorityWeight = message.tieBreaker;
 
   self._trigger('peerJoined', self._user.sid, self.getPeerInfo(), true);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
-
-  if (typeof message.tieBreaker === 'number') {
-    self._peerPriorityWeight = message.tieBreaker;
-  }
-
-  // Make Firefox the answerer always when connecting with other browsers
-  if (window.webrtcDetectedBrowser === 'firefox') {
-    log.warn('Decreasing weight for Firefox browser connection');
-
-    self._peerPriorityWeight -= 100000000000;
-  }
 
   if (self._streams.screenshare && self._streams.screenshare.stream) {
     self._trigger('incomingStream', self._user.sid, self._streams.screenshare.stream, true, self.getPeerInfo());
@@ -1000,13 +930,17 @@ Skylink.prototype._inRoomHandler = function(message) {
     mid: self._user.sid,
     rid: self._room.id,
     agent: window.webrtcDetectedBrowser,
-    version: window.webrtcDetectedVersion,
+    version: (window.webrtcDetectedVersion || 0).toString(),
     os: window.navigator.platform,
     userInfo: self._getUserInfo(),
     receiveOnly: self._receiveOnly,
-    sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
     weight: self._peerPriorityWeight,
-    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+    enableIceTrickle: self._enableIceTrickle,
+    enableDataChannel: self._enableDataChannel,
+    enableIceRestart: self._enableIceRestart,
+    SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+    DTProtocolVersion: self.DT_PROTOCOL_VERSION
   });
 };
 
@@ -1023,38 +957,71 @@ Skylink.prototype._enterHandler = function(message) {
   var self = this;
   var targetMid = message.mid;
   var isNewPeer = false;
+  var userInfo = message.userInfo || {};
+  userInfo.settings = userInfo.settings || {};
+  userInfo.mediaStatus = userInfo.mediaStatus || {};
+  userInfo.config = {
+    enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
+    enableIceRestart: typeof message.enableIceRestart === 'boolean' ? message.enableIceRestart : false,
+    enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
+    priorityWeight: typeof message.weight === 'number' ? message.weight : 0
+  };
+  userInfo.agent = {
+    name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
+    version: (function () {
+      if (!(message.version && typeof message.version === 'string')) {
+        return 0;
+      }
+      // E.g. 0.9.6, replace minor "." with 0
+      if (message.version.indexOf('.') > -1) {
+        var parts = message.version.split('.');
+        if (parts.length > 2) {
+          var majorVer = parts[0] || '0';
+          parts.splice(0, 1);
+          return parseFloat(majorVer + '.' + parts.join('0'), 10);
+        }
+        return parseFloat(message.version || '0', 10);
+      }
+      return parseInt(message.version || '0', 10);
+    })(),
+    os: typeof message.os === 'string' && message.os ? message.os : '',
+    pluginVersion: typeof message.temasysPluginVersion === 'string' && message.temasysPluginVersion ?
+      message.temasysPluginVersion : null,
+    SMProtocolVersion: message.SMProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
+      message.SMProtocolVersion : '0.1.1',
+    DTProtocolVersion: message.DTProtocolVersion && typeof message.DTProtocolVersion === 'string' ?
+      message.DTProtocolVersion : '0.1.0'
+  };
 
-  log.log([targetMid, null, message.type, 'Received Peer\'s presence ->'], message.userInfo);
+  log.log([targetMid, 'RTCPeerConnection', null, 'Peer "enter" received ->'], message);
 
   if (!self._peerInformations[targetMid]) {
     isNewPeer = true;
-    self._addPeer(targetMid, {
-      agent: message.agent,
-      version: message.version,
-      os: message.os
-    }, false, false, message.receiveOnly, message.sessionType === 'screensharing');
 
-    self._peerInformations[targetMid] = message.userInfo || {};
+    self._peerInformations[targetMid] = userInfo;
     self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
       userData: 0,
       audioMuted: 0,
       videoMuted: 0
     };
-    self._peerInformations[targetMid].agent = {
-      name: message.agent,
-      version: message.version,
-      os: message.os || '',
-      pluginVersion: message.temasysPluginVersion
-    };
 
-    if (targetMid !== 'MCU') {
-      self._trigger('peerJoined', targetMid, message.userInfo, false);
+    var hasScreenshare = userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
+      !!userInfo.settings.video.screenshare;
+
+    self._addPeer(targetMid, {
+      agent: userInfo.agent.name,
+      version: userInfo.agent.version,
+      os: userInfo.agent.os
+    }, false, false, message.receiveOnly, hasScreenshare);
+
+    if (targetMid === 'MCU') {
+      log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
+
+      self._hasMCU = true;
+      self._trigger('serverPeerJoined', targetMid, self.SERVER_PEER_TYPE.MCU);
 
     } else {
-      log.info([targetMid, 'RTCPeerConnection', 'MCU', 'MCU feature has been enabled'], message);
-      log.log([targetMid, null, message.type, 'MCU has joined'], message.userInfo);
-      this._hasMCU = true;
-      this._trigger('serverPeerJoined', targetMid, this.SERVER_PEER_TYPE.MCU);
+      self._trigger('peerJoined', targetMid, self.getPeerInfo(targetMid), false);
     }
 
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
@@ -1064,18 +1031,19 @@ Skylink.prototype._enterHandler = function(message) {
     type: self._SIG_MESSAGE_TYPE.WELCOME,
     mid: self._user.sid,
     rid: self._room.id,
-    receiveOnly: self._peerConnections[targetMid] ?
-    	!!self._peerConnections[targetMid].receiveOnly : false,
+    receiveOnly: self._peerConnections[targetMid] ? !!self._peerConnections[targetMid].receiveOnly : false,
     enableIceTrickle: self._enableIceTrickle,
     enableDataChannel: self._enableDataChannel,
+    enableIceRestart: self._enableIceRestart,
     agent: window.webrtcDetectedBrowser,
-    version: window.webrtcDetectedVersion,
+    version: (window.webrtcDetectedVersion || 0).toString(),
     os: window.navigator.platform,
     userInfo: self._getUserInfo(),
     target: targetMid,
     weight: self._peerPriorityWeight,
-    sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
-    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+    SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+    DTProtocolVersion: self.DT_PROTOCOL_VERSION
   });
 
   if (isNewPeer) {
@@ -1095,107 +1063,98 @@ Skylink.prototype._enterHandler = function(message) {
 Skylink.prototype._restartHandler = function(message){
   var self = this;
   var targetMid = message.mid;
+  var userInfo = message.userInfo || {};
+  userInfo.settings = userInfo.settings || {};
+  userInfo.mediaStatus = userInfo.mediaStatus || {};
+  userInfo.config = {
+    enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
+    enableIceRestart: typeof message.enableIceRestart === 'boolean' ? message.enableIceRestart : false,
+    enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
+    priorityWeight: typeof message.weight === 'number' ? message.weight : 0
+  };
+  userInfo.agent = {
+    name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
+    version: (function () {
+      if (!(message.version && typeof message.version === 'string')) {
+        return 0;
+      }
+      // E.g. 0.9.6, replace minor "." with 0
+      if (message.version.indexOf('.') > -1) {
+        var parts = message.version.split('.');
+        if (parts.length > 2) {
+          var majorVer = parts[0] || '0';
+          parts.splice(0, 1);
+          return parseFloat(majorVer + '.' + parts.join('0'), 10);
+        }
+        return parseFloat(message.version || '0', 10);
+      }
+      return parseInt(message.version || '0', 10);
+    })(),
+    os: typeof message.os === 'string' && message.os ? message.os : '',
+    pluginVersion: typeof message.temasysPluginVersion === 'string' && message.temasysPluginVersion ?
+      message.temasysPluginVersion : null,
+    SMProtocolVersion: message.SMProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
+      message.SMProtocolVersion : '0.1.1',
+    DTProtocolVersion: message.DTProtocolVersion && typeof message.DTProtocolVersion === 'string' ?
+      message.DTProtocolVersion : '0.1.0'
+  };
+
+  log.log([targetMid, 'RTCPeerConnection', null, 'Peer "restart" received ->'], message);
 
   if (!self._peerInformations[targetMid]) {
-    log.error([targetMid, null, null, 'Peer does not have an existing ' +
-      'session. Ignoring restart process.']);
+    log.error([targetMid, 'RTCPeerConnection', null, 'Peer does not have an existing session. Ignoring restart process.']);
     return;
   }
 
-  // NOTE: for now we ignore, but we should take-note to implement in the near future
   if (self._hasMCU) {
-    self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false);
+    log.warn([targetMid, 'RTCPeerConnection', null, 'Dropping restart request as MCU does not support re-negotiation. ' +
+      'Restart workaround is to re-join Room for Peer.']);
+    self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false, false);
     return;
   }
 
-  self.lastRestart = message.lastRestart || Date.now() || function() { return +new Date(); };
-
-  if (!self._peerConnections[targetMid]) {
-    log.error([targetMid, null, null, 'Peer does not have an existing ' +
-      'connection. Unable to restart']);
-    return;
-  }
-
-  // mcu has re-joined
-  // NOTE: logic trip since _hasMCU flags are ignored, this could result in failure perhaps?
-  if (targetMid === 'MCU') {
-    log.log([targetMid, null, message.type, 'MCU has restarted its connection']);
-    self._hasMCU = true;
-  }
-
-  // Uncomment because we do not need this
-  //self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-
-  message.agent = (!message.agent) ? 'chrome' : message.agent;
-  /*self._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
-    message.enableIceTrickle : self._enableIceTrickle;
-  self._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
-    message.enableDataChannel : self._enableDataChannel;*/
-
-  // re-add information
-  self._peerInformations[targetMid] = message.userInfo || {};
+  self._peerInformations[targetMid] = userInfo;
   self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
     userData: 0,
     audioMuted: 0,
     videoMuted: 0
   };
-  self._peerInformations[targetMid].agent = {
-    name: message.agent,
-    version: message.version,
-    os: message.os || '',
-    pluginVersion: message.temasysPluginVersion
-  };
-
-  var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
-
-  // This variable is not used
-  //var peerConnectionStateStable = false;
-
-  log.info([targetMid, 'RTCPeerConnection', null, 'Received restart request from peer'], message);
-  // we are no longer adding any peer
-  /*self._addPeer(targetMid, {
-    agent: message.agent,
-    version: message.version,
-    os: message.os
-  }, true, true, message.receiveOnly, message.sessionType === 'screensharing');*/
 
   // Make peer with highest weight do the offer
   if (self._peerPriorityWeight > message.weight) {
-    log.debug([targetMid, 'RTCPeerConnection', null, 'Restarting negotiation'], agent);
-    self._doOffer(targetMid, {
-      agent: agent.name,
-      version: agent.version,
-      os: agent.os
+    log.debug([targetMid, 'RTCPeerConnection', null, 'Re-negotiating new offer/answer.']);
+
+    self._doOffer(targetMid, message.doIceRestart === true, {
+      agent: userInfo.agent.name,
+      version: userInfo.agent.version,
+      os: userInfo.agent.os
     }, true);
 
   } else {
-    log.debug([targetMid, 'RTCPeerConnection', null, 'Waiting for peer to start re-negotiation'], agent);
+    log.debug([targetMid, 'RTCPeerConnection', null, 'Waiting for peer to start re-negotiation.']);
+
     self._sendChannelMessage({
       type: self._SIG_MESSAGE_TYPE.RESTART,
       mid: self._user.sid,
       rid: self._room.id,
       agent: window.webrtcDetectedBrowser,
-      version: window.webrtcDetectedVersion,
+      version: (window.webrtcDetectedVersion || 0).toString(),
       os: window.navigator.platform,
       userInfo: self._getUserInfo(),
       target: targetMid,
       weight: self._peerPriorityWeight,
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
+      enableIceRestart: self._enableIceRestart,
+      doIceRestart: message.doIceRestart === true,
       receiveOnly: self._peerConnections[targetMid] && self._peerConnections[targetMid].receiveOnly,
-      sessionType: !!self._streams.screenshare ? 'screensharing' : 'stream',
-      // SkylinkJS parameters (copy the parameters from received message parameters)
-      isConnectionRestart: !!message.isConnectionRestart,
-      lastRestart: message.lastRestart,
-      explicit: !!message.explicit,
-      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+      SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+      DTProtocolVersion: self.DT_PROTOCOL_VERSION
     });
   }
 
-  self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false);
-
-  // following the previous logic to do checker always
-  self._startPeerConnectionHealthCheck(targetMid, false);
+  self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false, message.doIceRestart === true);
 };
 
 /**
@@ -1208,92 +1167,108 @@ Skylink.prototype._restartHandler = function(message){
  * @since 0.5.4
  */
 Skylink.prototype._welcomeHandler = function(message) {
+  var self = this;
   var targetMid = message.mid;
-  var restartConn = false;
-  var beOfferer = this._peerPriorityWeight > message.weight;
   var isNewPeer = false;
-
-  log.log([targetMid, null, message.type, 'Received Peer\'s presence ->'], message.userInfo);
-
-  // We shouldn't assume as chrome
-  message.agent = (!message.agent) ? 'unknown' : message.agent;
-
-  var agent = {
-    agent: message.agent,
-    version: message.version,
-    os: message.os
+  var userInfo = message.userInfo || {};
+  userInfo.settings = userInfo.settings || {};
+  userInfo.mediaStatus = userInfo.mediaStatus || {};
+  userInfo.config = {
+    enableIceTrickle: typeof message.enableIceTrickle === 'boolean' ? message.enableIceTrickle : true,
+    enableIceRestart: typeof message.enableIceRestart === 'boolean' ? message.enableIceRestart : false,
+    enableDataChannel: typeof message.enableDataChannel === 'boolean' ? message.enableDataChannel : true,
+    priorityWeight: typeof message.weight === 'number' ? message.weight : 0
+  };
+  userInfo.agent = {
+    name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
+    version: (function () {
+      if (!(message.version && typeof message.version === 'string')) {
+        return 0;
+      }
+      // E.g. 0.9.6, replace minor "." with 0
+      if (message.version.indexOf('.') > -1) {
+        var parts = message.version.split('.');
+        if (parts.length > 2) {
+          var majorVer = parts[0] || '0';
+          parts.splice(0, 1);
+          return parseFloat(majorVer + '.' + parts.join('0'), 10);
+        }
+        return parseFloat(message.version || '0', 10);
+      }
+      return parseInt(message.version || '0', 10);
+    })(),
+    os: typeof message.os === 'string' && message.os ? message.os : '',
+    pluginVersion: typeof message.temasysPluginVersion === 'string' && message.temasysPluginVersion ?
+      message.temasysPluginVersion : null,
+    SMProtocolVersion: message.SMProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
+      message.SMProtocolVersion : '0.1.1',
+    DTProtocolVersion: message.DTProtocolVersion && typeof message.DTProtocolVersion === 'string' ?
+      message.DTProtocolVersion : '0.1.0'
   };
 
-  if (!this._peerInformations[targetMid]) {
-    this._peerInformations[targetMid] = message.userInfo || {};
-    this._peerMessagesStamps[targetMid] = this._peerMessagesStamps[targetMid] || {
+  log.log([targetMid, 'RTCPeerConnection', null, 'Peer "welcome" received ->'], message);
+
+  if (!self._peerInformations[targetMid]) {
+    isNewPeer = true;
+
+    self._peerInformations[targetMid] = userInfo;
+    self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
       userData: 0,
       audioMuted: 0,
       videoMuted: 0
     };
-    this._peerInformations[targetMid].agent = {
-      name: message.agent,
-      version: message.version,
-      os: message.os || '',
-      pluginVersion: message.temasysPluginVersion
-    };
-    // disable mcu for incoming peer sent by MCU
-    /*if (message.agent === 'MCU') {
-      this._enableDataChannel = false;
 
-    }*/
-    // user is not mcu
-    if (targetMid !== 'MCU') {
-      this._trigger('peerJoined', targetMid, message.userInfo, false);
+    var hasScreenshare = userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
+      !!userInfo.settings.video.screenshare;
+
+    self._addPeer(targetMid, {
+      agent: userInfo.agent.name,
+      version: userInfo.agent.version,
+      os: userInfo.agent.os
+    }, false, false, message.receiveOnly, hasScreenshare);
+
+    if (targetMid === 'MCU') {
+      log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
+
+      self._hasMCU = true;
+      self._trigger('serverPeerJoined', targetMid, self.SERVER_PEER_TYPE.MCU);
 
     } else {
-      log.info([targetMid, 'RTCPeerConnection', 'MCU', 'MCU feature is currently enabled'], message);
-      log.log([targetMid, null, message.type, 'MCU has ' +
-        ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
-      this._hasMCU = true;
-      this._trigger('serverPeerJoined', targetMid, this.SERVER_PEER_TYPE.MCU);
-      log.log([targetMid, null, message.type, 'Always setting as offerer because peer is MCU']);
-      beOfferer = true;
+      self._trigger('peerJoined', targetMid, self.getPeerInfo(targetMid), false);
     }
 
-    if (!this._peerConnections[targetMid]) {
-      this._addPeer(targetMid, agent, false, restartConn, message.receiveOnly, message.sessionType === 'screensharing');
-    }
-
-    this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
   }
 
-  if (this._hasMCU) {
-    log.log([targetMid, null, message.type, 'Always setting as offerer because MCU is present']);
-    beOfferer = true;
-  }
+  if (self._hasMCU || self._peerPriorityWeight > message.weight) {
+    log.debug([targetMid, 'RTCPeerConnection', null, 'Starting negotiation']);
 
-  /*this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
-    message.enableIceTrickle : this._enableIceTrickle;
-  this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
-    message.enableDataChannel : this._enableDataChannel;*/
-
-  log.debug([targetMid, 'RTCPeerConnection', null, 'Peer should start connection ->'], beOfferer);
-
-  if (beOfferer) {
-    log.debug([targetMid, 'RTCPeerConnection', null, 'Starting negotiation'], agent);
-    this._doOffer(targetMid, agent);
+    self._doOffer(targetMid, false, {
+      agent: userInfo.agent.name,
+      version: userInfo.agent.version,
+      os: userInfo.agent.os
+    }, true);
 
   } else {
-    log.debug([targetMid, 'RTCPeerConnection', null, 'Peer has to start the connection. Resending message'], beOfferer);
+    log.debug([targetMid, 'RTCPeerConnection', null, 'Waiting for peer to start negotiation.']);
 
-    this._sendChannelMessage({
-      type: this._SIG_MESSAGE_TYPE.WELCOME,
-      mid: this._user.sid,
-      rid: this._room.id,
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.WELCOME,
+      mid: self._user.sid,
+      rid: self._room.id,
       agent: window.webrtcDetectedBrowser,
-      version: window.webrtcDetectedVersion,
+      version: (window.webrtcDetectedVersion || 0).toString(),
+      enableIceRestart: self._enableIceRestart,
+      enableDataChannel: self._enableDataChannel,
+      enableIceTrickle: self._enableIceTrickle,
       os: window.navigator.platform,
-      userInfo: this._getUserInfo(),
+      userInfo: self._getUserInfo(),
       target: targetMid,
-      weight: this._peerPriorityWeight,
-      sessionType: !!this._streams.screenshare ? 'screensharing' : 'stream',
-      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+      weight: self._peerPriorityWeight,
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+      SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+      DTProtocolVersion: self.DT_PROTOCOL_VERSION
     });
   }
 };
@@ -1326,33 +1301,28 @@ Skylink.prototype._offerHandler = function(message) {
 
   // Add-on by Web SDK fixes
   if (message.userInfo && typeof message.userInfo === 'object') {
-    self._peerInformations[targetMid].settings = message.userInfo.settings;
-    self._peerInformations[targetMid].mediaStatus = message.userInfo.mediaStatus;
-    self._peerInformations[targetMid].userData = message.userInfo.userData;
+    var userInfo = message.userInfo || {};
+
+    self._peerInformations[targetMid].settings = userInfo.settings || {};
+    self._peerInformations[targetMid].mediaStatus = userInfo.mediaStatus || {};
+    self._peerInformations[targetMid].userData = userInfo.userData;
   }
 
   log.log([targetMid, null, message.type, 'Received offer from peer. ' +
     'Session description:'], message.sdp);
-  var offer = new window.RTCSessionDescription({
+  var offer = new RTCSessionDescription({
     type: message.type,
-    sdp: message.sdp
+    sdp: self._hasMCU ? message.sdp.split('\n').join('\r\n') : message.sdp
   });
   log.log([targetMid, 'RTCSessionDescription', message.type,
     'Session description object created'], offer);
 
-  // Configure it to force TURN connections by removing non-"relay" candidates
-  if (self._forceTURN && !self._enableIceTrickle) {
-    if (!self._hasMCU) {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from offer ' +
-        ' as TURN connections is forced']);
-
-      offer.sdp = offer.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
-
-    } else {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Not removing non-"relay"' +
-        '" candidates although TURN connections is forced as MCU is present']);
-    }
-  }
+  offer.sdp = self._handleSDPMCUConnectionCase(targetMid, offer, false);
+  offer.sdp = self._removeSDPFilteredCandidates(targetMid, offer);
+  offer.sdp = self._setSDPBitrate(targetMid, offer);
+  offer.sdp = self._setSDPOpusConfig(targetMid, offer);
+  offer.sdp = self._removeSDPCodecs(targetMid, offer);
+  offer.sdp = self._removeSDPREMBPackets(targetMid, offer);
 
   // This is always the initial state. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
@@ -1402,71 +1372,65 @@ Skylink.prototype._offerHandler = function(message) {
  */
 Skylink.prototype._candidateHandler = function(message) {
   var targetMid = message.mid;
-  var pc = this._peerConnections[targetMid];
-  log.log([targetMid, null, message.type, 'Received candidate from peer. Candidate config:'], {
-    sdp: message.sdp,
-    target: message.target,
-    candidate: message.candidate,
-    label: message.label
-  });
-  // create ice candidate object
-  var messageCan = message.candidate.split(' ');
-  var canType = messageCan[7];
-  log.log([targetMid, null, message.type, 'Candidate type:'], canType);
-  // if (canType !== 'relay' && canType !== 'srflx') {
-  // trace('Skipping non relay and non srflx candidates.');
-  var index = message.label;
-  var candidate = new window.RTCIceCandidate({
-    sdpMLineIndex: index,
-    candidate: message.candidate,
-    //id: message.id,
-    sdpMid: message.id
-    //label: index
-  });
 
-  if (this._forceTURN && canType !== 'relay') {
-    if (!this._hasMCU) {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Ignoring adding of "' + canType +
-        '" candidate as TURN connections is forced'], candidate);
-      return;
-    }
-
-    log.warn([targetMid, 'RTCICECandidate', null, 'Not ignoring adding of "' + canType +
-      '" candidate although TURN connections is forced as MCU is present'], candidate);
+  if (!message.candidate && !message.id) {
+    log.warn([targetMid, 'RTCIceCandidate', null, 'Received invalid ICE candidate message ->'], message);
+    return;
   }
 
-  if (pc) {
-  	if (pc.signalingState === this.PEER_CONNECTION_STATE.CLOSED) {
-  		log.warn([targetMid, null, message.type, 'Peer connection state ' +
-  			'is closed. Not adding candidate'], candidate);
-	    return;
-  	}
-    /*if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
-      log.debug([targetMid, null, null,
-        'Received but not adding Candidate as we are already connected to this peer']);
+  var canId = 'can-' + (new Date()).getTime();
+  var candidateType = message.candidate.split(' ')[7] || '';
+  var candidate = new RTCIceCandidate({
+    sdpMLineIndex: message.label,
+    candidate: message.candidate,
+    sdpMid: message.id
+  });
+
+  log.debug([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Received ICE candidate ->'], candidate);
+
+  this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.RECEIVED,
+    targetMid, canId, candidateType, {
+    candidate: candidate.candidate,
+    sdpMid: candidate.sdpMid,
+    sdpMLineIndex: candidate.sdpMLineIndex
+  }, null);
+
+  if (!(this._peerConnections[targetMid] &&
+    this._peerConnections[targetMid].signalingState !== this.PEER_CONNECTION_STATE.CLOSED)) {
+    log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping ICE candidate ' +
+      'as Peer connection does not exists or is closed'], this._peerConnections[targetMid].signalingState);
+    this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.DROPPED,
+      targetMid, canId, candidateType, {
+      candidate: candidate.candidate,
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex
+    }, new Error('Failed processing ICE candidate as Peer connection does not exists or is closed.'));
+    return;
+  }
+
+  if (this._filterCandidatesType[candidateType]) {
+    if (!(this._hasMCU && this._forceTURN)) {
+      log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping received ICE candidate as ' +
+        'it matches ICE candidate filtering flag ->'], candidate);
+      this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.DROPPED,
+        targetMid, canId, candidateType, {
+        candidate: candidate.candidate,
+        sdpMid: candidate.sdpMid,
+        sdpMLineIndex: candidate.sdpMLineIndex
+      }, new Error('Dropping of processing ICE candidate as it matches ICE candidate filtering flag.'));
       return;
-    }*/
-    // set queue before ice candidate cannot be added before setRemoteDescription.
-    // this will cause a black screen of media stream
-    if ((pc.setOffer === 'local' && pc.setAnswer === 'remote') ||
-      (pc.setAnswer === 'local' && pc.setOffer === 'remote')) {
-      pc.addIceCandidate(candidate, this._onAddIceCandidateSuccess, this._onAddIceCandidateFailure);
-      // NOTE ALEX: not implemented in chrome yet, need to wait
-      // function () { trace('ICE  -  addIceCandidate Succesfull. '); },
-      // function (error) { trace('ICE  - AddIceCandidate Failed: ' + error); }
-      //);
-      log.debug([targetMid, 'RTCIceCandidate', message.type,
-        'Added candidate'], candidate);
-    } else {
-      this._addIceCandidateToQueue(targetMid, candidate);
     }
+
+    log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Not dropping received ICE candidate as ' +
+      'TURN connections are enforced as MCU is present (and act as a TURN itself) so filtering of ICE candidate ' +
+      'flags are not honoured ->'], candidate);
+  }
+
+  if (this._peerConnections[targetMid].remoteDescription && this._peerConnections[targetMid].remoteDescription.sdp &&
+    this._peerConnections[targetMid].localDescription && this._peerConnections[targetMid].localDescription.sdp) {
+    this._addIceCandidate(targetMid, canId, candidate);
   } else {
-    // Added ice candidate to queue because it may be received before sending the offer
-    log.debug([targetMid, 'RTCIceCandidate', message.type,
-      'Not adding candidate as peer connection not present'], candidate);
-    // NOTE ALEX: if the offer was slow, this can happen
-    // we might keep a buffer of candidates to replay after receiving an offer.
-    this._addIceCandidateToQueue(targetMid, candidate);
+    this._addIceCandidateToQueue(targetMid, canId, candidate);
   }
 
   if (!this._gatheredCandidates[targetMid]) {
@@ -1476,7 +1440,7 @@ Skylink.prototype._candidateHandler = function(message) {
     };
   }
 
-  this._gatheredCandidates[targetMid].receiving[canType].push({
+  this._gatheredCandidates[targetMid].receiving[candidateType].push({
     sdpMid: candidate.sdpMid,
     sdpMLineIndex: candidate.sdpMLineIndex,
     candidate: candidate.candidate
@@ -1509,14 +1473,16 @@ Skylink.prototype._answerHandler = function(message) {
 
   // Add-on by Web SDK fixes
   if (message.userInfo && typeof message.userInfo === 'object') {
-    self._peerInformations[targetMid].settings = message.userInfo.settings;
-    self._peerInformations[targetMid].mediaStatus = message.userInfo.mediaStatus;
-    self._peerInformations[targetMid].userData = message.userInfo.userData;
+    var userInfo = message.userInfo || {};
+
+    self._peerInformations[targetMid].settings = userInfo.settings || {};
+    self._peerInformations[targetMid].mediaStatus = userInfo.mediaStatus || {};
+    self._peerInformations[targetMid].userData = userInfo.userData;
   }
 
-  var answer = new window.RTCSessionDescription({
+  var answer = new RTCSessionDescription({
     type: message.type,
-    sdp: message.sdp
+    sdp: self._hasMCU ? message.sdp.split('\n').join('\r\n') : message.sdp
   });
 
   log.log([targetMid, 'RTCSessionDescription', message.type,
@@ -1534,25 +1500,12 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }*/
 
-  // if firefox and peer is mcu, replace the sdp to suit mcu needs
-  if (window.webrtcDetectedType === 'moz' && targetMid === 'MCU') {
-    answer.sdp = answer.sdp.replace(/ generation 0/g, '');
-    answer.sdp = answer.sdp.replace(/ udp /g, ' UDP ');
-  }
-
-  // Configure it to force TURN connections by removing non-"relay" candidates
-  if (self._forceTURN && !self._enableIceTrickle) {
-    if (!self._hasMCU) {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Removing non-"relay" candidates from answer ' +
-        ' as TURN connections is forced']);
-
-      answer.sdp = answer.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
-
-    } else {
-      log.warn([targetMid, 'RTCICECandidate', null, 'Not removing non-"relay"' +
-        '" candidates although TURN connections is forced as MCU is present']);
-    }
-  }
+  answer.sdp = self._handleSDPMCUConnectionCase(targetMid, answer, false);
+  answer.sdp = self._removeSDPFilteredCandidates(targetMid, answer);
+  answer.sdp = self._setSDPBitrate(targetMid, answer);
+  answer.sdp = self._setSDPOpusConfig(targetMid, answer);
+  answer.sdp = self._removeSDPCodecs(targetMid, answer);
+  answer.sdp = self._removeSDPREMBPackets(targetMid, answer);
 
   // This should be the state after offer is received. or even after negotiation is successful
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {

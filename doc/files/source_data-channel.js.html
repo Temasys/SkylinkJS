@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.15</title>
+    <title>SkylinkJS 0.6.16</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.15</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.16</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -92,16 +92,29 @@
 /**
  * The list of Datachannel connection states.
  * @attribute DATA_CHANNEL_STATE
- * @param {String} CONNECTING &lt;small&gt;Value &lt;code&gt;&quot;connecting&quot;&lt;/code&gt;&lt;/small&gt;
+ * @param {String} CONNECTING          &lt;small&gt;Value &lt;code&gt;&quot;connecting&quot;&lt;/code&gt;&lt;/small&gt;
  *   The value of the state when Datachannel is attempting to establish a connection.
- * @param {String} OPEN       &lt;small&gt;Value &lt;code&gt;&quot;open&quot;&lt;/code&gt;&lt;/small&gt;
+ * @param {String} OPEN                &lt;small&gt;Value &lt;code&gt;&quot;open&quot;&lt;/code&gt;&lt;/small&gt;
  *   The value of the state when Datachannel has established a connection.
- * @param {String} CLOSING    &lt;small&gt;Value &lt;code&gt;&quot;closing&quot;&lt;/code&gt;&lt;/small&gt;
+ * @param {String} CLOSING             &lt;small&gt;Value &lt;code&gt;&quot;closing&quot;&lt;/code&gt;&lt;/small&gt;
  *   The value of the state when Datachannel connection is closing.
- * @param {String} CLOSED     &lt;small&gt;Value &lt;code&gt;&quot;closed&quot;&lt;/code&gt;&lt;/small&gt;
+ * @param {String} CLOSED              &lt;small&gt;Value &lt;code&gt;&quot;closed&quot;&lt;/code&gt;&lt;/small&gt;
  *   The value of the state when Datachannel connection has closed.
- * @param {String} ERROR      &lt;small&gt;Value &lt;code&gt;&quot;error&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when Datachannel connection has errors.
+ * @param {String} ERROR               &lt;small&gt;Value &lt;code&gt;&quot;error&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the state when Datachannel has encountered an exception during connection.
+ * @param {String} CREATE_ERROR        &lt;small&gt;Value &lt;code&gt;&quot;createError&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the state when Datachannel has failed to establish a connection.
+ * @param {String} BUFFERED_AMOUNT_LOW &lt;small&gt;Value &lt;code&gt;&quot;bufferedAmountLow&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the state when Datachannel when the amount of data buffered to be sent
+ *   falls below the Datachannel threshold.
+ *   &lt;small&gt;This state should occur only during after &lt;a href=&quot;#method_sendBlobData&quot;&gt;
+ *   &lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt; or &lt;a href=&quot;#method_sendURLData&quot;&gt;&lt;code&gt;sendURLData()&lt;/code&gt; method&lt;/a&gt; or
+ *   &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
+ * @param {String} SEND_MESSAGE_ERROR  &lt;small&gt;Value &lt;code&gt;&quot;sendMessageError&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the state when Datachannel when data transfer packets or P2P message fails to send.
+ *   &lt;small&gt;This state should occur only during after &lt;a href=&quot;#method_sendBlobData&quot;&gt;
+ *   &lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt; or &lt;a href=&quot;#method_sendURLData&quot;&gt;&lt;code&gt;sendURLData()&lt;/code&gt; method&lt;/a&gt; or
+ *   &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -112,7 +125,10 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
   OPEN: &#x27;open&#x27;,
   CLOSING: &#x27;closing&#x27;,
   CLOSED: &#x27;closed&#x27;,
-  ERROR: &#x27;error&#x27;
+  ERROR: &#x27;error&#x27;,
+  CREATE_ERROR: &#x27;createError&#x27;,
+  BUFFERED_AMOUNT_LOW: &#x27;bufferedAmountLow&#x27;,
+  SEND_MESSAGE_ERROR: &#x27;sendMessageError&#x27;
 };
 
 /**
@@ -146,28 +162,24 @@ Skylink.prototype.DATA_CHANNEL_TYPE = {
 };
 
 /**
- * Stores the flag if Peers should have any Datachannel connections.
- * @attribute _enableDataChannel
- * @default true
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._enableDataChannel = true;
-
-/**
- * Stores the list of Peer Datachannel connections.
- * @attribute _dataChannels
- * @param {JSON} (#peerId) The list of Datachannels associated with Peer ID.
- * @param {RTCDataChannel} (#peerId).&lt;#channelLabel&gt; The Datachannel connection.
- *   The property name &lt;code&gt;&quot;main&quot;&lt;/code&gt; is reserved for messaging Datachannel type.
+ * The list of Datachannel sending message error types.
+ * @attribute DATA_CHANNEL_MESSAGE_ERROR
+ * @param {String} MESSAGE &lt;small&gt;Value &lt;code&gt;&quot;message&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the Datachannel sending message error type when encountered during
+ *   sending P2P message from &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt;.
+ * @param {String} TRANSFER &lt;small&gt;Value &lt;code&gt;&quot;transfer&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the Datachannel sending message error type when encountered during
+ *   data transfers from &lt;a href=&quot;#method_sendURLData&quot;&gt;&lt;code&gt;sendURLData()&lt;/code&gt; method&lt;/a&gt; or
+ *   &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt;.
  * @type JSON
- * @private
+ * @readOnly
  * @for Skylink
- * @since 0.2.0
+ * @since 0.6.16
  */
-Skylink.prototype._dataChannels = {};
+Skylink.prototype.DATA_CHANNEL_MESSAGE_ERROR = {
+  MESSAGE: &#x27;message&#x27;,
+  TRANSFER: &#x27;transfer&#x27;
+};
 
 /**
  * Function that starts a Datachannel connection with Peer.
@@ -176,219 +188,230 @@ Skylink.prototype._dataChannels = {};
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customChannelName) {
+Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMessagingChannel) {
   var self = this;
 
-  if (typeof dc === &#x27;string&#x27;) {
-    customChannelName = dc;
-    dc = null;
-  }
-
-  if (!customChannelName) {
-    log.error([peerId, &#x27;RTCDataChannel&#x27;, null, &#x27;Aborting of creating Datachannel as no &#x27; +
-      &#x27;channel name is provided for channel. Aborting of creating Datachannel&#x27;], {
-        channelType: channelType
-      });
+  if (!self._user) {
+    log.error([peerId, &#x27;RTCDataChannel&#x27;, null,
+      &#x27;Aborting of creating or initializing Datachannel as User does not have Room session&#x27;]);
     return;
   }
 
-  var channelName = (dc) ? dc.label : customChannelName;
-  var pc = self._peerConnections[peerId];
-
-  var SctpSupported =
-    !(window.webrtcDetectedBrowser === &#x27;chrome&#x27; &amp;&amp; window.webrtcDetectedVersion &lt; 30 ||
-      window.webrtcDetectedBrowser === &#x27;opera&#x27;  &amp;&amp; window.webrtcDetectedVersion &lt; 20 );
-
-  if (!SctpSupported) {
-    log.warn([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;SCTP not supported&#x27;], {
-      channelType: channelType
-    });
+  if (!(self._peerConnections[peerId] &amp;&amp;
+    self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
+    log.error([peerId, &#x27;RTCDataChannel&#x27;, null,
+      &#x27;Aborting of creating or initializing Datachannel as Peer connection does not exists&#x27;]);
     return;
   }
 
-  var dcHasOpened = function () {
-    log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel state -&gt;&#x27;], {
-      readyState: &#x27;open&#x27;,
-      channelType: channelType
-    });
+  var channelName = self._user.sid + &#x27;_&#x27; + peerId;
+  var channelType = createAsMessagingChannel ? self.DATA_CHANNEL_TYPE.MESSAGING : self.DATA_CHANNEL_TYPE.DATA;
 
-    self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.OPEN,
-      peerId, null, channelName, channelType);
-  };
+  if (dataChannel &amp;&amp; typeof dataChannel === &#x27;object&#x27;) {
+    channelName = dataChannel.label;
 
-  if (!dc) {
+  } else if (typeof dataChannel === &#x27;string&#x27;) {
+    channelName = dataChannel;
+    dataChannel = null;
+  }
+
+  if (!dataChannel) {
     try {
-      dc = pc.createDataChannel(channelName);
-
-      if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
-        // the datachannel was not defined in array before it was triggered
-        // set a timeout to allow the dc objec to be returned before triggering &quot;open&quot;
-        setTimeout(dcHasOpened, 500);
-      } else {
-        self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId, null,
-          channelName, channelType);
-
-        self._wait(function () {
-          log.log([peerId, &#x27;RTCDataChannel&#x27;, dc.label, &#x27;Firing callback. &#x27; +
-            &#x27;Datachannel state has opened -&gt;&#x27;], dc.readyState);
-          dcHasOpened();
-        }, function () {
-          return dc.readyState === self.DATA_CHANNEL_STATE.OPEN;
-        });
-      }
-
-      log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel RTC object is created&#x27;], {
-        readyState: dc.readyState,
-        channelType: channelType
-      });
+      dataChannel = self._peerConnections[peerId].createDataChannel(channelName);
 
     } catch (error) {
-      log.error([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Exception occurred in datachannel:&#x27;], {
-        channelType: channelType,
-        error: error
-      });
-      self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.ERROR, peerId, error,
-        channelName, channelType);
+      log.error([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Failed creating Datachannel -&gt;&#x27;], error);
+      self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CREATE_ERROR, peerId, error, channelName, channelType, null);
       return;
-    }
-  } else {
-    if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
-      // the datachannel was not defined in array before it was triggered
-      // set a timeout to allow the dc objec to be returned before triggering &quot;open&quot;
-      setTimeout(dcHasOpened, 500);
-    } else {
-      dc.onopen = dcHasOpened;
     }
   }
 
-  log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Binary type support -&gt;&#x27;], {
-    binaryType: dc.binaryType,
-    readyState: dc.readyState,
-    channelType: channelType
-  });
+  if (!self._dataChannels[peerId]) {
+    log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;initializing main DataChannel&#x27;]);
 
-  dc.dcType = channelType;
+    channelType = self.DATA_CHANNEL_TYPE.MESSAGING;
 
-  dc.onerror = function(error) {
-    log.error([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Exception occurred in datachannel:&#x27;], {
-      channelType: channelType,
-      readyState: dc.readyState,
-      error: error
-    });
-    self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.ERROR, peerId, error,
-       channelName, channelType);
+    self._dataChannels[peerId] = {};
+
+  } else if (self._dataChannels[peerId].main &amp;&amp; self._dataChannels[peerId].main.channel.label === channelName) {
+    channelType = self.DATA_CHANNEL_TYPE.MESSAGING;
+  }
+
+  /**
+   * Subscribe to events
+   */
+  dataChannel.onerror = function (evt) {
+    var channelError = evt.error || evt;
+
+    log.error([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel has an exception -&gt;&#x27;], channelError);
+
+    self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.ERROR, peerId, channelError, channelName, channelType, null);
   };
 
-  dc.onclose = function() {
-    log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel state -&gt;&#x27;], {
-      readyState: &#x27;closed&#x27;,
-      channelType: channelType
-    });
+  dataChannel.onbufferedamountlow = function () {
+    log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel buffering data transfer low&#x27;]);
 
-    dc.hasFiredClosed = true;
+    // TODO: Should we add an event here
+    self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.BUFFERED_AMOUNT_LOW, peerId, null, channelName, channelType, null);
+  };
 
-    // give it some time to set the variable before actually closing and checking.
-    setTimeout(function () {
-      // redefine pc
-      pc = self._peerConnections[peerId];
-      // if closes because of firefox, reopen it again
-      // if it is closed because of a restart, ignore
+  dataChannel.onmessage = function(event) {
+    self._processDataChannelData(event.data, peerId, channelName, channelType);
+  };
 
-      var checkIfChannelClosedDuringConn = !!pc ? !pc.dataChannelClosed : false;
+  var onOpenHandlerFn = function () {
+    log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel has opened&#x27;]);
 
-      if (checkIfChannelClosedDuringConn &amp;&amp; dc.dcType === self.DATA_CHANNEL_TYPE.MESSAGING) {
-        log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Re-opening closed datachannel in &#x27; +
-          &#x27;on-going connection&#x27;], {
-            channelType: channelType,
-            readyState: dc.readyState,
-            isClosedDuringConnection: checkIfChannelClosedDuringConn
-        });
+    self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.OPEN, peerId, null, channelName, channelType, null);
+  };
 
-        self._dataChannels[peerId].main =
-          self._createDataChannel(peerId, self.DATA_CHANNEL_TYPE.MESSAGING, null, peerId);
+  if (dataChannel.readyState === self.DATA_CHANNEL_STATE.OPEN) {
+    setTimeout(onOpenHandlerFn, 500);
 
-        log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Re-opened closed datachannel&#x27;], {
-          channelType: channelType,
-          readyState: dc.readyState,
-          isClosedDuringConnection: checkIfChannelClosedDuringConn
-        });
+  } else {
+    self._trigger(&#x27;dataChannelState&#x27;, dataChannel.readyState, peerId, null, channelName, channelType, null);
 
-      } else {
-        self._closeDataChannel(peerId, channelName);
-        self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CLOSED, peerId, null,
-          channelName, channelType);
+    dataChannel.onopen = onOpenHandlerFn;
+  }
 
-        log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel has closed&#x27;], {
-          channelType: channelType,
-          readyState: dc.readyState,
-          isClosedDuringConnection: checkIfChannelClosedDuringConn
-        });
+  var onCloseHandlerFn = function () {
+    log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel has closed&#x27;]);
+
+    self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CLOSED, peerId, null, channelName, channelType, null);
+
+    if (channelType === self.DATA_CHANNEL_TYPE.MESSAGING) {
+      setTimeout(function () {
+        if (self._peerConnections[peerId] &amp;&amp;
+          self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED &amp;&amp;
+          (self._peerConnections[peerId].localDescription &amp;&amp;
+            self._peerConnections[peerId].localDescription.type === self.HANDSHAKE_PROGRESS.OFFER)) {
+          log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Reviving Datachannel connection&#x27;]);
+          self._createDataChannel(peerId, channelName, true);
+        }
+      }, 100);
+    }
+  };
+
+  // Fixes for Firefox bug (49 is working) -&gt; https://bugzilla.mozilla.org/show_bug.cgi?id=1118398
+  if (window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
+    var hasTriggeredClose = false;
+    var timeBlockAfterClosing = 0;
+
+    dataChannel.onclose = function () {
+      if (!hasTriggeredClose) {
+        hasTriggeredClose = true;
+        onCloseHandlerFn();
       }
-    }, 100);
-  };
+    };
 
-  dc.onmessage = function(event) {
-    self._dataChannelProtocolHandler(event.data, peerId, channelName, channelType);
-  };
+    var onFFClosed = setInterval(function () {
+      if (dataChannel.readyState === self.DATA_CHANNEL_STATE.CLOSED ||
+        hasTriggeredClose || timeBlockAfterClosing === 5) {
+        clearInterval(onFFClosed);
 
-  return dc;
+        if (!hasTriggeredClose) {
+          hasTriggeredClose = true;
+          onCloseHandlerFn();
+        }
+      // After 5 seconds from CLOSING state and Firefox is not rendering to close, we have to assume to close it.
+      // It is dead! This fixes the case where if it&#x27;s Firefox who closes the Datachannel, the connection will
+      // still assume as CLOSING..
+      } else if (dataChannel.readyState === self.DATA_CHANNEL_STATE.CLOSING) {
+        timeBlockAfterClosing++;
+      }
+    }, 1000);
+
+  } else {
+    dataChannel.onclose = onCloseHandlerFn;
+  }
+
+  if (channelType === self.DATA_CHANNEL_TYPE.MESSAGING) {
+    self._dataChannels[peerId].main = {
+      channelName: channelName,
+      channelType: channelType,
+      transferId: null,
+      channel: dataChannel
+    };
+  } else {
+    self._dataChannels[peerId][channelName] = {
+      channelName: channelName,
+      channelType: channelType,
+      transferId: channelName,
+      channel: dataChannel
+    };
+  }
 };
 
 /**
  * Function that sends data over the Datachannel connection.
- * @method _sendDataChannelMessage
+ * @method _sendMessageToDataChannel
  * @private
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._sendDataChannelMessage = function(peerId, data, channelKey) {
+Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp, doNotConvert) {
   var self = this;
 
-  var channelName;
-
-  if (!channelKey || channelKey === peerId) {
-    channelKey = &#x27;main&#x27;;
+  // Set it as &quot;main&quot; (MESSAGING) Datachannel
+  if (!channelProp || channelProp === peerId) {
+    channelProp = &#x27;main&#x27;;
   }
 
-  var dcList = self._dataChannels[peerId] || {};
-  var dc = dcList[channelKey];
-
-  if (!dc) {
-    log.error([peerId, &#x27;RTCDataChannel&#x27;, channelKey + &#x27;|&#x27; + channelName,
-      &#x27;Datachannel connection to peer does not exist&#x27;], {
-        enabledState: self._enableDataChannel,
-        dcList: dcList,
-        dc: dc,
-        type: (data.type || &#x27;DATA&#x27;),
-        data: data,
-        channelKey: channelKey
-    });
+  // TODO: What happens when we want to send binary data over or ArrayBuffers?
+  if (!(typeof data === &#x27;object&#x27; &amp;&amp; data) &amp;&amp; !(data &amp;&amp; typeof data === &#x27;string&#x27;)) {
+    log.warn([peerId, &#x27;RTCDataChannel&#x27;, &#x27;prop:&#x27; + channelProp, &#x27;Dropping invalid data -&gt;&#x27;], data);
     return;
-  } else {
-    channelName = dc.label;
+  }
 
-    log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelKey + &#x27;|&#x27; + channelName,
-      &#x27;Sending data using this channel key&#x27;], data);
+  if (!(self._peerConnections[peerId] &amp;&amp;
+    self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
+    log.warn([peerId, &#x27;RTCDataChannel&#x27;, &#x27;prop:&#x27; + channelProp,
+      &#x27;Dropping for sending message as Peer connection does not exists or is closed -&gt;&#x27;], data);
+    return;
+  }
 
-    if (dc.readyState === this.DATA_CHANNEL_STATE.OPEN) {
-      var dataString = (typeof data === &#x27;object&#x27;) ? JSON.stringify(data) : data;
-      log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelKey + &#x27;|&#x27; + dc.label,
-        &#x27;Sending to peer -&gt;&#x27;], {
-          readyState: dc.readyState,
-          type: (data.type || &#x27;DATA&#x27;),
-          data: data
-      });
-      dc.send(dataString);
+  if (!(self._dataChannels[peerId] &amp;&amp; self._dataChannels[peerId][channelProp])) {
+    log.warn([peerId, &#x27;RTCDataChannel&#x27;, &#x27;prop:&#x27; + channelProp,
+      &#x27;Dropping for sending message as Datachannel connection does not exists -&gt;&#x27;], data);
+    return;
+  }
+
+  var channelName = self._dataChannels[peerId][channelProp].channelName;
+  var channelType = self._dataChannels[peerId][channelProp].channelType;
+  var readyState  = self._dataChannels[peerId][channelProp].channel.readyState;
+  var messageType = typeof data === &#x27;object&#x27; &amp;&amp; data.type === self._DC_PROTOCOL_TYPE.MESSAGE ?
+    self.DATA_CHANNEL_MESSAGE_ERROR.MESSAGE : self.DATA_CHANNEL_MESSAGE_ERROR.TRANSFER;
+
+  if (readyState !== self.DATA_CHANNEL_STATE.OPEN) {
+    var notOpenError = &#x27;Failed sending message as Datachannel connection state is not opened. Current &#x27; +
+      &#x27;readyState is &quot;&#x27; + readyState + &#x27;&quot;&#x27;;
+
+    log.error([peerId, &#x27;RTCDataChannel&#x27;, &#x27;prop:&#x27; + channelProp, notOpenError + &#x27; -&gt;&#x27;], data);
+
+    self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.SEND_MESSAGE_ERROR, peerId,
+      new Error(notOpenError), channelName, channelType, messageType);
+    
+    throw new Error(notOpenError);
+  }
+
+  try {
+    if (!doNotConvert &amp;&amp; typeof data === &#x27;object&#x27;) {
+      log.debug([peerId, &#x27;RTCDataChannel&#x27;, &#x27;prop:&#x27; + channelProp, &#x27;Sending message -&gt;&#x27;], data);
+
+      self._dataChannels[peerId][channelProp].channel.send(JSON.stringify(data));
+
     } else {
-      log.error([peerId, &#x27;RTCDataChannel&#x27;, channelKey + &#x27;|&#x27; + dc.label,
-        &#x27;Datachannel is not opened&#x27;], {
-          readyState: dc.readyState,
-          type: (data.type || &#x27;DATA&#x27;),
-          data: data
-      });
-      this._trigger(&#x27;dataChannelState&#x27;, this.DATA_CHANNEL_STATE.ERROR,
-        peerId, &#x27;Datachannel is not ready.\nState is: &#x27; + dc.readyState);
+      log.debug([peerId, &#x27;RTCDataChannel&#x27;, &#x27;prop:&#x27; + channelProp, &#x27;Sending data with size -&gt;&#x27;], data.size || data.length);
+
+      self._dataChannels[peerId][channelProp].channel.send(data);
     }
+  } catch (error) {
+    log.error([peerId, &#x27;RTCDataChannel&#x27;, &#x27;prop:&#x27; + channelProp, &#x27;Failed sending message -&gt;&#x27;], error);
+
+    self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.SEND_MESSAGE_ERROR, peerId,
+      error, channelName, channelType, messageType);
+
+    throw error;
   }
 };
 
@@ -401,43 +424,43 @@ Skylink.prototype._sendDataChannelMessage = function(peerId, data, channelKey) {
  */
 Skylink.prototype._closeDataChannel = function(peerId, channelName) {
   var self = this;
-  var dcList = self._dataChannels[peerId] || {};
-  var dcKeysList = Object.keys(dcList);
 
-
-  if (channelName) {
-    dcKeysList = [channelName];
+  if (!self._dataChannels[peerId]) {
+    log.warn([peerId, &#x27;RTCDataChannel&#x27;, channelName || null,
+      &#x27;Aborting closing Datachannels as Peer connection does not have Datachannel sessions&#x27;]);
+    return;
   }
 
-  for (var i = 0; i &lt; dcKeysList.length; i++) {
-    var channelKey = dcKeysList[i];
-    var dc = dcList[channelKey];
+  var closeFn = function (channelProp) {
+    var channelName1 = self._dataChannels[peerId][channelProp].channelName;
+    var channelType = self._dataChannels[peerId][channelProp].channelType;
 
-    if (dc) {
-      if (dc.readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
-        log.log([peerId, &#x27;RTCDataChannel&#x27;, channelKey + &#x27;|&#x27; + dc.label,
-          &#x27;Closing datachannel&#x27;]);
-        dc.close();
-      } else {
-        if (!dc.hasFiredClosed &amp;&amp; window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
-          log.log([peerId, &#x27;RTCDataChannel&#x27;, channelKey + &#x27;|&#x27; + dc.label,
-            &#x27;Closed Firefox datachannel&#x27;]);
-          self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CLOSED, peerId,
-            null, channelName, channelKey === &#x27;main&#x27; ? self.DATA_CHANNEL_TYPE.MESSAGING :
-            self.DATA_CHANNEL_TYPE.DATA);
+    if (self._dataChannels[peerId][channelProp].readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
+      log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelName1, &#x27;Closing Datachannel&#x27;]);
+
+      self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CLOSING, peerId, null, channelName1, channelType, null);
+
+      self._dataChannels[peerId][channelProp].channel.close();
+
+      delete self._dataChannels[peerId][channelProp];
+    }
+  };
+
+  if (!channelName) {
+    for (var channelNameProp in self._dataChannels) {
+      if (self._dataChannels[peerId].hasOwnProperty(channelNameProp)) {
+        if (self._dataChannels[peerId][channelNameProp]) {
+          closeFn(channelNameProp);
         }
       }
-      delete self._dataChannels[peerId][channelKey];
-
-      log.log([peerId, &#x27;RTCDataChannel&#x27;, channelKey + &#x27;|&#x27; + dc.label,
-        &#x27;Sucessfully removed datachannel&#x27;]);
-    } else {
-      log.log([peerId, &#x27;RTCDataChannel&#x27;, channelKey + &#x27;|&#x27; + channelName,
-        &#x27;Unable to close Datachannel as it does not exists&#x27;], {
-          dc: dc,
-          dcList: dcList
-      });
     }
+  } else {
+    if (!self._dataChannels[peerId][channelName]) {
+      log.warn([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Aborting closing Datachannel as it does not exists&#x27;]);
+      return;
+    }
+
+    closeFn(channelName);
   }
 };
     </pre>

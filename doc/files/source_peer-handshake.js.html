@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.15</title>
+    <title>SkylinkJS 0.6.16</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.15</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.16</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -124,49 +124,13 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
 };
 
 /**
- * Stores the list of Peer connection health timers.
- * This timers sets a timeout which checks and waits if Peer connection is successfully established,
- *   or else it will attempt to re-negotiate with the Peer connection again.
- * @attribute _peerConnectionHealthTimers
- * @param {Object} &lt;#peerId&gt; The Peer connection health timer.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._peerConnectionHealthTimers = {};
-
-/**
- * Stores the list of Peer connection &quot;healthy&quot; flags, which indicates if Peer connection is
- *   successfully established, and when the health timers expires, it will clear the timer
- *   and not attempt to re-negotiate with the Peer connection again.
- * @attribute _peerConnectionHealth
- * @param {Boolean} &lt;#peerId&gt; The flag that indicates if Peer connection has been successfully established.
- * @type JSON
- * @private
- * @since 0.5.5
- */
-Skylink.prototype._peerConnectionHealth = {};
-
-/**
- * Stores the User connection priority weight.
- * If Peer has a higher connection weight, it will do the offer from its Peer connection first.
- * @attribute _peerPriorityWeight
- * @type Number
- * @private
- * @for Skylink
- * @since 0.5.0
- */
-Skylink.prototype._peerPriorityWeight = 0;
-
-/**
  * Function that creates the Peer connection offer session description.
  * @method _doOffer
  * @private
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
+Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   var self = this;
   var pc = self._peerConnections[targetMid] || self._addPeer(targetMid, peerBrowser);
 
@@ -187,9 +151,12 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
     return;
   }
 
+  var peerIceRestartSupport = !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart;
+
   var offerConstraints = {
     offerToReceiveAudio: true,
-    offerToReceiveVideo: true
+    offerToReceiveVideo: true,
+    iceRestart: self._enableIceRestart &amp;&amp; peerIceRestartSupport ? iceRestart === true : false
   };
 
   // NOTE: Removing ICE restart functionality as of now since Firefox does not support it yet
@@ -222,22 +189,18 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
     offerConstraints = {
       mandatory: {
         OfferToReceiveAudio: true,
-        OfferToReceiveVideo: true
+        OfferToReceiveVideo: true,
+        iceRestart: self._enableIceRestart &amp;&amp; peerIceRestartSupport ? iceRestart === true : false
       }
     };
   }
 
-  if (self._enableDataChannel) {
-    if (typeof self._dataChannels[targetMid] !== &#x27;object&#x27;) {
-      log.error([targetMid, &#x27;RTCDataChannel&#x27;, null, &#x27;Create offer error as unable to create datachannel &#x27; +
-        &#x27;as datachannels array is undefined&#x27;], self._dataChannels[targetMid]);
-      return;
-    }
-
+  if (self._enableDataChannel &amp;&amp; self._peerInformations[targetMid] &amp;&amp;
+    self._peerInformations[targetMid].config.enableDataChannel) {
     // Edge doesn&#x27;t support datachannels yet
-    if (!self._dataChannels[targetMid].main &amp;&amp; window.webrtcDetectedBrowser !== &#x27;edge&#x27;) {
-      self._dataChannels[targetMid].main =
-        self._createDataChannel(targetMid, self.DATA_CHANNEL_TYPE.MESSAGING, null, targetMid);
+    if (!(self._dataChannels[targetMid] &amp;&amp; self._dataChannels[targetMid].main) &amp;&amp;
+      window.webrtcDetectedBrowser !== &#x27;edge&#x27;) {
+      self._createDataChannel(targetMid);
       self._peerConnections[targetMid].hasMainChannel = true;
     }
   }
@@ -294,118 +257,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
   }, function(error) {
     log.error([targetMid, null, null, &#x27;Failed creating an answer:&#x27;], error);
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-  });//, self._room.connection.sdpConstraints);
-};
-
-/**
- * Function that starts the Peer connection health timer.
- * To count as a &quot;healthy&quot; successful established Peer connection, the
- *   ICE connection state has to be &quot;connected&quot; or &quot;completed&quot;,
- *   messaging Datachannel type state has to be &quot;opened&quot; (if Datachannel is enabled)
- *   and Signaling state has to be &quot;stable&quot;.
- * Should consider dropping of counting messaging Datachannel type being opened as
- *   it should not involve the actual Peer connection for media (audio/video) streaming.
- * @method _startPeerConnectionHealthCheck
- * @private
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
-  var self = this;
-  var timer = self._enableIceTrickle ? (toOffer ? 12500 : 10000) : 50000;
-  timer = (self._hasMCU) ? 105000 : timer;
-
-  // increase timeout for android/ios
-  /*var agent = self.getPeerInfo(peerId).agent;
-  if ([&#x27;Android&#x27;, &#x27;iOS&#x27;].indexOf(agent.name) &gt; -1) {
-    timer = 105000;
-  }*/
-
-  timer += self._retryCount*10000;
-
-  log.log([peerId, &#x27;PeerConnectionHealth&#x27;, null,
-    &#x27;Initializing check for peer\&#x27;s connection health&#x27;]);
-
-  if (self._peerConnectionHealthTimers[peerId]) {
-    // might be a re-handshake again
-    self._stopPeerConnectionHealthCheck(peerId);
-  }
-
-  self._peerConnectionHealthTimers[peerId] = setTimeout(function () {
-    // re-handshaking should start here.
-    var connectionStable = false;
-    var pc = self._peerConnections[peerId];
-
-    if (pc) {
-      var dc = (self._dataChannels[peerId] || {}).main;
-
-      var dcConnected = pc.hasMainChannel ? dc &amp;&amp; dc.readyState === self.DATA_CHANNEL_STATE.OPEN : true;
-      var iceConnected = pc.iceConnectionState === self.ICE_CONNECTION_STATE.CONNECTED ||
-        pc.iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED;
-      var signalingConnected = pc.signalingState === self.PEER_CONNECTION_STATE.STABLE;
-
-      connectionStable = dcConnected &amp;&amp; iceConnected &amp;&amp; signalingConnected;
-
-      log.debug([peerId, &#x27;PeerConnectionHealth&#x27;, null, &#x27;Connection status&#x27;], {
-        dcConnected: dcConnected,
-        iceConnected: iceConnected,
-        signalingConnected: signalingConnected
-      });
-    }
-
-    log.debug([peerId, &#x27;PeerConnectionHealth&#x27;, null, &#x27;Require reconnection?&#x27;], connectionStable);
-
-    if (!connectionStable) {
-      log.warn([peerId, &#x27;PeerConnectionHealth&#x27;, null, &#x27;Peer\&#x27;s health timer &#x27; +
-      &#x27;has expired&#x27;], 10000);
-
-      // clear the loop first
-      self._stopPeerConnectionHealthCheck(peerId);
-
-      log.debug([peerId, &#x27;PeerConnectionHealth&#x27;, null,
-        &#x27;Ice connection state time out. Re-negotiating connection&#x27;]);
-
-      //Maximum increament is 5 minutes
-      if (self._retryCount&lt;30){
-        //Increase after each consecutive connection failure
-        self._retryCount++;
-      }
-
-      // do a complete clean
-      if (!self._hasMCU) {
-        self._restartPeerConnection(peerId, true, true, null, false);
-      } else {
-        self._restartMCUConnection();
-      }
-    } else {
-      self._peerConnectionHealth[peerId] = true;
-    }
-  }, timer);
-};
-
-/**
- * Function that stops the Peer connection health timer.
- * This happens when Peer connection has been successfully established or when
- *   Peer leaves the Room.
- * @method _stopPeerConnectionHealthCheck
- * @private
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._stopPeerConnectionHealthCheck = function (peerId) {
-  var self = this;
-
-  if (self._peerConnectionHealthTimers[peerId]) {
-    log.debug([peerId, &#x27;PeerConnectionHealth&#x27;, null,
-      &#x27;Stopping peer connection health timer check&#x27;]);
-
-    clearTimeout(self._peerConnectionHealthTimers[peerId]);
-    delete self._peerConnectionHealthTimers[peerId];
-
-  } else {
-    log.debug([peerId, &#x27;PeerConnectionHealth&#x27;, null,
-      &#x27;Peer connection health does not have a timer check&#x27;]);
-  }
+  });
 };
 
 /**
@@ -421,147 +273,61 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   var self = this;
   var pc = self._peerConnections[targetMid];
 
-  /*if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &amp;&amp; pc.setAnswer) {
-    log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
-      &#x27;Ignoring session description. User has already set local answer&#x27;], sessionDescription);
-    return;
-  }
-  if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &amp;&amp; pc.setOffer) {
-    log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
-      &#x27;Ignoring session description. User has already set local offer&#x27;], sessionDescription);
-    return;
-  }*/
-
   // Added checks to ensure that sessionDescription is defined first
   if (!(!!sessionDescription &amp;&amp; !!sessionDescription.sdp)) {
-    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, null, &#x27;Dropping of setting local unknown sessionDescription &#x27; +
-      &#x27;as received sessionDescription is empty -&gt;&#x27;], sessionDescription);
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, null, &#x27;Local session description is undefined -&gt;&#x27;], sessionDescription);
     return;
   }
 
   // Added checks to ensure that connection object is defined first
   if (!pc) {
-    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Dropping of setting local &quot;&#x27; +
-      sessionDescription.type + &#x27;&quot; as connection does not exists&#x27;]);
-    return;
-  }
-
-  // Added checks to ensure that state is &quot;stable&quot; if setting local &quot;offer&quot;
-  if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &amp;&amp;
-    pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
     log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
-      &#x27;Dropping of setting local &quot;offer&quot; as signalingState is not &quot;&#x27; +
-      self.PEER_CONNECTION_STATE.STABLE + &#x27;&quot; -&gt;&#x27;], pc.signalingState);
+      &#x27;Local session description will not be set as connection does not exists -&gt;&#x27;], sessionDescription);
+    return;
+
+  } else if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &amp;&amp;
+    pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Local session description &#x27; +
+      &#x27;will not be set as signaling state is &quot;&#x27; + pc.signalingState + &#x27;&quot; -&gt;&#x27;], sessionDescription);
     return;
 
   // Added checks to ensure that state is &quot;have-remote-offer&quot; if setting local &quot;answer&quot;
   } else if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &amp;&amp;
     pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
-    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
-      &#x27;Dropping of setting local &quot;answer&quot; as signalingState is not &quot;&#x27; +
-      self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER + &#x27;&quot; -&gt;&#x27;], pc.signalingState);
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Local session description &#x27; +
+      &#x27;will not be set as signaling state is &quot;&#x27; + pc.signalingState + &#x27;&quot; -&gt;&#x27;], sessionDescription);
     return;
-  }
-
-
-  // NOTE ALEX: handle the pc = 0 case, just to be sure
-  var sdpLines = sessionDescription.sdp.split(&#x27;\r\n&#x27;);
-
-  // remove h264 invalid pref
-  sdpLines = self._removeSDPFirefoxH264Pref(sdpLines);
-
-  // Check if stereo was enabled
-  if (self._streams.userMedia &amp;&amp; self._streams.userMedia.settings.audio) {
-    if (self._streams.userMedia.settings.stereo) {
-      log.info([targetMid, null, null, &#x27;Enabling OPUS stereo flag&#x27;]);
-      self._addSDPStereo(sdpLines);
-    }
-  }
-
-  // Set SDP max bitrate
-  if (self._streamsBandwidthSettings) {
-    sdpLines = self._setSDPBitrate(sdpLines, self._streamsBandwidthSettings);
-  }
-
-  // set sdp resolution
-  /*if (self._streamSettings.hasOwnProperty(&#x27;video&#x27;)) {
-    sdpLines = self._setSDPVideoResolution(sdpLines, self._streamSettings.video);
-  }*/
-
-  /*log.info([targetMid, null, null, &#x27;Custom bandwidth settings:&#x27;], {
-    audio: (self._streamSettings.bandwidth.audio || &#x27;Not set&#x27;) + &#x27; kB/s&#x27;,
-    video: (self._streamSettings.bandwidth.video || &#x27;Not set&#x27;) + &#x27; kB/s&#x27;,
-    data: (self._streamSettings.bandwidth.data || &#x27;Not set&#x27;) + &#x27; kB/s&#x27;
-  });*/
-
-  /*if (self._streamSettings.video.hasOwnProperty(&#x27;frameRate&#x27;) &amp;&amp;
-    self._streamSettings.video.hasOwnProperty(&#x27;resolution&#x27;)){
-    log.info([targetMid, null, null, &#x27;Custom resolution settings:&#x27;], {
-      frameRate: (self._streamSettings.video.frameRate || &#x27;Not set&#x27;) + &#x27; fps&#x27;,
-      width: (self._streamSettings.video.resolution.width || &#x27;Not set&#x27;) + &#x27; px&#x27;,
-      height: (self._streamSettings.video.resolution.height || &#x27;Not set&#x27;) + &#x27; px&#x27;
-    });
-  }*/
-
-  // set video codec
-  if (self._selectedVideoCodec !== self.VIDEO_CODEC.AUTO) {
-    sdpLines = self._setSDPVideoCodec(sdpLines);
-  } else {
-    log.log([targetMid, null, null, &#x27;Not setting any video codec&#x27;]);
-  }
-
-  // set audio codec
-  if (self._selectedAudioCodec !== self.AUDIO_CODEC.AUTO) {
-    sdpLines = self._setSDPAudioCodec(sdpLines);
-  } else {
-    log.log([targetMid, null, null, &#x27;Not setting any audio codec&#x27;]);
-  }
-
-  sessionDescription.sdp = sdpLines.join(&#x27;\r\n&#x27;);
-
-  var removeVP9AptRtxPayload = false;
-  var agent = (self._peerInformations[targetMid] || {}).agent || {};
-
-  if (agent.pluginVersion) {
-    // 0.8.870 supports
-    var parts = agent.pluginVersion.split(&#x27;.&#x27;);
-    removeVP9AptRtxPayload = parseInt(parts[0], 10) &gt;= 0 &amp;&amp; parseInt(parts[1], 10) &gt;= 8 &amp;&amp;
-      parseInt(parts[2], 10) &gt;= 870;
-  }
-
-  // Remove rtx or apt= lines that prevent connections for browsers without VP8 or VP9 support
-  // See: https://bugs.chromium.org/p/webrtc/issues/detail?id=3962
-  if ([&#x27;chrome&#x27;, &#x27;opera&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; removeVP9AptRtxPayload) {
-    log.warn([targetMid, null, null, &#x27;Removing apt= and rtx payload lines causing connectivity issues&#x27;]);
-
-    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=101\r\n/g, &#x27;&#x27;);
-    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=107\r\n/g, &#x27;&#x27;);
-  }
-
-  // NOTE ALEX: opus should not be used for mobile
-  // Set Opus as the preferred codec in SDP if Opus is present.
-  //sessionDescription.sdp = preferOpus(sessionDescription.sdp);
-  // limit bandwidth
-  //sessionDescription.sdp = this._limitBandwidth(sessionDescription.sdp);
-  log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
-    &#x27;Updated session description:&#x27;], sessionDescription);
 
   // Added checks if there is a current local sessionDescription being processing before processing this one
-  if (pc.processingLocalSDP) {
+  } else if (pc.processingLocalSDP) {
     log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
-      &#x27;Dropping of setting local &#x27; + sessionDescription.type + &#x27; as there is another &#x27; +
-      &#x27;sessionDescription being processed -&gt;&#x27;], sessionDescription);
+      &#x27;Local session description will not be set as another is being processed -&gt;&#x27;], sessionDescription);
     return;
   }
 
   pc.processingLocalSDP = true;
 
+  sessionDescription.sdp = self._setSDPOpusConfig(targetMid, sessionDescription);
+  sessionDescription.sdp = self._setSDPCodec(targetMid, sessionDescription);
+  sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
+  sessionDescription.sdp = self._removeSDPH264VP9AptRtxForOlderPlugin(targetMid, sessionDescription);
+  sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
+  sessionDescription.sdp = self._handleSDPMCUConnectionCase(targetMid, sessionDescription, true);
+  sessionDescription.sdp = self._setSDPBitrate(targetMid, sessionDescription);
+  sessionDescription.sdp = self._handleSDPChromeBundleBug(targetMid, sessionDescription);
+  sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
+
+  log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
+    &#x27;Local session description updated -&gt;&#x27;], sessionDescription.sdp);
+
   pc.setLocalDescription(sessionDescription, function() {
-    log.debug([targetMid, sessionDescription.type, &#x27;Local description set&#x27;]);
+    log.debug([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
+      &#x27;Local session description has been set -&gt;&#x27;], sessionDescription);
 
     pc.processingLocalSDP = false;
 
     self._trigger(&#x27;handshakeProgress&#x27;, sessionDescription.type, targetMid);
+
     if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
       pc.setAnswer = &#x27;local&#x27;;
     } else {
@@ -570,18 +336,13 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
     if (!self._enableIceTrickle &amp;&amp; !pc.gathered) {
       log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
-        &#x27;Waiting for Ice gathering to complete to prevent Ice trickle&#x27;]);
+        &#x27;Local session description sending is halted to complete ICE gathering.&#x27;]);
       return;
-    }
-
-    // make checks for firefox session description
-    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &amp;&amp; window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
-      sessionDescription.sdp = self._addSDPSsrcFirefoxAnswer(targetMid, sessionDescription.sdp);
     }
 
     self._sendChannelMessage({
       type: sessionDescription.type,
-      sdp: sessionDescription.sdp,
+      sdp: self._addSDPMediaStreamTrackIDs(targetMid, sessionDescription),
       mid: self._user.sid,
       target: targetMid,
       rid: self._room.id,
@@ -589,12 +350,11 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     });
 
   }, function(error) {
-    self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+    log.error([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Local description failed setting -&gt;&#x27;], error);
 
     pc.processingLocalSDP = false;
 
-    log.error([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
-      &#x27;Failed setting local description: &#x27;], error);
+    self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   });
 };
 

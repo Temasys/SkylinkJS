@@ -92,41 +92,11 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
 };
 
 /**
- * Stores the current Room name that User is connected to.
- * @attribute _selectedRoom
- * @type String
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._selectedRoom = null;
-
-/**
- * Stores the flag that indicates if Room is locked.
- * @attribute _roomLocked
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._roomLocked = false;
-
-/**
- * Stores the flag that indicates if User is connected to the Room.
- * @attribute _inRoom
- * @type Boolean
- * @private
- * @for Skylink
- * @since 0.4.0
- */
-Skylink.prototype._inRoom = false;
-
-/**
  * Function that starts the Room session.
  * @method joinRoom
  * @param {String} [room] The Room name.
- * - When not provided, its value is the <code>options.defaultRoom</code> provided in the
- *   <a href="#method_init"><code>init()</code> method</a>.
+ * - When not provided or is provided as an empty string, its value is the <code>options.defaultRoom</code>
+ *   provided in the <a href="#method_init"><code>init()</code> method</a>.
  *   <small>Note that if you are using credentials based authentication, you cannot switch the Room
  *   that is not the same as the <code>options.defaultRoom</code> defined in the
  *   <a href="#method_init"><code>init()</code> method</a>.</small>
@@ -155,7 +125,8 @@ Skylink.prototype._inRoom = false;
  * @param {JSON} [options.bandwidth] <blockquote class="info">Note that this is currently not supported
  *   with Firefox browsers versions 48 and below as noted in an existing
  *   <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21">bugzilla ticket here</a>.</blockquote>
- *   The configuration to set the maximum streaming bandwidth sent to Peers.
+ *   The configuration to set the maximum streaming bandwidth to send to / receive from Peers.
+ *   <small>Note that Peers may override the "receive from" maximum streaming bandwidth depending on the Peers configuration.</small>
  * @param {Number} [options.bandwidth.audio] The maximum audio streaming bandwidth sent to Peers in kbps.
  *   <small>Recommended values are <code>50</code> to <code>200</code>. <code>50</code> is sufficient enough for
  *   an audio call. The higher you go if you want clearer audio and to be able to hear music streaming.</small>
@@ -167,6 +138,15 @@ Skylink.prototype._inRoom = false;
  *   <small>This affects the P2P messaging in <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>,
  *   and data transfers in <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a> and
  *   <a href="#method_sendURLData"><code>sendURLData()</code> method</a>.</small>
+ * @param {JSON} [options.googleXBandwidth] <blockquote class="info">Note that this is an experimental configuration
+ *   and may cause disruptions in connections or connectivity issues when toggled, or may not work depending on
+ *   browser supports. Currently, this only toggles the video codec bandwidth configuration.</blockquote>
+ *   The configuration to set the experimental google video streaming bandwidth sent to Peers.
+ *   <small>Note that Peers may override the "receive from" streaming bandwidth depending on the Peers configuration.</small>
+ * @param {Number} [options.googleXBandwidth.min] The minimum experimental google video streaming bandwidth sent to Peers.
+ *   <small>This toggles the <code>"x-google-min-bitrate"</code> flag in the session description.</small>
+ * @param {Number} [options.googleXBandwidth.max] The maximum experimental google video streaming bandwidth sent to Peers.
+ *   <small>This toggles the <code>"x-google-max-bitrate"</code> flag in the session description.</small>
  * @param {Boolean} [options.manualGetUserMedia] The flag if <code>joinRoom()</code> should trigger
  *   <a href="#event_mediaAccessRequired"><code>mediaAccessRequired</code> event</a> in which the
  *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> or
@@ -182,7 +162,9 @@ Skylink.prototype._inRoom = false;
  * @param {JSON} callback.error The error result in request.
  *   <small>Defined as <code>null</code> when there are no errors in request</small>
  * @param {Error|String} callback.error.error The error received when starting Room session has failed.
- * @param {Number} callback.error.errorCode The current <a href="#method_init"><code>init()</code> method</a> ready state.
+ * @param {Number} [callback.error.errorCode] The current <a href="#method_init"><code>init()</code> method</a> ready state.
+ *   <small>Defined as <code>null</code> when no <a href="#method_init"><code>init()</code> method</a>
+ *   has not been called due to invalid configuration.</small>
  *   [Rel: Skylink.READY_STATE_CHANGE]
  * @param {String} callback.error.room The Room name.
  * @param {JSON} callback.success The success result in request.
@@ -307,211 +289,110 @@ Skylink.prototype._inRoom = false;
  * @since 0.5.5
  */
 
-Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
+Skylink.prototype.joinRoom = function(room, options, callback) {
   var self = this;
-  var error;
-  var stopStream = false;
+  var selectedRoom = self._defaultRoom;
   var previousRoom = self._selectedRoom;
+  var mediaOptions = {};
 
-  if (room === null) {
-    error = 'Invalid room name is provided';
-    log.error(error, room);
+  if (room && typeof room === 'string') {
+    selectedRoom = room;
+  } else if (room && typeof room === 'object') {
+    mediaOptions = room;
+  } else if (typeof room === 'function') {
+    callback = room;
+  }
 
-    if (typeof mediaOptions === 'function') {
-      callback = mediaOptions;
-      mediaOptions = undefined;
-    }
+  if (options && typeof options === 'object') {
+    mediaOptions = options;
+  } else if (typeof options === 'function') {
+    callback = options;
+  }
+
+  var resolveAsErrorFn = function (error, tryRoom, readyState) {
+    log.error(error);
 
     if (typeof callback === 'function') {
       callback({
-        room: room,
-        errorCode: self._readyState,
-        error: new Error(error)
-      }, null);
+        room: tryRoom,
+        errorCode: readyState || null,
+        error: typeof error === 'string' ? new Error(error) : error
+      });
     }
-    return;
-  }
-  else if (typeof room === 'string') {
-    //joinRoom(room+); - skip
+  };
 
-    //joinRoom(room+,mediaOptions+) - skip
-
-    // joinRoom(room+,callback+)
-    if (typeof mediaOptions === 'function') {
-      callback = mediaOptions;
-      mediaOptions = undefined;
-
-    // joinRoom(room+, mediaOptions-)
-    } else if (typeof mediaOptions !== 'undefined') {
-      if (mediaOptions === null || typeof mediaOptions !== 'object') {
-        error = 'Invalid mediaOptions is provided';
-        log.error(error, mediaOptions);
-
-        // joinRoom(room+,mediaOptions-,callback+)
-        if (typeof callback === 'function') {
-          callback({
-            room: room,
-            errorCode: self._readyState,
-            error: new Error(error)
-          }, null);
-        }
+  var joinRoomFn = function () {
+    self._initSelectedRoom(selectedRoom, function(initError, initSuccess) {
+      if (initError) {
+        resolveAsErrorFn(initError.error, self._selectedRoom, self._readyState);
         return;
       }
-    }
 
-  } else if (typeof room === 'object') {
-    //joinRoom(mediaOptions+, callback);
-    if (typeof mediaOptions === 'function') {
-      callback = mediaOptions;
-    }
+      self._waitForOpenChannel(mediaOptions, function (error, success) {
+        if (error) {
+          resolveAsErrorFn(error, self._selectedRoom, self._readyState);
+          return;
+        }
 
-    //joinRoom(mediaOptions);
-    mediaOptions = room;
-    room = undefined;
-
-  } else if (typeof room === 'function') {
-    //joinRoom(callback);
-    callback = room;
-    room = undefined;
-    mediaOptions = undefined;
-
-  } else if (typeof room !== 'undefined') {
-    //joinRoom(mediaOptions-,callback?);
-    error = 'Invalid mediaOptions is provided';
-    log.error(error, mediaOptions);
-
-    if (typeof mediaOptions === 'function') {
-      callback = mediaOptions;
-      mediaOptions = undefined;
-    }
-
-    if (typeof callback === 'function') {
-      callback({
-        room: self._defaultRoom,
-        errorCode: self._readyState,
-        error: new Error(error)
-      }, null);
-      return;
-    }
-  }
-
-  // If no room provided, join the default room
-  if (!room) {
-    room = self._defaultRoom;
-  }
-
-  //if none of the above is true --> joinRoom()
-  var channelCallback = function (error, success) {
-    if (error) {
-      if (typeof callback === 'function') {
-        callback({
-          error: error,
-          errorCode: null,
-          room: self._selectedRoom
-        }, null);
-      }
-    } else {
-      if (typeof callback === 'function') {
         self.once('peerJoined', function(peerId, peerInfo, isSelf) {
-          // keep returning _inRoom false, so do a wait
-          self._wait(function () {
-            log.log([null, 'Socket', self._selectedRoom, 'Peer joined. Firing callback. ' +
-              'PeerId ->'
-            ], peerId);
+          if (typeof callback === 'function') {
+            log.info([null, 'Room', selectedRoom, 'Connected to Room ->'], peerInfo);
+
             callback(null, {
               room: self._selectedRoom,
               peerId: peerId,
               peerInfo: peerInfo
             });
-          }, function () {
-            return self._inRoom;
-          }, false);
+          }
         }, function(peerId, peerInfo, isSelf) {
-          return isSelf;
-        }, false);
-      }
+          return peerInfo.room === selectedRoom && isSelf;
+        });
 
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
-        uid: self._user.uid,
-        cid: self._key,
-        rid: self._room.id,
-        userCred: self._user.token,
-        timeStamp: self._user.timeStamp,
-        apiOwner: self._appKeyOwner,
-        roomCred: self._room.token,
-        start: self._room.startDateTime,
-        len: self._room.duration,
-        isPrivileged: self._isPrivileged === true, // Default to false if undefined
-        autoIntroduce: self._autoIntroduce !== false, // Default to true if undefined
-        key: self._appKey
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
+          uid: self._user.uid,
+          cid: self._key,
+          rid: self._room.id,
+          userCred: self._user.token,
+          timeStamp: self._user.timeStamp,
+          apiOwner: self._appKeyOwner,
+          roomCred: self._room.token,
+          start: self._room.startDateTime,
+          len: self._room.duration,
+          isPrivileged: self._isPrivileged === true, // Default to false if undefined
+          autoIntroduce: self._autoIntroduce !== false, // Default to true if undefined
+          key: self._appKey
+        });
       });
-    }
+    });
   };
 
+  if (room === null || ['number', 'boolean'].indexOf(typeof room) > -1) {
+    resolveAsErrorFn('Invalid room name is provided', room);
+    return;
+  }
+
+  if (options === null || ['number', 'boolean'].indexOf(typeof options) > -1) {
+    resolveAsErrorFn('Invalid mediaOptions is provided', selectedRoom);
+    return;
+  }
+
   if (self._inRoom) {
-    if (typeof mediaOptions === 'object') {
-      if (mediaOptions.audio === false && mediaOptions.video === false) {
-        stopStream = true;
-        log.warn([null, 'MediaStream', self._selectedRoom, 'Stopping current MediaStream ' +
-          'as provided settings for audio and video is false (' + stopStream + ')'], mediaOptions);
-      }
-    }
+    var stopStream = mediaOptions.audio === false && mediaOptions.video === false;
 
-    log.log([null, 'Socket', previousRoom, 'Leaving room before joining new room'], self._selectedRoom);
-
-    self.leaveRoom(stopStream, function(error, success) {
-      log.log([null, 'Socket', previousRoom, 'Leave room callback result'], {
-        error: error,
-        success: success
-      });
-      log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'], mediaOptions);
-      if (typeof room === 'string' ? room !== self._selectedRoom : false) {
-        self._initSelectedRoom(room, function(errorObj) {
-          if (errorObj) {
-            if (typeof callback === 'function') {
-              callback({
-                room: self._selectedRoom,
-                errorCode: self._readyState,
-                error: new Error(errorObj)
-              }, null);
-            }
-          } else {
-            self._waitForOpenChannel(mediaOptions, channelCallback);
-          }
-        });
-      } else {
-        self._waitForOpenChannel(mediaOptions, channelCallback);
-      }
+    self.leaveRoom(stopStream, function (lRError, lRSuccess) {
+      log.debug([null, 'Room', previousRoom, 'Leave Room callback result ->'], [lRError, lRSuccess]);
+      joinRoomFn();
     });
-
   } else {
-    log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
-      mediaOptions);
-
-    var isNotSameRoom = typeof room === 'string' ? room !== self._selectedRoom : false;
-
-    if (isNotSameRoom) {
-      self._initSelectedRoom(room, function(errorObj) {
-        if (errorObj) {
-          if (typeof callback === 'function') {
-            callback({
-              room: self._selectedRoom,
-              errorCode: self._readyState,
-              error: new Error(errorObj)
-            }, null);
-          }
-        } else {
-          self._waitForOpenChannel(mediaOptions, channelCallback);
-        }
-      });
-    } else {
-      self._waitForOpenChannel(mediaOptions, channelCallback);
-    }
+    joinRoomFn();
   }
 };
 
 /**
+ * <blockquote class="info">
+ *   Note that this method will close any existing socket channel connection despite not being in the Room.
+ * </blockquote>
  * Function that stops Room session.
  * @method leaveRoom
  * @param {Boolean|JSON} [stopMediaOptions=true] The flag if <code>leaveRoom()</code>
@@ -538,6 +419,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  * @param {String} callback.success.peerId The User's Room session Peer ID.
  * @param {String} callback.success.previousRoom The Room name.
  * @trigger <ol class="desc-seq">
+ *   <li>If Socket connection is opened: <ol><li><a href="#event_channelClose"><code>channelClose</code> event</a> triggers.</li></ol></li>
  *   <li>Checks if User is in Room. <ol><li>If User is not in a Room: <ol><li><b>ABORT</b> and return error.</li>
  *   </ol></li><li>Else: <ol><li>If parameter <code>stopMediaOptions.userMedia</code> value is <code>true</code>: <ol>
  *   <li>Invoke <a href="#method_stopStream"><code>stopStream()</code> method</a>. 
@@ -548,95 +430,79 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  *   <li><a href="#event_peerLeft"><code>peerLeft</code> event</a> triggers for User and all connected Peers in Room.</li>
  *   <li>If MCU is enabled for the App Key provided in <a href="#method_init"><code>init()</code> method</a>
  *   and connected: <ol><li><a href="#event_serverPeerLeft"><code>serverPeerLeft</code> event</a>
- *   triggers parameter payload <code>serverPeerType</code> as <code>MCU</code>.</li></ol></li>
- *   <li><a href="#event_channelClose"><code>channelClose</code> event</a> triggers.</li></ol></li></ol></li></ol>
+ *   triggers parameter payload <code>serverPeerType</code> as <code>MCU</code>.</li></ol></li></ol></li></ol></li></ol>
  * @for Skylink
  * @since 0.5.5
  */
 Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
   var self = this;
-  var error; // j-shint !!!
   var stopUserMedia = true;
   var stopScreenshare = true;
+  var previousRoom = self._selectedRoom;
+  var previousUserPeerId = self._user ? self._user.sid : null;
+  var peersThatLeft = [];
+  var isNotInRoom = !self._inRoom;
 
-  // shift parameters
-  if (typeof stopMediaOptions === 'function') {
-    callback = stopMediaOptions;
-    stopMediaOptions = true;
-  } else if (typeof stopMediaOptions === 'undefined') {
-    stopMediaOptions = true;
-  }
-
-  // stopMediaOptions === null or {} ?
-  if (typeof stopMediaOptions === 'object' && stopMediaOptions !== null) {
+  if (typeof stopMediaOptions === 'boolean') {
+    if (stopMediaOptions === false) {
+      stopUserMedia = false;
+      stopScreenshare = false;
+    }
+  } else if (stopMediaOptions && typeof stopMediaOptions === 'object') {
     stopUserMedia = stopMediaOptions.userMedia !== false;
     stopScreenshare = stopMediaOptions.screenshare !== false;
-
-  } else if (typeof stopMediaOptions !== 'boolean') {
-    error = 'stopMediaOptions parameter provided is not a boolean or valid object';
-    log.error(error, stopMediaOptions);
-    if (typeof callback === 'function') {
-      log.log([null, 'Socket', self._selectedRoom, 'Error occurred. ' +
-        'Firing callback with error -> '
-      ], error);
-      callback(new Error(error), null);
-    }
-    return;
-
-  } else if (stopMediaOptions === false) {
-    stopUserMedia = false;
-    stopScreenshare = false;
+  } else if (typeof stopMediaOptions === 'function') {
+    callback = stopMediaOptions;
   }
 
-  if (!self._inRoom) {
-    error = 'Unable to leave room as user is not in any room';
-    log.error(error);
-    if (typeof callback === 'function') {
-      log.log([null, 'Socket', self._selectedRoom, 'Error occurred. ' +
-        'Firing callback with error -> '
-      ], error);
-      callback(new Error(error), null);
-    }
-    return;
-  }
-
-  // NOTE: ENTER/WELCOME made but no peerconnection...
-  // which may result in peerLeft not triggered..
-  // WHY? but to ensure clear all
-  var peers = Object.keys(self._peerInformations);
-  var conns = Object.keys(self._peerConnections);
-  var i;
-  for (i = 0; i < conns.length; i++) {
-    if (peers.indexOf(conns[i]) === -1) {
-      peers.push(conns[i]);
+  for (var infoPeerId in self._peerInformations) {
+    if (self._peerInformations.hasOwnProperty(infoPeerId) && self._peerInformations[infoPeerId]) {
+      peersThatLeft.push(infoPeerId);
+      self._removePeer(infoPeerId);
     }
   }
-  for (i = 0; i < peers.length; i++) {
-    self._removePeer(peers[i]);
+
+  for (var connPeerId in self._peerConnections) {
+    if (self._peerConnections.hasOwnProperty(connPeerId) && self._peerConnections[connPeerId]) {
+      if (peersThatLeft.indexOf(connPeerId) === -1) {
+        peersThatLeft.push(connPeerId);
+        self._removePeer(connPeerId);
+      }
+    }
   }
+
   self._inRoom = false;
   self._closeChannel();
+
+  if (isNotInRoom) {
+    var notInRoomError = 'Unable to leave room as user is not in any room';
+    log.error([null, 'Room', previousRoom, notInRoomError]);
+
+    if (typeof callback === 'function') {
+      callback(new Error(notInRoomError), null);
+    }
+    return;
+  }
 
   self._stopStreams({
     userMedia: stopUserMedia,
     screenshare: stopScreenshare
   });
 
-  self._wait(function() {
-    log.log([null, 'Socket', self._selectedRoom, 'User left the room. Callback fired.']);
-    self._trigger('peerLeft', self._user.sid, self.getPeerInfo(), true);
+  self._wait(function () {
+    log.log([null, 'Room', previousRoom, 'User left the room']);
+
+    self._trigger('peerLeft', previousUserPeerId, self.getPeerInfo(), true);
 
     if (typeof callback === 'function') {
       callback(null, {
-        peerId: self._user.sid,
-        previousRoom: self._selectedRoom
+        peerId: previousUserPeerId,
+        previousRoom: previousRoom
       });
     }
-  }, function() {
-    return (Object.keys(self._peerConnections).length === 0 &&
-      self._channelOpen === false); // &&
-      //self._readyState === self.READY_STATE_CHANGE.COMPLETED);
-  }, false);
+  }, function () {
+    return !self._channelOpen;
+  });
 };
 
 /**
@@ -666,9 +532,6 @@ Skylink.prototype.lockRoom = function() {
     rid: this._room.id,
     lock: true
   });
-  this._roomLocked = true;
-  this._trigger('roomLock', true, this._user.sid,
-    this.getPeerInfo(), true);
 };
 
 /**
@@ -698,9 +561,6 @@ Skylink.prototype.unlockRoom = function() {
     rid: this._room.id,
     lock: false
   });
-  this._roomLocked = false;
-  this._trigger('roomLock', false, this._user.sid,
-    this.getPeerInfo(), true);
 };
 
 /**
@@ -721,19 +581,32 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
       mediaOptions = mediaOptions || {};
 
       self._userData = mediaOptions.userData || self._userData || '';
-      self._streamsBandwidthSettings = {};
+      self._streamsBandwidthSettings = {
+        googleX: {},
+        bAS: {}
+      };
 
       if (mediaOptions.bandwidth) {
         if (typeof mediaOptions.bandwidth.audio === 'number') {
-          self._streamsBandwidthSettings.audio = mediaOptions.bandwidth.audio;
+          self._streamsBandwidthSettings.bAS.audio = mediaOptions.bandwidth.audio;
         }
 
         if (typeof mediaOptions.bandwidth.video === 'number') {
-          self._streamsBandwidthSettings.video = mediaOptions.bandwidth.video;
+          self._streamsBandwidthSettings.bAS.video = mediaOptions.bandwidth.video;
         }
 
         if (typeof mediaOptions.bandwidth.data === 'number') {
-          self._streamsBandwidthSettings.data = mediaOptions.bandwidth.data;
+          self._streamsBandwidthSettings.bAS.data = mediaOptions.bandwidth.data;
+        }
+      }
+
+      if (mediaOptions.googleXBandwidth) {
+        if (typeof mediaOptions.googleXBandwidth.min === 'number') {
+          self._streamsBandwidthSettings.googleX.min = mediaOptions.googleXBandwidth.min;
+        }
+
+        if (typeof mediaOptions.googleXBandwidth.max === 'number') {
+          self._streamsBandwidthSettings.googleX.max = mediaOptions.googleXBandwidth.max;
         }
       }
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.15</title>
+    <title>SkylinkJS 0.6.16</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.15</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.16</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -165,45 +165,14 @@ Skylink.prototype.SERVER_PEER_TYPE = {
 };
 
 /**
- * Stores the restart initiated timestamp to throttle the &lt;code&gt;refreshConnection&lt;/code&gt; functionality.
- * @attribute _lastRestart
- * @type Object
- * @private
- * @for Skylink
- * @since 0.5.9
- */
-Skylink.prototype._lastRestart = null;
-
-/**
- * Stores the global number of Peer connection retries that would increase the wait-for-response timeout
- *   for the Peer connection health timer.
- * @attribute _retryCount
- * @type Number
- * @private
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype._retryCount = 0;
-
-/**
- * Stores the list of the Peer connections.
- * @attribute _peerConnections
- * @param {Object} &lt;#peerId&gt; The Peer connection.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype._peerConnections = {};
-
-/**
  * &lt;blockquote class=&quot;info&quot;&gt;
  *   For MCU enabled Peer connections, the restart functionality may differ, you may learn more about how to workaround
- *   it &lt;a href=&quot;http://support.temasys.com.sg/support/discussions/topics/12000002853&quot;&gt;in this article here&lt;/a&gt;.&lt;br&gt;
- *   For restarts with Peers connecting from Android or iOS SDKs, restarts might not work as written in
- *   &lt;a href=&quot;http://support.temasys.com.sg/support/discussions/topics/12000005188&quot;&gt;in this article here&lt;/a&gt;.&lt;br&gt;
- *   Note that this functionality should be used when Peer connection stream freezes during a connection,
- *   and is throttled when invoked many times in less than 3 seconds interval.
+ *   it &lt;a href=&quot;http://support.temasys.com.sg/support/discussions/topics/12000002853&quot;&gt;in this article here&lt;/a&gt;.
+ *   For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in
+ *   &lt;a href=&quot;http://support.temasys.com.sg/support/discussions/topics/12000005188&quot;&gt;in this article here&lt;/a&gt;.
+ *   Note that this functionality should be used when Peer connection stream freezes during a connection.
+ *   For a better user experience for only MCU enabled Peer connections, the functionality is throttled when invoked many
+ *   times in less than the milliseconds interval configured in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;.
  * &lt;/blockquote&gt;
  * Function that refreshes Peer connections to update with the current streaming.
  * @method refreshConnection
@@ -214,6 +183,12 @@ Skylink.prototype._peerConnections = {};
  *   The target Peer ID to refresh connection with.
  * - When provided as an Array, it will refresh all connections with all the Peer IDs provided.
  * - When not provided, it will refresh all the currently connected Peers in the Room.
+ * @param {Boolean} [iceRestart=false] &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that this flag will not be honoured for MCU enabled Peer connections as it is not necessary since for MCU
+ *   &quot;restart&quot; case is to invoke &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt; again.&lt;/blockquote&gt;
+ *   The flag if ICE connections should restart when refreshing Peer connections.
+ *   &lt;small&gt;This is used when ICE connection state is &lt;code&gt;FAILED&lt;/code&gt; or &lt;code&gt;DISCONNECTED&lt;/code&gt;, which state
+ *   can be retrieved with the &lt;a href=&quot;#event_iceConnectionState&quot;&gt;&lt;code&gt;iceConnectionState&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_peerRestart&quot;&gt;
@@ -247,7 +222,7 @@ Skylink.prototype._peerConnections = {};
  *   &lt;li&gt;&lt;a href=&quot;#event_peerRestart&quot;&gt;&lt;code&gt;peerRestart&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
  *   &lt;code&gt;isSelfInitiateRestart&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt; for all targeted Peer connections.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
  *   &lt;li&gt;Else: &lt;ol&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
- *   &lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
+ *   &lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @example
  *   // Example 1: Refreshing a Peer connection
  *   function refreshFrozenVideoStream (peerId) {
@@ -293,44 +268,75 @@ Skylink.prototype._peerConnections = {};
  *       }
  *     });
  *   }
+ *
+ *   // Example 4: Refresh Peer connection when ICE connection has failed or disconnected
+ *   //            and do a ICE connection refresh (only for non-MCU case)
+ *   skylinkDemo.on(&quot;iceConnectionState&quot;, function (state, peerId) {
+ *      if (!usesMCUKey &amp;&amp; [skylinkDemo.ICE_CONNECTION_STATE.FAILED,
+ *        skylinkDemo.ICE_CONNECTION_STATE.DISCONNECTED].indexOf(state) &gt; -1) {
+ *        skylinkDemo.refreshConnection(peerId, true);
+ *      }
+ *   });
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
+Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, callback) {
   var self = this;
 
   var listOfPeers = Object.keys(self._peerConnections);
-  var listOfPeerRestarts = [];
-  var error = &#x27;&#x27;;
-  var listOfPeerRestartErrors = {};
+  var doIceRestart = false;
 
   if(Array.isArray(targetPeerId)) {
     listOfPeers = targetPeerId;
-
   } else if (typeof targetPeerId === &#x27;string&#x27;) {
     listOfPeers = [targetPeerId];
+  } else if (typeof targetPeerId === &#x27;boolean&#x27;) {
+    doIceRestart = targetPeerId;
   } else if (typeof targetPeerId === &#x27;function&#x27;) {
     callback = targetPeerId;
   }
 
-  if (listOfPeers.length === 0) {
-    error = &#x27;There is currently no peer connections to restart&#x27;;
-    log.warn([null, &#x27;PeerConnection&#x27;, null, error]);
+  if (typeof iceRestart === &#x27;boolean&#x27;) {
+    doIceRestart = iceRestart;
+  } else if (typeof iceRestart === &#x27;function&#x27;) {
+    callback = iceRestart;
+  }
 
-    listOfPeerRestartErrors.self = new Error(error);
+  var emitErrorForPeersFn = function (error) {
+    log.error(error);
 
     if (typeof callback === &#x27;function&#x27;) {
+      var listOfPeerErrors = {};
+
+      if (listOfPeers.length === 0) {
+        listOfPeerErrors.self = new Error(error);
+      } else {
+        for (var i = 0; i &lt; listOfPeers.length; i++) {
+          listOfPeerErrors[listOfPeers[i]] = new Error(error);
+        }
+      }
+
       callback({
         refreshErrors: listOfPeerRestartErrors,
         listOfPeers: listOfPeers
       }, null);
     }
+  };
+
+  if (listOfPeers.length === 0) {
+    emitErrorForPeersFn(&#x27;There is currently no peer connections to restart&#x27;);
     return;
   }
 
-  self._throttle(function () {
-    self._refreshPeerConnection(listOfPeers, true, callback);
-  },5000)();
+  self._throttle(function (runFn) {
+    if (!runFn &amp;&amp; self._hasMCU) {
+      if (self._throttlingShouldThrowError) {
+        emitErrorForPeersFn(&#x27;Unable to run as throttle interval has not reached (&#x27; + self._throttlingTimeouts.refreshConnection + &#x27;ms).&#x27;);
+      }
+      return;
+    }
+    self._refreshPeerConnection(listOfPeers, doIceRestart, callback);
+  }, &#x27;refreshConnection&#x27;, self._throttlingTimeouts.refreshConnection);
 
 };
 
@@ -341,7 +347,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
  * @for Skylink
  * @since 0.6.15
  */
-Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle, callback) {
+Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, callback) {
   var self = this;
   var listOfPeerRestarts = [];
   var error = &#x27;&#x27;;
@@ -349,7 +355,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle,
 
   // To fix jshint dont put functions within a loop
   var refreshSinglePeerCallback = function (peerId) {
-    return function (error, success) {
+    return function (error) {
       if (listOfPeerRestarts.indexOf(peerId) === -1) {
         if (error) {
           log.error([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Failed restarting for peer&#x27;], error);
@@ -386,21 +392,10 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, shouldThrottle,
       return;
     }
 
-    if (shouldThrottle) {
-      var now = Date.now() || function() { return +new Date(); };
-
-      if (now - self.lastRestart &lt; 3000) {
-        error = &#x27;Last restart was so tight. Aborting.&#x27;;
-        log.error([peerId, null, null, error]);
-        listOfPeerRestartErrors[peerId] = new Error(error);
-        return;
-      }
-    }
-
     log.log([peerId, &#x27;PeerConnection&#x27;, null, &#x27;Restarting peer connection&#x27;]);
 
     // do a hard reset on variable object
-    self._restartPeerConnection(peerId, true, false, peerCallback, true);
+    self._restartPeerConnection(peerId, doIceRestart, peerCallback);
   };
 
   if(!self._hasMCU) {
@@ -635,6 +630,10 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
   var statsFn = function (peerId) {
     log.debug([peerId, &#x27;RTCStatsReport&#x27;, null, &#x27;Retrieivng connection status&#x27;]);
 
+    if (!self._peerStats[peerId]) {
+      self._peerStats[peerId] = {};
+    }
+
     var pc = self._peerConnections[peerId];
     var result = {
       raw: null,
@@ -642,12 +641,19 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
         iceConnectionState: pc.iceConnectionState,
         iceGatheringState: pc.iceGatheringState,
         signalingState: pc.signalingState,
-        remoteDescription: pc.remoteDescription,
-        localDescription: pc.localDescription,
+        remoteDescription: {
+          type: pc.remoteDescription ? pc.remoteDescription.type || null : null,
+          sdp : pc.remoteDescription ? pc.remoteDescription.sdp || null : null
+        },
+        localDescription: {
+          type: pc.localDescription ? pc.localDescription.type || null : null,
+          sdp : pc.localDescription ? pc.localDescription.sdp || null : null
+        },
         candidates: clone(self._gatheredCandidates[peerId] || {
           sending: { host: [], srflx: [], relay: [] },
           receiving: { host: [], srflx: [], relay: [] }
-        })
+        }),
+        dataChannels: {}
       },
       audio: {
         sending: {
@@ -655,13 +661,29 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           bytes: 0,
           packets: 0,
           packetsLost: 0,
-          rtt: 0
+          rtt: 0,
+          jitter: 0,
+          jitterBufferMs: null,
+          codec: self._getSDPSelectedCodec(peerId, pc.localDescription, &#x27;audio&#x27;),
+          inputLevel: null,
+          echoReturnLoss: null,
+          echoReturnLossEnhancement: null,
+          totalBytes: 0,
+          totalPackets: 0,
+          totalPacketsLost: 0
         },
         receiving: {
           ssrc: null,
           bytes: 0,
           packets: 0,
-          packetsLost: 0
+          packetsLost: 0,
+          jitter: 0,
+          jitterBufferMs: null,
+          codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, &#x27;audio&#x27;),
+          outputLevel: null,
+          totalBytes: 0,
+          totalPackets: 0,
+          totalPacketsLost: 0
         }
       },
       video: {
@@ -670,13 +692,52 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           bytes: 0,
           packets: 0,
           packetsLost: 0,
-          rtt: 0
+          rtt: 0,
+          jitter: 0,
+          jitterBufferMs: null,
+          codec: self._getSDPSelectedCodec(peerId, pc.localDescription, &#x27;video&#x27;),
+          frameWidth: null,
+          frameHeight: null,
+          framesInput: null,
+          frames: null,
+          frameRateMean: null,
+          frameRateStdDev: null,
+          framesDropped: null,
+          nacks: null,
+          plis: null,
+          firs: null,
+          totalBytes: 0,
+          totalPackets: 0,
+          totalPacketsLost: 0,
+          totalNacks: 0,
+          totalPlis: 0,
+          totalFirs: 0
         },
         receiving: {
           ssrc: null,
           bytes: 0,
           packets: 0,
-          packetsLost: 0
+          packetsLost: 0,
+          jitter: 0,
+          jitterBufferMs: null,
+          codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, &#x27;video&#x27;),
+          frameWidth: null,
+          frameHeight: null,
+          framesDecoded: null,
+          framesOutput: null,
+          frames: null,
+          frameRateMean: null,
+          frameRateStdDev: null,
+          nacks: null,
+          plis: null,
+          firs: null,
+          e2eDelay: null,
+          totalBytes: 0,
+          totalPackets: 0,
+          totalPacketsLost: 0,
+          totalNacks: 0,
+          totalPlis: 0,
+          totalFirs: 0
         }
       },
       selectedCandidate: {
@@ -684,6 +745,18 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
         remote: { ipAddress: null, candidateType: null, portNumber: null, transport: null }
       }
     };
+
+    for (var channelProp in self._dataChannels[peerId]) {
+      if (self._dataChannels[peerId].hasOwnProperty(channelProp) &amp;&amp; self._dataChannels[peerId][channelProp]) {
+        result.connection.dataChannels[self._dataChannels[peerId][channelProp].channel.label] = {
+          label: self._dataChannels[peerId][channelProp].channel.label,
+          readyState: self._dataChannels[peerId][channelProp].channel.readyState,
+          channelType: channelProp === &#x27;main&#x27; ? self.DATA_CHANNEL_TYPE.MESSAGING : self.DATA_CHANNEL_TYPE.DATA,
+          currentTransferId: self._dataChannels[peerId][channelProp].transferId || null
+        };
+      }
+    }
+
     var loopFn = function (obj, fn) {
       for (var prop in obj) {
         if (obj.hasOwnProperty(prop) &amp;&amp; obj[prop]) {
@@ -691,6 +764,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
         }
       }
     };
+
     var formatCandidateFn = function (candidateDirType, candidate) {
       result.selectedCandidate[candidateDirType].ipAddress = candidate.ipAddress;
       result.selectedCandidate[candidateDirType].candidateType = candidate.candidateType;
@@ -712,23 +786,55 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           if (prop.indexOf(&#x27;inbound_rtp&#x27;) === 0 || prop.indexOf(&#x27;outbound_rtp&#x27;) === 0) {
             dirType = prop.indexOf(&#x27;inbound_rtp&#x27;) === 0 ? &#x27;receiving&#x27; : &#x27;sending&#x27;;
 
-            result[obj.mediaType][dirType].bytes = dirType === &#x27;sending&#x27; ? obj.bytesSent : obj.bytesReceived;
-            result[obj.mediaType][dirType].packets = dirType === &#x27;sending&#x27; ? obj.packetsSent : obj.packetsReceived;
+            if (!self._peerStats[peerId][prop]) {
+              self._peerStats[peerId][prop] = obj;
+            }
+
+            result[obj.mediaType][dirType].bytes = self._parseConnectionStats(self._peerStats[peerId][prop],
+              obj, dirType === &#x27;receiving&#x27; ? &#x27;bytesReceived&#x27; : &#x27;bytesSent&#x27;);
+            result[obj.mediaType][dirType].totalBytes = parseInt(
+              (dirType === &#x27;receiving&#x27; ? obj.bytesReceived : obj.bytesSent) || &#x27;0&#x27;, 10);
+            result[obj.mediaType][dirType].packets = self._parseConnectionStats(self._peerStats[peerId][prop],
+              obj, dirType === &#x27;receiving&#x27; ? &#x27;packetsReceived&#x27; : &#x27;packetsSent&#x27;);
+            result[obj.mediaType][dirType].totalPackets = parseInt(
+              (dirType === &#x27;receiving&#x27; ? obj.packetsReceived : obj.packetsSent) || &#x27;0&#x27;, 10);
             result[obj.mediaType][dirType].ssrc = obj.ssrc;
 
             if (dirType === &#x27;receiving&#x27;) {
-              result[obj.mediaType][dirType].packetsLost = obj.packetsLost || 0;
+              result[obj.mediaType][dirType].packetsLost = self._parseConnectionStats(self._peerStats[peerId][prop],
+                obj, &#x27;packetsLost&#x27;);
+              result[obj.mediaType][dirType].totalPacketsLost = parseInt(obj.packetsLost || &#x27;0&#x27;, 10);
+              result[obj.mediaType][dirType].jitter = obj.jitter || 0;
             }
 
+            if (obj.mediaType === &#x27;video&#x27;) {
+              result.video[dirType].frameRateMean = obj.framerateMean || 0;
+              result.video[dirType].frameRateStdDev = obj.framerateStdDev || 0;
+
+              if (dirType === &#x27;sending&#x27;) {
+                result.video.sending.framesDropped = obj.framesDropped || 0;
+              }
+            }
+
+            self._peerStats[peerId][prop] = obj;
+
           // Sending RTP packets lost
-          } else if (prop.indexOf(&#x27;outbound_rtcp&#x27;) === 0) {
+          } else if (prop.indexOf(&#x27;inbound_rtcp&#x27;) === 0 || prop.indexOf(&#x27;outbound_rtcp&#x27;) === 0) {
             dirType = prop.indexOf(&#x27;inbound_rtp&#x27;) === 0 ? &#x27;receiving&#x27; : &#x27;sending&#x27;;
 
-            result[obj.mediaType][dirType].packetsLost = obj.packetsLost || 0;
+            if (!self._peerStats[peerId][prop]) {
+              self._peerStats[peerId][prop] = obj;
+            }
 
             if (dirType === &#x27;sending&#x27;) {
               result[obj.mediaType].sending.rtt = obj.mozRtt || 0;
+              result[obj.mediaType].sending.packetsLost = self._parseConnectionStats(self._peerStats[peerId][prop],
+                obj, &#x27;packetsLost&#x27;);
+              result[obj.mediaType].sending.totalPacketsLost = parseInt(obj.packetsLost || &#x27;0&#x27;, 10);
+              result[obj.mediaType].sending.jitter = obj.jitter || 0;
             }
+
+            self._peerStats[peerId][prop] = obj;
 
           // Candidates
           } else if (obj.nominated &amp;&amp; obj.selected) {
@@ -749,14 +855,27 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
                     [&#x27;outboundrtp&#x27;, &#x27;inboundrtp&#x27;].indexOf(streamObj.type) &gt; -1) {
                     var dirType = streamObj.type === &#x27;outboundrtp&#x27; ? &#x27;sending&#x27; : &#x27;receiving&#x27;;
 
-                    result[track.kind][dirType].bytes = dirType === &#x27;sending&#x27; ? streamObj.bytesSent : streamObj.bytesReceived;
-                    result[track.kind][dirType].packets = dirType === &#x27;sending&#x27; ? streamObj.packetsSent : streamObj.packetsReceived;
-                    result[track.kind][dirType].packetsLost = streamObj.packetsLost || 0;
+                    if (!self._peerStats[peerId][prop]) {
+                      self._peerStats[peerId][prop] = streamObj;
+                    }
+
+                    result[track.kind][dirType].bytes = self._parseConnectionStats(self._peerStats[peerId][prop], streamObj,
+                      dirType === &#x27;sending&#x27; ? &#x27;bytesSent&#x27; : &#x27;bytesReceived&#x27;);
+                    result[track.kind][dirType].totalBytes = parseInt(
+                      (dirType === &#x27;sending&#x27; ? streamObj.bytesSent : streamObj.bytesReceived) || &#x27;0&#x27;, 10);
+                    result[track.kind][dirType].packets = self._parseConnectionStats(self._peerStats[peerId][prop], streamObj,
+                      dirType === &#x27;sending&#x27; ? &#x27;packetsSent&#x27; : &#x27;packetsReceived&#x27;);
+                    result[track.kind][dirType].totalPackets = parseInt(
+                      (dirType === &#x27;sending&#x27; ? streamObj.packetsSent : streamObj.packetsReceived) || &#x27;0&#x27;, 10);
+                    result[track.kind][dirType].packetsLost = self._parseConnectionStats(self._peerStats[peerId][prop], streamObj, &#x27;packetsLost&#x27;);
+                    result[track.kind][dirType].totalPacketsLost = parseInt(streamObj.packetsLost || &#x27;0&#x27;, 10);
                     result[track.kind][dirType].ssrc = parseInt(streamObj.ssrc || &#x27;0&#x27;, 10);
 
                     if (dirType === &#x27;sending&#x27;) {
                       result[track.kind].sending.rtt = obj.roundTripTime || 0;
                     }
+
+                    self._peerStats[peerId][prop] = streamObj;
                   }
                 });
               }
@@ -777,18 +896,131 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
                 obj.hasOwnProperty(&#x27;audioInputLevel&#x27;) ? &#x27;audio&#x27; : &#x27;video&#x27;;
             }
 
+            if (!self._peerStats[peerId][prop]) {
+              self._peerStats[peerId][prop] = obj;
+            }
+
+            try {
+              if (obj.mediaType === &#x27;video&#x27; &amp;&amp; dirType === &#x27;receiving&#x27;) {
+                var captureStartNtpTimeMs = parseInt(obj.googCaptureStartNtpTimeMs || &#x27;0&#x27;, 10);
+
+                if (captureStartNtpTimeMs &gt; 0 &amp;&amp; pc.getRemoteStreams().length &gt; 0 &amp;&amp; document &amp;&amp;
+                  typeof document.getElementsByTagName === &#x27;function&#x27;) {
+                  var streamId = pc.getRemoteStreams()[0].id || pc.getRemoteStreams()[0].label;
+                  var elements = [];
+
+                  if (self._isUsingPlugin) {
+                    elements = document.getElementsByTagName(&#x27;object&#x27;);
+                  } else {
+                    elements = document.getElementsByTagName(&#x27;video&#x27;);
+
+                    if (elements.length === 0) {
+                      elements = document.getElementsByTagName(&#x27;audio&#x27;);
+                    }
+                  }
+
+                  for (var e = 0; e &lt; elements.length; e++) {
+                    var videoElmStreamId = null;
+
+                    if (self._isUsingPlugin) {
+                      if (!(elements[e].children &amp;&amp; typeof elements[e].children === &#x27;object&#x27; &amp;&amp;
+                        typeof elements[e].children.length === &#x27;number&#x27; &amp;&amp; elements[e].children.length &gt; 0)) {
+                        break;
+                      }
+
+                      for (var ec = 0; ec &lt; elements[e].children.length; ec++) {
+                        if (elements[e].children[ec].name === &#x27;streamId&#x27;) {
+                          videoElmStreamId = elements[e].children[ec].value || null;
+                          break;
+                        }
+                      }
+
+                    } else {
+                      videoElmStreamId = elements[e].srcObject ? elements[e].srcObject.id ||
+                        elements[e].srcObject.label : null;
+                    }
+
+                    if (videoElmStreamId &amp;&amp; videoElmStreamId === streamId) {
+                      result[obj.mediaType][dirType].e2eDelay = ((new Date()).getTime() + 2208988800000) -
+                        captureStartNtpTimeMs - elements[e].currentTime * 1000;
+                      break;
+                    }
+                  }
+                }
+              }
+            } catch (error) {
+              log.warn([peerId, &#x27;RTCStatsReport&#x27;, null, &#x27;Failed retrieving e2e delay -&gt;&#x27;], error);
+            }
+
             // Receiving/Sending RTP packets
-            result[obj.mediaType][dirType].bytes = parseInt((dirType === &#x27;receiving&#x27; ?
-              obj.bytesReceived : obj.bytesSent) || &#x27;0&#x27;, 10);
-            result[obj.mediaType][dirType].packets = parseInt((dirType === &#x27;receiving&#x27; ?
-              obj.packetsReceived : obj.packetsSent) || &#x27;0&#x27;, 10);
             result[obj.mediaType][dirType].ssrc = parseInt(obj.ssrc || &#x27;0&#x27;, 10);
-            result[obj.mediaType][dirType].packetsLost = parseInt(obj.packetsLost || &#x27;0&#x27;, 10);
+            result[obj.mediaType][dirType].bytes = self._parseConnectionStats(self._peerStats[peerId][prop],
+              obj, dirType === &#x27;receiving&#x27; ? &#x27;bytesReceived&#x27; : &#x27;bytesSent&#x27;);
+            result[obj.mediaType][dirType].totalBytes = parseInt((dirType === &#x27;receiving&#x27; ? obj.bytesReceived :
+              obj.bytesSent) || &#x27;0&#x27;, 10);
+            result[obj.mediaType][dirType].packets = self._parseConnectionStats(self._peerStats[peerId][prop],
+              obj, dirType === &#x27;receiving&#x27; ? &#x27;packetsReceived&#x27; : &#x27;packetsSent&#x27;);
+            result[obj.mediaType][dirType].totalPackets = parseInt((dirType === &#x27;receiving&#x27; ? obj.packetsReceived :
+              obj.packetsSent) || &#x27;0&#x27;, 10);
+            result[obj.mediaType][dirType].packetsLost = self._parseConnectionStats(self._peerStats[peerId][prop],
+              obj, &#x27;packetsLost&#x27;);
+            result[obj.mediaType][dirType].totalPacketsLost = parseInt(obj.packetsLost || &#x27;0&#x27;, 10);
+            result[obj.mediaType][dirType].jitter = parseFloat(obj.googJitterReceived || &#x27;0&#x27;, 10);
+            result[obj.mediaType][dirType].googJitterBufferMs = parseFloat(obj.googJitterBufferMs || &#x27;0&#x27;, 10);
+
+            if (result[obj.mediaType][dirType].codec) {
+              if (obj.googCodecName &amp;&amp; obj.googCodecName !== &#x27;unknown&#x27;) {
+                result[obj.mediaType][dirType].codec.name = obj.googCodecName;
+              }
+              if (obj.codecImplementationName &amp;&amp; obj.codecImplementationName !== &#x27;unknown&#x27;) {
+                result[obj.mediaType][dirType].codec.implementation = obj.codecImplementationName;
+              }
+            }
 
             if (dirType === &#x27;sending&#x27;) {
               // NOTE: Chrome sending audio does have it but plugin has..
-              result[obj.mediaType].sending.rtt = parseInt(obj.googRtt || &#x27;0&#x27;, 10);
+              result[obj.mediaType].sending.rtt = parseFloat(obj.googRtt || &#x27;0&#x27;, 10);
             }
+
+            if (obj.mediaType === &#x27;video&#x27;) {
+              result.video[dirType].frameWidth = parseInt((dirType === &#x27;receiving&#x27; ?
+                obj.googFrameWidthReceived : obj.googFrameWidthSent) || &#x27;0&#x27;, 10);
+              result.video[dirType].frameHeight = parseInt((dirType === &#x27;receiving&#x27; ?
+                obj.googFrameHeightReceived : obj.googFrameHeightSent) || &#x27;0&#x27;, 10);
+              result.video[dirType].frames = parseInt((dirType === &#x27;receiving&#x27; ?
+                obj.googFrameRateReceived : obj.googFrameRateSent) || &#x27;0&#x27;, 10);
+
+              result.video[dirType].nacks = self._parseConnectionStats(self._peerStats[peerId][prop],
+                obj, dirType === &#x27;receiving&#x27; ? &#x27;googNacksReceived&#x27; : &#x27;googNacksSent&#x27;);
+              result[obj.mediaType][dirType].totalNacks = parseInt((dirType === &#x27;receiving&#x27; ? obj.googNacksReceived :
+                obj.googNacksSent) || &#x27;0&#x27;, 10);
+              result.video[dirType].plis = self._parseConnectionStats(self._peerStats[peerId][prop],
+                obj, dirType === &#x27;receiving&#x27; ? &#x27;googPlisReceived&#x27; : &#x27;googPlisSent&#x27;);
+              result[obj.mediaType][dirType].totalPlis = parseInt((dirType === &#x27;receiving&#x27; ? obj.googPlisReceived :
+                obj.googPlisSent) || &#x27;0&#x27;, 10);
+              result.video[dirType].firs = self._parseConnectionStats(self._peerStats[peerId][prop],
+                obj, dirType === &#x27;receiving&#x27; ? &#x27;googFirsReceived&#x27; : &#x27;googFirsSent&#x27;);
+              result[obj.mediaType][dirType].totalFirs = parseInt((dirType === &#x27;receiving&#x27; ? obj.googFirsReceived :
+                obj.googFirsSent) || &#x27;0&#x27;, 10);
+
+              if (dirType === &#x27;receiving&#x27;) {
+                result.video[dirType].framesDecoded = parseInt(obj.googFrameRateDecoded || &#x27;0&#x27;, 10);
+                result.video[dirType].framesOutput = parseInt(obj.googFrameRateOutput || &#x27;0&#x27;, 10);
+              } else {
+                result.video[dirType].framesInput = parseInt(obj.googFrameRateInput || &#x27;0&#x27;, 10);
+              }
+            } else {
+              if (dirType === &#x27;receiving&#x27;) {
+                result.audio[dirType].outputLevel = parseFloat(obj.audioOutputLevel || &#x27;0&#x27;, 10);
+
+              } else {
+                result.audio[dirType].inputLevel = parseFloat(obj.audioInputLevel || &#x27;0&#x27;, 10);
+                result.audio[dirType].echoReturnLoss = parseFloat(obj.googEchoCancellationReturnLoss || &#x27;0&#x27;, 10);
+                result.audio[dirType].echoReturnLossEnhancement = parseFloat(obj.googEchoCancellationReturnLossEnhancement || &#x27;0&#x27;, 10);
+              }
+            }
+
+            self._peerStats[peerId][prop] = obj;
 
             if (!reportedCandidate) {
               loopFn(stats, function (canObj, canProp) {
@@ -885,31 +1117,17 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
   if (!receiveOnly) {
     self._addLocalMediaStreams(targetMid);
   }
-  // I&#x27;m the callee I need to make an offer
-  /*if (toOffer) {
-    self._doOffer(targetMid, peerBrowser);
-  }*/
-
-  // do a peer connection health check
-  // let MCU handle this case
-  if (!self._hasMCU) {
-    this._startPeerConnectionHealthCheck(targetMid, toOffer);
-  } else {
-    log.warn([targetMid, &#x27;PeerConnectionHealth&#x27;, null, &#x27;Not setting health timer for MCU connection&#x27;]);
-    return;
-  }
 };
 
 /**
  * Function that re-negotiates a Peer connection.
- * We currently do not implement the ICE restart functionality.
  * Remember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).
  * @method _restartPeerConnection
  * @private
  * @for Skylink
  * @since 0.5.8
  */
-Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, isConnectionRestart, callback, explicit) {
+Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callback) {
   var self = this;
 
   if (!self._peerConnections[peerId]) {
@@ -918,16 +1136,11 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
     return;
   }
 
-  delete self._peerConnectionHealth[peerId];
-
-  self._stopPeerConnectionHealthCheck(peerId);
-
   var pc = self._peerConnections[peerId];
-
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // prevent restarts for other SDK clients
-  if ([&#x27;Android&#x27;, &#x27;iOS&#x27;, &#x27;cpp&#x27;].indexOf(agent.name) &gt; -1) {
+  if ((agent.SMProtocolVersion || &#x27;&#x27;) &lt; &#x27;0.1.2&#x27;) {
     var notSupportedError = new Error(&#x27;Failed restarting with other agents connecting from other SDKs as &#x27; +
       &#x27;re-negotiation is not supported by other SDKs&#x27;);
 
@@ -936,7 +1149,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
     if (typeof callback === &#x27;function&#x27;) {
       log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart failure callback&#x27;]);
-      callback(null, notSupportedError);
+      callback(notSupportedError);
     }
     return;
   }
@@ -948,47 +1161,34 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
       self._addLocalMediaStreams(peerId);
     }
 
-    if (isSelfInitiatedRestart){
-      log.log([peerId, null, null, &#x27;Sending restart message to signaling server&#x27;]);
+    log.log([peerId, null, null, &#x27;Sending restart message to signaling server&#x27;]);
 
-      var lastRestart = Date.now() || function() { return +new Date(); };
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.RESTART,
+      mid: self._user.sid,
+      rid: self._room.id,
+      agent: window.webrtcDetectedBrowser,
+      version: (window.webrtcDetectedVersion || 0).toString(),
+      os: window.navigator.platform,
+      userInfo: self._getUserInfo(),
+      target: peerId,
+      weight: self._peerPriorityWeight,
+      receiveOnly: self._peerConnections[peerId] &amp;&amp; self._peerConnections[peerId].receiveOnly,
+      enableIceTrickle: self._enableIceTrickle,
+      enableDataChannel: self._enableDataChannel,
+      enableIceRestart: self._enableIceRestart,
+      doIceRestart: doIceRestart === true,
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+      SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+      DTProtocolVersion: self.DT_PROTOCOL_VERSION
+    });
 
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.RESTART,
-        mid: self._user.sid,
-        rid: self._room.id,
-        agent: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
-        os: window.navigator.platform,
-        userInfo: self._getUserInfo(),
-        target: peerId,
-        isConnectionRestart: !!isConnectionRestart,
-        lastRestart: lastRestart,
-        // This will not be used based off the logic in _restartHandler
-        weight: self._peerPriorityWeight,
-        receiveOnly: self._peerConnections[peerId] &amp;&amp; self._peerConnections[peerId].receiveOnly,
-        enableIceTrickle: self._enableIceTrickle,
-        enableDataChannel: self._enableDataChannel,
-        sessionType: !!self._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
-        explicit: !!explicit,
-        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
-      });
+    self._trigger(&#x27;peerRestart&#x27;, peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
 
-      self._trigger(&#x27;peerRestart&#x27;, peerId, self.getPeerInfo(peerId), false);
-
-      if (typeof callback === &#x27;function&#x27;) {
-        log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart callback&#x27;]);
-        callback(null, null);
-      }
-    } else {
-      if (typeof callback === &#x27;function&#x27;) {
-        log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart callback (receiving peer)&#x27;]);
-        callback(null, null);
-      }
+    if (typeof callback === &#x27;function&#x27;) {
+      log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart callback&#x27;]);
+      callback(null);
     }
-
-    // following the previous logic to do checker always
-    self._startPeerConnectionHealthCheck(peerId, false);
 
   } else {
     // Let&#x27;s check if the signalingState is stable first.
@@ -1016,7 +1216,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         });
         if (typeof callback === &#x27;function&#x27;) {
           log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart failure callback&#x27;]);
-          callback(null, new Error(noLocalDescriptionError));
+          callback(new Error(noLocalDescriptionError));
         }
       }
     // It could have connection state closed
@@ -1025,7 +1225,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
       log.warn([peerId, &#x27;RTCPeerConnection&#x27;, null, unableToRestartError]);
       if (typeof callback === &#x27;function&#x27;) {
         log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart failure callback&#x27;]);
-        callback(null, new Error(unableToRestartError));
+        callback(new Error(unableToRestartError));
       }
     }
   }
@@ -1039,6 +1239,11 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
  * @since 0.5.5
  */
 Skylink.prototype._removePeer = function(peerId) {
+  if (!this._peerConnections[peerId] &amp;&amp; !this._peerInformations[peerId]) {
+    log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Dropping the hangup from Peer as not connected to Peer at all.&#x27;]);
+    return;
+  }
+
   var peerInfo = clone(this.getPeerInfo(peerId)) || {
     userData: &#x27;&#x27;,
     settings: {},
@@ -1054,8 +1259,6 @@ Skylink.prototype._removePeer = function(peerId) {
     log.log([peerId, null, null, &#x27;MCU has stopped listening and left&#x27;]);
     this._trigger(&#x27;serverPeerLeft&#x27;, peerId, this.SERVER_PEER_TYPE.MCU);
   }
-  // stop any existing peer health timer
-  this._stopPeerConnectionHealthCheck(peerId);
 
   // check if health timer exists
   if (typeof this._peerConnections[peerId] !== &#x27;undefined&#x27;) {
@@ -1066,7 +1269,7 @@ Skylink.prototype._removePeer = function(peerId) {
       this._peerConnections[peerId].close();
     }
 
-    if (this._peerConnections[peerId].hasStream) {
+    if (peerId !== &#x27;MCU&#x27; &amp;&amp; this._peerConnections[peerId].hasStream) {
       this._trigger(&#x27;streamEnded&#x27;, peerId, this.getPeerInfo(peerId), false);
     }
 
@@ -1080,12 +1283,9 @@ Skylink.prototype._removePeer = function(peerId) {
   if (typeof this._peerMessagesStamps[peerId] !== &#x27;undefined&#x27;) {
     delete this._peerMessagesStamps[peerId];
   }
-  
-  if (typeof this._peerConnectionHealth[peerId] !== &#x27;undefined&#x27;) {
-    delete this._peerConnectionHealth[peerId];
-  }
+
   // close datachannel connection
-  if (this._enableDataChannel) {
+  if (this._dataChannels[peerId]) {
     this._closeDataChannel(peerId);
   }
 
@@ -1127,8 +1327,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.processingRemoteSDP = false;
   pc.gathered = false;
 
-  // datachannels
-  self._dataChannels[targetMid] = {};
   // candidates
   self._gatheredCandidates[targetMid] = {
     sending: { host: [], srflx: [], relay: [] },
@@ -1140,8 +1338,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.ondatachannel = function(event) {
     var dc = event.channel || event;
     log.debug([targetMid, &#x27;RTCDataChannel&#x27;, dc.label, &#x27;Received datachannel -&gt;&#x27;], dc);
-    if (self._enableDataChannel) {
-
+    if (self._enableDataChannel &amp;&amp; self._peerInformations[targetMid] &amp;&amp;
+      self._peerInformations[targetMid].config.enableDataChannel) {
       var channelType = self.DATA_CHANNEL_TYPE.DATA;
       var channelKey = dc.label;
 
@@ -1152,8 +1350,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
         pc.hasMainChannel = true;
       }
 
-      self._dataChannels[targetMid][channelKey] =
-        self._createDataChannel(targetMid, channelType, dc, dc.label);
+      self._createDataChannel(targetMid, dc);
 
     } else {
       log.warn([targetMid, &#x27;RTCDataChannel&#x27;, dc.label, &#x27;Not adding datachannel as enable datachannel &#x27; +
@@ -1164,115 +1361,49 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     var stream = event.stream || event;
 
     if (targetMid === &#x27;MCU&#x27;) {
-      log.debug([targetMid, &#x27;MediaStream&#x27;, stream.id, &#x27;Ignoring received remote stream from MCU -&gt;&#x27;], stream);
+      log.warn([targetMid, &#x27;MediaStream&#x27;, stream.id, &#x27;Ignoring received remote stream from MCU -&gt;&#x27;], stream);
       return;
+    }
+
+    // Fixes for the dirty-hack for Chrome offer to Firefox (inactive)
+    // See: ESS-680
+    if (!self._hasMCU &amp;&amp; window.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp;
+      pc.getRemoteStreams().length &gt; 1 &amp;&amp; pc.remoteDescription &amp;&amp; pc.remoteDescription.sdp) {
+      var recvStreamId = stream.id || stream.label;
+
+      if (pc.remoteDescription.sdp.indexOf(&#x27; msid:&#x27; + recvStreamId + &#x27; &#x27;) === -1) {
+        log.warn([targetMid, &#x27;MediaStream&#x27;, stream.id, &#x27;Ignoring received empty remote stream -&gt;&#x27;], stream);
+       return;
+      }
     }
 
     pc.hasStream = true;
 
-    var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
-    var timeout = 0;
-
-    // NOTE: Add timeouts to the firefox stream received because it seems to have some sort of black stream rendering at first
-    // This may not be advisable but that it seems to work after 1500s. (tried with ICE established but it does not work and getStats)
-    if (agent.name === &#x27;firefox&#x27; &amp;&amp; window.webrtcDetectedBrowser !== &#x27;firefox&#x27;) {
-      timeout = 1500;
-    }
-    setTimeout(function () {
-      self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
-    }, timeout);
+    self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
   };
   pc.onicecandidate = function(event) {
-    var candidate = event.candidate || event;
-
-    if (candidate.candidate) {
-      pc.gathered = false;
-    } else {
-      pc.gathered = true;
-    }
-
-    log.debug([targetMid, &#x27;RTCIceCandidate&#x27;, null, &#x27;Ice candidate generated -&gt;&#x27;], candidate);
-    self._onIceCandidate(targetMid, candidate);
+    self._onIceCandidate(targetMid, event.candidate || event);
   };
   pc.oniceconnectionstatechange = function(evt) {
-    checkIceConnectionState(targetMid, pc.iceConnectionState,
-      function(iceConnectionState) {
-      log.debug([targetMid, &#x27;RTCIceConnectionState&#x27;, null,
-        &#x27;Ice connection state changed -&gt;&#x27;], iceConnectionState);
+    checkIceConnectionState(targetMid, pc.iceConnectionState, function(iceConnectionState) {
+      log.debug([targetMid, &#x27;RTCIceConnectionState&#x27;, null, &#x27;Ice connection state changed -&gt;&#x27;], iceConnectionState);
+
       self._trigger(&#x27;iceConnectionState&#x27;, iceConnectionState, targetMid);
 
-      // clear all peer connection health check
-      // peer connection is stable. now if there is a waiting check on it
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED &amp;&amp;
-        pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
-        log.debug([targetMid, &#x27;PeerConnectionHealth&#x27;, null,
-          &#x27;Peer connection with user is stable&#x27;]);
-        self._peerConnectionHealth[targetMid] = true;
-        self._stopPeerConnectionHealthCheck(targetMid);
-        self._retryCount = 0;
+      if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED &amp;&amp; self._enableIceTrickle) {
+        self._trigger(&#x27;iceConnectionState&#x27;, self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
       }
-
-      if (typeof self._ICEConnectionFailures[targetMid] === &#x27;undefined&#x27;) {
-        self._ICEConnectionFailures[targetMid] = 0;
-      }
-
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {
-        self._ICEConnectionFailures[targetMid] += 1;
-
-        if (self._enableIceTrickle) {
-          self._trigger(&#x27;iceConnectionState&#x27;,
-            self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
-        }
-
-        // refresh when failed. ignore for MCU case since restart is handled by MCU in this case
-        if (!self._hasMCU) {
-          self._restartPeerConnection(targetMid, true, true, null, false);
-        }
-      }
-
-      /**** SJS-53: Revert of commit ******
-      // resend if failed
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {
-        log.debug([targetMid, &#x27;RTCIceConnectionState&#x27;, null,
-          &#x27;Ice connection state failed. Re-negotiating connection&#x27;]);
-        self._removePeer(targetMid);
-        self._sendChannelMessage({
-          type: self._SIG_MESSAGE_TYPE.WELCOME,
-          mid: self._user.sid,
-          rid: self._room.id,
-          agent: window.webrtcDetectedBrowser,
-          version: window.webrtcDetectedVersion,
-          userInfo: self._getUserInfo(),
-          target: targetMid,
-          restartNego: true,
-          hsPriority: -1
-        });
-      } *****/
     });
   };
   // pc.onremovestream = function () {
   //   self._onRemoteStreamRemoved(targetMid);
   // };
   pc.onsignalingstatechange = function() {
-    log.debug([targetMid, &#x27;RTCSignalingState&#x27;, null,
-      &#x27;Peer connection state changed -&gt;&#x27;], pc.signalingState);
+    log.debug([targetMid, &#x27;RTCSignalingState&#x27;, null, &#x27;Peer connection state changed -&gt;&#x27;], pc.signalingState);
     self._trigger(&#x27;peerConnectionState&#x27;, pc.signalingState, targetMid);
-
-    // clear all peer connection health check
-    // peer connection is stable. now if there is a waiting check on it
-    if ((pc.iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED ||
-      pc.iceConnectionState === self.ICE_CONNECTION_STATE.CONNECTED) &amp;&amp;
-      pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
-      log.debug([targetMid, &#x27;PeerConnectionHealth&#x27;, null,
-        &#x27;Peer connection with user is stable&#x27;]);
-      self._peerConnectionHealth[targetMid] = true;
-      self._stopPeerConnectionHealthCheck(targetMid);
-      self._retryCount = 0;
-    }
   };
   pc.onicegatheringstatechange = function() {
-    log.log([targetMid, &#x27;RTCIceGatheringState&#x27;, null,
-      &#x27;Ice gathering state changed -&gt;&#x27;], pc.iceGatheringState);
+    log.log([targetMid, &#x27;RTCIceGatheringState&#x27;, null, &#x27;Ice gathering state changed -&gt;&#x27;], pc.iceGatheringState);
     self._trigger(&#x27;candidateGenerationState&#x27;, pc.iceGatheringState, targetMid);
   };
 
@@ -1314,7 +1445,6 @@ Skylink.prototype._restartMCUConnection = function(callback) {
   var peerId; // j shint is whinning
   var receiveOnly = false;
   // for MCU case, these dont matter at all
-  var lastRestart = Date.now() || function() { return +new Date(); };
   var weight = (new Date()).valueOf();
 
   self._trigger(&#x27;serverPeerRestart&#x27;, &#x27;MCU&#x27;, self.SERVER_PEER_TYPE.MCU);
@@ -1334,7 +1464,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
     }
 
     if (peerId !== &#x27;MCU&#x27;) {
-      self._trigger(&#x27;peerRestart&#x27;, peerId, self.getPeerInfo(peerId), true);
+      self._trigger(&#x27;peerRestart&#x27;, peerId, self.getPeerInfo(peerId), true, false);
 
       log.log([peerId, null, null, &#x27;Sending restart message to signaling server&#x27;]);
 
@@ -1343,19 +1473,19 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         mid: self._user.sid,
         rid: self._room.id,
         agent: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
+        version: (window.webrtcDetectedVersion || 0).toString(),
         os: window.navigator.platform,
         userInfo: self._getUserInfo(),
         target: peerId, //&#x27;MCU&#x27;,
-        isConnectionRestart: false,
-        lastRestart: lastRestart,
         weight: self._peerPriorityWeight,
         receiveOnly: receiveOnly,
         enableIceTrickle: self._enableIceTrickle,
         enableDataChannel: self._enableDataChannel,
-        sessionType: !!self._streams.screenshare ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
-        explicit: true,
-        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+        enableIceRestart: self._enableIceRestart,
+        doIceRestart: false,
+        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+        SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+        DTProtocolVersion: self.DT_PROTOCOL_VERSION
       });
     }
   }
@@ -1399,6 +1529,28 @@ Skylink.prototype._restartMCUConnection = function(callback) {
     }
   });
 };
+
+/**
+ * Function that handles the stats tabulation.
+ * @method _parseConnectionStats
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._parseConnectionStats = function(prevStats, stats, prop) {
+  var nTime = stats.timestamp;
+  var oTime = prevStats.timestamp;
+  var nVal = parseFloat(stats[prop] || &#x27;0&#x27;, 10);
+  var oVal = parseFloat(prevStats[prop] || &#x27;0&#x27;, 10);
+
+  if ((new Date(nTime).getTime()) === (new Date(oTime).getTime())) {
+    return nVal;
+  }
+
+  return parseFloat(((nVal - oVal) / (nTime - oTime) * 1000).toFixed(3) || &#x27;0&#x27;, 10);
+};
+
+
 
     </pre>
 </div>

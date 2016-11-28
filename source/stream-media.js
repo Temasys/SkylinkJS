@@ -12,6 +12,8 @@
  *   local <code>"offer"</code> / <code>"answer"</code> session description video codec preference.
  * @param {String} VP8  <small>Value <code>"VP8"</code></small>
  *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/VP8">VP8</a> video codec.
+ * @param {String} VP9  <small>Value <code>"VP9"</code></small>
+ *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/VP9">VP9</a> video codec.
  * @param {String} H264 <small>Value <code>"H264"</code></small>
  *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC">H264</a> video codec.
  * @type JSON
@@ -22,7 +24,8 @@
 Skylink.prototype.VIDEO_CODEC = {
   AUTO: 'auto',
   VP8: 'VP8',
-  H264: 'H264'
+  H264: 'H264',
+  VP9: 'VP9'
   //H264UC: 'H264UC'
 };
 
@@ -42,6 +45,8 @@ Skylink.prototype.VIDEO_CODEC = {
  *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/Opus_(audio_format)">OPUS</a> audio codec.
  * @param {String} ISAC <small>Value <code>"ISAC"</code></small>
  *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/Internet_Speech_Audio_Codec">ISAC</a> audio codec.
+ * @param {String} G722 <small>Value <code>"G722"</code></small>
+ *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/G.722">G722</a> audio codec.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -53,7 +58,7 @@ Skylink.prototype.AUDIO_CODEC = {
   OPUS: 'opus',
   //ILBC: 'ILBC',
   //G711: 'G711',
-  //G722: 'G722',
+  G722: 'G722'
   //SILK: 'SILK'
 };
 
@@ -222,124 +227,10 @@ Skylink.prototype.RECORDING_STATE = {
 };
 
 /**
- * Stores the list of recordings.
- * @attribute _recordings
- * @type JSON
- * @private
- * @beta
- * @for Skylink
- * @since 0.6.-
- */
-Skylink.prototype._recordings = {};
-
-/**
- * Stores the current active recording session ID.
- * There can only be 1 recording session at a time in a Room
- * @attribute _currentRecordingId
- * @type JSON
- * @private
- * @beta
- * @for Skylink
- * @since 0.6.-
- */
-Skylink.prototype._currentRecordingId = false;
-
-/**
- * Stores the recording session timeout to ensure 4 seconds has been recorded.
- * @attribute _recordingStartInterval
- * @type JSON
- * @private
- * @beta
- * @for Skylink
- * @since 0.6.-
- */
-Skylink.prototype._recordingStartInterval = null;
-
-/**
- * Stores the flag that indicates if <code>getUserMedia()</code> should fallback to retrieve
- *   audio only Stream after retrieval of audio and video Stream had failed.
- * @attribute _audioFallback
- * @type Boolean
- * @default false
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._audioFallback = false;
-
-/**
- * Stores the Streams.
- * @attribute _streams
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.15
- */
-Skylink.prototype._streams = {
-  userMedia: null,
-  screenshare: null
-};
-
-/**
- * Stores the default camera Stream settings.
- * @attribute _streamsDefaultSettings
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.15
- */
-Skylink.prototype._streamsDefaultSettings = {
-  userMedia: {
-    audio: {
-      stereo: false
-    },
-    video: {
-      resolution: {
-        width: 640,
-        height: 480
-      },
-      frameRate: 50
-    }
-  },
-  screenshare: {
-    video: true
-  }
-};
-
-/**
- * Stores all the Stream required muted settings.
- * @attribute _streamsMutedSettings
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.15
- */
-Skylink.prototype._streamsMutedSettings = {
-  audioMuted: false,
-  videoMuted: false
-};
-
-/**
- * Stores all the Stream sending maximum bandwidth settings.
- * @attribute _streamsBandwidthSettings
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.15
- */
-Skylink.prototype._streamsBandwidthSettings = {};
-
-/**
- * Stores all the Stream stopped callbacks.
- * @attribute _streamsStoppedCbs
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.15
- */
-Skylink.prototype._streamsStoppedCbs = {};
-
-/**
+ * <blockquote class="info">
+ *   For a better user experience, the functionality is throttled when invoked many times in less
+ *   than the milliseconds interval configured in the <a href="#method_init"><code>init()</code> method</a>.
+ * </blockquote>
  * Function that retrieves camera Stream.
  * @method getUserMedia
  * @param {JSON} [options] The camera Stream configuration options.
@@ -347,17 +238,39 @@ Skylink.prototype._streamsStoppedCbs = {};
  *   <small>To fallback to retrieve audio track only when retrieving of audio and video tracks failed,
  *   enable the <code>audioFallback</code> flag in the <a href="#method_init"><code>init()</code> method</a>.</small>
  * @param {Boolean} [options.useExactConstraints=false] <blockquote class="info">
- *   Note that by enabling this flag, exact values will be requested  when retrieving camera Stream,
+ *   Note that by enabling this flag, exact values will be requested when retrieving camera Stream,
  *   but it does not prevent constraints related errors. By default when not enabled,
  *   expected mandatory maximum values (or optional values for source ID) will requested to prevent constraints related
- *   errors, with an exception for <code>options.video.frameRate</code> option in Safari and IE (plugin-enabled) browsers,
+ *   errors, with an exception for <code>options.video.frameRate</code> option in Safari and IE (any plugin-enabled) browsers,
  *   where the expected maximum value will not be requested due to the lack of support.</blockquote>
  *   The flag if <code>getUserMedia()</code> should request for camera Stream to match exact requested values of
  *   <code>options.audio.deviceId</code> and <code>options.video.deviceId</code>, <code>options.video.resolution</code>
  *   and <code>options.video.frameRate</code> when provided.
  * @param {Boolean|JSON} [options.audio=false] The audio configuration options.
  * @param {Boolean} [options.audio.stereo=false] The flag if stereo band should be configured
- *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
+ *   <small>Note that Peers may override the "receiving" <code>stereo</code> config depending on the Peers configuration.</small>
+ * @param {Boolean} [options.audio.usedtx] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec
+ *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
+ *   <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ *   <small>Note that Peers may override the "receiving" <code>usedtx</code> config depending on the Peers configuration.</small>
+ * @param {Boolean} [options.audio.useinbandfec] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be
+ *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
+ *   <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ *   <small>Note that Peers may override the "receiving" <code>useinbandfec</code> config depending on the Peers configuration.</small>
+ * @param {Number} [options.audio.maxplaybackrate] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
+ *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
+ *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ *   <small>Note that Peers may override the "receiving" <code>maxplaybackrate</code> config depending on the Peers configuration.</small>
  * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
  *   <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.audioMuted</code>,
  *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.audioMuted</code> value to
@@ -374,6 +287,7 @@ Skylink.prototype._streamsStoppedCbs = {};
  *   <small>The list of available audio source ID can be retrieved by the <a href="https://developer.
  * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices"><code>navigator.mediaDevices.enumerateDevices</code>
  *   API</a>.</small>
+ * @param {Boolean} [options.audio.echoCancellation=false] The flag to enable audio tracks echo cancellation.
  * @param {Boolean|JSON} [options.video=false] The video configuration options.
  * @param {Boolean} [options.video.mute=false] The flag if video tracks should be muted upon receiving them.
  *   <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.videoMuted</code>,
@@ -384,10 +298,25 @@ Skylink.prototype._streamsStoppedCbs = {};
  *   <small>By default, <a href="#attr_VIDEO_RESOLUTION"><code>VGA</code></a> resolution option
  *   is selected when not provided.</small>
  *   [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Number} [options.video.resolution.width] The video resolution width.
- * @param {Number} [options.video.resolution.height] The video resolution height.
- * @param {Number} [options.video.frameRate] The video <a href="https://en.wikipedia.org/wiki/Frame_rate">
+ * @param {Number|JSON} [options.video.resolution.width] The video resolution width.
+ * - When provided as a number, it is the video resolution width.
+ * - When provided as a JSON, it is the <code>navigator.mediaDevices.getUserMedia()</code> <code>.width</code> settings.
+ *   Parameters are <code>"ideal"</code> for ideal resolution width, <code>"exact"</code> for exact video resolution width,
+ *   <code>"min"</code> for min video resolution width and <code>"max"</code> for max video resolution width.
+ *   Note that this may result in constraints related errors depending on the browser/hardware supports.
+ * @param {Number|JSON} [options.video.resolution.height] The video resolution height.
+ * - When provided as a number, it is the video resolution height.
+ * - When provided as a JSON, it is the <code>navigator.mediaDevices.getUserMedia()</code> <code>.height</code> settings.
+ *   Parameters are <code>"ideal"</code> for ideal video resolution height, <code>"exact"</code> for exact video resolution height,
+ *   <code>"min"</code> for min video resolution height and <code>"max"</code> for max video resolution height.
+ *   Note that this may result in constraints related errors depending on the browser/hardware supports.
+ * @param {Number|JSON} [options.video.frameRate] The video <a href="https://en.wikipedia.org/wiki/Frame_rate">
  *   frameRate</a> per second (fps).
+ * - When provided as a number, it is the video framerate.
+ * - When provided as a JSON, it is the <code>navigator.mediaDevices.getUserMedia()</code> <code>.frameRate</code> settings.
+ *   Parameters are <code>"ideal"</code> for ideal video framerate, <code>"exact"</code> for exact video framerate,
+ *   <code>"min"</code> for min video framerate and <code>"max"</code> for max video framerate.
+ *   Note that this may result in constraints related errors depending on the browser/hardware supports.
  * @param {Array} [options.video.optional] <blockquote class="info">
  *   Note that this may result in constraints related error when <code>options.useExactConstraints</code> value is
  *   <code>true</code>. If you are looking to set the requested source ID of the video track,
@@ -588,42 +517,56 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     return;
   }*/
 
-  if (typeof callback === 'function') {
-    var mediaAccessSuccessFn = function (stream) {
-      self.off('mediaAccessError', mediaAccessErrorFn);
-      callback(null, stream);
-    };
-    var mediaAccessErrorFn = function (error) {
-      self.off('mediaAccessSuccess', mediaAccessSuccessFn);
-      callback(error, null);
-    };
+  self._throttle(function (runFn) {
+    if (!runFn) {
+      if (self._throttlingShouldThrowError) {
+        var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._throttlingTimeouts.getUserMedia + 'ms).';
+        log.error(throttleLimitError);
 
-    self.once('mediaAccessSuccess', mediaAccessSuccessFn, function (stream, isScreensharing) {
-      return !isScreensharing;
-    });
-
-    self.once('mediaAccessError', mediaAccessErrorFn, function (error, isScreensharing) {
-      return !isScreensharing;
-    });
-  }
-
-  // Parse stream settings
-  var settings = self._parseStreamSettings(options);
-
-  navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
-    if (settings.mutedSettings.shouldAudioMuted) {
-      self._streamsMutedSettings.audioMuted = true;
+        if (typeof callback === 'function') {
+          callback(new Error(throttleLimitError), null);
+        }
+      }
+      return;
     }
 
-    if (settings.mutedSettings.shouldVideoMuted) {
-      self._streamsMutedSettings.videoMuted = true;
+    if (typeof callback === 'function') {
+      var mediaAccessSuccessFn = function (stream) {
+        self.off('mediaAccessError', mediaAccessErrorFn);
+        callback(null, stream);
+      };
+      var mediaAccessErrorFn = function (error) {
+        self.off('mediaAccessSuccess', mediaAccessSuccessFn);
+        callback(error, null);
+      };
+
+      self.once('mediaAccessSuccess', mediaAccessSuccessFn, function (stream, isScreensharing) {
+        return !isScreensharing;
+      });
+
+      self.once('mediaAccessError', mediaAccessErrorFn, function (error, isScreensharing) {
+        return !isScreensharing;
+      });
     }
 
-    self._onStreamAccessSuccess(stream, settings, false, false);
+    // Parse stream settings
+    var settings = self._parseStreamSettings(options);
 
-  }, function (error) {
-    self._onStreamAccessError(error, settings, false, false);
-  });
+    navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
+      if (settings.mutedSettings.shouldAudioMuted) {
+        self._streamsMutedSettings.audioMuted = true;
+      }
+
+      if (settings.mutedSettings.shouldVideoMuted) {
+        self._streamsMutedSettings.videoMuted = true;
+      }
+
+      self._onStreamAccessSuccess(stream, settings, false, false);
+
+    }, function (error) {
+      self._onStreamAccessError(error, settings, false, false);
+    });
+  }, 'getUserMedia', self._throttlingTimeouts.getUserMedia);
 };
 
 /**
@@ -1124,9 +1067,34 @@ Skylink.prototype.disableVideo = function() {
 };
 
 /**
+ * <blockquote class="info">
+ *   For a better user experience, the functionality is throttled when invoked many times in less
+ *   than the milliseconds interval configured in the <a href="#method_init"><code>init()</code> method</a>.
+ * </blockquote>
  * Function that retrieves screensharing Stream.
  * @method shareScreen
- * @param {JSON} [enableAudio=false] The flag if audio tracks should be retrieved.
+ * @param {JSON|Boolean} [enableAudio=false] The flag if audio tracks should be retrieved.
+ * @param {Boolean} [enableAudio.stereo=false] The flag if stereo band should be configured
+ *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ * @param {Boolean} [enableAudio.usedtx] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec
+ *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Boolean} [enableAudio.useinbandfec] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be
+ *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [enableAudio.maxplaybackrate] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
+ *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Boolean} [enableAudio.echoCancellation=false] The flag to enable audio tracks echo cancellation.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_mediaAccessSuccess">
@@ -1171,7 +1139,7 @@ Skylink.prototype.disableVideo = function() {
  *   <code>mediaAccessSuccess</code> event</a> triggers parameter payload <code>isScreensharing</code>
  *   value as <code>true</code> and <code>isAudioFallback</code> value as <code>false</code>.</li></ol></li><li>Else: <ol>
  *   <li>If there is any previous <code>shareScreen()</code> Stream: <ol>
- *   <li>Invokes <a href="#method_stopScreen"><code>stopScreen()</code> method</a>.</li></ol></li> 
+ *   <li>Invokes <a href="#method_stopScreen"><code>stopScreen()</code> method</a>.</li></ol></li>
  *   <li><a href="#event_mediaAccessFallback"><code>mediaAccessFallback</code> event</a> triggers parameter payload
  *   <code>state</code> as <code>FALLBACKED</code>, <code>isScreensharing</code> value as <code>true</code> and
  *   <code>isAudioFallback</code> value as <code>false</code>.</li>
@@ -1207,39 +1175,40 @@ Skylink.prototype.disableVideo = function() {
  */
 Skylink.prototype.shareScreen = function (enableAudio, callback) {
   var self = this;
+  var enableAudioSettings = {
+    stereo: true
+  };
 
   if (typeof enableAudio === 'function') {
     callback = enableAudio;
     enableAudio = true;
+
+  } else if (enableAudio && typeof enableAudio === 'object') {
+    enableAudioSettings.usedtx = typeof enableAudio.usedtx === 'boolean' ? enableAudio.usedtx : null;
+    enableAudioSettings.useinbandfec = typeof enableAudio.useinbandfec === 'boolean' ? enableAudio.useinbandfec : null;
+    enableAudioSettings.stereo = enableAudio.stereo === true;
+    enableAudioSettings.echoCancellation = enableAudio.echoCancellation === true;
   }
 
-  if (typeof enableAudio !== 'boolean') {
-    enableAudio = true;
-  }
+  self._throttle(function (runFn) {
+    if (!runFn) {
+      if (self._throttlingShouldThrowError) {
+        var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._throttlingTimeouts.shareScreen + 'ms).';
+        log.error(throttleLimitError);
 
-  var throttleFn = function (fn, wait) {
-    if (!self._timestamp.func){
-      //First time run, need to force timestamp to skip condition
-      self._timestamp.func = self._timestamp.now - wait;
-    }
-    var now = Date.now();
-
-    if (!self._timestamp.screen) {
-      if (now - self._timestamp.func < wait) {
-        return;
+        if (typeof callback === 'function') {
+          callback(new Error(throttleLimitError), null);
+        }
       }
+      return;
     }
-    fn();
-    self._timestamp.screen = false;
-    self._timestamp.func = now;
-  };
 
-  throttleFn(function () {
     var settings = {
       settings: {
-        audio: enableAudio,
+        audio: enableAudio === true || (enableAudio && typeof enableAudio === 'object') ? enableAudioSettings : false,
         video: {
-          screenshare: true
+          screenshare: true,
+          exactConstraints: false
         }
       },
       getUserMediaSettings: {
@@ -1335,8 +1304,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
     }
-
-  }, 10000);
+  }, 'shareScreen', self._throttlingTimeouts.shareScreen);
 };
 
 /**
@@ -1475,6 +1443,7 @@ Skylink.prototype._stopStreams = function (options) {
 
     if (self._streamsStoppedCbs[streamId]) {
       self._streamsStoppedCbs[streamId]();
+      delete self._streamsStoppedCbs[streamId];
     }
   };
 
@@ -1531,117 +1500,152 @@ Skylink.prototype._parseStreamSettings = function(options) {
   };
 
   if (options.audio) {
-    settings.settings.audio = {
-      stereo: false,
-      exactConstraints: !!options.useExactConstraints
-    };
-    settings.getUserMediaSettings.audio = {};
-
-    if (typeof options.audio.stereo === 'boolean') {
-      settings.settings.audio.stereo = options.audio.stereo;
-    }
-
-    if (typeof options.audio.mute === 'boolean') {
-      settings.mutedSettings.shouldAudioMuted = options.audio.mute;
-    }
-
-    if (Array.isArray(options.audio.optional)) {
-      settings.settings.audio.optional = clone(options.audio.optional);
-      settings.getUserMediaSettings.audio.optional = clone(options.audio.optional);
-    }
-
-    if (options.audio.deviceId && typeof options.audio.deviceId === 'string' &&
-      window.webrtcDetectedBrowser !== 'firefox') {
-      settings.settings.audio.deviceId = options.audio.deviceId;
-
-      if (options.useExactConstraints) {
-        settings.getUserMediaSettings.audio.deviceId = { exact: options.audio.deviceId };
-
-      } else {
-        if (!Array.isArray(settings.getUserMediaSettings.audio.optional)) {
-          settings.getUserMediaSettings.audio.optional = [];
-        }
-
-        settings.getUserMediaSettings.audio.optional.push({
-          sourceId: options.audio.deviceId
-        });
-      }
-    }
-
     // For Edge to work since they do not support the advanced constraints yet
     if (window.webrtcDetectedBrowser === 'edge') {
       settings.getUserMediaSettings.audio = true;
+    } else {
+      settings.settings.audio = {
+        stereo: false,
+        exactConstraints: !!options.useExactConstraints,
+        echoCancellation: false
+      };
+      settings.getUserMediaSettings.audio = {
+        echoCancellation: false
+      };
+
+      if (typeof options.audio === 'object') {
+        if (typeof options.audio.stereo === 'boolean') {
+          settings.settings.audio.stereo = options.audio.stereo;
+        }
+
+        if (typeof options.audio.useinbandfec === 'boolean') {
+          settings.settings.audio.useinbandfec = options.audio.useinbandfec;
+        }
+
+        if (typeof options.audio.usedtx === 'boolean') {
+          settings.settings.audio.usedtx = options.audio.usedtx;
+        }
+
+        if (typeof options.audio.maxplaybackrate === 'number' &&
+          options.audio.maxplaybackrate >= 8000 && options.audio.maxplaybackrate <= 48000) {
+          settings.settings.audio.maxplaybackrate = options.audio.maxplaybackrate;
+        }
+
+        if (typeof options.audio.mute === 'boolean') {
+          settings.mutedSettings.shouldAudioMuted = options.audio.mute;
+        }
+
+        if (typeof options.audio.echoCancellation === 'boolean') {
+          settings.settings.audio.echoCancellation = options.audio.echoCancellation;
+          settings.getUserMediaSettings.audio.echoCancellation = options.audio.echoCancellation;
+        }
+
+        if (Array.isArray(options.audio.optional)) {
+          settings.settings.audio.optional = clone(options.audio.optional);
+          settings.getUserMediaSettings.audio.optional = clone(options.audio.optional);
+        }
+
+        if (options.audio.deviceId && typeof options.audio.deviceId === 'string' &&
+          window.webrtcDetectedBrowser !== 'firefox') {
+          settings.settings.audio.deviceId = options.audio.deviceId;
+
+          if (options.useExactConstraints) {
+            settings.getUserMediaSettings.audio.deviceId = { exact: options.audio.deviceId };
+
+          } else {
+            if (!Array.isArray(settings.getUserMediaSettings.audio.optional)) {
+              settings.getUserMediaSettings.audio.optional = [];
+            }
+
+            settings.getUserMediaSettings.audio.optional.push({
+              sourceId: options.audio.deviceId
+            });
+          }
+        }
+      }
     }
   }
 
   if (options.video) {
-    settings.settings.video = {
-      resolution: clone(this.VIDEO_RESOLUTION.VGA),
-      screenshare: false,
-      exactConstraints: !!options.useExactConstraints
-    };
-    settings.getUserMediaSettings.video = {};
-
-    if (typeof options.video.mute === 'boolean') {
-      settings.mutedSettings.shouldVideoMuted = options.video.mute;
-    }
-
-    if (Array.isArray(options.video.optional)) {
-      settings.settings.video.optional = clone(options.video.optional);
-      settings.getUserMediaSettings.video.optional = clone(options.video.optional);
-    }
-
-    if (options.video.deviceId && typeof options.video.deviceId === 'string' &&
-      window.webrtcDetectedBrowser !== 'firefox') {
-      settings.settings.video.deviceId = options.video.deviceId;
-
-      if (options.useExactConstraints) {
-        settings.getUserMediaSettings.video.deviceId = { exact: options.video.deviceId };
-
-      } else {
-        if (!Array.isArray(settings.getUserMediaSettings.video.optional)) {
-          settings.getUserMediaSettings.video.optional = [];
-        }
-
-        settings.getUserMediaSettings.video.optional.push({
-          sourceId: options.video.deviceId
-        });
-      }
-    }
-
-    if (options.video.resolution && typeof options.video.resolution === 'object') {
-      if (typeof options.video.resolution.width === 'number') {
-        settings.settings.video.resolution.width = options.video.resolution.width;
-      }
-      if (typeof options.video.resolution.height === 'number') {
-        settings.settings.video.resolution.height = options.video.resolution.height;
-      }
-    }
-
-    if (options.useExactConstraints) {
-      settings.getUserMediaSettings.video.width = { exact: settings.settings.video.resolution.width };
-      settings.getUserMediaSettings.video.height = { exact: settings.settings.video.resolution.height };
-
-      if (typeof options.video.frameRate === 'number') {
-        settings.settings.video.frameRate = options.video.frameRate;
-        settings.getUserMediaSettings.video.frameRate = { exact: options.video.frameRate };
-      }
-
-    } else {
-      settings.getUserMediaSettings.video.mandatory = {
-        maxWidth: settings.settings.video.resolution.width,
-        maxHeight: settings.settings.video.resolution.height
-      };
-
-      if (typeof options.video.frameRate === 'number' && ['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) === -1) {
-        settings.settings.video.frameRate = options.video.frameRate;
-        settings.getUserMediaSettings.video.mandatory.maxFrameRate = options.video.frameRate;
-      }
-    }
-
     // For Edge to work since they do not support the advanced constraints yet
     if (window.webrtcDetectedBrowser === 'edge') {
       settings.getUserMediaSettings.video = true;
+    } else {
+      settings.settings.video = {
+        resolution: clone(this.VIDEO_RESOLUTION.VGA),
+        screenshare: false,
+        exactConstraints: !!options.useExactConstraints
+      };
+      settings.getUserMediaSettings.video = {};
+
+      if (typeof options.video === 'object') {
+        if (typeof options.video.mute === 'boolean') {
+          settings.mutedSettings.shouldVideoMuted = options.video.mute;
+        }
+
+        if (Array.isArray(options.video.optional)) {
+          settings.settings.video.optional = clone(options.video.optional);
+          settings.getUserMediaSettings.video.optional = clone(options.video.optional);
+        }
+
+        if (options.video.deviceId && typeof options.video.deviceId === 'string' &&
+          window.webrtcDetectedBrowser !== 'firefox') {
+          settings.settings.video.deviceId = options.video.deviceId;
+
+          if (options.useExactConstraints) {
+            settings.getUserMediaSettings.video.deviceId = { exact: options.video.deviceId };
+
+          } else {
+            if (!Array.isArray(settings.getUserMediaSettings.video.optional)) {
+              settings.getUserMediaSettings.video.optional = [];
+            }
+
+            settings.getUserMediaSettings.video.optional.push({
+              sourceId: options.video.deviceId
+            });
+          }
+        }
+
+        if (options.video.resolution && typeof options.video.resolution === 'object') {
+          if ((options.video.resolution.width && typeof options.video.resolution.width === 'object') ||
+            typeof options.video.resolution.width === 'number') {
+            settings.settings.video.resolution.width = options.video.resolution.width;
+          }
+          if ((options.video.resolution.height && typeof options.video.resolution.height === 'object') ||
+            typeof options.video.resolution.height === 'number') {
+            settings.settings.video.resolution.height = options.video.resolution.height;
+          }
+        }
+
+        settings.getUserMediaSettings.video.width = typeof settings.settings.video.resolution.width === 'object' ?
+          settings.settings.video.resolution.width : (options.useExactConstraints ?
+          { exact: settings.settings.video.resolution.width } : { max: settings.settings.video.resolution.width });
+
+        settings.getUserMediaSettings.video.height = typeof settings.settings.video.resolution.height === 'object' ?
+          settings.settings.video.resolution.height : (options.useExactConstraints ?
+          { exact: settings.settings.video.resolution.height } : { max: settings.settings.video.resolution.height });
+
+        if ((options.video.frameRate && typeof options.video.frameRate === 'object') || typeof object.video.frameRate === 'number') {
+          //
+          if (!(typeof options.video.frameRate === 'number' && !options.useExactConstraints && self._isUsingPlugin)) {
+            settings.settings.video.frameRate = options.video.frameRate;
+            settings.getUserMediaSettings.video.frameRate = typeof settings.settings.video.frameRate === 'object' ?
+              settings.settings.video.frameRate : (options.useExactConstraints ?
+              { exact: settings.settings.video.frameRate } : { max: settings.settings.video.frameRate });
+          }
+        }
+      } else if (options.useExactConstraints) {
+        settings.getUserMediaSettings.video = {
+          width: { exact: settings.settings.video.resolution.width },
+          height: { exact: settings.settings.video.resolution.height }
+        };
+
+      } else {
+        settings.getUserMediaSettings.video.mandatory = {
+          maxWidth: settings.settings.video.resolution.width,
+          maxHeight: settings.settings.video.resolution.height
+        };
+      }
     }
   }
 
@@ -1688,8 +1692,8 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
         mid: self._user.sid,
         rid: self._room.id,
         cid: self._key,
-        sessionType: !!isScreenSharing ? 'screensharing' : 'stream',
         streamId: streamId,
+        settings: settings.settings,
         status: 'ended'
       });
 
@@ -1711,6 +1715,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
     stream.oninactive = function () {
       if (self._streamsStoppedCbs[streamId]) {
         self._streamsStoppedCbs[streamId]();
+        delete self._streamsStoppedCbs[streamId];
       }
     };
 
@@ -1725,6 +1730,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
 
         if (self._streamsStoppedCbs[streamId]) {
           self._streamsStoppedCbs[streamId]();
+          delete self._streamsStoppedCbs[streamId];
         }
 
       } else {
@@ -1736,6 +1742,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
     stream.onended = function () {
       if (self._streamsStoppedCbs[streamId]) {
         self._streamsStoppedCbs[streamId]();
+        delete self._streamsStoppedCbs[streamId];
       }
     };
   }
@@ -1927,26 +1934,4 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
       log.error([peerId, null, null, 'Failed adding local stream'], error);
     }
   }
-
-  setTimeout(function () {
-    if (self._inRoom && !self._hasMCU) {
-      var streamId = null;
-
-      if (self._streams.screenshare && self._streams.screenshare.stream) {
-        streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
-      } else if (self._streams.userMedia && self._streams.userMedia.stream) {
-        streamId = self._streams.userMedia.stream.id || self._streams.userMedia.stream.label;
-      }
-
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.STREAM,
-        mid: self._user.sid,
-        rid: self._room.id,
-        cid: self._key,
-        sessionType: self._streams.screenshare && self._streams.screenshare.stream ? 'screensharing' : 'stream',
-        streamId: streamId,
-        status: 'check'
-      });
-    }
-  }, 3500);
 };

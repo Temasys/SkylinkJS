@@ -1,13 +1,25 @@
 /**
- * <blockquote class="info">
- *   Currently, we do not support Blob or ArrayBuffer data type of transfers, but we
- *   will look into implementing it in the future.
- * </blockquote>
  * The list of supported data transfer data types.
  * @attribute DATA_TRANSFER_DATA_TYPE
  * @param {String} BINARY_STRING <small>Value <code>"binaryString"</code></small>
- *   The value of the transfer type that sends all data packets as string
- *   (or converts them into string) when transferring data over the Datachannel connection.
+ *   The value of data transfer data type when Blob binary data chunks encoded to Base64 encoded string are
+ *   sent or received over the Datachannel connection for the data transfer session.
+ *   <small>Used only in <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a> when
+ *   parameter <code>sendChunksAsBinary</code> value is <code>false</code>.</small>
+ * @param {String} ARRAY_BUFFER  <small>Value <code>"arrayBuffer"</code></small>
+ *   The value of data transfer data type when ArrayBuffer binary data chunks are
+ *   sent or received over the Datachannel connection for the data transfer session.
+ *   <small>Used only in <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a> when
+ *   parameter <code>sendChunksAsBinary</code> value is <code>true</code>.</small>
+ * @param {String} BLOB          <small>Value <code>"blob"</code></small>
+ *   The value of data transfer data type when Blob binary data chunks are
+ *   sent or received over the Datachannel connection for the data transfer session.
+ *   <small>Used only in <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a> when
+ *   parameter <code>sendChunksAsBinary</code> value is <code>true</code>.</small>
+ * @param {String} STRING        <small>Value <code>"string"</code></small>
+ *   The value of data transfer data type when only string data chunks are
+ *   sent or received over the Datachannel connection for the data transfer session.
+ *   <small>Used only in <a href="#method_sendURLData"><code>sendURLData()</code> method</a>.</small>
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -16,7 +28,8 @@
 Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
   BINARY_STRING: 'binaryString',
   ARRAY_BUFFER: 'arrayBuffer',
-  BLOB: 'blob'
+  BLOB: 'blob',
+  STRING: 'string'
 };
 
 /**
@@ -43,6 +56,28 @@ Skylink.prototype._CHUNK_FILE_SIZE = 49152;
 Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 12288;
 
 /**
+ * Stores the data chunk size for binary Blob transfers.
+ * @attribute _BINARY_FILE_SIZE
+ * @type Number
+ * @private
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._BINARY_FILE_SIZE = 65456;
+
+/**
+ * Stores the data chunk size for binary Blob transfers.
+ * @attribute _MOZ_BINARY_FILE_SIZE
+ * @type Number
+ * @private
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._MOZ_BINARY_FILE_SIZE = 16384;
+
+/**
  * Stores the data chunk size for data URI string transfers.
  * @attribute _CHUNK_DATAURL_SIZE
  * @type Number
@@ -62,7 +97,7 @@ Skylink.prototype._CHUNK_DATAURL_SIZE = 1212;
  * @since 0.1.0
  */
 Skylink.prototype._base64ToBlob = function(dataURL) {
-  var byteString = atob(dataURL.replace(/\s\r\n/g, ''));
+  var byteString = atob(dataURL);
   // write the bytes of the string to an ArrayBuffer
   var ab = new ArrayBuffer(byteString.length);
   var ia = new Uint8Array(ab);
@@ -88,6 +123,27 @@ Skylink.prototype._blobToBase64 = function(data, callback) {
     callback(base64BinaryString);
   };
   fileReader.readAsDataURL(data);
+};
+
+/**
+ * Function that converts a Blob object into ArrayBuffer object.
+ * @method _blobToArrayBuffer
+ * @private
+ * @for Skylink
+ * @since 0.1.0
+ */
+Skylink.prototype._blobToArrayBuffer = function(data, callback) {
+  var self = this;
+  var fileReader = new FileReader();
+  fileReader.onload = function() {
+    // Load Blob as dataurl base64 string
+    if (self._isUsingPlugin) {
+      callback(new Int8Array(fileReader.result));
+    } else {
+      callback(fileReader.result);
+    }
+  };
+  fileReader.readAsArrayBuffer(data);
 };
 
 /**
@@ -154,25 +210,4 @@ Skylink.prototype._chunkDataURL = function(dataURL, chunkSize) {
   }
 
   return dataURLArray;
-};
-
-/**
- * Function that assembles the data string chunks into a large string.
- * @method _assembleDataURL
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._assembleDataURL = function(dataURLArray) {
-  var outputStr = '';
-
-  for (var i = 0; i < dataURLArray.length; i++) {
-    try {
-      outputStr += dataURLArray[i];
-    } catch (error) {
-      console.error('Malformed', i, dataURLArray[i]);
-    }
-  }
-
-  return outputStr;
 };
