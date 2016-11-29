@@ -313,25 +313,29 @@ Skylink.prototype.MEDIA_ACCESS_FALLBACK_STATE = {
  *   and &lt;code&gt;options.video.frameRate&lt;/code&gt; when provided.
  * @param {Boolean|JSON} [options.audio=false] The audio configuration options.
  * @param {Boolean} [options.audio.stereo=false] The flag if stereo band should be configured
- *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending / receiving audio data.
+ *   &lt;small&gt;Note that Peers may override the &quot;receiving&quot; &lt;code&gt;stereo&lt;/code&gt; config depending on the Peers configuration.&lt;/small&gt;
  * @param {Boolean} [options.audio.usedtx] &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that this feature might not work depending on the browser support and implementation.&lt;/blockquote&gt;
  *   The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec
- *   is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ *   is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending / receiving audio data.
  *   &lt;small&gt;This might help to reduce bandwidth it reduces the bitrate during silence or background noise.&lt;/small&gt;
  *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
+ *   &lt;small&gt;Note that Peers may override the &quot;receiving&quot; &lt;code&gt;usedtx&lt;/code&gt; config depending on the Peers configuration.&lt;/small&gt;
  * @param {Boolean} [options.audio.useinbandfec] &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that this feature might not work depending on the browser support and implementation.&lt;/blockquote&gt;
  *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be
- *   configured when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ *   configured when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending / receiving audio data.
  *   &lt;small&gt;This might help to reduce the harm of packet loss by encoding information about the previous packet.&lt;/small&gt;
  *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
+ *   &lt;small&gt;Note that Peers may override the &quot;receiving&quot; &lt;code&gt;useinbandfec&lt;/code&gt; config depending on the Peers configuration.&lt;/small&gt;
  * @param {Number} [options.audio.maxplaybackrate] &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that this feature might not work depending on the browser support and implementation.&lt;/blockquote&gt;
  *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
- *   &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ *   &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending / receiving audio data.
  *   &lt;small&gt;This value must be between &lt;code&gt;8000&lt;/code&gt; to &lt;code&gt;48000&lt;/code&gt;.&lt;/small&gt;
  *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
+ *   &lt;small&gt;Note that Peers may override the &quot;receiving&quot; &lt;code&gt;maxplaybackrate&lt;/code&gt; config depending on the Peers configuration.&lt;/small&gt;
  * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
  *   &lt;small&gt;Providing the value as &lt;code&gt;false&lt;/code&gt; does nothing to &lt;code&gt;peerInfo.mediaStatus.audioMuted&lt;/code&gt;,
  *   but when provided as &lt;code&gt;true&lt;/code&gt;, this sets the &lt;code&gt;peerInfo.mediaStatus.audioMuted&lt;/code&gt; value to
@@ -749,7 +753,7 @@ Skylink.prototype.sendStream = function(options, callback) {
   var restartFn = function (stream) {
     if (self._inRoom) {
       if (!self._streams.screenshare) {
-        self._trigger(&#x27;incomingStream&#x27;, self._user.sid, stream, true, self.getPeerInfo());
+        self._trigger(&#x27;incomingStream&#x27;, self._user.sid, stream, true, self.getPeerInfo(), false, stream.id || stream.label);
         self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
       }
 
@@ -1283,7 +1287,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
       self.off(&#x27;mediaAccessError&#x27;, mediaAccessErrorFn);
 
       if (self._inRoom) {
-        self._trigger(&#x27;incomingStream&#x27;, self._user.sid, stream, true, self.getPeerInfo());
+        self._trigger(&#x27;incomingStream&#x27;, self._user.sid, stream, true, self.getPeerInfo(), true, stream.id || stream.label);
         self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
 
         if (Object.keys(self._peerConnections).length &gt; 0 || self._hasMCU) {
@@ -1418,7 +1422,8 @@ Skylink.prototype.stopScreen = function () {
 
     if (this._inRoom) {
       if (this._streams.userMedia &amp;&amp; this._streams.userMedia.stream) {
-        this._trigger(&#x27;incomingStream&#x27;, this._user.sid, this._streams.userMedia.stream, true, this.getPeerInfo());
+        this._trigger(&#x27;incomingStream&#x27;, this._user.sid, this._streams.userMedia.stream, true, this.getPeerInfo(),
+          false, this._streams.userMedia.stream.id || this._streams.userMedia.stream.label);
         this._trigger(&#x27;peerUpdated&#x27;, this._user.sid, this.getPeerInfo(), true);
       }
       this._refreshPeerConnection(Object.keys(this._peerConnections), false);
@@ -1918,7 +1923,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
     log.log([targetMid, &#x27;MediaStream&#x27;, stream.id, &#x27;Peer is having a screensharing session with user&#x27;]);
   }
 
-  self._trigger(&#x27;incomingStream&#x27;, targetMid, stream, false, self.getPeerInfo(targetMid));
+  self._trigger(&#x27;incomingStream&#x27;, targetMid, stream, false, self.getPeerInfo(targetMid), isScreenSharing, stream.id || stream.label);
   self._trigger(&#x27;peerUpdated&#x27;, targetMid, self.getPeerInfo(targetMid), false);
 };
 
@@ -1993,6 +1998,54 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
     } else {
       // Fix errors thrown like NS_ERROR_UNEXPECTED
       log.error([peerId, null, null, &#x27;Failed adding local stream&#x27;], error);
+    }
+  }
+};
+
+/**
+ * Function that handles ended streams.
+ * @method _handleEndedStreams
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._handleEndedStreams = function (peerId, checkStreamId) {
+  var self = this;
+  self._streamsSession[peerId] = self._streamsSession[peerId] || {};
+
+  var renderEndedFn = function (streamId) {
+    var shouldTrigger = !!self._streamsSession[peerId][streamId];
+
+    if (!checkStreamId &amp;&amp; self._peerConnections[peerId] &amp;&amp;
+      self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
+      var streams = self._peerConnections[peerId].getRemoteStreams();
+
+      for (var i = 0; i &lt; streams.length; i++) {
+        if (streamId === (streams[i].id || streams[i].label)) {
+          shouldTrigger = false;
+          break;
+        }
+      }
+    }
+
+    if (shouldTrigger) {
+      var peerInfo = clone(self.getPeerInfo(peerId));
+      peerInfo.settings.audio = clone(self._streamsSession[peerId][streamId].audio);
+      peerInfo.settings.video = clone(self._streamsSession[peerId][streamId].video);
+      var hasScreenshare = peerInfo.settings.video &amp;&amp; typeof peerInfo.settings.video === &#x27;object&#x27; &amp;&amp;
+        !!peerInfo.settings.video.screenshare;
+      self._streamsSession[peerId][streamId] = false;
+      self._trigger(&#x27;streamEnded&#x27;, peerId, peerInfo, false, hasScreenshare, streamId);
+    }
+  };
+
+  if (checkStreamId) {
+    renderEndedFn(checkStreamId);
+  } else {
+    for (var prop in self._streamsSession[peerId]) {
+      if (self._streamsSession[peerId].hasOwnProperty(prop) &amp;&amp; self._streamsSession[peerId][prop]) {
+        renderEndedFn(prop);
+      }
     }
   }
 };

@@ -1046,11 +1046,10 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
   }
 
   var pc = self._peerConnections[peerId];
-
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // prevent restarts for other SDK clients
-  if ((agent.SMProtocolVersion || '') >= '0.1.2') {
+  if ((agent.SMProtocolVersion || '') < '0.1.2') {
     var notSupportedError = new Error('Failed restarting with other agents connecting from other SDKs as ' +
       're-negotiation is not supported by other SDKs');
 
@@ -1179,8 +1178,8 @@ Skylink.prototype._removePeer = function(peerId) {
       this._peerConnections[peerId].close();
     }
 
-    if (peerId !== 'MCU' && this._peerConnections[peerId].hasStream) {
-      this._trigger('streamEnded', peerId, this.getPeerInfo(peerId), false);
+    if (peerId !== 'MCU') {
+      this._handleEndedStreams(peerId);
     }
 
     delete this._peerConnections[peerId];
@@ -1192,6 +1191,10 @@ Skylink.prototype._removePeer = function(peerId) {
   // remove peer messages stamps session
   if (typeof this._peerMessagesStamps[peerId] !== 'undefined') {
     delete this._peerMessagesStamps[peerId];
+  }
+  // remove peer streams session
+  if (typeof this._streamsSession[peerId] !== 'undefined') {
+    delete this._streamsSession[peerId];
   }
 
   // close datachannel connection
@@ -1214,14 +1217,10 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
   // using .urls feature
   try {
-    pc = new window.RTCPeerConnection(
-      self._room.connection.peerConfig,
-      self._room.connection.peerConstraints);
+    pc = new RTCPeerConnection(self._room.connection.peerConfig, self._room.connection.peerConstraints);
     log.info([targetMid, null, null, 'Created peer connection']);
-    log.debug([targetMid, null, null, 'Peer connection config:'],
-      self._room.connection.peerConfig);
-    log.debug([targetMid, null, null, 'Peer connection constraints:'],
-      self._room.connection.peerConstraints);
+    log.debug([targetMid, null, null, 'Peer connection config:'], self._room.connection.peerConfig);
+    log.debug([targetMid, null, null, 'Peer connection constraints:'], self._room.connection.peerConstraints);
   } catch (error) {
     log.error([targetMid, null, null, 'Failed creating peer connection:'], error);
     return null;
@@ -1236,12 +1235,15 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.processingLocalSDP = false;
   pc.processingRemoteSDP = false;
   pc.gathered = false;
+  pc.gathering = false;
 
   // candidates
   self._gatheredCandidates[targetMid] = {
     sending: { host: [], srflx: [], relay: [] },
     receiving: { host: [], srflx: [], relay: [] }
   };
+
+  self._streamsSession[targetMid] = self._streamsSession[targetMid] || {};
 
   // callbacks
   // standard not implemented: onnegotiationneeded,
@@ -1267,11 +1269,13 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
         'is set to false']);
     }
   };
+
   pc.onaddstream = function(event) {
     var stream = event.stream || event;
+    var streamId = stream.id || stream.label;
 
     if (targetMid === 'MCU') {
-      log.warn([targetMid, 'MediaStream', stream.id, 'Ignoring received remote stream from MCU ->'], stream);
+      log.warn([targetMid, 'MediaStream', streamId, 'Ignoring received remote stream from MCU ->'], stream);
       return;
     }
 
@@ -1279,45 +1283,38 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     // See: ESS-680
     if (!self._hasMCU && window.webrtcDetectedBrowser === 'firefox' &&
       pc.getRemoteStreams().length > 1 && pc.remoteDescription && pc.remoteDescription.sdp) {
-      var recvStreamId = stream.id || stream.label;
-
-      if (pc.remoteDescription.sdp.indexOf(' msid:' + recvStreamId + ' ') === -1) {
-        log.warn([targetMid, 'MediaStream', stream.id, 'Ignoring received empty remote stream ->'], stream);
-       return;
+      
+      if (pc.remoteDescription.sdp.indexOf(' msid:' + streamId + ' ') === -1) {
+        log.warn([targetMid, 'MediaStream', streamId, 'Ignoring received empty remote stream ->'], stream);
+        return;
       }
     }
 
+    var peerSettings = clone(self.getPeerInfo(targetMid).settings);
+    var hasScreenshare = peerSettings.video && typeof peerSettings.video === 'object' && !!peerSettings.video.screenshare;
+
     pc.hasStream = true;
+    pc.hasScreen = !!hasScreenshare;
 
-    var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
-    var timeout = 0;
+    self._streamsSession[targetMid][streamId] = peerSettings;
 
-    // NOTE: Add timeouts to the firefox stream received because it seems to have some sort of black stream rendering at first
-    // This may not be advisable but that it seems to work after 1500s. (tried with ICE established but it does not work and getStats)
-    if (agent.name === 'firefox' && window.webrtcDetectedBrowser !== 'firefox') {
-      timeout = 1500;
-    }
-    setTimeout(function () {
-      self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
-    }, timeout);
+    self._onRemoteStreamAdded(targetMid, stream, !!hasScreenshare);
   };
+
   pc.onicecandidate = function(event) {
     self._onIceCandidate(targetMid, event.candidate || event);
   };
+
   pc.oniceconnectionstatechange = function(evt) {
-    checkIceConnectionState(targetMid, pc.iceConnectionState, function(iceConnectionState) {
-      log.debug([targetMid, 'RTCIceConnectionState', null, 'Ice connection state changed ->'], iceConnectionState);
+    log.debug([targetMid, 'RTCIceConnectionState', null, 'Ice connection state changed ->'], pc.iceConnectionState);
 
-      self._trigger('iceConnectionState', iceConnectionState, targetMid);
+    self._trigger('iceConnectionState', pc.iceConnectionState, targetMid);
 
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._enableIceTrickle) {
-        self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
-      }
-    });
+    if (pc.iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._enableIceTrickle) {
+      self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
+    }
   };
-  // pc.onremovestream = function () {
-  //   self._onRemoteStreamRemoved(targetMid);
-  // };
+
   pc.onsignalingstatechange = function() {
     log.debug([targetMid, 'RTCSignalingState', null, 'Peer connection state changed ->'], pc.signalingState);
     self._trigger('peerConnectionState', pc.signalingState, targetMid);

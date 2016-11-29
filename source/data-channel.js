@@ -331,31 +331,31 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype._closeDataChannel = function(peerId, channelName) {
+Skylink.prototype._closeDataChannel = function(peerId, channelProp) {
   var self = this;
 
   if (!self._dataChannels[peerId]) {
-    log.warn([peerId, 'RTCDataChannel', channelName || null,
+    log.warn([peerId, 'RTCDataChannel', channelProp || null,
       'Aborting closing Datachannels as Peer connection does not have Datachannel sessions']);
     return;
   }
 
-  var closeFn = function (channelProp) {
-    var channelName = self._dataChannels[peerId][channelProp].channelName;
-    var channelType = self._dataChannels[peerId][channelProp].channelType;
+  var closeFn = function (rChannelProp) {
+    var channelName = self._dataChannels[peerId][rChannelProp].channelName;
+    var channelType = self._dataChannels[peerId][rChannelProp].channelType;
 
-    if (self._dataChannels[peerId][channelProp].readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
+    if (self._dataChannels[peerId][rChannelProp].readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
       log.debug([peerId, 'RTCDataChannel', channelName, 'Closing Datachannel']);
 
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSING, peerId, null, channelName, channelType, null);
 
-      self._dataChannels[peerId][channelProp].channel.close();
+      self._dataChannels[peerId][rChannelProp].channel.close();
 
-      delete self._dataChannels[peerId][channelProp];
+      delete self._dataChannels[peerId][rChannelProp];
     }
   };
 
-  if (!channelName) {
+  if (!channelProp) {
     for (var channelNameProp in self._dataChannels) {
       if (self._dataChannels[peerId].hasOwnProperty(channelNameProp)) {
         if (self._dataChannels[peerId][channelNameProp]) {
@@ -364,11 +364,11 @@ Skylink.prototype._closeDataChannel = function(peerId, channelName) {
       }
     }
   } else {
-    if (!self._dataChannels[peerId][channelName]) {
-      log.warn([peerId, 'RTCDataChannel', channelName, 'Aborting closing Datachannel as it does not exists']);
+    if (!self._dataChannels[peerId][channelProp]) {
+      log.warn([peerId, 'RTCDataChannel', channelProp, 'Aborting closing Datachannel as it does not exists']);
       return;
     }
 
-    closeFn(channelName);
+    closeFn(channelProp);
   }
 };

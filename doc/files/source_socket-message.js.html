@@ -586,32 +586,21 @@ Skylink.prototype._streamEventHandler = function(message) {
   var targetMid = message.mid;
   log.log([targetMid, null, message.type, &#x27;Peer\&#x27;s stream status:&#x27;], message.status);
 
-  if (this._peerInformations[targetMid]) {
-    var currentPeerInfo = clone(this.getPeerInfo(targetMid));
-    var hasScreenshare = false;
-
-    if (message.settings &amp;&amp; typeof message.settings === &#x27;object&#x27;) {
-      currentPeerInfo.settings.audio = message.settings.audio;
-      currentPeerInfo.settings.video = message.settings.video;
-      hasScreenshare = currentPeerInfo.settings.video &amp;&amp; typeof currentPeerInfo.settings.video === &#x27;object&#x27; &amp;&amp;
-        !!currentPeerInfo.settings.video.screenshare;
-    }
-
-  	if (message.status === &#x27;ended&#x27;) {
-  		this._trigger(&#x27;streamEnded&#x27;, targetMid, currentPeerInfo, hasScreenshare, message.streamId);
-      this._trigger(&#x27;peerUpdated&#x27;, targetMid, this.getPeerInfo(targetMid), false);
-
-      if (this._peerConnections[targetMid]) {
-        this._peerConnections[targetMid].hasStream = false;
-        if (hasScreenshare) {
-          this._peerConnections[targetMid].hasScreen = false;
-        }
-      } else {
-        log.log([targetMid, null, message.type, &#x27;Peer connection not found&#x27;]);
+  if (this._peerInformations[targetMid] &amp;&amp; message.streamId) {
+    this._streamsSession[targetMid] = this._streamsSession[targetMid] || {};
+    if (message.status === &#x27;ended&#x27;) {
+      if (message.settings &amp;&amp; typeof message.settings === &#x27;object&#x27; &amp;&amp;
+        typeof this._streamsSession[targetMid][message.streamId] === &#x27;undefined&#x27;) {
+        this._streamsSession[targetMid][message.streamId] = {
+          audio: message.settings.audio,
+          video: message.settings.video
+        };
       }
-  	}
 
+      this._handleEndedStreams(targetMid, message.streamId);
+  	}
   } else {
+    // Probably left the room already
     log.log([targetMid, null, message.type, &#x27;Peer does not have any user information&#x27;]);
   }
 };
@@ -697,25 +686,19 @@ Skylink.prototype._inRoomHandler = function(message) {
   self._room.connection.peerConfig = self._setIceServers(message.pc_config);
   self._inRoom = true;
   self._user.sid = message.sid;
-  self._peerPriorityWeight = (new Date()).getTime();
+  self._peerPriorityWeight = message.tieBreaker;
 
   self._trigger(&#x27;peerJoined&#x27;, self._user.sid, self.getPeerInfo(), true);
   self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
 
-  if (typeof message.tieBreaker === &#x27;number&#x27;) {
-    self._peerPriorityWeight = message.tieBreaker;
-  }
-
-  // Make Firefox the answerer always when connecting with other browsers
-  if (window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
-    log.warn(&#x27;Decreasing weight for Firefox browser connection&#x27;);
-    self._peerPriorityWeight -= 100000000000;
-  }
+  var streamId = null;
 
   if (self._streams.screenshare &amp;&amp; self._streams.screenshare.stream) {
-    self._trigger(&#x27;incomingStream&#x27;, self._user.sid, self._streams.screenshare.stream, true, self.getPeerInfo());
+    streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
+    self._trigger(&#x27;incomingStream&#x27;, self._user.sid, self._streams.screenshare.stream, true, self.getPeerInfo(), true, streamId);
   } else if (self._streams.userMedia &amp;&amp; self._streams.userMedia.stream) {
-    self._trigger(&#x27;incomingStream&#x27;, self._user.sid, self._streams.userMedia.stream, true, self.getPeerInfo());
+    streamId = self._streams.userMedia.stream.id || self._streams.userMedia.stream.label;
+    self._trigger(&#x27;incomingStream&#x27;, self._user.sid, self._streams.userMedia.stream, true, self.getPeerInfo(), false, streamId);
   }
   // NOTE ALEX: should we wait for local streams?
   // or just go with what we have (if no stream, then one way?)
@@ -766,12 +749,12 @@ Skylink.prototype._enterHandler = function(message) {
   userInfo.agent = {
     name: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
     version: (function () {
-      if (typeof message.version !== &#x27;string&#x27;) {
+      if (!(message.version &amp;&amp; typeof message.version === &#x27;string&#x27;)) {
         return 0;
       }
       // E.g. 0.9.6, replace minor &quot;.&quot; with 0
       if (message.version.indexOf(&#x27;.&#x27;) &gt; -1) {
-        parts = message.version.split(&#x27;.&#x27;);
+        var parts = message.version.split(&#x27;.&#x27;);
         if (parts.length &gt; 2) {
           var majorVer = parts[0] || &#x27;0&#x27;;
           parts.splice(0, 1);
@@ -786,8 +769,8 @@ Skylink.prototype._enterHandler = function(message) {
       message.temasysPluginVersion : null,
     SMProtocolVersion: message.SMProtocolVersion &amp;&amp; typeof message.SMProtocolVersion === &#x27;string&#x27; ?
       message.SMProtocolVersion : &#x27;0.1.1&#x27;,
-    DTProtocolVersion: message.DTProtocolVersion &amp;&amp; typeof message.SMProtocolVersion === &#x27;string&#x27; ?
-      message.SMProtocolVersion : &#x27;0.1.0&#x27;
+    DTProtocolVersion: message.DTProtocolVersion &amp;&amp; typeof message.DTProtocolVersion === &#x27;string&#x27; ?
+      message.DTProtocolVersion : &#x27;0.1.0&#x27;
   };
 
   log.log([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Peer &quot;enter&quot; received -&gt;&#x27;], message);
@@ -872,12 +855,12 @@ Skylink.prototype._restartHandler = function(message){
   userInfo.agent = {
     name: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
     version: (function () {
-      if (typeof message.version !== &#x27;string&#x27;) {
+      if (!(message.version &amp;&amp; typeof message.version === &#x27;string&#x27;)) {
         return 0;
       }
       // E.g. 0.9.6, replace minor &quot;.&quot; with 0
       if (message.version.indexOf(&#x27;.&#x27;) &gt; -1) {
-        parts = message.version.split(&#x27;.&#x27;);
+        var parts = message.version.split(&#x27;.&#x27;);
         if (parts.length &gt; 2) {
           var majorVer = parts[0] || &#x27;0&#x27;;
           parts.splice(0, 1);
@@ -892,8 +875,8 @@ Skylink.prototype._restartHandler = function(message){
       message.temasysPluginVersion : null,
     SMProtocolVersion: message.SMProtocolVersion &amp;&amp; typeof message.SMProtocolVersion === &#x27;string&#x27; ?
       message.SMProtocolVersion : &#x27;0.1.1&#x27;,
-    DTProtocolVersion: message.DTProtocolVersion &amp;&amp; typeof message.SMProtocolVersion === &#x27;string&#x27; ?
-      message.SMProtocolVersion : &#x27;0.1.0&#x27;
+    DTProtocolVersion: message.DTProtocolVersion &amp;&amp; typeof message.DTProtocolVersion === &#x27;string&#x27; ?
+      message.DTProtocolVersion : &#x27;0.1.0&#x27;
   };
 
   log.log([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Peer &quot;restart&quot; received -&gt;&#x27;], message);
@@ -979,12 +962,12 @@ Skylink.prototype._welcomeHandler = function(message) {
   userInfo.agent = {
     name: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
     version: (function () {
-      if (typeof message.version !== &#x27;string&#x27;) {
+      if (!(message.version &amp;&amp; typeof message.version === &#x27;string&#x27;)) {
         return 0;
       }
       // E.g. 0.9.6, replace minor &quot;.&quot; with 0
       if (message.version.indexOf(&#x27;.&#x27;) &gt; -1) {
-        parts = message.version.split(&#x27;.&#x27;);
+        var parts = message.version.split(&#x27;.&#x27;);
         if (parts.length &gt; 2) {
           var majorVer = parts[0] || &#x27;0&#x27;;
           parts.splice(0, 1);
@@ -999,8 +982,8 @@ Skylink.prototype._welcomeHandler = function(message) {
       message.temasysPluginVersion : null,
     SMProtocolVersion: message.SMProtocolVersion &amp;&amp; typeof message.SMProtocolVersion === &#x27;string&#x27; ?
       message.SMProtocolVersion : &#x27;0.1.1&#x27;,
-    DTProtocolVersion: message.DTProtocolVersion &amp;&amp; typeof message.SMProtocolVersion === &#x27;string&#x27; ?
-      message.SMProtocolVersion : &#x27;0.1.0&#x27;
+    DTProtocolVersion: message.DTProtocolVersion &amp;&amp; typeof message.DTProtocolVersion === &#x27;string&#x27; ?
+      message.DTProtocolVersion : &#x27;0.1.0&#x27;
   };
 
   log.log([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Peer &quot;welcome&quot; received -&gt;&#x27;], message);
@@ -1117,6 +1100,9 @@ Skylink.prototype._offerHandler = function(message) {
 
   offer.sdp = self._removeSDPFilteredCandidates(targetMid, offer);
   offer.sdp = self._setSDPBitrate(targetMid, offer);
+  offer.sdp = self._setSDPOpusConfig(targetMid, offer);
+  offer.sdp = self._removeSDPCodecs(targetMid, offer);
+  offer.sdp = self._removeSDPREMBPackets(targetMid, offer);
 
   log.log([targetMid, &#x27;RTCSessionDescription&#x27;, message.type, &#x27;Updated remote offer -&gt;&#x27;], offer.sdp);
 
@@ -1298,6 +1284,9 @@ Skylink.prototype._answerHandler = function(message) {
 
   answer.sdp = self._removeSDPFilteredCandidates(targetMid, answer);
   answer.sdp = self._setSDPBitrate(targetMid, answer);
+  answer.sdp = self._setSDPOpusConfig(targetMid, answer);
+  answer.sdp = self._removeSDPCodecs(targetMid, answer);
+  answer.sdp = self._removeSDPREMBPackets(targetMid, answer);
 
   log.log([targetMid, &#x27;RTCSessionDescription&#x27;, message.type, &#x27;Updated remote answer -&gt;&#x27;], answer.sdp);
 

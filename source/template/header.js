@@ -966,6 +966,17 @@ function Skylink() {
   this._streamsStoppedCbs = {};
 
   /**
+   * Stores all the Stream sessions.
+   * Defined as <code>false</code> when Stream has already ended.
+   * @attribute _streamsSession
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.15
+   */
+  this._streamsSession = {};
+
+  /**
    * Stores the preferred sending Peer connection streaming audio codec.
    * @attribute _selectedAudioCodec
    * @type String

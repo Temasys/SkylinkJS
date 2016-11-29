@@ -267,7 +267,7 @@ var _eventsDocs = {
    *   <small>When defined as <code>true</code>, the <code>peerInfo.settings.video.screenshare</code> value is
    *   considered as <code>false</code>  and the <code>peerInfo.settings.video.exactConstraints</code>
    *   value is considered as <code>false</code>.</small>
-   * @param {JSON} peerInfo.settings.video.resolution The Peer Stream video resolution.
+   * @param {JSON} [peerInfo.settings.video.resolution] The Peer Stream video resolution.
    *   [Rel: Skylink.VIDEO_RESOLUTION]
    * @param {Number|JSON} peerInfo.settings.video.resolution.width The Peer Stream video resolution width or
    *   video resolution width settings.
@@ -393,6 +393,8 @@ var _eventsDocs = {
    * @param {JSON} peerInfo The Peer session information.
    *   <small>Object signature matches the <code>peerInfo</code> parameter payload received in the
    *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small>
+   * @param {Boolean} isScreensharing The flag if Peer Stream is a screensharing Stream.
+   * @param {String} streamId The Stream ID.
    * @for Skylink
    * @since 0.5.5
    */
@@ -587,7 +589,9 @@ var _eventsDocs = {
   serverPeerRestart: [],
 
   /**
-   * Event triggered when Peer Stream streaming has stopped.
+   * Event triggered when a Peer Stream streaming has stopped.
+   * <small>Note that it may not be the currently sent Stream to User, and it also triggers
+   * when User leaves the Room for any currently sent Stream to User from Peer.</small>
    * @event streamEnded
    * @param {String} peerId The Peer ID.
    * @param {JSON} peerInfo The Peer session information.
@@ -981,7 +985,7 @@ var _eventsDocs = {
    * @param {String} candidateId The remote ICE candidate session ID.
    *   <small>Note that this value is not related to WebRTC API but for identification of remote ICE candidate received.</small>
    * @param {String} candidateType The remote ICE candidate type.
-   *   <small>Expected values are <code>"host"</code> (local network), <code>"srflx"</code> (STUN) and <code>"relay" (TURN).</small>
+   *   <small>Expected values are <code>"host"</code> (local network), <code>"srflx"</code> (STUN) and <code>"relay"</code> (TURN).</small>
    * @param {JSON} candidate The remote ICE candidate.
    * @param {String} candidate.candidate The remote ICE candidate connection description.
    * @param {String} candidate.sdpMid The remote ICE candidate identifier based on the remote session description.

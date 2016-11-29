@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Mon Nov 28 2016 20:03:30 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Tue Nov 29 2016 17:29:05 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -968,6 +968,17 @@ function Skylink() {
   this._streamsStoppedCbs = {};
 
   /**
+   * Stores all the Stream sessions.
+   * Defined as <code>false</code> when Stream has already ended.
+   * @attribute _streamsSession
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.15
+   */
+  this._streamsSession = {};
+
+  /**
    * Stores the preferred sending Peer connection streaming audio codec.
    * @attribute _selectedAudioCodec
    * @type String
@@ -1344,31 +1355,31 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype._closeDataChannel = function(peerId, channelName) {
+Skylink.prototype._closeDataChannel = function(peerId, channelProp) {
   var self = this;
 
   if (!self._dataChannels[peerId]) {
-    log.warn([peerId, 'RTCDataChannel', channelName || null,
+    log.warn([peerId, 'RTCDataChannel', channelProp || null,
       'Aborting closing Datachannels as Peer connection does not have Datachannel sessions']);
     return;
   }
 
-  var closeFn = function (channelProp) {
-    var channelName = self._dataChannels[peerId][channelProp].channelName;
-    var channelType = self._dataChannels[peerId][channelProp].channelType;
+  var closeFn = function (rChannelProp) {
+    var channelName = self._dataChannels[peerId][rChannelProp].channelName;
+    var channelType = self._dataChannels[peerId][rChannelProp].channelType;
 
-    if (self._dataChannels[peerId][channelProp].readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
+    if (self._dataChannels[peerId][rChannelProp].readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
       log.debug([peerId, 'RTCDataChannel', channelName, 'Closing Datachannel']);
 
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSING, peerId, null, channelName, channelType, null);
 
-      self._dataChannels[peerId][channelProp].channel.close();
+      self._dataChannels[peerId][rChannelProp].channel.close();
 
-      delete self._dataChannels[peerId][channelProp];
+      delete self._dataChannels[peerId][rChannelProp];
     }
   };
 
-  if (!channelName) {
+  if (!channelProp) {
     for (var channelNameProp in self._dataChannels) {
       if (self._dataChannels[peerId].hasOwnProperty(channelNameProp)) {
         if (self._dataChannels[peerId][channelNameProp]) {
@@ -1377,12 +1388,12 @@ Skylink.prototype._closeDataChannel = function(peerId, channelName) {
       }
     }
   } else {
-    if (!self._dataChannels[peerId][channelName]) {
-      log.warn([peerId, 'RTCDataChannel', channelName, 'Aborting closing Datachannel as it does not exists']);
+    if (!self._dataChannels[peerId][channelProp]) {
+      log.warn([peerId, 'RTCDataChannel', channelProp, 'Aborting closing Datachannel as it does not exists']);
       return;
     }
 
-    closeFn(channelName);
+    closeFn(channelProp);
   }
 };
 Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
@@ -2359,7 +2370,8 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
   if (accept) {
     log.debug([peerId, 'RTCDataChannel', transferId, 'Accepted data transfer and starting ...']);
 
-    var dataChannelStateCbFn = function (state, evtPeerId, error) {
+    var dataChannelStateCbFn = function (state, evtPeerId, error, cN, cT) {
+      console.info(evtPeerId, error, cN, cT);
       self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR, transferId, peerId,
         self._getTransferInfo(transferId, peerId, true, false, false), {
         transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD,
@@ -2734,6 +2746,7 @@ Skylink.prototype._startDataTransfer = function(chunks, transferInfo, listOfPeer
     for (var p = 0; p < listOfPeers.length; p++) {
       var agentName = (((self._peerInformations[listOfPeers[p]]) || {}).agent || {}).name || '';
 
+      // C++ SDK does not support binary file transfer for now
       if (self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1) {
         self._dataTransfers[transferId].enforceBSPeers.push(listOfPeers[p]);
       }
@@ -3006,10 +3019,10 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
   }
 
   var agentName = (self._peerInformations[peerId].agent || {}).name || '';
-  var requireInterop = self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1;
+  var requireInterop = self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1 && agentName !== 'cpp';
 
   // Prevent DATA_URL (or "string" dataType transfers) with Android / iOS / C++ SDKs
-  if (requireInterop && self._dataTransfers[transferId].dataType === self.DATA_TRANSFER_SESSION_TYPE.DATA_URL) {
+  if ((requireInterop || agentName === 'cpp') && self._dataTransfers[transferId].dataType === self.DATA_TRANSFER_SESSION_TYPE.DATA_URL) {
     returnErrorBeforeTransferFn('Unable to start data transfer as Peer do not support DATA_URL type of data transfers');
     return;
   }
@@ -3064,9 +3077,9 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
       return;
     }
 
-    if (evtPeerId === peerId) {
-      if (state === self.DATA_CHANNEL_STATE.OPEN && channelName === transferId &&
-        channelType === self.DATA_CHANNEL_TYPE.DATA) {
+    if (evtPeerId === peerId && (channelType === self.DATA_CHANNEL_TYPE.DATA ? channelName === transferId : true)) {
+      if (state === self.DATA_CHANNEL_STATE.OPEN && channelType === self.DATA_CHANNEL_TYPE.DATA &&
+        channelName === transferId) {
         sendWRQFn();
         return false;
       }
@@ -3811,6 +3824,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       log.log([targetMid, 'RTCIceCandidate', null, 'ICE gathering has started.']);
 
       pc.gathering = true;
+      pc.gathered = false;
 
       self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.GATHERING, targetMid);
     }
@@ -3844,8 +3858,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       candidate: candidate.candidate
     });
 
-    if (!(self._enableIceTrickle && self._peerInformations[targetMid] &&
-      self._peerInformations[targetMid].config.enableIceTrickle)) {
+    if (!self._enableIceTrickle) {
       log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate as ' +
         'trickle ICE is disabled ->'], candidate);
       return;
@@ -3867,12 +3880,12 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
     log.log([targetMid, 'RTCIceCandidate', null, 'ICE gathering has completed.']);
 
     pc.gathering = false;
+    pc.gathered = true;
 
     self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.COMPLETED, targetMid);
 
     // Disable Ice trickle option
-    if (!(self._enableIceTrickle && self._peerInformations[targetMid] &&
-      self._peerInformations[targetMid].config.enableIceTrickle)) {
+    if (!self._enableIceTrickle) {
       var sessionDescription = self._peerConnections[targetMid].localDescription;
 
       if (!(sessionDescription && sessionDescription.type && sessionDescription.sdp)) {
@@ -5279,11 +5292,10 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
   }
 
   var pc = self._peerConnections[peerId];
-
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // prevent restarts for other SDK clients
-  if ((agent.SMProtocolVersion || '') >= '0.1.2') {
+  if ((agent.SMProtocolVersion || '') < '0.1.2') {
     var notSupportedError = new Error('Failed restarting with other agents connecting from other SDKs as ' +
       're-negotiation is not supported by other SDKs');
 
@@ -5412,8 +5424,8 @@ Skylink.prototype._removePeer = function(peerId) {
       this._peerConnections[peerId].close();
     }
 
-    if (peerId !== 'MCU' && this._peerConnections[peerId].hasStream) {
-      this._trigger('streamEnded', peerId, this.getPeerInfo(peerId), false);
+    if (peerId !== 'MCU') {
+      this._handleEndedStreams(peerId);
     }
 
     delete this._peerConnections[peerId];
@@ -5425,6 +5437,10 @@ Skylink.prototype._removePeer = function(peerId) {
   // remove peer messages stamps session
   if (typeof this._peerMessagesStamps[peerId] !== 'undefined') {
     delete this._peerMessagesStamps[peerId];
+  }
+  // remove peer streams session
+  if (typeof this._streamsSession[peerId] !== 'undefined') {
+    delete this._streamsSession[peerId];
   }
 
   // close datachannel connection
@@ -5447,14 +5463,10 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
   // using .urls feature
   try {
-    pc = new window.RTCPeerConnection(
-      self._room.connection.peerConfig,
-      self._room.connection.peerConstraints);
+    pc = new RTCPeerConnection(self._room.connection.peerConfig, self._room.connection.peerConstraints);
     log.info([targetMid, null, null, 'Created peer connection']);
-    log.debug([targetMid, null, null, 'Peer connection config:'],
-      self._room.connection.peerConfig);
-    log.debug([targetMid, null, null, 'Peer connection constraints:'],
-      self._room.connection.peerConstraints);
+    log.debug([targetMid, null, null, 'Peer connection config:'], self._room.connection.peerConfig);
+    log.debug([targetMid, null, null, 'Peer connection constraints:'], self._room.connection.peerConstraints);
   } catch (error) {
     log.error([targetMid, null, null, 'Failed creating peer connection:'], error);
     return null;
@@ -5469,12 +5481,15 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.processingLocalSDP = false;
   pc.processingRemoteSDP = false;
   pc.gathered = false;
+  pc.gathering = false;
 
   // candidates
   self._gatheredCandidates[targetMid] = {
     sending: { host: [], srflx: [], relay: [] },
     receiving: { host: [], srflx: [], relay: [] }
   };
+
+  self._streamsSession[targetMid] = self._streamsSession[targetMid] || {};
 
   // callbacks
   // standard not implemented: onnegotiationneeded,
@@ -5500,11 +5515,13 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
         'is set to false']);
     }
   };
+
   pc.onaddstream = function(event) {
     var stream = event.stream || event;
+    var streamId = stream.id || stream.label;
 
     if (targetMid === 'MCU') {
-      log.warn([targetMid, 'MediaStream', stream.id, 'Ignoring received remote stream from MCU ->'], stream);
+      log.warn([targetMid, 'MediaStream', streamId, 'Ignoring received remote stream from MCU ->'], stream);
       return;
     }
 
@@ -5512,45 +5529,38 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     // See: ESS-680
     if (!self._hasMCU && window.webrtcDetectedBrowser === 'firefox' &&
       pc.getRemoteStreams().length > 1 && pc.remoteDescription && pc.remoteDescription.sdp) {
-      var recvStreamId = stream.id || stream.label;
-
-      if (pc.remoteDescription.sdp.indexOf(' msid:' + recvStreamId + ' ') === -1) {
-        log.warn([targetMid, 'MediaStream', stream.id, 'Ignoring received empty remote stream ->'], stream);
-       return;
+      
+      if (pc.remoteDescription.sdp.indexOf(' msid:' + streamId + ' ') === -1) {
+        log.warn([targetMid, 'MediaStream', streamId, 'Ignoring received empty remote stream ->'], stream);
+        return;
       }
     }
 
+    var peerSettings = clone(self.getPeerInfo(targetMid).settings);
+    var hasScreenshare = peerSettings.video && typeof peerSettings.video === 'object' && !!peerSettings.video.screenshare;
+
     pc.hasStream = true;
+    pc.hasScreen = !!hasScreenshare;
 
-    var agent = (self.getPeerInfo(targetMid) || {}).agent || {};
-    var timeout = 0;
+    self._streamsSession[targetMid][streamId] = peerSettings;
 
-    // NOTE: Add timeouts to the firefox stream received because it seems to have some sort of black stream rendering at first
-    // This may not be advisable but that it seems to work after 1500s. (tried with ICE established but it does not work and getStats)
-    if (agent.name === 'firefox' && window.webrtcDetectedBrowser !== 'firefox') {
-      timeout = 1500;
-    }
-    setTimeout(function () {
-      self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
-    }, timeout);
+    self._onRemoteStreamAdded(targetMid, stream, !!hasScreenshare);
   };
+
   pc.onicecandidate = function(event) {
     self._onIceCandidate(targetMid, event.candidate || event);
   };
+
   pc.oniceconnectionstatechange = function(evt) {
-    checkIceConnectionState(targetMid, pc.iceConnectionState, function(iceConnectionState) {
-      log.debug([targetMid, 'RTCIceConnectionState', null, 'Ice connection state changed ->'], iceConnectionState);
+    log.debug([targetMid, 'RTCIceConnectionState', null, 'Ice connection state changed ->'], pc.iceConnectionState);
 
-      self._trigger('iceConnectionState', iceConnectionState, targetMid);
+    self._trigger('iceConnectionState', pc.iceConnectionState, targetMid);
 
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._enableIceTrickle) {
-        self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
-      }
-    });
+    if (pc.iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._enableIceTrickle) {
+      self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
+    }
   };
-  // pc.onremovestream = function () {
-  //   self._onRemoteStreamRemoved(targetMid);
-  // };
+
   pc.onsignalingstatechange = function() {
     log.debug([targetMid, 'RTCSignalingState', null, 'Peer connection state changed ->'], pc.signalingState);
     self._trigger('peerConnectionState', pc.signalingState, targetMid);
@@ -5781,16 +5791,19 @@ Skylink.prototype.getPeerInfo = function(peerId) {
   if (typeof peerId === 'string' && typeof this._peerInformations[peerId] === 'object') {
     peerInfo = clone(this._peerInformations[peerId]);
     peerInfo.room = clone(this._selectedRoom);
-    peerInfo.settings.googleXBandwidth = {};
+    peerInfo.settings.bandwidth = peerInfo.settings.bandwidth || {};
+    peerInfo.settings.googleXBandwidth = peerInfo.settings.googleXBandwidth || {};
 
     if (!(typeof peerInfo.settings.video === 'boolean' || (peerInfo.settings.video &&
       typeof peerInfo.settings.video === 'object'))) {
       peerInfo.settings.video = false;
+      peerInfo.mediaStatus.audioMuted = true;
     }
 
     if (!(typeof peerInfo.settings.audio === 'boolean' || (peerInfo.settings.audio &&
       typeof peerInfo.settings.audio === 'object'))) {
       peerInfo.settings.audio = false;
+      peerInfo.mediaStatus.audioMuted = true;
     }
 
     if (typeof peerInfo.mediaStatus.audioMuted !== 'boolean') {
@@ -5807,17 +5820,25 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     }
 
     if (peerInfo.settings.video && typeof peerInfo.settings.video === 'object' &&
-      peerInfo.settings.video.frameRate === -1) {
-      peerInfo.settings.video.frameRate = null;
+      peerInfo.settings.video.customSettings && typeof peerInfo.settings.video.customSettings === 'object') {
+      if (peerInfo.settings.video.customSettings.frameRate) {
+        peerInfo.settings.video.frameRate = clone(peerInfo.settings.video.customSettings.frameRate);
+      }
+      if (peerInfo.settings.video.customSettings.width) {
+        peerInfo.settings.video.resolution = peerInfo.settings.video.resolution || {};
+        peerInfo.settings.video.resolution.width = clone(peerInfo.settings.video.customSettings.width);
+      }
+      if (peerInfo.settings.video.customSettings.height) {
+        peerInfo.settings.video.resolution = peerInfo.settings.video.resolution || {};
+        peerInfo.settings.video.resolution.height = clone(peerInfo.settings.video.customSettings.height);
+      }
+      if (peerInfo.settings.video.customSettings.facingMode) {
+        peerInfo.settings.video.facingMode = clone(peerInfo.settings.video.customSettings.facingMode);
+      }
     }
 
     if (peerInfo.settings.audio && typeof peerInfo.settings.audio === 'object') {
-      peerInfo.settings.audio.usedtx = typeof peerInfo.settings.audio.usedtx === 'boolean' ?
-        peerInfo.settings.audio.usedtx : null;
-      peerInfo.settings.audio.maxplaybackrate = typeof peerInfo.settings.audio.maxplaybackrate === 'number' ?
-        peerInfo.settings.audio.maxplaybackrate : null;
-      peerInfo.settings.audio.useinbandfec = typeof peerInfo.settings.audio.useinbandfec === 'boolean' ?
-        peerInfo.settings.audio.useinbandfec : null;
+      peerInfo.settings.audio.stereo = peerInfo.settings.audio.stereo === true;
     }
 
     if (!(peerInfo.userData !== null && typeof peerInfo.userData !== 'undefined')) {
@@ -5836,7 +5857,9 @@ Skylink.prototype.getPeerInfo = function(peerId) {
         name: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion,
         os: window.navigator.platform,
-        pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+        pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+        SMProtocolVersion: this.SMProtocolVersion,
+        DTProtocolVersion: this.DTProtocolVersion
       },
       room: clone(this._selectedRoom),
       config: {
@@ -6130,6 +6153,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
   pc.processingLocalSDP = true;
 
+  // Sets and expected receiving codecs etc.
   sessionDescription.sdp = self._setSDPOpusConfig(targetMid, sessionDescription);
   sessionDescription.sdp = self._setSDPCodec(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
@@ -6477,7 +6501,8 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @param {JSON} [options.bandwidth] <blockquote class="info">Note that this is currently not supported
  *   with Firefox browsers versions 48 and below as noted in an existing
  *   <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21">bugzilla ticket here</a>.</blockquote>
- *   The configuration to set the maximum streaming bandwidth sent to Peers.
+ *   The configuration to set the maximum streaming bandwidth to send to / receive from Peers.
+ *   <small>Note that Peers may override the "receive from" maximum streaming bandwidth depending on the Peers configuration.</small>
  * @param {Number} [options.bandwidth.audio] The maximum audio streaming bandwidth sent to Peers in kbps.
  *   <small>Recommended values are <code>50</code> to <code>200</code>. <code>50</code> is sufficient enough for
  *   an audio call. The higher you go if you want clearer audio and to be able to hear music streaming.</small>
@@ -6493,6 +6518,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   and may cause disruptions in connections or connectivity issues when toggled, or may not work depending on
  *   browser supports. Currently, this only toggles the video codec bandwidth configuration.</blockquote>
  *   The configuration to set the experimental google video streaming bandwidth sent to Peers.
+ *   <small>Note that Peers may override the "receive from" streaming bandwidth depending on the Peers configuration.</small>
  * @param {Number} [options.googleXBandwidth.min] The minimum experimental google video streaming bandwidth sent to Peers.
  *   <small>This toggles the <code>"x-google-min-bitrate"</code> flag in the session description.</small>
  * @param {Number} [options.googleXBandwidth.max] The maximum experimental google video streaming bandwidth sent to Peers.
@@ -7351,15 +7377,17 @@ Skylink.prototype.generateUUID = function() {
  *   Note that if the audio codec is not supported, the SDK will not configure the local <code>"offer"</code> or
  *   <code>"answer"</code> session description to prefer the codec.</blockquote>
  *   The option to configure the preferred audio codec
- *   to use to encode sending audio data when available for Peer connection.
+ *   to use to decode receiving audio data when available for Peer connection.
  * - When not provided, its value is <code>AUTO</code>.
+ *   <small>Note that Peers may override the receiving audio codec depending on the Peers configuration.</small>
  *   [Rel: Skylink.AUDIO_CODEC]
  * @param {String} [options.videoCodec] <blockquote class="info">
  *   Note that if the video codec is not supported, the SDK will not configure the local <code>"offer"</code> or
  *   <code>"answer"</code> session description to prefer the codec.</blockquote>
  *   The option to configure the preferred video codec
- *   to use to encode sending video data when available for Peer connection.
+ *   to use to decode receiving video data when available for Peer connection.
  * - When not provided, its value is <code>AUTO</code>.
+ *   <small>Note that Peers may override the receiving video codec depending on the Peers configuration.</small>
  *   [Rel: Skylink.VIDEO_CODEC]
  * @param {Number} [options.socketTimeout=20000] The timeout for each attempts for socket connection
  *   with the Signaling server to indicate that connection has timed out and has failed to establish.
@@ -8774,7 +8802,7 @@ var _eventsDocs = {
    *   <small>When defined as <code>true</code>, the <code>peerInfo.settings.video.screenshare</code> value is
    *   considered as <code>false</code>  and the <code>peerInfo.settings.video.exactConstraints</code>
    *   value is considered as <code>false</code>.</small>
-   * @param {JSON} peerInfo.settings.video.resolution The Peer Stream video resolution.
+   * @param {JSON} [peerInfo.settings.video.resolution] The Peer Stream video resolution.
    *   [Rel: Skylink.VIDEO_RESOLUTION]
    * @param {Number|JSON} peerInfo.settings.video.resolution.width The Peer Stream video resolution width or
    *   video resolution width settings.
@@ -8900,6 +8928,8 @@ var _eventsDocs = {
    * @param {JSON} peerInfo The Peer session information.
    *   <small>Object signature matches the <code>peerInfo</code> parameter payload received in the
    *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small>
+   * @param {Boolean} isScreensharing The flag if Peer Stream is a screensharing Stream.
+   * @param {String} streamId The Stream ID.
    * @for Skylink
    * @since 0.5.5
    */
@@ -9094,7 +9124,9 @@ var _eventsDocs = {
   serverPeerRestart: [],
 
   /**
-   * Event triggered when Peer Stream streaming has stopped.
+   * Event triggered when a Peer Stream streaming has stopped.
+   * <small>Note that it may not be the currently sent Stream to User, and it also triggers
+   * when User leaves the Room for any currently sent Stream to User from Peer.</small>
    * @event streamEnded
    * @param {String} peerId The Peer ID.
    * @param {JSON} peerInfo The Peer session information.
@@ -9488,7 +9520,7 @@ var _eventsDocs = {
    * @param {String} candidateId The remote ICE candidate session ID.
    *   <small>Note that this value is not related to WebRTC API but for identification of remote ICE candidate received.</small>
    * @param {String} candidateType The remote ICE candidate type.
-   *   <small>Expected values are <code>"host"</code> (local network), <code>"srflx"</code> (STUN) and <code>"relay" (TURN).</small>
+   *   <small>Expected values are <code>"host"</code> (local network), <code>"srflx"</code> (STUN) and <code>"relay"</code> (TURN).</small>
    * @param {JSON} candidate The remote ICE candidate.
    * @param {String} candidate.candidate The remote ICE candidate connection description.
    * @param {String} candidate.sdpMid The remote ICE candidate identifier based on the remote session description.
@@ -10723,32 +10755,21 @@ Skylink.prototype._streamEventHandler = function(message) {
   var targetMid = message.mid;
   log.log([targetMid, null, message.type, 'Peer\'s stream status:'], message.status);
 
-  if (this._peerInformations[targetMid]) {
-    var currentPeerInfo = clone(this.getPeerInfo(targetMid));
-    var hasScreenshare = false;
-
-    if (message.settings && typeof message.settings === 'object') {
-      currentPeerInfo.settings.audio = message.settings.audio;
-      currentPeerInfo.settings.video = message.settings.video;
-      hasScreenshare = currentPeerInfo.settings.video && typeof currentPeerInfo.settings.video === 'object' &&
-        !!currentPeerInfo.settings.video.screenshare;
-    }
-
-  	if (message.status === 'ended') {
-  		this._trigger('streamEnded', targetMid, currentPeerInfo, hasScreenshare, message.streamId);
-      this._trigger('peerUpdated', targetMid, this.getPeerInfo(targetMid), false);
-
-      if (this._peerConnections[targetMid]) {
-        this._peerConnections[targetMid].hasStream = false;
-        if (hasScreenshare) {
-          this._peerConnections[targetMid].hasScreen = false;
-        }
-      } else {
-        log.log([targetMid, null, message.type, 'Peer connection not found']);
+  if (this._peerInformations[targetMid] && message.streamId) {
+    this._streamsSession[targetMid] = this._streamsSession[targetMid] || {};
+    if (message.status === 'ended') {
+      if (message.settings && typeof message.settings === 'object' &&
+        typeof this._streamsSession[targetMid][message.streamId] === 'undefined') {
+        this._streamsSession[targetMid][message.streamId] = {
+          audio: message.settings.audio,
+          video: message.settings.video
+        };
       }
-  	}
 
+      this._handleEndedStreams(targetMid, message.streamId);
+  	}
   } else {
+    // Probably left the room already
     log.log([targetMid, null, message.type, 'Peer does not have any user information']);
   }
 };
@@ -10834,25 +10855,19 @@ Skylink.prototype._inRoomHandler = function(message) {
   self._room.connection.peerConfig = self._setIceServers(message.pc_config);
   self._inRoom = true;
   self._user.sid = message.sid;
-  self._peerPriorityWeight = (new Date()).getTime();
+  self._peerPriorityWeight = message.tieBreaker;
 
   self._trigger('peerJoined', self._user.sid, self.getPeerInfo(), true);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
 
-  if (typeof message.tieBreaker === 'number') {
-    self._peerPriorityWeight = message.tieBreaker;
-  }
-
-  // Make Firefox the answerer always when connecting with other browsers
-  if (window.webrtcDetectedBrowser === 'firefox') {
-    log.warn('Decreasing weight for Firefox browser connection');
-    self._peerPriorityWeight -= 100000000000;
-  }
+  var streamId = null;
 
   if (self._streams.screenshare && self._streams.screenshare.stream) {
-    self._trigger('incomingStream', self._user.sid, self._streams.screenshare.stream, true, self.getPeerInfo());
+    streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
+    self._trigger('incomingStream', self._user.sid, self._streams.screenshare.stream, true, self.getPeerInfo(), true, streamId);
   } else if (self._streams.userMedia && self._streams.userMedia.stream) {
-    self._trigger('incomingStream', self._user.sid, self._streams.userMedia.stream, true, self.getPeerInfo());
+    streamId = self._streams.userMedia.stream.id || self._streams.userMedia.stream.label;
+    self._trigger('incomingStream', self._user.sid, self._streams.userMedia.stream, true, self.getPeerInfo(), false, streamId);
   }
   // NOTE ALEX: should we wait for local streams?
   // or just go with what we have (if no stream, then one way?)
@@ -10903,12 +10918,12 @@ Skylink.prototype._enterHandler = function(message) {
   userInfo.agent = {
     name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
     version: (function () {
-      if (typeof message.version !== 'string') {
+      if (!(message.version && typeof message.version === 'string')) {
         return 0;
       }
       // E.g. 0.9.6, replace minor "." with 0
       if (message.version.indexOf('.') > -1) {
-        parts = message.version.split('.');
+        var parts = message.version.split('.');
         if (parts.length > 2) {
           var majorVer = parts[0] || '0';
           parts.splice(0, 1);
@@ -10923,8 +10938,8 @@ Skylink.prototype._enterHandler = function(message) {
       message.temasysPluginVersion : null,
     SMProtocolVersion: message.SMProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
       message.SMProtocolVersion : '0.1.1',
-    DTProtocolVersion: message.DTProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
-      message.SMProtocolVersion : '0.1.0'
+    DTProtocolVersion: message.DTProtocolVersion && typeof message.DTProtocolVersion === 'string' ?
+      message.DTProtocolVersion : '0.1.0'
   };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "enter" received ->'], message);
@@ -11009,12 +11024,12 @@ Skylink.prototype._restartHandler = function(message){
   userInfo.agent = {
     name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
     version: (function () {
-      if (typeof message.version !== 'string') {
+      if (!(message.version && typeof message.version === 'string')) {
         return 0;
       }
       // E.g. 0.9.6, replace minor "." with 0
       if (message.version.indexOf('.') > -1) {
-        parts = message.version.split('.');
+        var parts = message.version.split('.');
         if (parts.length > 2) {
           var majorVer = parts[0] || '0';
           parts.splice(0, 1);
@@ -11029,8 +11044,8 @@ Skylink.prototype._restartHandler = function(message){
       message.temasysPluginVersion : null,
     SMProtocolVersion: message.SMProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
       message.SMProtocolVersion : '0.1.1',
-    DTProtocolVersion: message.DTProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
-      message.SMProtocolVersion : '0.1.0'
+    DTProtocolVersion: message.DTProtocolVersion && typeof message.DTProtocolVersion === 'string' ?
+      message.DTProtocolVersion : '0.1.0'
   };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "restart" received ->'], message);
@@ -11116,12 +11131,12 @@ Skylink.prototype._welcomeHandler = function(message) {
   userInfo.agent = {
     name: typeof message.agent === 'string' && message.agent ? message.agent : 'other',
     version: (function () {
-      if (typeof message.version !== 'string') {
+      if (!(message.version && typeof message.version === 'string')) {
         return 0;
       }
       // E.g. 0.9.6, replace minor "." with 0
       if (message.version.indexOf('.') > -1) {
-        parts = message.version.split('.');
+        var parts = message.version.split('.');
         if (parts.length > 2) {
           var majorVer = parts[0] || '0';
           parts.splice(0, 1);
@@ -11136,8 +11151,8 @@ Skylink.prototype._welcomeHandler = function(message) {
       message.temasysPluginVersion : null,
     SMProtocolVersion: message.SMProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
       message.SMProtocolVersion : '0.1.1',
-    DTProtocolVersion: message.DTProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
-      message.SMProtocolVersion : '0.1.0'
+    DTProtocolVersion: message.DTProtocolVersion && typeof message.DTProtocolVersion === 'string' ?
+      message.DTProtocolVersion : '0.1.0'
   };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "welcome" received ->'], message);
@@ -11254,6 +11269,9 @@ Skylink.prototype._offerHandler = function(message) {
 
   offer.sdp = self._removeSDPFilteredCandidates(targetMid, offer);
   offer.sdp = self._setSDPBitrate(targetMid, offer);
+  offer.sdp = self._setSDPOpusConfig(targetMid, offer);
+  offer.sdp = self._removeSDPCodecs(targetMid, offer);
+  offer.sdp = self._removeSDPREMBPackets(targetMid, offer);
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote offer ->'], offer.sdp);
 
@@ -11435,6 +11453,9 @@ Skylink.prototype._answerHandler = function(message) {
 
   answer.sdp = self._removeSDPFilteredCandidates(targetMid, answer);
   answer.sdp = self._setSDPBitrate(targetMid, answer);
+  answer.sdp = self._setSDPOpusConfig(targetMid, answer);
+  answer.sdp = self._removeSDPCodecs(targetMid, answer);
+  answer.sdp = self._removeSDPREMBPackets(targetMid, answer);
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote answer ->'], answer.sdp);
 
@@ -11679,25 +11700,29 @@ Skylink.prototype.MEDIA_ACCESS_FALLBACK_STATE = {
  *   and <code>options.video.frameRate</code> when provided.
  * @param {Boolean|JSON} [options.audio=false] The audio configuration options.
  * @param {Boolean} [options.audio.stereo=false] The flag if stereo band should be configured
- *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
+ *   <small>Note that Peers may override the "receiving" <code>stereo</code> config depending on the Peers configuration.</small>
  * @param {Boolean} [options.audio.usedtx] <blockquote class="info">
  *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
  *   The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec
- *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
  *   <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
+ *   <small>Note that Peers may override the "receiving" <code>usedtx</code> config depending on the Peers configuration.</small>
  * @param {Boolean} [options.audio.useinbandfec] <blockquote class="info">
  *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
  *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be
- *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
  *   <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
+ *   <small>Note that Peers may override the "receiving" <code>useinbandfec</code> config depending on the Peers configuration.</small>
  * @param {Number} [options.audio.maxplaybackrate] <blockquote class="info">
  *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
  *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
- *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
  *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
+ *   <small>Note that Peers may override the "receiving" <code>maxplaybackrate</code> config depending on the Peers configuration.</small>
  * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
  *   <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.audioMuted</code>,
  *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.audioMuted</code> value to
@@ -12115,7 +12140,7 @@ Skylink.prototype.sendStream = function(options, callback) {
   var restartFn = function (stream) {
     if (self._inRoom) {
       if (!self._streams.screenshare) {
-        self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo());
+        self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo(), false, stream.id || stream.label);
         self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
       }
 
@@ -12649,7 +12674,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
       self.off('mediaAccessError', mediaAccessErrorFn);
 
       if (self._inRoom) {
-        self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo());
+        self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo(), true, stream.id || stream.label);
         self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 
         if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
@@ -12784,7 +12809,8 @@ Skylink.prototype.stopScreen = function () {
 
     if (this._inRoom) {
       if (this._streams.userMedia && this._streams.userMedia.stream) {
-        this._trigger('incomingStream', this._user.sid, this._streams.userMedia.stream, true, this.getPeerInfo());
+        this._trigger('incomingStream', this._user.sid, this._streams.userMedia.stream, true, this.getPeerInfo(),
+          false, this._streams.userMedia.stream.id || this._streams.userMedia.stream.label);
         this._trigger('peerUpdated', this._user.sid, this.getPeerInfo(), true);
       }
       this._refreshPeerConnection(Object.keys(this._peerConnections), false);
@@ -13284,7 +13310,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
     log.log([targetMid, 'MediaStream', stream.id, 'Peer is having a screensharing session with user']);
   }
 
-  self._trigger('incomingStream', targetMid, stream, false, self.getPeerInfo(targetMid));
+  self._trigger('incomingStream', targetMid, stream, false, self.getPeerInfo(targetMid), isScreenSharing, stream.id || stream.label);
   self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
 };
 
@@ -13359,6 +13385,54 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
     } else {
       // Fix errors thrown like NS_ERROR_UNEXPECTED
       log.error([peerId, null, null, 'Failed adding local stream'], error);
+    }
+  }
+};
+
+/**
+ * Function that handles ended streams.
+ * @method _handleEndedStreams
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._handleEndedStreams = function (peerId, checkStreamId) {
+  var self = this;
+  self._streamsSession[peerId] = self._streamsSession[peerId] || {};
+
+  var renderEndedFn = function (streamId) {
+    var shouldTrigger = !!self._streamsSession[peerId][streamId];
+
+    if (!checkStreamId && self._peerConnections[peerId] &&
+      self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
+      var streams = self._peerConnections[peerId].getRemoteStreams();
+
+      for (var i = 0; i < streams.length; i++) {
+        if (streamId === (streams[i].id || streams[i].label)) {
+          shouldTrigger = false;
+          break;
+        }
+      }
+    }
+
+    if (shouldTrigger) {
+      var peerInfo = clone(self.getPeerInfo(peerId));
+      peerInfo.settings.audio = clone(self._streamsSession[peerId][streamId].audio);
+      peerInfo.settings.video = clone(self._streamsSession[peerId][streamId].video);
+      var hasScreenshare = peerInfo.settings.video && typeof peerInfo.settings.video === 'object' &&
+        !!peerInfo.settings.video.screenshare;
+      self._streamsSession[peerId][streamId] = false;
+      self._trigger('streamEnded', peerId, peerInfo, false, hasScreenshare, streamId);
+    }
+  };
+
+  if (checkStreamId) {
+    renderEndedFn(checkStreamId);
+  } else {
+    for (var prop in self._streamsSession[peerId]) {
+      if (self._streamsSession[peerId].hasOwnProperty(prop) && self._streamsSession[peerId][prop]) {
+        renderEndedFn(prop);
+      }
     }
   }
 };
@@ -13953,7 +14027,6 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   var self = this;
   var sdpLines = sessionDescription.sdp.split('\r\n');
   var mediaType = '';
-  var isMediaAllowed
 
   for (var i = 0; i < sdpLines.length; i++) {
     if (sdpLines[i].indexOf('m=') === 0) {

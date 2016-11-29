@@ -798,7 +798,8 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
   if (accept) {
     log.debug([peerId, 'RTCDataChannel', transferId, 'Accepted data transfer and starting ...']);
 
-    var dataChannelStateCbFn = function (state, evtPeerId, error) {
+    var dataChannelStateCbFn = function (state, evtPeerId, error, cN, cT) {
+      console.info(evtPeerId, error, cN, cT);
       self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR, transferId, peerId,
         self._getTransferInfo(transferId, peerId, true, false, false), {
         transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD,
@@ -1173,6 +1174,7 @@ Skylink.prototype._startDataTransfer = function(chunks, transferInfo, listOfPeer
     for (var p = 0; p < listOfPeers.length; p++) {
       var agentName = (((self._peerInformations[listOfPeers[p]]) || {}).agent || {}).name || '';
 
+      // C++ SDK does not support binary file transfer for now
       if (self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1) {
         self._dataTransfers[transferId].enforceBSPeers.push(listOfPeers[p]);
       }
@@ -1445,10 +1447,10 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
   }
 
   var agentName = (self._peerInformations[peerId].agent || {}).name || '';
-  var requireInterop = self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1;
+  var requireInterop = self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1 && agentName !== 'cpp';
 
   // Prevent DATA_URL (or "string" dataType transfers) with Android / iOS / C++ SDKs
-  if (requireInterop && self._dataTransfers[transferId].dataType === self.DATA_TRANSFER_SESSION_TYPE.DATA_URL) {
+  if ((requireInterop || agentName === 'cpp') && self._dataTransfers[transferId].dataType === self.DATA_TRANSFER_SESSION_TYPE.DATA_URL) {
     returnErrorBeforeTransferFn('Unable to start data transfer as Peer do not support DATA_URL type of data transfers');
     return;
   }
@@ -1503,9 +1505,9 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
       return;
     }
 
-    if (evtPeerId === peerId) {
-      if (state === self.DATA_CHANNEL_STATE.OPEN && channelName === transferId &&
-        channelType === self.DATA_CHANNEL_TYPE.DATA) {
+    if (evtPeerId === peerId && (channelType === self.DATA_CHANNEL_TYPE.DATA ? channelName === transferId : true)) {
+      if (state === self.DATA_CHANNEL_STATE.OPEN && channelType === self.DATA_CHANNEL_TYPE.DATA &&
+        channelName === transferId) {
         sendWRQFn();
         return false;
       }

@@ -83,6 +83,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       log.log([targetMid, 'RTCIceCandidate', null, 'ICE gathering has started.']);
 
       pc.gathering = true;
+      pc.gathered = false;
 
       self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.GATHERING, targetMid);
     }
@@ -116,8 +117,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       candidate: candidate.candidate
     });
 
-    if (!(self._enableIceTrickle && self._peerInformations[targetMid] &&
-      self._peerInformations[targetMid].config.enableIceTrickle)) {
+    if (!self._enableIceTrickle) {
       log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate as ' +
         'trickle ICE is disabled ->'], candidate);
       return;
@@ -139,12 +139,12 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
     log.log([targetMid, 'RTCIceCandidate', null, 'ICE gathering has completed.']);
 
     pc.gathering = false;
+    pc.gathered = true;
 
     self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.COMPLETED, targetMid);
 
     // Disable Ice trickle option
-    if (!(self._enableIceTrickle && self._peerInformations[targetMid] &&
-      self._peerInformations[targetMid].config.enableIceTrickle)) {
+    if (!self._enableIceTrickle) {
       var sessionDescription = self._peerConnections[targetMid].localDescription;
 
       if (!(sessionDescription && sessionDescription.type && sessionDescription.sdp)) {

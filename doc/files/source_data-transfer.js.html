@@ -889,7 +889,8 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
   if (accept) {
     log.debug([peerId, &#x27;RTCDataChannel&#x27;, transferId, &#x27;Accepted data transfer and starting ...&#x27;]);
 
-    var dataChannelStateCbFn = function (state, evtPeerId, error) {
+    var dataChannelStateCbFn = function (state, evtPeerId, error, cN, cT) {
+      console.info(evtPeerId, error, cN, cT);
       self._trigger(&#x27;dataTransferState&#x27;, self.DATA_TRANSFER_STATE.ERROR, transferId, peerId,
         self._getTransferInfo(transferId, peerId, true, false, false), {
         transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD,
@@ -1264,6 +1265,7 @@ Skylink.prototype._startDataTransfer = function(chunks, transferInfo, listOfPeer
     for (var p = 0; p &lt; listOfPeers.length; p++) {
       var agentName = (((self._peerInformations[listOfPeers[p]]) || {}).agent || {}).name || &#x27;&#x27;;
 
+      // C++ SDK does not support binary file transfer for now
       if (self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1) {
         self._dataTransfers[transferId].enforceBSPeers.push(listOfPeers[p]);
       }
@@ -1536,10 +1538,10 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
   }
 
   var agentName = (self._peerInformations[peerId].agent || {}).name || &#x27;&#x27;;
-  var requireInterop = self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1;
+  var requireInterop = self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1 &amp;&amp; agentName !== &#x27;cpp&#x27;;
 
   // Prevent DATA_URL (or &quot;string&quot; dataType transfers) with Android / iOS / C++ SDKs
-  if (requireInterop &amp;&amp; self._dataTransfers[transferId].dataType === self.DATA_TRANSFER_SESSION_TYPE.DATA_URL) {
+  if ((requireInterop || agentName === &#x27;cpp&#x27;) &amp;&amp; self._dataTransfers[transferId].dataType === self.DATA_TRANSFER_SESSION_TYPE.DATA_URL) {
     returnErrorBeforeTransferFn(&#x27;Unable to start data transfer as Peer do not support DATA_URL type of data transfers&#x27;);
     return;
   }
@@ -1594,9 +1596,9 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
       return;
     }
 
-    if (evtPeerId === peerId) {
-      if (state === self.DATA_CHANNEL_STATE.OPEN &amp;&amp; channelName === transferId &amp;&amp;
-        channelType === self.DATA_CHANNEL_TYPE.DATA) {
+    if (evtPeerId === peerId &amp;&amp; (channelType === self.DATA_CHANNEL_TYPE.DATA ? channelName === transferId : true)) {
+      if (state === self.DATA_CHANNEL_STATE.OPEN &amp;&amp; channelType === self.DATA_CHANNEL_TYPE.DATA &amp;&amp;
+        channelName === transferId) {
         sendWRQFn();
         return false;
       }

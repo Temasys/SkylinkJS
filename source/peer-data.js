@@ -109,16 +109,19 @@ Skylink.prototype.getPeerInfo = function(peerId) {
   if (typeof peerId === 'string' && typeof this._peerInformations[peerId] === 'object') {
     peerInfo = clone(this._peerInformations[peerId]);
     peerInfo.room = clone(this._selectedRoom);
-    peerInfo.settings.googleXBandwidth = {};
+    peerInfo.settings.bandwidth = peerInfo.settings.bandwidth || {};
+    peerInfo.settings.googleXBandwidth = peerInfo.settings.googleXBandwidth || {};
 
     if (!(typeof peerInfo.settings.video === 'boolean' || (peerInfo.settings.video &&
       typeof peerInfo.settings.video === 'object'))) {
       peerInfo.settings.video = false;
+      peerInfo.mediaStatus.audioMuted = true;
     }
 
     if (!(typeof peerInfo.settings.audio === 'boolean' || (peerInfo.settings.audio &&
       typeof peerInfo.settings.audio === 'object'))) {
       peerInfo.settings.audio = false;
+      peerInfo.mediaStatus.audioMuted = true;
     }
 
     if (typeof peerInfo.mediaStatus.audioMuted !== 'boolean') {
@@ -135,17 +138,25 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     }
 
     if (peerInfo.settings.video && typeof peerInfo.settings.video === 'object' &&
-      peerInfo.settings.video.frameRate === -1) {
-      peerInfo.settings.video.frameRate = null;
+      peerInfo.settings.video.customSettings && typeof peerInfo.settings.video.customSettings === 'object') {
+      if (peerInfo.settings.video.customSettings.frameRate) {
+        peerInfo.settings.video.frameRate = clone(peerInfo.settings.video.customSettings.frameRate);
+      }
+      if (peerInfo.settings.video.customSettings.width) {
+        peerInfo.settings.video.resolution = peerInfo.settings.video.resolution || {};
+        peerInfo.settings.video.resolution.width = clone(peerInfo.settings.video.customSettings.width);
+      }
+      if (peerInfo.settings.video.customSettings.height) {
+        peerInfo.settings.video.resolution = peerInfo.settings.video.resolution || {};
+        peerInfo.settings.video.resolution.height = clone(peerInfo.settings.video.customSettings.height);
+      }
+      if (peerInfo.settings.video.customSettings.facingMode) {
+        peerInfo.settings.video.facingMode = clone(peerInfo.settings.video.customSettings.facingMode);
+      }
     }
 
     if (peerInfo.settings.audio && typeof peerInfo.settings.audio === 'object') {
-      peerInfo.settings.audio.usedtx = typeof peerInfo.settings.audio.usedtx === 'boolean' ?
-        peerInfo.settings.audio.usedtx : null;
-      peerInfo.settings.audio.maxplaybackrate = typeof peerInfo.settings.audio.maxplaybackrate === 'number' ?
-        peerInfo.settings.audio.maxplaybackrate : null;
-      peerInfo.settings.audio.useinbandfec = typeof peerInfo.settings.audio.useinbandfec === 'boolean' ?
-        peerInfo.settings.audio.useinbandfec : null;
+      peerInfo.settings.audio.stereo = peerInfo.settings.audio.stereo === true;
     }
 
     if (!(peerInfo.userData !== null && typeof peerInfo.userData !== 'undefined')) {
@@ -164,7 +175,9 @@ Skylink.prototype.getPeerInfo = function(peerId) {
         name: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion,
         os: window.navigator.platform,
-        pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+        pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+        SMProtocolVersion: this.SMProtocolVersion,
+        DTProtocolVersion: this.DTProtocolVersion
       },
       room: clone(this._selectedRoom),
       config: {

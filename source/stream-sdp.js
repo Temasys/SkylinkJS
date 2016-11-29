@@ -596,7 +596,6 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   var self = this;
   var sdpLines = sessionDescription.sdp.split('\r\n');
   var mediaType = '';
-  var isMediaAllowed
 
   for (var i = 0; i < sdpLines.length; i++) {
     if (sdpLines[i].indexOf('m=') === 0) {
