@@ -216,6 +216,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
   pc.processingLocalSDP = true;
 
+  // Sets and expected receiving codecs etc.
   sessionDescription.sdp = self._setSDPOpusConfig(targetMid, sessionDescription);
   sessionDescription.sdp = self._setSDPCodec(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);

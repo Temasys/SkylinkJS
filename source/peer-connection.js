@@ -1213,14 +1213,10 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
   // using .urls feature
   try {
-    pc = new window.RTCPeerConnection(
-      self._room.connection.peerConfig,
-      self._room.connection.peerConstraints);
+    pc = new RTCPeerConnection(self._room.connection.peerConfig, self._room.connection.peerConstraints);
     log.info([targetMid, null, null, 'Created peer connection']);
-    log.debug([targetMid, null, null, 'Peer connection config:'],
-      self._room.connection.peerConfig);
-    log.debug([targetMid, null, null, 'Peer connection constraints:'],
-      self._room.connection.peerConstraints);
+    log.debug([targetMid, null, null, 'Peer connection config:'], self._room.connection.peerConfig);
+    log.debug([targetMid, null, null, 'Peer connection constraints:'], self._room.connection.peerConstraints);
   } catch (error) {
     log.error([targetMid, null, null, 'Failed creating peer connection:'], error);
     return null;
@@ -1235,6 +1231,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.processingLocalSDP = false;
   pc.processingRemoteSDP = false;
   pc.gathered = false;
+  pc.gathering = false;
 
   // candidates
   self._gatheredCandidates[targetMid] = {
@@ -1266,6 +1263,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
         'is set to false']);
     }
   };
+
   pc.onaddstream = function(event) {
     var stream = event.stream || event;
 
@@ -1290,23 +1288,21 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 
     self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
   };
+
   pc.onicecandidate = function(event) {
     self._onIceCandidate(targetMid, event.candidate || event);
   };
+
   pc.oniceconnectionstatechange = function(evt) {
-    checkIceConnectionState(targetMid, pc.iceConnectionState, function(iceConnectionState) {
-      log.debug([targetMid, 'RTCIceConnectionState', null, 'Ice connection state changed ->'], iceConnectionState);
+    log.debug([targetMid, 'RTCIceConnectionState', null, 'Ice connection state changed ->'], pc.iceConnectionState);
 
-      self._trigger('iceConnectionState', iceConnectionState, targetMid);
+    self._trigger('iceConnectionState', pc.iceConnectionState, targetMid);
 
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._enableIceTrickle) {
-        self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
-      }
-    });
+    if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._enableIceTrickle) {
+      self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
+    }
   };
-  // pc.onremovestream = function () {
-  //   self._onRemoteStreamRemoved(targetMid);
-  // };
+
   pc.onsignalingstatechange = function() {
     log.debug([targetMid, 'RTCSignalingState', null, 'Peer connection state changed ->'], pc.signalingState);
     self._trigger('peerConnectionState', pc.signalingState, targetMid);

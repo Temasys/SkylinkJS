@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Tue Nov 29 2016 11:51:53 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Tue Nov 29 2016 12:42:19 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.16 - Tue Nov 29 2016 11:51:53 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Tue Nov 29 2016 12:42:19 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -15326,6 +15326,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       log.log([targetMid, 'RTCIceCandidate', null, 'ICE gathering has started.']);
 
       pc.gathering = true;
+      pc.gathered = false;
 
       self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.GATHERING, targetMid);
     }
@@ -15359,8 +15360,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       candidate: candidate.candidate
     });
 
-    if (!(self._enableIceTrickle && self._peerInformations[targetMid] &&
-      self._peerInformations[targetMid].config.enableIceTrickle)) {
+    if (!self._enableIceTrickle) {
       log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate as ' +
         'trickle ICE is disabled ->'], candidate);
       return;
@@ -15382,12 +15382,12 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
     log.log([targetMid, 'RTCIceCandidate', null, 'ICE gathering has completed.']);
 
     pc.gathering = false;
+    pc.gathered = true;
 
     self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.COMPLETED, targetMid);
 
     // Disable Ice trickle option
-    if (!(self._enableIceTrickle && self._peerInformations[targetMid] &&
-      self._peerInformations[targetMid].config.enableIceTrickle)) {
+    if (!self._enableIceTrickle) {
       var sessionDescription = self._peerConnections[targetMid].localDescription;
 
       if (!(sessionDescription && sessionDescription.type && sessionDescription.sdp)) {
@@ -16961,14 +16961,10 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
   // using .urls feature
   try {
-    pc = new window.RTCPeerConnection(
-      self._room.connection.peerConfig,
-      self._room.connection.peerConstraints);
+    pc = new RTCPeerConnection(self._room.connection.peerConfig, self._room.connection.peerConstraints);
     log.info([targetMid, null, null, 'Created peer connection']);
-    log.debug([targetMid, null, null, 'Peer connection config:'],
-      self._room.connection.peerConfig);
-    log.debug([targetMid, null, null, 'Peer connection constraints:'],
-      self._room.connection.peerConstraints);
+    log.debug([targetMid, null, null, 'Peer connection config:'], self._room.connection.peerConfig);
+    log.debug([targetMid, null, null, 'Peer connection constraints:'], self._room.connection.peerConstraints);
   } catch (error) {
     log.error([targetMid, null, null, 'Failed creating peer connection:'], error);
     return null;
@@ -16983,6 +16979,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.processingLocalSDP = false;
   pc.processingRemoteSDP = false;
   pc.gathered = false;
+  pc.gathering = false;
 
   // candidates
   self._gatheredCandidates[targetMid] = {
@@ -17014,6 +17011,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
         'is set to false']);
     }
   };
+
   pc.onaddstream = function(event) {
     var stream = event.stream || event;
 
@@ -17038,23 +17036,21 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 
     self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
   };
+
   pc.onicecandidate = function(event) {
     self._onIceCandidate(targetMid, event.candidate || event);
   };
+
   pc.oniceconnectionstatechange = function(evt) {
-    checkIceConnectionState(targetMid, pc.iceConnectionState, function(iceConnectionState) {
-      log.debug([targetMid, 'RTCIceConnectionState', null, 'Ice connection state changed ->'], iceConnectionState);
+    log.debug([targetMid, 'RTCIceConnectionState', null, 'Ice connection state changed ->'], pc.iceConnectionState);
 
-      self._trigger('iceConnectionState', iceConnectionState, targetMid);
+    self._trigger('iceConnectionState', pc.iceConnectionState, targetMid);
 
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._enableIceTrickle) {
-        self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
-      }
-    });
+    if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._enableIceTrickle) {
+      self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
+    }
   };
-  // pc.onremovestream = function () {
-  //   self._onRemoteStreamRemoved(targetMid);
-  // };
+
   pc.onsignalingstatechange = function() {
     log.debug([targetMid, 'RTCSignalingState', null, 'Peer connection state changed ->'], pc.signalingState);
     self._trigger('peerConnectionState', pc.signalingState, targetMid);
@@ -17647,6 +17643,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
   pc.processingLocalSDP = true;
 
+  // Sets and expected receiving codecs etc.
   sessionDescription.sdp = self._setSDPOpusConfig(targetMid, sessionDescription);
   sessionDescription.sdp = self._setSDPCodec(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
