@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Tue Nov 29 2016 12:42:19 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Tue Nov 29 2016 16:15:11 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.16 - Tue Nov 29 2016 12:42:19 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Tue Nov 29 2016 16:15:11 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -12499,6 +12499,17 @@ function Skylink() {
    * @since 0.6.15
    */
   this._streamsStoppedCbs = {};
+
+  /**
+   * Stores all the Stream sessions.
+   * Defined as <code>false</code> when Stream has already ended.
+   * @attribute _streamsSession
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.15
+   */
+  this._streamsSession = {};
 
   /**
    * Stores the preferred sending Peer connection streaming audio codec.
@@ -16926,8 +16937,8 @@ Skylink.prototype._removePeer = function(peerId) {
       this._peerConnections[peerId].close();
     }
 
-    if (peerId !== 'MCU' && this._peerConnections[peerId].hasStream) {
-      this._trigger('streamEnded', peerId, this.getPeerInfo(peerId), false);
+    if (peerId !== 'MCU') {
+      this._handleEndedStreams(peerId);
     }
 
     delete this._peerConnections[peerId];
@@ -16939,6 +16950,10 @@ Skylink.prototype._removePeer = function(peerId) {
   // remove peer messages stamps session
   if (typeof this._peerMessagesStamps[peerId] !== 'undefined') {
     delete this._peerMessagesStamps[peerId];
+  }
+  // remove peer streams session
+  if (typeof this._streamsSession[peerId] !== 'undefined') {
+    delete this._streamsSession[peerId];
   }
 
   // close datachannel connection
@@ -16987,6 +17002,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     receiving: { host: [], srflx: [], relay: [] }
   };
 
+  self._streamsSession[targetMid] = self._streamsSession[targetMid] || {};
+
   // callbacks
   // standard not implemented: onnegotiationneeded,
   pc.ondatachannel = function(event) {
@@ -17014,9 +17031,10 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 
   pc.onaddstream = function(event) {
     var stream = event.stream || event;
+    var streamId = stream.id || stream.label;
 
     if (targetMid === 'MCU') {
-      log.warn([targetMid, 'MediaStream', stream.id, 'Ignoring received remote stream from MCU ->'], stream);
+      log.warn([targetMid, 'MediaStream', streamId, 'Ignoring received remote stream from MCU ->'], stream);
       return;
     }
 
@@ -17024,17 +17042,22 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     // See: ESS-680
     if (!self._hasMCU && window.webrtcDetectedBrowser === 'firefox' &&
       pc.getRemoteStreams().length > 1 && pc.remoteDescription && pc.remoteDescription.sdp) {
-      var recvStreamId = stream.id || stream.label;
-
-      if (pc.remoteDescription.sdp.indexOf(' msid:' + recvStreamId + ' ') === -1) {
-        log.warn([targetMid, 'MediaStream', stream.id, 'Ignoring received empty remote stream ->'], stream);
-       return;
+      
+      if (pc.remoteDescription.sdp.indexOf(' msid:' + streamId + ' ') === -1) {
+        log.warn([targetMid, 'MediaStream', streamId, 'Ignoring received empty remote stream ->'], stream);
+        return;
       }
     }
 
-    pc.hasStream = true;
+    var peerSettings = clone(self.getPeerInfo(targetMid).settings);
+    var hasScreenshare = peerSettings.video && typeof peerSettings.video === 'object' && !!peerSettings.video.screenshare;
 
-    self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
+    pc.hasStream = true;
+    pc.hasScreen = !!hasScreenshare;
+
+    self._streamsSession[targetMid][streamId] = peerSettings;
+
+    self._onRemoteStreamAdded(targetMid, stream, !!hasScreenshare);
   };
 
   pc.onicecandidate = function(event) {
@@ -17046,7 +17069,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 
     self._trigger('iceConnectionState', pc.iceConnectionState, targetMid);
 
-    if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._enableIceTrickle) {
+    if (pc.iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._enableIceTrickle) {
       self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
     }
   };
@@ -20356,6 +20379,8 @@ var _eventsDocs = {
    * @param {JSON} peerInfo The Peer session information.
    *   <small>Object signature matches the <code>peerInfo</code> parameter payload received in the
    *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small>
+   * @param {Boolean} isScreensharing The flag if Peer Stream is a screensharing Stream.
+   * @param {String} streamId The Stream ID.
    * @for Skylink
    * @since 0.5.5
    */
@@ -20550,7 +20575,9 @@ var _eventsDocs = {
   serverPeerRestart: [],
 
   /**
-   * Event triggered when Peer Stream streaming has stopped.
+   * Event triggered when a Peer Stream streaming has stopped.
+   * <small>Note that it may not be the currently sent Stream to User, and it also triggers
+   * when User leaves the Room for any currently sent Stream to User from Peer.</small>
    * @event streamEnded
    * @param {String} peerId The Peer ID.
    * @param {JSON} peerInfo The Peer session information.
@@ -22179,32 +22206,21 @@ Skylink.prototype._streamEventHandler = function(message) {
   var targetMid = message.mid;
   log.log([targetMid, null, message.type, 'Peer\'s stream status:'], message.status);
 
-  if (this._peerInformations[targetMid]) {
-    var currentPeerInfo = clone(this.getPeerInfo(targetMid));
-    var hasScreenshare = false;
-
-    if (message.settings && typeof message.settings === 'object') {
-      currentPeerInfo.settings.audio = message.settings.audio;
-      currentPeerInfo.settings.video = message.settings.video;
-      hasScreenshare = currentPeerInfo.settings.video && typeof currentPeerInfo.settings.video === 'object' &&
-        !!currentPeerInfo.settings.video.screenshare;
-    }
-
-  	if (message.status === 'ended') {
-  		this._trigger('streamEnded', targetMid, currentPeerInfo, hasScreenshare, message.streamId);
-      this._trigger('peerUpdated', targetMid, this.getPeerInfo(targetMid), false);
-
-      if (this._peerConnections[targetMid]) {
-        this._peerConnections[targetMid].hasStream = false;
-        if (hasScreenshare) {
-          this._peerConnections[targetMid].hasScreen = false;
-        }
-      } else {
-        log.log([targetMid, null, message.type, 'Peer connection not found']);
+  if (this._peerInformations[targetMid] && message.streamId) {
+    this._streamsSession[targetMid] = this._streamsSession[targetMid] || {};
+    if (message.status === 'ended') {
+      if (message.settings && typeof message.settings === 'object' &&
+        typeof this._streamsSession[targetMid][message.streamId] === 'undefined') {
+        this._streamsSession[targetMid][message.streamId] = {
+          audio: message.settings.audio,
+          video: message.settings.video
+        };
       }
-  	}
 
+      this._handleEndedStreams(targetMid, message.streamId);
+  	}
   } else {
+    // Probably left the room already
     log.log([targetMid, null, message.type, 'Peer does not have any user information']);
   }
 };
@@ -22295,10 +22311,14 @@ Skylink.prototype._inRoomHandler = function(message) {
   self._trigger('peerJoined', self._user.sid, self.getPeerInfo(), true);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
 
+  var streamId = null;
+
   if (self._streams.screenshare && self._streams.screenshare.stream) {
-    self._trigger('incomingStream', self._user.sid, self._streams.screenshare.stream, true, self.getPeerInfo());
+    streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
+    self._trigger('incomingStream', self._user.sid, self._streams.screenshare.stream, true, self.getPeerInfo(), true, streamId);
   } else if (self._streams.userMedia && self._streams.userMedia.stream) {
-    self._trigger('incomingStream', self._user.sid, self._streams.userMedia.stream, true, self.getPeerInfo());
+    streamId = self._streams.userMedia.stream.id || self._streams.userMedia.stream.label;
+    self._trigger('incomingStream', self._user.sid, self._streams.userMedia.stream, true, self.getPeerInfo(), false, streamId);
   }
   // NOTE ALEX: should we wait for local streams?
   // or just go with what we have (if no stream, then one way?)
@@ -23567,7 +23587,7 @@ Skylink.prototype.sendStream = function(options, callback) {
   var restartFn = function (stream) {
     if (self._inRoom) {
       if (!self._streams.screenshare) {
-        self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo());
+        self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo(), false, stream.id || stream.label);
         self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
       }
 
@@ -24101,7 +24121,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
       self.off('mediaAccessError', mediaAccessErrorFn);
 
       if (self._inRoom) {
-        self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo());
+        self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo(), true, stream.id || stream.label);
         self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 
         if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
@@ -24236,7 +24256,8 @@ Skylink.prototype.stopScreen = function () {
 
     if (this._inRoom) {
       if (this._streams.userMedia && this._streams.userMedia.stream) {
-        this._trigger('incomingStream', this._user.sid, this._streams.userMedia.stream, true, this.getPeerInfo());
+        this._trigger('incomingStream', this._user.sid, this._streams.userMedia.stream, true, this.getPeerInfo(),
+          false, this._streams.userMedia.stream.id || this._streams.userMedia.stream.label);
         this._trigger('peerUpdated', this._user.sid, this.getPeerInfo(), true);
       }
       this._refreshPeerConnection(Object.keys(this._peerConnections), false);
@@ -24736,7 +24757,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
     log.log([targetMid, 'MediaStream', stream.id, 'Peer is having a screensharing session with user']);
   }
 
-  self._trigger('incomingStream', targetMid, stream, false, self.getPeerInfo(targetMid));
+  self._trigger('incomingStream', targetMid, stream, false, self.getPeerInfo(targetMid), isScreenSharing, stream.id || stream.label);
   self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
 };
 
@@ -24811,6 +24832,54 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
     } else {
       // Fix errors thrown like NS_ERROR_UNEXPECTED
       log.error([peerId, null, null, 'Failed adding local stream'], error);
+    }
+  }
+};
+
+/**
+ * Function that handles ended streams.
+ * @method _handleEndedStreams
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._handleEndedStreams = function (peerId, checkStreamId) {
+  var self = this;
+  self._streamsSession[peerId] = self._streamsSession[peerId] || {};
+
+  var renderEndedFn = function (streamId) {
+    var shouldTrigger = !!self._streamsSession[peerId][streamId];
+
+    if (!checkStreamId && self._peerConnections[peerId] &&
+      self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
+      var streams = self._peerConnections[peerId].getRemoteStreams();
+
+      for (var i = 0; i < streams.length; i++) {
+        if (streamId === (streams[i].id || streams[i].label)) {
+          shouldTrigger = false;
+          break;
+        }
+      }
+    }
+
+    if (shouldTrigger) {
+      var peerInfo = clone(self.getPeerInfo(peerId));
+      peerInfo.settings.audio = clone(self._streamsSession[peerId][streamId].audio);
+      peerInfo.settings.video = clone(self._streamsSession[peerId][streamId].video);
+      var hasScreenshare = peerInfo.settings.video && typeof peerInfo.settings.video === 'object' &&
+        !!peerInfo.settings.video.screenshare;
+      self._streamsSession[peerId][streamId] = false;
+      self._trigger('streamEnded', peerId, peerInfo, false, hasScreenshare, streamId);
+    }
+  };
+
+  if (checkStreamId) {
+    renderEndedFn(checkStreamId);
+  } else {
+    for (var prop in self._streamsSession[peerId]) {
+      if (self._streamsSession[peerId].hasOwnProperty(prop) && self._streamsSession[peerId][prop]) {
+        renderEndedFn(prop);
+      }
     }
   }
 };

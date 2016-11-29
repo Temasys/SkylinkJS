@@ -1178,8 +1178,8 @@ Skylink.prototype._removePeer = function(peerId) {
       this._peerConnections[peerId].close();
     }
 
-    if (peerId !== 'MCU' && this._peerConnections[peerId].hasStream) {
-      this._trigger('streamEnded', peerId, this.getPeerInfo(peerId), false);
+    if (peerId !== 'MCU') {
+      this._handleEndedStreams(peerId);
     }
 
     delete this._peerConnections[peerId];
@@ -1191,6 +1191,10 @@ Skylink.prototype._removePeer = function(peerId) {
   // remove peer messages stamps session
   if (typeof this._peerMessagesStamps[peerId] !== 'undefined') {
     delete this._peerMessagesStamps[peerId];
+  }
+  // remove peer streams session
+  if (typeof this._streamsSession[peerId] !== 'undefined') {
+    delete this._streamsSession[peerId];
   }
 
   // close datachannel connection
@@ -1239,6 +1243,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     receiving: { host: [], srflx: [], relay: [] }
   };
 
+  self._streamsSession[targetMid] = self._streamsSession[targetMid] || {};
+
   // callbacks
   // standard not implemented: onnegotiationneeded,
   pc.ondatachannel = function(event) {
@@ -1266,9 +1272,10 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 
   pc.onaddstream = function(event) {
     var stream = event.stream || event;
+    var streamId = stream.id || stream.label;
 
     if (targetMid === 'MCU') {
-      log.warn([targetMid, 'MediaStream', stream.id, 'Ignoring received remote stream from MCU ->'], stream);
+      log.warn([targetMid, 'MediaStream', streamId, 'Ignoring received remote stream from MCU ->'], stream);
       return;
     }
 
@@ -1276,17 +1283,22 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     // See: ESS-680
     if (!self._hasMCU && window.webrtcDetectedBrowser === 'firefox' &&
       pc.getRemoteStreams().length > 1 && pc.remoteDescription && pc.remoteDescription.sdp) {
-      var recvStreamId = stream.id || stream.label;
-
-      if (pc.remoteDescription.sdp.indexOf(' msid:' + recvStreamId + ' ') === -1) {
-        log.warn([targetMid, 'MediaStream', stream.id, 'Ignoring received empty remote stream ->'], stream);
-       return;
+      
+      if (pc.remoteDescription.sdp.indexOf(' msid:' + streamId + ' ') === -1) {
+        log.warn([targetMid, 'MediaStream', streamId, 'Ignoring received empty remote stream ->'], stream);
+        return;
       }
     }
 
-    pc.hasStream = true;
+    var peerSettings = clone(self.getPeerInfo(targetMid).settings);
+    var hasScreenshare = peerSettings.video && typeof peerSettings.video === 'object' && !!peerSettings.video.screenshare;
 
-    self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
+    pc.hasStream = true;
+    pc.hasScreen = !!hasScreenshare;
+
+    self._streamsSession[targetMid][streamId] = peerSettings;
+
+    self._onRemoteStreamAdded(targetMid, stream, !!hasScreenshare);
   };
 
   pc.onicecandidate = function(event) {
@@ -1298,7 +1310,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 
     self._trigger('iceConnectionState', pc.iceConnectionState, targetMid);
 
-    if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._enableIceTrickle) {
+    if (pc.iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._enableIceTrickle) {
       self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
     }
   };

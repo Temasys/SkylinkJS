@@ -1269,8 +1269,8 @@ Skylink.prototype._removePeer = function(peerId) {
       this._peerConnections[peerId].close();
     }
 
-    if (peerId !== &#x27;MCU&#x27; &amp;&amp; this._peerConnections[peerId].hasStream) {
-      this._trigger(&#x27;streamEnded&#x27;, peerId, this.getPeerInfo(peerId), false);
+    if (peerId !== &#x27;MCU&#x27;) {
+      this._handleEndedStreams(peerId);
     }
 
     delete this._peerConnections[peerId];
@@ -1282,6 +1282,10 @@ Skylink.prototype._removePeer = function(peerId) {
   // remove peer messages stamps session
   if (typeof this._peerMessagesStamps[peerId] !== &#x27;undefined&#x27;) {
     delete this._peerMessagesStamps[peerId];
+  }
+  // remove peer streams session
+  if (typeof this._streamsSession[peerId] !== &#x27;undefined&#x27;) {
+    delete this._streamsSession[peerId];
   }
 
   // close datachannel connection
@@ -1304,14 +1308,10 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
   // using .urls feature
   try {
-    pc = new window.RTCPeerConnection(
-      self._room.connection.peerConfig,
-      self._room.connection.peerConstraints);
+    pc = new RTCPeerConnection(self._room.connection.peerConfig, self._room.connection.peerConstraints);
     log.info([targetMid, null, null, &#x27;Created peer connection&#x27;]);
-    log.debug([targetMid, null, null, &#x27;Peer connection config:&#x27;],
-      self._room.connection.peerConfig);
-    log.debug([targetMid, null, null, &#x27;Peer connection constraints:&#x27;],
-      self._room.connection.peerConstraints);
+    log.debug([targetMid, null, null, &#x27;Peer connection config:&#x27;], self._room.connection.peerConfig);
+    log.debug([targetMid, null, null, &#x27;Peer connection constraints:&#x27;], self._room.connection.peerConstraints);
   } catch (error) {
     log.error([targetMid, null, null, &#x27;Failed creating peer connection:&#x27;], error);
     return null;
@@ -1326,12 +1326,15 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.processingLocalSDP = false;
   pc.processingRemoteSDP = false;
   pc.gathered = false;
+  pc.gathering = false;
 
   // candidates
   self._gatheredCandidates[targetMid] = {
     sending: { host: [], srflx: [], relay: [] },
     receiving: { host: [], srflx: [], relay: [] }
   };
+
+  self._streamsSession[targetMid] = self._streamsSession[targetMid] || {};
 
   // callbacks
   // standard not implemented: onnegotiationneeded,
@@ -1357,11 +1360,13 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
         &#x27;is set to false&#x27;]);
     }
   };
+
   pc.onaddstream = function(event) {
     var stream = event.stream || event;
+    var streamId = stream.id || stream.label;
 
     if (targetMid === &#x27;MCU&#x27;) {
-      log.warn([targetMid, &#x27;MediaStream&#x27;, stream.id, &#x27;Ignoring received remote stream from MCU -&gt;&#x27;], stream);
+      log.warn([targetMid, &#x27;MediaStream&#x27;, streamId, &#x27;Ignoring received remote stream from MCU -&gt;&#x27;], stream);
       return;
     }
 
@@ -1369,35 +1374,38 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     // See: ESS-680
     if (!self._hasMCU &amp;&amp; window.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp;
       pc.getRemoteStreams().length &gt; 1 &amp;&amp; pc.remoteDescription &amp;&amp; pc.remoteDescription.sdp) {
-      var recvStreamId = stream.id || stream.label;
-
-      if (pc.remoteDescription.sdp.indexOf(&#x27; msid:&#x27; + recvStreamId + &#x27; &#x27;) === -1) {
-        log.warn([targetMid, &#x27;MediaStream&#x27;, stream.id, &#x27;Ignoring received empty remote stream -&gt;&#x27;], stream);
-       return;
+      
+      if (pc.remoteDescription.sdp.indexOf(&#x27; msid:&#x27; + streamId + &#x27; &#x27;) === -1) {
+        log.warn([targetMid, &#x27;MediaStream&#x27;, streamId, &#x27;Ignoring received empty remote stream -&gt;&#x27;], stream);
+        return;
       }
     }
 
-    pc.hasStream = true;
+    var peerSettings = clone(self.getPeerInfo(targetMid).settings);
+    var hasScreenshare = peerSettings.video &amp;&amp; typeof peerSettings.video === &#x27;object&#x27; &amp;&amp; !!peerSettings.video.screenshare;
 
-    self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
+    pc.hasStream = true;
+    pc.hasScreen = !!hasScreenshare;
+
+    self._streamsSession[targetMid][streamId] = peerSettings;
+
+    self._onRemoteStreamAdded(targetMid, stream, !!hasScreenshare);
   };
+
   pc.onicecandidate = function(event) {
     self._onIceCandidate(targetMid, event.candidate || event);
   };
+
   pc.oniceconnectionstatechange = function(evt) {
-    checkIceConnectionState(targetMid, pc.iceConnectionState, function(iceConnectionState) {
-      log.debug([targetMid, &#x27;RTCIceConnectionState&#x27;, null, &#x27;Ice connection state changed -&gt;&#x27;], iceConnectionState);
+    log.debug([targetMid, &#x27;RTCIceConnectionState&#x27;, null, &#x27;Ice connection state changed -&gt;&#x27;], pc.iceConnectionState);
 
-      self._trigger(&#x27;iceConnectionState&#x27;, iceConnectionState, targetMid);
+    self._trigger(&#x27;iceConnectionState&#x27;, pc.iceConnectionState, targetMid);
 
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED &amp;&amp; self._enableIceTrickle) {
-        self._trigger(&#x27;iceConnectionState&#x27;, self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
-      }
-    });
+    if (pc.iceConnectionState === self.ICE_CONNECTION_STATE.FAILED &amp;&amp; self._enableIceTrickle) {
+      self._trigger(&#x27;iceConnectionState&#x27;, self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
+    }
   };
-  // pc.onremovestream = function () {
-  //   self._onRemoteStreamRemoved(targetMid);
-  // };
+
   pc.onsignalingstatechange = function() {
     log.debug([targetMid, &#x27;RTCSignalingState&#x27;, null, &#x27;Peer connection state changed -&gt;&#x27;], pc.signalingState);
     self._trigger(&#x27;peerConnectionState&#x27;, pc.signalingState, targetMid);

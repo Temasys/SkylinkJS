@@ -753,7 +753,7 @@ Skylink.prototype.sendStream = function(options, callback) {
   var restartFn = function (stream) {
     if (self._inRoom) {
       if (!self._streams.screenshare) {
-        self._trigger(&#x27;incomingStream&#x27;, self._user.sid, stream, true, self.getPeerInfo());
+        self._trigger(&#x27;incomingStream&#x27;, self._user.sid, stream, true, self.getPeerInfo(), false, stream.id || stream.label);
         self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
       }
 
@@ -1287,7 +1287,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
       self.off(&#x27;mediaAccessError&#x27;, mediaAccessErrorFn);
 
       if (self._inRoom) {
-        self._trigger(&#x27;incomingStream&#x27;, self._user.sid, stream, true, self.getPeerInfo());
+        self._trigger(&#x27;incomingStream&#x27;, self._user.sid, stream, true, self.getPeerInfo(), true, stream.id || stream.label);
         self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
 
         if (Object.keys(self._peerConnections).length &gt; 0 || self._hasMCU) {
@@ -1422,7 +1422,8 @@ Skylink.prototype.stopScreen = function () {
 
     if (this._inRoom) {
       if (this._streams.userMedia &amp;&amp; this._streams.userMedia.stream) {
-        this._trigger(&#x27;incomingStream&#x27;, this._user.sid, this._streams.userMedia.stream, true, this.getPeerInfo());
+        this._trigger(&#x27;incomingStream&#x27;, this._user.sid, this._streams.userMedia.stream, true, this.getPeerInfo(),
+          false, this._streams.userMedia.stream.id || this._streams.userMedia.stream.label);
         this._trigger(&#x27;peerUpdated&#x27;, this._user.sid, this.getPeerInfo(), true);
       }
       this._refreshPeerConnection(Object.keys(this._peerConnections), false);
@@ -1922,7 +1923,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
     log.log([targetMid, &#x27;MediaStream&#x27;, stream.id, &#x27;Peer is having a screensharing session with user&#x27;]);
   }
 
-  self._trigger(&#x27;incomingStream&#x27;, targetMid, stream, false, self.getPeerInfo(targetMid));
+  self._trigger(&#x27;incomingStream&#x27;, targetMid, stream, false, self.getPeerInfo(targetMid), isScreenSharing, stream.id || stream.label);
   self._trigger(&#x27;peerUpdated&#x27;, targetMid, self.getPeerInfo(targetMid), false);
 };
 
@@ -1997,6 +1998,54 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
     } else {
       // Fix errors thrown like NS_ERROR_UNEXPECTED
       log.error([peerId, null, null, &#x27;Failed adding local stream&#x27;], error);
+    }
+  }
+};
+
+/**
+ * Function that handles ended streams.
+ * @method _handleEndedStreams
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._handleEndedStreams = function (peerId, checkStreamId) {
+  var self = this;
+  self._streamsSession[peerId] = self._streamsSession[peerId] || {};
+
+  var renderEndedFn = function (streamId) {
+    var shouldTrigger = !!self._streamsSession[peerId][streamId];
+
+    if (!checkStreamId &amp;&amp; self._peerConnections[peerId] &amp;&amp;
+      self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
+      var streams = self._peerConnections[peerId].getRemoteStreams();
+
+      for (var i = 0; i &lt; streams.length; i++) {
+        if (streamId === (streams[i].id || streams[i].label)) {
+          shouldTrigger = false;
+          break;
+        }
+      }
+    }
+
+    if (shouldTrigger) {
+      var peerInfo = clone(self.getPeerInfo(peerId));
+      peerInfo.settings.audio = clone(self._streamsSession[peerId][streamId].audio);
+      peerInfo.settings.video = clone(self._streamsSession[peerId][streamId].video);
+      var hasScreenshare = peerInfo.settings.video &amp;&amp; typeof peerInfo.settings.video === &#x27;object&#x27; &amp;&amp;
+        !!peerInfo.settings.video.screenshare;
+      self._streamsSession[peerId][streamId] = false;
+      self._trigger(&#x27;streamEnded&#x27;, peerId, peerInfo, false, hasScreenshare, streamId);
+    }
+  };
+
+  if (checkStreamId) {
+    renderEndedFn(checkStreamId);
+  } else {
+    for (var prop in self._streamsSession[peerId]) {
+      if (self._streamsSession[peerId].hasOwnProperty(prop) &amp;&amp; self._streamsSession[peerId][prop]) {
+        renderEndedFn(prop);
+      }
     }
   }
 };

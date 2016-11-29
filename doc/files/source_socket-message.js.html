@@ -586,32 +586,21 @@ Skylink.prototype._streamEventHandler = function(message) {
   var targetMid = message.mid;
   log.log([targetMid, null, message.type, &#x27;Peer\&#x27;s stream status:&#x27;], message.status);
 
-  if (this._peerInformations[targetMid]) {
-    var currentPeerInfo = clone(this.getPeerInfo(targetMid));
-    var hasScreenshare = false;
-
-    if (message.settings &amp;&amp; typeof message.settings === &#x27;object&#x27;) {
-      currentPeerInfo.settings.audio = message.settings.audio;
-      currentPeerInfo.settings.video = message.settings.video;
-      hasScreenshare = currentPeerInfo.settings.video &amp;&amp; typeof currentPeerInfo.settings.video === &#x27;object&#x27; &amp;&amp;
-        !!currentPeerInfo.settings.video.screenshare;
-    }
-
-  	if (message.status === &#x27;ended&#x27;) {
-  		this._trigger(&#x27;streamEnded&#x27;, targetMid, currentPeerInfo, hasScreenshare, message.streamId);
-      this._trigger(&#x27;peerUpdated&#x27;, targetMid, this.getPeerInfo(targetMid), false);
-
-      if (this._peerConnections[targetMid]) {
-        this._peerConnections[targetMid].hasStream = false;
-        if (hasScreenshare) {
-          this._peerConnections[targetMid].hasScreen = false;
-        }
-      } else {
-        log.log([targetMid, null, message.type, &#x27;Peer connection not found&#x27;]);
+  if (this._peerInformations[targetMid] &amp;&amp; message.streamId) {
+    this._streamsSession[targetMid] = this._streamsSession[targetMid] || {};
+    if (message.status === &#x27;ended&#x27;) {
+      if (message.settings &amp;&amp; typeof message.settings === &#x27;object&#x27; &amp;&amp;
+        typeof this._streamsSession[targetMid][message.streamId] === &#x27;undefined&#x27;) {
+        this._streamsSession[targetMid][message.streamId] = {
+          audio: message.settings.audio,
+          video: message.settings.video
+        };
       }
-  	}
 
+      this._handleEndedStreams(targetMid, message.streamId);
+  	}
   } else {
+    // Probably left the room already
     log.log([targetMid, null, message.type, &#x27;Peer does not have any user information&#x27;]);
   }
 };
@@ -702,10 +691,14 @@ Skylink.prototype._inRoomHandler = function(message) {
   self._trigger(&#x27;peerJoined&#x27;, self._user.sid, self.getPeerInfo(), true);
   self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
 
+  var streamId = null;
+
   if (self._streams.screenshare &amp;&amp; self._streams.screenshare.stream) {
-    self._trigger(&#x27;incomingStream&#x27;, self._user.sid, self._streams.screenshare.stream, true, self.getPeerInfo());
+    streamId = self._streams.screenshare.stream.id || self._streams.screenshare.stream.label;
+    self._trigger(&#x27;incomingStream&#x27;, self._user.sid, self._streams.screenshare.stream, true, self.getPeerInfo(), true, streamId);
   } else if (self._streams.userMedia &amp;&amp; self._streams.userMedia.stream) {
-    self._trigger(&#x27;incomingStream&#x27;, self._user.sid, self._streams.userMedia.stream, true, self.getPeerInfo());
+    streamId = self._streams.userMedia.stream.id || self._streams.userMedia.stream.label;
+    self._trigger(&#x27;incomingStream&#x27;, self._user.sid, self._streams.userMedia.stream, true, self.getPeerInfo(), false, streamId);
   }
   // NOTE ALEX: should we wait for local streams?
   // or just go with what we have (if no stream, then one way?)
