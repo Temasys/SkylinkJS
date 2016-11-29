@@ -248,7 +248,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @param {JSON} [options.sdpSettings] &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that this is mainly used for debugging purposes and that it is an experimental flag, so
  *   it may cause disruptions in connections or connectivity issues when toggled. Note that it might not work
- *   with MCU enabled Peer connections or break connections.&lt;/blockquote&gt;
+ *   with MCU enabled Peer connections or break MCU enabled Peer connections.&lt;/blockquote&gt;
  *   The configuration to set the session description settings.
  * @param {JSON} [options.sdpSettings.connection] The configuration to set the session description connection settings.
  *   &lt;small&gt;Note that this configuration may disable the media streaming and these settings will be enabled for
@@ -539,7 +539,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
  *   &lt;li&gt;If Socket connection is opened: &lt;ol&gt;&lt;li&gt;&lt;a href=&quot;#event_channelClose&quot;&gt;&lt;code&gt;channelClose&lt;/code&gt; event&lt;/a&gt; triggers.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
  *   &lt;li&gt;Checks if User is in Room. &lt;ol&gt;&lt;li&gt;If User is not in a Room: &lt;ol&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;
  *   &lt;/ol&gt;&lt;/li&gt;&lt;li&gt;Else: &lt;ol&gt;&lt;li&gt;If parameter &lt;code&gt;stopMediaOptions.userMedia&lt;/code&gt; value is &lt;code&gt;true&lt;/code&gt;: &lt;ol&gt;
- *   &lt;li&gt;Invoke &lt;a href=&quot;#method_stopStream&quot;&gt;&lt;code&gt;stopStream()&lt;/code&gt; method&lt;/a&gt;. 
+ *   &lt;li&gt;Invoke &lt;a href=&quot;#method_stopStream&quot;&gt;&lt;code&gt;stopStream()&lt;/code&gt; method&lt;/a&gt;.
  *   &lt;small&gt;Regardless of request errors, &lt;code&gt;leaveRoom()&lt;/code&gt; will still proceed.&lt;/small&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
  *   &lt;li&gt;If parameter &lt;code&gt;stopMediaOptions.screenshare&lt;/code&gt; value is &lt;code&gt;true&lt;/code&gt;: &lt;ol&gt;
  *   &lt;li&gt;Invoke &lt;a href=&quot;#method_stopScreen&quot;&gt;&lt;code&gt;stopScreen()&lt;/code&gt; method&lt;/a&gt;.

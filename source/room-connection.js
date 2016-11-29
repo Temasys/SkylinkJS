@@ -157,7 +157,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @param {JSON} [options.sdpSettings] <blockquote class="info">
  *   Note that this is mainly used for debugging purposes and that it is an experimental flag, so
  *   it may cause disruptions in connections or connectivity issues when toggled. Note that it might not work
- *   with MCU enabled Peer connections or break connections.</blockquote>
+ *   with MCU enabled Peer connections or break MCU enabled Peer connections.</blockquote>
  *   The configuration to set the session description settings.
  * @param {JSON} [options.sdpSettings.connection] The configuration to set the session description connection settings.
  *   <small>Note that this configuration may disable the media streaming and these settings will be enabled for
@@ -448,7 +448,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
  *   <li>If Socket connection is opened: <ol><li><a href="#event_channelClose"><code>channelClose</code> event</a> triggers.</li></ol></li>
  *   <li>Checks if User is in Room. <ol><li>If User is not in a Room: <ol><li><b>ABORT</b> and return error.</li>
  *   </ol></li><li>Else: <ol><li>If parameter <code>stopMediaOptions.userMedia</code> value is <code>true</code>: <ol>
- *   <li>Invoke <a href="#method_stopStream"><code>stopStream()</code> method</a>. 
+ *   <li>Invoke <a href="#method_stopStream"><code>stopStream()</code> method</a>.
  *   <small>Regardless of request errors, <code>leaveRoom()</code> will still proceed.</small></li></ol></li>
  *   <li>If parameter <code>stopMediaOptions.screenshare</code> value is <code>true</code>: <ol>
  *   <li>Invoke <a href="#method_stopScreen"><code>stopScreen()</code> method</a>.

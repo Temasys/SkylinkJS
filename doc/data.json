@@ -2097,7 +2097,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1532,
+            "line": 1534,
             "description": "Function that returns the data transfer session.",
             "itemtype": "method",
             "name": "_getTransferInfo",
@@ -2108,7 +2108,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1614,
+            "line": 1616,
             "description": "Function that returns the compiled data transfer data.",
             "itemtype": "method",
             "name": "_getTransferData",
@@ -2119,7 +2119,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1641,
+            "line": 1643,
             "description": "Function that handles the data transfers sessions timeouts.",
             "itemtype": "method",
             "name": "_handleDataTransferTimeoutForPeer",
@@ -2130,13 +2130,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1685,
+            "line": 1687,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1732,
+            "line": 1734,
             "description": "Function that handles the data received from Datachannel and\nroutes to the relevant data transfer protocol handler.",
             "itemtype": "method",
             "name": "_processDataChannelData",
@@ -2147,7 +2147,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1869,
+            "line": 1871,
             "description": "Function that handles the \"WRQ\" data transfer protocol.",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
@@ -2158,7 +2158,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1911,
+            "line": 1913,
             "description": "Function that handles the \"ACK\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
@@ -2169,13 +2169,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1930,
+            "line": 1932,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2013,
+            "line": 2015,
             "description": "Function that handles the \"MESSAGE\" data transfer protocol.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -2186,7 +2186,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2034,
+            "line": 2036,
             "description": "Function that handles the \"ERROR\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -2197,13 +2197,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2053,
+            "line": 2055,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2085,
+            "line": 2087,
             "description": "Function that handles the \"CANCEL\" data transfer protocol.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -2214,13 +2214,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2102,
+            "line": 2104,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2134,
+            "line": 2136,
             "description": "Function that handles the data transfer chunk received.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
@@ -3209,7 +3209,7 @@
                         },
                         {
                             "name": "sdpSettings",
-                            "description": "<blockquote class=\"info\">\n  Note that this is mainly used for debugging purposes and that it is an experimental flag, so\n  it may cause disruptions in connections or connectivity issues when toggled. Note that it might not work\n  with MCU enabled Peer connections or break connections.</blockquote>\n  The configuration to set the session description settings.",
+                            "description": "<blockquote class=\"info\">\n  Note that this is mainly used for debugging purposes and that it is an experimental flag, so\n  it may cause disruptions in connections or connectivity issues when toggled. Note that it might not work\n  with MCU enabled Peer connections or break MCU enabled Peer connections.</blockquote>\n  The configuration to set the session description settings.",
                             "type": "JSON",
                             "optional": true,
                             "props": [
@@ -3412,7 +3412,7 @@
                     ]
                 }
             ],
-            "trigger": "<ol class=\"desc-seq\">\n  <li>If Socket connection is opened: <ol><li><a href=\"#event_channelClose\"><code>channelClose</code> event</a> triggers.</li></ol></li>\n  <li>Checks if User is in Room. <ol><li>If User is not in a Room: <ol><li><b>ABORT</b> and return error.</li>\n  </ol></li><li>Else: <ol><li>If parameter <code>stopMediaOptions.userMedia</code> value is <code>true</code>: <ol>\n  <li>Invoke <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>. \n  <small>Regardless of request errors, <code>leaveRoom()</code> will still proceed.</small></li></ol></li>\n  <li>If parameter <code>stopMediaOptions.screenshare</code> value is <code>true</code>: <ol>\n  <li>Invoke <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>.\n  <small>Regardless of request errors, <code>leaveRoom()</code> will still proceed.</small></li></ol></li>\n  <li><a href=\"#event_peerLeft\"><code>peerLeft</code> event</a> triggers for User and all connected Peers in Room.</li>\n  <li>If MCU is enabled for the App Key provided in <a href=\"#method_init\"><code>init()</code> method</a>\n  and connected: <ol><li><a href=\"#event_serverPeerLeft\"><code>serverPeerLeft</code> event</a>\n  triggers parameter payload <code>serverPeerType</code> as <code>MCU</code>.</li></ol></li></ol></li></ol></li></ol>",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>If Socket connection is opened: <ol><li><a href=\"#event_channelClose\"><code>channelClose</code> event</a> triggers.</li></ol></li>\n  <li>Checks if User is in Room. <ol><li>If User is not in a Room: <ol><li><b>ABORT</b> and return error.</li>\n  </ol></li><li>Else: <ol><li>If parameter <code>stopMediaOptions.userMedia</code> value is <code>true</code>: <ol>\n  <li>Invoke <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>.\n  <small>Regardless of request errors, <code>leaveRoom()</code> will still proceed.</small></li></ol></li>\n  <li>If parameter <code>stopMediaOptions.screenshare</code> value is <code>true</code>: <ol>\n  <li>Invoke <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>.\n  <small>Regardless of request errors, <code>leaveRoom()</code> will still proceed.</small></li></ol></li>\n  <li><a href=\"#event_peerLeft\"><code>peerLeft</code> event</a> triggers for User and all connected Peers in Room.</li>\n  <li>If MCU is enabled for the App Key provided in <a href=\"#method_init\"><code>init()</code> method</a>\n  and connected: <ol><li><a href=\"#event_serverPeerLeft\"><code>serverPeerLeft</code> event</a>\n  triggers parameter payload <code>serverPeerType</code> as <code>MCU</code>.</li></ol></li></ol></li></ol></li></ol>",
             "since": "0.5.5",
             "class": "Skylink"
         },
@@ -8291,19 +8291,19 @@
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:1685"
+            "line": " source/data-transfer.js:1687"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:1930"
+            "line": " source/data-transfer.js:1932"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2053"
+            "line": " source/data-transfer.js:2055"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2102"
+            "line": " source/data-transfer.js:2104"
         }
     ]
 }

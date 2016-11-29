@@ -1608,10 +1608,12 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
   });
 
   // Create new Datachannel for Peer to start data transfer
-  if (!(requireInterop || channelProp === &#x27;main&#x27;)) {
+  if (!((requireInterop &amp;&amp; peerId !== &#x27;MCU&#x27;) || channelProp === &#x27;main&#x27;)) {
     channelProp = transferId;
 
     self._createDataChannel(peerId, transferId);
+
+    console.info(&#x27;Datachannel created&#x27;);
 
   } else {
     self._dataChannels[peerId].main.transferId = transferId;

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Tue Nov 29 2016 21:12:48 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Tue Nov 29 2016 21:44:24 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.16 - Tue Nov 29 2016 21:12:48 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Tue Nov 29 2016 21:44:24 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -14622,10 +14622,12 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
   });
 
   // Create new Datachannel for Peer to start data transfer
-  if (!(requireInterop || channelProp === 'main')) {
+  if (!((requireInterop && peerId !== 'MCU') || channelProp === 'main')) {
     channelProp = transferId;
 
     self._createDataChannel(peerId, transferId);
+
+    console.info('Datachannel created');
 
   } else {
     self._dataChannels[peerId].main.transferId = transferId;
@@ -18066,7 +18068,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @param {JSON} [options.sdpSettings] <blockquote class="info">
  *   Note that this is mainly used for debugging purposes and that it is an experimental flag, so
  *   it may cause disruptions in connections or connectivity issues when toggled. Note that it might not work
- *   with MCU enabled Peer connections or break connections.</blockquote>
+ *   with MCU enabled Peer connections or break MCU enabled Peer connections.</blockquote>
  *   The configuration to set the session description settings.
  * @param {JSON} [options.sdpSettings.connection] The configuration to set the session description connection settings.
  *   <small>Note that this configuration may disable the media streaming and these settings will be enabled for
@@ -18357,7 +18359,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
  *   <li>If Socket connection is opened: <ol><li><a href="#event_channelClose"><code>channelClose</code> event</a> triggers.</li></ol></li>
  *   <li>Checks if User is in Room. <ol><li>If User is not in a Room: <ol><li><b>ABORT</b> and return error.</li>
  *   </ol></li><li>Else: <ol><li>If parameter <code>stopMediaOptions.userMedia</code> value is <code>true</code>: <ol>
- *   <li>Invoke <a href="#method_stopStream"><code>stopStream()</code> method</a>. 
+ *   <li>Invoke <a href="#method_stopStream"><code>stopStream()</code> method</a>.
  *   <small>Regardless of request errors, <code>leaveRoom()</code> will still proceed.</small></li></ol></li>
  *   <li>If parameter <code>stopMediaOptions.screenshare</code> value is <code>true</code>: <ol>
  *   <li>Invoke <a href="#method_stopScreen"><code>stopScreen()</code> method</a>.
