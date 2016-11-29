@@ -247,7 +247,8 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   &lt;small&gt;After 30 seconds without any Stream retrieved, this results in the &#x60;callback(error, ..)&#x60; result.&lt;/small&gt;
  * @param {JSON} [options.sdpSettings] &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that this is mainly used for debugging purposes and that it is an experimental flag, so
- *   it may cause disruptions in connections or connectivity issues when toggled. &lt;/blockquote&gt;
+ *   it may cause disruptions in connections or connectivity issues when toggled. Note that it might not work
+ *   with MCU enabled Peer connections or break connections.&lt;/blockquote&gt;
  *   The configuration to set the session description settings.
  * @param {JSON} [options.sdpSettings.connection] The configuration to set the session description connection settings.
  *   &lt;small&gt;Note that this configuration may disable the media streaming and these settings will be enabled for
