@@ -1522,8 +1522,6 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
 
     self._createDataChannel(peerId, transferId);
 
-    console.info('Datachannel created');
-
   } else {
     self._dataChannels[peerId].main.transferId = transferId;
 
