@@ -697,7 +697,8 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
       if (!self._sdpSettings.connection[mediaType === &#x27;application&#x27; ? &#x27;data&#x27; : mediaType] &amp;&amp; targetMid !== &#x27;MCU&#x27;) {
         sdpLines.splice(i, 1);
         i--;
-      } else if (mediaType &amp;&amp; [&#x27;a=sendrecv&#x27;, &#x27;a=sendonly&#x27;, &#x27;a=recvonly&#x27;].indexOf(sdpLines[i]) &gt; -1) {
+      } else if (mediaType &amp;&amp; [&#x27;audio&#x27;, &#x27;video&#x27;].indexOf(mediaType) &gt; -1 &amp;&amp;
+        [&#x27;a=sendrecv&#x27;, &#x27;a=sendonly&#x27;, &#x27;a=recvonly&#x27;].indexOf(sdpLines[i]) &gt; -1) {
         if (self._hasMCU) {
           sdpLines[i] = targetMid === &#x27;MCU&#x27; ? &#x27;a=sendonly&#x27; : &#x27;a=recvonly&#x27;;
         }

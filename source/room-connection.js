@@ -154,9 +154,9 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   must be retrieved as a requirement before Room session may begin.
  *   <small>This ignores the <code>options.audio</code> and <code>options.video</code> configuration.</small>
  *   <small>After 30 seconds without any Stream retrieved, this results in the `callback(error, ..)` result.</small>
- * @param {JSON} [options.sdpSettings] <blockquote class="info">Note that this is an EXTREMELY experimental configuration
- *   and may cause disruptions in connections or connectivity issues when toggled. It is never recommended to toggle
- *   these configuration unless required.</blockquote>
+ * @param {JSON} [options.sdpSettings] <blockquote class="info">
+ *   Note that this is mainly used for debugging purposes and that it is an experimental flag, so
+ *   it may cause disruptions in connections or connectivity issues when toggled. </blockquote>
  *   The configuration to set the session description settings.
  * @param {JSON} [options.sdpSettings.connection] The configuration to set the session description connection settings.
  *   <small>Note that this configuration may disable the media streaming and these settings will be enabled for
