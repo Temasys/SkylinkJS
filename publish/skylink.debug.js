@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Tue Nov 29 2016 17:29:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Tue Nov 29 2016 17:43:30 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -14037,7 +14037,8 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
       if (!self._sdpSettings.connection[mediaType === 'application' ? 'data' : mediaType] && targetMid !== 'MCU') {
         sdpLines.splice(i, 1);
         i--;
-      } else if (mediaType && ['a=sendrecv', 'a=sendonly', 'a=recvonly'].indexOf(sdpLines[i]) > -1) {
+      } else if (mediaType && ['audio', 'video'].indexOf(mediaType) > -1 &&
+        ['a=sendrecv', 'a=sendonly', 'a=recvonly'].indexOf(sdpLines[i]) > -1) {
         if (self._hasMCU) {
           sdpLines[i] = targetMid === 'MCU' ? 'a=sendonly' : 'a=recvonly';
         }
