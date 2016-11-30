@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Wed Nov 30 2016 15:33:39 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Wed Nov 30 2016 18:12:14 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -3718,8 +3718,9 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, chunk, chunkType, chun
   self._dataTransfers[transferId].sessions[peerId].receivedSize += chunkSize;
   self._dataTransfers[transferId].chunks[self._dataTransfers[transferId].sessions[peerId].ackN] = chunk;
 
-  if (self._dataTransfers[transferId].sessions[peerId].receivedSize === self._dataTransfers[transferId].size) {
-    log.log([peerId, 'RTCDataChannel', channelProp, 'Data transfer has been completed']);
+  if (self._dataTransfers[transferId].sessions[peerId].receivedSize >= self._dataTransfers[transferId].size) {
+    log.log([peerId, 'RTCDataChannel', channelProp, 'Data transfer has been completed. Computed size ->'], 
+      self._dataTransfers[transferId].sessions[peerId].receivedSize);
 
     // Send last ACK to Peer to indicate completion of data transfers
     self._sendMessageToDataChannel(peerId, {
