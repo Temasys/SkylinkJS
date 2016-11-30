@@ -1404,7 +1404,16 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
 
     self.once('dataTransferState', dataTransferStateCbFn, function (state, evtTransferId, evtPeerId) {
       if (!(self._dataTransfers[transferId] && self._dataTransfers[transferId].sessions[peerId])) {
-        self.off('dataTransferState', dataTransferStateCbFn);
+        if (dataTransferStateCbFn) {
+          self.off('dataTransferState', dataTransferStateCbFn);
+        }
+        if (peerConnectionStateCbFn) {
+          self.off('peerConnectionState', peerConnectionStateCbFn);
+        }
+
+        if (dataChannelStateCbFn) {
+          self.off('dataChannelState', dataChannelStateCbFn);
+        }
         return;
       }
       return evtTransferId === transferId && evtPeerId === peerId &&

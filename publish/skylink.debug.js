@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Tue Nov 29 2016 21:44:24 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Wed Nov 30 2016 13:56:31 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -2976,7 +2976,16 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
 
     self.once('dataTransferState', dataTransferStateCbFn, function (state, evtTransferId, evtPeerId) {
       if (!(self._dataTransfers[transferId] && self._dataTransfers[transferId].sessions[peerId])) {
-        self.off('dataTransferState', dataTransferStateCbFn);
+        if (dataTransferStateCbFn) {
+          self.off('dataTransferState', dataTransferStateCbFn);
+        }
+        if (peerConnectionStateCbFn) {
+          self.off('peerConnectionState', peerConnectionStateCbFn);
+        }
+
+        if (dataChannelStateCbFn) {
+          self.off('dataChannelState', dataChannelStateCbFn);
+        }
         return;
       }
       return evtTransferId === transferId && evtPeerId === peerId &&
@@ -3093,8 +3102,6 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
     channelProp = transferId;
 
     self._createDataChannel(peerId, transferId);
-
-    console.info('Datachannel created');
 
   } else {
     self._dataChannels[peerId].main.transferId = transferId;
