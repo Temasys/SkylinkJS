@@ -154,6 +154,32 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   must be retrieved as a requirement before Room session may begin.
  *   <small>This ignores the <code>options.audio</code> and <code>options.video</code> configuration.</small>
  *   <small>After 30 seconds without any Stream retrieved, this results in the `callback(error, ..)` result.</small>
+ * @param {JSON} [options.sdpSettings] <blockquote class="info">
+ *   Note that this is mainly used for debugging purposes and that it is an experimental flag, so
+ *   it may cause disruptions in connections or connectivity issues when toggled. Note that it might not work
+ *   with MCU enabled Peer connections or break MCU enabled Peer connections.</blockquote>
+ *   The configuration to set the session description settings.
+ * @param {JSON} [options.sdpSettings.connection] The configuration to set the session description connection settings.
+ *   <small>Note that this configuration may disable the media streaming and these settings will be enabled for
+ *   MCU server Peer connection regardless of the flags configured.</small>
+ * @param {Boolean} [options.sdpSettings.connection.audio=true] The configuration to enable audio session description connection.
+ * @param {Boolean} [options.sdpSettings.connection.video=true] The configuration to enable video session description connection.
+ * @param {Boolean} [options.sdpSettings.connection.data=true] The configuration to enable Datachannel session description connection.
+ * @param {JSON} [options.sdpSettings.direction] The configuration to set the session description connection direction
+ *   to enable or disable uploading and downloading audio or video media streaming.
+ *   <small>Note that this configuration does not prevent RTCP packets from being sent and received.</small>
+ * @param {JSON} [options.sdpSettings.direction.audio] The configuration to set the session description
+ *   connection direction for audio streaming.
+ * @param {Boolean} [options.sdpSettings.direction.audio.send=true] The flag if uploading audio streaming
+ *   should be enabled when available.
+ * @param {Boolean} [options.sdpSettings.direction.audio.receive=true] The flag if downloading audio
+ *   streaming should be enabled when available.
+ * @param {JSON} [options.sdpSettings.direction.video] The configuration to set the session description
+ *   connection direction for video streaming.
+ * @param {Boolean} [options.sdpSettings.direction.video.send=true] The flag if uploading video streaming
+ *   should be enabled when available.
+ * @param {Boolean} [options.sdpSettings.direction.video.receive=true] The flag if downloading video streaming
+ *   should be enabled when available.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_peerJoined">
@@ -422,7 +448,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
  *   <li>If Socket connection is opened: <ol><li><a href="#event_channelClose"><code>channelClose</code> event</a> triggers.</li></ol></li>
  *   <li>Checks if User is in Room. <ol><li>If User is not in a Room: <ol><li><b>ABORT</b> and return error.</li>
  *   </ol></li><li>Else: <ol><li>If parameter <code>stopMediaOptions.userMedia</code> value is <code>true</code>: <ol>
- *   <li>Invoke <a href="#method_stopStream"><code>stopStream()</code> method</a>. 
+ *   <li>Invoke <a href="#method_stopStream"><code>stopStream()</code> method</a>.
  *   <small>Regardless of request errors, <code>leaveRoom()</code> will still proceed.</small></li></ol></li>
  *   <li>If parameter <code>stopMediaOptions.screenshare</code> value is <code>true</code>: <ol>
  *   <li>Invoke <a href="#method_stopScreen"><code>stopScreen()</code> method</a>.
@@ -586,6 +612,18 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
         bAS: {}
       };
 
+      self._sdpSettings = {
+        connection: {
+          audio: true,
+          video: true,
+          data: true
+        },
+        direction: {
+          audio: { send: true, receive: true },
+          video: { send: true, receive: true }
+        }
+      };
+
       if (mediaOptions.bandwidth) {
         if (typeof mediaOptions.bandwidth.audio === 'number') {
           self._streamsBandwidthSettings.bAS.audio = mediaOptions.bandwidth.audio;
@@ -607,6 +645,32 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 
         if (typeof mediaOptions.googleXBandwidth.max === 'number') {
           self._streamsBandwidthSettings.googleX.max = mediaOptions.googleXBandwidth.max;
+        }
+      }
+
+      if (mediaOptions.sdpSettings) {
+        if (mediaOptions.sdpSettings.direction) {
+          if (mediaOptions.sdpSettings.direction.audio) {
+            self._sdpSettings.direction.audio.receive = typeof mediaOptions.sdpSettings.direction.audio.receive === 'boolean' ?
+              mediaOptions.sdpSettings.direction.audio.receive : true;
+            self._sdpSettings.direction.audio.send = typeof mediaOptions.sdpSettings.direction.audio.send === 'boolean' ?
+              mediaOptions.sdpSettings.direction.audio.send : true;
+          }
+
+          if (mediaOptions.sdpSettings.direction.video) {
+            self._sdpSettings.direction.video.receive = typeof mediaOptions.sdpSettings.direction.video.receive === 'boolean' ?
+              mediaOptions.sdpSettings.direction.video.receive : true;
+            self._sdpSettings.direction.video.send = typeof mediaOptions.sdpSettings.direction.video.send === 'boolean' ?
+              mediaOptions.sdpSettings.direction.video.send : true;
+          }
+        }
+        if (mediaOptions.sdpSettings.connection) {
+          self._sdpSettings.connection.audio = typeof mediaOptions.sdpSettings.connection.audio === 'boolean' ?
+            mediaOptions.sdpSettings.connection.audio : true;
+          self._sdpSettings.connection.video = typeof mediaOptions.sdpSettings.connection.video === 'boolean' ?
+            mediaOptions.sdpSettings.connection.video : true;
+          self._sdpSettings.connection.data = typeof mediaOptions.sdpSettings.connection.data === 'boolean' ?
+            mediaOptions.sdpSettings.connection.data : true;
         }
       }
 

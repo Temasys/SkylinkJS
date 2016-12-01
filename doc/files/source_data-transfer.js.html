@@ -229,7 +229,7 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype._SUPPORTED_WEB_AGENTS = [&#x27;chrome&#x27;, &#x27;firefox&#x27;, &#x27;safari&#x27;, &#x27;IE&#x27;, &#x27;edge&#x27; ,&#x27;opera&#x27;, &#x27;bowser&#x27;, &#x27;blink&#x27;, &#x27;cpp&#x27;];
+Skylink.prototype._SUPPORTED_WEB_AGENTS = [&#x27;chrome&#x27;, &#x27;firefox&#x27;, &#x27;safari&#x27;, &#x27;IE&#x27;, &#x27;edge&#x27; ,&#x27;opera&#x27;, &#x27;bowser&#x27;, &#x27;blink&#x27;];
 
 /**
  * &lt;blockquote class=&quot;info&quot;&gt;
@@ -1266,7 +1266,7 @@ Skylink.prototype._startDataTransfer = function(chunks, transferInfo, listOfPeer
       var agentName = (((self._peerInformations[listOfPeers[p]]) || {}).agent || {}).name || &#x27;&#x27;;
 
       // C++ SDK does not support binary file transfer for now
-      if (self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1 || agentName === &#x27;cpp&#x27;) {
+      if (self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1) {
         self._dataTransfers[transferId].enforceBSPeers.push(listOfPeers[p]);
       }
     }
@@ -1328,9 +1328,9 @@ Skylink.prototype._startDataTransfer = function(chunks, transferInfo, listOfPeer
 
     if (typeof MCUInteropStatus === &#x27;boolean&#x27;) {
       if (MCUInteropStatus === true) {
-        self._dataTransfers[transferId].peers.main[listOfPeers[i]] = false;
+        self._dataTransfers[transferId].peers.main[listOfPeers[i]] = true;
       } else {
-        self._dataTransfers[transferId].peers[transferId][listOfPeers[i]] = false;
+        self._dataTransfers[transferId].peers[transferId][listOfPeers[i]] = true;
       }
     }
   }
@@ -1446,7 +1446,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
       }
 
       if (channelProp) {
-        self._dataTransfers[transferId].peers[channelProp][peerId] = true;
+        delete self._dataTransfers[transferId].peers[channelProp][peerId];
       }
 
       if (state === self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED) {
@@ -1457,45 +1457,34 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
 
       // Handle Peer uploading to MCU case
       if (self._hasMCU &amp;&amp; self._dataTransfers[transferId].direction === self.DATA_TRANSFER_TYPE.UPLOAD) {
-        var broadcastedPeers = [self._dataTransfers[transferId].peers.main, self._dataTransfers[transferId].peers[transferId]];
-
-        for (var i = 0; i &lt; broadcastedPeers.length; i++) {
-          // Should not happen but insanity check
-          if (!broadcastedPeers[i]) {
-            return;
-          }
-
-          for (var bcPeerId in broadcastedPeers[i]) {
-            if (broadcastedPeers[i].hasOwnProperty(bcPeerId) &amp;&amp; !broadcastedPeers[i][bcPeerId]) {
-              return;
-            }
-          }
+        if (!(Object.keys(self._dataTransfers[transferId].peers.main).length === 0 &amp;&amp;
+          Object.keys(self._dataTransfers[transferId].peers[transferId]).length === 0)) {
+          return;
         }
 
         delete self._dataTransfers[transferId];
 
-        if (self._dataChannels.MCU) {
-          if (self._dataChannels.MCU.main) {
-            self._dataChannels.MCU.main.transferId = null;
-          }
-
-          if (self._dataChannels.MCU[transferId]) {
-            self._closeDataChannel(&#x27;MCU&#x27;, transferId);
-          }
-        }
-
       } else {
         delete self._dataTransfers[transferId].sessions[peerId];
 
-        if (Object.keys(self._dataTransfers[transferId]).length === 0) {
+        if (Object.keys(self._dataTransfers[transferId].sessions).length === 0) {
           delete self._dataTransfers[transferId];
         }
       }
     };
 
     self.once(&#x27;dataTransferState&#x27;, dataTransferStateCbFn, function (state, evtTransferId, evtPeerId) {
-      if (!(self._dataTransfers[transferId] &amp;&amp; self._dataTransfers[transferId].sessions[peerId])) {
-        self.off(&#x27;dataTransferState&#x27;, dataTransferStateCbFn);
+      if (!(self._dataTransfers[transferId] &amp;&amp; (self._hasMCU ? (self._dataTransfers[transferId].peers.main[peerId] ||
+        self._dataTransfers[transferId].peers[transferId][peerId]) : self._dataTransfers[transferId].sessions[peerId]))) {
+        if (dataTransferStateCbFn) {
+          self.off(&#x27;dataTransferState&#x27;, dataTransferStateCbFn);
+        }
+        if (peerConnectionStateCbFn) {
+          self.off(&#x27;peerConnectionState&#x27;, peerConnectionStateCbFn);
+        }
+        if (dataChannelStateCbFn) {
+          self.off(&#x27;dataChannelState&#x27;, dataChannelStateCbFn);
+        }
         return;
       }
       return evtTransferId === transferId &amp;&amp; evtPeerId === peerId &amp;&amp;
@@ -1538,10 +1527,10 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
   }
 
   var agentName = (self._peerInformations[peerId].agent || {}).name || &#x27;&#x27;;
-  var requireInterop = self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1;
+  var requireInterop = self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1 &amp;&amp; agentName !== &#x27;cpp&#x27;;
 
   // Prevent DATA_URL (or &quot;string&quot; dataType transfers) with Android / iOS / C++ SDKs
-  if (requireInterop &amp;&amp; self._dataTransfers[transferId].dataType === self.DATA_TRANSFER_SESSION_TYPE.DATA_URL) {
+  if ((requireInterop || agentName === &#x27;cpp&#x27;) &amp;&amp; self._dataTransfers[transferId].dataType === self.DATA_TRANSFER_SESSION_TYPE.DATA_URL) {
     returnErrorBeforeTransferFn(&#x27;Unable to start data transfer as Peer do not support DATA_URL type of data transfers&#x27;);
     return;
   }
@@ -1608,7 +1597,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
   });
 
   // Create new Datachannel for Peer to start data transfer
-  if (!(requireInterop || channelProp === &#x27;main&#x27;)) {
+  if (!((requireInterop &amp;&amp; peerId !== &#x27;MCU&#x27;) || channelProp === &#x27;main&#x27;)) {
     channelProp = transferId;
 
     self._createDataChannel(peerId, transferId);
@@ -1784,11 +1773,11 @@ Skylink.prototype._handleDataTransferTimeoutForPeer = function (transferId, peer
           for (var i = 0; i &lt; broadcastedPeers.length; i++) {
             // Should not happen but insanity check
             if (!broadcastedPeers[i]) {
-              return;
+              continue;
             }
 
             for (var bcPeerId in broadcastedPeers[i]) {
-              if (broadcastedPeers[i].hasOwnProperty(bcPeerId) &amp;&amp; !broadcastedPeers[i][bcPeerId]) {
+              if (broadcastedPeers[i].hasOwnProperty(bcPeerId) &amp;&amp; broadcastedPeers[i][bcPeerId]) {
                 cb(bcPeerId);
               }
             }
@@ -2030,7 +2019,7 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelProp) {
       }
       for (var evtPeerId in self._dataTransfers[transferId].peers[channelProp]) {
         if (self._dataTransfers[transferId].peers[channelProp].hasOwnProperty(evtPeerId) &amp;&amp;
-          !self._dataTransfers[transferId].peers[channelProp][evtPeerId]) {
+          self._dataTransfers[transferId].peers[channelProp][evtPeerId]) {
           cb(evtPeerId);
         }
       }
@@ -2153,7 +2142,7 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelProp) {
       }
       for (var evtPeerId in self._dataTransfers[transferId].peers[channelProp]) {
         if (self._dataTransfers[transferId].peers[channelProp].hasOwnProperty(evtPeerId) &amp;&amp;
-          !self._dataTransfers[transferId].peers[channelProp][evtPeerId]) {
+          self._dataTransfers[transferId].peers[channelProp][evtPeerId]) {
           cb(evtPeerId);
         }
       }
@@ -2202,7 +2191,7 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelProp) {
       }
       for (var evtPeerId in self._dataTransfers[transferId].peers[channelProp]) {
         if (self._dataTransfers[transferId].peers[channelProp].hasOwnProperty(evtPeerId) &amp;&amp;
-          !self._dataTransfers[transferId].peers[channelProp][evtPeerId]) {
+          self._dataTransfers[transferId].peers[channelProp][evtPeerId]) {
           cb(evtPeerId);
         }
       }
@@ -2248,8 +2237,9 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, chunk, chunkType, chun
   self._dataTransfers[transferId].sessions[peerId].receivedSize += chunkSize;
   self._dataTransfers[transferId].chunks[self._dataTransfers[transferId].sessions[peerId].ackN] = chunk;
 
-  if (self._dataTransfers[transferId].sessions[peerId].receivedSize === self._dataTransfers[transferId].size) {
-    log.log([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Data transfer has been completed&#x27;]);
+  if (self._dataTransfers[transferId].sessions[peerId].receivedSize &gt;= self._dataTransfers[transferId].size) {
+    log.log([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Data transfer has been completed. Computed size -&gt;&#x27;], 
+      self._dataTransfers[transferId].sessions[peerId].receivedSize);
 
     // Send last ACK to Peer to indicate completion of data transfers
     self._sendMessageToDataChannel(peerId, {
