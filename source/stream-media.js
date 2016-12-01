@@ -213,7 +213,7 @@ Skylink.prototype.MEDIA_ACCESS_FALLBACK_STATE = {
  * @param {Number} ERROR <small>Value <code>-1</code></small>
  *   The value of the state state when recording session has errors.
  *   <small>This can happen during recording session or during mixin of recording videos,
- *   and at this stage, the recording session or mixin is aborted.</small>
+ *   and at this stage, any current recording session or mixin is aborted.</small>
  * @type JSON
  * @beta
  * @for Skylink

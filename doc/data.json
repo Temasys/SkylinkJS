@@ -6315,6 +6315,23 @@
         {
             "file": "source/socket-message.js",
             "line": 391,
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires MCU and recording to be enabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>. If recording feature is not available to\n  be enabled in the <a href=\"https://console.temasys.io\">Developer Console</a>, please\n  <a href=\"http://support.temasys.com.sg\">contact us on our support portal</a>.\n</blockquote>\nGets the list of current recording sessions since User has connected to the Room.",
+            "itemtype": "method",
+            "name": "getRecordings",
+            "return": {
+                "description": "The list of recording sessions.<ul>\n  <li><code><#recordingId></code><var><b>{</b>JSON<b>}</b></var><p>The recording session.</p><ul>\n  <li><code>active</code><var><b>{</b>Boolean<b>}</b></var><p>The flag that indicates if the recording session is currently active.</p></li>\n  <li><code>state</code><var><b>{</b>Number<b>}</b></var><p>The current recording state. [Rel: Skylink.RECORDING_STATE]</p></li>\n  <li><code>startedDateTime</code><var><b>{</b>String<b>}</b></var><p>The recording session started DateTime in\n  <a href=\"https://en.wikipedia.org/wiki/ISO_8601\">ISO 8601 format</a>.<small>Note that this value may not be\n  very accurate as this value is recorded when the start event is received.</small></p></li>\n  <li><code>endedDateTime</code><var><b>{</b>String<b>}</b></var><p>The recording session ended DateTime in\n  <a href=\"https://en.wikipedia.org/wiki/ISO_8601\">ISO 8601 format</a>.<small>Note that this value may not be\n  very accurate as this value is recorded when the stop event is received.</small>\n  <small>Defined only after <code>state</code> has triggered <code>STOP</code>.</small></p></li>\n  <li><code>mixingDateTime</code><var><b>{</b>String<b>}</b></var><p>The recording session mixing completed DateTime in\n  <a href=\"https://en.wikipedia.org/wiki/ISO_8601\">ISO 8601 format</a>.<small>Note that this value may not be\n  very accurate as this value is recorded when the mixing completed event is received.</small>\n  <small>Defined only when <code>state</code> is <code>LINK</code>.</small></p></li>\n  <li><code>links</code><var><b>{</b>JSON<b>}</b></var><p>The recording session links.\n  <small>Object signature matches the <code>link</code> parameter payload received in the\n  <a href=\"#event_recordingState\"><code>recordingState</code> event</a>.</small>\n  <small>Defined only when <code>state</code> is <code>LINK</code>.</small></p></li>\n  <li><code>error</code><var><b>{</b>Error<b>}</b></var><p>The recording session error.\n  <small>Defined only when <code>state</code> is <code>ERROR</code>.</small></p></li></ul></li></ul>",
+                "type": "JSON"
+            },
+            "example": [
+                "\n  // Example 1: Get recording sessions\n  skylinkDemo.getRecordings();"
+            ],
+            "beta": 1,
+            "since": "0.6.16",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/socket-message.js",
+            "line": 432,
             "description": "Function that process and parses the socket message string received from the Signaling.",
             "itemtype": "method",
             "name": "_processSigMessage",
@@ -6325,7 +6342,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 410,
+            "line": 451,
             "description": "Function that handles and processes the socket message received.",
             "itemtype": "method",
             "name": "_processingSingleMessage",
@@ -6336,7 +6353,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 499,
+            "line": 540,
             "description": "Function that handles the \"peerList\" socket message received.\nSee confluence docs for the \"peerList\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_peerListEventHandler",
@@ -6347,7 +6364,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 515,
+            "line": 556,
             "description": "Function that handles the \"introduceError\" socket message received.\nSee confluence docs for the \"introduceError\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_introduceErrorEventHandler",
@@ -6358,7 +6375,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 531,
+            "line": 572,
             "description": "Function that handles the \"approach\" socket message received.\nSee confluence docs for the \"approach\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_approachEventHandler",
@@ -6369,7 +6386,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 566,
+            "line": 607,
             "description": "Function that handles the \"redirect\" socket message received.\nSee confluence docs for the \"redirect\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_redirectHandler",
@@ -6380,7 +6397,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 598,
+            "line": 639,
             "description": "Function that handles the \"updateUserEvent\" socket message received.\nSee confluence docs for the \"updateUserEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
@@ -6391,7 +6408,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 626,
+            "line": 667,
             "description": "Function that handles the \"roomLockEvent\" socket message received.\nSee confluence docs for the \"roomLockEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
@@ -6402,7 +6419,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 642,
+            "line": 683,
             "description": "Function that handles the \"muteAudioEvent\" socket message received.\nSee confluence docs for the \"muteAudioEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -6413,7 +6430,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 672,
+            "line": 713,
             "description": "Function that handles the \"muteVideoEvent\" socket message received.\nSee confluence docs for the \"muteVideoEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -6424,7 +6441,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 703,
+            "line": 744,
             "description": "Function that handles the \"stream\" socket message received.\nSee confluence docs for the \"stream\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_streamEventHandler",
@@ -6435,7 +6452,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 735,
+            "line": 776,
             "description": "Function that handles the \"bye\" socket message received.\nSee confluence docs for the \"bye\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -6446,7 +6463,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 756,
+            "line": 797,
             "description": "Function that handles the \"private\" socket message received.\nSee confluence docs for the \"private\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -6457,7 +6474,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 778,
+            "line": 819,
             "description": "Function that handles the \"public\" socket message received.\nSee confluence docs for the \"public\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -6468,7 +6485,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 800,
+            "line": 841,
             "description": "Handles the RECORDING Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_recordingEventHandler",
@@ -6504,7 +6521,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 886,
+            "line": 936,
             "description": "Function that handles the \"inRoom\" socket message received.\nSee confluence docs for the \"inRoom\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -6515,7 +6532,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 940,
+            "line": 990,
             "description": "Function that handles the \"enter\" socket message received.\nSee confluence docs for the \"enter\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -6526,7 +6543,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1047,
+            "line": 1097,
             "description": "Function that handles the \"restart\" socket message received.\nSee confluence docs for the \"restart\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -6537,7 +6554,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1153,
+            "line": 1203,
             "description": "Function that handles the \"welcome\" socket message received.\nSee confluence docs for the \"welcome\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -6548,7 +6565,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1269,
+            "line": 1319,
             "description": "Function that handles the \"offer\" socket message received.\nSee confluence docs for the \"offer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -6559,7 +6576,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1359,
+            "line": 1409,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -6570,7 +6587,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1445,
+            "line": 1495,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -6809,7 +6826,7 @@
                 },
                 {
                     "name": "ERROR",
-                    "description": "<small>Value <code>-1</code></small>\n  The value of the state state when recording session has errors.\n  <small>This can happen during recording session or during mixin of recording videos,\n  and at this stage, the recording session or mixin is aborted.</small>",
+                    "description": "<small>Value <code>-1</code></small>\n  The value of the state state when recording session has errors.\n  <small>This can happen during recording session or during mixin of recording videos,\n  and at this stage, any current recording session or mixin is aborted.</small>",
                     "type": "Number"
                 }
             ],

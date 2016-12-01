@@ -480,6 +480,47 @@ Skylink.prototype.stopRecording = function (callback, callbackSuccessWhenLink) {
 };
 
 /**
+ * &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that this feature requires MCU and recording to be enabled for the App Key provided in the
+ *   &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;. If recording feature is not available to
+ *   be enabled in the &lt;a href=&quot;https://console.temasys.io&quot;&gt;Developer Console&lt;/a&gt;, please
+ *   &lt;a href=&quot;http://support.temasys.com.sg&quot;&gt;contact us on our support portal&lt;/a&gt;.
+ * &lt;/blockquote&gt;
+ * Gets the list of current recording sessions since User has connected to the Room.
+ * @method getRecordings
+ * @return {JSON} The list of recording sessions.&lt;ul&gt;
+ *   &lt;li&gt;&lt;code&gt;&lt;#recordingId&gt;&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The recording session.&lt;/p&gt;&lt;ul&gt;
+ *   &lt;li&gt;&lt;code&gt;active&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;Boolean&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The flag that indicates if the recording session is currently active.&lt;/p&gt;&lt;/li&gt;
+ *   &lt;li&gt;&lt;code&gt;state&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;Number&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The current recording state. [Rel: Skylink.RECORDING_STATE]&lt;/p&gt;&lt;/li&gt;
+ *   &lt;li&gt;&lt;code&gt;startedDateTime&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The recording session started DateTime in
+ *   &lt;a href=&quot;https://en.wikipedia.org/wiki/ISO_8601&quot;&gt;ISO 8601 format&lt;/a&gt;.&lt;small&gt;Note that this value may not be
+ *   very accurate as this value is recorded when the start event is received.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;
+ *   &lt;li&gt;&lt;code&gt;endedDateTime&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The recording session ended DateTime in
+ *   &lt;a href=&quot;https://en.wikipedia.org/wiki/ISO_8601&quot;&gt;ISO 8601 format&lt;/a&gt;.&lt;small&gt;Note that this value may not be
+ *   very accurate as this value is recorded when the stop event is received.&lt;/small&gt;
+ *   &lt;small&gt;Defined only after &lt;code&gt;state&lt;/code&gt; has triggered &lt;code&gt;STOP&lt;/code&gt;.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;
+ *   &lt;li&gt;&lt;code&gt;mixingDateTime&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The recording session mixing completed DateTime in
+ *   &lt;a href=&quot;https://en.wikipedia.org/wiki/ISO_8601&quot;&gt;ISO 8601 format&lt;/a&gt;.&lt;small&gt;Note that this value may not be
+ *   very accurate as this value is recorded when the mixing completed event is received.&lt;/small&gt;
+ *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; is &lt;code&gt;LINK&lt;/code&gt;.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;
+ *   &lt;li&gt;&lt;code&gt;links&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The recording session links.
+ *   &lt;small&gt;Object signature matches the &lt;code&gt;link&lt;/code&gt; parameter payload received in the
+ *   &lt;a href=&quot;#event_recordingState&quot;&gt;&lt;code&gt;recordingState&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
+ *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; is &lt;code&gt;LINK&lt;/code&gt;.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;
+ *   &lt;li&gt;&lt;code&gt;error&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;Error&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The recording session error.
+ *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; is &lt;code&gt;ERROR&lt;/code&gt;.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;
+ * @example
+ *   // Example 1: Get recording sessions
+ *   skylinkDemo.getRecordings();
+ * @beta
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype.getRecordings = function () {
+  return clone(this._recordings);
+};
+
+/**
  * Function that process and parses the socket message string received from the Signaling.
  * @method _processSigMessage
  * @private
@@ -912,8 +953,12 @@ Skylink.prototype._recordingEventHandler = function (message) {
 
       self._currentRecordingId = message.recordingId;
       self._recordings[message.recordingId] = {
-        isOn: true,
-        url: null,
+        active: true,
+        state: self.RECORDING_STATE.START,
+        startedDateTime: (new Date()).toISOString(),
+        endedDateTime: null,
+        mixingDateTime: null,
+        links: null,
         error: null
       };
       self._recordingStartInterval = setTimeout(function () {
@@ -939,7 +984,9 @@ Skylink.prototype._recordingEventHandler = function (message) {
 
     log.debug([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Stopped recording&#x27;]);
 
-    self._recordings[message.recordingId].isOn = false;
+    self._recordings[message.recordingId].active = false;
+    self._recordings[message.recordingId].state = self.RECORDING_STATE.STOP;
+    self._recordings[message.recordingId].endedDateTime = (new Date()).toISOString();
     self._trigger(&#x27;recordingState&#x27;, self.RECORDING_STATE.STOP, message.recordingId, null, null);
 
   } else if (message.action === &#x27;url&#x27;) {
@@ -948,9 +995,11 @@ Skylink.prototype._recordingEventHandler = function (message) {
       return;
     }
 
-    self._recordings[message.recordingId].url = message.url;
     var links = message.url &amp;&amp; typeof message.url === &#x27;object&#x27; ? message.url : { mixin: message.url };
 
+    self._recordings[message.recordingId].links = links;
+    self._recordings[message.recordingId].state = self.RECORDING_STATE.LINK;
+    self._recordings[message.recordingId].mixingDateTime = (new Date()).toISOString();
     self._trigger(&#x27;recordingState&#x27;, self.RECORDING_STATE.LINK, message.recordingId, links, null);
 
   } else {
@@ -962,15 +1011,16 @@ Skylink.prototype._recordingEventHandler = function (message) {
 
     log.error([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Recording failure -&gt;&#x27;], recordingError);
 
+    self._recordings[message.recordingId].state = self.RECORDING_STATE.ERROR;
     self._recordings[message.recordingId].error = recordingError;
-    self._trigger(&#x27;recordingState&#x27;, self.RECORDING_STATE.ERROR, message.recordingId, null, recordingError);
 
-    if (self._recordings[message.recordingId].isOn) {
+    if (self._recordings[message.recordingId].active) {
       log.debug([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Stopped recording abruptly&#x27;]);
-
-      self._recordings[message.recordingId].isOn = false;
-      self._trigger(&#x27;recordingState&#x27;, self.RECORDING_STATE.STOP, message.recordingId, null, recordingError);
+      self._recordings[message.recordingId].active = false;
+      //self._trigger(&#x27;recordingState&#x27;, self.RECORDING_STATE.STOP, message.recordingId, null, recordingError);
     }
+
+    self._trigger(&#x27;recordingState&#x27;, self.RECORDING_STATE.ERROR, message.recordingId, null, recordingError);
   }
 };
 
