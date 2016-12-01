@@ -217,7 +217,7 @@ Skylink.prototype.MEDIA_ACCESS_FALLBACK_STATE = {
  * @type JSON
  * @beta
  * @for Skylink
- * @since 0.6.x
+ * @since 0.6.16
  */
 Skylink.prototype.RECORDING_STATE = {
   START: 0,

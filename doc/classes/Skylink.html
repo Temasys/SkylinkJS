@@ -2630,6 +2630,15 @@ Before using any Skylink functionalities, you will need to authenticate your App
                     </span>
                   </a>
                 
+                  <a href="#event_getConnectionStatusStateChange" class="list-group-item code-menu-item event-item ">
+                    &nbsp;&nbsp;getConnectionStatusStateChange
+                    <span class="settings">
+                      
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#event_getPeersStateChange" class="list-group-item code-menu-item event-item ">
                     &nbsp;&nbsp;getPeersStateChange
                     <span class="settings">
@@ -8429,7 +8438,7 @@ See confluence docs for the &quot;public&quot; expected properties to be receive
 
     <small>
       
-        <i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.-</span>
+        <i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.16</span>
       
 
       
@@ -21856,7 +21865,7 @@ If enabled, the Peers connecting the same Room will receive each others &quot;en
     
 
     
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.-</span></small>
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.16</span></small>
     
   </div>
 
@@ -25696,7 +25705,7 @@ If Peer has a higher connection weight, it will do the offer from its Peer conne
     
 
     
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.-</span></small>
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.16</span></small>
     
   </div>
 
@@ -25774,7 +25783,7 @@ If Peer has a higher connection weight, it will do the offer from its Peer conne
     
 
     
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.-</span></small>
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.16</span></small>
     
   </div>
 
@@ -32618,7 +32627,7 @@ The list of Peer connection session description exchanging states.</p>
     
 
     
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.x</span></small>
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.16</span></small>
     
   </div>
 
@@ -35806,6 +35815,2220 @@ Event triggered when receiving socket message from the Signaling server.</p>
                   </li>
                 
               </ul>
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="event_getConnectionStatusStateChange" class="code-item attr item event-item ">
+  <h3 class="code-item-name"><code>getConnectionStatusStateChange</code></h3>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l672"><code>source&#x2F;skylink-events.js:672</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.14</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Event triggered when <a href="#method_getConnectionStatus"><code>getConnectionStatus()</code> method</a>
+retrieval state changes.</p>
+
+  </div>
+
+  
+    <div class="code-item-section">
+      <h4>Event Payload:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">state</code>
+            <span class="type"><b>{</b>Number<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The current <code>getConnectionStatus()</code> retrieval state.
+  [Rel: Skylink.GET_CONNECTION_STATUS_STATE]</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">peerId</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The Peer ID.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">stats</code>
+            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+                <p>The Peer connection current stats.
+  <small>Defined only when <code>state</code> payload is <code>RETRIEVE_SUCCESS</code>.</small></p>
+
+            </div>
+
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">raw</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The Peer connection raw stats before parsing.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">audio</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The Peer connection audio streaming stats.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">sending</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending audio streaming stats.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.bytes</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection current sending audio streaming bytes.
+  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.totalBytes</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection total sending audio streaming bytes.
+  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.packets</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection current sending audio streaming packets.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.totalPackets</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection total sending audio streaming packets.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.packetsLost</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection current sending audio streaming packets lost.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.totalPacketsLost</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection total sending audio streaming packets lost.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.ssrc</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending audio streaming RTP packets SSRC.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.rtt</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending audio streaming RTT (Round-trip delay time).
+  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.jitter</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending audio streaming RTP packets jitter in seconds.
+  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.jitterBufferMs</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending audio streaming
+  RTP packets jitter buffer in miliseconds.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.codec</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending audio streaming selected codec information.
+  <small>Defined as <code>null</code> if local session description is not available before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.codec.name</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending audio streaming selected codec name.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.codec.payloadType</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending audio streaming selected codec payload type.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.codec.implementation</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending audio streaming selected codec implementation.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.codec.channels</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending audio streaming selected codec channels (2 for stereo).
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing,
+  and this is usually present in <code>stats.audio</code> property.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.codec.clockRate</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending audio streaming selected codec media sampling rate.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.codec.params</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending audio streaming selected codec parameters.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.inputLevel</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending audio streaming input level.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.echoReturnLoss</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending audio streaming echo return loss in db (decibels).
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.echoReturnLossEnhancement</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending audio streaming
+  echo return loss enhancement db (decibels).
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving audio streaming stats.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.bytes</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection current sending audio streaming bytes.
+  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.totalBytes</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection total sending audio streaming bytes.
+  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.packets</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection current receiving audio streaming packets.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.totalPackets</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection total receiving audio streaming packets.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.packetsLost</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection current receiving audio streaming packets lost.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.totalPacketsLost</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection total receiving audio streaming packets lost.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.ssrc</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving audio streaming RTP packets SSRC.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.jitter</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving audio streaming RTP packets jitter in seconds.
+  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.jitterBufferMs</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving audio streaming
+  RTP packets jitter buffer in miliseconds.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.codec</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving audio streaming selected codec information.
+  <small>Defined as <code>null</code> if remote session description is not available before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.codec.name</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving audio streaming selected codec name.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.codec.payloadType</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving audio streaming selected codec payload type.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.codec.implementation</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving audio streaming selected codec implementation.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.codec.channels</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving audio streaming selected codec channels (2 for stereo).
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing,
+  and this is usually present in <code>stats.audio</code> property.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.codec.clockRate</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving audio streaming selected codec media sampling rate.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.codec.params</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving audio streaming selected codec parameters.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.outputLevel</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving audio streaming output level.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">video</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The Peer connection video streaming stats.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">sending</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending video streaming stats.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.bytes</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection current sending video streaming bytes.
+  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.totalBytes</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection total sending video streaming bytes.
+  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.packets</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection current sending video streaming packets.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.totalPackets</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection total sending video streaming packets.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.packetsLost</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection current sending video streaming packets lost.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.totalPacketsLost</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection total sending video streaming packets lost.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.ssrc</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending video streaming RTP packets SSRC.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.rtt</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending video streaming RTT (Round-trip delay time).
+  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.jitter</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending video streaming RTP packets jitter in seconds.
+  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.jitterBufferMs</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending video streaming
+  RTP packets jitter buffer in miliseconds.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.codec</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending video streaming selected codec information.
+  <small>Defined as <code>null</code> if local session description is not available before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.codec.name</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending video streaming selected codec name.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.codec.payloadType</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending video streaming selected codec payload type.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.codec.implementation</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending video streaming selected codec implementation.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.codec.channels</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending video streaming selected codec channels (2 for stereo).
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing,
+  and this is usually present in <code>stats.audio</code> property.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.codec.clockRate</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending video streaming selected codec media sampling rate.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.codec.params</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending video streaming selected codec parameters.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.frames</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending video streaming frames.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.framesInput</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending video streaming frames input.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.framesDropped</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending video streaming frames dropped.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.frameRateMean</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending video streaming fps mean.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.frameRateStdDev</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection sending video streaming fps standard deviation.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.nacks</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection current sending video streaming nacks.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.totalNacks</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection total sending video streaming nacks.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.plis</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection current sending video streaming plis.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.totalPlis</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection total sending video streaming plis.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.firs</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection current sending video streaming firs.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sending.totalFirs</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection total sending video streaming firs.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving video streaming stats.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.bytes</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection current receiving video streaming bytes.
+  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.totalBytes</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection total receiving video streaming bytes.
+  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.packets</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection current receiving video streaming packets.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.totalPackets</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection total receiving video streaming packets.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.packetsLost</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection current receiving video streaming packets lost.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.totalPacketsLost</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection total receiving video streaming packets lost.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.ssrc</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving video streaming RTP packets SSRC.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.e2eDelay</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving video streaming e2e delay.
+  <small>Defined as <code>null</code> if it's not present in original raw stats before parsing, and that
+  it finds any existing audio, video or object (plugin) DOM elements that has set with the
+  Peer remote stream object to parse current time. Note that <code>document.getElementsByTagName</code> function
+  and DOM <code>.currentTime</code> has to be supported inorder for data to be parsed correctly.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.jitter</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving video streaming RTP packets jitter in seconds.
+  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.jitterBufferMs</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving video streaming
+  RTP packets jitter buffer in miliseconds.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.codec</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving video streaming selected codec information.
+  <small>Defined as <code>null</code> if remote session description is not available before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.codec.name</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving video streaming selected codec name.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.codec.payloadType</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving video streaming selected codec payload type.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.codec.implementation</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving video streaming selected codec implementation.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.codec.channels</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving video streaming selected codec channels (2 for stereo).
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing,
+  and this is usually present in <code>stats.audio</code> property.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.codec.clockRate</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving video streaming selected codec media sampling rate.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.codec.params</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving video streaming selected codec parameters.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.frames</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving video streaming frames.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.framesOutput</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving video streaming frames output.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.framesDecoded</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving video streaming frames decoded.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.frameRateMean</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving video streaming fps mean.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.frameRateStdDev</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection receiving video streaming fps standard deviation.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.nacks</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection current receiving video streaming nacks.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.totalNacks</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection total receiving video streaming nacks.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.plis</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection current receiving video streaming plis.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.totalPlis</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection totally receiving video streaming plis.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.firs</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection current receiving video streaming firs.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiving.totalFirs</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The Peer connection total receiving video streaming firs.
+  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">selectedCandidate</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The Peer connection selected ICE candidate pair stats.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">local</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection selected local ICE candidate.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">local.ipAddress</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection selected
+  local ICE candidate IP address.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">local.portNumber</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection selected
+  local ICE candidate port number.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">local.transport</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection selected
+  local ICE candidate IP transport type.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">local.candidateType</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection selected
+  local ICE candidate type.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">remote</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection selected remote ICE candidate.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">remote.ipAddress</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection selected
+  remote ICE candidate IP address.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">remote.portNumber</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection selected
+  remote ICE candidate port number.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">remote.transport</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection selected
+  remote ICE candidate IP transport type.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">remote.candidateType</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection selected
+  remote ICE candidate type.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">connection</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The Peer connection object stats.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">iceConnectionState</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection ICE connection state.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">iceGatheringState</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection ICE gathering state.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">signalingState</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection signaling state.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">localDescription</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection local session description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">localDescription.type</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection local session description type.
+  <small>Defined as <code>null</code> when local session description is not available.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">localDescription.sdp</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection local session description SDP.
+  <small>Defined as <code>null</code> when local session description is not available.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">remoteDescription</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection remote session description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">remoteDescription.type</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection remote session description type.
+  <small>Defined as <code>null</code> when remote session description is not available.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">remoteDescription.sdp</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection remote session description sdp.
+  <small>Defined as <code>null</code> when remote session description is not available.</small>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection list of ICE candidates sent or received.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.sending</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection list of local ICE candidates sent.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.sending.host</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection list of local
+  <code>"host"</code> (local network) ICE candidates sent.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.sending.host.#index</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection local
+  <code>"host"</code> (local network) ICE candidate.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.sending.host.#index.candidate</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection local
+  <code>"host"</code> (local network) ICE candidate connection description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.sending.host.#index.sdpMid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection local
+  <code>"host"</code> (local network) ICE candidate identifier based on the local session description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.sending.host.#index.sdpMLineIndex</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection local
+  <code>"host"</code> (local network) ICE candidate media description index (starting from <code>0</code>)
+  based on the local session description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.sending.srflx</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection list of local
+  <code>"srflx"</code> (STUN) ICE candidates sent.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.sending.srflx.#index</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection local
+  <code>"srflx"</code> (STUN) ICE candidate.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.sending.srflx.#index.candidate</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection local
+  <code>"srflx"</code> (STUN) ICE candidate connection description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.sending.srflx.#index.sdpMid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection local
+  <code>"srflx"</code> (STUN) ICE candidate identifier based on the local session description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.sending.srflx.#index.sdpMLineIndex</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection local
+  <code>"srflx"</code> (STUN) ICE candidate media description index (starting from <code>0</code>)
+  based on the local session description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.sending.relay</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection list of local
+  <code>"relay"</code> (TURN) candidates sent.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.sending.relay.#index</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection local
+  <code>"relay"</code> (TURN) ICE candidate.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.sending.relay.#index.candidate</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection local
+  <code>"relay"</code> (TURN) ICE candidate connection description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.sending.relay.#index.sdpMid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection local
+  <code>"relay"</code> (TURN) ICE candidate identifier based on the local session description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.sending.relay.#index.sdpMLineIndex</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection local
+  <code>"relay"</code> (TURN) ICE candidate media description index (starting from <code>0</code>)
+  based on the local session description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.receiving</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection list of remote ICE candidates received.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.receiving.host</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection list of remote
+  <code>"host"</code> (local network) ICE candidates received.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.receiving.host.#index</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection remote
+  <code>"host"</code> (local network) ICE candidate.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.receiving.host.#index.candidate</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection remote
+  <code>"host"</code> (local network) ICE candidate connection description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.receiving.host.#index.sdpMid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection remote
+  <code>"host"</code> (local network) ICE candidate identifier based on the remote session description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.receiving.host.#index.sdpMLineIndex</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection remote
+  <code>"host"</code> (local network) ICE candidate media description index (starting from <code>0</code>)
+  based on the remote session description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.receiving.srflx</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection list of remote
+  <code>"srflx"</code> (STUN) ICE candidates received.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.receiving.srflx.#index</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection remote
+  <code>"srflx"</code> (STUN) ICE candidate.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.receiving.srflx.#index.candidate</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection remote
+  <code>"srflx"</code> (STUN) ICE candidate connection description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.receiving.srflx.#index.sdpMid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection remote
+  <code>"srflx"</code> (STUN) ICE candidate identifier based on the remote session description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.receiving.srflx.#index.sdpMLineIndex</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection remote
+  <code>"srflx"</code> (STUN) ICE candidate media description index (starting from <code>0</code>)
+  based on the remote session description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.receiving.relay</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection list of remote
+  <code>"relay"</code> (TURN) ICE candidates received.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.receiving.relay.#index</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection remote
+  <code>"relay"</code> (TURN) ICE candidate.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.receiving.relay.#index.candidate</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection remote
+  <code>"relay"</code> (TURN) ICE candidate connection description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.receiving.relay.#index.sdpMid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection remote
+  <code>"relay"</code> (TURN) ICE candidate identifier based on the remote session description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidates.receiving.relay.#index.sdpMLineIndex</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection remote
+  <code>"relay"</code> (TURN) ICE candidate media description index (starting from <code>0</code>)
+  based on the remote session description.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">dataChannels</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection list of Datachannel connections.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">dataChannels.#channelName</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection Datachannel connection stats.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">dataChannels.#channelName.label</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection Datachannel connection ID.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">dataChannels.#channelName.readyState</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection Datachannel connection readyState.
+  [Rel: Skylink.DATA_CHANNEL_STATE]
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">dataChannels.#channelName.type</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection Datachannel connection type.
+  [Rel: Skylink.DATA_CHANNEL_TYPE]
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">dataChannels.#channelName.currentTransferId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The Peer connection
+  Datachannel connection current progressing transfer session ID.
+  <small>Defined as <code>null</code> when there is currently no transfer session progressing on the Datachannel connection.</small>
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">error</code>
+            <span class="type"><b>{</b>Error<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The error object received.
+  <small>Defined only when <code>state</code> payload is <code>RETRIEVE_ERROR</code>.</small></p>
+
+            </div>
+
             
           </li>
       
@@ -39127,7 +41350,7 @@ Event triggered when a Peer connection session description exchanging state has 
     
 
     
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.-</span></small>
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.16</span></small>
     
   </div>
 

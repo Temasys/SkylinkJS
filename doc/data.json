@@ -1295,7 +1295,7 @@
             "access": "private",
             "tagname": "",
             "beta": 1,
-            "since": "0.6.-",
+            "since": "0.6.16",
             "class": "Skylink"
         },
         {
@@ -1308,7 +1308,7 @@
             "access": "private",
             "tagname": "",
             "beta": 1,
-            "since": "0.6.-",
+            "since": "0.6.16",
             "class": "Skylink"
         },
         {
@@ -1321,7 +1321,7 @@
             "access": "private",
             "tagname": "",
             "beta": 1,
-            "since": "0.6.-",
+            "since": "0.6.16",
             "class": "Skylink"
         },
         {
@@ -5824,7 +5824,899 @@
                 }
             ],
             "beta": 1,
-            "since": "0.6.-",
+            "since": "0.6.16",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 672,
+            "description": "Event triggered when <a href=\"#method_getConnectionStatus\"><code>getConnectionStatus()</code> method</a>\nretrieval state changes.",
+            "itemtype": "event",
+            "name": "getConnectionStatusStateChange",
+            "params": [
+                {
+                    "name": "state",
+                    "description": "The current <code>getConnectionStatus()</code> retrieval state.\n  [Rel: Skylink.GET_CONNECTION_STATUS_STATE]",
+                    "type": "Number"
+                },
+                {
+                    "name": "peerId",
+                    "description": "The Peer ID.",
+                    "type": "String"
+                },
+                {
+                    "name": "stats",
+                    "description": "The Peer connection current stats.\n  <small>Defined only when <code>state</code> payload is <code>RETRIEVE_SUCCESS</code>.</small>",
+                    "type": "JSON",
+                    "optional": true,
+                    "props": [
+                        {
+                            "name": "raw",
+                            "description": "The Peer connection raw stats before parsing.",
+                            "type": "JSON"
+                        },
+                        {
+                            "name": "audio",
+                            "description": "The Peer connection audio streaming stats.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "sending",
+                                    "description": "The Peer connection sending audio streaming stats.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "sending.bytes",
+                                    "description": "The Peer connection current sending audio streaming bytes.\n  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.totalBytes",
+                                    "description": "The Peer connection total sending audio streaming bytes.\n  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.packets",
+                                    "description": "The Peer connection current sending audio streaming packets.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.totalPackets",
+                                    "description": "The Peer connection total sending audio streaming packets.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.packetsLost",
+                                    "description": "The Peer connection current sending audio streaming packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.totalPacketsLost",
+                                    "description": "The Peer connection total sending audio streaming packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.ssrc",
+                                    "description": "The Peer connection sending audio streaming RTP packets SSRC.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.rtt",
+                                    "description": "The Peer connection sending audio streaming RTT (Round-trip delay time).\n  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.jitter",
+                                    "description": "The Peer connection sending audio streaming RTP packets jitter in seconds.\n  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.jitterBufferMs",
+                                    "description": "The Peer connection sending audio streaming\n  RTP packets jitter buffer in miliseconds.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.codec",
+                                    "description": "The Peer connection sending audio streaming selected codec information.\n  <small>Defined as <code>null</code> if local session description is not available before parsing.</small>",
+                                    "type": "JSON",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.codec.name",
+                                    "description": "The Peer connection sending audio streaming selected codec name.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "sending.codec.payloadType",
+                                    "description": "The Peer connection sending audio streaming selected codec payload type.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.codec.implementation",
+                                    "description": "The Peer connection sending audio streaming selected codec implementation.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.codec.channels",
+                                    "description": "The Peer connection sending audio streaming selected codec channels (2 for stereo).\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing,\n  and this is usually present in <code>stats.audio</code> property.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.codec.clockRate",
+                                    "description": "The Peer connection sending audio streaming selected codec media sampling rate.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.codec.params",
+                                    "description": "The Peer connection sending audio streaming selected codec parameters.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.inputLevel",
+                                    "description": "The Peer connection sending audio streaming input level.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.echoReturnLoss",
+                                    "description": "The Peer connection sending audio streaming echo return loss in db (decibels).\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.echoReturnLossEnhancement",
+                                    "description": "The Peer connection sending audio streaming\n  echo return loss enhancement db (decibels).\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving",
+                                    "description": "The Peer connection receiving audio streaming stats.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "receiving.bytes",
+                                    "description": "The Peer connection current sending audio streaming bytes.\n  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.totalBytes",
+                                    "description": "The Peer connection total sending audio streaming bytes.\n  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.packets",
+                                    "description": "The Peer connection current receiving audio streaming packets.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.totalPackets",
+                                    "description": "The Peer connection total receiving audio streaming packets.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.packetsLost",
+                                    "description": "The Peer connection current receiving audio streaming packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.totalPacketsLost",
+                                    "description": "The Peer connection total receiving audio streaming packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.ssrc",
+                                    "description": "The Peer connection receiving audio streaming RTP packets SSRC.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.jitter",
+                                    "description": "The Peer connection receiving audio streaming RTP packets jitter in seconds.\n  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.jitterBufferMs",
+                                    "description": "The Peer connection receiving audio streaming\n  RTP packets jitter buffer in miliseconds.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.codec",
+                                    "description": "The Peer connection receiving audio streaming selected codec information.\n  <small>Defined as <code>null</code> if remote session description is not available before parsing.</small>",
+                                    "type": "JSON",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.codec.name",
+                                    "description": "The Peer connection receiving audio streaming selected codec name.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "receiving.codec.payloadType",
+                                    "description": "The Peer connection receiving audio streaming selected codec payload type.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.codec.implementation",
+                                    "description": "The Peer connection receiving audio streaming selected codec implementation.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.codec.channels",
+                                    "description": "The Peer connection receiving audio streaming selected codec channels (2 for stereo).\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing,\n  and this is usually present in <code>stats.audio</code> property.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.codec.clockRate",
+                                    "description": "The Peer connection receiving audio streaming selected codec media sampling rate.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.codec.params",
+                                    "description": "The Peer connection receiving audio streaming selected codec parameters.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.outputLevel",
+                                    "description": "The Peer connection receiving audio streaming output level.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                }
+                            ]
+                        },
+                        {
+                            "name": "video",
+                            "description": "The Peer connection video streaming stats.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "sending",
+                                    "description": "The Peer connection sending video streaming stats.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "sending.bytes",
+                                    "description": "The Peer connection current sending video streaming bytes.\n  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.totalBytes",
+                                    "description": "The Peer connection total sending video streaming bytes.\n  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.packets",
+                                    "description": "The Peer connection current sending video streaming packets.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.totalPackets",
+                                    "description": "The Peer connection total sending video streaming packets.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.packetsLost",
+                                    "description": "The Peer connection current sending video streaming packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.totalPacketsLost",
+                                    "description": "The Peer connection total sending video streaming packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.ssrc",
+                                    "description": "The Peer connection sending video streaming RTP packets SSRC.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.rtt",
+                                    "description": "The Peer connection sending video streaming RTT (Round-trip delay time).\n  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.jitter",
+                                    "description": "The Peer connection sending video streaming RTP packets jitter in seconds.\n  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.jitterBufferMs",
+                                    "description": "The Peer connection sending video streaming\n  RTP packets jitter buffer in miliseconds.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.codec",
+                                    "description": "The Peer connection sending video streaming selected codec information.\n  <small>Defined as <code>null</code> if local session description is not available before parsing.</small>",
+                                    "type": "JSON",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.codec.name",
+                                    "description": "The Peer connection sending video streaming selected codec name.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "sending.codec.payloadType",
+                                    "description": "The Peer connection sending video streaming selected codec payload type.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "sending.codec.implementation",
+                                    "description": "The Peer connection sending video streaming selected codec implementation.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.codec.channels",
+                                    "description": "The Peer connection sending video streaming selected codec channels (2 for stereo).\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing,\n  and this is usually present in <code>stats.audio</code> property.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.codec.clockRate",
+                                    "description": "The Peer connection sending video streaming selected codec media sampling rate.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.codec.params",
+                                    "description": "The Peer connection sending video streaming selected codec parameters.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.frames",
+                                    "description": "The Peer connection sending video streaming frames.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.framesInput",
+                                    "description": "The Peer connection sending video streaming frames input.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.framesDropped",
+                                    "description": "The Peer connection sending video streaming frames dropped.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.frameRateMean",
+                                    "description": "The Peer connection sending video streaming fps mean.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.frameRateStdDev",
+                                    "description": "The Peer connection sending video streaming fps standard deviation.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.nacks",
+                                    "description": "The Peer connection current sending video streaming nacks.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.totalNacks",
+                                    "description": "The Peer connection total sending video streaming nacks.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.plis",
+                                    "description": "The Peer connection current sending video streaming plis.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.totalPlis",
+                                    "description": "The Peer connection total sending video streaming plis.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.firs",
+                                    "description": "The Peer connection current sending video streaming firs.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.totalFirs",
+                                    "description": "The Peer connection total sending video streaming firs.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving",
+                                    "description": "The Peer connection receiving video streaming stats.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "receiving.bytes",
+                                    "description": "The Peer connection current receiving video streaming bytes.\n  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.totalBytes",
+                                    "description": "The Peer connection total receiving video streaming bytes.\n  <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.packets",
+                                    "description": "The Peer connection current receiving video streaming packets.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.totalPackets",
+                                    "description": "The Peer connection total receiving video streaming packets.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.packetsLost",
+                                    "description": "The Peer connection current receiving video streaming packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.totalPacketsLost",
+                                    "description": "The Peer connection total receiving video streaming packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.ssrc",
+                                    "description": "The Peer connection receiving video streaming RTP packets SSRC.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.e2eDelay",
+                                    "description": "The Peer connection receiving video streaming e2e delay.\n  <small>Defined as <code>null</code> if it's not present in original raw stats before parsing, and that\n  it finds any existing audio, video or object (plugin) DOM elements that has set with the\n  Peer remote stream object to parse current time. Note that <code>document.getElementsByTagName</code> function\n  and DOM <code>.currentTime</code> has to be supported inorder for data to be parsed correctly.</small>",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.jitter",
+                                    "description": "The Peer connection receiving video streaming RTP packets jitter in seconds.\n  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.jitterBufferMs",
+                                    "description": "The Peer connection receiving video streaming\n  RTP packets jitter buffer in miliseconds.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.codec",
+                                    "description": "The Peer connection receiving video streaming selected codec information.\n  <small>Defined as <code>null</code> if remote session description is not available before parsing.</small>",
+                                    "type": "JSON",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.codec.name",
+                                    "description": "The Peer connection receiving video streaming selected codec name.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "receiving.codec.payloadType",
+                                    "description": "The Peer connection receiving video streaming selected codec payload type.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.codec.implementation",
+                                    "description": "The Peer connection receiving video streaming selected codec implementation.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.codec.channels",
+                                    "description": "The Peer connection receiving video streaming selected codec channels (2 for stereo).\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing,\n  and this is usually present in <code>stats.audio</code> property.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.codec.clockRate",
+                                    "description": "The Peer connection receiving video streaming selected codec media sampling rate.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.codec.params",
+                                    "description": "The Peer connection receiving video streaming selected codec parameters.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.frames",
+                                    "description": "The Peer connection receiving video streaming frames.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.framesOutput",
+                                    "description": "The Peer connection receiving video streaming frames output.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.framesDecoded",
+                                    "description": "The Peer connection receiving video streaming frames decoded.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.frameRateMean",
+                                    "description": "The Peer connection receiving video streaming fps mean.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.frameRateStdDev",
+                                    "description": "The Peer connection receiving video streaming fps standard deviation.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.nacks",
+                                    "description": "The Peer connection current receiving video streaming nacks.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.totalNacks",
+                                    "description": "The Peer connection total receiving video streaming nacks.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.plis",
+                                    "description": "The Peer connection current receiving video streaming plis.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.totalPlis",
+                                    "description": "The Peer connection totally receiving video streaming plis.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.firs",
+                                    "description": "The Peer connection current receiving video streaming firs.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "receiving.totalFirs",
+                                    "description": "The Peer connection total receiving video streaming firs.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                }
+                            ]
+                        },
+                        {
+                            "name": "selectedCandidate",
+                            "description": "The Peer connection selected ICE candidate pair stats.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "local",
+                                    "description": "The Peer connection selected local ICE candidate.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "local.ipAddress",
+                                    "description": "The Peer connection selected\n  local ICE candidate IP address.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "local.portNumber",
+                                    "description": "The Peer connection selected\n  local ICE candidate port number.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "local.transport",
+                                    "description": "The Peer connection selected\n  local ICE candidate IP transport type.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "local.candidateType",
+                                    "description": "The Peer connection selected\n  local ICE candidate type.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "remote",
+                                    "description": "The Peer connection selected remote ICE candidate.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "remote.ipAddress",
+                                    "description": "The Peer connection selected\n  remote ICE candidate IP address.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "remote.portNumber",
+                                    "description": "The Peer connection selected\n  remote ICE candidate port number.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "remote.transport",
+                                    "description": "The Peer connection selected\n  remote ICE candidate IP transport type.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "remote.candidateType",
+                                    "description": "The Peer connection selected\n  remote ICE candidate type.",
+                                    "type": "String"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "connection",
+                            "description": "The Peer connection object stats.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "iceConnectionState",
+                                    "description": "The Peer connection ICE connection state.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "iceGatheringState",
+                                    "description": "The Peer connection ICE gathering state.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "signalingState",
+                                    "description": "The Peer connection signaling state.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "localDescription",
+                                    "description": "The Peer connection local session description.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "localDescription.type",
+                                    "description": "The Peer connection local session description type.\n  <small>Defined as <code>null</code> when local session description is not available.</small>",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "localDescription.sdp",
+                                    "description": "The Peer connection local session description SDP.\n  <small>Defined as <code>null</code> when local session description is not available.</small>",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "remoteDescription",
+                                    "description": "The Peer connection remote session description.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "remoteDescription.type",
+                                    "description": "The Peer connection remote session description type.\n  <small>Defined as <code>null</code> when remote session description is not available.</small>",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "remoteDescription.sdp",
+                                    "description": "The Peer connection remote session description sdp.\n  <small>Defined as <code>null</code> when remote session description is not available.</small>",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates",
+                                    "description": "The Peer connection list of ICE candidates sent or received.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.sending",
+                                    "description": "The Peer connection list of local ICE candidates sent.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.sending.host",
+                                    "description": "The Peer connection list of local\n  <code>\"host\"</code> (local network) ICE candidates sent.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "candidates.sending.host.#index",
+                                    "description": "The Peer connection local\n  <code>\"host\"</code> (local network) ICE candidate.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.sending.host.#index.candidate",
+                                    "description": "The Peer connection local\n  <code>\"host\"</code> (local network) ICE candidate connection description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.sending.host.#index.sdpMid",
+                                    "description": "The Peer connection local\n  <code>\"host\"</code> (local network) ICE candidate identifier based on the local session description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.sending.host.#index.sdpMLineIndex",
+                                    "description": "The Peer connection local\n  <code>\"host\"</code> (local network) ICE candidate media description index (starting from <code>0</code>)\n  based on the local session description.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "candidates.sending.srflx",
+                                    "description": "The Peer connection list of local\n  <code>\"srflx\"</code> (STUN) ICE candidates sent.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "candidates.sending.srflx.#index",
+                                    "description": "The Peer connection local\n  <code>\"srflx\"</code> (STUN) ICE candidate.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.sending.srflx.#index.candidate",
+                                    "description": "The Peer connection local\n  <code>\"srflx\"</code> (STUN) ICE candidate connection description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.sending.srflx.#index.sdpMid",
+                                    "description": "The Peer connection local\n  <code>\"srflx\"</code> (STUN) ICE candidate identifier based on the local session description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.sending.srflx.#index.sdpMLineIndex",
+                                    "description": "The Peer connection local\n  <code>\"srflx\"</code> (STUN) ICE candidate media description index (starting from <code>0</code>)\n  based on the local session description.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "candidates.sending.relay",
+                                    "description": "The Peer connection list of local\n  <code>\"relay\"</code> (TURN) candidates sent.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "candidates.sending.relay.#index",
+                                    "description": "The Peer connection local\n  <code>\"relay\"</code> (TURN) ICE candidate.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.sending.relay.#index.candidate",
+                                    "description": "The Peer connection local\n  <code>\"relay\"</code> (TURN) ICE candidate connection description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.sending.relay.#index.sdpMid",
+                                    "description": "The Peer connection local\n  <code>\"relay\"</code> (TURN) ICE candidate identifier based on the local session description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.sending.relay.#index.sdpMLineIndex",
+                                    "description": "The Peer connection local\n  <code>\"relay\"</code> (TURN) ICE candidate media description index (starting from <code>0</code>)\n  based on the local session description.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "candidates.receiving",
+                                    "description": "The Peer connection list of remote ICE candidates received.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.receiving.host",
+                                    "description": "The Peer connection list of remote\n  <code>\"host\"</code> (local network) ICE candidates received.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "candidates.receiving.host.#index",
+                                    "description": "The Peer connection remote\n  <code>\"host\"</code> (local network) ICE candidate.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.receiving.host.#index.candidate",
+                                    "description": "The Peer connection remote\n  <code>\"host\"</code> (local network) ICE candidate connection description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.receiving.host.#index.sdpMid",
+                                    "description": "The Peer connection remote\n  <code>\"host\"</code> (local network) ICE candidate identifier based on the remote session description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.receiving.host.#index.sdpMLineIndex",
+                                    "description": "The Peer connection remote\n  <code>\"host\"</code> (local network) ICE candidate media description index (starting from <code>0</code>)\n  based on the remote session description.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "candidates.receiving.srflx",
+                                    "description": "The Peer connection list of remote\n  <code>\"srflx\"</code> (STUN) ICE candidates received.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "candidates.receiving.srflx.#index",
+                                    "description": "The Peer connection remote\n  <code>\"srflx\"</code> (STUN) ICE candidate.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.receiving.srflx.#index.candidate",
+                                    "description": "The Peer connection remote\n  <code>\"srflx\"</code> (STUN) ICE candidate connection description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.receiving.srflx.#index.sdpMid",
+                                    "description": "The Peer connection remote\n  <code>\"srflx\"</code> (STUN) ICE candidate identifier based on the remote session description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.receiving.srflx.#index.sdpMLineIndex",
+                                    "description": "The Peer connection remote\n  <code>\"srflx\"</code> (STUN) ICE candidate media description index (starting from <code>0</code>)\n  based on the remote session description.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "candidates.receiving.relay",
+                                    "description": "The Peer connection list of remote\n  <code>\"relay\"</code> (TURN) ICE candidates received.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "candidates.receiving.relay.#index",
+                                    "description": "The Peer connection remote\n  <code>\"relay\"</code> (TURN) ICE candidate.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "candidates.receiving.relay.#index.candidate",
+                                    "description": "The Peer connection remote\n  <code>\"relay\"</code> (TURN) ICE candidate connection description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.receiving.relay.#index.sdpMid",
+                                    "description": "The Peer connection remote\n  <code>\"relay\"</code> (TURN) ICE candidate identifier based on the remote session description.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "candidates.receiving.relay.#index.sdpMLineIndex",
+                                    "description": "The Peer connection remote\n  <code>\"relay\"</code> (TURN) ICE candidate media description index (starting from <code>0</code>)\n  based on the remote session description.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "dataChannels",
+                                    "description": "The Peer connection list of Datachannel connections.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "dataChannels.#channelName",
+                                    "description": "The Peer connection Datachannel connection stats.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "dataChannels.#channelName.label",
+                                    "description": "The Peer connection Datachannel connection ID.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "dataChannels.#channelName.readyState",
+                                    "description": "The Peer connection Datachannel connection readyState.\n  [Rel: Skylink.DATA_CHANNEL_STATE]",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "dataChannels.#channelName.type",
+                                    "description": "The Peer connection Datachannel connection type.\n  [Rel: Skylink.DATA_CHANNEL_TYPE]",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "dataChannels.#channelName.currentTransferId",
+                                    "description": "The Peer connection\n  Datachannel connection current progressing transfer session ID.\n  <small>Defined as <code>null</code> when there is currently no transfer session progressing on the Datachannel connection.</small>",
+                                    "type": "String"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "error",
+                    "description": "The error object received.\n  <small>Defined only when <code>state</code> payload is <code>RETRIEVE_ERROR</code>.</small>",
+                    "type": "Error"
+                }
+            ],
+            "since": "0.6.14",
             "class": "Skylink"
         },
         {
@@ -6516,7 +7408,7 @@
             "access": "private",
             "tagname": "",
             "beta": 1,
-            "since": "0.6.-",
+            "since": "0.6.16",
             "class": "Skylink"
         },
         {
@@ -6832,7 +7724,7 @@
             ],
             "type": "JSON",
             "beta": 1,
-            "since": "0.6.x",
+            "since": "0.6.16",
             "class": "Skylink"
         },
         {

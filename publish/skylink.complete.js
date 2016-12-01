@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Fri Dec 02 2016 00:46:51 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Fri Dec 02 2016 00:55:10 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.16 - Fri Dec 02 2016 00:46:51 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Fri Dec 02 2016 00:55:10 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -12593,7 +12593,7 @@ function Skylink() {
    * @private
    * @beta
    * @for Skylink
-   * @since 0.6.-
+   * @since 0.6.16
    */
   this._recordings = {};
 
@@ -12605,7 +12605,7 @@ function Skylink() {
    * @private
    * @beta
    * @for Skylink
-   * @since 0.6.-
+   * @since 0.6.16
    */
   this._currentRecordingId = false;
 
@@ -12616,7 +12616,7 @@ function Skylink() {
    * @private
    * @beta
    * @for Skylink
-   * @since 0.6.-
+   * @since 0.6.16
    */
   this._recordingStartInterval = null;
 }
@@ -20758,11 +20758,11 @@ var _eventsDocs = {
    *   <small>Defined only when <code>state</code> payload is <code>ERROR</code>.</small>
    * @beta
    * @for Skylink
-   * @since 0.6.-
+   * @since 0.6.16
    */
   recordingState: [],
 
-  /*
+  /**
    * Event triggered when <a href="#method_getConnectionStatus"><code>getConnectionStatus()</code> method</a>
    * retrieval state changes.
    * @event getConnectionStatusStateChange
@@ -20850,7 +20850,7 @@ var _eventsDocs = {
    * @param {Number} stats.video.sending.totalPackets The Peer connection total sending video streaming packets.
    * @param {Number} stats.video.sending.packetsLost The Peer connection current sending video streaming packets lost.
    * @param {Number} stats.video.sending.totalPacketsLost The Peer connection total sending video streaming packets lost.
-   * @param {JSON} stats.video.sending.ssrc The Peer connection sending video streaming RTP packets SSRC.
+   * @param {Number} stats.video.sending.ssrc The Peer connection sending video streaming RTP packets SSRC.
    * @param {Number} stats.video.sending.rtt The Peer connection sending video streaming RTT (Round-trip delay time).
    *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
    * @param {Number} stats.video.sending.jitter The Peer connection sending video streaming RTP packets jitter in seconds.
@@ -20908,7 +20908,7 @@ var _eventsDocs = {
    *   it finds any existing audio, video or object (plugin) DOM elements that has set with the
    *   Peer remote stream object to parse current time. Note that <code>document.getElementsByTagName</code> function
    *   and DOM <code>.currentTime</code> has to be supported inorder for data to be parsed correctly.</small>
-   * @param {Number} stats.video.receiving.jitter The Peer connection receiving video streaming RTP packets jitter in seconds.g
+   * @param {Number} stats.video.receiving.jitter The Peer connection receiving video streaming RTP packets jitter in seconds.
    *   <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>
    * @param {Number} [stats.video.receiving.jitterBufferMs] The Peer connection receiving video streaming
    *   RTP packets jitter buffer in miliseconds.
@@ -22688,7 +22688,7 @@ Skylink.prototype._publicMessageHandler = function(message) {
  * @private
  * @beta
  * @for Skylink
- * @since 0.6.-
+ * @since 0.6.16
  */
 Skylink.prototype._recordingEventHandler = function (message) {
   var self = this;
@@ -23628,7 +23628,7 @@ Skylink.prototype.MEDIA_ACCESS_FALLBACK_STATE = {
  * @type JSON
  * @beta
  * @for Skylink
- * @since 0.6.x
+ * @since 0.6.16
  */
 Skylink.prototype.RECORDING_STATE = {
   START: 0,

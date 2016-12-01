@@ -1058,7 +1058,7 @@ function Skylink() {
    * @private
    * @beta
    * @for Skylink
-   * @since 0.6.-
+   * @since 0.6.16
    */
   this._recordings = {};
 
@@ -1070,7 +1070,7 @@ function Skylink() {
    * @private
    * @beta
    * @for Skylink
-   * @since 0.6.-
+   * @since 0.6.16
    */
   this._currentRecordingId = false;
 
@@ -1081,7 +1081,7 @@ function Skylink() {
    * @private
    * @beta
    * @for Skylink
-   * @since 0.6.-
+   * @since 0.6.16
    */
   this._recordingStartInterval = null;
 }

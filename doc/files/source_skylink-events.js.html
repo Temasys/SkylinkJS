@@ -756,11 +756,11 @@ var _eventsDocs = {
    *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; payload is &lt;code&gt;ERROR&lt;/code&gt;.&lt;/small&gt;
    * @beta
    * @for Skylink
-   * @since 0.6.-
+   * @since 0.6.16
    */
   recordingState: [],
 
-  /*
+  /**
    * Event triggered when &lt;a href=&quot;#method_getConnectionStatus&quot;&gt;&lt;code&gt;getConnectionStatus()&lt;/code&gt; method&lt;/a&gt;
    * retrieval state changes.
    * @event getConnectionStatusStateChange
@@ -848,7 +848,7 @@ var _eventsDocs = {
    * @param {Number} stats.video.sending.totalPackets The Peer connection total sending video streaming packets.
    * @param {Number} stats.video.sending.packetsLost The Peer connection current sending video streaming packets lost.
    * @param {Number} stats.video.sending.totalPacketsLost The Peer connection total sending video streaming packets lost.
-   * @param {JSON} stats.video.sending.ssrc The Peer connection sending video streaming RTP packets SSRC.
+   * @param {Number} stats.video.sending.ssrc The Peer connection sending video streaming RTP packets SSRC.
    * @param {Number} stats.video.sending.rtt The Peer connection sending video streaming RTT (Round-trip delay time).
    *   &lt;small&gt;Defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing.&lt;/small&gt;
    * @param {Number} stats.video.sending.jitter The Peer connection sending video streaming RTP packets jitter in seconds.
@@ -906,7 +906,7 @@ var _eventsDocs = {
    *   it finds any existing audio, video or object (plugin) DOM elements that has set with the
    *   Peer remote stream object to parse current time. Note that &lt;code&gt;document.getElementsByTagName&lt;/code&gt; function
    *   and DOM &lt;code&gt;.currentTime&lt;/code&gt; has to be supported inorder for data to be parsed correctly.&lt;/small&gt;
-   * @param {Number} stats.video.receiving.jitter The Peer connection receiving video streaming RTP packets jitter in seconds.g
+   * @param {Number} stats.video.receiving.jitter The Peer connection receiving video streaming RTP packets jitter in seconds.
    *   &lt;small&gt;Defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing.&lt;/small&gt;
    * @param {Number} [stats.video.receiving.jitterBufferMs] The Peer connection receiving video streaming
    *   RTP packets jitter buffer in miliseconds.
