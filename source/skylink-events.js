@@ -657,7 +657,7 @@ var _eventsDocs = {
    * @param {JSON} link The recording session mixin videos link in
    *   <a href="https://en.wikipedia.org/wiki/MPEG-4_Part_14">MP4</a> format.
    *   <small>Defined only when <code>state</code> payload is <code>LINK</code>.</small>
-   * @param {String} link.#peerId The recording session recorded Peer only video associated 
+   * @param {String} link.#peerId The recording session recorded Peer only video associated
    *   with the Peer ID defined in <code>#peerId</code> property.
    *   <small>If <code>#peerId</code> value is <code>"mixin"</code>, it means that is the mixin
    *   video of all Peers in the Room.</small>

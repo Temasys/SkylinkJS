@@ -5812,7 +5812,7 @@
                     "props": [
                         {
                             "name": "#peerId",
-                            "description": "The recording session recorded Peer only video associated \n  with the Peer ID defined in <code>#peerId</code> property.\n  <small>If <code>#peerId</code> value is <code>\"mixin\"</code>, it means that is the mixin\n  video of all Peers in the Room.</small>",
+                            "description": "The recording session recorded Peer only video associated\n  with the Peer ID defined in <code>#peerId</code> property.\n  <small>If <code>#peerId</code> value is <code>\"mixin\"</code>, it means that is the mixin\n  video of all Peers in the Room.</small>",
                             "type": "String"
                         }
                     ]
@@ -6228,7 +6228,7 @@
         {
             "file": "source/socket-message.js",
             "line": 179,
-            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"mcu\"</code> value to be <code>\"ON\"</code> and recording\n  to be enabled for the App Key provided in the <a href=\"#method_init\"><code>init()</code> method</a>.\n  To enable recording for the App Key, please <a href=\"http://support.temasys.com.sg\">contact us\n  on our support portal</a>.\n</blockquote>\nStarts a recording session.",
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires MCU and recording to be enabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>. If recording feature is not available to\n  be enabled in the <a href=\"https://console.temasys.io\">Developer Console</a>, please\n  <a href=\"http://support.temasys.com.sg\">contact us on our support portal</a>.\n</blockquote>\nStarts a recording session.",
             "itemtype": "method",
             "name": "startRecording",
             "params": [
@@ -6256,13 +6256,13 @@
             ],
             "trigger": "<ol class=\"desc-seq\">\n  <li>If MCU is not connected: <ol><li><b>ABORT</b> and return error.</li></ol></li>\n  <li>If there is an existing recording session currently going on: <ol>\n  <li><b>ABORT</b> and return error.</li></ol></li>\n  <li>Sends to MCU via Signaling server to start recording session. <ol>\n  <li>If recording session has been started successfully: <ol>\n  <li><a href=\"#event_recordingState\"><code>recordingState</code> event</a> triggers\n  parameter payload <code>state</code> as <code>START</code>.</li></ol></li></ol></li></ol>",
             "beta": 1,
-            "since": "0.6.x",
+            "since": "0.6.16",
             "class": "Skylink"
         },
         {
             "file": "source/socket-message.js",
             "line": 255,
-            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"mcu\"</code> value to be <code>\"ON\"</code> and recording\n  to be enabled for the App Key provided in the <a href=\"#method_init\"><code>init()</code> method</a>.\n  To enable recording for the App Key, please <a href=\"http://support.temasys.com.sg\">contact us\n  on our support portal</a>.\n</blockquote>\nStops a recording session.",
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires MCU and recording to be enabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>. If recording feature is not available to\n  be enabled in the <a href=\"https://console.temasys.io\">Developer Console</a>, please\n  <a href=\"http://support.temasys.com.sg\">contact us on our support portal</a>.\n</blockquote>\nStops a recording session.",
             "params": [
                 {
                     "name": "callback",
@@ -6309,7 +6309,7 @@
             ],
             "trigger": "<ol class=\"desc-seq\">\n  <li>If MCU is not connected: <ol><li><b>ABORT</b> and return error.</li></ol></li>\n  <li>If there is no existing recording session currently going on: <ol>\n  <li><b>ABORT</b> and return error.</li></ol></li>\n  <li>If existing recording session recording time has not elapsed more than 4 seconds:\n  <small>4 seconds is mandatory for recording session to ensure better recording\n  experience and stability.</small> <ol><li><b>ABORT</b> and return error.</li></ol></li>\n  <li>Sends to MCU via Signaling server to stop recording session: <ol>\n  <li>If recording session has been stopped successfully: <ol>\n  <li><a href=\"#event_recordingState\"><code>recordingState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>START</code>.\n  <li>MCU starts mixin recorded session videos: <ol>\n  <li>If recording session has been mixin successfully with links: <ol>\n  <li><a href=\"#event_recordingState\"><code>recordingState</code> event</a> triggers\n  parameter payload <code>state</code> as <code>LINK</code>.<li>Else: <ol>\n  <li><a href=\"#event_recordingState\"><code>recordingState</code> event</a> triggers\n  parameter payload <code>state</code> as <code>ERROR</code>.<li><b>ABORT</b> and return error.</ol></li>\n  </ol></li></ol></li><li>Else: <ol>\n  <li><a href=\"#event_recordingState\"><code>recordingState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> and return error.</li>\n  </ol></li></ol></li></ol>",
             "beta": 1,
-            "since": "0.6.x",
+            "since": "0.6.16",
             "class": "Skylink"
         },
         {

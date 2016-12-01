@@ -178,10 +178,10 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
 
 /**
  * <blockquote class="info">
- *   Note that this feature requires <code>"mcu"</code> value to be <code>"ON"</code> and recording
- *   to be enabled for the App Key provided in the <a href="#method_init"><code>init()</code> method</a>.
- *   To enable recording for the App Key, please <a href="http://support.temasys.com.sg">contact us
- *   on our support portal</a>.
+ *   Note that this feature requires MCU and recording to be enabled for the App Key provided in the
+ *   <a href="#method_init"><code>init()</code> method</a>. If recording feature is not available to
+ *   be enabled in the <a href="https://console.temasys.io">Developer Console</a>, please
+ *   <a href="http://support.temasys.com.sg">contact us on our support portal</a>.
  * </blockquote>
  * Starts a recording session.
  * @method startRecording
@@ -212,7 +212,7 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
  *   parameter payload <code>state</code> as <code>START</code>.</li></ol></li></ol></li></ol>
  * @beta
  * @for Skylink
- * @since 0.6.x
+ * @since 0.6.16
  */
 Skylink.prototype.startRecording = function (callback) {
   var self = this;
@@ -254,10 +254,10 @@ Skylink.prototype.startRecording = function (callback) {
 
 /**
  * <blockquote class="info">
- *   Note that this feature requires <code>"mcu"</code> value to be <code>"ON"</code> and recording
- *   to be enabled for the App Key provided in the <a href="#method_init"><code>init()</code> method</a>.
- *   To enable recording for the App Key, please <a href="http://support.temasys.com.sg">contact us
- *   on our support portal</a>.
+ *   Note that this feature requires MCU and recording to be enabled for the App Key provided in the
+ *   <a href="#method_init"><code>init()</code> method</a>. If recording feature is not available to
+ *   be enabled in the <a href="https://console.temasys.io">Developer Console</a>, please
+ *   <a href="http://support.temasys.com.sg">contact us on our support portal</a>.
  * </blockquote>
  * Stops a recording session.
  * @param {Function} [callback] The callback function fired when request has completed.
@@ -318,7 +318,7 @@ Skylink.prototype.startRecording = function (callback) {
  *   </ol></li></ol></li></ol>
  * @beta
  * @for Skylink
- * @since 0.6.x
+ * @since 0.6.16
  */
 Skylink.prototype.stopRecording = function (callback, callbackSuccessWhenLink) {
   var self = this;

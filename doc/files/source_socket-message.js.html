@@ -269,10 +269,10 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
 
 /**
  * &lt;blockquote class=&quot;info&quot;&gt;
- *   Note that this feature requires &lt;code&gt;&quot;mcu&quot;&lt;/code&gt; value to be &lt;code&gt;&quot;ON&quot;&lt;/code&gt; and recording
- *   to be enabled for the App Key provided in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;.
- *   To enable recording for the App Key, please &lt;a href=&quot;http://support.temasys.com.sg&quot;&gt;contact us
- *   on our support portal&lt;/a&gt;.
+ *   Note that this feature requires MCU and recording to be enabled for the App Key provided in the
+ *   &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;. If recording feature is not available to
+ *   be enabled in the &lt;a href=&quot;https://console.temasys.io&quot;&gt;Developer Console&lt;/a&gt;, please
+ *   &lt;a href=&quot;http://support.temasys.com.sg&quot;&gt;contact us on our support portal&lt;/a&gt;.
  * &lt;/blockquote&gt;
  * Starts a recording session.
  * @method startRecording
@@ -303,7 +303,7 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
  *   parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;START&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @beta
  * @for Skylink
- * @since 0.6.x
+ * @since 0.6.16
  */
 Skylink.prototype.startRecording = function (callback) {
   var self = this;
@@ -345,10 +345,10 @@ Skylink.prototype.startRecording = function (callback) {
 
 /**
  * &lt;blockquote class=&quot;info&quot;&gt;
- *   Note that this feature requires &lt;code&gt;&quot;mcu&quot;&lt;/code&gt; value to be &lt;code&gt;&quot;ON&quot;&lt;/code&gt; and recording
- *   to be enabled for the App Key provided in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;.
- *   To enable recording for the App Key, please &lt;a href=&quot;http://support.temasys.com.sg&quot;&gt;contact us
- *   on our support portal&lt;/a&gt;.
+ *   Note that this feature requires MCU and recording to be enabled for the App Key provided in the
+ *   &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;. If recording feature is not available to
+ *   be enabled in the &lt;a href=&quot;https://console.temasys.io&quot;&gt;Developer Console&lt;/a&gt;, please
+ *   &lt;a href=&quot;http://support.temasys.com.sg&quot;&gt;contact us on our support portal&lt;/a&gt;.
  * &lt;/blockquote&gt;
  * Stops a recording session.
  * @param {Function} [callback] The callback function fired when request has completed.
@@ -409,7 +409,7 @@ Skylink.prototype.startRecording = function (callback) {
  *   &lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
  * @beta
  * @for Skylink
- * @since 0.6.x
+ * @since 0.6.16
  */
 Skylink.prototype.stopRecording = function (callback, callbackSuccessWhenLink) {
   var self = this;

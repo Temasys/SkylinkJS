@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Thu Dec 01 2016 23:45:50 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Thu Dec 01 2016 23:54:54 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.16 - Thu Dec 01 2016 23:45:50 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Thu Dec 01 2016 23:54:54 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -20750,7 +20750,7 @@ var _eventsDocs = {
    * @param {JSON} link The recording session mixin videos link in
    *   <a href="https://en.wikipedia.org/wiki/MPEG-4_Part_14">MP4</a> format.
    *   <small>Defined only when <code>state</code> payload is <code>LINK</code>.</small>
-   * @param {String} link.#peerId The recording session recorded Peer only video associated 
+   * @param {String} link.#peerId The recording session recorded Peer only video associated
    *   with the Peer ID defined in <code>#peerId</code> property.
    *   <small>If <code>#peerId</code> value is <code>"mixin"</code>, it means that is the mixin
    *   video of all Peers in the Room.</small>
@@ -22017,10 +22017,10 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
 
 /**
  * <blockquote class="info">
- *   Note that this feature requires <code>"mcu"</code> value to be <code>"ON"</code> and recording
- *   to be enabled for the App Key provided in the <a href="#method_init"><code>init()</code> method</a>.
- *   To enable recording for the App Key, please <a href="http://support.temasys.com.sg">contact us
- *   on our support portal</a>.
+ *   Note that this feature requires MCU and recording to be enabled for the App Key provided in the
+ *   <a href="#method_init"><code>init()</code> method</a>. If recording feature is not available to
+ *   be enabled in the <a href="https://console.temasys.io">Developer Console</a>, please
+ *   <a href="http://support.temasys.com.sg">contact us on our support portal</a>.
  * </blockquote>
  * Starts a recording session.
  * @method startRecording
@@ -22051,7 +22051,7 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
  *   parameter payload <code>state</code> as <code>START</code>.</li></ol></li></ol></li></ol>
  * @beta
  * @for Skylink
- * @since 0.6.x
+ * @since 0.6.16
  */
 Skylink.prototype.startRecording = function (callback) {
   var self = this;
@@ -22093,10 +22093,10 @@ Skylink.prototype.startRecording = function (callback) {
 
 /**
  * <blockquote class="info">
- *   Note that this feature requires <code>"mcu"</code> value to be <code>"ON"</code> and recording
- *   to be enabled for the App Key provided in the <a href="#method_init"><code>init()</code> method</a>.
- *   To enable recording for the App Key, please <a href="http://support.temasys.com.sg">contact us
- *   on our support portal</a>.
+ *   Note that this feature requires MCU and recording to be enabled for the App Key provided in the
+ *   <a href="#method_init"><code>init()</code> method</a>. If recording feature is not available to
+ *   be enabled in the <a href="https://console.temasys.io">Developer Console</a>, please
+ *   <a href="http://support.temasys.com.sg">contact us on our support portal</a>.
  * </blockquote>
  * Stops a recording session.
  * @param {Function} [callback] The callback function fired when request has completed.
@@ -22157,7 +22157,7 @@ Skylink.prototype.startRecording = function (callback) {
  *   </ol></li></ol></li></ol>
  * @beta
  * @for Skylink
- * @since 0.6.x
+ * @since 0.6.16
  */
 Skylink.prototype.stopRecording = function (callback, callbackSuccessWhenLink) {
   var self = this;
