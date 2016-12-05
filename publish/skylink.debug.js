@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Mon Dec 05 2016 17:16:41 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Mon Dec 05 2016 17:18:25 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -5341,26 +5341,6 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
     }
 
     log.log([peerId, null, null, 'Sending restart message to signaling server']);
-
-    self._sendChannelMessage({
-      type: self._SIG_MESSAGE_TYPE.RESTART,
-      mid: self._user.sid,
-      rid: self._room.id,
-      agent: window.webrtcDetectedBrowser,
-      version: (window.webrtcDetectedVersion || 0).toString(),
-      os: window.navigator.platform,
-      userInfo: self._getUserInfo(),
-      target: peerId,
-      weight: self._peerPriorityWeight,
-      receiveOnly: self._peerConnections[peerId] && self._peerConnections[peerId].receiveOnly,
-      enableIceTrickle: self._enableIceTrickle,
-      enableDataChannel: self._enableDataChannel,
-      enableIceRestart: self._enableIceRestart,
-      doIceRestart: doIceRestart === true,
-      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
-      SMProtocolVersion: self.SM_PROTOCOL_VERSION,
-      DTProtocolVersion: self.DT_PROTOCOL_VERSION
-    });
 
     self._sendChannelMessage({
       type: self._SIG_MESSAGE_TYPE.RESTART,
