@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Mon Dec 05 2016 14:44:03 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Mon Dec 05 2016 17:16:41 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.16 - Mon Dec 05 2016 14:44:03 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Mon Dec 05 2016 17:16:41 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -16874,6 +16874,26 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
     }
 
     log.log([peerId, null, null, 'Sending restart message to signaling server']);
+
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.RESTART,
+      mid: self._user.sid,
+      rid: self._room.id,
+      agent: window.webrtcDetectedBrowser,
+      version: (window.webrtcDetectedVersion || 0).toString(),
+      os: window.navigator.platform,
+      userInfo: self._getUserInfo(),
+      target: peerId,
+      weight: self._peerPriorityWeight,
+      receiveOnly: self._peerConnections[peerId] && self._peerConnections[peerId].receiveOnly,
+      enableIceTrickle: self._enableIceTrickle,
+      enableDataChannel: self._enableDataChannel,
+      enableIceRestart: self._enableIceRestart,
+      doIceRestart: doIceRestart === true,
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+      SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+      DTProtocolVersion: self.DT_PROTOCOL_VERSION
+    });
 
     self._sendChannelMessage({
       type: self._SIG_MESSAGE_TYPE.RESTART,
@@ -23007,6 +23027,12 @@ Skylink.prototype._restartHandler = function(message){
   if (self._peerPriorityWeight > message.weight) {
     log.debug([targetMid, 'RTCPeerConnection', null, 'Re-negotiating new offer/answer.']);
 
+    if (self._peerMessagesStamps[targetMid].hasRestart) {
+      log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding extra "restart" received.']);
+      return;
+    }
+
+    self._peerMessagesStamps[targetMid].hasRestart = true;
     self._doOffer(targetMid, message.doIceRestart === true, {
       agent: userInfo.agent.name,
       version: userInfo.agent.version,
@@ -23428,6 +23454,10 @@ Skylink.prototype._answerHandler = function(message) {
     pc.processingRemoteSDP = false;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
+
+    if (self._peerMessagesStamps[targetMid]) {
+      self._peerMessagesStamps[targetMid].hasRestart = false;
+    }
 
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);

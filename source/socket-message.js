@@ -1168,6 +1168,12 @@ Skylink.prototype._restartHandler = function(message){
   if (self._peerPriorityWeight > message.weight) {
     log.debug([targetMid, 'RTCPeerConnection', null, 'Re-negotiating new offer/answer.']);
 
+    if (self._peerMessagesStamps[targetMid].hasRestart) {
+      log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding extra "restart" received.']);
+      return;
+    }
+
+    self._peerMessagesStamps[targetMid].hasRestart = true;
     self._doOffer(targetMid, message.doIceRestart === true, {
       agent: userInfo.agent.name,
       version: userInfo.agent.version,
@@ -1589,6 +1595,10 @@ Skylink.prototype._answerHandler = function(message) {
     pc.processingRemoteSDP = false;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
+
+    if (self._peerMessagesStamps[targetMid]) {
+      self._peerMessagesStamps[targetMid].hasRestart = false;
+    }
 
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
