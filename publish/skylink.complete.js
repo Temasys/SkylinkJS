@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Fri Dec 02 2016 00:55:10 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Mon Dec 05 2016 14:44:03 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.16 - Fri Dec 02 2016 00:55:10 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Mon Dec 05 2016 14:44:03 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -22881,11 +22881,6 @@ Skylink.prototype._enterHandler = function(message) {
     isNewPeer = true;
 
     self._peerInformations[targetMid] = userInfo;
-    self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
-      userData: 0,
-      audioMuted: 0,
-      videoMuted: 0
-    };
 
     var hasScreenshare = userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
       !!userInfo.settings.video.screenshare;
@@ -22908,6 +22903,12 @@ Skylink.prototype._enterHandler = function(message) {
 
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
   }
+
+  self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
+    userData: 0,
+    audioMuted: 0,
+    videoMuted: 0
+  };
 
   self._sendChannelMessage({
     type: self._SIG_MESSAGE_TYPE.WELCOME,
@@ -23094,11 +23095,6 @@ Skylink.prototype._welcomeHandler = function(message) {
     isNewPeer = true;
 
     self._peerInformations[targetMid] = userInfo;
-    self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
-      userData: 0,
-      audioMuted: 0,
-      videoMuted: 0
-    };
 
     var hasScreenshare = userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
       !!userInfo.settings.video.screenshare;
@@ -23123,9 +23119,22 @@ Skylink.prototype._welcomeHandler = function(message) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
   }
 
+  self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
+    userData: 0,
+    audioMuted: 0,
+    videoMuted: 0,
+    hasWelcome: false
+  };
+
   if (self._hasMCU || self._peerPriorityWeight > message.weight) {
+    if (self._peerMessagesStamps[targetMid].hasWelcome) {
+      log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding extra "welcome" received.']);
+      return;
+    }
+
     log.debug([targetMid, 'RTCPeerConnection', null, 'Starting negotiation']);
 
+    self._peerMessagesStamps[targetMid].hasWelcome = true;
     self._doOffer(targetMid, false, {
       agent: userInfo.agent.name,
       version: userInfo.agent.version,

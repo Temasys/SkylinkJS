@@ -1042,11 +1042,6 @@ Skylink.prototype._enterHandler = function(message) {
     isNewPeer = true;
 
     self._peerInformations[targetMid] = userInfo;
-    self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
-      userData: 0,
-      audioMuted: 0,
-      videoMuted: 0
-    };
 
     var hasScreenshare = userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
       !!userInfo.settings.video.screenshare;
@@ -1069,6 +1064,12 @@ Skylink.prototype._enterHandler = function(message) {
 
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
   }
+
+  self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
+    userData: 0,
+    audioMuted: 0,
+    videoMuted: 0
+  };
 
   self._sendChannelMessage({
     type: self._SIG_MESSAGE_TYPE.WELCOME,
@@ -1255,11 +1256,6 @@ Skylink.prototype._welcomeHandler = function(message) {
     isNewPeer = true;
 
     self._peerInformations[targetMid] = userInfo;
-    self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
-      userData: 0,
-      audioMuted: 0,
-      videoMuted: 0
-    };
 
     var hasScreenshare = userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
       !!userInfo.settings.video.screenshare;
@@ -1284,9 +1280,22 @@ Skylink.prototype._welcomeHandler = function(message) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
   }
 
+  self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
+    userData: 0,
+    audioMuted: 0,
+    videoMuted: 0,
+    hasWelcome: false
+  };
+
   if (self._hasMCU || self._peerPriorityWeight > message.weight) {
+    if (self._peerMessagesStamps[targetMid].hasWelcome) {
+      log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding extra "welcome" received.']);
+      return;
+    }
+
     log.debug([targetMid, 'RTCPeerConnection', null, 'Starting negotiation']);
 
+    self._peerMessagesStamps[targetMid].hasWelcome = true;
     self._doOffer(targetMid, false, {
       agent: userInfo.agent.name,
       version: userInfo.agent.version,
