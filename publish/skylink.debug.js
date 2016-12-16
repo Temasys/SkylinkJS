@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Mon Dec 05 2016 17:18:25 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Sat Dec 17 2016 03:07:45 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -4567,7 +4567,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, c
       error = 'There is currently no existing peer connection made ' +
         'with the peer. Unable to restart connection';
       log.error([peerId, null, null, error]);
-      listOfPeerRestartErrors[peerId] = new Error(error);
+      peerCallback(error);
       return;
     }
 
@@ -4588,17 +4588,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, c
       } else {
         error = 'Peer connection with peer does not exists. Unable to restart';
         log.error([peerId, 'PeerConnection', null, error]);
-        listOfPeerRestartErrors[peerId] = new Error(error);
-      }
-
-      // there's an error to trigger for
-      if (i === listOfPeers.length - 1 && Object.keys(listOfPeerRestartErrors).length > 0) {
-        if (typeof callback === 'function') {
-          callback({
-            refreshErrors: listOfPeerRestartErrors,
-            listOfPeers: listOfPeers
-          }, null);
-        }
+        refreshSinglePeerCallback(peerId)(error);
       }
     }
   } else {
@@ -5319,7 +5309,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // prevent restarts for other SDK clients
-  if ((agent.SMProtocolVersion || '') < '0.1.2') {
+  if (self._isLowerThanVersion(agent.SMProtocolVersion || '', '0.1.2')) {
     var notSupportedError = new Error('Failed restarting with other agents connecting from other SDKs as ' +
       're-negotiation is not supported by other SDKs');
 
@@ -11210,7 +11200,15 @@ Skylink.prototype._recordingEventHandler = function (message) {
       return;
     }
 
-    var links = message.url && typeof message.url === 'object' ? message.url : { mixin: message.url };
+    var links = {};
+
+    if (Array.isArray(message.urls)) {
+      for (var i = 0; i < message.urls.length; i++) {
+        links[messages.urls[i].id || ''] = essages.urls[i].url || '';
+      }
+    } else if (typeof message.url === 'string') {
+      links.mixin = message.url;
+    }
 
     self._recordings[message.recordingId].links = links;
     self._recordings[message.recordingId].state = self.RECORDING_STATE.LINK;
@@ -11916,6 +11914,26 @@ Skylink.prototype._answerHandler = function(message) {
       state: pc.signalingState
     });
   });
+};
+
+/**
+ * Function that compares the SM / DT protocol versions to see if it in the version.
+ * @method _isLowerThanVersion
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._isLowerThanVersion = function (agentVer, requiredVer) {
+  var partsA = agentVer.split('.');
+  var partsB = requiredVer.split('.');
+
+  for (var i = 0; i < partsB.length; i++) {
+    if (parseInt(partsA[i] || '0', 10) < parseInt(partsB[i] || '0', 10)) {
+      return true;
+    }
+  }
+
+  return false;
 };
 
 Skylink.prototype.VIDEO_CODEC = {

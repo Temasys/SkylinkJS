@@ -904,7 +904,15 @@ Skylink.prototype._recordingEventHandler = function (message) {
       return;
     }
 
-    var links = message.url && typeof message.url === 'object' ? message.url : { mixin: message.url };
+    var links = {};
+
+    if (Array.isArray(message.urls)) {
+      for (var i = 0; i < message.urls.length; i++) {
+        links[messages.urls[i].id || ''] = essages.urls[i].url || '';
+      }
+    } else if (typeof message.url === 'string') {
+      links.mixin = message.url;
+    }
 
     self._recordings[message.recordingId].links = links;
     self._recordings[message.recordingId].state = self.RECORDING_STATE.LINK;
@@ -1610,4 +1618,24 @@ Skylink.prototype._answerHandler = function(message) {
       state: pc.signalingState
     });
   });
+};
+
+/**
+ * Function that compares the SM / DT protocol versions to see if it in the version.
+ * @method _isLowerThanVersion
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._isLowerThanVersion = function (agentVer, requiredVer) {
+  var partsA = agentVer.split('.');
+  var partsB = requiredVer.split('.');
+
+  for (var i = 0; i < partsB.length; i++) {
+    if (parseInt(partsA[i] || '0', 10) < parseInt(partsB[i] || '0', 10)) {
+      return true;
+    }
+  }
+
+  return false;
 };

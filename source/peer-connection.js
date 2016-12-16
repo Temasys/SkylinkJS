@@ -297,7 +297,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, c
       error = 'There is currently no existing peer connection made ' +
         'with the peer. Unable to restart connection';
       log.error([peerId, null, null, error]);
-      listOfPeerRestartErrors[peerId] = new Error(error);
+      peerCallback(error);
       return;
     }
 
@@ -318,17 +318,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, c
       } else {
         error = 'Peer connection with peer does not exists. Unable to restart';
         log.error([peerId, 'PeerConnection', null, error]);
-        listOfPeerRestartErrors[peerId] = new Error(error);
-      }
-
-      // there's an error to trigger for
-      if (i === listOfPeers.length - 1 && Object.keys(listOfPeerRestartErrors).length > 0) {
-        if (typeof callback === 'function') {
-          callback({
-            refreshErrors: listOfPeerRestartErrors,
-            listOfPeers: listOfPeers
-          }, null);
-        }
+        refreshSinglePeerCallback(peerId)(error);
       }
     }
   } else {
@@ -1049,7 +1039,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // prevent restarts for other SDK clients
-  if ((agent.SMProtocolVersion || '') < '0.1.2') {
+  if (self._isLowerThanVersion(agent.SMProtocolVersion || '', '0.1.2')) {
     var notSupportedError = new Error('Failed restarting with other agents connecting from other SDKs as ' +
       're-negotiation is not supported by other SDKs');
 
