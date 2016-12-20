@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Tue Dec 20 2016 21:29:46 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Tue Dec 20 2016 22:12:35 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.16 - Tue Dec 20 2016 21:29:46 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Tue Dec 20 2016 22:12:35 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -12239,17 +12239,6 @@ function Skylink() {
   this._hasMCU = false;
 
   /**
-   * Stores the flag that indicates if User should only receive Stream from Peer connections but
-   *   do not send User's Stream to Peer connections.
-   * @attribute _receiveOnly
-   * @type Boolean
-   * @private
-   * @for Skylink
-   * @since 0.5.10
-   */
-  this._receiveOnly = false;
-
-  /**
    * Stores the flag if HTTPS connections should be enforced when connecting to
    *   the API or Signaling server if App is accessing from HTTP domain.
    * HTTPS connections are enforced if App is accessing from HTTPS domains.
@@ -12629,6 +12618,16 @@ function Skylink() {
    * @since 0.6.16
    */
   this._recordingStartInterval = null;
+
+  /**
+   * Stores the flag if MCU should use renegotiation.
+   * @attribute _mcuUseRenegoRestart
+   * @type Boolean
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._mcuUseRenegoRestart = false;
 }
 Skylink.prototype.DATA_CHANNEL_STATE = {
   CONNECTING: 'connecting',
@@ -15888,8 +15887,10 @@ Skylink.prototype.SERVER_PEER_TYPE = {
 
 /**
  * <blockquote class="info">
- *   For MCU enabled Peer connections, the restart functionality may differ, you may learn more about how to workaround
- *   it <a href="http://support.temasys.com.sg/support/discussions/topics/12000002853">in this article here</a>.
+ *   For MCU enabled Peer connections with <code>options.mcuUseRenegoRestart</code> set to <code>false</code>
+ *   in the <a href="#method_init"><code>init()</code> method</a>, the restart functionality may differ, you
+ *   may learn more about how to workaround it
+ *   <a href="http://support.temasys.com.sg/support/discussions/topics/12000002853">in this article here</a>.
  *   For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in
  *   <a href="http://support.temasys.com.sg/support/discussions/topics/12000005188">in this article here</a>.
  *   Note that this functionality should be used when Peer connection stream freezes during a connection.
@@ -15934,10 +15935,12 @@ Skylink.prototype.SERVER_PEER_TYPE = {
  *   <code>isSelfInitiateRestart</code> value as <code>true</code> for all connected Peer connections.</li>
  *   <li><a href="#event_serverPeerRestart"><code>serverPeerRestart</code> event</a> triggers for
  *   connected MCU server Peer connection.</li></ol></li>
- *   <li>Invokes <a href="#method_joinRoom"><code>joinRoom()</code> method</a> <small><code>refreshConnection()</code>
+ *   <li>If <code>options.mcuUseRenegoRestart</code> value is <code>false</code> set in the
+ *   <a href="#method_init"><code>init()</code> method</a>: <ol><li>
+ *   Invokes <a href="#method_joinRoom"><code>joinRoom()</code> method</a> <small><code>refreshConnection()</code>
  *   will retain the User session information except the Peer ID will be a different assigned ID due to restarting the
  *   Room session.</small> <ol><li>If request has errors <ol><li><b>ABORT</b> and return error.
- *   </li></ol></li></ol></li></ol></li>
+ *   </li></ol></li></ol></li></ol></li></ol></li>
  *   <li>Else: <ol><li>If there are connected Peers in the Room: <ol>
  *   <li>Refresh connections for all targeted Peers. <ol>
  *   <li>If Peer connection exists: <ol>
@@ -16051,7 +16054,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, callbac
   }
 
   self._throttle(function (runFn) {
-    if (!runFn && self._hasMCU) {
+    if (!runFn && self._hasMCU && !self._mcuUseRenegoRestart) {
       if (self._throttlingShouldThrowError) {
         emitErrorForPeersFn('Unable to run as throttle interval has not reached (' + self._throttlingTimeouts.refreshConnection + 'ms).');
       }
@@ -16135,7 +16138,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, c
       }
     }
   } else {
-    self._restartMCUConnection(callback);
+    self._restartMCUConnection(callback, doIceRestart);
   }
 };
 
@@ -16885,11 +16888,12 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       userInfo: self._getUserInfo(),
       target: peerId,
       weight: self._peerPriorityWeight,
-      receiveOnly: self._peerConnections[peerId] && self._peerConnections[peerId].receiveOnly,
+      receiveOnly: false,
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
       enableIceRestart: self._enableIceRestart,
       doIceRestart: doIceRestart === true,
+      isRestartResend: false,
       temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
       SMProtocolVersion: self.SM_PROTOCOL_VERSION,
       DTProtocolVersion: self.DT_PROTOCOL_VERSION
@@ -17168,111 +17172,107 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
  * @for Skylink
  * @since 0.6.1
  */
-Skylink.prototype._restartMCUConnection = function(callback) {
+Skylink.prototype._restartMCUConnection = function(callback, doIceRestart) {
   var self = this;
-  log.info([self._user.sid, null, null, 'Restarting with MCU enabled']);
-  // Save room name
-  /*var roomName = (self._room.id).substring((self._room.id)
-                    .indexOf('_api_') + 5, (self._room.id).length);*/
   var listOfPeers = Object.keys(self._peerConnections);
   var listOfPeerRestartErrors = {};
-  var peerId; // j shint is whinning
-  var receiveOnly = false;
-  // for MCU case, these dont matter at all
-  var weight = (new Date()).valueOf();
+  var sendRestartMsgFn = function (peerId) {
+    var restartMsg = {
+      type: self._SIG_MESSAGE_TYPE.RESTART,
+      mid: self._user.sid,
+      rid: self._room.id,
+      agent: window.webrtcDetectedBrowser,
+      version: (window.webrtcDetectedVersion || 0).toString(),
+      os: window.navigator.platform,
+      userInfo: self._getUserInfo(),
+      target: peerId,
+      weight: self._peerPriorityWeight,
+      receiveOnly: false,
+      enableIceTrickle: self._enableIceTrickle,
+      enableDataChannel: self._enableDataChannel,
+      enableIceRestart: self._enableIceRestart,
+      doIceRestart: self._mcuUseRenegoRestart && !!doIceRestart,
+      isRestartResend: false,
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+      SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+      DTProtocolVersion: self.DT_PROTOCOL_VERSION
+    };
 
-  self._trigger('serverPeerRestart', 'MCU', self.SERVER_PEER_TYPE.MCU);
+    if (self._publishOnly) {
+      restartMsg.publishOnly = {
+        type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
+      };
+      if (self._publishOnly.parentId) {
+        restartMsg.parentId = self._publishOnly.parentId;
+      }
+    }
+
+    log.log([listOfPeers[i], 'RTCPeerConnection', null, 'Sending restart message to signaling server ->'], restartMsg);
+
+    self._sendChannelMessage(restartMsg);
+  };
 
   for (var i = 0; i < listOfPeers.length; i++) {
-    peerId = listOfPeers[i];
-
-    if (!self._peerConnections[peerId]) {
+    if (!self._peerConnections[listOfPeers[i]]) {
       var error = 'Peer connection with peer does not exists. Unable to restart';
-      log.error([peerId, 'PeerConnection', null, error]);
-      listOfPeerRestartErrors[peerId] = new Error(error);
+      log.error([listOfPeers[i], 'PeerConnection', null, error]);
+      listOfPeerRestartErrors[listOfPeers[i]] = new Error(error);
       continue;
     }
 
-    if (peerId === 'MCU') {
-      receiveOnly = !!self._peerConnections[peerId].receiveOnly;
-    }
+    if (listOfPeers[i] !== 'MCU') {
+      self._trigger('peerRestart', listOfPeers[i], self.getPeerInfo(listOfPeers[i]), true, false);
 
-    if (peerId !== 'MCU') {
-      self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true, false);
-
-      log.log([peerId, null, null, 'Sending restart message to signaling server']);
-
-      var restartMsg = {
-        type: self._SIG_MESSAGE_TYPE.RESTART,
-        mid: self._user.sid,
-        rid: self._room.id,
-        agent: window.webrtcDetectedBrowser,
-        version: (window.webrtcDetectedVersion || 0).toString(),
-        os: window.navigator.platform,
-        userInfo: self._getUserInfo(),
-        target: peerId, //'MCU',
-        weight: self._peerPriorityWeight,
-        receiveOnly: receiveOnly,
-        enableIceTrickle: self._enableIceTrickle,
-        enableDataChannel: self._enableDataChannel,
-        enableIceRestart: self._enableIceRestart,
-        doIceRestart: false,
-        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
-        SMProtocolVersion: self.SM_PROTOCOL_VERSION,
-        DTProtocolVersion: self.DT_PROTOCOL_VERSION
-      };
-
-      if (self._publishOnly) {
-        restartMsg.publishOnly = {
-          type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
-        };
-        if (self._publishOnly.parentId) {
-          restartMsg.parentId = self._publishOnly.parentId;
-        }
+      if (!self._mcuUseRenegoRestart) {
+        sendRestartMsgFn(listOfPeers[i]);
       }
-
-      self._sendChannelMessage(restartMsg);
     }
   }
 
-  // Restart with MCU = peer leaves then rejoins room
-  var peerJoinedFn = function (peerId, peerInfo, isSelf) {
-    log.log([null, 'PeerConnection', null, 'Invoked all peers to restart with MCU. Firing callback']);
+  self._trigger('serverPeerRestart', 'MCU', self.SERVER_PEER_TYPE.MCU);
 
-    if (typeof callback === 'function') {
-      if (Object.keys(listOfPeerRestartErrors).length > 0) {
-        callback({
-          refreshErrors: listOfPeerRestartErrors,
-          listOfPeers: listOfPeers
-        }, null);
-      } else {
-        callback(null, {
-          listOfPeers: listOfPeers
-        });
-      }
-    }
-  };
+  if (self._mcuUseRenegoRestart) {
+    sendRestartMsgFn('MCU');
+  } else {
+    // Restart with MCU = peer leaves then rejoins room
+    var peerJoinedFn = function (peerId, peerInfo, isSelf) {
+      log.log([null, 'PeerConnection', null, 'Invoked all peers to restart with MCU. Firing callback']);
 
-  self.once('peerJoined', peerJoinedFn, function (peerId, peerInfo, isSelf) {
-    return isSelf;
-  });
-
-  self.leaveRoom(false, function (error, success) {
-    if (error) {
       if (typeof callback === 'function') {
-        for (var i = 0; i < listOfPeers.length; i++) {
-          listOfPeerRestartErrors[listOfPeers[i]] = error;
+        if (Object.keys(listOfPeerRestartErrors).length > 0) {
+          callback({
+            refreshErrors: listOfPeerRestartErrors,
+            listOfPeers: listOfPeers
+          }, null);
+        } else {
+          callback(null, {
+            listOfPeers: listOfPeers
+          });
         }
-        callback({
-          refreshErrors: listOfPeerRestartErrors,
-          listOfPeers: listOfPeers
-        }, null);
       }
-    } else {
-      //self._trigger('serverPeerLeft', 'MCU', self.SERVER_PEER_TYPE.MCU);
-      self.joinRoom(self._selectedRoom);
-    }
-  });
+    };
+
+    self.once('peerJoined', peerJoinedFn, function (peerId, peerInfo, isSelf) {
+      return isSelf;
+    });
+
+    self.leaveRoom(false, function (error, success) {
+      if (error) {
+        if (typeof callback === 'function') {
+          for (var i = 0; i < listOfPeers.length; i++) {
+            listOfPeerRestartErrors[listOfPeers[i]] = error;
+          }
+          callback({
+            refreshErrors: listOfPeerRestartErrors,
+            listOfPeers: listOfPeers
+          }, null);
+        }
+      } else {
+        //self._trigger('serverPeerLeft', 'MCU', self.SERVER_PEER_TYPE.MCU);
+        self.joinRoom(self._selectedRoom);
+      }
+    });
+  }
 };
 
 /**
@@ -19021,13 +19021,17 @@ Skylink.prototype.generateUUID = function() {
  * @param {Number} [options.throttleIntervals.getUserMedia=0] The interval timeout for
  *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> throttling in milliseconds.
  * @param {Number} [options.throttleIntervals.refreshConnection=5000] <blockquote class="info">
- *   Note that this throttling is only done for MCU enabled Peer connections.
+ *   Note that this throttling is only done for MCU enabled Peer connections with the
+ *   <code>options.mcuUseRenegoRestart</code> being set to <code>false</code>.
  *   </blockquote> The interval timeout for <a href="#method_refreshConnection">
  *   <code>refreshConnection()</code> method</a> throttling in milliseconds.
  *   <small>Note that there will be no throttling when <a href="#method_refreshConnection">
  *   <code>refreshConnection()</code> method</a> is called internally.</small>
- * @param {Boolean} [options.throttleShouldThrowError] The flag if throttled methods should throw errors when
+ * @param {Boolean} [options.throttleShouldThrowError=false] The flag if throttled methods should throw errors when
  *   method is invoked less than the interval timeout value configured in <code>options.throttleIntervals</code>.
+ * @param {Boolean} [options.mcuUseRenegoRestart=false] The flag if <a href="#method_refreshConnection"><code>
+ *   refreshConnection()</code> method</a> should renegotiate like non-MCU enabled Peer connection for MCU
+ *   enabled Peer connections instead of invoking <a href="#method_joinRoom"><code>joinRoom()</code> method</a> again.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_readyStateChange">
@@ -19072,6 +19076,7 @@ Skylink.prototype.generateUUID = function() {
  * @param {JSON} callback.success.filterCandidatesType The configured value of the <code>options.filterCandidatesType</code>.
  * @param {Number} callback.success.throttleIntervals The configured value of the <code>options.throttleIntervals</code>.
  * @param {Number} callback.success.throttleShouldThrowError The configured value of the <code>options.throttleShouldThrowError</code>.
+ * @param {Number} callback.success.mcuUseRenegoRestart The configured value of the <code>options.mcuUseRenegoRestart</code>.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -19180,6 +19185,7 @@ Skylink.prototype.init = function(options, callback) {
     getUserMedia: 0
   };
   var throttleShouldThrowError = false;
+  var mcuUseRenegoRestart = false;
 
   log.log('Provided init options:', options);
 
@@ -19250,6 +19256,9 @@ Skylink.prototype.init = function(options, callback) {
     // set the flag if throttling should throw error when called less than the interval timeout configured
     throttleShouldThrowError = (typeof options.throttleShouldThrowError === 'boolean') ?
       options.throttleShouldThrowError : throttleShouldThrowError;
+    // set the flag if MCU refreshConnection() should use renegotiation
+    mcuUseRenegoRestart = (typeof options.mcuUseRenegoRestart === 'boolean') ?
+      options.mcuUseRenegoRestart : mcuUseRenegoRestart;
     // set the use of filtering ICE candidates
     if (typeof options.filterCandidatesType === 'object' && options.filterCandidatesType) {
       filterCandidatesType.host = (typeof options.filterCandidatesType.host === 'boolean') ?
@@ -19344,6 +19353,7 @@ Skylink.prototype.init = function(options, callback) {
   self._throttlingTimeouts = throttleIntervals;
   self._throttlingShouldThrowError = throttleShouldThrowError;
   self._disableREMB = disableREMB;
+  self._mcuUseRenegoRestart = mcuUseRenegoRestart;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -19370,7 +19380,8 @@ Skylink.prototype.init = function(options, callback) {
     disableREMB: self._disableREMB,
     filterCandidatesType: self._filterCandidatesType,
     throttleIntervals: self._throttlingTimeouts,
-    throttleShouldThrowError: self._throttlingShouldThrowError
+    throttleShouldThrowError: self._throttlingShouldThrowError,
+    mcuUseRenegoRestart: self._mcuUseRenegoRestart
   });
   // trigger the readystate
   self._readyState = 0;
@@ -19411,7 +19422,8 @@ Skylink.prototype.init = function(options, callback) {
             disableREMB: self._disableREMB,
             filterCandidatesType: self._filterCandidatesType,
             throttleIntervals: self._throttlingTimeouts,
-            throttleShouldThrowError: self._throttlingShouldThrowError
+            throttleShouldThrowError: self._throttlingShouldThrowError,
+            mcuUseRenegoRestart: self._mcuUseRenegoRestart
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +
@@ -19710,7 +19722,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     disableREMB: self._disableREMB,
     filterCandidatesType: self._filterCandidatesType,
     throttleIntervals: self._throttlingTimeouts,
-    throttleShouldThrowError: self._throttlingShouldThrowError
+    throttleShouldThrowError: self._throttlingShouldThrowError,
+    mcuUseRenegoRestart: self._mcuUseRenegoRestart
   };
   if (self._roomCredentials) {
     initOptions.credentials = {
@@ -22496,7 +22509,7 @@ Skylink.prototype._approachEventHandler = function(message){
     version: (window.webrtcDetectedVersion || 0).toString(),
     os: window.navigator.platform,
     userInfo: self._getUserInfo(),
-    receiveOnly: self._receiveOnly,
+    receiveOnly: false,
     target: message.target,
     weight: self._peerPriorityWeight,
     temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
@@ -22896,7 +22909,7 @@ Skylink.prototype._inRoomHandler = function(message) {
     version: (window.webrtcDetectedVersion || 0).toString(),
     os: window.navigator.platform,
     userInfo: self._getUserInfo(),
-    receiveOnly: self._receiveOnly,
+    receiveOnly: false,
     weight: self._peerPriorityWeight,
     temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
     enableIceTrickle: self._enableIceTrickle,
@@ -23015,12 +23028,12 @@ Skylink.prototype._enterHandler = function(message) {
     type: self._SIG_MESSAGE_TYPE.WELCOME,
     mid: self._user.sid,
     rid: self._room.id,
-    receiveOnly: self._peerConnections[targetMid] ? !!self._peerConnections[targetMid].receiveOnly : false,
     enableIceTrickle: self._enableIceTrickle,
     enableDataChannel: self._enableDataChannel,
     enableIceRestart: self._enableIceRestart,
     agent: window.webrtcDetectedBrowser,
     version: (window.webrtcDetectedVersion || 0).toString(),
+    receiveOnly: false,
     os: window.navigator.platform,
     userInfo: self._getUserInfo(),
     target: targetMid,
@@ -23152,6 +23165,7 @@ Skylink.prototype._restartHandler = function(message){
       enableIceRestart: self._enableIceRestart,
       doIceRestart: message.doIceRestart === true,
       receiveOnly: self._peerConnections[targetMid] && self._peerConnections[targetMid].receiveOnly,
+      isRestartResend: true,
       temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
       SMProtocolVersion: self.SM_PROTOCOL_VERSION,
       DTProtocolVersion: self.DT_PROTOCOL_VERSION,
@@ -23289,10 +23303,10 @@ Skylink.prototype._welcomeHandler = function(message) {
       type: self._SIG_MESSAGE_TYPE.WELCOME,
       mid: self._user.sid,
       rid: self._room.id,
-      receiveOnly: self._peerConnections[targetMid] ? !!self._peerConnections[targetMid].receiveOnly : false,
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
       enableIceRestart: self._enableIceRestart,
+      receiveOnly: false,
       agent: window.webrtcDetectedBrowser,
       version: (window.webrtcDetectedVersion || 0).toString(),
       os: window.navigator.platform,

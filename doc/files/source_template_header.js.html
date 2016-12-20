@@ -795,17 +795,6 @@ function Skylink() {
   this._hasMCU = false;
 
   /**
-   * Stores the flag that indicates if User should only receive Stream from Peer connections but
-   *   do not send User&#x27;s Stream to Peer connections.
-   * @attribute _receiveOnly
-   * @type Boolean
-   * @private
-   * @for Skylink
-   * @since 0.5.10
-   */
-  this._receiveOnly = false;
-
-  /**
    * Stores the flag if HTTPS connections should be enforced when connecting to
    *   the API or Signaling server if App is accessing from HTTP domain.
    * HTTPS connections are enforced if App is accessing from HTTPS domains.
@@ -1185,6 +1174,16 @@ function Skylink() {
    * @since 0.6.16
    */
   this._recordingStartInterval = null;
+
+  /**
+   * Stores the flag if MCU should use renegotiation.
+   * @attribute _mcuUseRenegoRestart
+   * @type Boolean
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._mcuUseRenegoRestart = false;
 }
     </pre>
 </div>

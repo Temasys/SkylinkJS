@@ -75,8 +75,10 @@ Skylink.prototype.SERVER_PEER_TYPE = {
 
 /**
  * <blockquote class="info">
- *   For MCU enabled Peer connections, the restart functionality may differ, you may learn more about how to workaround
- *   it <a href="http://support.temasys.com.sg/support/discussions/topics/12000002853">in this article here</a>.
+ *   For MCU enabled Peer connections with <code>options.mcuUseRenegoRestart</code> set to <code>false</code>
+ *   in the <a href="#method_init"><code>init()</code> method</a>, the restart functionality may differ, you
+ *   may learn more about how to workaround it
+ *   <a href="http://support.temasys.com.sg/support/discussions/topics/12000002853">in this article here</a>.
  *   For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in
  *   <a href="http://support.temasys.com.sg/support/discussions/topics/12000005188">in this article here</a>.
  *   Note that this functionality should be used when Peer connection stream freezes during a connection.
@@ -121,10 +123,12 @@ Skylink.prototype.SERVER_PEER_TYPE = {
  *   <code>isSelfInitiateRestart</code> value as <code>true</code> for all connected Peer connections.</li>
  *   <li><a href="#event_serverPeerRestart"><code>serverPeerRestart</code> event</a> triggers for
  *   connected MCU server Peer connection.</li></ol></li>
- *   <li>Invokes <a href="#method_joinRoom"><code>joinRoom()</code> method</a> <small><code>refreshConnection()</code>
+ *   <li>If <code>options.mcuUseRenegoRestart</code> value is <code>false</code> set in the
+ *   <a href="#method_init"><code>init()</code> method</a>: <ol><li>
+ *   Invokes <a href="#method_joinRoom"><code>joinRoom()</code> method</a> <small><code>refreshConnection()</code>
  *   will retain the User session information except the Peer ID will be a different assigned ID due to restarting the
  *   Room session.</small> <ol><li>If request has errors <ol><li><b>ABORT</b> and return error.
- *   </li></ol></li></ol></li></ol></li>
+ *   </li></ol></li></ol></li></ol></li></ol></li>
  *   <li>Else: <ol><li>If there are connected Peers in the Room: <ol>
  *   <li>Refresh connections for all targeted Peers. <ol>
  *   <li>If Peer connection exists: <ol>
@@ -238,7 +242,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, callbac
   }
 
   self._throttle(function (runFn) {
-    if (!runFn && self._hasMCU) {
+    if (!runFn && self._hasMCU && !self._mcuUseRenegoRestart) {
       if (self._throttlingShouldThrowError) {
         emitErrorForPeersFn('Unable to run as throttle interval has not reached (' + self._throttlingTimeouts.refreshConnection + 'ms).');
       }
@@ -322,7 +326,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, c
       }
     }
   } else {
-    self._restartMCUConnection(callback);
+    self._restartMCUConnection(callback, doIceRestart);
   }
 };
 
@@ -1072,11 +1076,12 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       userInfo: self._getUserInfo(),
       target: peerId,
       weight: self._peerPriorityWeight,
-      receiveOnly: self._peerConnections[peerId] && self._peerConnections[peerId].receiveOnly,
+      receiveOnly: false,
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
       enableIceRestart: self._enableIceRestart,
       doIceRestart: doIceRestart === true,
+      isRestartResend: false,
       temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
       SMProtocolVersion: self.SM_PROTOCOL_VERSION,
       DTProtocolVersion: self.DT_PROTOCOL_VERSION
@@ -1355,111 +1360,107 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
  * @for Skylink
  * @since 0.6.1
  */
-Skylink.prototype._restartMCUConnection = function(callback) {
+Skylink.prototype._restartMCUConnection = function(callback, doIceRestart) {
   var self = this;
-  log.info([self._user.sid, null, null, 'Restarting with MCU enabled']);
-  // Save room name
-  /*var roomName = (self._room.id).substring((self._room.id)
-                    .indexOf('_api_') + 5, (self._room.id).length);*/
   var listOfPeers = Object.keys(self._peerConnections);
   var listOfPeerRestartErrors = {};
-  var peerId; // j shint is whinning
-  var receiveOnly = false;
-  // for MCU case, these dont matter at all
-  var weight = (new Date()).valueOf();
+  var sendRestartMsgFn = function (peerId) {
+    var restartMsg = {
+      type: self._SIG_MESSAGE_TYPE.RESTART,
+      mid: self._user.sid,
+      rid: self._room.id,
+      agent: window.webrtcDetectedBrowser,
+      version: (window.webrtcDetectedVersion || 0).toString(),
+      os: window.navigator.platform,
+      userInfo: self._getUserInfo(),
+      target: peerId,
+      weight: self._peerPriorityWeight,
+      receiveOnly: false,
+      enableIceTrickle: self._enableIceTrickle,
+      enableDataChannel: self._enableDataChannel,
+      enableIceRestart: self._enableIceRestart,
+      doIceRestart: self._mcuUseRenegoRestart && !!doIceRestart,
+      isRestartResend: false,
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+      SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+      DTProtocolVersion: self.DT_PROTOCOL_VERSION
+    };
 
-  self._trigger('serverPeerRestart', 'MCU', self.SERVER_PEER_TYPE.MCU);
+    if (self._publishOnly) {
+      restartMsg.publishOnly = {
+        type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
+      };
+      if (self._publishOnly.parentId) {
+        restartMsg.parentId = self._publishOnly.parentId;
+      }
+    }
+
+    log.log([listOfPeers[i], 'RTCPeerConnection', null, 'Sending restart message to signaling server ->'], restartMsg);
+
+    self._sendChannelMessage(restartMsg);
+  };
 
   for (var i = 0; i < listOfPeers.length; i++) {
-    peerId = listOfPeers[i];
-
-    if (!self._peerConnections[peerId]) {
+    if (!self._peerConnections[listOfPeers[i]]) {
       var error = 'Peer connection with peer does not exists. Unable to restart';
-      log.error([peerId, 'PeerConnection', null, error]);
-      listOfPeerRestartErrors[peerId] = new Error(error);
+      log.error([listOfPeers[i], 'PeerConnection', null, error]);
+      listOfPeerRestartErrors[listOfPeers[i]] = new Error(error);
       continue;
     }
 
-    if (peerId === 'MCU') {
-      receiveOnly = !!self._peerConnections[peerId].receiveOnly;
-    }
+    if (listOfPeers[i] !== 'MCU') {
+      self._trigger('peerRestart', listOfPeers[i], self.getPeerInfo(listOfPeers[i]), true, false);
 
-    if (peerId !== 'MCU') {
-      self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true, false);
-
-      log.log([peerId, null, null, 'Sending restart message to signaling server']);
-
-      var restartMsg = {
-        type: self._SIG_MESSAGE_TYPE.RESTART,
-        mid: self._user.sid,
-        rid: self._room.id,
-        agent: window.webrtcDetectedBrowser,
-        version: (window.webrtcDetectedVersion || 0).toString(),
-        os: window.navigator.platform,
-        userInfo: self._getUserInfo(),
-        target: peerId, //'MCU',
-        weight: self._peerPriorityWeight,
-        receiveOnly: receiveOnly,
-        enableIceTrickle: self._enableIceTrickle,
-        enableDataChannel: self._enableDataChannel,
-        enableIceRestart: self._enableIceRestart,
-        doIceRestart: false,
-        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
-        SMProtocolVersion: self.SM_PROTOCOL_VERSION,
-        DTProtocolVersion: self.DT_PROTOCOL_VERSION
-      };
-
-      if (self._publishOnly) {
-        restartMsg.publishOnly = {
-          type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
-        };
-        if (self._publishOnly.parentId) {
-          restartMsg.parentId = self._publishOnly.parentId;
-        }
+      if (!self._mcuUseRenegoRestart) {
+        sendRestartMsgFn(listOfPeers[i]);
       }
-
-      self._sendChannelMessage(restartMsg);
     }
   }
 
-  // Restart with MCU = peer leaves then rejoins room
-  var peerJoinedFn = function (peerId, peerInfo, isSelf) {
-    log.log([null, 'PeerConnection', null, 'Invoked all peers to restart with MCU. Firing callback']);
+  self._trigger('serverPeerRestart', 'MCU', self.SERVER_PEER_TYPE.MCU);
 
-    if (typeof callback === 'function') {
-      if (Object.keys(listOfPeerRestartErrors).length > 0) {
-        callback({
-          refreshErrors: listOfPeerRestartErrors,
-          listOfPeers: listOfPeers
-        }, null);
-      } else {
-        callback(null, {
-          listOfPeers: listOfPeers
-        });
-      }
-    }
-  };
+  if (self._mcuUseRenegoRestart) {
+    sendRestartMsgFn('MCU');
+  } else {
+    // Restart with MCU = peer leaves then rejoins room
+    var peerJoinedFn = function (peerId, peerInfo, isSelf) {
+      log.log([null, 'PeerConnection', null, 'Invoked all peers to restart with MCU. Firing callback']);
 
-  self.once('peerJoined', peerJoinedFn, function (peerId, peerInfo, isSelf) {
-    return isSelf;
-  });
-
-  self.leaveRoom(false, function (error, success) {
-    if (error) {
       if (typeof callback === 'function') {
-        for (var i = 0; i < listOfPeers.length; i++) {
-          listOfPeerRestartErrors[listOfPeers[i]] = error;
+        if (Object.keys(listOfPeerRestartErrors).length > 0) {
+          callback({
+            refreshErrors: listOfPeerRestartErrors,
+            listOfPeers: listOfPeers
+          }, null);
+        } else {
+          callback(null, {
+            listOfPeers: listOfPeers
+          });
         }
-        callback({
-          refreshErrors: listOfPeerRestartErrors,
-          listOfPeers: listOfPeers
-        }, null);
       }
-    } else {
-      //self._trigger('serverPeerLeft', 'MCU', self.SERVER_PEER_TYPE.MCU);
-      self.joinRoom(self._selectedRoom);
-    }
-  });
+    };
+
+    self.once('peerJoined', peerJoinedFn, function (peerId, peerInfo, isSelf) {
+      return isSelf;
+    });
+
+    self.leaveRoom(false, function (error, success) {
+      if (error) {
+        if (typeof callback === 'function') {
+          for (var i = 0; i < listOfPeers.length; i++) {
+            listOfPeerRestartErrors[listOfPeers[i]] = error;
+          }
+          callback({
+            refreshErrors: listOfPeerRestartErrors,
+            listOfPeers: listOfPeers
+          }, null);
+        }
+      } else {
+        //self._trigger('serverPeerLeft', 'MCU', self.SERVER_PEER_TYPE.MCU);
+        self.joinRoom(self._selectedRoom);
+      }
+    });
+  }
 };
 
 /**
