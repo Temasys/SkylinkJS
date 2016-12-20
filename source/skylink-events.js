@@ -325,6 +325,9 @@ var _eventsDocs = {
    * @param {Number} peerInfo.config.priorityWeight The flag if Peer or User should be the offerer.
    *   <small>If User's <code>priorityWeight</code> is higher than Peer's, User is the offerer, else Peer is.
    *   However for the case where the MCU is connected, User will always be the offerer.</small>
+   * @param {Boolean} peerInfo.config.publishOnly The flag if Peer is publishing only stream but not receiving streams.
+   * @param {Boolean} peerInfo.config.receiveOnly The flag if Peer is receiving only streams but not publishing stream.
+   * @param {String} [peerInfo.parentId] The parent Peer ID that it is matched to for multi-streaming connections.
    * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
    * @since 0.5.2

@@ -1062,7 +1062,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
 
     log.log([peerId, null, null, 'Sending restart message to signaling server']);
 
-    self._sendChannelMessage({
+    var restartMsg = {
       type: self._SIG_MESSAGE_TYPE.RESTART,
       mid: self._user.sid,
       rid: self._room.id,
@@ -1080,8 +1080,18 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
       SMProtocolVersion: self.SM_PROTOCOL_VERSION,
       DTProtocolVersion: self.DT_PROTOCOL_VERSION
-    });
+    };
 
+    if (self._publishOnly) {
+      restartMsg.publishOnly = {
+        type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
+      };
+      if (self._publishOnly.parentId) {
+        restartMsg.parentId = self._publishOnly.parentId;
+      }
+    }
+
+    self._sendChannelMessage(restartMsg);
     self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
 
     if (typeof callback === 'function') {
@@ -1148,6 +1158,7 @@ Skylink.prototype._removePeer = function(peerId) {
     settings: {},
     mediaStatus: {},
     agent: {},
+    config: {},
     room: clone(this._selectedRoom)
   };
 
@@ -1267,13 +1278,16 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     if (targetMid === 'MCU') {
       log.warn([targetMid, 'MediaStream', streamId, 'Ignoring received remote stream from MCU ->'], stream);
       return;
+    } else if (!self._sdpSettings.direction.audio.receive && !self._sdpSettings.direction.video.receive) {
+      log.warn([targetMid, 'MediaStream', streamId, 'Ignoring received empty remote stream ->'], stream);
+      return;
     }
 
     // Fixes for the dirty-hack for Chrome offer to Firefox (inactive)
     // See: ESS-680
     if (!self._hasMCU && window.webrtcDetectedBrowser === 'firefox' &&
       pc.getRemoteStreams().length > 1 && pc.remoteDescription && pc.remoteDescription.sdp) {
-      
+
       if (pc.remoteDescription.sdp.indexOf(' msid:' + streamId + ' ') === -1) {
         log.warn([targetMid, 'MediaStream', streamId, 'Ignoring received empty remote stream ->'], stream);
         return;
@@ -1375,7 +1389,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
 
       log.log([peerId, null, null, 'Sending restart message to signaling server']);
 
-      self._sendChannelMessage({
+      var restartMsg = {
         type: self._SIG_MESSAGE_TYPE.RESTART,
         mid: self._user.sid,
         rid: self._room.id,
@@ -1393,7 +1407,18 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
         SMProtocolVersion: self.SM_PROTOCOL_VERSION,
         DTProtocolVersion: self.DT_PROTOCOL_VERSION
-      });
+      };
+
+      if (self._publishOnly) {
+        restartMsg.publishOnly = {
+          type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
+        };
+        if (self._publishOnly.parentId) {
+          restartMsg.parentId = self._publishOnly.parentId;
+        }
+      }
+
+      self._sendChannelMessage(restartMsg);
     }
   }
 

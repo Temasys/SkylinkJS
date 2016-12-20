@@ -675,7 +675,8 @@ Skylink.prototype._approachEventHandler = function(message){
   // self._room.connection.peerConfig = self._setIceServers(message.pc_config);
   // self._inRoom = true;
   self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
-  self._sendChannelMessage({
+
+  var enterMsg = {
     type: self._SIG_MESSAGE_TYPE.ENTER,
     mid: self._user.sid,
     rid: self._room.id,
@@ -692,7 +693,18 @@ Skylink.prototype._approachEventHandler = function(message){
     enableIceRestart: self._enableIceRestart,
     SMProtocolVersion: self.SM_PROTOCOL_VERSION,
     DTProtocolVersion: self.DT_PROTOCOL_VERSION
-  });
+  };
+
+  if (self._publishOnly) {
+    enterMsg.publishOnly = {
+      type: self._streams.screenshare &amp;&amp; self._streams.screenshare.stream ? &#x27;screenshare&#x27; : &#x27;video&#x27;
+    };
+    if (self._publishOnly.parentId) {
+      enterMsg.parentId = self._publishOnly.parentId;
+    }
+  }
+
+  self._sendChannelMessage(enterMsg);
 };
 
 /**
@@ -748,8 +760,7 @@ Skylink.prototype._updateUserEventHandler = function(message) {
       this._peerMessagesStamps[targetMid].userData = message.stamp;
     }
     this._peerInformations[targetMid].userData = message.userData || {};
-    this._trigger(&#x27;peerUpdated&#x27;, targetMid,
-      this.getPeerInfo(targetMid), false);
+    this._trigger(&#x27;peerUpdated&#x27;, targetMid, this.getPeerInfo(targetMid), false);
   } else {
     log.log([targetMid, null, message.type, &#x27;Peer does not have any user information&#x27;]);
   }
@@ -767,8 +778,7 @@ Skylink.prototype._updateUserEventHandler = function(message) {
 Skylink.prototype._roomLockEventHandler = function(message) {
   var targetMid = message.mid;
   log.log([targetMid, message.type, &#x27;Room lock status:&#x27;], message.lock);
-  this._trigger(&#x27;roomLock&#x27;, message.lock, targetMid,
-    this.getPeerInfo(targetMid), false);
+  this._trigger(&#x27;roomLock&#x27;, message.lock, targetMid, this.getPeerInfo(targetMid), false);
 };
 
 /**
@@ -825,8 +835,7 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
     this._trigger(&#x27;streamMuted&#x27;, targetMid, this.getPeerInfo(targetMid), false,
       this._peerInformations[targetMid].settings.video &amp;&amp;
       this._peerInformations[targetMid].settings.video.screenshare);
-    this._trigger(&#x27;peerUpdated&#x27;, targetMid,
-      this.getPeerInfo(targetMid), false);
+    this._trigger(&#x27;peerUpdated&#x27;, targetMid, this.getPeerInfo(targetMid), false);
   } else {
     log.log([targetMid, null, message.type, &#x27;Peer does not have any user information&#x27;]);
   }
@@ -995,7 +1004,15 @@ Skylink.prototype._recordingEventHandler = function (message) {
       return;
     }
 
-    var links = message.url &amp;&amp; typeof message.url === &#x27;object&#x27; ? message.url : { mixin: message.url };
+    var links = {};
+
+    if (Array.isArray(message.urls)) {
+      for (var i = 0; i &lt; message.urls.length; i++) {
+        links[messages.urls[i].id || &#x27;&#x27;] = essages.urls[i].url || &#x27;&#x27;;
+      }
+    } else if (typeof message.url === &#x27;string&#x27;) {
+      links.mixin = message.url;
+    }
 
     self._recordings[message.recordingId].links = links;
     self._recordings[message.recordingId].state = self.RECORDING_STATE.LINK;
@@ -1059,7 +1076,7 @@ Skylink.prototype._inRoomHandler = function(message) {
   // do we hardcode the logic here, or give the flexibility?
   // It would be better to separate, do we could choose with whom
   // we want to communicate, instead of connecting automatically to all.
-  self._sendChannelMessage({
+  var enterMsg = {
     type: self._SIG_MESSAGE_TYPE.ENTER,
     mid: self._user.sid,
     rid: self._room.id,
@@ -1075,7 +1092,18 @@ Skylink.prototype._inRoomHandler = function(message) {
     enableIceRestart: self._enableIceRestart,
     SMProtocolVersion: self.SM_PROTOCOL_VERSION,
     DTProtocolVersion: self.DT_PROTOCOL_VERSION
-  });
+  };
+
+  if (self._publishOnly) {
+    enterMsg.publishOnly = {
+      type: self._streams.screenshare &amp;&amp; self._streams.screenshare.stream ? &#x27;screenshare&#x27; : &#x27;video&#x27;
+    };
+    if (self._publishOnly.parentId) {
+      enterMsg.parentId = self._publishOnly.parentId;
+    }
+  }
+
+  self._sendChannelMessage(enterMsg);
 };
 
 /**
@@ -1098,8 +1126,11 @@ Skylink.prototype._enterHandler = function(message) {
     enableIceTrickle: typeof message.enableIceTrickle === &#x27;boolean&#x27; ? message.enableIceTrickle : true,
     enableIceRestart: typeof message.enableIceRestart === &#x27;boolean&#x27; ? message.enableIceRestart : false,
     enableDataChannel: typeof message.enableDataChannel === &#x27;boolean&#x27; ? message.enableDataChannel : true,
-    priorityWeight: typeof message.weight === &#x27;number&#x27; ? message.weight : 0
+    priorityWeight: typeof message.weight === &#x27;number&#x27; ? message.weight : 0,
+    receiveOnly: message.receiveOnly === true,
+    publishOnly: !!message.publishOnly
   };
+  userInfo.parentId = message.parentId || null;
   userInfo.agent = {
     name: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
     version: (function () {
@@ -1129,15 +1160,16 @@ Skylink.prototype._enterHandler = function(message) {
 
   log.log([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Peer &quot;enter&quot; received -&gt;&#x27;], message);
 
+  if (self._publishOnly &amp;&amp; ((self._hasMCU &amp;&amp; targetMid !== &#x27;MCU&#x27;) || (self._publishOnly.parentId &amp;&amp;
+    self._publishOnly.parentId === targetMid))) {
+    log.warn([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Discarding &quot;enter&quot; for publishOnly case -&gt;&#x27;], message);
+    return;
+  }
+
   if (!self._peerInformations[targetMid]) {
     isNewPeer = true;
 
     self._peerInformations[targetMid] = userInfo;
-    self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
-      userData: 0,
-      audioMuted: 0,
-      videoMuted: 0
-    };
 
     var hasScreenshare = userInfo.settings.video &amp;&amp; typeof userInfo.settings.video === &#x27;object&#x27; &amp;&amp;
       !!userInfo.settings.video.screenshare;
@@ -1161,7 +1193,13 @@ Skylink.prototype._enterHandler = function(message) {
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ENTER, targetMid);
   }
 
-  self._sendChannelMessage({
+  self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
+    userData: 0,
+    audioMuted: 0,
+    videoMuted: 0
+  };
+
+  var welcomeMsg = {
     type: self._SIG_MESSAGE_TYPE.WELCOME,
     mid: self._user.sid,
     rid: self._room.id,
@@ -1178,7 +1216,18 @@ Skylink.prototype._enterHandler = function(message) {
     temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
     SMProtocolVersion: self.SM_PROTOCOL_VERSION,
     DTProtocolVersion: self.DT_PROTOCOL_VERSION
-  });
+  };
+
+  if (self._publishOnly) {
+    welcomeMsg.publishOnly = {
+      type: self._streams.screenshare &amp;&amp; self._streams.screenshare.stream ? &#x27;screenshare&#x27; : &#x27;video&#x27;
+    };
+    if (self._publishOnly.parentId) {
+      welcomeMsg.parentId = self._publishOnly.parentId;
+    }
+  }
+
+  self._sendChannelMessage(welcomeMsg);
 
   if (isNewPeer) {
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
@@ -1204,8 +1253,11 @@ Skylink.prototype._restartHandler = function(message){
     enableIceTrickle: typeof message.enableIceTrickle === &#x27;boolean&#x27; ? message.enableIceTrickle : true,
     enableIceRestart: typeof message.enableIceRestart === &#x27;boolean&#x27; ? message.enableIceRestart : false,
     enableDataChannel: typeof message.enableDataChannel === &#x27;boolean&#x27; ? message.enableDataChannel : true,
-    priorityWeight: typeof message.weight === &#x27;number&#x27; ? message.weight : 0
+    priorityWeight: typeof message.weight === &#x27;number&#x27; ? message.weight : 0,
+    receiveOnly: message.receiveOnly === true,
+    publishOnly: !!message.publishOnly
   };
+  userInfo.parentId = message.parentId || null;
   userInfo.agent = {
     name: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
     version: (function () {
@@ -1258,6 +1310,12 @@ Skylink.prototype._restartHandler = function(message){
   if (self._peerPriorityWeight &gt; message.weight) {
     log.debug([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Re-negotiating new offer/answer.&#x27;]);
 
+    if (self._peerMessagesStamps[targetMid].hasRestart) {
+      log.warn([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Discarding extra &quot;restart&quot; received.&#x27;]);
+      return;
+    }
+
+    self._peerMessagesStamps[targetMid].hasRestart = true;
     self._doOffer(targetMid, message.doIceRestart === true, {
       agent: userInfo.agent.name,
       version: userInfo.agent.version,
@@ -1267,7 +1325,7 @@ Skylink.prototype._restartHandler = function(message){
   } else {
     log.debug([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Waiting for peer to start re-negotiation.&#x27;]);
 
-    self._sendChannelMessage({
+    var restartMsg = {
       type: self._SIG_MESSAGE_TYPE.RESTART,
       mid: self._user.sid,
       rid: self._room.id,
@@ -1284,8 +1342,19 @@ Skylink.prototype._restartHandler = function(message){
       receiveOnly: self._peerConnections[targetMid] &amp;&amp; self._peerConnections[targetMid].receiveOnly,
       temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
       SMProtocolVersion: self.SM_PROTOCOL_VERSION,
-      DTProtocolVersion: self.DT_PROTOCOL_VERSION
-    });
+      DTProtocolVersion: self.DT_PROTOCOL_VERSION,
+    };
+
+    if (self._publishOnly) {
+      restartMsg.publishOnly = {
+        type: self._streams.screenshare &amp;&amp; self._streams.screenshare.stream ? &#x27;screenshare&#x27; : &#x27;video&#x27;
+      };
+      if (self._publishOnly.parentId) {
+        restartMsg.parentId = self._publishOnly.parentId;
+      }
+    }
+
+    self._sendChannelMessage(restartMsg);
   }
 
   self._trigger(&#x27;peerRestart&#x27;, targetMid, self.getPeerInfo(targetMid), false, message.doIceRestart === true);
@@ -1311,8 +1380,11 @@ Skylink.prototype._welcomeHandler = function(message) {
     enableIceTrickle: typeof message.enableIceTrickle === &#x27;boolean&#x27; ? message.enableIceTrickle : true,
     enableIceRestart: typeof message.enableIceRestart === &#x27;boolean&#x27; ? message.enableIceRestart : false,
     enableDataChannel: typeof message.enableDataChannel === &#x27;boolean&#x27; ? message.enableDataChannel : true,
-    priorityWeight: typeof message.weight === &#x27;number&#x27; ? message.weight : 0
+    priorityWeight: typeof message.weight === &#x27;number&#x27; ? message.weight : 0,
+    receiveOnly: message.receiveOnly === true,
+    publishOnly: !!message.publishOnly
   };
+  userInfo.parentId = message.parentId || null;
   userInfo.agent = {
     name: typeof message.agent === &#x27;string&#x27; &amp;&amp; message.agent ? message.agent : &#x27;other&#x27;,
     version: (function () {
@@ -1342,15 +1414,16 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   log.log([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Peer &quot;welcome&quot; received -&gt;&#x27;], message);
 
+  if (self._publishOnly &amp;&amp; ((self._hasMCU &amp;&amp; targetMid !== &#x27;MCU&#x27;) || (self._publishOnly.parentId &amp;&amp;
+    self._publishOnly.parentId === targetMid))) {
+    log.warn([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Discarding &quot;welcome&quot; for publishOnly case -&gt;&#x27;], message);
+    return;
+  }
+
   if (!self._peerInformations[targetMid]) {
     isNewPeer = true;
 
     self._peerInformations[targetMid] = userInfo;
-    self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
-      userData: 0,
-      audioMuted: 0,
-      videoMuted: 0
-    };
 
     var hasScreenshare = userInfo.settings.video &amp;&amp; typeof userInfo.settings.video === &#x27;object&#x27; &amp;&amp;
       !!userInfo.settings.video.screenshare;
@@ -1375,9 +1448,22 @@ Skylink.prototype._welcomeHandler = function(message) {
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
   }
 
+  self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
+    userData: 0,
+    audioMuted: 0,
+    videoMuted: 0,
+    hasWelcome: false
+  };
+
   if (self._hasMCU || self._peerPriorityWeight &gt; message.weight) {
+    if (self._peerMessagesStamps[targetMid].hasWelcome) {
+      log.warn([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Discarding extra &quot;welcome&quot; received.&#x27;]);
+      return;
+    }
+
     log.debug([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Starting negotiation&#x27;]);
 
+    self._peerMessagesStamps[targetMid].hasWelcome = true;
     self._doOffer(targetMid, false, {
       agent: userInfo.agent.name,
       version: userInfo.agent.version,
@@ -1387,15 +1473,16 @@ Skylink.prototype._welcomeHandler = function(message) {
   } else {
     log.debug([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Waiting for peer to start negotiation.&#x27;]);
 
-    self._sendChannelMessage({
+    var welcomeMsg = {
       type: self._SIG_MESSAGE_TYPE.WELCOME,
       mid: self._user.sid,
       rid: self._room.id,
+      receiveOnly: self._peerConnections[targetMid] ? !!self._peerConnections[targetMid].receiveOnly : false,
+      enableIceTrickle: self._enableIceTrickle,
+      enableDataChannel: self._enableDataChannel,
+      enableIceRestart: self._enableIceRestart,
       agent: window.webrtcDetectedBrowser,
       version: (window.webrtcDetectedVersion || 0).toString(),
-      enableIceRestart: self._enableIceRestart,
-      enableDataChannel: self._enableDataChannel,
-      enableIceTrickle: self._enableIceTrickle,
       os: window.navigator.platform,
       userInfo: self._getUserInfo(),
       target: targetMid,
@@ -1403,7 +1490,18 @@ Skylink.prototype._welcomeHandler = function(message) {
       temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
       SMProtocolVersion: self.SM_PROTOCOL_VERSION,
       DTProtocolVersion: self.DT_PROTOCOL_VERSION
-    });
+    };
+
+    if (self._publishOnly) {
+      welcomeMsg.publishOnly = {
+        type: self._streams.screenshare &amp;&amp; self._streams.screenshare.stream ? &#x27;screenshare&#x27; : &#x27;video&#x27;
+      };
+      if (self._publishOnly.parentId) {
+        welcomeMsg.parentId = self._publishOnly.parentId;
+      }
+    }
+
+    self._sendChannelMessage(welcomeMsg);
   }
 };
 
@@ -1672,6 +1770,10 @@ Skylink.prototype._answerHandler = function(message) {
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
 
+    if (self._peerMessagesStamps[targetMid]) {
+      self._peerMessagesStamps[targetMid].hasRestart = false;
+    }
+
   }, function(error) {
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 
@@ -1682,6 +1784,26 @@ Skylink.prototype._answerHandler = function(message) {
       state: pc.signalingState
     });
   });
+};
+
+/**
+ * Function that compares the SM / DT protocol versions to see if it in the version.
+ * @method _isLowerThanVersion
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._isLowerThanVersion = function (agentVer, requiredVer) {
+  var partsA = agentVer.split(&#x27;.&#x27;);
+  var partsB = requiredVer.split(&#x27;.&#x27;);
+
+  for (var i = 0; i &lt; partsB.length; i++) {
+    if (parseInt(partsA[i] || &#x27;0&#x27;, 10) &lt; parseInt(partsB[i] || &#x27;0&#x27;, 10)) {
+      return true;
+    }
+  }
+
+  return false;
 };
 
     </pre>

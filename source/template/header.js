@@ -1052,6 +1052,16 @@ function Skylink() {
   };
 
   /**
+   * Stores the publish only settings.
+   * @attribute _publishOnly
+   * @type JSON|Boolean
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._publishOnly = false;
+
+  /**
    * Stores the list of recordings.
    * @attribute _recordings
    * @type JSON

@@ -388,7 +388,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, c
       error = &#x27;There is currently no existing peer connection made &#x27; +
         &#x27;with the peer. Unable to restart connection&#x27;;
       log.error([peerId, null, null, error]);
-      listOfPeerRestartErrors[peerId] = new Error(error);
+      peerCallback(error);
       return;
     }
 
@@ -409,17 +409,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, c
       } else {
         error = &#x27;Peer connection with peer does not exists. Unable to restart&#x27;;
         log.error([peerId, &#x27;PeerConnection&#x27;, null, error]);
-        listOfPeerRestartErrors[peerId] = new Error(error);
-      }
-
-      // there&#x27;s an error to trigger for
-      if (i === listOfPeers.length - 1 &amp;&amp; Object.keys(listOfPeerRestartErrors).length &gt; 0) {
-        if (typeof callback === &#x27;function&#x27;) {
-          callback({
-            refreshErrors: listOfPeerRestartErrors,
-            listOfPeers: listOfPeers
-          }, null);
-        }
+        refreshSinglePeerCallback(peerId)(error);
       }
     }
   } else {
@@ -1140,7 +1130,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
   var agent = (self.getPeerInfo(peerId) || {}).agent || {};
 
   // prevent restarts for other SDK clients
-  if ((agent.SMProtocolVersion || &#x27;&#x27;) &lt; &#x27;0.1.2&#x27;) {
+  if (self._isLowerThanVersion(agent.SMProtocolVersion || &#x27;&#x27;, &#x27;0.1.2&#x27;)) {
     var notSupportedError = new Error(&#x27;Failed restarting with other agents connecting from other SDKs as &#x27; +
       &#x27;re-negotiation is not supported by other SDKs&#x27;);
 
@@ -1163,7 +1153,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
 
     log.log([peerId, null, null, &#x27;Sending restart message to signaling server&#x27;]);
 
-    self._sendChannelMessage({
+    var restartMsg = {
       type: self._SIG_MESSAGE_TYPE.RESTART,
       mid: self._user.sid,
       rid: self._room.id,
@@ -1181,8 +1171,18 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
       SMProtocolVersion: self.SM_PROTOCOL_VERSION,
       DTProtocolVersion: self.DT_PROTOCOL_VERSION
-    });
+    };
 
+    if (self._publishOnly) {
+      restartMsg.publishOnly = {
+        type: self._streams.screenshare &amp;&amp; self._streams.screenshare.stream ? &#x27;screenshare&#x27; : &#x27;video&#x27;
+      };
+      if (self._publishOnly.parentId) {
+        restartMsg.parentId = self._publishOnly.parentId;
+      }
+    }
+
+    self._sendChannelMessage(restartMsg);
     self._trigger(&#x27;peerRestart&#x27;, peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
 
     if (typeof callback === &#x27;function&#x27;) {
@@ -1249,6 +1249,7 @@ Skylink.prototype._removePeer = function(peerId) {
     settings: {},
     mediaStatus: {},
     agent: {},
+    config: {},
     room: clone(this._selectedRoom)
   };
 
@@ -1368,13 +1369,16 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     if (targetMid === &#x27;MCU&#x27;) {
       log.warn([targetMid, &#x27;MediaStream&#x27;, streamId, &#x27;Ignoring received remote stream from MCU -&gt;&#x27;], stream);
       return;
+    } else if (!self._sdpSettings.direction.audio.receive &amp;&amp; !self._sdpSettings.direction.video.receive) {
+      log.warn([targetMid, &#x27;MediaStream&#x27;, streamId, &#x27;Ignoring received empty remote stream -&gt;&#x27;], stream);
+      return;
     }
 
     // Fixes for the dirty-hack for Chrome offer to Firefox (inactive)
     // See: ESS-680
     if (!self._hasMCU &amp;&amp; window.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp;
       pc.getRemoteStreams().length &gt; 1 &amp;&amp; pc.remoteDescription &amp;&amp; pc.remoteDescription.sdp) {
-      
+
       if (pc.remoteDescription.sdp.indexOf(&#x27; msid:&#x27; + streamId + &#x27; &#x27;) === -1) {
         log.warn([targetMid, &#x27;MediaStream&#x27;, streamId, &#x27;Ignoring received empty remote stream -&gt;&#x27;], stream);
         return;
@@ -1476,7 +1480,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
 
       log.log([peerId, null, null, &#x27;Sending restart message to signaling server&#x27;]);
 
-      self._sendChannelMessage({
+      var restartMsg = {
         type: self._SIG_MESSAGE_TYPE.RESTART,
         mid: self._user.sid,
         rid: self._room.id,
@@ -1494,7 +1498,18 @@ Skylink.prototype._restartMCUConnection = function(callback) {
         temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
         SMProtocolVersion: self.SM_PROTOCOL_VERSION,
         DTProtocolVersion: self.DT_PROTOCOL_VERSION
-      });
+      };
+
+      if (self._publishOnly) {
+        restartMsg.publishOnly = {
+          type: self._streams.screenshare &amp;&amp; self._streams.screenshare.stream ? &#x27;screenshare&#x27; : &#x27;video&#x27;
+        };
+        if (self._publishOnly.parentId) {
+          restartMsg.parentId = self._publishOnly.parentId;
+        }
+      }
+
+      self._sendChannelMessage(restartMsg);
     }
   }
 

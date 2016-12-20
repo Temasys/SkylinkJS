@@ -180,6 +180,17 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   should be enabled when available.
  * @param {Boolean} [options.sdpSettings.direction.video.receive=true] The flag if downloading video streaming
  *   should be enabled when available.
+ * @param {JSON|Boolean} [options.publishOnly] <blockquote class="info">
+ *   For MCU enabled Peer connections, defining this flag would make Peer not know other Peers presence in the Room.<br>
+ *   For non-MCU enable Peer connections, defining this flag would cause other Peers in the Room to
+ *   not to send Stream to Peer, and overrides the config
+ *   <code>options.sdpSettings.direction.audio.receive</code> value to <code>false</code>,
+ *   <code>options.sdpSettings.direction.video.receive</code> value to <code>false</code>,
+ *   <code>options.sdpSettings.direction.video.send</code> value to <code>true</code> and
+ *   <code>options.sdpSettings.direction.audio.send</code> value to <code>true</code>.</blockquote>
+ *   The config if Peer would publish only.
+ * @param {String} [options.publishOnly.parentId] The parent Peer ID to match to when Peer is connected.
+ *   <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_peerJoined">
@@ -518,7 +529,8 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
   self._wait(function () {
     log.log([null, 'Room', previousRoom, 'User left the room']);
 
-    self._trigger('peerLeft', previousUserPeerId, self.getPeerInfo(), true);
+    self._trigger('peerLeft', previousUserPeerId, self.getPeerInfo(), true,
+      self._publishOnly && self._publishOnly.parentId ? self._publishOnly.parentId : null);
 
     if (typeof callback === 'function') {
       callback(null, {
@@ -611,7 +623,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
         googleX: {},
         bAS: {}
       };
-
+      self._publishOnly = false;
       self._sdpSettings = {
         connection: {
           audio: true,
@@ -671,6 +683,19 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
             mediaOptions.sdpSettings.connection.video : true;
           self._sdpSettings.connection.data = typeof mediaOptions.sdpSettings.connection.data === 'boolean' ?
             mediaOptions.sdpSettings.connection.data : true;
+        }
+      }
+
+      if (mediaOptions.publishOnly) {
+        self._sdpSettings.direction.audio.send = true;
+        self._sdpSettings.direction.audio.receive = false;
+        self._sdpSettings.direction.video.send = true;
+        self._sdpSettings.direction.video.receive = false;
+        self._publishOnly = { parentId: null };
+
+        if (typeof mediaOptions.publishOnly === 'object' && mediaOptions.publishOnly.parentId &&
+          typeof mediaOptions.publishOnly.parentId === 'string') {
+          self._publishOnly.parentId = mediaOptions.publishOnly.parentId;
         }
       }
 

@@ -163,6 +163,8 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       peerInfo.userData = '';
     }
 
+    peerInfo.parentId = peerInfo.parentId || null;
+
   } else {
     peerInfo = {
       userData: clone(this._userData),
@@ -184,7 +186,9 @@ Skylink.prototype.getPeerInfo = function(peerId) {
         enableDataChannel: this._enableDataChannel,
         enableIceTrickle: this._enableIceTrickle,
         enableIceRestart: this._enableIceRestart,
-        priorityWeight: this._peerPriorityWeight
+        priorityWeight: this._peerPriorityWeight,
+        receiveOnly: false,
+        publishOnly: !!this._publishOnly
       }
     };
 
@@ -200,6 +204,7 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 
     peerInfo.settings.bandwidth = clone(this._streamsBandwidthSettings.bAS);
     peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
+    peerInfo.parentId = this._publishOnly ? this._publishOnly.parentId || null : null;
   }
 
   if (!peerInfo.settings.audio) {
