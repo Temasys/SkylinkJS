@@ -256,6 +256,14 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 
     peerInfo.parentId = peerInfo.parentId || null;
 
+    if (peerId === &#x27;MCU&#x27;) {
+      peerInfo.config.receiveOnly = true;
+      peerInfo.config.publishOnly = false;
+    } else if (this._hasMCU) {
+      peerInfo.config.receiveOnly = false;
+      peerInfo.config.publishOnly = true;
+    }
+
   } else {
     peerInfo = {
       userData: clone(this._userData),
@@ -296,6 +304,7 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     peerInfo.settings.bandwidth = clone(this._streamsBandwidthSettings.bAS);
     peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
     peerInfo.parentId = this._publishOnly ? this._publishOnly.parentId || null : null;
+    peerInfo.config.receiveOnly = !peerInfo.settings.video &amp;&amp; !peerInfo.settings.audio;
   }
 
   if (!peerInfo.settings.audio) {
@@ -331,6 +340,48 @@ Skylink.prototype.getPeersInRoom = function() {
   }
 
   return listOfPeersInfo;
+};
+
+/**
+ * Function that gets the list of connected Peers Streams in the Room.
+ * @method getPeersStream
+ * @return {JSON} The list of the Peers Stream
+ *   &lt;small&gt;Each property is the Peer ID with its value as Stream object. Defined as &lt;code&gt;null&lt;/code&gt;
+ *   if the Peer is not currently sending any Stream.&lt;/small&gt;
+ * @example
+ *   // Example 1: Get the list of currently connected Peers in the same Room
+ *   var streams = skylinkDemo.getPeersStream();
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype.getPeersStream = function() {
+  var listOfPeersStreams = {};
+  var listOfPeers = Object.keys(this._peerConnections);
+
+  for (var i = 0; i &lt; listOfPeers.length; i++) {
+    var stream = null;
+
+    if ((!this._sdpSettings.direction.audio.receive &amp;&amp; !this._sdpSettings.direction.video.receive) ||
+      !(this._peerConnections[listOfPeers[i]] &amp;&amp; this._peerConnections[listOfPeers[i]].remoteDescription &amp;&amp;
+      this._peerConnections[listOfPeers[i]].remoteDescription.sdp)) {
+      listOfPeersStreams[listOfPeers[i]] = stream;
+      continue;
+    }
+
+    var streams = this._peerConnections[listOfPeers[i]].getRemoteStreams();
+
+    for (var j = 0; j &lt; streams.length; j++) {
+      if (this._peerConnections[listOfPeers[i]].remoteDescription.sdp.indexOf(
+        &#x27;msid:&#x27; + (streams[j].id || streams[j].label)) &gt; 0) {
+        stream = streams[j];
+        break;
+      }
+    }
+
+    listOfPeersStreams[listOfPeers[i]] = stream;
+  }
+
+  return listOfPeersStreams;
 };
 
 /**

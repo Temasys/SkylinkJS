@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Tue Dec 20 2016 23:43:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Wed Dec 21 2016 00:03:42 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -6045,6 +6045,48 @@ Skylink.prototype.getPeersInRoom = function() {
   }
 
   return listOfPeersInfo;
+};
+
+/**
+ * Function that gets the list of connected Peers Streams in the Room.
+ * @method getPeersStream
+ * @return {JSON} The list of the Peers Stream
+ *   <small>Each property is the Peer ID with its value as Stream object. Defined as <code>null</code>
+ *   if the Peer is not currently sending any Stream.</small>
+ * @example
+ *   // Example 1: Get the list of currently connected Peers in the same Room
+ *   var streams = skylinkDemo.getPeersStream();
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype.getPeersStream = function() {
+  var listOfPeersStreams = {};
+  var listOfPeers = Object.keys(this._peerConnections);
+
+  for (var i = 0; i < listOfPeers.length; i++) {
+    var stream = null;
+
+    if ((!this._sdpSettings.direction.audio.receive && !this._sdpSettings.direction.video.receive) ||
+      !(this._peerConnections[listOfPeers[i]] && this._peerConnections[listOfPeers[i]].remoteDescription &&
+      this._peerConnections[listOfPeers[i]].remoteDescription.sdp)) {
+      listOfPeersStreams[listOfPeers[i]] = stream;
+      continue;
+    }
+
+    var streams = this._peerConnections[listOfPeers[i]].getRemoteStreams();
+
+    for (var j = 0; j < streams.length; j++) {
+      if (this._peerConnections[listOfPeers[i]].remoteDescription.sdp.indexOf(
+        'msid:' + (streams[j].id || streams[j].label)) > 0) {
+        stream = streams[j];
+        break;
+      }
+    }
+
+    listOfPeersStreams[listOfPeers[i]] = stream;
+  }
+
+  return listOfPeersStreams;
 };
 
 /**

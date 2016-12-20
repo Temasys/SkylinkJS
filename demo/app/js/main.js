@@ -796,7 +796,7 @@ $('#display_user_info').val(displayName);
 
 Demo.Skylink.init(config, function (error, success) {
   if (success) {
-    Demo.Skylink.joinRoom(demoAppJoinRoomConfig || {
+    Demo.Skylink.joinRoom(window.demoAppJoinRoomConfig || {
       userData: displayName,
       audio: { stereo: true },
       video: true
@@ -957,7 +957,7 @@ $(document).ready(function() {
     }
   });
   $('#share_screen_btn').click(function () {
-    Demo.Skylink.shareScreen(true);
+    Demo.Skylink.shareScreen(false);
   });
   $('#stop_screen_btn').click(function() {
     Demo.Skylink.stopScreen();

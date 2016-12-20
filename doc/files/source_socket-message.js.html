@@ -138,7 +138,8 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   APPROACH: &#x27;approach&#x27;,
   START_RECORDING: &#x27;startRecordingRoom&#x27;,
   STOP_RECORDING: &#x27;stopRecordingRoom&#x27;,
-  RECORDING: &#x27;recordingEvent&#x27;
+  RECORDING: &#x27;recordingEvent&#x27;,
+  END_OF_CANDIDATES: &#x27;endOfCandidates&#x27;
 };
 
 /**
@@ -622,6 +623,9 @@ Skylink.prototype._processSingleMessage = function(message) {
   case this._SIG_MESSAGE_TYPE.RECORDING:
     this._recordingEventHandler(message);
     break;
+  case this._SIG_MESSAGE_TYPE.END_OF_CANDIDATES:
+    this._endOfCandidatesHandler(message);
+    break;
   default:
     log.error([message.mid, null, null, &#x27;Unsupported message -&gt;&#x27;], message.type);
     break;
@@ -642,6 +646,28 @@ Skylink.prototype._peerListEventHandler = function(message){
   self._peerList = message.result;
   log.log([&#x27;Server&#x27;, null, message.type, &#x27;Received list of peers&#x27;], self._peerList);
   self._trigger(&#x27;getPeersStateChange&#x27;,self.GET_PEERS_STATE.RECEIVED, self._user.sid, self._peerList);
+};
+
+/**
+ * Function that handles the &quot;endOfCandidates&quot; socket message received.
+ * See confluence docs for the &quot;endOfCandidates&quot; expected properties to be received
+ *   based on the current &lt;code&gt;SM_PROTOCOL_VERSION&lt;/code&gt;.
+ * @method _endOfCandidatesHandler
+ * @private
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._endOfCandidatesHandler = function(message){
+  var self = this;
+  var targetMid = message.mid;
+
+  if (!(self._peerConnections[targetMid] &amp;&amp;
+    self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
+    return;
+  }
+
+  self._peerEndOfCandidatesCounter[targetMid].expectedLen = message.noOfExpectedCandidates || 0;
+  self._signalingEndOfCandidates(targetMid);
 };
 
 /**
@@ -684,7 +710,7 @@ Skylink.prototype._approachEventHandler = function(message){
     version: (window.webrtcDetectedVersion || 0).toString(),
     os: window.navigator.platform,
     userInfo: self._getUserInfo(),
-    receiveOnly: false,
+    receiveOnly: self.getPeerInfo().config.receiveOnly,
     target: message.target,
     weight: self._peerPriorityWeight,
     temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
@@ -1084,7 +1110,7 @@ Skylink.prototype._inRoomHandler = function(message) {
     version: (window.webrtcDetectedVersion || 0).toString(),
     os: window.navigator.platform,
     userInfo: self._getUserInfo(),
-    receiveOnly: false,
+    receiveOnly: self.getPeerInfo().config.receiveOnly,
     weight: self._peerPriorityWeight,
     temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
     enableIceTrickle: self._enableIceTrickle,
@@ -1208,7 +1234,7 @@ Skylink.prototype._enterHandler = function(message) {
     enableIceRestart: self._enableIceRestart,
     agent: window.webrtcDetectedBrowser,
     version: (window.webrtcDetectedVersion || 0).toString(),
-    receiveOnly: false,
+    receiveOnly: self.getPeerInfo().config.receiveOnly,
     os: window.navigator.platform,
     userInfo: self._getUserInfo(),
     target: targetMid,
@@ -1305,6 +1331,8 @@ Skylink.prototype._restartHandler = function(message){
     audioMuted: 0,
     videoMuted: 0
   };
+  self._peerEndOfCandidatesCounter[targetMid] = self._peerEndOfCandidatesCounter[targetMid] || {};
+  self._peerEndOfCandidatesCounter[targetMid].len = 0;
 
   // Make peer with highest weight do the offer
   if (self._peerPriorityWeight &gt; message.weight) {
@@ -1339,7 +1367,7 @@ Skylink.prototype._restartHandler = function(message){
       enableDataChannel: self._enableDataChannel,
       enableIceRestart: self._enableIceRestart,
       doIceRestart: message.doIceRestart === true,
-      receiveOnly: self._peerConnections[targetMid] &amp;&amp; self._peerConnections[targetMid].receiveOnly,
+      receiveOnly: self.getPeerInfo().config.receiveOnly,
       isRestartResend: true,
       temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
       SMProtocolVersion: self.SM_PROTOCOL_VERSION,
@@ -1481,7 +1509,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
       enableIceRestart: self._enableIceRestart,
-      receiveOnly: false,
+      receiveOnly: self.getPeerInfo().config.receiveOnly,
       agent: window.webrtcDetectedBrowser,
       version: (window.webrtcDetectedVersion || 0).toString(),
       os: window.navigator.platform,
@@ -1623,6 +1651,11 @@ Skylink.prototype._candidateHandler = function(message) {
 
   log.debug([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType, &#x27;Received ICE candidate -&gt;&#x27;], candidate);
 
+  this._peerEndOfCandidatesCounter[targetMid] = this._peerEndOfCandidatesCounter[targetMid] || {};
+  this._peerEndOfCandidatesCounter[targetMid].len = this._peerEndOfCandidatesCounter[targetMid].len || 0;
+  this._peerEndOfCandidatesCounter[targetMid].hasSet = false;
+  this._peerEndOfCandidatesCounter[targetMid].len++;
+
   this._trigger(&#x27;candidateProcessingState&#x27;, this.CANDIDATE_PROCESSING_STATE.RECEIVED,
     targetMid, canId, candidateType, {
     candidate: candidate.candidate,
@@ -1640,6 +1673,7 @@ Skylink.prototype._candidateHandler = function(message) {
       sdpMid: candidate.sdpMid,
       sdpMLineIndex: candidate.sdpMLineIndex
     }, new Error(&#x27;Failed processing ICE candidate as Peer connection does not exists or is closed.&#x27;));
+    this._signalingEndOfCandidates(targetMid);
     return;
   }
 
@@ -1653,6 +1687,7 @@ Skylink.prototype._candidateHandler = function(message) {
         sdpMid: candidate.sdpMid,
         sdpMLineIndex: candidate.sdpMLineIndex
       }, new Error(&#x27;Dropping of processing ICE candidate as it matches ICE candidate filtering flag.&#x27;));
+      this._signalingEndOfCandidates(targetMid);
       return;
     }
 
@@ -1667,6 +1702,8 @@ Skylink.prototype._candidateHandler = function(message) {
   } else {
     this._addIceCandidateToQueue(targetMid, canId, candidate);
   }
+
+  this._signalingEndOfCandidates(targetMid);
 
   if (!this._gatheredCandidates[targetMid]) {
     this._gatheredCandidates[targetMid] = {

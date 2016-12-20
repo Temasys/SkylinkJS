@@ -345,6 +345,16 @@ function Skylink() {
   this._peerCandidatesQueue = {};
 
   /**
+   * Stores the list of ICE candidates received before signaling end.
+   * @attribute _peerEndOfCandidatesCounter
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._peerEndOfCandidatesCounter = {};
+
+  /**
    * Stores the list of Peer connection ICE candidates.
    * @attribute _gatheredCandidates
    * @param {JSON} &lt;#peerId&gt; The list of the Peer connection ICE candidates.

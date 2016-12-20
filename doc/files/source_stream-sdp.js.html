@@ -403,7 +403,13 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
     return sessionDescription.sdp;
   }
 
-  var sdpLines = sessionDescription.sdp.split(&#x27;\r\n&#x27;);
+  var sessionDescriptionStr = sessionDescription.sdp;
+
+  if (!this._enableIceTrickle) {
+    sessionDescriptionStr = sessionDescriptionStr.replace(/a=end-of-candidates\r\n/g, &#x27;&#x27;);
+  }
+
+  var sdpLines = sessionDescriptionStr.split(&#x27;\r\n&#x27;);
   var agent = ((this._peerInformations[targetMid] || {}).agent || {}).name || &#x27;&#x27;;
   var localStream = this._peerConnections[targetMid].getLocalStreams()[0];
   var localStreamId = localStream.id || localStream.label;
@@ -416,6 +422,7 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
     }
 
     var trackId = tracks[0].id || tracks[0].label;
+    var trackLabel = tracks[0].label || &#x27;Default&#x27;;
     var ssrcId = null;
     var hasReachedType = false;
 
@@ -434,8 +441,8 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
         ssrcId = (sdpLines[i].split(&#x27;:&#x27;)[1] || &#x27;&#x27;).split(&#x27; &#x27;)[0] || null;
 
         var msidLine = &#x27;a=ssrc:&#x27; + ssrcId + &#x27; msid:&#x27; + localStreamId + &#x27; &#x27; + trackId;
-        var mslabelLine = &#x27;a=ssrc:&#x27; + ssrcId + &#x27; mslabel:default&#x27;;
-        var labelLine = &#x27;a=ssrc:&#x27; + ssrcId + &#x27; label:&#x27; + trackId;
+        var mslabelLine = &#x27;a=ssrc:&#x27; + ssrcId + &#x27; mslabel:&#x27; + trackLabel;
+        var labelLine = &#x27;a=ssrc:&#x27; + ssrcId + &#x27; label:&#x27; + trackLabel;
 
         if (sdpLines.indexOf(msidLine) === -1) {
           sdpLines.splice(i + 1, 0, msidLine);
@@ -458,6 +465,19 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
 
   parseFn(&#x27;audio&#x27;, localStream.getAudioTracks());
   parseFn(&#x27;video&#x27;, localStream.getVideoTracks());
+
+  // Signaling end-of-candidates
+  if (!this._enableIceTrickle){
+    for (var i = 0; i &lt; sdpLines.length; i++) {
+      if (sdpLines[i].indexOf(&#x27;a=candidate:&#x27;) === 0) {
+        if (sdpLines[i + 1] ? !(sdpLines[i + 1].indexOf(&#x27;a=candidate:&#x27;) === 0 ||
+          sdpLines[i + 1].indexOf(&#x27;a=end-of-candidates&#x27;) === 0) : true) {
+          sdpLines.splice(i + 1, 0, &#x27;a=end-of-candidates&#x27;);
+          i++;
+        }
+      }
+    }
+  }
 
   return sdpLines.join(&#x27;\r\n&#x27;);
 };
