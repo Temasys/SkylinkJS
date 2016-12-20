@@ -796,7 +796,7 @@ $('#display_user_info').val(displayName);
 
 Demo.Skylink.init(config, function (error, success) {
   if (success) {
-    Demo.Skylink.joinRoom({
+    Demo.Skylink.joinRoom(demoAppJoinRoomConfig || {
       userData: displayName,
       audio: { stereo: true },
       video: true
