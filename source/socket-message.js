@@ -47,7 +47,8 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   APPROACH: 'approach',
   START_RECORDING: 'startRecordingRoom',
   STOP_RECORDING: 'stopRecordingRoom',
-  RECORDING: 'recordingEvent'
+  RECORDING: 'recordingEvent',
+  END_OF_CANDIDATES: 'endOfCandidates'
 };
 
 /**
@@ -531,6 +532,9 @@ Skylink.prototype._processSingleMessage = function(message) {
   case this._SIG_MESSAGE_TYPE.RECORDING:
     this._recordingEventHandler(message);
     break;
+  case this._SIG_MESSAGE_TYPE.END_OF_CANDIDATES:
+    this._endOfCandidatesHandler(message);
+    break;
   default:
     log.error([message.mid, null, null, 'Unsupported message ->'], message.type);
     break;
@@ -551,6 +555,28 @@ Skylink.prototype._peerListEventHandler = function(message){
   self._peerList = message.result;
   log.log(['Server', null, message.type, 'Received list of peers'], self._peerList);
   self._trigger('getPeersStateChange',self.GET_PEERS_STATE.RECEIVED, self._user.sid, self._peerList);
+};
+
+/**
+ * Function that handles the "endOfCandidates" socket message received.
+ * See confluence docs for the "endOfCandidates" expected properties to be received
+ *   based on the current <code>SM_PROTOCOL_VERSION</code>.
+ * @method _endOfCandidatesHandler
+ * @private
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._endOfCandidatesHandler = function(message){
+  var self = this;
+  var targetMid = message.mid;
+
+  if (!(self._peerConnections[targetMid] &&
+    self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
+    return;
+  }
+
+  self._peerEndOfCandidatesCounter[targetMid].expectedLen = message.noOfExpectedCandidates || 0;
+  self._signalingEndOfCandidates(targetMid);
 };
 
 /**
@@ -1214,6 +1240,8 @@ Skylink.prototype._restartHandler = function(message){
     audioMuted: 0,
     videoMuted: 0
   };
+  self._peerEndOfCandidatesCounter[targetMid] = self._peerEndOfCandidatesCounter[targetMid] || {};
+  self._peerEndOfCandidatesCounter[targetMid].len = 0;
 
   // Make peer with highest weight do the offer
   if (self._peerPriorityWeight > message.weight) {
@@ -1532,6 +1560,11 @@ Skylink.prototype._candidateHandler = function(message) {
 
   log.debug([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Received ICE candidate ->'], candidate);
 
+  this._peerEndOfCandidatesCounter[targetMid] = this._peerEndOfCandidatesCounter[targetMid] || {};
+  this._peerEndOfCandidatesCounter[targetMid].len = this._peerEndOfCandidatesCounter[targetMid].len || 0;
+  this._peerEndOfCandidatesCounter[targetMid].hasSet = false;
+  this._peerEndOfCandidatesCounter[targetMid].len++;
+
   this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.RECEIVED,
     targetMid, canId, candidateType, {
     candidate: candidate.candidate,
@@ -1549,6 +1582,7 @@ Skylink.prototype._candidateHandler = function(message) {
       sdpMid: candidate.sdpMid,
       sdpMLineIndex: candidate.sdpMLineIndex
     }, new Error('Failed processing ICE candidate as Peer connection does not exists or is closed.'));
+    this._signalingEndOfCandidates(targetMid);
     return;
   }
 
@@ -1562,6 +1596,7 @@ Skylink.prototype._candidateHandler = function(message) {
         sdpMid: candidate.sdpMid,
         sdpMLineIndex: candidate.sdpMLineIndex
       }, new Error('Dropping of processing ICE candidate as it matches ICE candidate filtering flag.'));
+      this._signalingEndOfCandidates(targetMid);
       return;
     }
 
@@ -1576,6 +1611,8 @@ Skylink.prototype._candidateHandler = function(message) {
   } else {
     this._addIceCandidateToQueue(targetMid, canId, candidate);
   }
+
+  this._signalingEndOfCandidates(targetMid);
 
   if (!this._gatheredCandidates[targetMid]) {
     this._gatheredCandidates[targetMid] = {

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Tue Dec 20 2016 22:34:01 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Tue Dec 20 2016 23:43:05 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -254,6 +254,16 @@ function Skylink() {
    * @since 0.5.1
    */
   this._peerCandidatesQueue = {};
+
+  /**
+   * Stores the list of ICE candidates received before signaling end.
+   * @attribute _peerEndOfCandidatesCounter
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._peerEndOfCandidatesCounter = {};
 
   /**
    * Stores the list of Peer connection ICE candidates.
@@ -3927,11 +3937,22 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
         return;
       }
 
+      // a=end-of-candidates should present in non-trickle ICE connections so no need to send endOfCandidates message
       self._sendChannelMessage({
         type: sessionDescription.type,
         sdp: self._addSDPMediaStreamTrackIDs(targetMid, sessionDescription),
         mid: self._user.sid,
         userInfo: self._getUserInfo(),
+        target: targetMid,
+        rid: self._room.id
+      });
+    } else if (self._gatheredCandidates[targetMid]) {
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.END_OF_CANDIDATES,
+        noOfExpectedCandidates: self._gatheredCandidates[targetMid].sending.srflx.length +
+          self._gatheredCandidates[targetMid].sending.host.length +
+          self._gatheredCandidates[targetMid].sending.relay.length,
+        mid: self._user.sid,
         target: targetMid,
         rid: self._room.id
       });
@@ -3976,14 +3997,23 @@ Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
 
   for (var i = 0; i < this._peerCandidatesQueue[targetMid].length; i++) {
     var canArray = this._peerCandidatesQueue[targetMid][i];
-    var candidateType = canArray[1].candidate.split(' ')[7];
 
-    log.debug([targetMid, 'RTCIceCandidate', canArray[0] + ':' + candidateType, 'Adding buffered ICE candidate.']);
+    if (canArray) {
+      var candidateType = canArray[1].candidate.split(' ')[7];
 
-    this._addIceCandidate(targetMid, canArray[0], canArray[1]);
+      log.debug([targetMid, 'RTCIceCandidate', canArray[0] + ':' + candidateType, 'Adding buffered ICE candidate.']);
+
+      this._addIceCandidate(targetMid, canArray[0], canArray[1]);
+    } else if (this._peerConnections[targetMid] &&
+      this._peerConnections[targetMid].signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
+      log.debug([targetMid, 'RTCPeerConnection', null, 'Signaling of end-of-candidates remote ICE gathering.']);
+      this._peerConnections[targetMid].addIceCandidate(null);
+    }
   }
 
   delete this._peerCandidatesQueue[targetMid];
+
+  this._signalingEndOfCandidates(targetMid);
 };
 
 /**
@@ -5375,6 +5405,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       }
     }
 
+    self._peerEndOfCandidatesCounter[peerId] = self._peerEndOfCandidatesCounter[peerId] || {};
+    self._peerEndOfCandidatesCounter[peerId].len = 0;
     self._sendChannelMessage(restartMsg);
     self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
 
@@ -5481,6 +5513,10 @@ Skylink.prototype._removePeer = function(peerId) {
   if (typeof this._streamsSession[peerId] !== 'undefined') {
     delete this._streamsSession[peerId];
   }
+  // remove peer streams session
+  if (typeof this._peerEndOfCandidatesCounter[peerId] !== 'undefined') {
+    delete this._peerEndOfCandidatesCounter[peerId];
+  }
 
   // close datachannel connection
   if (this._dataChannels[peerId]) {
@@ -5529,6 +5565,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   };
 
   self._streamsSession[targetMid] = self._streamsSession[targetMid] || {};
+  self._peerEndOfCandidatesCounter[targetMid] = self._peerEndOfCandidatesCounter[targetMid] || {};
 
   // callbacks
   // standard not implemented: onnegotiationneeded,
@@ -5699,6 +5736,8 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart) {
   self._trigger('serverPeerRestart', 'MCU', self.SERVER_PEER_TYPE.MCU);
 
   if (self._mcuUseRenegoRestart) {
+    self._peerEndOfCandidatesCounter.MCU = self._peerEndOfCandidatesCounter.MCU || {};
+    self._peerEndOfCandidatesCounter.MCU.len = 0;
     sendRestartMsgFn('MCU');
   } else {
     // Restart with MCU = peer leaves then rejoins room
@@ -5760,6 +5799,32 @@ Skylink.prototype._parseConnectionStats = function(prevStats, stats, prop) {
   }
 
   return parseFloat(((nVal - oVal) / (nTime - oTime) * 1000).toFixed(3) || '0', 10);
+};
+
+/**
+ * Function that signals the end-of-candidates flag.
+ * @method _signalingEndOfCandidates
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
+  var self = this;
+
+  if (!self._peerEndOfCandidatesCounter[targetMid]) {
+    return;
+  }
+
+  if (self._peerConnections[targetMid].remoteDescription &&
+    self._peerConnections[targetMid].remoteDescription.sdp &&
+    typeof self._peerEndOfCandidatesCounter[targetMid].expectedLen === 'number' &&
+    self._peerEndOfCandidatesCounter[targetMid].len >= self._peerEndOfCandidatesCounter[targetMid].expectedLen &&
+    (self._peerCandidatesQueue[targetMid] ? self._peerCandidatesQueue[targetMid].length === 0 : true) &&
+    !self._peerEndOfCandidatesCounter[targetMid].hasSet) {
+    log.debug([targetMid, 'RTCPeerConnection', null, 'Signaling of end-of-candidates remote ICE gathering.']);
+    self._peerEndOfCandidatesCounter[targetMid].hasSet = true;
+    self._peerConnections[targetMid].addIceCandidate(null);
+  }
 };
 
 
@@ -6115,6 +6180,8 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   }
 
   log.debug([targetMid, null, null, 'Creating offer with config:'], offerConstraints);
+
+  pc.endOfCandidates = false;
 
   pc.createOffer(function(offer) {
     log.debug([targetMid, null, null, 'Created offer'], offer);
@@ -10439,7 +10506,8 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   APPROACH: 'approach',
   START_RECORDING: 'startRecordingRoom',
   STOP_RECORDING: 'stopRecordingRoom',
-  RECORDING: 'recordingEvent'
+  RECORDING: 'recordingEvent',
+  END_OF_CANDIDATES: 'endOfCandidates'
 };
 
 /**
@@ -10923,6 +10991,9 @@ Skylink.prototype._processSingleMessage = function(message) {
   case this._SIG_MESSAGE_TYPE.RECORDING:
     this._recordingEventHandler(message);
     break;
+  case this._SIG_MESSAGE_TYPE.END_OF_CANDIDATES:
+    this._endOfCandidatesHandler(message);
+    break;
   default:
     log.error([message.mid, null, null, 'Unsupported message ->'], message.type);
     break;
@@ -10943,6 +11014,28 @@ Skylink.prototype._peerListEventHandler = function(message){
   self._peerList = message.result;
   log.log(['Server', null, message.type, 'Received list of peers'], self._peerList);
   self._trigger('getPeersStateChange',self.GET_PEERS_STATE.RECEIVED, self._user.sid, self._peerList);
+};
+
+/**
+ * Function that handles the "endOfCandidates" socket message received.
+ * See confluence docs for the "endOfCandidates" expected properties to be received
+ *   based on the current <code>SM_PROTOCOL_VERSION</code>.
+ * @method _endOfCandidatesHandler
+ * @private
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._endOfCandidatesHandler = function(message){
+  var self = this;
+  var targetMid = message.mid;
+
+  if (!(self._peerConnections[targetMid] &&
+    self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
+    return;
+  }
+
+  self._peerEndOfCandidatesCounter[targetMid].expectedLen = message.noOfExpectedCandidates || 0;
+  self._signalingEndOfCandidates(targetMid);
 };
 
 /**
@@ -11606,6 +11699,8 @@ Skylink.prototype._restartHandler = function(message){
     audioMuted: 0,
     videoMuted: 0
   };
+  self._peerEndOfCandidatesCounter[targetMid] = self._peerEndOfCandidatesCounter[targetMid] || {};
+  self._peerEndOfCandidatesCounter[targetMid].len = 0;
 
   // Make peer with highest weight do the offer
   if (self._peerPriorityWeight > message.weight) {
@@ -11924,6 +12019,11 @@ Skylink.prototype._candidateHandler = function(message) {
 
   log.debug([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Received ICE candidate ->'], candidate);
 
+  this._peerEndOfCandidatesCounter[targetMid] = this._peerEndOfCandidatesCounter[targetMid] || {};
+  this._peerEndOfCandidatesCounter[targetMid].len = this._peerEndOfCandidatesCounter[targetMid].len || 0;
+  this._peerEndOfCandidatesCounter[targetMid].hasSet = false;
+  this._peerEndOfCandidatesCounter[targetMid].len++;
+
   this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.RECEIVED,
     targetMid, canId, candidateType, {
     candidate: candidate.candidate,
@@ -11941,6 +12041,7 @@ Skylink.prototype._candidateHandler = function(message) {
       sdpMid: candidate.sdpMid,
       sdpMLineIndex: candidate.sdpMLineIndex
     }, new Error('Failed processing ICE candidate as Peer connection does not exists or is closed.'));
+    this._signalingEndOfCandidates(targetMid);
     return;
   }
 
@@ -11954,6 +12055,7 @@ Skylink.prototype._candidateHandler = function(message) {
         sdpMid: candidate.sdpMid,
         sdpMLineIndex: candidate.sdpMLineIndex
       }, new Error('Dropping of processing ICE candidate as it matches ICE candidate filtering flag.'));
+      this._signalingEndOfCandidates(targetMid);
       return;
     }
 
@@ -11968,6 +12070,8 @@ Skylink.prototype._candidateHandler = function(message) {
   } else {
     this._addIceCandidateToQueue(targetMid, canId, candidate);
   }
+
+  this._signalingEndOfCandidates(targetMid);
 
   if (!this._gatheredCandidates[targetMid]) {
     this._gatheredCandidates[targetMid] = {
@@ -14378,7 +14482,13 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
     return sessionDescription.sdp;
   }
 
-  var sdpLines = sessionDescription.sdp.split('\r\n');
+  var sessionDescriptionStr = sessionDescription.sdp;
+
+  if (!this._enableIceTrickle) {
+    sessionDescriptionStr = sessionDescriptionStr.replace(/a=end-of-candidates\r\n/g, '');
+  }
+
+  var sdpLines = sessionDescriptionStr.split('\r\n');
   var agent = ((this._peerInformations[targetMid] || {}).agent || {}).name || '';
   var localStream = this._peerConnections[targetMid].getLocalStreams()[0];
   var localStreamId = localStream.id || localStream.label;
@@ -14391,6 +14501,7 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
     }
 
     var trackId = tracks[0].id || tracks[0].label;
+    var trackLabel = tracks[0].label || 'Default';
     var ssrcId = null;
     var hasReachedType = false;
 
@@ -14409,8 +14520,8 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
         ssrcId = (sdpLines[i].split(':')[1] || '').split(' ')[0] || null;
 
         var msidLine = 'a=ssrc:' + ssrcId + ' msid:' + localStreamId + ' ' + trackId;
-        var mslabelLine = 'a=ssrc:' + ssrcId + ' mslabel:default';
-        var labelLine = 'a=ssrc:' + ssrcId + ' label:' + trackId;
+        var mslabelLine = 'a=ssrc:' + ssrcId + ' mslabel:' + trackLabel;
+        var labelLine = 'a=ssrc:' + ssrcId + ' label:' + trackLabel;
 
         if (sdpLines.indexOf(msidLine) === -1) {
           sdpLines.splice(i + 1, 0, msidLine);
@@ -14433,6 +14544,19 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
 
   parseFn('audio', localStream.getAudioTracks());
   parseFn('video', localStream.getVideoTracks());
+
+  // Signaling end-of-candidates
+  if (!this._enableIceTrickle){
+    for (var i = 0; i < sdpLines.length; i++) {
+      if (sdpLines[i].indexOf('a=candidate:') === 0) {
+        if (sdpLines[i + 1] ? !(sdpLines[i + 1].indexOf('a=candidate:') === 0 ||
+          sdpLines[i + 1].indexOf('a=end-of-candidates') === 0) : true) {
+          sdpLines.splice(i + 1, 0, 'a=end-of-candidates');
+          i++;
+        }
+      }
+    }
+  }
 
   return sdpLines.join('\r\n');
 };

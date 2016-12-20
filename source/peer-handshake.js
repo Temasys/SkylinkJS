@@ -116,6 +116,8 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
 
   log.debug([targetMid, null, null, 'Creating offer with config:'], offerConstraints);
 
+  pc.endOfCandidates = false;
+
   pc.createOffer(function(offer) {
     log.debug([targetMid, null, null, 'Created offer'], offer);
 

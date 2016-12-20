@@ -1096,6 +1096,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       }
     }
 
+    self._peerEndOfCandidatesCounter[peerId] = self._peerEndOfCandidatesCounter[peerId] || {};
+    self._peerEndOfCandidatesCounter[peerId].len = 0;
     self._sendChannelMessage(restartMsg);
     self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
 
@@ -1202,6 +1204,10 @@ Skylink.prototype._removePeer = function(peerId) {
   if (typeof this._streamsSession[peerId] !== 'undefined') {
     delete this._streamsSession[peerId];
   }
+  // remove peer streams session
+  if (typeof this._peerEndOfCandidatesCounter[peerId] !== 'undefined') {
+    delete this._peerEndOfCandidatesCounter[peerId];
+  }
 
   // close datachannel connection
   if (this._dataChannels[peerId]) {
@@ -1250,6 +1256,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   };
 
   self._streamsSession[targetMid] = self._streamsSession[targetMid] || {};
+  self._peerEndOfCandidatesCounter[targetMid] = self._peerEndOfCandidatesCounter[targetMid] || {};
 
   // callbacks
   // standard not implemented: onnegotiationneeded,
@@ -1420,6 +1427,8 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart) {
   self._trigger('serverPeerRestart', 'MCU', self.SERVER_PEER_TYPE.MCU);
 
   if (self._mcuUseRenegoRestart) {
+    self._peerEndOfCandidatesCounter.MCU = self._peerEndOfCandidatesCounter.MCU || {};
+    self._peerEndOfCandidatesCounter.MCU.len = 0;
     sendRestartMsgFn('MCU');
   } else {
     // Restart with MCU = peer leaves then rejoins room
@@ -1481,6 +1490,32 @@ Skylink.prototype._parseConnectionStats = function(prevStats, stats, prop) {
   }
 
   return parseFloat(((nVal - oVal) / (nTime - oTime) * 1000).toFixed(3) || '0', 10);
+};
+
+/**
+ * Function that signals the end-of-candidates flag.
+ * @method _signalingEndOfCandidates
+ * @private
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
+  var self = this;
+
+  if (!self._peerEndOfCandidatesCounter[targetMid]) {
+    return;
+  }
+
+  if (self._peerConnections[targetMid].remoteDescription &&
+    self._peerConnections[targetMid].remoteDescription.sdp &&
+    typeof self._peerEndOfCandidatesCounter[targetMid].expectedLen === 'number' &&
+    self._peerEndOfCandidatesCounter[targetMid].len >= self._peerEndOfCandidatesCounter[targetMid].expectedLen &&
+    (self._peerCandidatesQueue[targetMid] ? self._peerCandidatesQueue[targetMid].length === 0 : true) &&
+    !self._peerEndOfCandidatesCounter[targetMid].hasSet) {
+    log.debug([targetMid, 'RTCPeerConnection', null, 'Signaling of end-of-candidates remote ICE gathering.']);
+    self._peerEndOfCandidatesCounter[targetMid].hasSet = true;
+    self._peerConnections[targetMid].addIceCandidate(null);
+  }
 };
 
 

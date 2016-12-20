@@ -312,7 +312,13 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
     return sessionDescription.sdp;
   }
 
-  var sdpLines = sessionDescription.sdp.split('\r\n');
+  var sessionDescriptionStr = sessionDescription.sdp;
+
+  if (!this._enableIceTrickle) {
+    sessionDescriptionStr = sessionDescriptionStr.replace(/a=end-of-candidates\r\n/g, '');
+  }
+
+  var sdpLines = sessionDescriptionStr.split('\r\n');
   var agent = ((this._peerInformations[targetMid] || {}).agent || {}).name || '';
   var localStream = this._peerConnections[targetMid].getLocalStreams()[0];
   var localStreamId = localStream.id || localStream.label;
@@ -325,6 +331,7 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
     }
 
     var trackId = tracks[0].id || tracks[0].label;
+    var trackLabel = tracks[0].label || 'Default';
     var ssrcId = null;
     var hasReachedType = false;
 
@@ -343,8 +350,8 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
         ssrcId = (sdpLines[i].split(':')[1] || '').split(' ')[0] || null;
 
         var msidLine = 'a=ssrc:' + ssrcId + ' msid:' + localStreamId + ' ' + trackId;
-        var mslabelLine = 'a=ssrc:' + ssrcId + ' mslabel:default';
-        var labelLine = 'a=ssrc:' + ssrcId + ' label:' + trackId;
+        var mslabelLine = 'a=ssrc:' + ssrcId + ' mslabel:' + trackLabel;
+        var labelLine = 'a=ssrc:' + ssrcId + ' label:' + trackLabel;
 
         if (sdpLines.indexOf(msidLine) === -1) {
           sdpLines.splice(i + 1, 0, msidLine);
@@ -367,6 +374,19 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
 
   parseFn('audio', localStream.getAudioTracks());
   parseFn('video', localStream.getVideoTracks());
+
+  // Signaling end-of-candidates
+  if (!this._enableIceTrickle){
+    for (var i = 0; i < sdpLines.length; i++) {
+      if (sdpLines[i].indexOf('a=candidate:') === 0) {
+        if (sdpLines[i + 1] ? !(sdpLines[i + 1].indexOf('a=candidate:') === 0 ||
+          sdpLines[i + 1].indexOf('a=end-of-candidates') === 0) : true) {
+          sdpLines.splice(i + 1, 0, 'a=end-of-candidates');
+          i++;
+        }
+      }
+    }
+  }
 
   return sdpLines.join('\r\n');
 };
