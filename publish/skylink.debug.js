@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Tue Dec 20 2016 22:12:35 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Tue Dec 20 2016 22:34:01 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -5355,7 +5355,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       userInfo: self._getUserInfo(),
       target: peerId,
       weight: self._peerPriorityWeight,
-      receiveOnly: false,
+      receiveOnly: self.getPeerInfo().config.receiveOnly,
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
       enableIceRestart: self._enableIceRestart,
@@ -5654,7 +5654,7 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart) {
       userInfo: self._getUserInfo(),
       target: peerId,
       weight: self._peerPriorityWeight,
-      receiveOnly: false,
+      receiveOnly: self.getPeerInfo().config.receiveOnly,
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
       enableIceRestart: self._enableIceRestart,
@@ -5896,6 +5896,14 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 
     peerInfo.parentId = peerInfo.parentId || null;
 
+    if (peerId === 'MCU') {
+      peerInfo.config.receiveOnly = true;
+      peerInfo.config.publishOnly = false;
+    } else if (this._hasMCU) {
+      peerInfo.config.receiveOnly = false;
+      peerInfo.config.publishOnly = true;
+    }
+
   } else {
     peerInfo = {
       userData: clone(this._userData),
@@ -5936,6 +5944,7 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     peerInfo.settings.bandwidth = clone(this._streamsBandwidthSettings.bAS);
     peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
     peerInfo.parentId = this._publishOnly ? this._publishOnly.parentId || null : null;
+    peerInfo.config.receiveOnly = !peerInfo.settings.video && !peerInfo.settings.audio;
   }
 
   if (!peerInfo.settings.audio) {
@@ -10976,7 +10985,7 @@ Skylink.prototype._approachEventHandler = function(message){
     version: (window.webrtcDetectedVersion || 0).toString(),
     os: window.navigator.platform,
     userInfo: self._getUserInfo(),
-    receiveOnly: false,
+    receiveOnly: self.getPeerInfo().config.receiveOnly,
     target: message.target,
     weight: self._peerPriorityWeight,
     temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
@@ -11376,7 +11385,7 @@ Skylink.prototype._inRoomHandler = function(message) {
     version: (window.webrtcDetectedVersion || 0).toString(),
     os: window.navigator.platform,
     userInfo: self._getUserInfo(),
-    receiveOnly: false,
+    receiveOnly: self.getPeerInfo().config.receiveOnly,
     weight: self._peerPriorityWeight,
     temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
     enableIceTrickle: self._enableIceTrickle,
@@ -11500,7 +11509,7 @@ Skylink.prototype._enterHandler = function(message) {
     enableIceRestart: self._enableIceRestart,
     agent: window.webrtcDetectedBrowser,
     version: (window.webrtcDetectedVersion || 0).toString(),
-    receiveOnly: false,
+    receiveOnly: self.getPeerInfo().config.receiveOnly,
     os: window.navigator.platform,
     userInfo: self._getUserInfo(),
     target: targetMid,
@@ -11631,7 +11640,7 @@ Skylink.prototype._restartHandler = function(message){
       enableDataChannel: self._enableDataChannel,
       enableIceRestart: self._enableIceRestart,
       doIceRestart: message.doIceRestart === true,
-      receiveOnly: self._peerConnections[targetMid] && self._peerConnections[targetMid].receiveOnly,
+      receiveOnly: self.getPeerInfo().config.receiveOnly,
       isRestartResend: true,
       temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
       SMProtocolVersion: self.SM_PROTOCOL_VERSION,
@@ -11773,7 +11782,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
       enableIceRestart: self._enableIceRestart,
-      receiveOnly: false,
+      receiveOnly: self.getPeerInfo().config.receiveOnly,
       agent: window.webrtcDetectedBrowser,
       version: (window.webrtcDetectedVersion || 0).toString(),
       os: window.navigator.platform,

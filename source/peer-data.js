@@ -165,6 +165,14 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 
     peerInfo.parentId = peerInfo.parentId || null;
 
+    if (peerId === 'MCU') {
+      peerInfo.config.receiveOnly = true;
+      peerInfo.config.publishOnly = false;
+    } else if (this._hasMCU) {
+      peerInfo.config.receiveOnly = false;
+      peerInfo.config.publishOnly = true;
+    }
+
   } else {
     peerInfo = {
       userData: clone(this._userData),
@@ -205,6 +213,7 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     peerInfo.settings.bandwidth = clone(this._streamsBandwidthSettings.bAS);
     peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
     peerInfo.parentId = this._publishOnly ? this._publishOnly.parentId || null : null;
+    peerInfo.config.receiveOnly = !peerInfo.settings.video && !peerInfo.settings.audio;
   }
 
   if (!peerInfo.settings.audio) {
