@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Wed Dec 21 2016 00:03:42 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Wed Dec 21 2016 13:40:19 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -8328,12 +8328,6 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
 };
 
 
-var SDPUtils = function () {
-  
-
-
-
-};
 Skylink.prototype.LOG_LEVEL = {
   DEBUG: 4,
   LOG: 3,
@@ -11745,7 +11739,7 @@ Skylink.prototype._restartHandler = function(message){
   self._peerEndOfCandidatesCounter[targetMid].len = 0;
 
   // Make peer with highest weight do the offer
-  if (self._peerPriorityWeight > message.weight) {
+  if (self._hasMCU ? message.isRestartResend : self._peerPriorityWeight > message.weight) {
     log.debug([targetMid, 'RTCPeerConnection', null, 'Re-negotiating new offer/answer.']);
 
     if (self._peerMessagesStamps[targetMid].hasRestart) {
