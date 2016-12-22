@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Sat Dec 17 2016 03:07:45 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Thu Dec 22 2016 13:47:06 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.16 - Sat Dec 17 2016 03:07:45 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Thu Dec 22 2016 13:47:06 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -17010,7 +17010,18 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
   // using .urls feature
   try {
-    pc = new RTCPeerConnection(self._room.connection.peerConfig, self._room.connection.peerConstraints);
+    pc = new RTCPeerConnection({
+      iceServers: self._room.connection.peerConfig.iceServers,
+      iceTransportPolicy: self._filterCandidatesType.host && self._filterCandidatesType.srflx &&
+        !self._filterCandidatesType.relay ? 'relay' : 'all',
+      bundlePolicy: 'max-bundle',
+      rtcpMuxPolicy: 'require'
+    }, {
+      optional: [
+        { DtlsSrtpKeyAgreement: true },
+        { googIPv6: true }
+      ]
+    });
     log.info([targetMid, null, null, 'Created peer connection']);
     log.debug([targetMid, null, null, 'Peer connection config:'], self._room.connection.peerConfig);
     log.debug([targetMid, null, null, 'Peer connection constraints:'], self._room.connection.peerConstraints);
@@ -19665,6 +19676,12 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
 };
 
 
+var SDPUtils = function () {
+  
+
+
+
+};
 Skylink.prototype.LOG_LEVEL = {
   DEBUG: 4,
   LOG: 3,
