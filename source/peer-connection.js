@@ -1221,7 +1221,18 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
   // using .urls feature
   try {
-    pc = new RTCPeerConnection(self._room.connection.peerConfig, self._room.connection.peerConstraints);
+    pc = new RTCPeerConnection({
+      iceServers: self._room.connection.peerConfig.iceServers,
+      iceTransportPolicy: self._filterCandidatesType.host && self._filterCandidatesType.srflx &&
+        !self._filterCandidatesType.relay ? 'relay' : 'all',
+      bundlePolicy: 'max-bundle',
+      rtcpMuxPolicy: 'require'
+    }, {
+      optional: [
+        { DtlsSrtpKeyAgreement: true },
+        { googIPv6: true }
+      ]
+    });
     log.info([targetMid, null, null, 'Created peer connection']);
     log.debug([targetMid, null, null, 'Peer connection config:'], self._room.connection.peerConfig);
     log.debug([targetMid, null, null, 'Peer connection constraints:'], self._room.connection.peerConstraints);

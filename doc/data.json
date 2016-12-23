@@ -2755,7 +2755,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1025,
+            "line": 1021,
             "description": "Function that re-negotiates a Peer connection.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -2766,7 +2766,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1150,
+            "line": 1142,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -2777,7 +2777,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1220,
+            "line": 1212,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -2788,7 +2788,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1360,
+            "line": 1363,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -2799,7 +2799,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1475,
+            "line": 1478,
             "description": "Function that handles the stats tabulation.",
             "itemtype": "method",
             "name": "_parseConnectionStats",
@@ -2810,7 +2810,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1495,
+            "line": 1498,
             "description": "Function that signals the end-of-candidates flag.",
             "itemtype": "method",
             "name": "_signalingEndOfCandidates",
@@ -2981,7 +2981,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 134,
+            "line": 139,
             "description": "Function that creates the Peer connection answer session description.\nThis comes after receiving and setting the offer session description.",
             "itemtype": "method",
             "name": "_doAnswer",
@@ -2992,7 +2992,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 174,
+            "line": 184,
             "description": "Function that sets the local session description and sends to Peer.\nIf trickle ICE is disabled, the local session description will be sent after\n  ICE gathering has been completed.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",

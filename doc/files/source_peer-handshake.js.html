@@ -195,6 +195,11 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     };
   }
 
+  // Add stream only at offer/answer end
+  if (!self._hasMCU || targetMid === &#x27;MCU&#x27;) {
+    self._addLocalMediaStreams(targetMid);
+  }
+
   if (self._enableDataChannel &amp;&amp; self._peerInformations[targetMid] &amp;&amp;
     self._peerInformations[targetMid].config.enableDataChannel) {
     // Edge doesn&#x27;t support datachannels yet
@@ -249,6 +254,11 @@ Skylink.prototype._doAnswer = function(targetMid) {
       &#x27;Dropping of creating of answer as signalingState is not &quot;&#x27; +
       self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER + &#x27;&quot; -&gt;&#x27;], pc.signalingState);
     return;
+  }
+
+  // Add stream only at offer/answer end
+  if (!self._hasMCU || targetMid === &#x27;MCU&#x27;) {
+    self._addLocalMediaStreams(targetMid);
   }
 
   // No ICE restart constraints for createAnswer as it fails in chrome 48
