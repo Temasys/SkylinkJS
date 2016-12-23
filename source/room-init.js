@@ -305,13 +305,17 @@ Skylink.prototype.generateUUID = function() {
  * @param {Number} [options.throttleIntervals.getUserMedia=0] The interval timeout for
  *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> throttling in milliseconds.
  * @param {Number} [options.throttleIntervals.refreshConnection=5000] <blockquote class="info">
- *   Note that this throttling is only done for MCU enabled Peer connections.
+ *   Note that this throttling is only done for MCU enabled Peer connections with the
+ *   <code>options.mcuUseRenegoRestart</code> being set to <code>false</code>.
  *   </blockquote> The interval timeout for <a href="#method_refreshConnection">
  *   <code>refreshConnection()</code> method</a> throttling in milliseconds.
  *   <small>Note that there will be no throttling when <a href="#method_refreshConnection">
  *   <code>refreshConnection()</code> method</a> is called internally.</small>
- * @param {Boolean} [options.throttleShouldThrowError] The flag if throttled methods should throw errors when
+ * @param {Boolean} [options.throttleShouldThrowError=false] The flag if throttled methods should throw errors when
  *   method is invoked less than the interval timeout value configured in <code>options.throttleIntervals</code>.
+ * @param {Boolean} [options.mcuUseRenegoRestart=false] The flag if <a href="#method_refreshConnection"><code>
+ *   refreshConnection()</code> method</a> should renegotiate like non-MCU enabled Peer connection for MCU
+ *   enabled Peer connections instead of invoking <a href="#method_joinRoom"><code>joinRoom()</code> method</a> again.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_readyStateChange">
@@ -356,6 +360,7 @@ Skylink.prototype.generateUUID = function() {
  * @param {JSON} callback.success.filterCandidatesType The configured value of the <code>options.filterCandidatesType</code>.
  * @param {Number} callback.success.throttleIntervals The configured value of the <code>options.throttleIntervals</code>.
  * @param {Number} callback.success.throttleShouldThrowError The configured value of the <code>options.throttleShouldThrowError</code>.
+ * @param {Number} callback.success.mcuUseRenegoRestart The configured value of the <code>options.mcuUseRenegoRestart</code>.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -464,6 +469,7 @@ Skylink.prototype.init = function(options, callback) {
     getUserMedia: 0
   };
   var throttleShouldThrowError = false;
+  var mcuUseRenegoRestart = false;
 
   log.log('Provided init options:', options);
 
@@ -534,6 +540,9 @@ Skylink.prototype.init = function(options, callback) {
     // set the flag if throttling should throw error when called less than the interval timeout configured
     throttleShouldThrowError = (typeof options.throttleShouldThrowError === 'boolean') ?
       options.throttleShouldThrowError : throttleShouldThrowError;
+    // set the flag if MCU refreshConnection() should use renegotiation
+    mcuUseRenegoRestart = (typeof options.mcuUseRenegoRestart === 'boolean') ?
+      options.mcuUseRenegoRestart : mcuUseRenegoRestart;
     // set the use of filtering ICE candidates
     if (typeof options.filterCandidatesType === 'object' && options.filterCandidatesType) {
       filterCandidatesType.host = (typeof options.filterCandidatesType.host === 'boolean') ?
@@ -628,6 +637,7 @@ Skylink.prototype.init = function(options, callback) {
   self._throttlingTimeouts = throttleIntervals;
   self._throttlingShouldThrowError = throttleShouldThrowError;
   self._disableREMB = disableREMB;
+  self._mcuUseRenegoRestart = mcuUseRenegoRestart;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -654,7 +664,8 @@ Skylink.prototype.init = function(options, callback) {
     disableREMB: self._disableREMB,
     filterCandidatesType: self._filterCandidatesType,
     throttleIntervals: self._throttlingTimeouts,
-    throttleShouldThrowError: self._throttlingShouldThrowError
+    throttleShouldThrowError: self._throttlingShouldThrowError,
+    mcuUseRenegoRestart: self._mcuUseRenegoRestart
   });
   // trigger the readystate
   self._readyState = 0;
@@ -695,7 +706,8 @@ Skylink.prototype.init = function(options, callback) {
             disableREMB: self._disableREMB,
             filterCandidatesType: self._filterCandidatesType,
             throttleIntervals: self._throttlingTimeouts,
-            throttleShouldThrowError: self._throttlingShouldThrowError
+            throttleShouldThrowError: self._throttlingShouldThrowError,
+            mcuUseRenegoRestart: self._mcuUseRenegoRestart
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +
@@ -994,7 +1006,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     disableREMB: self._disableREMB,
     filterCandidatesType: self._filterCandidatesType,
     throttleIntervals: self._throttlingTimeouts,
-    throttleShouldThrowError: self._throttlingShouldThrowError
+    throttleShouldThrowError: self._throttlingShouldThrowError,
+    mcuUseRenegoRestart: self._mcuUseRenegoRestart
   };
   if (self._roomCredentials) {
     initOptions.credentials = {

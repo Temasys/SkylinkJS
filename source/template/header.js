@@ -254,6 +254,16 @@ function Skylink() {
   this._peerCandidatesQueue = {};
 
   /**
+   * Stores the list of ICE candidates received before signaling end.
+   * @attribute _peerEndOfCandidatesCounter
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._peerEndOfCandidatesCounter = {};
+
+  /**
    * Stores the list of Peer connection ICE candidates.
    * @attribute _gatheredCandidates
    * @param {JSON} <#peerId> The list of the Peer connection ICE candidates.
@@ -704,17 +714,6 @@ function Skylink() {
   this._hasMCU = false;
 
   /**
-   * Stores the flag that indicates if User should only receive Stream from Peer connections but
-   *   do not send User's Stream to Peer connections.
-   * @attribute _receiveOnly
-   * @type Boolean
-   * @private
-   * @for Skylink
-   * @since 0.5.10
-   */
-  this._receiveOnly = false;
-
-  /**
    * Stores the flag if HTTPS connections should be enforced when connecting to
    *   the API or Signaling server if App is accessing from HTTP domain.
    * HTTPS connections are enforced if App is accessing from HTTPS domains.
@@ -1052,6 +1051,16 @@ function Skylink() {
   };
 
   /**
+   * Stores the publish only settings.
+   * @attribute _publishOnly
+   * @type JSON|Boolean
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._publishOnly = false;
+
+  /**
    * Stores the list of recordings.
    * @attribute _recordings
    * @type JSON
@@ -1084,4 +1093,14 @@ function Skylink() {
    * @since 0.6.16
    */
   this._recordingStartInterval = null;
+
+  /**
+   * Stores the flag if MCU should use renegotiation.
+   * @attribute _mcuUseRenegoRestart
+   * @type Boolean
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._mcuUseRenegoRestart = false;
 }

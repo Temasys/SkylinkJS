@@ -153,11 +153,22 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
         return;
       }
 
+      // a=end-of-candidates should present in non-trickle ICE connections so no need to send endOfCandidates message
       self._sendChannelMessage({
         type: sessionDescription.type,
         sdp: self._addSDPMediaStreamTrackIDs(targetMid, sessionDescription),
         mid: self._user.sid,
         userInfo: self._getUserInfo(),
+        target: targetMid,
+        rid: self._room.id
+      });
+    } else if (self._gatheredCandidates[targetMid]) {
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.END_OF_CANDIDATES,
+        noOfExpectedCandidates: self._gatheredCandidates[targetMid].sending.srflx.length +
+          self._gatheredCandidates[targetMid].sending.host.length +
+          self._gatheredCandidates[targetMid].sending.relay.length,
+        mid: self._user.sid,
         target: targetMid,
         rid: self._room.id
       });
@@ -202,14 +213,23 @@ Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
 
   for (var i = 0; i < this._peerCandidatesQueue[targetMid].length; i++) {
     var canArray = this._peerCandidatesQueue[targetMid][i];
-    var candidateType = canArray[1].candidate.split(' ')[7];
 
-    log.debug([targetMid, 'RTCIceCandidate', canArray[0] + ':' + candidateType, 'Adding buffered ICE candidate.']);
+    if (canArray) {
+      var candidateType = canArray[1].candidate.split(' ')[7];
 
-    this._addIceCandidate(targetMid, canArray[0], canArray[1]);
+      log.debug([targetMid, 'RTCIceCandidate', canArray[0] + ':' + candidateType, 'Adding buffered ICE candidate.']);
+
+      this._addIceCandidate(targetMid, canArray[0], canArray[1]);
+    } else if (this._peerConnections[targetMid] &&
+      this._peerConnections[targetMid].signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
+      log.debug([targetMid, 'RTCPeerConnection', null, 'Signaling of end-of-candidates remote ICE gathering.']);
+      this._peerConnections[targetMid].addIceCandidate(null);
+    }
   }
 
   delete this._peerCandidatesQueue[targetMid];
+
+  this._signalingEndOfCandidates(targetMid);
 };
 
 /**

@@ -163,6 +163,16 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       peerInfo.userData = '';
     }
 
+    peerInfo.parentId = peerInfo.parentId || null;
+
+    if (peerId === 'MCU') {
+      peerInfo.config.receiveOnly = true;
+      peerInfo.config.publishOnly = false;
+    } else if (this._hasMCU) {
+      peerInfo.config.receiveOnly = false;
+      peerInfo.config.publishOnly = true;
+    }
+
   } else {
     peerInfo = {
       userData: clone(this._userData),
@@ -184,7 +194,9 @@ Skylink.prototype.getPeerInfo = function(peerId) {
         enableDataChannel: this._enableDataChannel,
         enableIceTrickle: this._enableIceTrickle,
         enableIceRestart: this._enableIceRestart,
-        priorityWeight: this._peerPriorityWeight
+        priorityWeight: this._peerPriorityWeight,
+        receiveOnly: false,
+        publishOnly: !!this._publishOnly
       }
     };
 
@@ -200,6 +212,8 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 
     peerInfo.settings.bandwidth = clone(this._streamsBandwidthSettings.bAS);
     peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
+    peerInfo.parentId = this._publishOnly ? this._publishOnly.parentId || null : null;
+    peerInfo.config.receiveOnly = !peerInfo.settings.video && !peerInfo.settings.audio;
   }
 
   if (!peerInfo.settings.audio) {
@@ -235,6 +249,48 @@ Skylink.prototype.getPeersInRoom = function() {
   }
 
   return listOfPeersInfo;
+};
+
+/**
+ * Function that gets the list of connected Peers Streams in the Room.
+ * @method getPeersStream
+ * @return {JSON} The list of the Peers Stream
+ *   <small>Each property is the Peer ID with its value as Stream object. Defined as <code>null</code>
+ *   if the Peer is not currently sending any Stream.</small>
+ * @example
+ *   // Example 1: Get the list of currently connected Peers in the same Room
+ *   var streams = skylinkDemo.getPeersStream();
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype.getPeersStream = function() {
+  var listOfPeersStreams = {};
+  var listOfPeers = Object.keys(this._peerConnections);
+
+  for (var i = 0; i < listOfPeers.length; i++) {
+    var stream = null;
+
+    if ((!this._sdpSettings.direction.audio.receive && !this._sdpSettings.direction.video.receive) ||
+      !(this._peerConnections[listOfPeers[i]] && this._peerConnections[listOfPeers[i]].remoteDescription &&
+      this._peerConnections[listOfPeers[i]].remoteDescription.sdp)) {
+      listOfPeersStreams[listOfPeers[i]] = stream;
+      continue;
+    }
+
+    var streams = this._peerConnections[listOfPeers[i]].getRemoteStreams();
+
+    for (var j = 0; j < streams.length; j++) {
+      if (this._peerConnections[listOfPeers[i]].remoteDescription.sdp.indexOf(
+        'msid:' + (streams[j].id || streams[j].label)) > 0) {
+        stream = streams[j];
+        break;
+      }
+    }
+
+    listOfPeersStreams[listOfPeers[i]] = stream;
+  }
+
+  return listOfPeersStreams;
 };
 
 /**
