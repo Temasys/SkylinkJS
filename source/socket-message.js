@@ -1227,7 +1227,7 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  if (self._hasMCU) {
+  if (self._hasMCU && !self._mcuUseRenegoRestart) {
     log.warn([targetMid, 'RTCPeerConnection', null, 'Dropping restart request as MCU does not support re-negotiation. ' +
       'Restart workaround is to re-join Room for Peer.']);
     self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false, false);
