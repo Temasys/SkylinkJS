@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Fri Dec 23 2016 16:40:29 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Fri Dec 23 2016 16:46:48 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -4404,7 +4404,8 @@ Skylink.prototype.SERVER_PEER_TYPE = {
  * - When provided as an Array, it will refresh all connections with all the Peer IDs provided.
  * - When not provided, it will refresh all the currently connected Peers in the Room.
  * @param {Boolean} [iceRestart=false] <blockquote class="info">
- *   Note that this flag will not be honoured for MCU enabled Peer connections as it is not necessary since for MCU
+ *   Note that this flag will not be honoured for MCU enabled Peer connections where
+ *   <code>options.mcuUseRenegoRestart</code> flag is set to <code>false</code> as it is not necessary since for MCU
  *   "restart" case is to invoke <a href="#method_joinRoom"><code>joinRoom()</code> method</a> again.</blockquote>
  *   The flag if ICE connections should restart when refreshing Peer connections.
  *   <small>This is used when ICE connection state is <code>FAILED</code> or <code>DISCONNECTED</code>, which state
@@ -5381,7 +5382,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
       enableIceRestart: self._enableIceRestart,
-      doIceRestart: doIceRestart === true,
+      doIceRestart: doIceRestart === true && self._enableIceRestart && self._peerInformations[peerId] &&
+        self._peerInformations[peerId].config.enableIceRestart,
       isRestartResend: false,
       temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
       SMProtocolVersion: self.SM_PROTOCOL_VERSION,
@@ -5698,7 +5700,9 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart) {
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
       enableIceRestart: self._enableIceRestart,
-      doIceRestart: self._mcuUseRenegoRestart && !!doIceRestart,
+      doIceRestart: self._mcuUseRenegoRestart && doIceRestart === true &&
+        self._enableIceRestart && self._peerInformations[peerId] &&
+        self._peerInformations[peerId].config.enableIceRestart,
       isRestartResend: false,
       temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
       SMProtocolVersion: self.SM_PROTOCOL_VERSION,

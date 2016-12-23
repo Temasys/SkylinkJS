@@ -3584,7 +3584,7 @@ Priority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l986"><code>source&#x2F;peer-connection.js:986</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l987"><code>source&#x2F;peer-connection.js:987</code></a>
       </small>
     
 
@@ -5047,7 +5047,7 @@ If provided string length is lesser than or equals to the chunk size, it should 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l1212"><code>source&#x2F;peer-connection.js:1212</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l1214"><code>source&#x2F;peer-connection.js:1214</code></a>
       </small>
     
 
@@ -7788,7 +7788,7 @@ This starts creating the socket connection and called at first not when requirin
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l1478"><code>source&#x2F;peer-connection.js:1478</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l1482"><code>source&#x2F;peer-connection.js:1482</code></a>
       </small>
     
 
@@ -8907,7 +8907,7 @@ See confluence docs for the &quot;redirect&quot; expected properties to be recei
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l256"><code>source&#x2F;peer-connection.js:256</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l257"><code>source&#x2F;peer-connection.js:257</code></a>
       </small>
     
 
@@ -8992,7 +8992,7 @@ See confluence docs for the &quot;redirect&quot; expected properties to be recei
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l1142"><code>source&#x2F;peer-connection.js:1142</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l1144"><code>source&#x2F;peer-connection.js:1144</code></a>
       </small>
     
 
@@ -9676,7 +9676,7 @@ See confluence docs for the &quot;restart&quot; expected properties to be receiv
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l1363"><code>source&#x2F;peer-connection.js:1363</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l1365"><code>source&#x2F;peer-connection.js:1365</code></a>
       </small>
     
 
@@ -9764,7 +9764,7 @@ The Peer ID will not stay the same though.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l1021"><code>source&#x2F;peer-connection.js:1021</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l1022"><code>source&#x2F;peer-connection.js:1022</code></a>
       </small>
     
 
@@ -10537,7 +10537,7 @@ Setting this may not necessarily work in Firefox.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l1498"><code>source&#x2F;peer-connection.js:1498</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l1502"><code>source&#x2F;peer-connection.js:1502</code></a>
       </small>
     
 
@@ -12453,7 +12453,7 @@ Function that unmutes both <a href="#method_getUserMedia"><code>getUserMedia()</
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l333"><code>source&#x2F;peer-connection.js:333</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l334"><code>source&#x2F;peer-connection.js:334</code></a>
       </small>
     
 
@@ -17927,7 +17927,8 @@ Function that refreshes Peer connections to update with the current streaming.</
             <div class="param-description">
               <small class="default"><span>DEFAULT: </span><code>false</code></small>
               <p><blockquote class="info">
-  Note that this flag will not be honoured for MCU enabled Peer connections as it is not necessary since for MCU
+  Note that this flag will not be honoured for MCU enabled Peer connections where
+  <code>options.mcuUseRenegoRestart</code> flag is set to <code>false</code> as it is not necessary since for MCU
   &quot;restart&quot; case is to invoke <a href="#method_joinRoom"><code>joinRoom()</code> method</a> again.</blockquote>
   The flag if ICE connections should restart when refreshing Peer connections.
   <small>This is used when ICE connection state is <code>FAILED</code> or <code>DISCONNECTED</code>, which state

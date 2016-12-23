@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Fri Dec 23 2016 16:40:29 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Fri Dec 23 2016 16:46:48 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.16 - Fri Dec 23 2016 16:40:29 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Fri Dec 23 2016 16:46:48 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -15937,7 +15937,8 @@ Skylink.prototype.SERVER_PEER_TYPE = {
  * - When provided as an Array, it will refresh all connections with all the Peer IDs provided.
  * - When not provided, it will refresh all the currently connected Peers in the Room.
  * @param {Boolean} [iceRestart=false] <blockquote class="info">
- *   Note that this flag will not be honoured for MCU enabled Peer connections as it is not necessary since for MCU
+ *   Note that this flag will not be honoured for MCU enabled Peer connections where
+ *   <code>options.mcuUseRenegoRestart</code> flag is set to <code>false</code> as it is not necessary since for MCU
  *   "restart" case is to invoke <a href="#method_joinRoom"><code>joinRoom()</code> method</a> again.</blockquote>
  *   The flag if ICE connections should restart when refreshing Peer connections.
  *   <small>This is used when ICE connection state is <code>FAILED</code> or <code>DISCONNECTED</code>, which state
@@ -16914,7 +16915,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
       enableIceRestart: self._enableIceRestart,
-      doIceRestart: doIceRestart === true,
+      doIceRestart: doIceRestart === true && self._enableIceRestart && self._peerInformations[peerId] &&
+        self._peerInformations[peerId].config.enableIceRestart,
       isRestartResend: false,
       temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
       SMProtocolVersion: self.SM_PROTOCOL_VERSION,
@@ -17231,7 +17233,9 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart) {
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
       enableIceRestart: self._enableIceRestart,
-      doIceRestart: self._mcuUseRenegoRestart && !!doIceRestart,
+      doIceRestart: self._mcuUseRenegoRestart && doIceRestart === true &&
+        self._enableIceRestart && self._peerInformations[peerId] &&
+        self._peerInformations[peerId].config.enableIceRestart,
       isRestartResend: false,
       temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
       SMProtocolVersion: self.SM_PROTOCOL_VERSION,
